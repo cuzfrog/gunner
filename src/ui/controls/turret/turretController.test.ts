@@ -27,7 +27,7 @@ describe("TurretController", () => {
       imageCatalog: { itemIconUrl: vi.fn((id: TypeId) => `images/icons/${nameForId[id]!.replaceAll(" ", "_")}.png`) },
       chargeCatalog: { chargesForTurret: vi.fn(() => CHARGE_OPTIONS) },
     });
-    controller.applyImported(IMPORTED_RIFTER_WITH_CARGO, { skillLevel: 5, overloaded: false });
+    controller.applyImported(IMPORTED_RIFTER_WITH_CARGO, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
 
     expect(controller.turret()).toBeDefined();
     expect(controller.ammo()).toBe("Hail S");
@@ -50,7 +50,7 @@ describe("TurretController", () => {
 
   test("applyImported without a turret leaves the trigger and inputs disabled", () => {
     const { document, controller } = buildTurret({ fittingImport: {} });
-    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined }, { skillLevel: 5, overloaded: false });
+    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined }, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(getFake(document, "ship-a-ammo-trigger").disabled).toBe(true);
     expect(controller.ammo()).toBe("Hail S");
     expect(getFake(document, "ship-a-tracking").disabled).toBe(true);
@@ -64,16 +64,16 @@ describe("TurretController", () => {
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
       chargeCatalog: { withCharge: vi.fn((turret, chargeId) => ({ ...turret, chargeId, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff })) },
     });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true }, "Republic Fleet EMP S");
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false }, "Republic Fleet EMP S");
 
-    expect(fittingImport.importFitting).toHaveBeenCalledWith("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    expect(fittingImport.importFitting).toHaveBeenCalledWith("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(controller.ammo()).toBe("Republic Fleet EMP S");
     expect(chargeCatalog.withCharge).toHaveBeenCalledWith(TURRET, CHARGE_OPTIONS[1].id);
   });
 
   test("restore with no fitting text resets to the default charge", () => {
     const { controller, fittingImport } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
-    controller.restore(undefined, { skillLevel: 5, overloaded: true }, "Republic Fleet EMP S");
+    controller.restore(undefined, { skillLevel: 5, overloaded: true, weaponOverloaded: false }, "Republic Fleet EMP S");
     expect(fittingImport.importFitting).not.toHaveBeenCalled();
     expect(controller.ammo()).toBe("Hail S");
     expect(controller.turret()).toBeUndefined();
@@ -84,7 +84,7 @@ describe("TurretController", () => {
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER_WITH_CARGO) },
       chargeCatalog: { chargesForTurret: vi.fn(() => CHARGE_OPTIONS) },
     });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     getFake(document, "ship-a-ammo-expand").trigger("click");
     controller.clear();
 
@@ -99,7 +99,7 @@ describe("TurretController", () => {
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
       chargeCatalog: { chargesForTurret: vi.fn(() => CHARGE_OPTIONS) },
     });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     const allSection = getFake(document, "ship-a-ammo-all-section");
     const expand = getFake(document, "ship-a-ammo-expand");
 
@@ -117,7 +117,7 @@ describe("TurretController", () => {
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER_WITH_CARGO) },
       chargeCatalog: { chargesForTurret: vi.fn(() => CHARGE_OPTIONS) },
     });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     controller.openAmmoPopup();
 
     const cargoList = getFake(document, "ship-a-ammo-cargo-list");
@@ -137,7 +137,7 @@ describe("TurretController", () => {
         chargesForTurret: vi.fn(() => CHARGE_OPTIONS),
       },
     });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     turretOverrides.set({ shipAMass: 1234 });
     getFake(document, "ship-a-optimal").value = "12345";
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
@@ -159,7 +159,7 @@ describe("TurretController", () => {
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
       imageCatalog: { itemIconUrl: vi.fn(() => undefined) },
     });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
 
     const icon = getFake(document, "ship-a-ammo-summary-icon");
     expect(icon.hidden).toBe(true);
@@ -176,7 +176,7 @@ describe("TurretController", () => {
     });
     const button = getFake(document, "ship-a-sig-res-options").children[0];
     const original = button.title;
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
 
     expect(button.title).not.toBe(original);
     controller.clear();
@@ -186,7 +186,7 @@ describe("TurretController", () => {
 
   test("currentTurretSpec reads inputs and uses the provided tracking override", () => {
     const { controller, trackingInput } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     const spec = controller.currentTurretSpec(0.5)!;
     expect(spec.tracking).toBe(0.5);
     expect(spec.sigResolution).toBe(40);
@@ -197,13 +197,13 @@ describe("TurretController", () => {
 
   test("currentTurretSpec returns undefined when no turret is fitted", () => {
     const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, turret: undefined })) } });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(controller.currentTurretSpec()).toBeUndefined();
   });
 
   test("currentTurretSpecs returns single-element array for single turret", () => {
     const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     const specs = controller.currentTurretSpecs();
     expect(specs.length).toBe(1);
     expect(specs[0].kind).toBe("turret");
@@ -218,7 +218,7 @@ describe("TurretController", () => {
       ],
     };
     const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => multiTurretImport) } });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     const specs = controller.currentTurretSpecs();
     expect(specs.length).toBe(2);
     expect(specs[0].damagePerShot).toBe(IMPORTED_RIFTER.turret!.damagePerShot);
@@ -249,7 +249,7 @@ describe("TurretController", () => {
         withCharge: vi.fn((turret, chargeId) => ({ ...turret, chargeId, damagePerShot: 999 })),
       },
     });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     controller.openAmmoPopup();
     (getFake(document, "ship-a-ammo-all-list").children[1].firstElementChild as unknown as FakeElement).trigger("click");
     const specs = controller.currentTurretSpecs();
@@ -260,13 +260,13 @@ describe("TurretController", () => {
 
   test("currentTurretSpecs returns empty array when no turret is fitted", () => {
     const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, turret: undefined, turrets: undefined })) } });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(controller.currentTurretSpecs()).toEqual([]);
   });
 
   test("capture returns the current turret inputs and ammo", () => {
     const { document, controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     getFake(document, "ship-a-optimal").value = "5000";
     getFake(document, "ship-a-falloff").value = "4000";
     getFake(document, "ship-a-sigRes").value = "M";
@@ -291,7 +291,7 @@ describe("TurretController", () => {
       imageCatalog: { itemIconUrl: vi.fn((name: string) => `images/icons/${name.replaceAll(" ", "_")}.png`) },
       i18n: { current: vi.fn((): Language => "zh") },
     });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     controller.openAmmoPopup();
 
     expect(getFake(document, "ship-a-ammo-summary").textContent).toBe("海怪 S");
@@ -325,7 +325,7 @@ describe("TurretController", () => {
     const { document, controller } = buildTurret({
       ships: { turretSizeOptions: vi.fn(() => ["small", "medium"] as const) },
     });
-    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     controller.setHullProfile(RIFTER);
     expect(buttonFor(document, "S").disabled).toBe(false);
     expect(buttonFor(document, "M").disabled).toBe(false);
@@ -342,7 +342,7 @@ describe("TurretController", () => {
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
       ships: { turretSizeOptions: vi.fn(() => ["small", "medium"] as const) },
     });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     getFake(document, "ship-a-sigRes").value = "L";
     controller.setHullProfile(RIFTER);
     expect(getFake(document, "ship-a-sigRes").value).toBe("S");
@@ -362,7 +362,7 @@ describe("TurretController", () => {
   test("setHullProfile re-enables larger classes when a bigger hull is selected", () => {
     const { document, controller } = buildTurret({ ships: { turretSizeOptions: mockTurretSizeOptions() } });
     const mediumProfile: ShipProfile = { ...RIFTER, id: "621" as ShipId, name: "Caracal", factionId: "caldari-state" as FactionId, hullTypeId: "26" as HullTypeId };
-    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     controller.setHullProfile(RIFTER);
     expect(buttonFor(document, "L").disabled).toBe(true);
     controller.setHullProfile(mediumProfile);
@@ -391,7 +391,7 @@ describe("TurretController", () => {
   test("clicking a sig-res button with a fitted turret switches module and emits configInvalidated", () => {
     const { document, controller, events } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
-    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     buttonFor(document, "M").trigger("click");
     expect(getFake(document, "ship-a-sigRes").value).toBe("M");
     expect(emitConfigInvalidated).toHaveBeenCalled();
@@ -404,7 +404,7 @@ describe("TurretController", () => {
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
     });
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
-    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     buttonFor(document, "M").trigger("click");
     expect(controller.turret()?.moduleId).toBe("491" as TypeId);
     expect(controller.turret()?.sigResolutionClass).toBe("M");
@@ -416,7 +416,7 @@ describe("TurretController", () => {
     const { document, controller, turretOverrides, events } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
     });
-    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     getFake(document, "ship-a-tracking").value = "0.5";
     getFake(document, "ship-a-tracking").trigger("input");
     expect(turretOverrides.get().tracking).toBe(0.5);
@@ -432,7 +432,7 @@ describe("TurretController", () => {
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER_WITH_CARGO) },
       chargeCatalog: { chargesForTurret: vi.fn(() => CHARGE_OPTIONS), chargesForSize: vi.fn(() => CHARGE_OPTIONS) },
     });
-    controller.applyImported(IMPORTED_RIFTER_WITH_CARGO, { skillLevel: 5, overloaded: false });
+    controller.applyImported(IMPORTED_RIFTER_WITH_CARGO, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     controller.openAmmoPopup();
     const cargoList = getFake(document, "ship-a-ammo-cargo-list");
     expect(cargoList.children.length).toBe(2);
@@ -445,7 +445,7 @@ describe("TurretController", () => {
       fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, turret: undefined })) },
     });
     const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
-    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined }, { skillLevel: 5, overloaded: false });
+    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined }, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     buttonFor(document, "M").trigger("click");
     expect(turretOverrides.get().sigRes).toBe("M");
     expect(emitDisplayInvalidated).toHaveBeenCalled();
@@ -478,7 +478,7 @@ describe("TurretController", () => {
     const { document, controller } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
     });
-    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(getFake(document, "ship-a-turret-variant-gear").disabled).toBe(false);
   });
 
@@ -486,7 +486,7 @@ describe("TurretController", () => {
     const { document, controller, popupGroup } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
     });
-    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     getFake(document, "ship-a-turret-variant-gear").trigger("click");
     expect(popupGroup.toggle).toHaveBeenCalled();
   });
@@ -500,7 +500,7 @@ describe("TurretController", () => {
       { id: "21076" as TypeId, name: "125mm Gatling AutoCannon II", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 5, metaGroupID: 2 } as never,
     ]);
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
-    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const list = getFake(document, "ship-a-turret-variants");
     const buttons = Array.from(list.children).filter((c) => c.getAttribute("data-value") === "21076");
     expect(buttons.length).toBe(1);
@@ -519,7 +519,7 @@ describe("TurretController", () => {
       { id: "486" as TypeId, name: "200mm AutoCannon I", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 0, metaGroupID: 1 } as never,
       { id: "21076" as TypeId, name: "125mm Gatling AutoCannon II", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 5, metaGroupID: 2 } as never,
     ]);
-    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const list = getFake(document, "ship-a-turret-variants");
     const buttons = Array.from(list.children).filter((c) => c.getAttribute("data-value") === "21076");
     expect(buttons.length).toBe(1);

@@ -55,9 +55,9 @@ function createManager(options: {
   const shipASide: FittingPopupHost = {
     profile: RIFTER,
     get fittingText() { return options.fittingTextOf ? options.fittingTextOf("shipA") : "[Rifter, Brawler]\n200mm AutoCannon I"; },
-    skillConditions: () => ({ skillLevel: 5 as const, overloaded: true }),
+    skillConditions: () => ({ skillLevel: 5 as const, overloaded: true, weaponOverloaded: false }),
   };
-  const shipBSide: FittingPopupHost = { profile: undefined, fittingText: undefined, skillConditions: () => ({ skillLevel: 5 as const, overloaded: true }) };
+  const shipBSide: FittingPopupHost = { profile: undefined, fittingText: undefined, skillConditions: () => ({ skillLevel: 5 as const, overloaded: true, weaponOverloaded: false }) };
   return {
     manager: new FittingPreviewManagerImpl({
       fittingImport,

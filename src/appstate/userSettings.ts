@@ -78,6 +78,7 @@ export interface UserSettings {
   shipAInertia: number;
   shipASkillLevel?: SkillLevel;
   shipAOverload?: boolean;
+  shipAWeaponOverload?: boolean;
   initialDistance: number;
   shipBSpeed: number;
   shipBMode: AutopilotMode;
@@ -88,6 +89,7 @@ export interface UserSettings {
   shipBSig: number;
   shipBSkillLevel?: SkillLevel;
   shipBOverload?: boolean;
+  shipBWeaponOverload?: boolean;
   shipAHullId?: ShipId;
   shipAPropulsion?: PropulsionSelection;
   shipBHullId?: ShipId;

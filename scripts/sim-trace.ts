@@ -179,7 +179,7 @@ class TraceParamsParserImpl implements TraceParamsParser {
 
   private loadEwarProjection(path: string, overloaded: boolean): EwarProjection {
     const text = readFileSync(path, "utf-8");
-    const conditions: StatConditions = { skillLevel: 5, overloaded: false };
+    const conditions: StatConditions = { skillLevel: 5, overloaded: false, weaponOverloaded: false };
     const imported = this.fittingImport.importFitting(text, conditions);
     if (!imported) throw new Error(`Could not import ewar fitting from ${path}`);
     return buildEwarProjection(imported.ewar, overloaded);

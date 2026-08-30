@@ -15,6 +15,7 @@ import { parseEft, type BankKind, type EftDocument, type EftLine, type QuantityI
 import type { ItemNameCatalog, ItemNameResolver } from "../gamedata/itemNames";
 import type { ModuleSlotCatalog } from "../gamedata/moduleSlots";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedLauncher } from "./chargeCatalog";
+import type { GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
 import type { MissileSkillModel } from "./missileStats";
 import { FittingStateFactory, type FittingState, type FittingModuleEntry, type CargoEntry } from "./fittingState";
@@ -90,6 +91,7 @@ export class FittingImportImpl implements FittingImport {
     ships,
     fittingDb,
     chargeCatalog,
+    gunFamilies,
     missileCatalog,
     missileSkillModel,
     stackingPenalty,
@@ -100,6 +102,7 @@ export class FittingImportImpl implements FittingImport {
     ships: Ships;
     fittingDb: FittingDb;
     chargeCatalog: ChargeCatalog;
+    gunFamilies: GunFamilies;
     missileCatalog: MissileCatalog;
     missileSkillModel: MissileSkillModel;
     stackingPenalty: StackingPenalty;
@@ -113,7 +116,7 @@ export class FittingImportImpl implements FittingImport {
     this.itemNameResolver = itemNameResolver;
     this.moduleSlotCatalog = moduleSlotCatalog;
     this.fittingStateFactory = new FittingStateFactory(fittingDb);
-    this.calculator = new FittingCalculatorImpl({ fittingDb, ships, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog });
+    this.calculator = new FittingCalculatorImpl({ fittingDb, ships, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog });
   }
 
   propulsionVariantNames(module: PropulsionModule): readonly PropulsionVariant[] {

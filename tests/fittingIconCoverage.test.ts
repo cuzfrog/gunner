@@ -40,6 +40,7 @@ const fittingImport = new FittingImportImpl({
   ships,
   fittingDb: FITTING_DB,
   chargeCatalog,
+  gunFamilies,
   missileCatalog,
   missileSkillModel,
   stackingPenalty,

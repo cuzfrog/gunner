@@ -25,6 +25,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   private readonly popupGroup: PopupGroup;
   private skillPopupOpen = false;
   private readonly skillChoice: ChoiceGroupImpl;
+  private weaponOverloaded = false;
   readonly popup: Popup;
 
   constructor({ panel, els, i18n, popupGroup }: { panel: SidePanel; els: SkillOverloadSectionEls; i18n: I18n; popupGroup: PopupGroup }) {
@@ -51,7 +52,16 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     return {
       skillLevel: skillLevelFromString(this.els.skills.value),
       overloaded: this.els.overload.checked,
+      weaponOverloaded: this.weaponOverloaded,
     };
+  }
+
+  setWeaponOverloaded(overloaded: boolean): void {
+    this.weaponOverloaded = overloaded;
+  }
+
+  isWeaponOverloaded(): boolean {
+    return this.weaponOverloaded;
   }
 
   setOverloadDisabled(): void {

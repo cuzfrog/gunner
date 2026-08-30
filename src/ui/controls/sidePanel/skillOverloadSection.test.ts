@@ -84,7 +84,7 @@ describe("SkillOverloadSection", () => {
     const { document, section } = buildSkillSection();
     getFake(document, "ship-a-skills").value = "2";
     getFake(document, "ship-a-overload").checked = true;
-    expect(section.skillConditions()).toEqual({ skillLevel: 2, overloaded: true });
+    expect(section.skillConditions()).toEqual({ skillLevel: 2, overloaded: true, weaponOverloaded: false });
   });
 
   test("setOverloadActive toggles the overload input and button", () => {

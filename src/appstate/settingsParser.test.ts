@@ -606,7 +606,7 @@ describe("SettingsParser", () => {
     const decoded = parser.decodeUrlSettings(urlFor(settings).split("c=")[1]);
     expect(decoded).not.toBeNull();
     expect(decoded!.shipA.speed).toBe(override);
-    const conditions = { skillLevel: settings.shipASkillLevel ?? 5, overloaded: settings.shipAOverload ?? true };
+    const conditions = { skillLevel: settings.shipASkillLevel ?? 5, overloaded: settings.shipAOverload ?? true, weaponOverloaded: false };
     const expected = realShips.cradle.ships.fittedStats(RIFTER_PROFILE, IMPORTED_RIFTER.fitted, RIFTER_PROPULSION, conditions, override).baseMaxSpeed;
     expect(decoded!.shipA.fittedHull?.baseMaxSpeed).toBeCloseTo(expected, 6);
   });
@@ -623,7 +623,7 @@ describe("SettingsParser", () => {
     };
     const decoded = parser.decodeUrlSettings(urlFor(settings).split("c=")[1]);
     expect(decoded).not.toBeNull();
-    const conditions = { skillLevel: settings.shipASkillLevel ?? 5, overloaded: settings.shipAOverload ?? true };
+    const conditions = { skillLevel: settings.shipASkillLevel ?? 5, overloaded: settings.shipAOverload ?? true, weaponOverloaded: false };
     const expected = realShips.cradle.ships.fittedStats(RIFTER_PROFILE, IMPORTED_RIFTER.fitted, RIFTER_PROPULSION, conditions).baseMaxSpeed;
     expect(decoded!.shipA.fittedHull?.baseMaxSpeed).toBeCloseTo(expected, 6);
   });

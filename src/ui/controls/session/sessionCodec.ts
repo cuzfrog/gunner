@@ -313,6 +313,7 @@ function sidePanelStateOf(combatant: CombatantSettings): SidePanelState {
     aggressivity: combatant.aggressivity,
     skillLevel: combatant.skillLevel,
     overload: combatant.overload,
+    weaponOverload: combatant.weaponOverload,
     hull: combatant.hull,
     propulsion: combatant.propulsion,
     fitting: combatant.fitting,

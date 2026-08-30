@@ -124,7 +124,7 @@ describe("naked hull", () => {
       baseSpeed: 340,
       sigRadius: 35,
     };
-    const stats = fittedStats(profile, undefined, ab1, { skillLevel: 5, overloaded: true });
+    const stats = fittedStats(profile, undefined, ab1, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(stats.maxSpeed).toBeCloseTo(1258.10, 2);
     expect(stats.mass).toBe(1_650_000);
     expect(stats.inertiaModifier).toBeCloseTo(2.025, 3);
@@ -138,15 +138,15 @@ describe("naked hull", () => {
   });
 
   test("overload multiplies the propulsion speed bonus and leaves mass and signature alone", () => {
-    const stats = fittedStats(frigate, undefined, ab1, { skillLevel: 0, overloaded: true });
+    const stats = fittedStats(frigate, undefined, ab1, { skillLevel: 0, overloaded: true, weaponOverloaded: false });
     expect(stats.maxSpeed).toBeCloseTo(1090, 0);
     expect(stats.mass).toBe(1_500_000);
     expect(stats.sigRadius).toBe(35);
   });
 
   test("overload has no effect when no propulsion module is fitted", () => {
-    const withOverload = fittedStats(frigate, undefined, undefined, { skillLevel: 5, overloaded: true });
-    const withoutOverload = fittedStats(frigate, undefined, undefined, { skillLevel: 5, overloaded: false });
+    const withOverload = fittedStats(frigate, undefined, undefined, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
+    const withoutOverload = fittedStats(frigate, undefined, undefined, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(withOverload).toEqual(withoutOverload);
   });
 
@@ -218,7 +218,7 @@ describe("fittedStats", () => {
   });
 
   test("with overload and skills scales the propulsion speed bonus only, leaving align time unchanged", () => {
-    const stats = fittedStats(frigate, fitted, ab1, { skillLevel: 5, overloaded: true });
+    const stats = fittedStats(frigate, fitted, ab1, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(stats.maxSpeed).toBeGreaterThan(440);
     expect(stats.mass).toBe(1_750_000);
     expect(stats.inertiaModifier).toBeCloseTo(1.8225, 6);
@@ -261,5 +261,5 @@ describe("maxSpeedForFittedMass", () => {
 });
 
 function conditions(level: SkillLevel): StatConditions {
-  return { skillLevel: level, overloaded: false };
+  return { skillLevel: level, overloaded: false, weaponOverloaded: false };
 }

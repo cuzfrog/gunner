@@ -32,7 +32,7 @@ const itemNameCatalog = new StaticItemNameCatalog();
 const itemNameResolver = new StaticItemNameResolver();
 
 const importer = new FittingImportImpl({
-  ships, fittingDb: FITTING_DB, chargeCatalog, missileCatalog, missileSkillModel,
+  ships, fittingDb: FITTING_DB, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel,
   stackingPenalty: stacking, itemNameCatalog, itemNameResolver,
   moduleSlotCatalog: MODULE_SLOT_CATALOG,
 });
@@ -90,7 +90,7 @@ function turretSpecFromImported(t: NonNullable<NonNullable<ReturnType<typeof imp
 
 describe("Harbinger DPS cross-check (all skills 5, no overload)", () => {
   test("matches pyfa nominal DPS for 6x HPL II + Conflagration M + 2x Heat Sink II", () => {
-    const result = importer.importFitting(HARBINGER_FIT, { skillLevel: 5, overloaded: false });
+    const result = importer.importFitting(HARBINGER_FIT, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(result).toBeDefined();
     expect(result!.turret).toBeDefined();
     expect(result!.turret!.turretCount).toBe(6);
@@ -100,21 +100,21 @@ describe("Harbinger DPS cross-check (all skills 5, no overload)", () => {
   });
 
   test("damage multiplier includes hull, skill, specialization, and stacking-penalized module bonuses", () => {
-    const result = importer.importFitting(HARBINGER_FIT, { skillLevel: 5, overloaded: false });
+    const result = importer.importFitting(HARBINGER_FIT, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const heatSinkStacking = stacking.apply([1.1, 1.1]);
     const expectedDamageMultiplier = 3.6 * heatSinkStacking * 1.5 * 1.15 * 1.25 * 1.1;
     expect(result!.turret!.damageMultiplier).toBeCloseTo(expectedDamageMultiplier, 6);
   });
 
   test("cycle time includes stacking-penalized module and unpenalized skill RoF bonuses", () => {
-    const result = importer.importFitting(HARBINGER_FIT, { skillLevel: 5, overloaded: false });
+    const result = importer.importFitting(HARBINGER_FIT, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const heatSinkSpeedStacking = stacking.apply([0.895, 0.895]);
     const expectedCycleTime = 5.25 * heatSinkSpeedStacking * 0.9 * 0.8;
     expect(result!.turret!.cycleTime).toBeCloseTo(expectedCycleTime, 6);
   });
 
   test("engagement composer nominalDps matches import-layer DPS at zero range", () => {
-    const result = importer.importFitting(HARBINGER_FIT, { skillLevel: 5, overloaded: false });
+    const result = importer.importFitting(HARBINGER_FIT, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const turret = turretSpecFromImported(result!.turret!);
     const composer = makeComposer();
     const view = composer.compose(snapshot(), { weapons: { shipA: [turret], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 } });

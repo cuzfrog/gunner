@@ -86,7 +86,7 @@ describe("LauncherController class switch", () => {
       launcherClasses: classAwareLauncherClasses(),
       launchersByModuleId: { [String(ROCKET_MODULE_ID)]: rocketLauncher },
     });
-    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
 
     const specBefore = controller.currentMissileSpec()!;
     expect(specBefore).toBeDefined();
@@ -112,7 +112,7 @@ describe("LauncherController class switch", () => {
       launcherClasses: classAwareLauncherClasses(),
       launchersByModuleId: { [String(ROCKET_MODULE_ID)]: rocketLauncher, [String(LIGHT_MODULE_ID)]: lightLauncher },
     });
-    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
 
     clickClassButton(document, "ship-a", "light");
     expect(controller.launcher()?.moduleId).toBe(LIGHT_MODULE_ID);
@@ -134,7 +134,7 @@ describe("LauncherController class switch", () => {
       launcherClasses: classAwareLauncherClasses(),
       launchersByModuleId: { [String(ROCKET_MODULE_ID)]: rocketLauncher, [String(LIGHT_MODULE_ID)]: lightLauncher },
     });
-    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
 
     clickClassButton(document, "ship-a", "light");
     clickClassButton(document, "ship-a", "rocket");
@@ -157,13 +157,13 @@ describe("LauncherController class switch", () => {
       launcherClasses: classAwareLauncherClasses(),
       launchersByModuleId: { [String(ROCKET_MODULE_ID)]: rocketLauncher, [String(LIGHT_MODULE_ID)]: lightLauncher },
     });
-    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     controller["onAmmoSelect"](userRocketAmmoId);
     expect(panelMemory.recallLauncher("rocket")?.ammoId).toBe(userRocketAmmoId);
 
     controller.clear();
     expect(panelMemory.recallLauncher("rocket")).toBeUndefined();
-    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(panelMemory.recallLauncher("rocket")?.ammoId).toBe(SCOURGE_ROCKET_ID);
   });
 });

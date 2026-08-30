@@ -45,6 +45,8 @@ export interface ISkillOverloadSection {
   skillConditions(): StatConditions;
   setOverloadDisabled(): void;
   setOverloadActive(active: boolean): void;
+  setWeaponOverloaded(overloaded: boolean): void;
+  isWeaponOverloaded(): boolean;
   onOverloadButtonClick(): void;
   onSkillOrOverloadChange(updateInertia: boolean): void;
   currentSkillLevel(): SkillLevel | undefined;

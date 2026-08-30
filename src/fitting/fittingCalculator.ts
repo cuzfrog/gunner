@@ -4,6 +4,7 @@ import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStat
 import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec } from "../sim";
 import { SIG_RESOLUTIONS } from "../sim";
 import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher } from "./chargeCatalog";
+import type { GunFamily, GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
 import type { MissileSkillModel } from "./missileStats";
 import { TRACKING_SKILL_BONUS, OPTIMAL_SKILL_BONUS, FALLOFF_SKILL_BONUS, STANDARD_SIGNATURE_RESOLUTION, sigResolutionClassFromChargeSize } from "./turretStats";
@@ -35,6 +36,7 @@ interface FittingCalculatorDeps {
   readonly fittingDb: FittingDb;
   readonly ships: Ships;
   readonly chargeCatalog: ChargeCatalog;
+  readonly gunFamilies: GunFamilies;
   readonly missileCatalog: MissileCatalog;
   readonly missileSkillModel: MissileSkillModel;
   readonly stackingPenalty: StackingPenalty;
@@ -45,6 +47,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
   private readonly db: FittingDb;
   private readonly ships: Ships;
   private readonly chargeCatalog: ChargeCatalog;
+  private readonly gunFamilies: GunFamilies;
   private readonly missileCatalog: MissileCatalog;
   private readonly missileSkillModel: MissileSkillModel;
   private readonly stacking: StackingPenalty;
@@ -54,6 +57,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
     this.db = deps.fittingDb;
     this.ships = deps.ships;
     this.chargeCatalog = deps.chargeCatalog;
+    this.gunFamilies = deps.gunFamilies;
     this.missileCatalog = deps.missileCatalog;
     this.missileSkillModel = deps.missileSkillModel;
     this.stacking = deps.stackingPenalty;
@@ -119,6 +123,10 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const modifiedDamageMultiplier = turret.damageMultiplier * moduleDamageBonus * hullDamageMultiplier * skillDamageMultiplier;
       const modifiedCycleTime = turret.cycleTime * moduleSpeedBonus * hullRoFMultiplier * skillRoFMultiplier;
 
+      const [overloadDamage, overloadCycle] = weaponOverloadMultipliers(this.gunFamilies.familyOf(group.moduleId), conditions.weaponOverloaded);
+      const finalDamageMultiplier = modifiedDamageMultiplier * overloadDamage;
+      const finalCycleTime = modifiedCycleTime * overloadCycle;
+
       const sigResClass = sigResolutionClassFromChargeSize(turret.chargeSize);
       const sigRes = SIG_RESOLUTIONS[sigResClass];
       const skillTrackingMultiplier = 1 + TRACKING_SKILL_BONUS * skillLevel;
@@ -144,9 +152,9 @@ export class FittingCalculatorImpl implements FittingCalculator {
         chargeId: chargeId ?? this.chargeCatalog.usualForChargeSize(turret.chargeSize),
         base,
         moduleId: group.moduleId,
-        damageMultiplier: modifiedDamageMultiplier,
+        damageMultiplier: finalDamageMultiplier,
         damagePerShot: 0,
-        cycleTime: modifiedCycleTime,
+        cycleTime: finalCycleTime,
         turretCount: group.count,
       };
       const selectedCharge = chargeId && this.db.charges[chargeId] ? chargeId : this.chargeCatalog.usualForTurret(turretForChargeSelection);
@@ -162,9 +170,9 @@ export class FittingCalculatorImpl implements FittingCalculator {
         chargeId: selectedCharge,
         base,
         moduleId: group.moduleId,
-        damageMultiplier: modifiedDamageMultiplier,
-        damagePerShot: modifiedDamageMultiplier * chargeDamage,
-        cycleTime: modifiedCycleTime,
+        damageMultiplier: finalDamageMultiplier,
+        damagePerShot: finalDamageMultiplier * chargeDamage,
+        cycleTime: finalCycleTime,
         turretCount: group.count,
       });
     }
@@ -195,6 +203,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
     if (!missileStats) return undefined;
 
     const output = this.missileSkillModel.compute(launcherStats, missileStats, fitting.hullBonuses, conditions.skillLevel);
+    const launcherOverloadCycle = conditions.weaponOverloaded ? WEAPON_OVERLOAD_ROF_MULTIPLIER : 1;
     return {
       moduleId: bestGroup.moduleId,
       name: launcherStats.name,
@@ -202,7 +211,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       chargeId,
       chargeName: missileStats.name,
       damagePerMissile: output.damagePerMissile,
-      cycleTime: output.cycleTime,
+      cycleTime: output.cycleTime * launcherOverloadCycle,
       explosionRadius: output.explosionRadius,
       explosionVelocity: output.explosionVelocity,
       damageReductionFactor: output.damageReductionFactor,
@@ -417,4 +426,14 @@ function computeSkillRoFMultiplier(skillBonuses: readonly SkillBonus[], skillLev
 
 function hullBonusPercent(bonus: HullBonus, skillLevel: number): number {
   return bonus.magnitude * (bonus.skill ? skillLevel : 1);
+}
+
+const WEAPON_OVERLOAD_DAMAGE_MULTIPLIER = 1.15;
+const WEAPON_OVERLOAD_ROF_MULTIPLIER = 0.85;
+const SHORT_RANGE_GUN_FAMILIES: ReadonlySet<GunFamily> = new Set(["pulseLaser", "blaster", "autocannon"]);
+
+function weaponOverloadMultipliers(family: GunFamily, weaponOverloaded: boolean): readonly [damageMultiplier: number, cycleMultiplier: number] {
+  if (!weaponOverloaded) return [1, 1] as const;
+  if (SHORT_RANGE_GUN_FAMILIES.has(family)) return [WEAPON_OVERLOAD_DAMAGE_MULTIPLIER, 1] as const;
+  return [1, WEAPON_OVERLOAD_ROF_MULTIPLIER] as const;
 }

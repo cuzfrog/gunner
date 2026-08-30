@@ -53,6 +53,7 @@ function panelStateFrom(settings: UserSettings, side: "shipA" | "shipB"): SidePa
     aggressivity: (side === "shipA" ? settings.shipAAggressivity : settings.shipBAggressivity) ?? 1,
     skillLevel: side === "shipA" ? settings.shipASkillLevel : settings.shipBSkillLevel,
     overload: side === "shipA" ? settings.shipAOverload ?? true : settings.shipBOverload ?? true,
+    weaponOverload: side === "shipA" ? settings.shipAWeaponOverload ?? false : settings.shipBWeaponOverload ?? false,
     hull: side === "shipA" ? settings.shipAHullId : settings.shipBHullId,
     propulsion: side === "shipA" ? settings.shipAPropulsion : settings.shipBPropulsion,
     fitting: side === "shipA" ? settings.shipAFitting : settings.shipBFitting,
@@ -124,6 +125,7 @@ function sidePanelStateWithDefaults(state: Partial<SidePanelState>): SidePanelSt
     aggressivity: 1,
     skillLevel: 5,
     overload: true,
+    weaponOverload: false,
     hull: undefined,
     propulsion: undefined,
     fitting: undefined,
@@ -388,8 +390,8 @@ function makeProfile(): ProfileSettings {
 
 describe("SessionCodec", () => {
   test("capture returns a complete UserSettings from current controls", () => {
-    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: { shipAMass: 1_400_000 }, fittedHull: undefined });
-    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: { shipAMass: 1_400_000 }, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
     const { codec, turretControllers, turretOverridesBySide, els } = buildCodec({ shipA, shipB });
     const shipATurret = turretControllers.shipA;
     const shipBTurret = turretControllers.shipB;
@@ -567,8 +569,8 @@ describe("SessionCodec", () => {
   test("capture and restore include ewar activations", () => {
     const ewarController = mockEwarController();
     const fittingImport = mockFittingImport();
-    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nStasis Webifier I", overrides: {}, fittedHull: undefined });
-    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nStasis Webifier I", overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
     vi.mocked(ewarController.capture).mockReturnValue({
       webs: [{ active: true, overloaded: false }],
       grapplers: [],
@@ -602,8 +604,8 @@ describe("SessionCodec", () => {
   });
 
   test("corrupt startup data falls back to defaults", () => {
-    const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
-    const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
+    const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
     const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })), savePreferences: vi.fn() } as unknown as SettingsStore;
     const events = new UiEventsImpl();
     const onStartupDefaultsApplied = vi.fn();
@@ -628,8 +630,8 @@ describe("SessionCodec", () => {
   });
 
   test("resetToDefaults clears the selected profile and ship state back to pristine", () => {
-    const pristineShipA = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
-    const pristineShipB = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
+    const pristineShipA = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
+    const pristineShipB = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
     const shipA = mockSidePanel("shipA", pristineShipA);
     const shipB = mockSidePanel("shipB", pristineShipB);
     const clearSelectedProfile = vi.fn();
@@ -672,8 +674,8 @@ describe("SessionCodec", () => {
   test("profileLoaded event restores the named profile and emits sessionRestored", () => {
     const profile = makeProfile();
     const loadProfile = vi.fn(() => profile);
-    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
-    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
     const events = new UiEventsImpl();
     const onSessionRestored = vi.fn();
     events.onSessionRestored(onSessionRestored);
@@ -708,8 +710,8 @@ describe("SessionCodec", () => {
 
   test("profileTextLoaded event restores the shared profile and emits sessionRestored", () => {
     const profile = makeProfile();
-    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
-    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
     const events = new UiEventsImpl();
     const onSessionRestored = vi.fn();
     events.onSessionRestored(onSessionRestored);
@@ -741,8 +743,8 @@ describe("SessionCodec", () => {
   });
 
   test("newProfile event resets to defaults and emits sessionReset", () => {
-    const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
-    const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
+    const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
     const clearSelectedProfile = vi.fn();
     const loadPreferences = vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 }));
     const settingsStore = { loadPreferences, clearSelectedProfile } as unknown as SettingsStore;
@@ -762,8 +764,8 @@ describe("SessionCodec", () => {
   });
 
   test("profileDeleted event resets to defaults and emits sessionReset", () => {
-    const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
-    const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
+    const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
     const clearSelectedProfile = vi.fn();
     const loadPreferences = vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 }));
     const settingsStore = { loadPreferences, clearSelectedProfile } as unknown as SettingsStore;

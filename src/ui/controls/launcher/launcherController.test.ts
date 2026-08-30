@@ -29,7 +29,7 @@ describe("LauncherController", () => {
   test("applyImported with a launcher renders telemetry", () => {
     const { document, controller } = buildLauncher();
     const launcher = importedLauncherFixture();
-    controller.applyImported(importedWithLauncher(launcher), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(launcher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(controller.launcher()).toBeDefined();
     expect(controller.ammoId()).toBe(SCOURGE_LIGHT_ID);
     expect(getFake(document, "ship-a-launcher-ammo-summary").textContent).toBe("Scourge Light Missile");
@@ -43,27 +43,27 @@ describe("LauncherController", () => {
 
   test("applyImported without a launcher leaves no launcher", () => {
     const { controller } = buildLauncher();
-    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false });
+    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(controller.launcher()).toBeUndefined();
   });
 
   test("triggers are disabled when no launcher is fitted", () => {
     const { document, controller } = buildLauncher();
-    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false });
+    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(getFake(document, "ship-a-launcher-attributes-trigger").disabled).toBe(true);
     expect(getFake(document, "ship-a-launcher-ammo-trigger").disabled).toBe(true);
   });
 
   test("triggers are enabled when a launcher is fitted", () => {
     const { document, controller } = buildLauncher();
-    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(getFake(document, "ship-a-launcher-attributes-trigger").disabled).toBe(false);
     expect(getFake(document, "ship-a-launcher-ammo-trigger").disabled).toBe(false);
   });
 
   test("clear resets the launcher", () => {
     const { controller, popupGroup } = buildLauncher();
-    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     controller.clear();
     expect(controller.launcher()).toBeUndefined();
     expect(popupGroup.close).toHaveBeenCalled();
@@ -73,22 +73,22 @@ describe("LauncherController", () => {
     const { controller, fittingImport, fittingOverrides } = buildLauncher({
       fittingImport: { importFitting: vi.fn(() => importedWithLauncher(importedLauncherFixture())) },
     });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true }, NOVA_LIGHT_ID);
-    expect(fittingImport.importFitting).toHaveBeenCalledWith("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false }, NOVA_LIGHT_ID);
+    expect(fittingImport.importFitting).toHaveBeenCalledWith("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(controller.ammoId()).toBe(NOVA_LIGHT_ID);
     expect(fittingOverrides.get().launcherChargeReplacements.get(importedLauncherFixture().moduleId)).toBe(NOVA_LIGHT_ID);
   });
 
   test("restore with no fitting text clears the launcher", () => {
     const { controller, fittingImport } = buildLauncher();
-    controller.restore(undefined, { skillLevel: 5, overloaded: true });
+    controller.restore(undefined, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(fittingImport.importFitting).not.toHaveBeenCalled();
     expect(controller.launcher()).toBeUndefined();
   });
 
   test("selecting a different missile updates the launcher and closes the popup", () => {
     const { document, controller, popupGroup } = buildLauncher();
-    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     controller.openAmmoPopup();
     const list = getFake(document, "ship-a-launcher-ammo-list");
     expect(list.children.length).toBe(2);
@@ -99,7 +99,7 @@ describe("LauncherController", () => {
 
   test("capture returns the current ammo id", () => {
     const { controller } = buildLauncher();
-    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(controller.capture().ammo).toBe(SCOURGE_LIGHT_ID);
   });
 
@@ -111,7 +111,7 @@ describe("LauncherController", () => {
   test("currentMissileSpec returns a MissileSpec with flightRange when a launcher is fitted", () => {
     const { controller } = buildLauncher();
     const launcher = importedLauncherFixture();
-    controller.applyImported(importedWithLauncher(launcher), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(launcher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const spec = controller.currentMissileSpec();
     expect(spec).toBeDefined();
     expect(spec!.kind).toBe("missile");
@@ -144,7 +144,7 @@ describe("LauncherController", () => {
 
   test("icons are hidden when no launcher is fitted", () => {
     const { document, controller } = buildLauncher();
-    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false });
+    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(getFake(document, "ship-a-launcher-ammo-summary-icon").hidden).toBe(true);
   });
 
@@ -152,7 +152,7 @@ describe("LauncherController", () => {
     const { document, controller } = buildLauncher({
       imageCatalog: { itemIconUrl: vi.fn(() => "images/launcher.png") },
     });
-    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const ammoIcon = getFake(document, "ship-a-launcher-ammo-summary-icon");
     expect(ammoIcon.hidden).toBe(false);
     expect(ammoIcon.src).toBe("images/launcher.png");
@@ -162,7 +162,7 @@ describe("LauncherController", () => {
     const { document, controller } = buildLauncher({
       imageCatalog: { itemIconUrl: vi.fn(() => undefined) },
     });
-    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(getFake(document, "ship-a-launcher-ammo-summary-icon").hidden).toBe(true);
   });
 
@@ -181,7 +181,7 @@ describe("LauncherController", () => {
 
   test("class selector renders translated launcher class labels with explosion radius values", () => {
     const { document, controller, i18n } = buildLauncher();
-    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const classOptions = getFake(document, "ship-a-launcher-class-options");
     const buttons = classOptions.children as unknown as FakeElement[];
     expect(buttons.length).toBeGreaterThan(0);
@@ -200,7 +200,7 @@ describe("LauncherController", () => {
     const { document, controller } = buildLauncher({
       imageCatalog: { itemIconUrl: vi.fn(() => "images/launcher-light.png") },
     });
-    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const classOptions = getFake(document, "ship-a-launcher-class-options");
     const buttons = classOptions.children as unknown as FakeElement[];
     for (const button of buttons) {
@@ -212,7 +212,7 @@ describe("LauncherController", () => {
 
   test("class selector does not render icons when no launcher is fitted", () => {
     const { document, controller } = buildLauncher();
-    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false });
+    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const classOptions = getFake(document, "ship-a-launcher-class-options");
     const buttons = classOptions.children as unknown as FakeElement[];
     for (const button of buttons) {
@@ -223,19 +223,19 @@ describe("LauncherController", () => {
 
   test("variant gear is disabled when no launcher is fitted", () => {
     const { document, controller } = buildLauncher();
-    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false });
+    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(getFake(document, "ship-a-launcher-variant-gear").disabled).toBe(true);
   });
 
   test("variant gear is enabled when a launcher is fitted", () => {
     const { document, controller } = buildLauncher();
-    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(getFake(document, "ship-a-launcher-variant-gear").disabled).toBe(false);
   });
 
   test("clicking variant gear toggles the popup via popupGroup", () => {
     const { document, controller, popupGroup } = buildLauncher();
-    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     getFake(document, "ship-a-launcher-variant-gear").trigger("click");
     expect(popupGroup.toggle).toHaveBeenCalled();
   });
@@ -251,7 +251,7 @@ describe("LauncherController", () => {
       { id: "2404" as TypeId, name: "Light Missile Launcher II", launcherGroup: 509, chargeGroups: [384, 394, 653], rateOfFire: 12.8, metaLevel: 5, metaGroupID: 2 } as never,
     ]);
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
-    controller.applyImported(importedWithLauncher(baseLauncher), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(baseLauncher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const list = getFake(document, "ship-a-launcher-variants");
     const buttons = Array.from(list.children).filter((c) => c.getAttribute("data-value") === "2404");
     expect(buttons.length).toBe(1);
