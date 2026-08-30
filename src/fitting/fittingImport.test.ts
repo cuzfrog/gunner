@@ -1069,6 +1069,68 @@ Warp Scrambler II, Gremlin K5`,
     expect(result!.ewar.disruptors).toEqual([]);
   });
 
+  test("resolves target painter from EFT fitting", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Painter]
+Target Painter II`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.ewar.painters).toEqual([
+      expect.objectContaining({ moduleName: "Target Painter II", maxRange: 36000, falloff: 90000, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 20 }),
+    ]);
+  });
+
+  test("resolves missile guidance computer with precision script", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, MGC]
+Missile Guidance Computer II, Missile Precision Script`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.missileBoosts.computers).toEqual([
+      expect.objectContaining({ moduleName: "Missile Guidance Computer II", explosionRadiusBonusPercent: -8.25, explosionVelocityBonusPercent: 8.25, missileVelocityBonusPercent: 5.5, flightTimeBonusPercent: 5.5, overloadStrengthBonusPercent: 15 }),
+    ]);
+    expect(result!.missileBoosts.computers[0].defaultScript).toEqual(expect.objectContaining({ name: "Missile Precision Script" }));
+    expect(result!.missileBoosts.scripts.length).toBe(2);
+  });
+
+  test("resolves missile guidance enhancer as passive missile booster", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, MGE]
+Missile Guidance Enhancer II`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.missileBoosts.enhancers).toEqual([
+      expect.objectContaining({ moduleName: "Missile Guidance Enhancer II", explosionRadiusBonusPercent: -6, explosionVelocityBonusPercent: 6, missileVelocityBonusPercent: 6, flightTimeBonusPercent: 6 }),
+    ]);
+    expect(result!.missileBoosts.computers).toEqual([]);
+  });
+
+  test("resolves empty missile boosts when no MGC or MGE fitted", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Empty]
+Heat Sink II`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.missileBoosts.computers).toEqual([]);
+    expect(result!.missileBoosts.enhancers).toEqual([]);
+  });
+
   test("imports a real preset and resolves cargo charges with drones before cargo", async () => {
     const path = join(import.meta.dir, "..", "..", "data", "ship-fittings", "Abaddon", "Pulse_Armor_Abaddon.txt");
     const text = await Bun.file(path).text();

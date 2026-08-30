@@ -66,7 +66,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   }
 
   private assess(frame: EngagementFrame, ship: ShipState, opponent: ShipState, attack: AttackState): AttackAssessment {
-    const paintedSig = attack.opponentSigRadius * this.ewarResolver.sigMultiplier(opponent.ewar, frame.distance);
+    const paintedSig = attack.opponentSigRadius * this.ewarResolver.sigMultiplier(ship.ewar, frame.distance);
     if (attack.weapon.kind === "turret") {
       return this.assessTurret(frame, ship, opponent, attack.weapon, paintedSig);
     }

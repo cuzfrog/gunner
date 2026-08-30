@@ -9,7 +9,7 @@ import type {
   Ships,
   StatConditions,
 } from "../ships";
-import { type BoostLoadout, type EwarLoadout, type StackingPenalty } from "../sim";
+import { type BoostLoadout, type EwarLoadout, type MissileBoosterLoadout, type StackingPenalty } from "../sim";
 import { parseEft, type BankKind, type EftDocument, type EftLine, type QuantityItem } from "./eft";
 
 import type { ItemNameCatalog, ItemNameResolver } from "../gamedata/itemNames";
@@ -59,6 +59,7 @@ export interface ImportedFitting {
   readonly cargoCharges: readonly CargoCharge[];
   readonly ewar: EwarLoadout;
   readonly boosts: BoostLoadout;
+  readonly missileBoosts: MissileBoosterLoadout;
   readonly hullBonuses: readonly HullBonus[];
 }
 
@@ -166,6 +167,7 @@ export class FittingImportImpl implements FittingImport {
     const cargoCharges = this.calculator.resolveCargoCharges(fittingState);
     const ewar = this.calculator.resolveEwar(fittingState);
     const boosts = this.calculator.resolveBoosts(fittingState);
+    const missileBoosts = this.calculator.resolveMissileBoosts(fittingState);
 
     return {
       profile: resolved.profile,
@@ -179,6 +181,7 @@ export class FittingImportImpl implements FittingImport {
       cargoCharges,
       ewar,
       boosts,
+      missileBoosts,
       hullBonuses,
     };
   }
@@ -338,12 +341,15 @@ function isModuleRole(id: TypeId, db: FittingDb): boolean {
     db.stasisGrapplers[id] !== undefined ||
     db.trackingComputers[id] !== undefined ||
     db.trackingDisruptors[id] !== undefined ||
-    db.warpScramblers[id] !== undefined
+    db.warpScramblers[id] !== undefined ||
+    db.targetPainters[id] !== undefined ||
+    db.missileGuidanceComputers[id] !== undefined ||
+    db.missileGuidanceEnhancers[id] !== undefined
   );
 }
 
 function isChargeRole(id: TypeId, db: FittingDb): boolean {
-  return db.charges[id] !== undefined || db.scripts[id] !== undefined || db.disruptionScripts[id] !== undefined || db.missiles[id] !== undefined;
+  return db.charges[id] !== undefined || db.scripts[id] !== undefined || db.disruptionScripts[id] !== undefined || db.missiles[id] !== undefined || db.missileScripts[id] !== undefined;
 }
 
 function moduleByName(db: FittingDb, name: string): FittingModuleStats | undefined {

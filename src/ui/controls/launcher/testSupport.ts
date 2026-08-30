@@ -180,7 +180,7 @@ export function buildLauncher(
     resolvePropulsion: vi.fn(() => undefined),
     resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] })),
     resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
-    resolveCargoCharges: vi.fn(() => []),
+    resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveCargoCharges: vi.fn(() => []),
   });
   const controller = new LauncherControllerImpl({
     side,

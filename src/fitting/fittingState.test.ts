@@ -21,6 +21,9 @@ function moduleId(name: string): TypeId {
   for (const stats of Object.values(FITTING_DB.launchers)) if (stats.name === name) return stats.id;
   for (const stats of Object.values(FITTING_DB.modules)) if (stats.name === name) return stats.id;
   for (const stats of Object.values(FITTING_DB.trackingComputers)) if (stats.name === name) return stats.id;
+  for (const stats of Object.values(FITTING_DB.targetPainters)) if (stats.name === name) return stats.id;
+  for (const stats of Object.values(FITTING_DB.missileGuidanceComputers)) if (stats.name === name) return stats.id;
+  for (const stats of Object.values(FITTING_DB.missileGuidanceEnhancers)) if (stats.name === name) return stats.id;
   throw new Error(`Module not found: ${name}`);
 }
 
@@ -28,6 +31,7 @@ function chargeId(name: string): TypeId {
   for (const stats of Object.values(FITTING_DB.charges)) if (stats.name === name) return stats.id;
   for (const stats of Object.values(FITTING_DB.missiles)) if (stats.name === name) return stats.id;
   for (const stats of Object.values(FITTING_DB.scripts)) if (stats.name === name) return stats.id;
+  for (const stats of Object.values(FITTING_DB.missileScripts)) if (stats.name === name) return stats.id;
   for (const stats of Object.values(FITTING_DB.drones)) if (stats.name === name) return stats.id;
   throw new Error(`Charge not found: ${name}`);
 }
@@ -107,6 +111,40 @@ describe("FittingStateFactory", () => {
     expect(state.boosterModules.length).toBe(1);
     expect(state.boosterModules[0].moduleId).toBe(moduleId("Tracking Computer I"));
     expect(state.boosterModules[0].chargeId).toBe(chargeId("Tracking Speed Script"));
+    expect(state.supportModules.length).toBe(1);
+  });
+
+  test("classifies target painter as ewar module", () => {
+    const factory = new FittingStateFactory(FITTING_DB);
+    const state = factory.create(profile, hullBonuses, [
+      entry("Target Painter II"),
+      entry("Heat Sink II"),
+    ], [], []);
+    expect(state.ewarModules.length).toBe(1);
+    expect(state.ewarModules[0].moduleId).toBe(moduleId("Target Painter II"));
+    expect(state.supportModules.length).toBe(1);
+  });
+
+  test("classifies missile guidance computer as missile booster module", () => {
+    const factory = new FittingStateFactory(FITTING_DB);
+    const state = factory.create(profile, hullBonuses, [
+      entry("Missile Guidance Computer II", "Missile Precision Script"),
+      entry("Heat Sink II"),
+    ], [], []);
+    expect(state.missileBoosterModules.length).toBe(1);
+    expect(state.missileBoosterModules[0].moduleId).toBe(moduleId("Missile Guidance Computer II"));
+    expect(state.missileBoosterModules[0].chargeId).toBe(chargeId("Missile Precision Script"));
+    expect(state.supportModules.length).toBe(1);
+  });
+
+  test("classifies missile guidance enhancer as missile booster module", () => {
+    const factory = new FittingStateFactory(FITTING_DB);
+    const state = factory.create(profile, hullBonuses, [
+      entry("Missile Guidance Enhancer II"),
+      entry("Heat Sink II"),
+    ], [], []);
+    expect(state.missileBoosterModules.length).toBe(1);
+    expect(state.missileBoosterModules[0].moduleId).toBe(moduleId("Missile Guidance Enhancer II"));
     expect(state.supportModules.length).toBe(1);
   });
 

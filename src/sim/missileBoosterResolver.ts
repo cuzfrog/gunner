@@ -25,7 +25,7 @@ export class MissileBoosterResolverImpl implements MissileBoosterResolver {
       if (!activation || !activation.active) continue;
 
       const overloadFactor = activation.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
-      const script = activation.script;
+      const script = activation.script ?? spec.defaultScript;
       const erMultiplier = script ? script.explosionRadiusMultiplier : 1;
       const evMultiplier = script ? script.explosionVelocityMultiplier : 1;
       const mvMultiplier = script ? script.missileVelocityMultiplier : 1;

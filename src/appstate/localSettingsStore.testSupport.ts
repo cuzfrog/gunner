@@ -200,7 +200,7 @@ const EMPTY_FITTING_STATE: FittingState = {
   launcherGroups: [],
   propulsionModule: undefined,
   ewarModules: [],
-  boosterModules: [],
+  boosterModules: [], missileBoosterModules: [],
   drones: [],
   cargo: [],
 };
@@ -227,7 +227,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   },
   cargoCharges: [],
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
-  boosts: { computers: [], scripts: [] },
+  boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
 };
 export function fakeStorage(): StorageProvider {

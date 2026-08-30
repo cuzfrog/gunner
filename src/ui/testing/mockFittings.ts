@@ -148,7 +148,7 @@ const EMPTY_FITTING_STATE: FittingState = {
   launcherGroups: [],
   propulsionModule: undefined,
   ewarModules: [],
-  boosterModules: [],
+  boosterModules: [], missileBoosterModules: [],
   drones: [],
   cargo: [],
 };
@@ -167,7 +167,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   turret: TURRET,
   cargoCharges: [],
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
-  boosts: { computers: [], scripts: [] },
+  boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
 };
 export const IMPORTED_RIFTER_WITH_CARGO: ImportedFitting = { ...IMPORTED_RIFTER, cargoCharges: [{ id: "21898" as TypeId, quantity: 2000 }] };

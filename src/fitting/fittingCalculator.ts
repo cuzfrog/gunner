@@ -1,8 +1,8 @@
 import type { TypeId } from "../gamedata/ids";
-import type { FittingDb, FittingModuleStats, HullBonus, LauncherStats, MissileStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, TurretWeaponGroup, WarpScramblerStats, DisruptionScriptStats } from "../gamedata/fittingDb";
+import type { FittingDb, FittingModuleStats, HullBonus, LauncherStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, TurretWeaponGroup, WarpScramblerStats, DisruptionScriptStats } from "../gamedata/fittingDb";
 import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
-import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec } from "../sim";
-import { SIG_RESOLUTIONS } from "../sim";
+import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec } from "../sim";
+import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT } from "../sim";
 import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher } from "./chargeCatalog";
 import type { GunFamily, GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
@@ -29,6 +29,7 @@ export interface FittingCalculator {
   resolvePropulsion(fitting: FittingState): PropulsionResult | undefined;
   resolveEwar(fitting: FittingState): EwarLoadout;
   resolveBoosts(fitting: FittingState): BoostLoadout;
+  resolveMissileBoosts(fitting: FittingState): MissileBoosterLoadout;
   resolveCargoCharges(fitting: FittingState): readonly { id: TypeId; quantity: number }[];
 }
 
@@ -202,6 +203,17 @@ export class FittingCalculatorImpl implements FittingCalculator {
     const missileStats = this.db.missiles[chargeId];
     if (!missileStats) return undefined;
 
+    const bcsDamageMultipliers: number[] = [];
+    const bcsCycleTimeMultipliers: number[] = [];
+    for (const mod of fitting.supportModules) {
+      const stats = this.db.modules[mod.moduleId];
+      if (!stats) continue;
+      if (stats.missileDamageMultiplier && stats.missileDamageMultiplier !== 1) bcsDamageMultipliers.push(stats.missileDamageMultiplier);
+      if (stats.missileCycleTimeMultiplier && stats.missileCycleTimeMultiplier !== 1) bcsCycleTimeMultipliers.push(stats.missileCycleTimeMultiplier);
+    }
+    const bcsDamageBonus = this.stacking.apply(bcsDamageMultipliers);
+    const bcsCycleTimeBonus = this.stacking.apply(bcsCycleTimeMultipliers);
+
     const output = this.missileSkillModel.compute(launcherStats, missileStats, fitting.hullBonuses, conditions.skillLevel);
     const launcherOverloadCycle = conditions.weaponOverloaded ? WEAPON_OVERLOAD_ROF_MULTIPLIER : 1;
     return {
@@ -210,8 +222,8 @@ export class FittingCalculatorImpl implements FittingCalculator {
       count: bestGroup.count,
       chargeId,
       chargeName: missileStats.name,
-      damagePerMissile: output.damagePerMissile,
-      cycleTime: output.cycleTime * launcherOverloadCycle,
+      damagePerMissile: output.damagePerMissile * bcsDamageBonus,
+      cycleTime: output.cycleTime * bcsCycleTimeBonus * launcherOverloadCycle,
       explosionRadius: output.explosionRadius,
       explosionVelocity: output.explosionVelocity,
       damageReductionFactor: output.damageReductionFactor,
@@ -282,6 +294,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
     const grapplers: StasisGrapplerSpec[] = [];
     const disruptors: TrackingDisruptorSpec[] = [];
     const scramblers: WarpScramblerSpec[] = [];
+    const painters: TargetPainterSpec[] = [];
 
     for (const mod of fitting.ewarModules) {
       const webStats = this.db.stasisWebs[mod.moduleId];
@@ -304,11 +317,16 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const scramblerStats = this.db.warpScramblers[mod.moduleId];
       if (scramblerStats) {
         scramblers.push({ moduleName: scramblerStats.name, moduleId: scramblerStats.id, maxRange: scramblerStats.maxRange, overloadRangeBonusPercent: scramblerStats.overloadRangeBonusPercent });
+        continue;
+      }
+      const painterStats = this.db.targetPainters[mod.moduleId];
+      if (painterStats) {
+        painters.push(painterSpecFrom(painterStats));
       }
     }
 
-    if (webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && scripts.length === 0) return { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] };
-    return { webs, grapplers, disruptors, scramblers, painters: [], scripts };
+    if (webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && painters.length === 0 && scripts.length === 0) return { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] };
+    return { webs, grapplers, disruptors, scramblers, painters, scripts };
   }
 
   resolveBoosts(fitting: FittingState): BoostLoadout {
@@ -325,6 +343,30 @@ export class FittingCalculatorImpl implements FittingCalculator {
     }
 
     return { computers, scripts };
+  }
+
+  resolveMissileBoosts(fitting: FittingState): MissileBoosterLoadout {
+    const scripts = missileScriptSpecsFrom(this.db.missileScripts);
+    const scriptByName = new Map(scripts.map((s) => [s.name, s]));
+    const computers: MissileBoosterSpec[] = [];
+    const enhancers: MissileEnhancerSpec[] = [];
+
+    for (const mod of fitting.missileBoosterModules) {
+      const computerStats = this.db.missileGuidanceComputers[mod.moduleId];
+      if (computerStats) {
+        const scriptName = mod.chargeId ? this.itemNameCatalog.nameForId(mod.chargeId, "en") : undefined;
+        const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
+        computers.push(missileBoosterSpecFrom(computerStats, defaultScript));
+        continue;
+      }
+      const enhancerStats = this.db.missileGuidanceEnhancers[mod.moduleId];
+      if (enhancerStats) {
+        enhancers.push(missileEnhancerSpecFrom(enhancerStats));
+      }
+    }
+
+    if (computers.length === 0 && enhancers.length === 0 && scripts.length === 0) return EMPTY_MISSILE_BOOSTER_LOADOUT;
+    return { computers, enhancers, scripts };
   }
 
   resolveCargoCharges(fitting: FittingState): readonly { id: TypeId; quantity: number }[] {
@@ -363,6 +405,26 @@ function disruptionScriptSpecsFrom(scripts: Readonly<Record<string, DisruptionSc
     result.push({ name: stats.name, moduleId: stats.id, trackingMultiplier: 1 + stats.trackingDeltaBonus / 100, optimalMultiplier: 1 + stats.rangeDeltaBonus / 100, falloffMultiplier: 1 + stats.falloffDeltaBonus / 100 });
   }
   return result;
+}
+
+function painterSpecFrom(stats: TargetPainterStats): TargetPainterSpec {
+  return { moduleName: stats.name, moduleId: stats.id, maxRange: stats.maxRange, falloff: stats.falloff, signatureRadiusBonusPercent: stats.signatureRadiusBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent };
+}
+
+function missileScriptSpecsFrom(scripts: Readonly<Record<string, MissileScriptStats>>): MissileScriptSpec[] {
+  const result: MissileScriptSpec[] = [];
+  for (const stats of Object.values(scripts)) {
+    result.push({ name: stats.name, moduleId: stats.id, explosionRadiusMultiplier: stats.explosionRadiusMultiplier, explosionVelocityMultiplier: stats.explosionVelocityMultiplier, missileVelocityMultiplier: stats.missileVelocityMultiplier, flightTimeMultiplier: stats.flightTimeMultiplier });
+  }
+  return result;
+}
+
+function missileBoosterSpecFrom(stats: MissileGuidanceComputerStats, defaultScript: MissileScriptSpec | undefined): MissileBoosterSpec {
+  return { moduleName: stats.name, moduleId: stats.id, explosionRadiusBonusPercent: stats.explosionRadiusBonusPercent, explosionVelocityBonusPercent: stats.explosionVelocityBonusPercent, missileVelocityBonusPercent: stats.missileVelocityBonusPercent, flightTimeBonusPercent: stats.flightTimeBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent, defaultScript };
+}
+
+function missileEnhancerSpecFrom(stats: MissileGuidanceEnhancerStats): MissileEnhancerSpec {
+  return { moduleName: stats.name, moduleId: stats.id, explosionRadiusBonusPercent: stats.explosionRadiusBonusPercent, explosionVelocityBonusPercent: stats.explosionVelocityBonusPercent, missileVelocityBonusPercent: stats.missileVelocityBonusPercent, flightTimeBonusPercent: stats.flightTimeBonusPercent };
 }
 
 function collectTurretPercents(stats: FittingModuleStats, script: TurretScriptStats | undefined, trackingPercents: number[], optimalPercents: number[], falloffPercents: number[]): void {
