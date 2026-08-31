@@ -78,3 +78,7 @@ export interface Controls {
   setPlaying(playing: boolean): void;
   setCallbacks(callbacks: ControlsCallbacks): void;
 }
+
+export interface ViewStore {
+  currentView(): EngagementView | undefined;
+}

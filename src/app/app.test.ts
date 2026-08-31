@@ -104,7 +104,7 @@ function baseView(): EngagementView {
     damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0 },
     turret: { hit, expectedMultiplier: 1 },
   };
-  return { frame, attacks: { shipA: assessment, shipB: assessment }, effectiveWeapons: { shipA: turret, shipB: turret } };
+  return { frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret } };
 }
 
 function sideReadoutValues(
@@ -176,6 +176,7 @@ describe("AppImpl", () => {
     const view: EngagementView = {
       frame,
       attacks: { shipA: assessment, shipB: assessment },
+      weaponAttacks: { shipA: [], shipB: [] },
       effectiveWeapons: { shipA: effectiveTurret, shipB: effectiveTurret },
     };
     simulation.snapshot.mockReturnValue(boostedSnapshot);
@@ -190,7 +191,7 @@ describe("AppImpl", () => {
   });
 
   test("falls back to the view's effective weapon when the composer returns no assessment", () => {
-    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, effectiveWeapons: { shipA: turret, shipB: turret } };
+    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret } };
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
@@ -312,6 +313,7 @@ describe("AppImpl", () => {
     const droneView: EngagementView = {
       frame,
       attacks: { shipA: droneAssessment, shipB: droneAssessment },
+      weaponAttacks: { shipA: [], shipB: [] },
       effectiveWeapons: { shipA: drone, shipB: drone },
     };
     engagementFrameComposer.compose.mockReturnValue(droneView);

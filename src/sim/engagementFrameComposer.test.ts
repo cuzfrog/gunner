@@ -87,6 +87,12 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.attacks.shipB).toEqual(shipBAssessment);
     expect(view.effectiveWeapons.shipA).toBe(effectiveTurret);
     expect(view.effectiveWeapons.shipB).toBe(shipBEffectiveTurret);
+    expect(view.weaponAttacks.shipA).toHaveLength(1);
+    expect(view.weaponAttacks.shipA[0].weapon).toBe(shipATurret);
+    expect(view.weaponAttacks.shipA[0].assessment).toEqual(shipAAssessment);
+    expect(view.weaponAttacks.shipB).toHaveLength(1);
+    expect(view.weaponAttacks.shipB[0].weapon).toBe(shipBTurret);
+    expect(view.weaponAttacks.shipB[0].assessment).toEqual(shipBAssessment);
     expect(kinematics.computeEngagement).toHaveBeenCalledWith(shipA, shipB, 1);
     expect(kinematics.computeEngagement).toHaveBeenCalledTimes(1);
     expect(engagementEvaluator.evaluate).toHaveBeenCalledWith(frame, {
@@ -138,5 +144,11 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.attacks.shipA!.damage.volley).toBe(shipADamage.volley + secondDamage.volley);
     expect(view.attacks.shipA!.effectiveWeapon).toBe(effectiveTurret);
     expect(view.attacks.shipB).toBeUndefined();
+    expect(view.weaponAttacks.shipA).toHaveLength(2);
+    expect(view.weaponAttacks.shipA[0].weapon).toBe(shipATurret);
+    expect(view.weaponAttacks.shipA[0].assessment).toEqual(shipAAssessment);
+    expect(view.weaponAttacks.shipA[1].weapon).toBe(secondTurret);
+    expect(view.weaponAttacks.shipA[1].assessment).toEqual(secondAssessment);
+    expect(view.weaponAttacks.shipB).toHaveLength(0);
   });
 });

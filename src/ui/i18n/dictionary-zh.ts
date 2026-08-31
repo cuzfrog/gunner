@@ -236,4 +236,12 @@ export const ZH: LanguageSlice<"zh"> = {
   "dpsHint.volley": { zh: "齐射" },
   "dpsHint.cycleTime": { zh: "周期" },
   "dpsHint.dps": { zh: "DPS" },
+  "dpsHint.turretDps": { zh: "炮塔 DPS" },
+  "dpsHint.missileDps": { zh: "导弹 DPS" },
+  "dpsHint.droneDps": { zh: "无人机 DPS" },
+  "appliedDpsHint.applied": { zh: "实际 DPS" },
+  "appliedDpsHint.application": { zh: "命中率" },
+  "appliedDpsHint.totalNominal": { zh: "总标称 DPS" },
+  "appliedDpsHint.totalApplied": { zh: "总实际 DPS" },
+  "appliedDpsHint.totalApplication": { zh: "总命中率" },
 } as const;

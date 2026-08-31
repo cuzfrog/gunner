@@ -234,4 +234,12 @@ export const JA: LanguageSlice<"ja"> = {
   "dpsHint.volley": { ja: "ボレー" },
   "dpsHint.cycleTime": { ja: "サイクル" },
   "dpsHint.dps": { ja: "DPS" },
+  "dpsHint.turretDps": { ja: "タレット DPS" },
+  "dpsHint.missileDps": { ja: "ミサイル DPS" },
+  "dpsHint.droneDps": { ja: "ドローン DPS" },
+  "appliedDpsHint.applied": { ja: "適用 DPS" },
+  "appliedDpsHint.application": { ja: "適用率" },
+  "appliedDpsHint.totalNominal": { ja: "合計公称 DPS" },
+  "appliedDpsHint.totalApplied": { ja: "合計適用 DPS" },
+  "appliedDpsHint.totalApplication": { ja: "合計適用率" },
 } as const;

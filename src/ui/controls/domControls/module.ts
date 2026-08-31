@@ -35,6 +35,7 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
       previewManager: proxy.previewManager,
       simConfigSource: proxy.simConfigSource,
     })).singleton(),
+    viewStore: asFunction((proxy: ControlsCradle) => proxy.controls).singleton(),
   });
 }
 

@@ -4,7 +4,7 @@ import {
   type WeaponSpec,
 } from "../../../sim";
 import { isEventTargetWithClosest, num } from "../controlsDom";
-import type { Controls, ControlsCallbacks, EffectiveReadouts } from "../controlsContract";
+import type { Controls, ControlsCallbacks, EffectiveReadouts, ViewStore } from "../controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
 import type { EffectiveReadout } from "../effectiveReadout";
 import type { FittingPreviewManager, PopupGroup } from "../popup";
@@ -65,7 +65,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
 
 const READOUT_INTERVAL_MS = 50;
 
-export class DomControls implements Controls, DomControlsHost {
+export class DomControls implements Controls, DomControlsHost, ViewStore {
   private readonly deps: DomControlsDeps;
   private readonly els: DomControlsEls;
   private readonly popupGroup: PopupGroup;
@@ -236,20 +236,28 @@ export class DomControls implements Controls, DomControlsHost {
   }
   getWeapons(side: Side): readonly WeaponSpec[] {
     const activeKind = this.weaponSystemSwitches[side].activeKind();
+    const weapons: WeaponSpec[] = [];
     if (activeKind === "drone") {
       const drone = this.droneControllers[side].currentDroneSpec();
-      if (drone) return [drone];
-      return this.turretControllers[side].currentTurretSpecs();
-    }
-    if (activeKind === "missile") {
+      if (drone) weapons.push(drone);
+    } else if (activeKind === "missile") {
       const missile = this.launcherControllers[side].currentMissileSpec();
-      if (missile) return [missile];
-      return this.turretControllers[side].currentTurretSpecs();
+      if (missile) weapons.push(missile);
+    } else {
+      for (const turret of this.turretControllers[side].currentTurretSpecs()) weapons.push(turret);
     }
-    const turrets = this.turretControllers[side].currentTurretSpecs();
-    if (turrets.length > 0) return turrets;
-    const missile = this.launcherControllers[side].currentMissileSpec();
-    return missile ? [missile] : [];
+    if (activeKind !== "turret") {
+      for (const turret of this.turretControllers[side].currentTurretSpecs()) weapons.push(turret);
+    }
+    if (activeKind !== "missile") {
+      const missile = this.launcherControllers[side].currentMissileSpec();
+      if (missile) weapons.push(missile);
+    }
+    if (activeKind !== "drone") {
+      const drone = this.droneControllers[side].currentDroneSpec();
+      if (drone) weapons.push(drone);
+    }
+    return weapons;
   }
   getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
@@ -267,6 +275,9 @@ export class DomControls implements Controls, DomControlsHost {
     this.applyReadoutsIfReady();
     this.rangeOverlayController.update();
     this.portraitsController.update();
+  }
+  currentView(): EngagementView | undefined {
+    return this.cachedReadouts?.view;
   }
   setPlaying(playing: boolean): void {
     if (!playing && this.playing && this.cachedReadouts) {

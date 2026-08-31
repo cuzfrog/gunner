@@ -8,7 +8,7 @@ import type { ImageCatalog } from "../icons";
 import type { Timer } from "../timer";
 import type { UiEvents } from "../events";
 import type { createControlsEls } from "./elements";
-import type { Controls } from "./controlsContract";
+import type { Controls, ViewStore } from "./controlsContract";
 import type { DomControlsHost } from "./domControls";
 import type { EffectiveReadout } from "./effectiveReadout";
 import type { EngagementReadout } from "./engagementReadout";
@@ -37,6 +37,8 @@ import type { DpsHintProvider } from "./dpsHint";
 import type { DpsHintRenderer } from "./dpsHint";
 import type { AmmoHintProvider } from "./ammoHint";
 import type { AmmoHintRenderer } from "./ammoHint";
+import type { AppliedDpsHintProvider } from "./appliedDpsHint";
+import type { AppliedDpsHintRenderer } from "./appliedDpsHint";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -109,7 +111,7 @@ export interface ControlsCradle {
   readonly importController: ImportController;
   readonly shareController: ShareController;
   readonly rangeOverlayController: RangeOverlayController;
-  readonly controls: Controls & DomControlsHost;
+  readonly controls: Controls & DomControlsHost & ViewStore;
   readonly confirmController: ConfirmController;
   readonly profileEquality: ProfileEquality;
   readonly profileChangeTracker: ProfileChangeTracker;
@@ -118,4 +120,7 @@ export interface ControlsCradle {
   readonly dpsHintProvider: DpsHintProvider;
   readonly ammoHintRenderer: AmmoHintRenderer;
   readonly ammoHintProvider: AmmoHintProvider;
+  readonly viewStore: ViewStore;
+  readonly appliedDpsHintRenderer: AppliedDpsHintRenderer;
+  readonly appliedDpsHintProvider: AppliedDpsHintProvider;
 }

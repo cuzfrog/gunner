@@ -234,4 +234,12 @@ export const EN: LanguageSlice<"en"> = {
   "dpsHint.volley": { en: "Volley" },
   "dpsHint.cycleTime": { en: "Cycle" },
   "dpsHint.dps": { en: "DPS" },
+  "dpsHint.turretDps": { en: "Turret DPS" },
+  "dpsHint.missileDps": { en: "Missile DPS" },
+  "dpsHint.droneDps": { en: "Drone DPS" },
+  "appliedDpsHint.applied": { en: "Applied DPS" },
+  "appliedDpsHint.application": { en: "Application" },
+  "appliedDpsHint.totalNominal": { en: "Total Nominal DPS" },
+  "appliedDpsHint.totalApplied": { en: "Total Applied DPS" },
+  "appliedDpsHint.totalApplication": { en: "Total Application" },
 } as const;

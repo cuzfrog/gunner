@@ -3,6 +3,7 @@ import type { TypeId } from "../../../gamedata/ids";
 import type { ItemNameCatalog } from "../../../gamedata";
 import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";
+import type { WeaponKind } from "../../../sim";
 import type { HintContentProvider } from "../hoverHint";
 import { DAMAGE_ICON_URLS, DAMAGE_TYPE_ORDER } from "../damageTypeIcons";
 import type { DroneController } from "../drone";
@@ -24,6 +25,7 @@ export interface DpsHintProviderDeps {
 
 interface DpsHintSource {
   readonly typeId: TypeId;
+  readonly weaponKind: WeaponKind;
   readonly count: number;
   readonly cycleTime: number;
   readonly damageBreakdown: DamageBreakdown;
@@ -76,15 +78,15 @@ function sideFromAnchor(anchor: HTMLElement): Side | undefined {
 }
 
 function turretHintSource(turret: ImportedTurret): DpsHintSource {
-  return { typeId: turret.moduleId, count: turret.turretCount, cycleTime: turret.cycleTime, damageBreakdown: turret.damageBreakdown };
+  return { typeId: turret.moduleId, weaponKind: "turret", count: turret.turretCount, cycleTime: turret.cycleTime, damageBreakdown: turret.damageBreakdown };
 }
 
 function launcherHintSource(launcher: ImportedLauncher): DpsHintSource {
-  return { typeId: launcher.moduleId, count: launcher.count, cycleTime: launcher.cycleTime, damageBreakdown: launcher.damageBreakdown };
+  return { typeId: launcher.moduleId, weaponKind: "missile", count: launcher.count, cycleTime: launcher.cycleTime, damageBreakdown: launcher.damageBreakdown };
 }
 
 function droneHintSource(drone: ImportedDrone): DpsHintSource {
-  return { typeId: drone.typeId, count: drone.count, cycleTime: drone.cycleTime, damageBreakdown: drone.damageBreakdown };
+  return { typeId: drone.typeId, weaponKind: "drone", count: drone.count, cycleTime: drone.cycleTime, damageBreakdown: drone.damageBreakdown };
 }
 
 function buildWeaponGroup(source: DpsHintSource, itemNameCatalog: ItemNameCatalog, language: Language): DpsHintGroup {
@@ -95,7 +97,7 @@ function buildWeaponGroup(source: DpsHintSource, itemNameCatalog: ItemNameCatalo
   const volley = ammo * cumulative * source.count;
   const dps = source.cycleTime > 0 ? volley / source.cycleTime : 0;
   const summary: DpsHintSummary = { ammo, multiplier: cumulative, count: source.count, volley, cycleTime: source.cycleTime, dps };
-  return { name, types, ammo, factors, summary };
+  return { name, weaponKind: source.weaponKind, types, ammo, factors, summary };
 }
 
 function buildTypeRows(damageByType: Readonly<Partial<Record<DamageType, number>>>): { types: readonly DpsHintTypeRow[]; ammo: number } {

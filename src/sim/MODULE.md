@@ -12,7 +12,6 @@ no-new-exports:
   - vec2.ts
   - ewarResolver.ts
   - engagementFrameComposer.test.ts
-  - engagementFrameComposer.ts
   - simValueParser.ts
   - simValueParser.test.ts
   - kinematics.ts
@@ -49,4 +48,4 @@ Cross-boundary contracts: `index.ts` exports the ewar domain types (`EwarLoadout
 
 DI wiring: `module.ts` registers `simValueParser`, `shipASteering` and `shipBSteering` as separate singleton `PredictiveAutopilot` instances, `kinematics`, `hitChance`, `stackingPenalty`, `ewarResolver`, `turretBoosterResolver`, `missileBoosterResolver`, `missileApplication`, `droneApplication`, `turretDamage`, `engagementEvaluator`, `engagementFrameComposer` and `simulation` against the singleton `container` in `src/container.ts`. The `simConfig` consumed by `simulation` is provided by the composition root.
 
-Gate relaxed: `types.ts` and `index.ts` were removed from `no-new-exports` to add `TargetPainterSpec`, `MissileBoosterSpec`, `MissileBoosterLoadout`, `MissileBoosterActivation`, `MissileBoosterProjection`, and `PainterActivation` alongside the existing ewar/booster DTO family. These types are shared DTOs consumed by `fitting`, `app`, and `ui`; splitting them into a separate file would fragment the cross-boundary contract model. `fireControl.ts`, `cradle.ts`, and `module.ts` were removed to wire `DroneApplication` into the engagement evaluator and DI container; the evaluator dispatches drone weapons alongside turret and missile weapons.
+Gate relaxed: `types.ts` and `index.ts` were removed from `no-new-exports` to add `TargetPainterSpec`, `MissileBoosterSpec`, `MissileBoosterLoadout`, `MissileBoosterActivation`, `MissileBoosterProjection`, and `PainterActivation` alongside the existing ewar/booster DTO family. These types are shared DTOs consumed by `fitting`, `app`, and `ui`; splitting them into a separate file would fragment the cross-boundary contract model. `fireControl.ts`, `cradle.ts`, and `module.ts` were removed to wire `DroneApplication` into the engagement evaluator and DI container; the evaluator dispatches drone weapons alongside turret and missile weapons. `engagementFrameComposer.ts` was removed to add `WeaponAttack` alongside `EngagementView` — per-weapon assessments are needed by the UI to render Applied DPS source attribution.
