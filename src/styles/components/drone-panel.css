@@ -128,7 +128,7 @@
   font-size: 11px;
 }
 
-.drone-summary-bar-invalid .drone-summary-value {
+.drone-summary-bar.is-invalid .drone-summary-value {
   color: var(--text-danger);
 }
 

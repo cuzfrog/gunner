@@ -31,6 +31,7 @@ export class DroneControllerImpl implements DroneController {
   private readonly popupGroup: PopupGroup;
   private readonly popupValue: Popup;
   private readonly catalogLists: Readonly<Record<DroneSizeClass, SelectableListImpl>>;
+  private readonly catalogEls: Readonly<Record<DroneSizeClass, HTMLElement>>;
   private readonly droneChip: SummaryChipImpl;
   private droneGroups: DroneGroup[] = [];
   private resolvedDrones: readonly ImportedDrone[] = [];
@@ -55,6 +56,12 @@ export class DroneControllerImpl implements DroneController {
       medium: new SelectableListImpl({ itemClass: "drone-catalog-item selectable-item", nameClass: "drone-catalog-name", iconClass: "drone-catalog-icon", role: "option", wrapInListItem: true }),
       heavy: new SelectableListImpl({ itemClass: "drone-catalog-item selectable-item", nameClass: "drone-catalog-name", iconClass: "drone-catalog-icon", role: "option", wrapInListItem: true }),
       sentry: new SelectableListImpl({ itemClass: "drone-catalog-item selectable-item", nameClass: "drone-catalog-name", iconClass: "drone-catalog-icon", role: "option", wrapInListItem: true }),
+    };
+    this.catalogEls = {
+      light: this.els.catalogLight,
+      medium: this.els.catalogMedium,
+      heavy: this.els.catalogHeavy,
+      sentry: this.els.catalogSentry,
     };
     this.droneChip = new SummaryChipImpl(this.els.summary, this.els.summaryIcon);
     this.popupValue = createPopup({
@@ -146,7 +153,7 @@ export class DroneControllerImpl implements DroneController {
 
   private renderTelemetry(): void {
     const drone = this.resolvedDrones[0];
-    this.els.trigger.disabled = this.droneGroups.length === 0;
+    this.els.trigger.disabled = this.loadoutContext === undefined;
     if (!drone) {
       this.droneChip.render("-", undefined);
       this.clearStatDisplay();
@@ -202,13 +209,13 @@ export class DroneControllerImpl implements DroneController {
       setText(this.els.summaryCount, "0/0");
       setText(this.els.summaryBandwidth, "0/0");
       setText(this.els.summaryBay, "0/0");
-      this.els.summaryBar.classList.remove("drone-summary-bar-invalid");
+      this.els.summaryBar.classList.remove("is-invalid");
       return;
     }
     setText(this.els.summaryCount, `${v.totalCount}/${profile.maxActiveDrones}`);
     setText(this.els.summaryBandwidth, `${v.totalBandwidth}/${profile.droneBandwidth}`);
     setText(this.els.summaryBay, `${v.totalVolume}/${profile.droneCapacity}`);
-    this.els.summaryBar.classList.toggle("drone-summary-bar-invalid", !v.valid);
+    this.els.summaryBar.classList.toggle("is-invalid", !v.valid);
   }
 
   private renderCatalog(): void {
@@ -220,8 +227,7 @@ export class DroneControllerImpl implements DroneController {
         iconUrl: this.imageCatalog.itemIconUrl(opt.id),
         selected: false,
       }));
-      const container = this.catalogContainer(sizeClass);
-      const buttons = this.catalogLists[sizeClass].render(container, items);
+      const buttons = this.catalogLists[sizeClass].render(this.catalogEls[sizeClass], items);
       for (const button of buttons) {
         const typeId = button.dataset.value as TypeId;
         button.addEventListener("click", () => this.addDrone(typeId));
@@ -266,10 +272,6 @@ export class DroneControllerImpl implements DroneController {
     this.recompute();
     this.render();
     this.events.emitConfigInvalidated();
-  }
-
-  private catalogContainer(sizeClass: DroneSizeClass): HTMLElement {
-    return this.els[`catalog${capitalize(sizeClass)}` as keyof DroneEls] as HTMLElement;
   }
 
   private totalCount(): number {
@@ -333,8 +335,4 @@ function importedDroneToDroneSpec(drone: ImportedDrone): DroneSpec {
 
 function droneDamagePerShot(drone: ImportedDrone): number {
   return (drone.emDamage + drone.thermalDamage + drone.kineticDamage + drone.explosiveDamage) * drone.damageMultiplier;
-}
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }

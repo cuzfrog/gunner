@@ -1,6 +1,7 @@
 import { buildDrone, importedDroneFixture, NEUTRAL_CONDITIONS } from "./testSupport";
 import { FakeElement, getFake, IMPORTED_RIFTER } from "../testSupport";
-import type { DroneGroup, DroneLoadoutContext, DroneLoadoutViolation, ImportedFitting } from "../../../fitting";
+import type { DroneCatalog, DroneGroup, DroneLoadoutContext, DroneLoadoutViolation, ImportedFitting } from "../../../fitting";
+import type { DroneSizeClass } from "../../../gamedata/fittingDb";
 import type { TypeId } from "../../../gamedata/ids";
 import type { StatConditions } from "../../../ships";
 
@@ -45,10 +46,15 @@ describe("DroneController", () => {
     expect(controller.drone()).toBeUndefined();
   });
 
-  test("trigger is disabled when no drones are fitted", () => {
+  test("trigger is disabled when no hull is loaded", () => {
+    const { document, controller } = buildDrone();
+    expect(getFake(document, "ship-a-drone-trigger").disabled).toBe(true);
+  });
+
+  test("trigger is enabled when hull is loaded even with empty drones", () => {
     const { document, controller } = buildDrone();
     controller.applyImported(importedWithDrones([]), NEUTRAL_CONDITIONS);
-    expect(getFake(document, "ship-a-drone-trigger").disabled).toBe(true);
+    expect(getFake(document, "ship-a-drone-trigger").disabled).toBe(false);
   });
 
   test("trigger is enabled when drones are fitted", () => {
@@ -170,10 +176,10 @@ describe("DroneController", () => {
       droneLoadoutResolver: resolverReturningDrones([hobgoblin, warrior]),
       droneCatalog: {
         has: vi.fn(() => true),
-        dronesByClass: vi.fn((sizeClass: string) => sizeClass === "light" ? [{ id: WARRIOR_ID, name: "Warrior I", sizeClass: "light", damage: 10, damageByType: {}, bandwidth: 5, volume: 5 }] : []),
+        dronesByClass: vi.fn((sizeClass: DroneSizeClass): readonly { id: TypeId; name: string; sizeClass: DroneSizeClass; damage: number; damageByType: Record<string, number>; bandwidth: number; volume: number }[] => sizeClass === "light" ? [{ id: WARRIOR_ID, name: "Warrior I", sizeClass: "light", damage: 10, damageByType: {}, bandwidth: 5, volume: 5 }] : []),
         usualForClass: vi.fn(() => undefined),
         idForName: vi.fn(() => undefined),
-      },
+      } satisfies DroneCatalog,
     });
     controller.applyImported(importedWithDrones([hobgoblin]), NEUTRAL_CONDITIONS);
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
@@ -247,5 +253,101 @@ describe("DroneController", () => {
     controller.restore("[Rifter, Test]", NEUTRAL_CONDITIONS);
     expect(controller.drone()).toBeUndefined();
     expect(droneLoadoutResolver.resolve).toHaveBeenCalledWith([], expect.any(Object), NEUTRAL_CONDITIONS);
+  });
+
+  test("trigger is enabled when context exists even with empty groups", () => {
+    const { document, controller } = buildDrone({
+      fittingImport: {
+        importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, drones: [] })),
+      },
+    });
+    controller.restore("[Rifter, Test]", NEUTRAL_CONDITIONS);
+    expect(controller.capture().droneGroups).toEqual([]);
+    const trigger = getFake(document, "ship-a-drone-trigger");
+    expect(trigger.disabled).toBe(false);
+  });
+
+  test("incrementing a drone count updates the group and emits configInvalidated", () => {
+    const hobgoblin = importedDroneFixture();
+    const { document, controller, events } = buildDrone({
+      droneLoadoutResolver: resolverReturningDrones([hobgoblin]),
+    });
+    controller.applyImported(importedWithDrones([hobgoblin]), NEUTRAL_CONDITIONS);
+    const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
+    const loadoutList = getFake(document, "ship-a-drone-loadout-list");
+    const row = loadoutList.children[0] as unknown as FakeElement;
+    const stepper = row.children.find((c) => c.className.split(" ").includes("drone-stepper")) as unknown as FakeElement;
+    const incrementBtn = stepper.children.find((c) => c.className.split(" ").includes("drone-stepper-plus")) as unknown as FakeElement;
+    incrementBtn.trigger("click");
+    expect(controller.capture().droneGroups).toEqual([{ typeId: HOBGOBLIN_ID, count: 6 }]);
+    expect(emitConfigInvalidated).toHaveBeenCalled();
+  });
+
+  test("decrementing a drone count to zero removes the group", () => {
+    const hobgoblin = importedDroneFixture({ count: 1 });
+    const { document, controller, events } = buildDrone({
+      droneLoadoutResolver: resolverReturningDrones([hobgoblin]),
+    });
+    controller.applyImported(importedWithDrones([hobgoblin]), NEUTRAL_CONDITIONS);
+    const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
+    const loadoutList = getFake(document, "ship-a-drone-loadout-list");
+    const row = loadoutList.children[0] as unknown as FakeElement;
+    const stepper = row.children.find((c) => c.className.split(" ").includes("drone-stepper")) as unknown as FakeElement;
+    const decrementBtn = stepper.children.find((c) => c.className.split(" ").includes("drone-stepper-minus")) as unknown as FakeElement;
+    decrementBtn.trigger("click");
+    expect(controller.capture().droneGroups).toEqual([]);
+    expect(emitConfigInvalidated).toHaveBeenCalled();
+  });
+
+  test("remove button removes the drone group", () => {
+    const hobgoblin = importedDroneFixture();
+    const { document, controller, events } = buildDrone({
+      droneLoadoutResolver: resolverReturningDrones([hobgoblin]),
+    });
+    controller.applyImported(importedWithDrones([hobgoblin]), NEUTRAL_CONDITIONS);
+    const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
+    const loadoutList = getFake(document, "ship-a-drone-loadout-list");
+    const row = loadoutList.children[0] as unknown as FakeElement;
+    const removeBtn = row.children.find((c) => c.className.split(" ").includes("drone-remove-btn")) as unknown as FakeElement;
+    removeBtn.trigger("click");
+    expect(controller.capture().droneGroups).toEqual([]);
+    expect(emitConfigInvalidated).toHaveBeenCalled();
+  });
+
+  test("summary bar shows count, bandwidth, and bay from validation", () => {
+    const hobgoblin = importedDroneFixture();
+    const { document, controller } = buildDrone({
+      droneLoadoutResolver: resolverReturningDrones([hobgoblin]),
+      droneLoadoutValidator: {
+        validate: vi.fn(() => ({ valid: false, totalCount: 5, totalBandwidth: 25, totalVolume: 25, violations: ["bandwidthExceeded"] as readonly DroneLoadoutViolation[] })),
+      },
+    });
+    controller.applyImported(importedWithDrones([hobgoblin]), NEUTRAL_CONDITIONS);
+    const summaryCount = getFake(document, "ship-a-drone-summary-count");
+    const summaryBandwidth = getFake(document, "ship-a-drone-summary-bandwidth");
+    const summaryBay = getFake(document, "ship-a-drone-summary-bay");
+    const summaryBar = getFake(document, "ship-a-drone-summary-bar");
+    expect(summaryCount.textContent).toBe("5/5");
+    expect(summaryBandwidth.textContent).toBe("25/0");
+    expect(summaryBay.textContent).toBe("25/0");
+    expect(summaryBar.classList.toggle).toHaveBeenCalledWith("is-invalid", true);
+  });
+
+  test("clicking a catalog drone that already exists increments its count", () => {
+    const hobgoblin = importedDroneFixture();
+    const { document, controller } = buildDrone({
+      droneLoadoutResolver: resolverReturningDrones([hobgoblin, { ...hobgoblin, count: 6 }]),
+      droneCatalog: {
+        has: vi.fn(() => true),
+        dronesByClass: vi.fn((sizeClass: DroneSizeClass): readonly { id: TypeId; name: string; sizeClass: DroneSizeClass; damage: number; damageByType: Record<string, number>; bandwidth: number; volume: number }[] => sizeClass === "light" ? [{ id: HOBGOBLIN_ID, name: "Hobgoblin I", sizeClass: "light", damage: 10, damageByType: {}, bandwidth: 5, volume: 5 }] : []),
+        usualForClass: vi.fn(() => undefined),
+        idForName: vi.fn(() => undefined),
+      } satisfies DroneCatalog,
+    });
+    controller.applyImported(importedWithDrones([hobgoblin]), NEUTRAL_CONDITIONS);
+    const catalogList = getFake(document, "ship-a-drone-catalog-light");
+    const catalogButton = catalogList.children[0]?.firstElementChild as unknown as FakeElement;
+    catalogButton.trigger("click");
+    expect(controller.capture().droneGroups).toEqual([{ typeId: HOBGOBLIN_ID, count: 6 }]);
   });
 });

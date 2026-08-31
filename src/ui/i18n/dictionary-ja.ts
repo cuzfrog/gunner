@@ -125,7 +125,7 @@ export const JA: LanguageSlice<"ja"> = {
   "label.droneCount": { ja: "ドローン数" },
   "label.droneOrbitSpeed": { ja: "周回速度" },
   "label.droneMaxVelocity": { ja: "最大速度" },
-  "drone.activeLoadout": { ja: "アクティブ装備" },
+  "drone.activeLoadout": { ja: "稼働ドローン" },
   "drone.count": { ja: "ドローン" },
   "drone.bandwidth": { ja: "帯域幅" },
   "drone.bay": { ja: "ベイ" },
