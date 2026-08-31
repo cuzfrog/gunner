@@ -255,9 +255,5 @@ export class SidePanelImpl implements SidePanel {
     this.droneLink.restore(this.fittingText, this.skillConditions());
   }
 
-  setDroneProfile(profile: ShipProfile | undefined): void {
-    this.droneLink.setHullProfile(profile);
-  }
-
   skillConditions(): StatConditions { return this.sections.skill.skillConditions(); }
 }

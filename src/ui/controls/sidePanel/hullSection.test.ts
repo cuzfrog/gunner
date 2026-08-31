@@ -127,7 +127,6 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
     setLauncherProfile: vi.fn(),
     clearDrone: vi.fn(),
     restoreDrone: vi.fn(),
-    setDroneProfile: vi.fn(),
   } as unknown as SidePanel);
 
   const section = new HullSection({ panel, els, ships, i18n });

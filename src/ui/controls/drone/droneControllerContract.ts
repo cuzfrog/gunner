@@ -1,8 +1,8 @@
-import type { DroneCatalog, FittingCalculator, FittingDb, FittingImport, ImportedDrone } from "../../../fitting";
+import type { FittingImport, ImportedDrone } from "../../../fitting";
 import type { ImportedFitting } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { DroneSpec } from "../../../sim";
-import type { ShipProfile, Ships, StatConditions } from "../../../ships";
+import type { StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
@@ -13,15 +13,11 @@ import type { Side } from "../side";
 export interface DroneControllerDeps {
   readonly side: Side;
   readonly els: DroneEls;
-  readonly fittingDb: FittingDb;
   readonly fittingImport: FittingImport;
-  readonly droneCatalog: DroneCatalog;
-  readonly ships: Ships;
   readonly imageCatalog: ImageCatalog;
   readonly i18n: I18n;
   readonly events: UiEvents;
   readonly popupGroup: PopupGroup;
-  readonly fittingCalculator: FittingCalculator;
 }
 
 export interface DroneEls {
@@ -48,7 +44,6 @@ export interface DroneController {
   currentDroneSpec(): DroneSpec | undefined;
   applyImported(imported: ImportedFitting, conditions: StatConditions): void;
   restore(fitting?: string, conditions?: StatConditions, droneTypeId?: TypeId): void;
-  setHullProfile(profile: ShipProfile | undefined): void;
   clear(): void;
   capture(): { droneTypeId: TypeId | undefined };
   isPopupOpen(): boolean;

@@ -85,7 +85,6 @@ export class HullSection implements IHullSection {
     this.panel.setConfigInputsEnabled(true);
     this.panel.setTurretProfile(profile);
     this.panel.setLauncherProfile(profile);
-    this.panel.setDroneProfile(profile);
     this.panel.renderFittingPopupIfOpen();
     this.panel.sections.propulsion.renderPropulsionOptions(propulsionId);
     if (updateStats) {
@@ -120,7 +119,6 @@ export class HullSection implements IHullSection {
     this.panel.setConfigInputsEnabled(false);
     this.panel.setTurretProfile(undefined);
     this.panel.setLauncherProfile(undefined);
-    this.panel.setDroneProfile(undefined);
     this.panel.closeFittingPopupIfOpen();
     this.updateHullHint();
     this.panel.sections.propulsion.renderPropulsionOptions();

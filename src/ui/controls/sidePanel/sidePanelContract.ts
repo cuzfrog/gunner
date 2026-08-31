@@ -50,7 +50,6 @@ export interface SidePanel {
   setLauncherProfile(profile: ShipProfile | undefined): void;
   clearDrone(): void;
   restoreDrone(): void;
-  setDroneProfile(profile: ShipProfile | undefined): void;
   renderFittingPopupIfOpen(): void;
   closeFittingPopupIfOpen(): void;
   hideFittingPreview(): void;

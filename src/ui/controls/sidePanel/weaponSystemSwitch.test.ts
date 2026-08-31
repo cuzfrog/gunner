@@ -116,4 +116,33 @@ describe("WeaponSystemSwitchImpl", () => {
     sw.autoToggle(false, false, false);
     expect(sw.activeKind()).toBe("turret");
   });
+
+  test("autoToggle switches to drone when only drone is available", () => {
+    const { switch: sw, document } = buildSwitch();
+    sw.autoToggle(false, false, true);
+    expect(sw.activeKind()).toBe("drone");
+    expect(getFake(document, "ship-a-drone-panel").hidden).toBe(false);
+    expect(getFake(document, "ship-a-turret-panel").hidden).toBe(true);
+  });
+
+  test("autoToggle keeps current kind when turret and drone are available", () => {
+    const { switch: sw } = buildSwitch();
+    sw.setActiveKind("drone");
+    sw.autoToggle(true, false, true);
+    expect(sw.activeKind()).toBe("drone");
+  });
+
+  test("autoToggle keeps current kind when launcher and drone are available", () => {
+    const { switch: sw } = buildSwitch();
+    sw.setActiveKind("drone");
+    sw.autoToggle(false, true, true);
+    expect(sw.activeKind()).toBe("drone");
+  });
+
+  test("autoToggle keeps current kind when all weapon types are available", () => {
+    const { switch: sw } = buildSwitch();
+    sw.setActiveKind("drone");
+    sw.autoToggle(true, true, true);
+    expect(sw.activeKind()).toBe("drone");
+  });
 });

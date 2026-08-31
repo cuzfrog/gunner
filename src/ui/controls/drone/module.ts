@@ -22,15 +22,11 @@ function createDroneController(side: Side, deps: ControlsCradle): DroneControlle
   return new DroneControllerImpl({
     side,
     els: collectDroneEls(deps.els, side),
-    fittingDb: deps.fittingDb,
     fittingImport: deps.fittingImport,
-    droneCatalog: deps.droneCatalog,
-    ships: deps.ships,
     imageCatalog: deps.imageCatalog,
     i18n: deps.i18n,
     events: deps.uiEvents,
     popupGroup: deps.popupGroup,
-    fittingCalculator: deps.fittingCalculator,
   });
 }
 

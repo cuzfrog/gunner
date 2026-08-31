@@ -1,4 +1,4 @@
-import type { ShipProfile, StatConditions } from "../../../ships";
+import type { StatConditions } from "../../../ships";
 import type { PopupGroup } from "../popup";
 import type { DroneController } from "../drone";
 import type { Side } from "../side";
@@ -6,7 +6,6 @@ import type { Side } from "../side";
 export interface PanelDroneLink {
   clear(): void;
   restore(fittingText: string | undefined, conditions: StatConditions): void;
-  setHullProfile(profile: ShipProfile | undefined): void;
 }
 
 export function createPanelDroneLink(side: Side, droneControllers: Record<Side, DroneController>, popupGroup: PopupGroup): PanelDroneLink {
@@ -23,9 +22,5 @@ class PanelDroneLinkImpl implements PanelDroneLink {
 
   restore(fittingText: string | undefined, conditions: StatConditions): void {
     this.drone.restore(fittingText, conditions);
-  }
-
-  setHullProfile(profile: ShipProfile | undefined): void {
-    this.drone.setHullProfile(profile);
   }
 }

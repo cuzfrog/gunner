@@ -52,6 +52,8 @@ no-new-exports:
   - turret/turretControllerContract.ts
   - drone/droneController.ts
   - drone/droneControllerContract.ts
+  - drone/droneController.test.ts
+  - drone/testSupport.ts
   - drone/module.ts
   - drone/index.ts
   - import/shipADrone.ts

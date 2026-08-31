@@ -315,7 +315,6 @@ class StubDroneController implements DroneController {
   currentDroneSpec = vi.fn(() => undefined);
   applyImported = vi.fn();
   restore = vi.fn();
-  setHullProfile = vi.fn();
   clear = vi.fn();
   capture = vi.fn(() => ({ droneTypeId: undefined }));
   isPopupOpen = vi.fn(() => false);

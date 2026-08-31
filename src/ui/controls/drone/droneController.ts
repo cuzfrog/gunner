@@ -1,8 +1,8 @@
-import type { DroneCatalog, FittingCalculator, FittingDb, FittingImport, FittingState, ImportedDrone } from "../../../fitting";
+import type { FittingImport, ImportedDrone } from "../../../fitting";
 import type { ImportedFitting } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { DroneSpec } from "../../../sim";
-import type { ShipProfile, Ships, StatConditions } from "../../../ships";
+import type { StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
@@ -20,36 +20,27 @@ export type { DroneController } from "./droneControllerContract";
 export class DroneControllerImpl implements DroneController {
   readonly side: Side;
   private readonly els: DroneEls;
-  private readonly fittingDb: FittingDb;
   private readonly fittingImport: FittingImport;
-  private readonly droneCatalog: DroneCatalog;
-  private readonly ships: Ships;
   private readonly imageCatalog: ImageCatalog;
   private readonly i18n: I18n;
   private readonly events: UiEvents;
   private readonly popupGroup: PopupGroup;
-  private readonly calculator: FittingCalculator;
   private readonly popupValue: Popup;
   private readonly droneList: SelectableListImpl;
   private readonly droneChip: SummaryChipImpl;
   private importedDrones: readonly ImportedDrone[] = [];
   private selectedTypeId: TypeId | undefined;
   private selectedDrone: ImportedDrone | undefined;
-  private hullProfile: ShipProfile | undefined;
   private popupOpen = false;
 
   constructor(deps: DroneControllerDeps) {
     this.side = deps.side;
     this.els = deps.els;
-    this.fittingDb = deps.fittingDb;
     this.fittingImport = deps.fittingImport;
-    this.droneCatalog = deps.droneCatalog;
-    this.ships = deps.ships;
     this.imageCatalog = deps.imageCatalog;
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.popupGroup = deps.popupGroup;
-    this.calculator = deps.fittingCalculator;
     this.droneList = new SelectableListImpl({
       itemClass: "drone-item selectable-item",
       nameClass: "drone-item-name",
@@ -85,7 +76,6 @@ export class DroneControllerImpl implements DroneController {
   }
 
   applyImported(imported: ImportedFitting, conditions: StatConditions): void {
-    this.hullProfile = imported.profile;
     this.importedDrones = imported.drones;
     this.selectDefault();
     this.render();
@@ -95,7 +85,6 @@ export class DroneControllerImpl implements DroneController {
     if (fitting && conditions) {
       const imported = this.fittingImport.importFitting(fitting, conditions);
       if (imported && imported.drones.length > 0) {
-        this.hullProfile = imported.profile;
         this.importedDrones = imported.drones;
         if (droneTypeId && this.importedDrones.some((d) => d.typeId === droneTypeId)) {
           this.selectedTypeId = droneTypeId;
@@ -113,16 +102,11 @@ export class DroneControllerImpl implements DroneController {
     this.render();
   }
 
-  setHullProfile(profile: ShipProfile | undefined): void {
-    this.hullProfile = profile;
-  }
-
   clear(): void {
     this.popupGroup.close(this.popupValue);
     this.importedDrones = [];
     this.selectedTypeId = undefined;
     this.selectedDrone = undefined;
-    this.hullProfile = undefined;
     this.render();
   }
 

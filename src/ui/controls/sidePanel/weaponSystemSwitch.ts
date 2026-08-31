@@ -59,8 +59,8 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
 
   autoToggle(hasTurret: boolean, hasLauncher: boolean, hasDrone: boolean): void {
     if (hasDrone && !hasTurret && !hasLauncher) this.kind = "drone";
-    else if (hasLauncher && !hasTurret) this.kind = "missile";
-    else if (hasTurret && !hasLauncher) this.kind = "turret";
+    else if (hasLauncher && !hasTurret && !hasDrone) this.kind = "missile";
+    else if (hasTurret && !hasLauncher && !hasDrone) this.kind = "turret";
     this.refresh();
   }
 
