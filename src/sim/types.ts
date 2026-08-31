@@ -83,8 +83,18 @@ export interface MissileSpec {
   readonly flightRange: number; // maxVelocity * flightTime, computed by the producer
 }
 
-export type WeaponSpec = TurretSpec | MissileSpec;
-export type WeaponKind = "turret" | "missile";
+export interface DroneSpec extends TurretApplicationSpec {
+  readonly kind: "drone";
+  readonly damagePerShot: number; // base damage of one drone per cycle
+  readonly cycleTime: number; // seconds
+  readonly droneCount: number;
+  readonly maxVelocity: number; // m/s, 0 for sentries
+  readonly orbitSpeed: number; // m/s, 0 for sentries
+  readonly isSentry: boolean;
+}
+
+export type WeaponSpec = TurretSpec | MissileSpec | DroneSpec;
+export type WeaponKind = "turret" | "missile" | "drone";
 
 export interface DamageAssessment {
   readonly nominalDps: number;
@@ -104,6 +114,13 @@ export interface MissileDamageBreakdown {
   readonly velocityTerm: number; // (S/E * Ve/Vt)^drfNorm
   readonly inRange: boolean; // distance <= flightRange
   readonly timeToImpact: number; // seconds
+}
+
+export interface DroneDamageBreakdown {
+  readonly hit: HitChanceBreakdown;
+  readonly expectedMultiplier: number;
+  readonly inRange: boolean;
+  readonly orbiting: boolean; // true for non-sentry drones in range
 }
 
 export interface EngagementFrame {

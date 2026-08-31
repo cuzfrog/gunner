@@ -9,6 +9,7 @@ export type { MissileBoosterResolver } from "./missileBoosterResolver";
 export type { EngagementFrameComposer, EngagementInput, EngagementView } from "./engagementFrameComposer";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { MissileApplication } from "./missileApplication";
+export type { DroneApplication } from "./droneApplication";
 export type { TurretDamage } from "./turretDamage";
 export { computeExpectedMultiplier } from "./expectedHitMultiplier";
 export type { StackingPenalty } from "./stackingPenalty";
@@ -23,6 +24,8 @@ export type {
   DisruptionBreakdown,
   DisruptionScriptSpec,
   DisruptorActivation,
+  DroneDamageBreakdown,
+  DroneSpec,
   EngagementFrame,
   EwarActivation,
   EwarEffectFamily,
