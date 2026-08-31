@@ -150,7 +150,7 @@ const EMPTY_FITTING_STATE: FittingState = {
   launcherGroups: [],
   propulsionModule: undefined,
   ewarModules: [],
-  boosterModules: [], missileBoosterModules: [],
+  boosterModules: [], missileBoosterModules: [], droneBoosterModules: [], droneGroups: [],
   drones: [],
   cargo: [],
 };

@@ -4,11 +4,13 @@ export type { DamageType, DamageFactor, DamageFactorKind, DamageBreakdown } from
 export { EMPTY_DAMAGE_BREAKDOWN } from "./damageBreakdown";
 export type { MissileCatalog, MissileOption } from "./missileCatalog";
 export type { MissileSkillModel } from "./missileStats";
+export type { DroneCatalog, DroneOption, ImportedDrone } from "./droneCatalog";
+export type { DroneSkillModel } from "./droneStats";
 export type { PresetFitting, PresetFittings } from "./presetFittings";
 export type { ModuleSlot } from "../gamedata/moduleSlots";
 export type { GunFamilies, GunFamily } from "./gunFamilies";
 export type { LauncherClass, LauncherClasses } from "./launcherClasses";
-export type { FittingState, FittedModule, TurretGroup, LauncherGroup, CargoEntry, FittingModuleEntry } from "./fittingState";
+export type { FittingState, FittedModule, TurretGroup, LauncherGroup, DroneGroup, CargoEntry, FittingModuleEntry } from "./fittingState";
 export type { FittingCalculator, HullSideAggregation, PropulsionResult } from "./fittingCalculator";
 export type { FittingOverrides, FittingOverridesStore } from "./fittingOverrides";
 export { applyFittingOverrides, FittingOverridesStoreImpl } from "./fittingOverrides";

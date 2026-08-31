@@ -205,7 +205,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
       resolvePropulsion: vi.fn(() => undefined),
       resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] })),
       resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
-      resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveCargoCharges: vi.fn(() => []),
+      resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveDrones: vi.fn(() => []), resolveCargoCharges: vi.fn(() => []),
     })),
     profileEquality: asValue<ProfileEquality>({ equal() { return true; } }),
     itemNameLoader: asValue({ ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) }),

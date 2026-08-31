@@ -1,5 +1,5 @@
 import type { TypeId } from "../gamedata/ids";
-import type { FittingDb, FittingModuleStats, HullBonus, LauncherStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, TurretWeaponGroup, WarpScramblerStats, DisruptionScriptStats } from "../gamedata/fittingDb";
+import type { FittingDb, FittingModuleStats, HullBonus, LauncherStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, TurretWeaponGroup, WarpScramblerStats, DisruptionScriptStats } from "../gamedata/fittingDb";
 import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
 import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec } from "../sim";
 import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT } from "../sim";
@@ -7,10 +7,12 @@ import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLaunche
 import type { GunFamily, GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
 import type { MissileSkillModel } from "./missileStats";
+import type { DroneCatalog, ImportedDrone } from "./droneCatalog";
+import type { DroneSkillModel } from "./droneStats";
 import { TRACKING_SKILL_BONUS, OPTIMAL_SKILL_BONUS, FALLOFF_SKILL_BONUS, STANDARD_SIGNATURE_RESOLUTION, sigResolutionClassFromChargeSize } from "./turretStats";
 import type { FittingState } from "./fittingState";
 import type { ItemNameCatalog } from "../gamedata/itemNames";
-import { type DamageBreakdown, type DamageFactor, chargeDamageByType, missileDamageByType } from "./damageBreakdown";
+import { type DamageBreakdown, type DamageFactor, chargeDamageByType, droneDamageByType, missileDamageByType } from "./damageBreakdown";
 
 export interface PropulsionResult extends PropulsionStats {
   readonly propulsionId: PropulsionId;
@@ -31,6 +33,7 @@ export interface FittingCalculator {
   resolveEwar(fitting: FittingState): EwarLoadout;
   resolveBoosts(fitting: FittingState): BoostLoadout;
   resolveMissileBoosts(fitting: FittingState): MissileBoosterLoadout;
+  resolveDrones(fitting: FittingState, conditions: StatConditions): readonly ImportedDrone[];
   resolveCargoCharges(fitting: FittingState): readonly { id: TypeId; quantity: number }[];
 }
 
@@ -41,6 +44,8 @@ interface FittingCalculatorDeps {
   readonly gunFamilies: GunFamilies;
   readonly missileCatalog: MissileCatalog;
   readonly missileSkillModel: MissileSkillModel;
+  readonly droneCatalog: DroneCatalog;
+  readonly droneSkillModel: DroneSkillModel;
   readonly stackingPenalty: StackingPenalty;
   readonly itemNameCatalog: ItemNameCatalog;
 }
@@ -52,6 +57,8 @@ export class FittingCalculatorImpl implements FittingCalculator {
   private readonly gunFamilies: GunFamilies;
   private readonly missileCatalog: MissileCatalog;
   private readonly missileSkillModel: MissileSkillModel;
+  private readonly droneCatalog: DroneCatalog;
+  private readonly droneSkillModel: DroneSkillModel;
   private readonly stacking: StackingPenalty;
   private readonly itemNameCatalog: ItemNameCatalog;
 
@@ -62,6 +69,8 @@ export class FittingCalculatorImpl implements FittingCalculator {
     this.gunFamilies = deps.gunFamilies;
     this.missileCatalog = deps.missileCatalog;
     this.missileSkillModel = deps.missileSkillModel;
+    this.droneCatalog = deps.droneCatalog;
+    this.droneSkillModel = deps.droneSkillModel;
     this.stacking = deps.stackingPenalty;
     this.itemNameCatalog = deps.itemNameCatalog;
   }
@@ -378,6 +387,77 @@ export class FittingCalculatorImpl implements FittingCalculator {
     return { computers, enhancers, scripts };
   }
 
+  resolveDrones(fitting: FittingState, conditions: StatConditions): readonly ImportedDrone[] {
+    if (fitting.droneGroups.length === 0) return [];
+
+    const ddaModifiers: { moduleId: TypeId; bonus: number }[] = [];
+    const odtlTrackingPercents: number[] = [];
+    const odtlOptimalPercents: number[] = [];
+    const odtlFalloffPercents: number[] = [];
+    const oteTrackingPercents: number[] = [];
+    const oteOptimalPercents: number[] = [];
+    const oteFalloffPercents: number[] = [];
+
+    for (const mod of fitting.droneBoosterModules) {
+      const moduleStats = this.db.modules[mod.moduleId];
+      if (moduleStats?.droneDamageBonus) ddaModifiers.push({ moduleId: mod.moduleId, bonus: moduleStats.droneDamageBonus });
+      const odtlStats = this.db.omnidirectionalTrackingLinks[mod.moduleId];
+      if (odtlStats) {
+        odtlTrackingPercents.push(odtlStats.trackingBonusPercent);
+        odtlOptimalPercents.push(odtlStats.optimalBonusPercent);
+        odtlFalloffPercents.push(odtlStats.falloffBonusPercent);
+        continue;
+      }
+      const oteStats = this.db.omnidirectionalTrackingEnhancers[mod.moduleId];
+      if (oteStats) {
+        oteTrackingPercents.push(oteStats.trackingBonusPercent);
+        oteOptimalPercents.push(oteStats.optimalBonusPercent);
+        oteFalloffPercents.push(oteStats.falloffBonusPercent);
+      }
+    }
+
+    const ddaDamageBonus = ddaModifiers.length > 0 ? this.stacking.apply(ddaModifiers.map((m) => 1 + m.bonus / 100)) : 1;
+    const trackingBonus = this.stacking.apply([...odtlTrackingPercents, ...oteTrackingPercents].map((p) => 1 + p / 100));
+    const optimalBonus = this.stacking.apply([...odtlOptimalPercents, ...oteOptimalPercents].map((p) => 1 + p / 100));
+    const falloffBonus = this.stacking.apply([...odtlFalloffPercents, ...oteFalloffPercents].map((p) => 1 + p / 100));
+
+    const result: ImportedDrone[] = [];
+    for (const group of fitting.droneGroups) {
+      const stats = this.db.combatDrones[group.typeId];
+      if (!stats) continue;
+      const skillOutput = this.droneSkillModel.compute(stats, fitting.hullBonuses, conditions.skillLevel);
+      const finalDamageMultiplier = skillOutput.damageMultiplier * ddaDamageBonus;
+      const finalTracking = skillOutput.tracking * trackingBonus;
+      const finalOptimal = skillOutput.optimal * optimalBonus;
+      const finalFalloff = skillOutput.falloff * falloffBonus;
+
+      const factors = buildDroneDamageFactors(stats.damageMultiplier, ddaDamageBonus, ddaModifiers, skillOutput.skillDamageMultiplier, skillOutput.skillDamageIds, skillOutput.hullDamageMultiplier, fitting.profile.name);
+
+      result.push({
+        typeId: group.typeId,
+        name: stats.name,
+        sizeClass: stats.sizeClass,
+        count: group.count,
+        damageMultiplier: finalDamageMultiplier,
+        emDamage: stats.emDamage,
+        thermalDamage: stats.thermalDamage,
+        kineticDamage: stats.kineticDamage,
+        explosiveDamage: stats.explosiveDamage,
+        tracking: finalTracking,
+        sigResolution: stats.sigResolution,
+        optimal: finalOptimal,
+        falloff: finalFalloff,
+        maxVelocity: skillOutput.maxVelocity,
+        orbitSpeed: skillOutput.orbitSpeed,
+        cycleTime: stats.cycleTime,
+        bandwidth: stats.bandwidth,
+        volume: stats.volume,
+        damageBreakdown: { damageByType: droneDamageByType(stats), factors },
+      });
+    }
+    return result;
+  }
+
   resolveCargoCharges(fitting: FittingState): readonly { id: TypeId; quantity: number }[] {
     const charges: { id: TypeId; quantity: number }[] = [];
     for (const item of fitting.drones) {
@@ -548,6 +628,14 @@ function buildMissileDamageFactors(skillDamageMultiplier: number, skillId: TypeI
   const factors: DamageFactor[] = [{ kind: "base", multiplier: 1 }];
   if (moduleDamageBonus !== 1) factors.push({ kind: "module", multiplier: moduleDamageBonus, moduleIds: moduleModifiers.map((m) => m.moduleId) });
   if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillIds: [skillId] });
+  if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
+  return factors;
+}
+
+function buildDroneDamageFactors(baseMultiplier: number, moduleDamageBonus: number, moduleModifiers: readonly { moduleId: TypeId; bonus: number }[], skillDamageMultiplier: number, skillDamageIds: readonly TypeId[], hullDamageMultiplier: number, hullName: string): readonly DamageFactor[] {
+  const factors: DamageFactor[] = [{ kind: "base", multiplier: baseMultiplier }];
+  if (moduleDamageBonus !== 1) factors.push({ kind: "module", multiplier: moduleDamageBonus, moduleIds: moduleModifiers.map((m) => m.moduleId) });
+  if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillIds: skillDamageIds });
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
   return factors;
 }

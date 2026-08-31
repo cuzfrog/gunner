@@ -18,6 +18,8 @@ import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedLauncher } fro
 import type { GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
 import type { MissileSkillModel } from "./missileStats";
+import type { DroneCatalog } from "./droneCatalog";
+import type { DroneSkillModel } from "./droneStats";
 import { FittingStateFactory, type FittingState, type FittingModuleEntry, type CargoEntry } from "./fittingState";
 import { FittingCalculatorImpl, type FittingCalculator } from "./fittingCalculator";
 import type { FittingDb, FittingModuleStats, HullBonus } from "../gamedata/fittingDb";
@@ -95,6 +97,8 @@ export class FittingImportImpl implements FittingImport {
     gunFamilies,
     missileCatalog,
     missileSkillModel,
+    droneCatalog,
+    droneSkillModel,
     stackingPenalty,
     itemNameCatalog,
     itemNameResolver,
@@ -106,6 +110,8 @@ export class FittingImportImpl implements FittingImport {
     gunFamilies: GunFamilies;
     missileCatalog: MissileCatalog;
     missileSkillModel: MissileSkillModel;
+    droneCatalog: DroneCatalog;
+    droneSkillModel: DroneSkillModel;
     stackingPenalty: StackingPenalty;
     itemNameCatalog: ItemNameCatalog;
     itemNameResolver: ItemNameResolver;
@@ -117,7 +123,7 @@ export class FittingImportImpl implements FittingImport {
     this.itemNameResolver = itemNameResolver;
     this.moduleSlotCatalog = moduleSlotCatalog;
     this.fittingStateFactory = new FittingStateFactory(fittingDb);
-    this.calculator = new FittingCalculatorImpl({ fittingDb, ships, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog });
+    this.calculator = new FittingCalculatorImpl({ fittingDb, ships, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog });
   }
 
   propulsionVariantNames(module: PropulsionModule): readonly PropulsionVariant[] {
