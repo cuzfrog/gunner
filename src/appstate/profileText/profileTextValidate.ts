@@ -48,7 +48,7 @@ export function parseScalarValue(
     return ships.parsePropulsionId(value);
   }
   if (field === "shipAAmmo" || field === "shipBAmmo") return resolveLegacyAmmoId(value, chargeCatalog);
-  if (field === "shipAWeaponKind" || field === "shipBWeaponKind") return value === "turret" || value === "missile" ? value : undefined;
+  if (field === "shipAWeaponKind" || field === "shipBWeaponKind") return value === "turret" || value === "missile" || value === "drone" ? value : undefined;
   if (field === "shipAMissileAmmo" || field === "shipBMissileAmmo") return toTypeId(value);
 
   const num = Number(value);

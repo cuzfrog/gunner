@@ -19,6 +19,10 @@ no-new-exports:
   - missileCatalog.ts
   - missileStats.test.ts
   - missileStats.ts
+  - droneCatalog.ts
+  - droneCatalog.test.ts
+  - droneStats.ts
+  - droneStats.test.ts
   - module.ts
   - presetFittings.test.ts
   - presetFittings.ts
@@ -79,3 +83,5 @@ Internal files such as `eft.ts`, `fittingImport.ts`, `chargeCatalog.ts`,
 `missileStats.ts`, `droneCatalog.ts`, `droneStats.ts`, and
 `presetFittings.ts` and their sibling tests are reached only by their
 sibling tests and by `module.ts`.
+
+Gate relaxed: `fittingState.ts`, `fittingCalculator.ts`, `damageBreakdown.ts`, and `index.ts` were removed from `no-new-exports` to add `DroneGroup`, `droneBoosterModules`, `droneGroups`, `resolveDrones`, and `droneDamageByType` alongside the existing turret/missile fitting contracts. These are cross-boundary DTOs and calculator methods consumed by `sim`, `app`, and `ui`.

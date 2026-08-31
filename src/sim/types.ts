@@ -56,14 +56,14 @@ export interface SimSnapshot {
   readonly commands: { readonly shipA: Vec2; readonly shipB: Vec2 };
 }
 
-export interface TurretApplicationSpec {
+export interface TrackingApplicationSpec {
   readonly tracking: number; // rad/s
   readonly sigResolution: number; // m
   readonly optimal: number; // m
   readonly falloff: number; // m
 }
 
-export interface TurretSpec extends TurretApplicationSpec {
+export interface TurretSpec extends TrackingApplicationSpec {
   readonly kind: "turret";
   readonly damagePerShot: number; // base damage of one turret shot
   readonly cycleTime: number; // seconds
@@ -83,7 +83,7 @@ export interface MissileSpec {
   readonly flightRange: number; // maxVelocity * flightTime, computed by the producer
 }
 
-export interface DroneSpec extends TurretApplicationSpec {
+export interface DroneSpec extends TrackingApplicationSpec {
   readonly kind: "drone";
   readonly damagePerShot: number; // base damage of one drone per cycle
   readonly cycleTime: number; // seconds

@@ -11,7 +11,6 @@ export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireC
 export type { MissileApplication } from "./missileApplication";
 export type { DroneApplication } from "./droneApplication";
 export type { TurretDamage } from "./turretDamage";
-export { computeExpectedMultiplier } from "./expectedHitMultiplier";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
   AppliedEwarEffect,
@@ -60,7 +59,7 @@ export type {
   TrackingBoosterSpec,
   TrackingDisruptorSpec,
   TurretBoostProjection,
-  TurretApplicationSpec,
+  TrackingApplicationSpec,
   TurretDamageBreakdown,
   TurretScriptSpec,
   TurretSpec,

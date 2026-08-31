@@ -12,7 +12,7 @@ import {
   type UserSettings,
   type WeaponRangeVisibility,
 } from "./userSettings";
-import type { SimValueParser } from "../sim";
+import type { SimValueParser, WeaponKind } from "../sim";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { decodeBase64 } from "./urlCodec";
 import { FittingBasis } from "./fittingBasis";
@@ -521,6 +521,6 @@ function sideValue<T>(side: "shipA" | "shipB", shipAValue: T, shipBValue: T): T 
   return side === "shipA" ? shipAValue : shipBValue;
 }
 
-function isOptionalWeaponKind(value: unknown): value is "turret" | "missile" | undefined {
-  return value === undefined || value === "turret" || value === "missile";
+function isOptionalWeaponKind(value: unknown): value is WeaponKind | undefined {
+  return value === undefined || value === "turret" || value === "missile" || value === "drone";
 }
