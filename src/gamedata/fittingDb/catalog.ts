@@ -2,6 +2,8 @@ import type { ShipId, TypeId } from "../ids";
 import {
   type ChargeStats,
   type DisruptionScriptStats,
+  type DroneSizeClass,
+  type DroneStats,
   type FittingModuleStats,
   type FittingPropulsionStats,
   type HullBonus,
@@ -23,6 +25,7 @@ import {
   type TurretWeaponGroup,
   type WarpScramblerStats,
   CHARGES,
+  COMBAT_DRONES,
   DISRUPTION_SCRIPTS,
   DRONES,
   FITTING_MODULES,
@@ -46,6 +49,8 @@ import {
 export type {
   ChargeStats,
   DisruptionScriptStats,
+  DroneSizeClass,
+  DroneStats,
   FittingModuleStats,
   FittingPropulsionStats,
   HullBonus,
@@ -91,6 +96,7 @@ export interface FittingDbData {
   readonly hullBonuses: Readonly<Record<ShipId, readonly HullBonus[]>>;
   readonly skillBonuses: readonly SkillBonus[];
   readonly drones: Readonly<Record<string, DroneEntry>>;
+  readonly combatDrones: Readonly<Record<string, Row<DroneStats>>>;
 }
 
 export type FittingDb = FittingDbData;
@@ -115,4 +121,5 @@ export const FITTING_DB: FittingDbData = {
   hullBonuses: HULL_BONUSES,
   skillBonuses: SKILL_BONUSES,
   drones: DRONES,
+  combatDrones: COMBAT_DRONES,
 };

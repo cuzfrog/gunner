@@ -36,6 +36,7 @@ interface SdeType {
   published: number;
   metaLevel?: number;
   metaGroupID?: number;
+  volume?: number;
 }
 
 type LocalizedName = { readonly en: string; readonly zh?: string; readonly ja?: string };
@@ -489,6 +490,8 @@ const MISSILE_CHARGE_GROUPS = new Set([
   89, 384, 385, 386, 387, 394, 395, 396, 476, 648, 653, 654, 655, 656, 657, 772, 1019, 1677, 1678,
 ]);
 
+const COMBAT_DRONE_GROUP = 100;
+
 const RIG_SIG_DRAWBACK_EFFECT = 2716;
 const RIG_AGILITY_DRAWBACK_EFFECT = 2717;
 const SHIP_CATEGORY_ID = 6;
@@ -827,6 +830,28 @@ export interface MissileScriptStats {
   readonly flightTimeMultiplier: number;
 }
 
+type DroneSizeClass = "light" | "medium" | "heavy" | "sentry";
+
+interface DroneStats {
+  readonly sizeClass: DroneSizeClass;
+  readonly damageMultiplier: number;
+  readonly emDamage: number;
+  readonly thermalDamage: number;
+  readonly kineticDamage: number;
+  readonly explosiveDamage: number;
+  readonly tracking: number;
+  readonly sigResolution: number;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly maxVelocity: number;
+  readonly orbitSpeed: number;
+  readonly cycleTime: number;
+  readonly bandwidth: number;
+  readonly volume: number;
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
+}
+
 function optionalNumber(value: number | undefined): number | undefined {
   if (value === undefined || !Number.isFinite(value) || value === 0) return undefined;
   return value;
@@ -1135,6 +1160,52 @@ function damageTypeFromValues(em: number, thermal: number, kinetic: number, expl
   return "explosive";
 }
 
+export function buildDroneStats(values: Map<string, number>, type: SdeType): DroneStats | undefined {
+  const damageMultiplier = values.get("damageMultiplier");
+  const tracking = values.get("trackingSpeed");
+  const sigResolution = values.get("optimalSigRadius");
+  const optimal = values.get("maxRange");
+  const speed = values.get("speed");
+  if (damageMultiplier === undefined || tracking === undefined || sigResolution === undefined || optimal === undefined || speed === undefined) return undefined;
+  const emDamage = values.get("emDamage") ?? 0;
+  const thermalDamage = values.get("thermalDamage") ?? 0;
+  const kineticDamage = values.get("kineticDamage") ?? 0;
+  const explosiveDamage = values.get("explosiveDamage") ?? 0;
+  if (emDamage + thermalDamage + kineticDamage + explosiveDamage <= 0) return undefined;
+  const falloff = values.get("falloff") ?? 0;
+  const maxVelocity = values.get("maxVelocity") ?? 0;
+  const orbitSpeed = values.get("entityCruiseSpeed") ?? 0;
+  const bandwidth = values.get("droneBandwidthUsed") ?? 0;
+  const volume = type.volume ?? bandwidth;
+  const sizeClass = droneSizeClassFromStats(maxVelocity, orbitSpeed, bandwidth);
+  return {
+    sizeClass,
+    damageMultiplier,
+    emDamage,
+    thermalDamage,
+    kineticDamage,
+    explosiveDamage,
+    tracking,
+    sigResolution,
+    optimal,
+    falloff,
+    maxVelocity,
+    orbitSpeed,
+    cycleTime: speed / 1000,
+    bandwidth,
+    volume,
+    metaLevel: type.metaLevel ?? 0,
+    metaGroupID: type.metaGroupID ?? 1,
+  };
+}
+
+function droneSizeClassFromStats(maxVelocity: number, orbitSpeed: number, bandwidth: number): DroneSizeClass {
+  if (maxVelocity <= 1 && orbitSpeed <= 1) return "sentry";
+  if (bandwidth <= 5) return "light";
+  if (bandwidth <= 10) return "medium";
+  return "heavy";
+}
+
 async function main() {
   const types = await loadMerged<SdeType>("types.");
   const typedogmas = await loadMerged<SdeTypeDogma>("typedogma.");
@@ -1162,6 +1233,7 @@ async function main() {
   const missileScripts: Record<string, Row<MissileScriptStats>> = {};
   const hullBonuses: Record<ShipId, readonly HullBonus[]> = {};
   const drones: Record<string, DroneEntry> = {};
+  const combatDrones: Record<string, Row<DroneStats>> = {};
   const itemNames: Record<string, LocalizedName> = {};
   const idToType = new Map<string, SdeType>();
   const shipNameToId = buildShipNameToId();
@@ -1269,6 +1341,10 @@ async function main() {
 
     if (groups[String(type.groupID)]?.categoryID === DRONE_CATEGORY_ID) {
       drones[id] = { id, name: enName };
+      if (type.groupID === COMBAT_DRONE_GROUP) {
+        const stats = buildDroneStats(values, type);
+        if (stats) combatDrones[id] = { ...stats, id, name: enName };
+      }
       addItemName(itemNames, id, type);
       continue;
     }
@@ -1376,6 +1452,9 @@ async function main() {
 
   const sortedDrones = Object.fromEntries(
     Object.entries(drones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
+  );
+  const sortedCombatDrones = Object.fromEntries(
+    Object.entries(combatDrones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
   );
 
   const skillMagnitudes = buildSkillMagnitudes(attributeNames, typedogmas);
@@ -1590,6 +1669,30 @@ export interface MissileScriptStats {
   readonly name: string;
 }
 
+export type DroneSizeClass = "light" | "medium" | "heavy" | "sentry";
+
+export interface DroneStats {
+  readonly sizeClass: DroneSizeClass;
+  readonly damageMultiplier: number;
+  readonly emDamage: number;
+  readonly thermalDamage: number;
+  readonly kineticDamage: number;
+  readonly explosiveDamage: number;
+  readonly tracking: number;
+  readonly sigResolution: number;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly maxVelocity: number;
+  readonly orbitSpeed: number;
+  readonly cycleTime: number;
+  readonly bandwidth: number;
+  readonly volume: number;
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
 `;
 
   const scriptDefinitions = `export const SCRIPTS: Readonly<Record<string, TurretScriptStats>> = ${stringifyWithTypeIds(scripts)};
@@ -1636,6 +1739,8 @@ export const MISSILE_SCRIPTS: Readonly<Record<string, MissileScriptStats>> = ${s
     ``,
     `export const DRONES: Readonly<Record<string, { readonly id: TypeId; readonly name: string }>> = ${stringifyWithTypeIds(sortedDrones)};`,
     ``,
+    `export const COMBAT_DRONES: Readonly<Record<string, DroneStats>> = ${stringifyWithTypeIds(sortedCombatDrones)};`,
+    ``,
   ];
 
   addInScopeItemNames(itemNames, types, groups, IN_SCOPE_CATEGORY_IDS);
@@ -1659,6 +1764,7 @@ export const MISSILE_SCRIPTS: Readonly<Record<string, MissileScriptStats>> = ${s
     missileGuidanceEnhancers,
     missileScripts,
     drones,
+    combatDrones,
   );
   const filteredItemNames = filterItemNames(itemNames, idToType, groups, dbTableNames);
 
@@ -1684,6 +1790,7 @@ export const MISSILE_SCRIPTS: Readonly<Record<string, MissileScriptStats>> = ${s
     `${Object.keys(missileScripts).length} missile scripts`,
     `${Object.keys(hullBonuses).length} hull bonus sets`,
     `${Object.keys(sortedDrones).length} drones`,
+    `${Object.keys(sortedCombatDrones).length} combat drones`,
   ];
   console.log(`Wrote ${counts.join(", ")} to ${OUT_FILE}`);
   console.log(`Wrote ${Object.keys(filteredItemNames).length} item names to ${I18N_EN_FILE}, ${I18N_ZH_FILE}, ${I18N_JA_FILE}`);
@@ -1752,6 +1859,7 @@ function collectDbTableNames(
   missileGuidanceEnhancers: Record<string, MissileGuidanceEnhancerStats>,
   missileScripts: Record<string, MissileScriptStats>,
   drones: Record<string, DroneEntry>,
+  combatDrones: Record<string, Row<DroneStats>>,
 ): Set<string> {
   return new Set([
     ...Object.keys(fittingModules),
@@ -1771,6 +1879,7 @@ function collectDbTableNames(
     ...Object.keys(missileGuidanceEnhancers),
     ...Object.keys(missileScripts),
     ...Object.keys(drones),
+    ...Object.keys(combatDrones),
     ...relevantSkillIds(),
   ]);
 }

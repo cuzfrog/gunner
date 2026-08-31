@@ -10,6 +10,7 @@ import { MissileSkillModelImpl } from "./missileStats";
 import { StaticItemNameCatalog, StaticItemNameResolver, type ItemNameCatalog, type ItemNameResolver } from "../gamedata/itemNames";
 import {
   CHARGES,
+  COMBAT_DRONES,
   DISRUPTION_SCRIPTS,
   DRONES,
   FITTING_MODULES,
@@ -245,6 +246,7 @@ const db: FittingDb = {
   hullBonuses: {},
   skillBonuses: [],
   drones: {},
+  combatDrones: {},
 };
 
 const hullBonusDb: FittingDb = {
@@ -311,6 +313,7 @@ const fullFittingDb: FittingDb = {
   hullBonuses: HULL_BONUSES,
   skillBonuses: SKILL_BONUSES,
   drones: DRONES,
+  combatDrones: COMBAT_DRONES,
 };
 const fullGunFamilies = new GunFamiliesImpl({ fittingDb: fullFittingDb });
 const fullChargeCatalog = new ChargeCatalogImpl({ fittingDb: fullFittingDb, gunFamilies: fullGunFamilies });
@@ -1509,7 +1512,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, hullBonuses: {}, skillBonuses: [], drones: DRONES };
+  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, hullBonuses: {}, skillBonuses: [], drones: DRONES, combatDrones: COMBAT_DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {

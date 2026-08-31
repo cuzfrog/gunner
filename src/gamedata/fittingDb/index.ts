@@ -3,6 +3,8 @@ export { FITTING_DB } from "./catalog";
 export type {
   ChargeStats,
   DisruptionScriptStats,
+  DroneSizeClass,
+  DroneStats,
   FittingModuleStats,
   FittingPropulsionStats,
   HullBonus,
@@ -26,6 +28,7 @@ export type {
 } from "./fittingDb";
 export {
   CHARGES,
+  COMBAT_DRONES,
   DISRUPTION_SCRIPTS,
   DRONES,
   FITTING_MODULES,

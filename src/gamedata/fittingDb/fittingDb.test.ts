@@ -1,5 +1,5 @@
 import type { ShipId, TypeId } from "../ids";
-import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, SCRIPTS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
+import { CHARGES, COMBAT_DRONES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, SCRIPTS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
 
 function moduleByName(name: string): FittingModuleStats | undefined {
   return Object.values(FITTING_MODULES).find((m) => m.name === name);
@@ -187,6 +187,45 @@ describe("fittingDb", () => {
     expect(rowByName(DRONES as Readonly<Record<string, { readonly id: TypeId; readonly name: string }>>, "Hobgoblin II")).toBeDefined();
     expect(rowByName(DRONES as Readonly<Record<string, { readonly id: TypeId; readonly name: string }>>, "Mining Drone I")).toBeDefined();
     expect(rowByName(DRONES as Readonly<Record<string, { readonly id: TypeId; readonly name: string }>>, "Salvage Drone I")).toBeDefined();
+  });
+
+  test("includes Hobgoblin II combat drone with both speed fields and light classification", () => {
+    expect(rowByName(COMBAT_DRONES, "Hobgoblin II")).toMatchObject({
+      sizeClass: "light",
+      damageMultiplier: 1.92,
+      thermalDamage: 20,
+      tracking: 2.178,
+      sigResolution: 25,
+      optimal: 2100,
+      falloff: 2000,
+      maxVelocity: 3360,
+      orbitSpeed: 660,
+      cycleTime: 4,
+      bandwidth: 5,
+      volume: 5,
+      metaLevel: 5,
+      metaGroupID: 2,
+    });
+  });
+
+  test("includes Garde II sentry drone with zero orbit speed and sentry classification", () => {
+    expect(rowByName(COMBAT_DRONES, "Garde II")).toMatchObject({
+      sizeClass: "sentry",
+      orbitSpeed: 0,
+      thermalDamage: 64,
+      optimal: 18000,
+      bandwidth: 25,
+    });
+  });
+
+  test("includes Hammerhead II as medium and Ogre II as heavy", () => {
+    expect(rowByName(COMBAT_DRONES, "Hammerhead II")?.sizeClass).toBe("medium");
+    expect(rowByName(COMBAT_DRONES, "Ogre II")?.sizeClass).toBe("heavy");
+  });
+
+  test("excludes non-combat drones from the combat drone table", () => {
+    expect(rowByName(COMBAT_DRONES, "Mining Drone I")).toBeUndefined();
+    expect(rowByName(COMBAT_DRONES, "Salvage Drone I")).toBeUndefined();
   });
 
   test("includes warp scramblers and excludes long warp disruptors", () => {
