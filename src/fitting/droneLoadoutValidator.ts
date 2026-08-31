@@ -27,7 +27,7 @@ export class DroneLoadoutValidatorImpl implements DroneLoadoutValidator {
     this.combatDrones = fittingDb.combatDrones;
   }
 
-  validate(groups: readonly DroneGroup[], profile: ShipProfile): LoadoutValidation {
+  validate(groups: readonly DroneGroup[], profile: ShipProfile): DroneLoadoutValidation {
     let totalCount = 0;
     let totalBandwidth = 0;
     let totalVolume = 0;

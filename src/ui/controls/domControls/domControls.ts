@@ -221,8 +221,8 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   getWeapon(side: Side): WeaponSpec | undefined {
     const activeKind = this.weaponSystemSwitches[side].activeKind();
     if (activeKind === "drone") {
-      const drone = this.droneControllers[side].currentDroneSpec();
-      if (drone) return drone;
+      const specs = this.droneControllers[side].currentDroneSpecs();
+      if (specs.length > 0) return specs[0];
       return this.turretControllers[side].currentTurretSpec();
     }
     if (activeKind === "missile") {
@@ -238,8 +238,7 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     const activeKind = this.weaponSystemSwitches[side].activeKind();
     const weapons: WeaponSpec[] = [];
     if (activeKind === "drone") {
-      const drone = this.droneControllers[side].currentDroneSpec();
-      if (drone) weapons.push(drone);
+      for (const spec of this.droneControllers[side].currentDroneSpecs()) weapons.push(spec);
     } else if (activeKind === "missile") {
       const missile = this.launcherControllers[side].currentMissileSpec();
       if (missile) weapons.push(missile);
@@ -254,8 +253,7 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
       if (missile) weapons.push(missile);
     }
     if (activeKind !== "drone") {
-      const drone = this.droneControllers[side].currentDroneSpec();
-      if (drone) weapons.push(drone);
+      for (const spec of this.droneControllers[side].currentDroneSpecs()) weapons.push(spec);
     }
     return weapons;
   }

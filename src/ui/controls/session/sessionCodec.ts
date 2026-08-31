@@ -1,4 +1,4 @@
-import type { ChargeCatalog, FittingImport } from "../../../fitting";
+import type { ChargeCatalog, DroneGroup, FittingImport } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
@@ -176,8 +176,8 @@ export class SessionCodecImpl implements SessionCodec {
       shipBWeaponKind,
       shipAMissileAmmo: shipALauncher.ammo,
       shipBMissileAmmo: shipBLauncher.ammo,
-      shipADroneTypeId: shipADrone.droneTypeId,
-      shipBDroneTypeId: shipBDrone.droneTypeId,
+      shipADroneTypeId: typeIdFromDroneGroups(shipADrone.droneGroups),
+      shipBDroneTypeId: typeIdFromDroneGroups(shipBDrone.droneGroups),
       shipAEwarActivation: this.ewarController.capture("shipA"),
       shipBEwarActivation: this.ewarController.capture("shipB"),
       shipABoosterActivation: this.boosterController.capture("shipA"),
@@ -240,9 +240,9 @@ export class SessionCodecImpl implements SessionCodec {
     this.launcherControllers[side].restore(fitting, panel.skillConditions(), ammoId);
   }
 
-  private restoreDrone(side: Side, fitting: string | undefined, droneTypeId: TypeId | undefined): void {
+  private restoreDrone(side: Side, fitting: string | undefined, droneGroups: readonly DroneGroup[] | undefined): void {
     const panel = side === "shipA" ? this.shipASide : this.shipBSide;
-    this.droneControllers[side].restore(fitting, panel.skillConditions(), droneTypeId);
+    this.droneControllers[side].restore(fitting, panel.skillConditions(), droneGroups);
   }
 
   resetToDefaults(): void {
@@ -277,8 +277,8 @@ export class SessionCodecImpl implements SessionCodec {
     });
     this.restoreLauncher("shipA", settings.shipA.fitting, settings.shipA.missileAmmo);
     this.restoreLauncher("shipB", settings.shipB.fitting, settings.shipB.missileAmmo);
-    this.restoreDrone("shipA", settings.shipA.fitting, settings.shipA.droneTypeId);
-    this.restoreDrone("shipB", settings.shipB.fitting, settings.shipB.droneTypeId);
+    this.restoreDrone("shipA", settings.shipA.fitting, droneGroupsFromTypeId(settings.shipA.droneTypeId));
+    this.restoreDrone("shipB", settings.shipB.fitting, droneGroupsFromTypeId(settings.shipB.droneTypeId));
     this.weaponSystemSwitches.shipA.setActiveKind(settings.shipA.weaponKind ?? "turret");
     this.weaponSystemSwitches.shipB.setActiveKind(settings.shipB.weaponKind ?? "turret");
     this.weaponSystemSwitches.shipA.autoToggle(this.turretControllers.shipA.turret() !== undefined, this.launcherControllers.shipA.launcher() !== undefined, this.droneControllers.shipA.drone() !== undefined);
@@ -353,4 +353,14 @@ function sidePanelStateOf(combatant: CombatantSettings): SidePanelState {
     fittedHull: combatant.fittedHull,
     sig: combatant.sig,
   };
+}
+
+function droneGroupsFromTypeId(typeId: TypeId | undefined): readonly DroneGroup[] | undefined {
+  if (typeId === undefined) return undefined;
+  return [{ typeId, count: 1 }];
+}
+
+function typeIdFromDroneGroups(groups: readonly DroneGroup[]): TypeId | undefined {
+  // Phase 6 will replace scalar droneTypeId with grouped drone state in persistence.
+  return groups.length > 0 ? groups[0].typeId : undefined;
 }

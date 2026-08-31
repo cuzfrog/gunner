@@ -1,4 +1,4 @@
-import { DroneLoadoutValidatorImpl, type DroneDroneLoadoutViolation, type DroneDroneLoadoutValidation } from "./droneLoadoutValidator";
+import { DroneLoadoutValidatorImpl, type DroneLoadoutViolation, type DroneLoadoutValidation } from "./droneLoadoutValidator";
 import type { DroneStats, FittingDb } from "../gamedata/fittingDb";
 import type { ShipProfile } from "../ships";
 import { toTypeId, type ShipId, type FactionId, type HullTypeId } from "../gamedata/ids";

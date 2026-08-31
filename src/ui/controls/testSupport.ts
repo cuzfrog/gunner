@@ -1,5 +1,5 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
-import type { ChargeCatalog, DroneCatalog, FittingCalculator, FittingImport, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingImport, PresetFittings } from "../../fitting";
 import type { TypeId } from "../../gamedata/ids";
 import type { Ships } from "../../ships";
 import { registerSimModule, type EwarResolver, type HitChance, type SimCradle } from "../../sim";
@@ -199,6 +199,8 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     fittingDb: asValue(mockFittingDb()),
     missileCatalog: asValue(mockMissileCatalog()),
     droneCatalog: asValue(mockDroneCatalog()),
+    droneLoadoutResolver: asValue(vi.mocked<DroneLoadoutResolver>({ resolve: vi.fn(() => []) })),
+    droneLoadoutValidator: asValue(vi.mocked<DroneLoadoutValidator>({ validate: vi.fn(() => ({ valid: true, totalCount: 0, totalBandwidth: 0, totalVolume: 0, violations: [] })) })),
     launcherClasses: asValue(mockLauncherClasses()),
     fittingCalculator: asValue(vi.mocked<FittingCalculator>({
       resolveTurrets: vi.fn(() => []),
@@ -312,11 +314,12 @@ class StubDroneController implements DroneController {
   readonly side: Side;
   popup: Popup = new StubPopup();
   drone = vi.fn(() => undefined);
-  currentDroneSpec = vi.fn(() => undefined);
+  currentDroneSpecs = vi.fn(() => []);
+  validation = vi.fn(() => undefined);
   applyImported = vi.fn();
   restore = vi.fn();
   clear = vi.fn();
-  capture = vi.fn(() => ({ droneTypeId: undefined }));
+  capture = vi.fn(() => ({ droneGroups: [] }));
   isPopupOpen = vi.fn(() => false);
   openPopup = vi.fn();
   closePopup = vi.fn();

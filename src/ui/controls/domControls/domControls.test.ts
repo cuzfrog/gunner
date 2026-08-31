@@ -163,7 +163,7 @@ describe("DomControls", () => {
     const droneSpec: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, isSentry: false };
     cradle.cradle.turretControllers.shipA.currentTurretSpecs = vi.fn(() => [turretSpec]);
     cradle.cradle.launcherControllers.shipA.currentMissileSpec = vi.fn(() => missileSpec);
-    cradle.cradle.droneControllers.shipA.currentDroneSpec = vi.fn(() => droneSpec);
+    cradle.cradle.droneControllers.shipA.currentDroneSpecs = vi.fn(() => [droneSpec]);
     cradle.cradle.weaponSystemSwitches.shipA.setActiveKind("turret");
     const turretActive = controls.getWeapons("shipA");
     expect(turretActive[0]).toBe(turretSpec);
@@ -186,7 +186,7 @@ describe("DomControls", () => {
     const { controls, cradle } = buildDomControls();
     cradle.cradle.turretControllers.shipA.currentTurretSpecs = vi.fn(() => []);
     cradle.cradle.launcherControllers.shipA.currentMissileSpec = vi.fn(() => undefined);
-    cradle.cradle.droneControllers.shipA.currentDroneSpec = vi.fn(() => undefined);
+    cradle.cradle.droneControllers.shipA.currentDroneSpecs = vi.fn(() => []);
     expect(controls.getWeapons("shipA")).toHaveLength(0);
   });
 

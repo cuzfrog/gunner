@@ -1,5 +1,5 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser, SettingsStore } from "../../appstate";
-import type { ChargeCatalog, DroneCatalog, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
 import type { EwarResolver, HitChance, SimValueParser } from "../../sim";
 import type { Ships } from "../../ships";
 import type { ItemNameCatalog, ItemNameLoader } from "../../gamedata";
@@ -93,6 +93,8 @@ export interface ControlsCradle {
   readonly fittingDb: FittingDb;
   readonly missileCatalog: MissileCatalog;
   readonly droneCatalog: DroneCatalog;
+  readonly droneLoadoutResolver: DroneLoadoutResolver;
+  readonly droneLoadoutValidator: DroneLoadoutValidator;
   readonly launcherClasses: LauncherClasses;
   readonly shipASide: SidePanel;
   readonly shipBSide: SidePanel;

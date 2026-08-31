@@ -1,5 +1,5 @@
 import type { ImageCatalog } from "../../icons";
-import type { FittingImport, ImportedDrone } from "../../../fitting";
+import type { DroneCatalog, DroneGroup, DroneLoadoutContext, DroneLoadoutResolver, DroneLoadoutValidation, DroneLoadoutValidator, FittingImport, ImportedDrone } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { StatConditions } from "../../../ships";
 import { UiEventsImpl } from "../../events";
@@ -61,12 +61,36 @@ export function importedDroneFixture(overrides: Partial<ImportedDrone> = {}): Im
   };
 }
 
+function mockDroneCatalog(): DroneCatalog {
+  return {
+    dronesByClass: vi.fn(() => []),
+    usualForClass: vi.fn(() => undefined),
+    has: vi.fn(() => true),
+    idForName: vi.fn(() => undefined),
+  };
+}
+
+function mockDroneLoadoutResolver(): DroneLoadoutResolver {
+  return {
+    resolve: vi.fn((_groups: readonly DroneGroup[], _fitting: DroneLoadoutContext, _conditions: StatConditions): readonly ImportedDrone[] => []),
+  };
+}
+
+function mockDroneLoadoutValidator(): DroneLoadoutValidator {
+  return {
+    validate: vi.fn((): DroneLoadoutValidation => ({ valid: true, totalCount: 0, totalBandwidth: 0, totalVolume: 0, violations: [] })),
+  };
+}
+
 export function buildDrone(
   options: {
     readonly side?: Side;
     readonly imageCatalog?: Partial<ImageCatalog>;
     readonly fittingImport?: Partial<FittingImport>;
     readonly i18n?: Partial<I18n>;
+    readonly droneCatalog?: Partial<DroneCatalog>;
+    readonly droneLoadoutResolver?: Partial<DroneLoadoutResolver>;
+    readonly droneLoadoutValidator?: Partial<DroneLoadoutValidator>;
   } = {},
 ) {
   const side = options.side ?? "shipA";
@@ -98,6 +122,9 @@ export function buildDrone(
     detectLanguageFromText: vi.fn(() => undefined),
     ...options.fittingImport,
   });
+  const droneCatalog = vi.mocked<DroneCatalog>({ ...mockDroneCatalog(), ...options.droneCatalog });
+  const droneLoadoutResolver = vi.mocked<DroneLoadoutResolver>({ ...mockDroneLoadoutResolver(), ...options.droneLoadoutResolver });
+  const droneLoadoutValidator = vi.mocked<DroneLoadoutValidator>({ ...mockDroneLoadoutValidator(), ...options.droneLoadoutValidator });
   const events = new UiEventsImpl();
   const popupGroup = vi.mocked<PopupGroup>({
     register: vi.fn(),
@@ -113,12 +140,15 @@ export function buildDrone(
     side,
     els,
     fittingImport,
+    droneCatalog,
+    droneLoadoutResolver,
+    droneLoadoutValidator,
     imageCatalog,
     i18n,
     events,
     popupGroup,
   });
-  return { document, controller, imageCatalog, fittingImport, i18n, events, popupGroup };
+  return { document, controller, imageCatalog, fittingImport, i18n, events, popupGroup, droneCatalog, droneLoadoutResolver, droneLoadoutValidator };
 }
 
 export const NEUTRAL_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: false, weaponOverloaded: false };
