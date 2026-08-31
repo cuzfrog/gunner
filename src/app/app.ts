@@ -89,6 +89,7 @@ export class AppImpl implements App {
 
   private weaponRangeForRenderer(weapon: WeaponSpec | undefined, side: Side): WeaponRange {
     if (weapon?.kind === "turret") return { kind: "turret", optimal: weapon.optimal, falloff: weapon.falloff };
+    if (weapon?.kind === "drone") return { kind: "drone", optimal: weapon.optimal, falloff: weapon.falloff };
     if (weapon?.kind === "missile") return { kind: "missile", range: weapon.flightRange };
     const fallback = this.controls.getWeapon(side);
     if (fallback?.kind === "missile") return { kind: "missile", range: fallback.flightRange };
@@ -129,6 +130,17 @@ export class AppImpl implements App {
         trackingBreakdown: disruption,
         optimalBreakdown: disruption,
         falloffBreakdown: disruption,
+      };
+    }
+    if (effectiveWeapon?.kind === "drone") {
+      return {
+        kind: "drone",
+        speed: ship.maxSpeed,
+        tracking: effectiveWeapon.tracking,
+        optimal: effectiveWeapon.optimal,
+        falloff: effectiveWeapon.falloff,
+        sigResolution: effectiveWeapon.sigResolution,
+        speedBreakdown,
       };
     }
     return { kind: "none", speed: ship.maxSpeed, speedBreakdown };

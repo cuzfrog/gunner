@@ -23,7 +23,13 @@ export interface MissileRange {
   readonly range: number;
 }
 
-export type WeaponRange = TurretRange | MissileRange;
+export interface DroneRange {
+  readonly kind: "drone";
+  readonly optimal: number;
+  readonly falloff: number;
+}
+
+export type WeaponRange = TurretRange | MissileRange | DroneRange;
 
 export interface WeaponRanges {
   readonly shipA: WeaponRange;
@@ -213,7 +219,7 @@ export class CanvasRenderer implements Renderer {
   }
 
   private drawRangeRings(center: Vec2, range: WeaponRange): void {
-    if (range.kind === "turret") {
+    if (range.kind === "turret" || range.kind === "drone") {
       this.drawRingAt(center, range.optimal, COLORS.optimalRing, [8, 6]);
       if (range.falloff > 0) {
         this.drawRingAt(center, range.optimal + range.falloff, COLORS.falloffRing, [4, 6]);
@@ -378,7 +384,7 @@ export class CanvasRenderer implements Renderer {
 }
 
 function weaponRangeMax(range: WeaponRange): number {
-  return range.kind === "turret" ? range.optimal + range.falloff : range.range;
+  return range.kind === "turret" || range.kind === "drone" ? range.optimal + range.falloff : range.range;
 }
 
 function formatTime(s: number): string {

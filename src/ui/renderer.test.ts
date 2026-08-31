@@ -350,5 +350,18 @@ describe("CanvasRenderer", () => {
       const { arcs } = rendererWithVisibility("none");
       expect(arcs.length).toBe(0);
     });
+
+    test("draws drone range rings identically to turret rings", () => {
+      const canvas = fakeCanvas();
+      const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
+      const droneRange = { kind: "drone" as const, optimal: 4000, falloff: 2000 };
+      renderer.draw(rangeSnapshot, frame, { shipA: droneRange, shipB: droneRange }, []);
+      const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
+      const scale = scaleOf(renderer);
+      const optimalRadius = droneRange.optimal * scale;
+      const falloffRadius = (droneRange.optimal + droneRange.falloff) * scale;
+      expect(ctx.arcs.some((a) => Math.abs(a[2] - optimalRadius) < 0.5)).toBe(true);
+      expect(ctx.arcs.some((a) => Math.abs(a[2] - falloffRadius) < 0.5)).toBe(true);
+    });
   });
 });

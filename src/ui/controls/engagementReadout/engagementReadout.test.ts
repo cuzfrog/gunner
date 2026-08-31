@@ -1,4 +1,4 @@
-import { Vec2, type AttackAssessment, type EngagementView, type MissileSpec, type ShipState, type TurretSpec } from "../../../sim";
+import { Vec2, type AttackAssessment, type DroneSpec, type EngagementView, type MissileSpec, type ShipState, type TurretSpec } from "../../../sim";
 import { EngagementReadoutImpl, type EngagementReadout, type ReadoutEls } from "./engagementReadout";
 
 function fakeSideEls(): ReadoutEls["shipA"] {
@@ -75,6 +75,7 @@ function fakeShipState(): ShipState {
 
 const DUMMY_TURRET: TurretSpec = { kind: "turret", tracking: 0, sigResolution: 40, optimal: 0, falloff: 0, damagePerShot: 12, cycleTime: 5, turretCount: 1 };
 const DUMMY_MISSILE: MissileSpec = { kind: "missile", damagePerMissile: 100, cycleTime: 10, launcherCount: 2, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 3, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
+const DUMMY_DRONE: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, isSentry: false };
 
 function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipADamage?: { nominalDps: number; appliedDps: number; application: number; volley: number } }) {
   const ship = fakeShipState();
@@ -118,6 +119,25 @@ function makeMissileView(overrides: { distance?: number; shipADamage?: { nominal
     missile: shipAMissile,
   };
   return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_MISSILE, shipB: undefined } } as unknown as EngagementView;
+}
+
+function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipADamage?: { nominalDps: number; appliedDps: number; application: number; volley: number } }) {
+  const ship = fakeShipState();
+  const frame = {
+    time: 0, shipA: ship, shipB: ship,
+    relPosition: new Vec2(0, overrides.distance ?? 0),
+    distance: overrides.distance ?? 0,
+    relVelocity: new Vec2(0, 0), radialVelocity: 0,
+    transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
+  };
+  const shipAHit = overrides.shipAHit ?? { chance: 0.5, trackingTerm: 1, rangeTerm: 0 };
+  const shipADamage = overrides.shipADamage ?? { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100 };
+  const shipAAttack: AttackAssessment = {
+    boostedWeapon: DUMMY_DRONE, effectiveWeapon: DUMMY_DRONE,
+    damage: shipADamage,
+    drone: { hit: shipAHit, expectedMultiplier: 0.8, inRange: true, orbiting: true },
+  };
+  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_DRONE, shipB: undefined } } as unknown as EngagementView;
 }
 
 function makeNoWeaponView(distance: number = 1000): EngagementView {
@@ -280,5 +300,26 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resSigFactor.classList.contains("is-dim")).toBe(false);
     expect(els.shipA.resVelocityFactor.classList.contains("is-dim")).toBe(false);
     expect(els.shipA.resTimeToImpact.classList.contains("is-dim")).toBe(false);
+  });
+
+  test("drone side shows hit-chance cards with DPS like turret", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeDroneView({ distance: 1000 }), T);
+    expect(els.shipA.resTurretCards.hidden).toBe(false);
+    expect(els.shipA.resMissileCards.hidden).toBe(true);
+    expect(els.shipA.resHit.textContent).toBe("50.0%");
+    expect(els.shipA.resTrackPen.textContent).toBe("50.0%");
+    expect(els.shipA.resRangePen.textContent).toBe("100.0%");
+    expect(els.shipA.resNominalDps.textContent).toBe("25.0");
+    expect(els.shipA.resAppliedDps.textContent).toBe("20.0");
+    expect(els.shipA.resAppliedDpsApplication.textContent).toBe("(80.0%)");
+  });
+
+  test("drone side with zero applied DPS shows is-danger", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeDroneView({ distance: 1000, shipADamage: { nominalDps: 25, appliedDps: 0, application: 0, volley: 100 } }), T);
+    expect(els.shipA.resAppliedDpsApplication.classList.contains("is-danger")).toBe(true);
   });
 });

@@ -1,10 +1,11 @@
-import type { DamageFactor, DamageType, ImportedLauncher, ImportedTurret } from "../../../fitting";
+import type { DamageBreakdown, DamageFactor, DamageType, ImportedDrone, ImportedLauncher, ImportedTurret } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { ItemNameCatalog } from "../../../gamedata";
 import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { HintContentProvider } from "../hoverHint";
 import { DAMAGE_ICON_URLS, DAMAGE_TYPE_ORDER } from "../damageTypeIcons";
+import type { DroneController } from "../drone";
 import type { LauncherController } from "../launcher";
 import type { Side } from "../side";
 import type { TurretController } from "../turret";
@@ -16,14 +17,23 @@ export interface DpsHintProviderDeps {
   readonly i18n: I18n;
   readonly turretControllers: Record<Side, TurretController>;
   readonly launcherControllers: Record<Side, LauncherController>;
+  readonly droneControllers: Record<Side, DroneController>;
   readonly itemNameCatalog: ItemNameCatalog;
   readonly dpsHintRenderer: DpsHintRenderer;
+}
+
+interface DpsHintSource {
+  readonly moduleId: TypeId;
+  readonly count: number;
+  readonly cycleTime: number;
+  readonly damageBreakdown: DamageBreakdown;
 }
 
 export class DpsHintProviderImpl implements HintContentProvider {
   private readonly i18n: I18n;
   private readonly turretControllers: Record<Side, TurretController>;
   private readonly launcherControllers: Record<Side, LauncherController>;
+  private readonly droneControllers: Record<Side, DroneController>;
   private readonly itemNameCatalog: ItemNameCatalog;
   private readonly renderer: DpsHintRenderer;
 
@@ -31,6 +41,7 @@ export class DpsHintProviderImpl implements HintContentProvider {
     this.i18n = deps.i18n;
     this.turretControllers = deps.turretControllers;
     this.launcherControllers = deps.launcherControllers;
+    this.droneControllers = deps.droneControllers;
     this.itemNameCatalog = deps.itemNameCatalog;
     this.renderer = deps.dpsHintRenderer;
   }
@@ -47,9 +58,11 @@ export class DpsHintProviderImpl implements HintContentProvider {
     const language = this.i18n.current();
     const turret = this.turretControllers[side].turret();
     const launcher = this.launcherControllers[side].launcher();
+    const drone = this.droneControllers[side].drone();
     const groups: DpsHintGroup[] = [];
-    if (turret) groups.push(buildTurretGroup(turret, this.itemNameCatalog, language));
-    if (launcher) groups.push(buildLauncherGroup(launcher, this.itemNameCatalog, language));
+    if (turret) groups.push(buildWeaponGroup(turretHintSource(turret), this.itemNameCatalog, language));
+    if (launcher) groups.push(buildWeaponGroup(launcherHintSource(launcher), this.itemNameCatalog, language));
+    if (drone) groups.push(buildWeaponGroup(droneHintSource(drone), this.itemNameCatalog, language));
     return { groups };
   }
 }
@@ -62,25 +75,26 @@ function sideFromAnchor(anchor: HTMLElement): Side | undefined {
   return undefined;
 }
 
-function buildTurretGroup(turret: ImportedTurret, itemNameCatalog: ItemNameCatalog, language: Language): DpsHintGroup {
-  const name = `${itemNameCatalog.nameForId(turret.moduleId, language)} x${turret.turretCount}`;
-  const { types, ammo } = buildTypeRows(turret.damageBreakdown.damageByType);
-  const factors = buildFactorRows(turret.damageBreakdown.factors, itemNameCatalog, language);
-  const cumulative = factors.length > 0 ? factors[factors.length - 1].cumulative : 1;
-  const volley = ammo * cumulative * turret.turretCount;
-  const dps = turret.cycleTime > 0 ? volley / turret.cycleTime : 0;
-  const summary: DpsHintSummary = { ammo, multiplier: cumulative, count: turret.turretCount, volley, cycleTime: turret.cycleTime, dps };
-  return { name, types, ammo, factors, summary };
+function turretHintSource(turret: ImportedTurret): DpsHintSource {
+  return { moduleId: turret.moduleId, count: turret.turretCount, cycleTime: turret.cycleTime, damageBreakdown: turret.damageBreakdown };
 }
 
-function buildLauncherGroup(launcher: ImportedLauncher, itemNameCatalog: ItemNameCatalog, language: Language): DpsHintGroup {
-  const name = `${itemNameCatalog.nameForId(launcher.moduleId, language)} x${launcher.count}`;
-  const { types, ammo } = buildTypeRows(launcher.damageBreakdown.damageByType);
-  const factors = buildFactorRows(launcher.damageBreakdown.factors, itemNameCatalog, language);
+function launcherHintSource(launcher: ImportedLauncher): DpsHintSource {
+  return { moduleId: launcher.moduleId, count: launcher.count, cycleTime: launcher.cycleTime, damageBreakdown: launcher.damageBreakdown };
+}
+
+function droneHintSource(drone: ImportedDrone): DpsHintSource {
+  return { moduleId: drone.typeId, count: drone.count, cycleTime: drone.cycleTime, damageBreakdown: drone.damageBreakdown };
+}
+
+function buildWeaponGroup(source: DpsHintSource, itemNameCatalog: ItemNameCatalog, language: Language): DpsHintGroup {
+  const name = `${itemNameCatalog.nameForId(source.moduleId, language)} x${source.count}`;
+  const { types, ammo } = buildTypeRows(source.damageBreakdown.damageByType);
+  const factors = buildFactorRows(source.damageBreakdown.factors, itemNameCatalog, language);
   const cumulative = factors.length > 0 ? factors[factors.length - 1].cumulative : 1;
-  const volley = ammo * cumulative * launcher.count;
-  const dps = launcher.cycleTime > 0 ? volley / launcher.cycleTime : 0;
-  const summary: DpsHintSummary = { ammo, multiplier: cumulative, count: launcher.count, volley, cycleTime: launcher.cycleTime, dps };
+  const volley = ammo * cumulative * source.count;
+  const dps = source.cycleTime > 0 ? volley / source.cycleTime : 0;
+  const summary: DpsHintSummary = { ammo, multiplier: cumulative, count: source.count, volley, cycleTime: source.cycleTime, dps };
   return { name, types, ammo, factors, summary };
 }
 

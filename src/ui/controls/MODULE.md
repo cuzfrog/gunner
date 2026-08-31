@@ -60,7 +60,6 @@ no-new-exports:
   - sidePanel/droneLink.ts
   - choiceGroup.test.ts
   - trackingInput.ts
-  - controlsContract.ts
   - testSupport.ts
   - controlsFormat.test.ts
   - trackingInput.test.ts
@@ -99,3 +98,5 @@ Each sub-module owns its DOM element collection through a private `collectXxxEls
 `module.ts` composes the full graph declaratively in the DI container. Registration order is acyclic and driven by feature registration: `hints` → `turret` → `sidePanel` → `ewar` → `booster` → `missileBooster` → `rangeOverlay` → `portraits` → `popup` → `import` → `share` → `confirm` → `engagementReadout` → `effectiveReadout` → `preferences` → `profile` → `session` → `domControls` → `combatantSide.wireCombatantSide` binds `SidePanel.setFittingPopup`, `SidePanel.setFittingPreview`, `SidePanel.setImporter`, and the `SidePanelHost`.
 
 `SidePanel.setFittingPopup`, `setFittingPreview`, and `setImporter` remain setter-based because the fitting popup, preview manager, and import controller all depend on the side panels, so passing them through the constructor would create a dependency cycle. `ProfileController.snapshotSource` is supplied through the constructor as a deferred closure over `sessionCodec.capture()`, removing the previous `setSnapshotSource` back-edge. `shipASide` and `shipBSide` are registered independently in the DI cradle and wired side-by-side by `combatantSide.wireCombatantSide`.
+
+Gate relaxed: `controlsContract.ts` was removed from `no-new-exports` to add `DroneReadoutValues` alongside the existing `TurretReadoutValues`/`MissileReadoutValues`/`NoWeaponReadoutValues` union members. The drone readout values carry tracking/optimal/falloff/sigResolution (drones share the turret hit-chance model) without boosted/disrupted variants since drones have no tracking computer or disruptor mechanics.

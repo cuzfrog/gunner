@@ -39,13 +39,23 @@ export interface MissileReadoutValues {
   readonly speedBreakdown?: SpeedBreakdown;
 }
 
+export interface DroneReadoutValues {
+  readonly kind: "drone";
+  readonly speed: number;
+  readonly tracking: number;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly sigResolution: number;
+  readonly speedBreakdown?: SpeedBreakdown;
+}
+
 export interface NoWeaponReadoutValues {
   readonly kind: "none";
   readonly speed: number;
   readonly speedBreakdown?: SpeedBreakdown;
 }
 
-export type SideReadoutValues = TurretReadoutValues | MissileReadoutValues | NoWeaponReadoutValues;
+export type SideReadoutValues = TurretReadoutValues | MissileReadoutValues | DroneReadoutValues | NoWeaponReadoutValues;
 
 export interface EffectiveReadouts {
   readonly shipA: SideReadoutValues;

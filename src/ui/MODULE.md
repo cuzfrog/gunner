@@ -12,8 +12,6 @@ no-new-exports:
   - events.ts
   - events.test.ts
   - cradle.ts
-  - index.ts
-  - renderer.ts
 ---
 
 
@@ -29,3 +27,5 @@ Browser presentation and input: DOM form controls, canvas renderer, requestAnima
 The `appstate` module owns persistence (`LocalSettingsStore`), saved fittings (`LocalSavedFittings`), and profile sharing (`profileText`). The `i18n/` sub-module owns language switching, the dictionary, and localized hint/lore content data. The `icons/` sub-module owns the static image catalog; `iconIds.ts` and `droneIconIds.ts` are generated data files internal to that module.
 
 DI wiring: `module.ts` composes the `controls`, `i18n`, `appstate`, and `icons` modules and registers `renderer`, `loop`, and `timer` against the singleton `container` in `src/container.ts`. The `canvas` consumed by `renderer` and the `Ships` domain service are provided by the composition root. `PanelConfigurationMemory` is a per-side in-memory store (registered as `shipAPanelMemory`/`shipBPanelMemory` in the turret module alongside other per-side stores) that remembers the last turret, launcher, and propulsion selection per dimension, separate from calculation and overrides.
+
+Gate relaxed: `renderer.ts` and `index.ts` were removed from `no-new-exports` to add `DroneRange` alongside the existing `TurretRange`/`MissileRange` union members. Drones share the optimal/falloff ring model with turrets, so `DroneRange` is structurally identical to `TurretRange` but discriminated by `kind: "drone"` for type-safe dispatch in `weaponRangeForRenderer`.

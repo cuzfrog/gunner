@@ -2,6 +2,7 @@ import {
   Vec2,
   type AttackAssessment,
   type DisruptionBreakdown,
+  type DroneSpec,
   type EngagementFrame,
   type EngagementFrameComposer,
   type EngagementView,
@@ -295,6 +296,33 @@ describe("AppImpl", () => {
     expect(controls.update).toHaveBeenCalledWith(baseView(), {
       shipA: { ...sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000), speedBreakdown: shipASpeed, trackingBreakdown: disruptionA, optimalBreakdown: disruptionA, falloffBreakdown: disruptionA },
       shipB: { ...sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000), speedBreakdown: shipBSpeed, trackingBreakdown: disruptionB, optimalBreakdown: disruptionB, falloffBreakdown: disruptionB },
+    });
+  });
+
+  test("returns drone readout values when the effective weapon is a drone", () => {
+    const drone: DroneSpec = {
+      kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500,
+      damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, isSentry: false,
+    };
+    const droneAssessment: AttackAssessment = {
+      boostedWeapon: drone, effectiveWeapon: drone,
+      damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100 },
+      drone: { hit, expectedMultiplier: 1, inRange: true, orbiting: true },
+    };
+    const droneView: EngagementView = {
+      frame,
+      attacks: { shipA: droneAssessment, shipB: droneAssessment },
+      effectiveWeapons: { shipA: drone, shipB: drone },
+    };
+    engagementFrameComposer.compose.mockReturnValue(droneView);
+    controls.getWeapon.mockReturnValue(drone);
+    controls.getWeapons.mockReturnValue([drone]);
+    app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
+    app.start();
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "drone", optimal: 1000, falloff: 500 }, shipB: { kind: "drone", optimal: 1000, falloff: 500 } }, []);
+    expect(controls.update).toHaveBeenCalledWith(droneView, {
+      shipA: { kind: "drone", speed: 0, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40, speedBreakdown: emptySpeedBreakdown },
+      shipB: { kind: "drone", speed: 0, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40, speedBreakdown: emptySpeedBreakdown },
     });
   });
 });
