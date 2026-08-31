@@ -1,5 +1,5 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser, SettingsStore } from "../../appstate";
-import type { ChargeCatalog, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, DroneCatalog, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
 import type { EwarResolver, HitChance, SimValueParser } from "../../sim";
 import type { Ships } from "../../ships";
 import type { ItemNameCatalog, ItemNameLoader } from "../../gamedata";
@@ -26,6 +26,7 @@ import type { HullDatalist, SessionCodec, SimConfigSource } from "./session";
 import type { SidePanel, WeaponSystemSwitch } from "./sidePanel";
 import type { TurretController, TurretOverrides } from "./turret";
 import type { LauncherController } from "./launcher";
+import type { DroneController } from "./drone";
 import type { RangeOverlayController } from "./rangeOverlay";
 import type { PortraitsController } from "./portraits";
 import type { HoverHintController } from "./hoverHint";
@@ -83,9 +84,13 @@ export interface ControlsCradle {
   readonly shipALauncherController: LauncherController;
   readonly shipBLauncherController: LauncherController;
   readonly launcherControllers: Record<Side, LauncherController>;
+  readonly shipADroneController: DroneController;
+  readonly shipBDroneController: DroneController;
+  readonly droneControllers: Record<Side, DroneController>;
   readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   readonly fittingDb: FittingDb;
   readonly missileCatalog: MissileCatalog;
+  readonly droneCatalog: DroneCatalog;
   readonly launcherClasses: LauncherClasses;
   readonly shipASide: SidePanel;
   readonly shipBSide: SidePanel;

@@ -38,6 +38,7 @@ export interface CombatantSettings {
   readonly ammo: TypeId;
   readonly weaponKind?: WeaponKind;
   readonly missileAmmo?: TypeId;
+  readonly droneTypeId?: TypeId;
 }
 
 export interface SessionSettings {

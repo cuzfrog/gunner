@@ -1,0 +1,74 @@
+@layer components {
+.drone-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.drone-attributes-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.drone-telemetry-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.drone-telemetry-label {
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.drone-telemetry-value {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.drone-popup {
+  min-width: 200px;
+}
+
+.drone-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.drone-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  width: 100%;
+  font-size: 12px;
+}
+
+.drone-item:hover {
+  background: var(--bg-inset);
+}
+
+.drone-item-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.drone-item-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+}

@@ -229,6 +229,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     turretCount: 1,
     damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
   },
+  drones: [],
   cargoCharges: [],
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },

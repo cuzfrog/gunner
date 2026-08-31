@@ -23,6 +23,7 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
       shipBSide: proxy.shipBSide,
       turretControllers: proxy.turretControllers,
       launcherControllers: proxy.launcherControllers,
+      droneControllers: proxy.droneControllers,
       weaponSystemSwitches: proxy.weaponSystemSwitches,
       importController: proxy.importController,
       ewarController: proxy.ewarController,

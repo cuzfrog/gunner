@@ -50,6 +50,12 @@ no-new-exports:
   - turret/sigResIcons.ts
   - turret/turretController.ts
   - turret/turretControllerContract.ts
+  - drone/droneController.ts
+  - drone/droneControllerContract.ts
+  - drone/module.ts
+  - drone/index.ts
+  - import/shipADrone.ts
+  - sidePanel/droneLink.ts
   - choiceGroup.test.ts
   - trackingInput.ts
   - controlsContract.ts
@@ -81,7 +87,7 @@ no-new-exports:
 
 DOM form controls, input orchestration, and popups for the gunner UI.
 
-The module is organized into sub-modules: `session`, `turret`, `popup`, `import`, `share`, `hints`, `sidePanel`, `ewar`, `booster`, `missileBooster`, `rangeOverlay`, `portraits`, `confirm`, `domControls`, `effectiveReadout`, `engagementReadout`, `preferences`, and `profile`. `DomControls` exposes the `Controls` facade. `EffectiveReadout` updates per-frame effective attribute suffixes for speed, tracking, optimal and falloff. `SimConfigSource` lives in `session` and owns `getConfig()` assembly from the two side panels, preferences, EWAR, boosters, missile boosters, and the initial distance source.
+The module is organized into sub-modules: `session`, `turret`, `popup`, `import`, `share`, `hints`, `sidePanel`, `ewar`, `booster`, `missileBooster`, `rangeOverlay`, `portraits`, `confirm`, `domControls`, `effectiveReadout`, `engagementReadout`, `preferences`, `profile`, and `drone`. `DomControls` exposes the `Controls` facade. `EffectiveReadout` updates per-frame effective attribute suffixes for speed, tracking, optimal and falloff. `SimConfigSource` lives in `session` and owns `getConfig()` assembly from the two side panels, preferences, EWAR, boosters, missile boosters, and the initial distance source.
 
 The public surface is `Controls`, `ControlsCallbacks`, `ControlsCradle`, `registerControlsModule`, `EffectiveReadouts` (used by `Controls.update`), and `Side`.
 `index.ts` re-exports these cross-boundary types. `elementContract.ts` is the single source of truth for control element ids, tags, and default values. `createControlsEls()` consumes it, and `index.ts` re-exports `DEFAULT_VALUES` and `TAG_BY_ID` for test/runtime contracts.

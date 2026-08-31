@@ -22,7 +22,7 @@ describe("ImportController", () => {
     expect(shipAPanel.fittingText).toBe(text);
     expect(turrets.shipA.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(launchers.shipA.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
-    expect(weaponSystemSwitches.shipA.autoToggle).toHaveBeenCalledWith(true, false);
+    expect(weaponSystemSwitches.shipA.autoToggle).toHaveBeenCalledWith(true, false, false);
     expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
     expect(onConfigPersisted).toHaveBeenCalled();
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hullId: IMPORTED_RIFTER.profile.id, name: "Brawler" }));

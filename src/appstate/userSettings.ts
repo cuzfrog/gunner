@@ -119,6 +119,8 @@ export interface UserSettings {
   shipBWeaponKind?: WeaponKind;
   shipAMissileAmmo?: TypeId;
   shipBMissileAmmo?: TypeId;
+  shipADroneTypeId?: TypeId;
+  shipBDroneTypeId?: TypeId;
   simSpeed: number;
   language: Language;
 }

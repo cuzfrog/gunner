@@ -15,6 +15,7 @@ import { parseEft, type BankKind, type EftDocument, type EftLine, type QuantityI
 import type { ItemNameCatalog, ItemNameResolver } from "../gamedata/itemNames";
 import type { ModuleSlotCatalog } from "../gamedata/moduleSlots";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedLauncher } from "./chargeCatalog";
+import type { ImportedDrone } from "./droneCatalog";
 import type { GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
 import type { MissileSkillModel } from "./missileStats";
@@ -58,6 +59,7 @@ export interface ImportedFitting {
   readonly turret?: ImportedTurret;
   readonly turrets?: readonly ImportedTurret[];
   readonly launcher?: ImportedLauncher;
+  readonly drones: readonly ImportedDrone[];
   readonly cargoCharges: readonly CargoCharge[];
   readonly ewar: EwarLoadout;
   readonly boosts: BoostLoadout;
@@ -170,6 +172,7 @@ export class FittingImportImpl implements FittingImport {
     const turrets = this.calculator.resolveTurrets(fittingState, conditions);
     const turret = turrets.length > 0 ? turrets[0] : undefined;
     const launcher = this.calculator.resolveLauncher(fittingState, conditions);
+    const drones = this.calculator.resolveDrones(fittingState, conditions);
     const cargoCharges = this.calculator.resolveCargoCharges(fittingState);
     const ewar = this.calculator.resolveEwar(fittingState);
     const boosts = this.calculator.resolveBoosts(fittingState);
@@ -184,6 +187,7 @@ export class FittingImportImpl implements FittingImport {
       turret,
       turrets: turrets.length > 0 ? turrets : undefined,
       launcher,
+      drones,
       cargoCharges,
       ewar,
       boosts,

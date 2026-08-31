@@ -7,6 +7,7 @@ import InputWithUnit from "../form/InputWithUnit.astro";
 import PanelHeading from "./PanelHeading.astro";
 import TurretPanel from "./TurretPanel.astro";
 import LauncherPanel from "./LauncherPanel.astro";
+import DronePanel from "./DronePanel.astro";
 import EwarField from "./EwarField.astro";
 import PropulsionGroup from "./PropulsionGroup.astro";
 import SkillsField from "./SkillsField.astro";
@@ -40,6 +41,8 @@ const modeSecond = side === "shipA"
     <TurretPanel idPrefix={idPrefix} side={side} />
 
     <LauncherPanel idPrefix={idPrefix} />
+
+    <DronePanel idPrefix={idPrefix} />
 
     <EwarField idPrefix={idPrefix} />
   </div>

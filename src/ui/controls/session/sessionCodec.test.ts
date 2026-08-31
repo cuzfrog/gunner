@@ -29,6 +29,7 @@ import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
 import type { LauncherController } from "../launcher";
+import type { DroneController } from "../drone";
 import type { WeaponSystemSwitch } from "../sidePanel";
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 
@@ -273,6 +274,25 @@ function mockLauncherControllers(): Record<Side, LauncherController> {
   return { shipA: make(), shipB: make() };
 }
 
+function mockDroneControllers(): Record<Side, DroneController> {
+  const make = (): DroneController => ({
+    side: "shipA",
+    popup: mockPopup(),
+    drone: vi.fn(() => undefined),
+    currentDroneSpec: vi.fn(() => undefined),
+    applyImported: vi.fn(),
+    restore: vi.fn(),
+    setHullProfile: vi.fn(),
+    clear: vi.fn(),
+    capture: vi.fn(() => ({ droneTypeId: undefined })),
+    isPopupOpen: vi.fn(() => false),
+    openPopup: vi.fn(),
+    closePopup: vi.fn(),
+    render: vi.fn(),
+  });
+  return { shipA: make(), shipB: make() };
+}
+
 function mockWeaponSystemSwitches(): Record<Side, WeaponSystemSwitch> {
   const make = (): WeaponSystemSwitch => ({
     side: "shipA",
@@ -292,6 +312,7 @@ function buildCodec(options: {
   turretControllers?: Record<Side, FakeTurretController>;
   turretOverridesBySide?: Record<Side, TurretOverrides>;
   launcherControllers?: Record<Side, LauncherController>;
+  droneControllers?: Record<Side, DroneController>;
   weaponSystemSwitches?: Record<Side, WeaponSystemSwitch>;
   preferences?: Partial<PreferencesController>;
   profileController?: Partial<ProfileController>;
@@ -351,6 +372,7 @@ function buildCodec(options: {
     turretControllers,
     turretOverridesBySide,
     launcherControllers,
+    droneControllers: options.droneControllers ?? mockDroneControllers(),
     weaponSystemSwitches,
     preferences,
     profileController,
@@ -365,7 +387,7 @@ function buildCodec(options: {
     fittingImport,
     parser,
   });
-  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, fittingImport, parser };
+  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, fittingImport, parser };
 }
 
 function makeProfile(): ProfileSettings {
@@ -561,8 +583,8 @@ describe("SessionCodec", () => {
     expect(launcherControllers.shipB.restore).toHaveBeenCalledWith(settings.shipBFitting, { skillLevel: 5, overloaded: true }, undefined);
     expect(weaponSystemSwitches.shipA.setActiveKind).toHaveBeenCalledWith("missile");
     expect(weaponSystemSwitches.shipB.setActiveKind).toHaveBeenCalledWith("turret");
-    expect(weaponSystemSwitches.shipA.autoToggle).toHaveBeenCalledWith(false, false);
-    expect(weaponSystemSwitches.shipB.autoToggle).toHaveBeenCalledWith(false, false);
+    expect(weaponSystemSwitches.shipA.autoToggle).toHaveBeenCalledWith(false, false, false);
+    expect(weaponSystemSwitches.shipB.autoToggle).toHaveBeenCalledWith(false, false, false);
   });
 
   test("restore defaults absent weapon kind to turret", () => {

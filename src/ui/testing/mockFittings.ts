@@ -1,4 +1,4 @@
-import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, FittingState, ImportedFitting, ImportedLauncher, ImportedTurret, LauncherClass, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, DroneCatalog, FittingImport, GunFamily, GunFamilies, FittingState, ImportedFitting, ImportedLauncher, ImportedTurret, LauncherClass, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
 import { EMPTY_DAMAGE_BREAKDOWN } from "../../fitting";
 import type { FittingDb, LauncherStats, TurretStats } from "../../gamedata/fittingDb";
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
@@ -167,6 +167,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   fittingState: RIFTER_FITTING_STATE,
   propulsion: undefined,
   turret: TURRET,
+  drones: [],
   cargoCharges: [],
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },

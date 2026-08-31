@@ -263,6 +263,21 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   launcherFlightTime: { tag: "SPAN" as const, baseId: "launcher-flight-time", defaultValue: undefined },
   launcherFlightRange: { tag: "SPAN" as const, baseId: "launcher-flight-range", defaultValue: undefined },
   launcherDamageReductionFactor: { tag: "SPAN" as const, baseId: "launcher-damage-reduction-factor", defaultValue: undefined },
+  dronePanel: { tag: "DIV" as const, baseId: "drone-panel", defaultValue: undefined },
+  droneTrigger: { tag: "BUTTON" as const, baseId: "drone-trigger", defaultValue: undefined },
+  droneSummary: { tag: "SPAN" as const, baseId: "drone-summary", defaultValue: undefined },
+  droneSummaryIcon: { tag: "IMG" as const, baseId: "drone-summary-icon", defaultValue: undefined },
+  dronePopup: { tag: "DIV" as const, baseId: "drone-popup", defaultValue: undefined },
+  droneList: { tag: "UL" as const, baseId: "drone-list", defaultValue: undefined },
+  droneField: { tag: "DIV" as const, baseId: "drone-field", defaultValue: undefined },
+  droneTracking: { tag: "SPAN" as const, baseId: "drone-tracking", defaultValue: undefined },
+  droneOptimal: { tag: "SPAN" as const, baseId: "drone-optimal", defaultValue: undefined },
+  droneFalloff: { tag: "SPAN" as const, baseId: "drone-falloff", defaultValue: undefined },
+  droneDamage: { tag: "SPAN" as const, baseId: "drone-damage", defaultValue: undefined },
+  droneCycleTime: { tag: "SPAN" as const, baseId: "drone-cycle-time", defaultValue: undefined },
+  droneOrbitSpeed: { tag: "SPAN" as const, baseId: "drone-orbit-speed", defaultValue: undefined },
+  droneMaxVelocity: { tag: "SPAN" as const, baseId: "drone-max-velocity", defaultValue: undefined },
+  droneCount: { tag: "SPAN" as const, baseId: "drone-count", defaultValue: undefined },
 } as const satisfies { readonly [K: string]: CombatantElementDefinition };
 
 export type GlobalElementDefinitionMap = typeof GLOBAL_ELEMENT_DEFINITIONS;

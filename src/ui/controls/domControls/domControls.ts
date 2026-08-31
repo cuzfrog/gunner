@@ -17,6 +17,7 @@ import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
 import type { Side } from "../side";
 import type { TurretController } from "../turret";
 import type { LauncherController } from "../launcher";
+import type { DroneController } from "../drone";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
@@ -49,6 +50,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   shipBSide: SidePanel;
   turretControllers: Record<Side, TurretController>;
   launcherControllers: Record<Side, LauncherController>;
+  droneControllers: Record<Side, DroneController>;
   weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   importController: ImportController;
   ewarController: EwarController;
@@ -77,6 +79,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly shipBSide: SidePanel;
   private readonly turretControllers: Record<Side, TurretController>;
   private readonly launcherControllers: Record<Side, LauncherController>;
+  private readonly droneControllers: Record<Side, DroneController>;
   private readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   private readonly importController: ImportController;
   private readonly ewarController: EwarController;
@@ -109,6 +112,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.shipBSide = all.shipBSide;
     this.turretControllers = all.turretControllers;
     this.launcherControllers = all.launcherControllers;
+    this.droneControllers = all.droneControllers;
     this.weaponSystemSwitches = all.weaponSystemSwitches;
     this.importController = all.importController;
     this.ewarController = all.ewarController;
@@ -216,6 +220,11 @@ export class DomControls implements Controls, DomControlsHost {
 
   getWeapon(side: Side): WeaponSpec | undefined {
     const activeKind = this.weaponSystemSwitches[side].activeKind();
+    if (activeKind === "drone") {
+      const drone = this.droneControllers[side].currentDroneSpec();
+      if (drone) return drone;
+      return this.turretControllers[side].currentTurretSpec();
+    }
     if (activeKind === "missile") {
       const missile = this.launcherControllers[side].currentMissileSpec();
       if (missile) return missile;
@@ -227,6 +236,11 @@ export class DomControls implements Controls, DomControlsHost {
   }
   getWeapons(side: Side): readonly WeaponSpec[] {
     const activeKind = this.weaponSystemSwitches[side].activeKind();
+    if (activeKind === "drone") {
+      const drone = this.droneControllers[side].currentDroneSpec();
+      if (drone) return [drone];
+      return this.turretControllers[side].currentTurretSpecs();
+    }
     if (activeKind === "missile") {
       const missile = this.launcherControllers[side].currentMissileSpec();
       if (missile) return [missile];
@@ -245,7 +259,7 @@ export class DomControls implements Controls, DomControlsHost {
   getZoomFactor(): number { return this.preferencesController.getZoomFactor(); }
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
   getWeaponRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getWeaponRangeVisibility(); }
-  hasWeapon(side: Side): boolean { return this.turretControllers[side].turret() !== undefined || this.launcherControllers[side].launcher() !== undefined; }
+  hasWeapon(side: Side): boolean { return this.turretControllers[side].turret() !== undefined || this.launcherControllers[side].launcher() !== undefined || this.droneControllers[side].drone() !== undefined; }
   update(view: EngagementView, effective: EffectiveReadouts): void {
     this.currentDistanceValue = view.frame.distance;
     this.deps.events.emitDistanceChanged(this.currentDistanceValue);
