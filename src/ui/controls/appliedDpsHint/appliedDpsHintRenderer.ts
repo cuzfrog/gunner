@@ -2,7 +2,6 @@ import type { WeaponKind } from "../../../sim";
 import { html } from "../markup";
 
 export interface AppliedDpsHintRow {
-  readonly name: string;
   readonly weaponKind: WeaponKind;
   readonly nominalDps: number;
   readonly appliedDps: number;
@@ -44,9 +43,9 @@ export class AppliedDpsHintRendererImpl implements AppliedDpsHintRenderer {
 function renderRow(row: AppliedDpsHintRow, t: (key: string) => string): HTMLElement {
   const kindLabel = t(`dpsHint.${row.weaponKind}Dps`);
   return html`<div class="dps-hint-group">
-    <div class="dps-hint-group-name">${row.name}</div>
+    <div class="dps-hint-group-name">${kindLabel}</div>
     <div class="dps-hint-row dps-hint-summary-row">
-      <span class="dps-hint-label">${kindLabel}</span>
+      <span class="dps-hint-label">${t("appliedDpsHint.nominal")}</span>
       <span class="dps-hint-value">${formatWithCommas(row.nominalDps, 1)}</span>
     </div>
     <div class="dps-hint-row dps-hint-summary-row">

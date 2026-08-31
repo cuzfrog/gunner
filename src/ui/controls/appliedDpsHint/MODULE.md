@@ -12,12 +12,13 @@ no-new-exports:
 Hover hint content provider for the applied DPS readout. Implements
 `HintContentProvider` with key `"appliedDps"`. Renders a per-weapon
 applied DPS breakdown from the current `EngagementView.weaponAttacks`:
-weapon name, nominal DPS, applied DPS, and application percentage per
-weapon, plus a combined total row.
+weapon-kind DPS label, nominal DPS, applied DPS, and application
+percentage per weapon, plus a combined total row.
 
 The provider reads the current `EngagementView` from `ViewStore`
 (implemented by `DomControls`) to obtain per-weapon `AttackAssessment`
-data. Weapon names are resolved via `ItemNameCatalog`.
+data. Weapon-kind labels are resolved via i18n keys
+(`dpsHint.turretDps` / `dpsHint.missileDps` / `dpsHint.droneDps`).
 
 Registration must happen after `registerHoverHintModule` and
 `registerDomControlsModule` because the provider depends on the

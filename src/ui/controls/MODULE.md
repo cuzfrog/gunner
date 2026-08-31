@@ -66,6 +66,7 @@ no-new-exports:
   - cradle.ts
   - module.test.ts
   - elementContract.ts
+  - index.ts
   - markup/html.ts
   - markup/html.test.ts
   - markup/index.ts
@@ -98,4 +99,4 @@ Each sub-module owns its DOM element collection through a private `collectXxxEls
 
 `SidePanel.setFittingPopup`, `setFittingPreview`, and `setImporter` remain setter-based because the fitting popup, preview manager, and import controller all depend on the side panels, so passing them through the constructor would create a dependency cycle. `ProfileController.snapshotSource` is supplied through the constructor as a deferred closure over `sessionCodec.capture()`, removing the previous `setSnapshotSource` back-edge. `shipASide` and `shipBSide` are registered independently in the DI cradle and wired side-by-side by `combatantSide.wireCombatantSide`.
 
-Gate relaxed: `controlsContract.ts` was removed from `no-new-exports` to add `DroneReadoutValues` alongside the existing `TurretReadoutValues`/`MissileReadoutValues`/`NoWeaponReadoutValues` union members. The drone readout values carry tracking/optimal/falloff/sigResolution (drones share the turret hit-chance model) without boosted/disrupted variants since drones have no tracking computer or disruptor mechanics. `index.ts` was removed to re-export `ViewStore` — the Applied DPS hint provider needs access to the current `EngagementView` for per-weapon source attribution.
+Gate relaxed: `controlsContract.ts` was removed from `no-new-exports` to add `DroneReadoutValues` alongside the existing `TurretReadoutValues`/`MissileReadoutValues`/`NoWeaponReadoutValues` union members. The drone readout values carry tracking/optimal/falloff/sigResolution (drones share the turret hit-chance model) without boosted/disrupted variants since drones have no tracking computer or disruptor mechanics. `ViewStore` was added to `controlsContract.ts` as a narrow DI interface for the Applied DPS hint provider; it is consumed only within the controls module so no `index.ts` re-export is needed.

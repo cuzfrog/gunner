@@ -1,5 +1,4 @@
-import type { EngagementView, WeaponAttack, WeaponKind } from "../../../sim";
-import type { I18n } from "../../i18n";
+import type { AttackAssessment, EngagementView, WeaponAttack, WeaponKind } from "../../../sim";
 import type { ViewStore } from "../controlsContract";
 import type { HintContentProvider } from "../hoverHint";
 import type { AppliedDpsHintModel, AppliedDpsHintRenderer, AppliedDpsHintRow } from "./appliedDpsHintRenderer";
@@ -7,18 +6,15 @@ import type { AppliedDpsHintModel, AppliedDpsHintRenderer, AppliedDpsHintRow } f
 export type AppliedDpsHintProvider = HintContentProvider;
 
 export interface AppliedDpsHintProviderDeps {
-  readonly i18n: I18n;
   readonly viewStore: ViewStore;
   readonly appliedDpsHintRenderer: AppliedDpsHintRenderer;
 }
 
 export class AppliedDpsHintProviderImpl implements HintContentProvider {
-  private readonly i18n: I18n;
   private readonly viewStore: ViewStore;
   private readonly renderer: AppliedDpsHintRenderer;
 
   constructor(deps: AppliedDpsHintProviderDeps) {
-    this.i18n = deps.i18n;
     this.viewStore = deps.viewStore;
     this.renderer = deps.appliedDpsHintRenderer;
   }
@@ -34,10 +30,15 @@ export class AppliedDpsHintProviderImpl implements HintContentProvider {
   }
 
   private buildModel(side: "shipA" | "shipB", view: EngagementView): AppliedDpsHintModel {
-    const attacks = view.weaponAttacks[side];
+    const weaponAttacks = view.weaponAttacks[side];
     const rows: AppliedDpsHintRow[] = [];
-    for (const attack of attacks) {
-      rows.push(buildRow(attack, this.i18n));
+    if (weaponAttacks.length > 0) {
+      for (const attack of weaponAttacks) {
+        rows.push(buildRow(attack));
+      }
+    } else {
+      const combined = view.attacks[side];
+      if (combined) rows.push(rowFromCombined(combined));
     }
     const totalNominalDps = rows.reduce((sum, row) => sum + row.nominalDps, 0);
     const totalAppliedDps = rows.reduce((sum, row) => sum + row.appliedDps, 0);
@@ -54,9 +55,14 @@ function sideFromAnchor(anchor: HTMLElement): "shipA" | "shipB" | undefined {
   return undefined;
 }
 
-function buildRow(weaponAttack: WeaponAttack, i18n: I18n): AppliedDpsHintRow {
+function buildRow(weaponAttack: WeaponAttack): AppliedDpsHintRow {
   const weaponKind: WeaponKind = weaponAttack.weapon.kind;
-  const name = i18n.t(`dpsHint.${weaponKind}Dps`);
   const damage = weaponAttack.assessment.damage;
-  return { name, weaponKind, nominalDps: damage.nominalDps, appliedDps: damage.appliedDps, application: damage.application };
+  return { weaponKind, nominalDps: damage.nominalDps, appliedDps: damage.appliedDps, application: damage.application };
+}
+
+function rowFromCombined(assessment: AttackAssessment): AppliedDpsHintRow {
+  const weaponKind: WeaponKind = assessment.effectiveWeapon.kind;
+  const damage = assessment.damage;
+  return { weaponKind, nominalDps: damage.nominalDps, appliedDps: damage.appliedDps, application: damage.application };
 }

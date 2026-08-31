@@ -5,8 +5,8 @@ import { AppliedDpsHintRendererImpl } from "./appliedDpsHintRenderer";
 function makeModel(): AppliedDpsHintModel {
   return {
     rows: [
-      { name: "Turret DPS", weaponKind: "turret", nominalDps: 100, appliedDps: 80, application: 0.8 },
-      { name: "Drone DPS", weaponKind: "drone", nominalDps: 50, appliedDps: 40, application: 0.8 },
+      { weaponKind: "turret", nominalDps: 100, appliedDps: 80, application: 0.8 },
+      { weaponKind: "drone", nominalDps: 50, appliedDps: 40, application: 0.8 },
     ],
     totalNominalDps: 150,
     totalAppliedDps: 120,
@@ -61,7 +61,7 @@ describe("AppliedDpsHintRendererImpl", () => {
     expect(children[2].className).toBe("dps-hint-summary");
   });
 
-  test("renders weapon kind DPS label, applied DPS, and application per row", () => {
+  test("renders weapon-kind heading, nominal, applied, and application per row", () => {
     const renderer = new AppliedDpsHintRendererImpl({ t: (key) => key });
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
     renderer.render(makeModel(), container as unknown as HTMLElement);
@@ -69,9 +69,9 @@ describe("AppliedDpsHintRendererImpl", () => {
     const firstGroup = elementChildren(root)[0];
     const groupChildren = elementChildren(firstGroup);
     expect(groupChildren[0].className).toBe("dps-hint-group-name");
-    expect(groupChildren[0].textContent).toBe("Turret DPS");
+    expect(groupChildren[0].textContent).toBe("dpsHint.turretDps");
     const nominalRow = groupChildren[1];
-    expect(elementChildren(nominalRow)[0].textContent).toBe("dpsHint.turretDps");
+    expect(elementChildren(nominalRow)[0].textContent).toBe("appliedDpsHint.nominal");
     expect(elementChildren(nominalRow)[1].textContent).toBe("100.0");
     const appliedRow = groupChildren[2];
     expect(elementChildren(appliedRow)[0].textContent).toBe("appliedDpsHint.applied");
@@ -96,7 +96,7 @@ describe("AppliedDpsHintRendererImpl", () => {
     expect(elementChildren(summaryChildren[2])[1].textContent).toBe("80.0%");
   });
 
-  test("renders empty hint for empty model", () => {
+  test("renders only total summary for empty model", () => {
     const renderer = new AppliedDpsHintRendererImpl({ t: (key) => key });
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
     renderer.render({ rows: [], totalNominalDps: 0, totalAppliedDps: 0, totalApplication: 0 }, container as unknown as HTMLElement);

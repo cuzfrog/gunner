@@ -45,8 +45,8 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
         shipB: shipBWeapons.length === 1 ? { weapon: shipBWeapons[0], opponentSigRadius: input.sigRadii.shipA } : undefined,
       });
       const weaponAttacks: Record<Side, readonly WeaponAttack[]> = {
-        shipA: this.weaponAttacksFrom(attacks.shipA, shipAWeapons[0]),
-        shipB: this.weaponAttacksFrom(attacks.shipB, shipBWeapons[0]),
+        shipA: weaponAttacksFrom(attacks.shipA, shipAWeapons[0]),
+        shipB: weaponAttacksFrom(attacks.shipB, shipBWeapons[0]),
       };
       const effectiveWeapons: Record<Side, WeaponSpec | undefined> = {
         shipA: attacks.shipA?.effectiveWeapon ?? shipAWeapons[0],
@@ -56,8 +56,8 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
     }
     const shipAResult = this.assessSide(frame, "shipA", shipAWeapons, input.sigRadii.shipB);
     const shipBResult = this.assessSide(frame, "shipB", shipBWeapons, input.sigRadii.shipA);
-    const attacks: Record<Side, AttackAssessment | undefined> = { shipA: shipAResult?.combined, shipB: shipBResult?.combined };
-    const weaponAttacks: Record<Side, readonly WeaponAttack[]> = { shipA: shipAResult?.weaponAttacks ?? [], shipB: shipBResult?.weaponAttacks ?? [] };
+    const attacks: Record<Side, AttackAssessment | undefined> = { shipA: shipAResult.combined, shipB: shipBResult.combined };
+    const weaponAttacks: Record<Side, readonly WeaponAttack[]> = { shipA: shipAResult.weaponAttacks, shipB: shipBResult.weaponAttacks };
     const effectiveWeapons: Record<Side, WeaponSpec | undefined> = {
       shipA: attacks.shipA?.effectiveWeapon ?? shipAWeapons[0],
       shipB: attacks.shipB?.effectiveWeapon ?? shipBWeapons[0],
@@ -65,37 +65,36 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
     return { frame, attacks, weaponAttacks, effectiveWeapons };
   }
 
-  private assessSide(frame: EngagementFrame, side: Side, weapons: readonly WeaponSpec[], opponentSigRadius: number): { combined: AttackAssessment | undefined; weaponAttacks: readonly WeaponAttack[] } | undefined {
-    if (weapons.length === 0) return undefined;
+  private assessSide(frame: EngagementFrame, side: Side, weapons: readonly WeaponSpec[], opponentSigRadius: number): { combined: AttackAssessment | undefined; weaponAttacks: readonly WeaponAttack[] } {
     const weaponAttacks: WeaponAttack[] = [];
     for (const weapon of weapons) {
-      const assessment = this.engagementEvaluator.evaluate(frame, this.singleAttack(side, { weapon, opponentSigRadius }))[side];
+      const assessment = this.engagementEvaluator.evaluate(frame, singleAttack(side, { weapon, opponentSigRadius }))[side];
       if (assessment) weaponAttacks.push({ weapon, assessment });
     }
     if (weaponAttacks.length === 0) return { combined: undefined, weaponAttacks: [] };
     if (weaponAttacks.length === 1) return { combined: weaponAttacks[0].assessment, weaponAttacks };
     const primary = weaponAttacks[0].assessment;
-    const totalDamage = weaponAttacks.reduce<DamageAssessment>(this.sumDamage, { nominalDps: 0, appliedDps: 0, application: 0, volley: 0 });
+    const totalDamage = weaponAttacks.reduce<DamageAssessment>(sumDamage, { nominalDps: 0, appliedDps: 0, application: 0, volley: 0 });
     return { combined: { ...primary, damage: totalDamage }, weaponAttacks };
   }
+}
 
-  private weaponAttacksFrom(assessment: AttackAssessment | undefined, weapon: WeaponSpec | undefined): readonly WeaponAttack[] {
-    if (assessment && weapon) return [{ weapon, assessment }];
-    return [];
-  }
+function weaponAttacksFrom(assessment: AttackAssessment | undefined, weapon: WeaponSpec | undefined): readonly WeaponAttack[] {
+  if (assessment && weapon) return [{ weapon, assessment }];
+  return [];
+}
 
-  private singleAttack(side: Side, state: AttackState): { shipA?: AttackState; shipB?: AttackState } {
-    return side === "shipA" ? { shipA: state } : { shipB: state };
-  }
+function singleAttack(side: Side, state: AttackState): { shipA?: AttackState; shipB?: AttackState } {
+  return side === "shipA" ? { shipA: state } : { shipB: state };
+}
 
-  private sumDamage(acc: DamageAssessment, weaponAttack: WeaponAttack): DamageAssessment {
-    const nominalDps = acc.nominalDps + weaponAttack.assessment.damage.nominalDps;
-    const appliedDps = acc.appliedDps + weaponAttack.assessment.damage.appliedDps;
-    return {
-      nominalDps,
-      appliedDps,
-      application: nominalDps > 0 ? appliedDps / nominalDps : 0,
-      volley: acc.volley + weaponAttack.assessment.damage.volley,
-    };
-  }
+function sumDamage(acc: DamageAssessment, weaponAttack: WeaponAttack): DamageAssessment {
+  const nominalDps = acc.nominalDps + weaponAttack.assessment.damage.nominalDps;
+  const appliedDps = acc.appliedDps + weaponAttack.assessment.damage.appliedDps;
+  return {
+    nominalDps,
+    appliedDps,
+    application: nominalDps > 0 ? appliedDps / nominalDps : 0,
+    volley: acc.volley + weaponAttack.assessment.damage.volley,
+  };
 }
