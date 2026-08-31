@@ -23,7 +23,6 @@ export function collectDroneEls(document: Document, side: Side): DroneEls {
     summary: document.getElementById(`${id}-drone-summary`)!,
     summaryIcon: document.getElementById(`${id}-drone-summary-icon`)! as HTMLImageElement,
     popup: document.getElementById(`${id}-drone-popup`)!,
-    list: document.getElementById(`${id}-drone-list`)!,
     field: document.getElementById(`${id}-drone-field`)!,
     tracking: document.getElementById(`${id}-drone-tracking`)!,
     optimal: document.getElementById(`${id}-drone-optimal`)!,
@@ -33,6 +32,17 @@ export function collectDroneEls(document: Document, side: Side): DroneEls {
     orbitSpeed: document.getElementById(`${id}-drone-orbit-speed`)!,
     maxVelocity: document.getElementById(`${id}-drone-max-velocity`)!,
     count: document.getElementById(`${id}-drone-count`)!,
+    loadoutSection: document.getElementById(`${id}-drone-loadout-section`)!,
+    loadoutList: document.getElementById(`${id}-drone-loadout-list`)!,
+    summaryBar: document.getElementById(`${id}-drone-summary-bar`)!,
+    summaryCount: document.getElementById(`${id}-drone-summary-count`)!,
+    summaryBandwidth: document.getElementById(`${id}-drone-summary-bandwidth`)!,
+    summaryBay: document.getElementById(`${id}-drone-summary-bay`)!,
+    catalogSection: document.getElementById(`${id}-drone-catalog-section`)!,
+    catalogLight: document.getElementById(`${id}-drone-catalog-light`)!,
+    catalogMedium: document.getElementById(`${id}-drone-catalog-medium`)!,
+    catalogHeavy: document.getElementById(`${id}-drone-catalog-heavy`)!,
+    catalogSentry: document.getElementById(`${id}-drone-catalog-sentry`)!,
   };
 }
 

@@ -25,7 +25,6 @@ export interface DroneEls {
   readonly summary: HTMLElement;
   readonly summaryIcon: HTMLImageElement;
   readonly popup: HTMLElement;
-  readonly list: HTMLElement;
   readonly field: HTMLElement;
   readonly tracking: HTMLElement;
   readonly optimal: HTMLElement;
@@ -35,6 +34,17 @@ export interface DroneEls {
   readonly orbitSpeed: HTMLElement;
   readonly maxVelocity: HTMLElement;
   readonly count: HTMLElement;
+  readonly loadoutSection: HTMLElement;
+  readonly loadoutList: HTMLElement;
+  readonly summaryBar: HTMLElement;
+  readonly summaryCount: HTMLElement;
+  readonly summaryBandwidth: HTMLElement;
+  readonly summaryBay: HTMLElement;
+  readonly catalogSection: HTMLElement;
+  readonly catalogLight: HTMLElement;
+  readonly catalogMedium: HTMLElement;
+  readonly catalogHeavy: HTMLElement;
+  readonly catalogSentry: HTMLElement;
 }
 
 export interface DroneController {

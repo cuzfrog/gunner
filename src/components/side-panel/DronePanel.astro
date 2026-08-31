@@ -40,7 +40,35 @@ const ROWS = [
       </span>
     </TriggerButton>
     <PopupBox id={`${idPrefix}-drone-popup`} extraClass="drone-popup" position="below" align="both" scroll>
-      <ul class="drone-list" id={`${idPrefix}-drone-list`} role="listbox"></ul>
+      <div class="drone-loadout-section" id={`${idPrefix}-drone-loadout-section`}>
+        <span class="fitting-group-label" data-i18n="drone.activeLoadout">Active loadout</span>
+        <div class="drone-loadout-list" id={`${idPrefix}-drone-loadout-list`}></div>
+        <div class="drone-summary-bar" id={`${idPrefix}-drone-summary-bar`}>
+          <span class="drone-summary-item">
+            <span class="drone-summary-label" data-i18n="drone.count">Drones</span>
+            <span class="drone-summary-value mono" id={`${idPrefix}-drone-summary-count`}>0/0</span>
+          </span>
+          <span class="drone-summary-item">
+            <span class="drone-summary-label" data-i18n="drone.bandwidth">Bandwidth</span>
+            <span class="drone-summary-value mono" id={`${idPrefix}-drone-summary-bandwidth`}>0/0</span>
+          </span>
+          <span class="drone-summary-item">
+            <span class="drone-summary-label" data-i18n="drone.bay">Bay</span>
+            <span class="drone-summary-value mono" id={`${idPrefix}-drone-summary-bay`}>0/0</span>
+          </span>
+        </div>
+      </div>
+      <div class="drone-catalog-section" id={`${idPrefix}-drone-catalog-section`}>
+        <span class="fitting-group-label" data-i18n="drone.addDrone">Add drone</span>
+        <span class="drone-size-class-label" data-i18n="drone.light">Light</span>
+        <ul class="drone-catalog-list" id={`${idPrefix}-drone-catalog-light`} role="listbox"></ul>
+        <span class="drone-size-class-label" data-i18n="drone.medium">Medium</span>
+        <ul class="drone-catalog-list" id={`${idPrefix}-drone-catalog-medium`} role="listbox"></ul>
+        <span class="drone-size-class-label" data-i18n="drone.heavy">Heavy</span>
+        <ul class="drone-catalog-list" id={`${idPrefix}-drone-catalog-heavy`} role="listbox"></ul>
+        <span class="drone-size-class-label" data-i18n="drone.sentry">Sentry</span>
+        <ul class="drone-catalog-list" id={`${idPrefix}-drone-catalog-sentry`} role="listbox"></ul>
+      </div>
     </PopupBox>
   </div>
 </div>

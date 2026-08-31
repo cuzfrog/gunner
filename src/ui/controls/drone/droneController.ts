@@ -1,4 +1,6 @@
 import type { DroneCatalog, DroneGroup, DroneLoadoutContext, DroneLoadoutResolver, DroneLoadoutValidation, DroneLoadoutValidator, FittingImport, ImportedDrone, ImportedFitting } from "../../../fitting";
+import type { DroneSizeClass } from "../../../gamedata/fittingDb";
+import type { TypeId } from "../../../gamedata/ids";
 import type { DroneSpec } from "../../../sim";
 import type { StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
@@ -6,12 +8,15 @@ import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
 import { setText } from "../controlsDom";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
+import { html } from "../markup";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
 import { SelectableListImpl, type SelectableItem, createPopup, SummaryChipImpl } from "../shared";
 import type { DroneController, DroneControllerDeps, DroneEls } from "./droneControllerContract";
 
 export type { DroneController } from "./droneControllerContract";
+
+const SIZE_CLASSES: readonly DroneSizeClass[] = ["light", "medium", "heavy", "sentry"];
 
 export class DroneControllerImpl implements DroneController {
   readonly side: Side;
@@ -25,7 +30,7 @@ export class DroneControllerImpl implements DroneController {
   private readonly events: UiEvents;
   private readonly popupGroup: PopupGroup;
   private readonly popupValue: Popup;
-  private readonly droneList: SelectableListImpl;
+  private readonly catalogLists: Readonly<Record<DroneSizeClass, SelectableListImpl>>;
   private readonly droneChip: SummaryChipImpl;
   private droneGroups: DroneGroup[] = [];
   private resolvedDrones: readonly ImportedDrone[] = [];
@@ -45,13 +50,12 @@ export class DroneControllerImpl implements DroneController {
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.popupGroup = deps.popupGroup;
-    this.droneList = new SelectableListImpl({
-      itemClass: "drone-item selectable-item",
-      nameClass: "drone-item-name",
-      iconClass: "drone-item-icon",
-      role: "option",
-      wrapInListItem: true,
-    });
+    this.catalogLists = {
+      light: new SelectableListImpl({ itemClass: "drone-catalog-item selectable-item", nameClass: "drone-catalog-name", iconClass: "drone-catalog-icon", role: "option", wrapInListItem: true }),
+      medium: new SelectableListImpl({ itemClass: "drone-catalog-item selectable-item", nameClass: "drone-catalog-name", iconClass: "drone-catalog-icon", role: "option", wrapInListItem: true }),
+      heavy: new SelectableListImpl({ itemClass: "drone-catalog-item selectable-item", nameClass: "drone-catalog-name", iconClass: "drone-catalog-icon", role: "option", wrapInListItem: true }),
+      sentry: new SelectableListImpl({ itemClass: "drone-catalog-item selectable-item", nameClass: "drone-catalog-name", iconClass: "drone-catalog-icon", role: "option", wrapInListItem: true }),
+    };
     this.droneChip = new SummaryChipImpl(this.els.summary, this.els.summaryIcon);
     this.popupValue = createPopup({
       popupEl: this.els.popup,
@@ -92,7 +96,7 @@ export class DroneControllerImpl implements DroneController {
   restore(fitting?: string, conditions?: StatConditions, droneGroups?: readonly DroneGroup[]): void {
     if (fitting && conditions) {
       const imported = this.fittingImport.importFitting(fitting, conditions);
-      if (imported && imported.drones.length > 0) {
+      if (imported) {
         this.loadoutContext = loadoutContextFromFitting(imported);
         this.conditions = conditions;
         const known = droneGroups && droneGroups.length > 0 ? filterKnownGroups(droneGroups, this.droneCatalog) : [];
@@ -134,13 +138,18 @@ export class DroneControllerImpl implements DroneController {
   }
 
   render(): void {
+    this.renderTelemetry();
+    this.renderLoadout();
+    this.renderSummary();
+    this.renderCatalog();
+  }
+
+  private renderTelemetry(): void {
     const drone = this.resolvedDrones[0];
-    const hasDrone = drone !== undefined;
     this.els.trigger.disabled = this.droneGroups.length === 0;
-    if (!hasDrone) {
+    if (!drone) {
       this.droneChip.render("-", undefined);
       this.clearStatDisplay();
-      this.renderDroneList();
       return;
     }
     this.droneChip.render(drone.name, this.imageCatalog.itemIconUrl(drone.typeId));
@@ -148,8 +157,7 @@ export class DroneControllerImpl implements DroneController {
     setText(this.els.tracking, formatNumber(drone.tracking, 4));
     setText(this.els.optimal, formatDistance(drone.optimal, t));
     setText(this.els.falloff, formatDistance(drone.falloff, t));
-    const damagePerShot = droneDamagePerShot(drone);
-    setText(this.els.damage, formatWithCommas(damagePerShot, 1));
+    setText(this.els.damage, formatWithCommas(droneDamagePerShot(drone), 1));
     setText(this.els.cycleTime, `${formatNumber(drone.cycleTime, 2)} s`);
     setText(this.els.count, String(this.totalCount()));
     if (drone.sizeClass === "sentry") {
@@ -159,7 +167,109 @@ export class DroneControllerImpl implements DroneController {
       setText(this.els.orbitSpeed, `${formatWithCommas(drone.orbitSpeed, 0)} m/s`);
       setText(this.els.maxVelocity, `${formatWithCommas(drone.maxVelocity, 0)} m/s`);
     }
-    this.renderDroneList();
+  }
+
+  private renderLoadout(): void {
+    this.els.loadoutList.innerHTML = "";
+    for (const group of this.droneGroups) {
+      const row = this.createLoadoutRow(group);
+      this.els.loadoutList.appendChild(row);
+    }
+  }
+
+  private createLoadoutRow(group: DroneGroup): Element {
+    const drone = this.resolvedDrones.find((d) => d.typeId === group.typeId);
+    const name = drone?.name ?? this.fittingImport.itemNameForId(group.typeId, this.i18n.current()) ?? String(group.typeId);
+    const iconUrl = this.imageCatalog.itemIconUrl(group.typeId);
+    const decrementBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-minus" aria-label="Decrease count">-</button>` as HTMLElement;
+    const incrementBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-plus" aria-label="Increase count">+</button>` as HTMLElement;
+    const removeBtn = html`<button type="button" class="btn drone-remove-btn" aria-label="Remove drone">x</button>` as HTMLElement;
+    decrementBtn.addEventListener("click", () => this.decrementCount(group.typeId));
+    incrementBtn.addEventListener("click", () => this.incrementCount(group.typeId));
+    removeBtn.addEventListener("click", () => this.removeDrone(group.typeId));
+    return html`<div class="drone-loadout-row" data-drone-id=${group.typeId}>
+      <img class="drone-loadout-icon" alt="" src=${iconUrl ?? ""} hidden=${iconUrl === undefined ? "" : false}>
+      <span class="drone-loadout-name truncate">${name}</span>
+      <div class="drone-stepper">${decrementBtn}<span class="drone-stepper-count mono">${group.count}</span>${incrementBtn}</div>
+      ${removeBtn}
+    </div>` as Element;
+  }
+
+  private renderSummary(): void {
+    const v = this.validationValue;
+    const profile = this.loadoutContext?.profile;
+    if (!v || !profile) {
+      setText(this.els.summaryCount, "0/0");
+      setText(this.els.summaryBandwidth, "0/0");
+      setText(this.els.summaryBay, "0/0");
+      this.els.summaryBar.classList.remove("drone-summary-bar-invalid");
+      return;
+    }
+    setText(this.els.summaryCount, `${v.totalCount}/${profile.maxActiveDrones}`);
+    setText(this.els.summaryBandwidth, `${v.totalBandwidth}/${profile.droneBandwidth}`);
+    setText(this.els.summaryBay, `${v.totalVolume}/${profile.droneCapacity}`);
+    this.els.summaryBar.classList.toggle("drone-summary-bar-invalid", !v.valid);
+  }
+
+  private renderCatalog(): void {
+    for (const sizeClass of SIZE_CLASSES) {
+      const options = this.droneCatalog.dronesByClass(sizeClass);
+      const items: SelectableItem[] = options.map((opt) => ({
+        value: opt.id,
+        label: opt.name,
+        iconUrl: this.imageCatalog.itemIconUrl(opt.id),
+        selected: false,
+      }));
+      const container = this.catalogContainer(sizeClass);
+      const buttons = this.catalogLists[sizeClass].render(container, items);
+      for (const button of buttons) {
+        const typeId = button.dataset.value as TypeId;
+        button.addEventListener("click", () => this.addDrone(typeId));
+      }
+    }
+  }
+
+  private addDrone(typeId: TypeId): void {
+    const existing = this.droneGroups.find((g) => g.typeId === typeId);
+    if (existing) {
+      this.droneGroups = this.droneGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count + 1 } : g);
+    } else {
+      this.droneGroups = [...this.droneGroups, { typeId, count: 1 }];
+    }
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private incrementCount(typeId: TypeId): void {
+    this.droneGroups = this.droneGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count + 1 } : g);
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private decrementCount(typeId: TypeId): void {
+    const existing = this.droneGroups.find((g) => g.typeId === typeId);
+    if (!existing) return;
+    if (existing.count <= 1) {
+      this.removeDrone(typeId);
+      return;
+    }
+    this.droneGroups = this.droneGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count - 1 } : g);
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private removeDrone(typeId: TypeId): void {
+    this.droneGroups = this.droneGroups.filter((g) => g.typeId !== typeId);
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private catalogContainer(sizeClass: DroneSizeClass): HTMLElement {
+    return this.els[`catalog${capitalize(sizeClass)}` as keyof DroneEls] as HTMLElement;
   }
 
   private totalCount(): number {
@@ -174,20 +284,6 @@ export class DroneControllerImpl implements DroneController {
     }
     this.validationValue = this.validator.validate(this.droneGroups, this.loadoutContext.profile);
     this.resolvedDrones = this.resolver.resolve(this.droneGroups, this.loadoutContext, this.conditions);
-  }
-
-  private renderDroneList(): void {
-    const items: SelectableItem[] = this.resolvedDrones.map((drone) => ({
-      value: drone.typeId,
-      label: drone.name,
-      iconUrl: this.imageCatalog.itemIconUrl(drone.typeId),
-      selected: false,
-      quantity: String(drone.count),
-    }));
-    const buttons = this.droneList.render(this.els.list, items);
-    for (const button of buttons) {
-      button.addEventListener("click", () => this.popupGroup.close(this.popupValue));
-    }
   }
 
   private clearStatDisplay(): void {
@@ -237,4 +333,8 @@ function importedDroneToDroneSpec(drone: ImportedDrone): DroneSpec {
 
 function droneDamagePerShot(drone: ImportedDrone): number {
   return (drone.emDamage + drone.thermalDamage + drone.kineticDamage + drone.explosiveDamage) * drone.damageMultiplier;
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }

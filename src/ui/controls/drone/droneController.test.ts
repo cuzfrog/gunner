@@ -163,19 +163,25 @@ describe("DroneController", () => {
     expect(controller.capture().droneGroups).toEqual([]);
   });
 
-  test("clicking a drone item closes the popup without emitting configInvalidated", () => {
+  test("clicking a catalog drone adds it to the loadout and emits configInvalidated", () => {
     const hobgoblin = importedDroneFixture();
     const warrior = importedDroneFixture({ typeId: WARRIOR_ID, name: "Warrior I" });
-    const { document, controller, events, popupGroup } = buildDrone({
+    const { document, controller, events } = buildDrone({
       droneLoadoutResolver: resolverReturningDrones([hobgoblin, warrior]),
+      droneCatalog: {
+        has: vi.fn(() => true),
+        dronesByClass: vi.fn((sizeClass: string) => sizeClass === "light" ? [{ id: WARRIOR_ID, name: "Warrior I", sizeClass: "light", damage: 10, damageByType: {}, bandwidth: 5, volume: 5 }] : []),
+        usualForClass: vi.fn(() => undefined),
+        idForName: vi.fn(() => undefined),
+      },
     });
-    controller.applyImported(importedWithDrones([hobgoblin, warrior]), NEUTRAL_CONDITIONS);
+    controller.applyImported(importedWithDrones([hobgoblin]), NEUTRAL_CONDITIONS);
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
-    const items = getFake(document, "ship-a-drone-list").children;
-    const warriorButton = items[1].firstElementChild as unknown as FakeElement;
-    warriorButton.trigger("click");
-    expect(popupGroup.close).toHaveBeenCalled();
-    expect(emitConfigInvalidated).not.toHaveBeenCalled();
+    const catalogList = getFake(document, "ship-a-drone-catalog-light");
+    const catalogButton = catalogList.children[0]?.firstElementChild as unknown as FakeElement;
+    catalogButton.trigger("click");
+    expect(controller.capture().droneGroups).toHaveLength(2);
+    expect(emitConfigInvalidated).toHaveBeenCalled();
   });
 
   test("validation returns the validator result after applyImported", () => {
@@ -232,7 +238,7 @@ describe("DroneController", () => {
     expect(controller.validation()).toBeUndefined();
   });
 
-  test("restore does not call resolve when import has no drones", () => {
+  test("restore with empty imported drones sets context and resolves empty groups", () => {
     const { controller, droneLoadoutResolver } = buildDrone({
       fittingImport: {
         importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, drones: [] })),
@@ -240,6 +246,6 @@ describe("DroneController", () => {
     });
     controller.restore("[Rifter, Test]", NEUTRAL_CONDITIONS);
     expect(controller.drone()).toBeUndefined();
-    expect(droneLoadoutResolver.resolve).not.toHaveBeenCalled();
+    expect(droneLoadoutResolver.resolve).toHaveBeenCalledWith([], expect.any(Object), NEUTRAL_CONDITIONS);
   });
 });

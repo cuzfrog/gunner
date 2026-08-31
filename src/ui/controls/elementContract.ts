@@ -268,7 +268,6 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   droneSummary: { tag: "SPAN" as const, baseId: "drone-summary", defaultValue: undefined },
   droneSummaryIcon: { tag: "IMG" as const, baseId: "drone-summary-icon", defaultValue: undefined },
   dronePopup: { tag: "DIV" as const, baseId: "drone-popup", defaultValue: undefined },
-  droneList: { tag: "UL" as const, baseId: "drone-list", defaultValue: undefined },
   droneField: { tag: "DIV" as const, baseId: "drone-field", defaultValue: undefined },
   droneTracking: { tag: "SPAN" as const, baseId: "drone-tracking", defaultValue: undefined },
   droneOptimal: { tag: "SPAN" as const, baseId: "drone-optimal", defaultValue: undefined },
@@ -278,6 +277,17 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   droneOrbitSpeed: { tag: "SPAN" as const, baseId: "drone-orbit-speed", defaultValue: undefined },
   droneMaxVelocity: { tag: "SPAN" as const, baseId: "drone-max-velocity", defaultValue: undefined },
   droneCount: { tag: "SPAN" as const, baseId: "drone-count", defaultValue: undefined },
+  droneLoadoutSection: { tag: "DIV" as const, baseId: "drone-loadout-section", defaultValue: undefined },
+  droneLoadoutList: { tag: "DIV" as const, baseId: "drone-loadout-list", defaultValue: undefined },
+  droneSummaryBar: { tag: "DIV" as const, baseId: "drone-summary-bar", defaultValue: undefined },
+  droneSummaryCount: { tag: "SPAN" as const, baseId: "drone-summary-count", defaultValue: undefined },
+  droneSummaryBandwidth: { tag: "SPAN" as const, baseId: "drone-summary-bandwidth", defaultValue: undefined },
+  droneSummaryBay: { tag: "SPAN" as const, baseId: "drone-summary-bay", defaultValue: undefined },
+  droneCatalogSection: { tag: "DIV" as const, baseId: "drone-catalog-section", defaultValue: undefined },
+  droneCatalogLight: { tag: "UL" as const, baseId: "drone-catalog-light", defaultValue: undefined },
+  droneCatalogMedium: { tag: "UL" as const, baseId: "drone-catalog-medium", defaultValue: undefined },
+  droneCatalogHeavy: { tag: "UL" as const, baseId: "drone-catalog-heavy", defaultValue: undefined },
+  droneCatalogSentry: { tag: "UL" as const, baseId: "drone-catalog-sentry", defaultValue: undefined },
 } as const satisfies { readonly [K: string]: CombatantElementDefinition };
 
 export type GlobalElementDefinitionMap = typeof GLOBAL_ELEMENT_DEFINITIONS;
