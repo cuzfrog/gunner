@@ -538,6 +538,10 @@ const DAMAGE_MODULE_EFFECTS: Readonly<Record<number, TurretWeaponGroup>> = {
 // on the skill item is a percentage per level; it is applied as an unpenalized boost.
 // WARHEAD_UPGRADES_SKILL_ID is the missile damage skill, not in SKILL_BONUS_RULES (turret-only).
 const WARHEAD_UPGRADES_SKILL_ID = "20315";
+// Drone skill typeIDs referenced by DroneSkillModelImpl (src/fitting/droneStats.ts).
+// These must stay in sync with the runtime constants so that addSkillNames includes them
+// in the item name packs for display-time resolution via ItemNameCatalog.
+const DRONE_SKILL_IDS = ["3442", "24241", "33699", "3441", "23594"];
 interface SkillBonusRule {
   readonly skillId: number;
   readonly bonusType: "turretDamage" | "turretRoF";
@@ -1930,14 +1934,27 @@ function relevantSkillIds(): readonly string[] {
   const ids = new Set<string>();
   for (const rule of SKILL_BONUS_RULES) ids.add(String(rule.skillId));
   ids.add(WARHEAD_UPGRADES_SKILL_ID);
+  for (const id of DRONE_SKILL_IDS) ids.add(id);
   return [...ids];
 }
+
+// Localized names for skill IDs that are not present in the SDE types table.
+// These skills were introduced in expansions after the SDE snapshot used by this script.
+// When the SDE is updated and these IDs appear in types.0.json, this fallback becomes
+// a no-op because addSkillNames checks the SDE first.
+const SKILL_NAME_FALLBACKS: Readonly<Record<string, LocalizedName>> = {
+  "24241": { en: "Light Drone Operation", zh: "轻型无人机操控理论", ja: "ライトドローンオペレーション" },
+  "33699": { en: "Medium Drone Operation", zh: "中型无人机操控理论", ja: "ミディアムドローンオペレーション" },
+  "23594": { en: "Sentry Drone Interfacing", zh: "岗哨无人机操控理论", ja: "セントリードローンインターフェイス" },
+};
 
 function addSkillNames(itemNames: Record<string, LocalizedName>, types: Readonly<Record<string, SdeType>>): void {
   for (const id of relevantSkillIds()) {
     if (id in itemNames) continue;
     const type = types[id];
-    if (type) addItemName(itemNames, id, type);
+    if (type) { addItemName(itemNames, id, type); continue; }
+    const fallback = SKILL_NAME_FALLBACKS[id];
+    if (fallback) itemNames[id] = fallback;
   }
 }
 
