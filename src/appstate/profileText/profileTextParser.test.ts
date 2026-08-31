@@ -57,7 +57,7 @@ describe("profileTextParser", () => {
   });
 
   test("rejects prototype-polluting sigRes values", () => {
-    const text = `# gunner v1\nversion=13\nshipA.tracking=0.32\nshipA.sigRes=toString\nshipA.optimal=5000\nshipA.falloff=5000\nshipA.speed=0\nshipA.mode=keepAtRange\nshipA.range=5000\nshipA.mass=1200000\nshipA.inertia=3\ninitialDistance=5000\nshipB.speed=1000\nshipB.mode=orbit\nshipB.range=5000\nshipB.mass=10000000\nshipB.inertia=0.45\nshipB.sig=40`;
+    const text = `# gunner v1\nversion=14\nshipA.tracking=0.32\nshipA.sigRes=toString\nshipA.optimal=5000\nshipA.falloff=5000\nshipA.speed=0\nshipA.mode=keepAtRange\nshipA.range=5000\nshipA.mass=1200000\nshipA.inertia=3\ninitialDistance=5000\nshipB.speed=1000\nshipB.mode=orbit\nshipB.range=5000\nshipB.mass=10000000\nshipB.inertia=0.45\nshipB.sig=40`;
     expect(parser.parse(text)).toBeUndefined();
   });
 
@@ -75,17 +75,17 @@ describe("profileTextParser", () => {
   });
 
   test("rejects an empty fitting block", () => {
-    const text = `# gunner v1\nversion=13\nshipA.fitting:\n---`;
+    const text = `# gunner v1\nversion=14\nshipA.fitting:\n---`;
     expect(parser.parse(text)).toBeUndefined();
   });
 
   test("reads a shipA ammo line", () => {
-    const text = `# gunner v1\nversion=13\nshipA.ammo=Hail S\nshipA.tracking=0.32\nshipA.sigRes=S\nshipA.optimal=5000\nshipA.falloff=5000\nshipA.speed=0\nshipA.mode=keepAtRange\nshipA.range=5000\nshipA.mass=1200000\nshipA.inertia=3\ninitialDistance=5000\nshipB.speed=1000\nshipB.mode=orbit\nshipB.range=5000\nshipB.mass=10000000\nshipB.inertia=0.45\nshipB.sig=40`;
+    const text = `# gunner v1\nversion=14\nshipA.ammo=Hail S\nshipA.tracking=0.32\nshipA.sigRes=S\nshipA.optimal=5000\nshipA.falloff=5000\nshipA.speed=0\nshipA.mode=keepAtRange\nshipA.range=5000\nshipA.mass=1200000\nshipA.inertia=3\ninitialDistance=5000\nshipB.speed=1000\nshipB.mode=orbit\nshipB.range=5000\nshipB.mass=10000000\nshipB.inertia=0.45\nshipB.sig=40`;
     expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, shipAAmmo: toTypeId("12608") });
   });
 
   test("reads a shipB ammo line", () => {
-    const text = `# gunner v1\nversion=13\nshipB.ammo=Republic Fleet EMP S\nshipA.tracking=0.32\nshipA.sigRes=S\nshipA.optimal=5000\nshipA.falloff=5000\nshipA.speed=0\nshipA.mode=keepAtRange\nshipA.range=5000\nshipA.mass=1200000\nshipA.inertia=3\ninitialDistance=5000\nshipB.speed=1000\nshipB.mode=orbit\nshipB.range=5000\nshipB.mass=10000000\nshipB.inertia=0.45\nshipB.sig=40`;
+    const text = `# gunner v1\nversion=14\nshipB.ammo=Republic Fleet EMP S\nshipA.tracking=0.32\nshipA.sigRes=S\nshipA.optimal=5000\nshipA.falloff=5000\nshipA.speed=0\nshipA.mode=keepAtRange\nshipA.range=5000\nshipA.mass=1200000\nshipA.inertia=3\ninitialDistance=5000\nshipB.speed=1000\nshipB.mode=orbit\nshipB.range=5000\nshipB.mass=10000000\nshipB.inertia=0.45\nshipB.sig=40`;
     expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, shipBAmmo: toTypeId("21898") });
   });
 
@@ -101,7 +101,7 @@ describe("profileTextParser", () => {
 
   test("resolves a legacy-wraith hull id in profile text", () => {
     const text = `# gunner v1
-version=13
+version=14
 shipA.tracking=0.32
 shipA.sigRes=S
 shipA.optimal=5000
@@ -127,7 +127,7 @@ shipB.sig=40`;
 
   test("degrades a garbage shipA hull id while keeping the rest of the profile", () => {
     const text = `# gunner v1
-version=13
+version=14
 shipA.tracking=0.32
 shipA.sigRes=S
 shipA.optimal=5000
@@ -150,7 +150,7 @@ shipB.sig=40`;
 
   test("degrades a garbage shipA hull id while keeping shipB hull", () => {
     const text = `# gunner v1
-version=13
+version=14
 shipA.tracking=0.32
 shipA.sigRes=S
 shipA.optimal=5000
@@ -183,7 +183,7 @@ shipA.propulsion=ab-5mn`;
 
   test("rejects a structurally invalid numeric field even when a hull is resolvable", () => {
     const text = `# gunner v1
-version=13
+version=14
 shipA.tracking=0.32
 shipA.sigRes=S
 shipA.optimal=5000
@@ -206,7 +206,7 @@ shipB.sig=40`;
 
   test("resolves legacy hull and ammo names to stable IDs", () => {
     const text = `# gunner v1
-version=13
+version=14
 shipA.tracking=0.32
 shipA.sigRes=S
 shipA.optimal=5000
@@ -234,7 +234,7 @@ shipB.sig=40`;
 
   test("ewar activation can appear before the side overload field", () => {
     const base = `# gunner v1
-version=13
+version=14
 shipA.tracking=0.32
 shipA.sigRes=S
 shipA.optimal=5000

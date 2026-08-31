@@ -1,6 +1,7 @@
 import type { AutopilotMode, SigResolutionClass, WeaponKind } from "../sim";
 import type { SkillLevel } from "../ships";
 import type { ShipId, TypeId } from "../gamedata/ids";
+import type { DroneGroup } from "../fitting";
 import {
   USER_SETTINGS_VERSION,
   type DisplayPreferences,
@@ -38,7 +39,7 @@ export interface CombatantSettings {
   readonly ammo: TypeId;
   readonly weaponKind?: WeaponKind;
   readonly missileAmmo?: TypeId;
-  readonly droneTypeId?: TypeId;
+  readonly droneGroups?: readonly DroneGroup[];
 }
 
 export interface SessionSettings {

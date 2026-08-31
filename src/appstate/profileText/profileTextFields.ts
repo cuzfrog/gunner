@@ -1,8 +1,9 @@
+import type { DroneGroup } from "../../fitting";
 import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation } from "../userSettings";
 
 export type Side = "shipA" | "shipB";
 export type ScalarField = keyof Omit<ProfileSettings, "shipAFitting" | "shipBFitting" | "shipAOverrides" | "shipBOverrides">;
-export type ScalarValue = string | number | boolean | FittedHullSummary | StoredEwarActivation | readonly StoredBoosterActivation[] | readonly StoredMissileBoosterActivation[];
+export type ScalarValue = string | number | boolean | FittedHullSummary | StoredEwarActivation | readonly StoredBoosterActivation[] | readonly StoredMissileBoosterActivation[] | readonly DroneGroup[];
 
 export const GLOBAL_FIELDS: readonly ScalarField[] = [
   "version",
@@ -32,7 +33,7 @@ export const SHIP_A_FIELDS: readonly ScalarField[] = [
   "shipAAmmo",
   "shipAWeaponKind",
   "shipAMissileAmmo",
-  "shipADroneTypeId",
+  "shipADroneGroups",
 ] as const;
 
 export const SHIP_B_FIELDS: readonly ScalarField[] = [
@@ -58,7 +59,7 @@ export const SHIP_B_FIELDS: readonly ScalarField[] = [
   "shipBAmmo",
   "shipBWeaponKind",
   "shipBMissileAmmo",
-  "shipBDroneTypeId",
+  "shipBDroneGroups",
 ] as const;
 
 export const ALL_FIELDS: readonly ScalarField[] = [...GLOBAL_FIELDS, ...SHIP_A_FIELDS, ...SHIP_B_FIELDS] as const;

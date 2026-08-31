@@ -58,8 +58,13 @@ describe("profileTextCodec", () => {
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });
 
-  test("round-trips a profile with droneTypeId", () => {
-    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAWeaponKind: "drone", shipADroneTypeId: toTypeId("24545") };
+  test("round-trips a profile with droneGroups", () => {
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAWeaponKind: "drone", shipADroneGroups: [{ typeId: toTypeId("24545"), count: 5 }] };
+    expect(codec.parse(codec.serialize(profile))).toEqual(profile);
+  });
+
+  test("round-trips a profile with multiple drone groups", () => {
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAWeaponKind: "drone", shipADroneGroups: [{ typeId: toTypeId("24545"), count: 3 }, { typeId: toTypeId("80001"), count: 2 }] };
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });
 
@@ -130,7 +135,7 @@ describe("profileTextCodec", () => {
 
   test("a profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
-version=13
+version=14
 shipA.tracking=0.32
 shipA.sigRes=S
 shipA.optimal=5000

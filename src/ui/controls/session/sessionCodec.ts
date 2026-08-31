@@ -176,8 +176,8 @@ export class SessionCodecImpl implements SessionCodec {
       shipBWeaponKind,
       shipAMissileAmmo: shipALauncher.ammo,
       shipBMissileAmmo: shipBLauncher.ammo,
-      shipADroneTypeId: typeIdFromDroneGroups(shipADrone.droneGroups),
-      shipBDroneTypeId: typeIdFromDroneGroups(shipBDrone.droneGroups),
+      shipADroneGroups: shipADrone.droneGroups,
+      shipBDroneGroups: shipBDrone.droneGroups,
       shipAEwarActivation: this.ewarController.capture("shipA"),
       shipBEwarActivation: this.ewarController.capture("shipB"),
       shipABoosterActivation: this.boosterController.capture("shipA"),
@@ -277,8 +277,8 @@ export class SessionCodecImpl implements SessionCodec {
     });
     this.restoreLauncher("shipA", settings.shipA.fitting, settings.shipA.missileAmmo);
     this.restoreLauncher("shipB", settings.shipB.fitting, settings.shipB.missileAmmo);
-    this.restoreDrone("shipA", settings.shipA.fitting, droneGroupsFromTypeId(settings.shipA.droneTypeId));
-    this.restoreDrone("shipB", settings.shipB.fitting, droneGroupsFromTypeId(settings.shipB.droneTypeId));
+    this.restoreDrone("shipA", settings.shipA.fitting, settings.shipA.droneGroups);
+    this.restoreDrone("shipB", settings.shipB.fitting, settings.shipB.droneGroups);
     this.weaponSystemSwitches.shipA.setActiveKind(settings.shipA.weaponKind ?? "turret");
     this.weaponSystemSwitches.shipB.setActiveKind(settings.shipB.weaponKind ?? "turret");
     this.weaponSystemSwitches.shipA.autoToggle(this.turretControllers.shipA.turret() !== undefined, this.launcherControllers.shipA.launcher() !== undefined, this.droneControllers.shipA.drone() !== undefined);
@@ -353,14 +353,4 @@ function sidePanelStateOf(combatant: CombatantSettings): SidePanelState {
     fittedHull: combatant.fittedHull,
     sig: combatant.sig,
   };
-}
-
-function droneGroupsFromTypeId(typeId: TypeId | undefined): readonly DroneGroup[] | undefined {
-  if (typeId === undefined) return undefined;
-  return [{ typeId, count: 1 }];
-}
-
-function typeIdFromDroneGroups(groups: readonly DroneGroup[]): TypeId | undefined {
-  // Phase 6 will replace scalar droneTypeId with grouped drone state in persistence.
-  return groups.length > 0 ? groups[0].typeId : undefined;
 }
