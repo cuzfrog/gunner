@@ -21,11 +21,12 @@ no-new-exports:
   - settingsParser.ts
   - settingsStore.ts
   - combatantSettings.ts
-  # userSettings.ts, validators.ts and index.ts relaxed: missile booster
-  # activation DTOs and validators are cross-boundary wire-format types
-  # consumed by ui and appstate parsers.
+  - index.ts
   - settingsCompat.ts
+  - userSettings.ts
+  - validators.ts
 ---
+
 
 
 

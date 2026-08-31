@@ -5,7 +5,9 @@ no-new-exports:
   - module.ts
   - appliedDpsHintProvider.test.ts
   - appliedDpsHintRenderer.test.ts
+  - index.ts
 ---
+
 
 # appliedDpsHint
 

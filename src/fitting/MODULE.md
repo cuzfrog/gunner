@@ -21,6 +21,10 @@ no-new-exports:
   - missileStats.ts
   - droneCatalog.ts
   - droneCatalog.test.ts
+  - droneLoadoutResolver.ts
+  - droneLoadoutResolver.test.ts
+  - droneLoadoutValidator.ts
+  - droneLoadoutValidator.test.ts
   - droneStats.ts
   - droneStats.test.ts
   - module.ts

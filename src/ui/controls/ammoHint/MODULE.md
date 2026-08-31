@@ -4,7 +4,10 @@ no-new-exports:
   - module.ts
   - ammoHintProvider.test.ts
   - ammoHintRenderer.test.ts
+  - ammoHintRenderer.ts
+  - index.ts
 ---
+
 
 # ammoHint
 

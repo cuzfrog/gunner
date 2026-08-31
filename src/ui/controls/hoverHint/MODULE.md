@@ -5,7 +5,9 @@ no-new-exports:
   - hintContentProvider.ts
   - module.ts
   - hoverHintController.test.ts
+  - index.ts
 ---
+
 
 # hoverHint
 

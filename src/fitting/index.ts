@@ -5,6 +5,8 @@ export { EMPTY_DAMAGE_BREAKDOWN } from "./damageBreakdown";
 export type { MissileCatalog, MissileOption } from "./missileCatalog";
 export type { MissileSkillModel } from "./missileStats";
 export type { DroneCatalog, DroneOption, ImportedDrone } from "./droneCatalog";
+export type { DroneLoadoutContext, DroneLoadoutResolver } from "./droneLoadoutResolver";
+export type { DroneLoadoutValidator, DroneLoadoutValidation, DroneLoadoutViolation } from "./droneLoadoutValidator";
 export type { DroneSkillModel } from "./droneStats";
 export type { PresetFitting, PresetFittings } from "./presetFittings";
 export type { ModuleSlot } from "../gamedata/moduleSlots";

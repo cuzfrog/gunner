@@ -13,7 +13,10 @@ no-new-exports:
   - selectableList.test.ts
   - spriteIcon.test.ts
   - summaryChip.test.ts
+  - index.ts
+  - variantSection.test.ts
 ---
+
 
 
 # shared

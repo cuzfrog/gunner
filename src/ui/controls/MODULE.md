@@ -75,7 +75,11 @@ no-new-exports:
   - shared/selectableList.test.ts
   - shared/MODULE.md
   - choiceGroup.ts
+  - controlsContract.ts
+  - controlsFormat.ts
+  - damageTypeIcons.ts
 ---
+
 
 
 

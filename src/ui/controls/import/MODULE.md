@@ -11,7 +11,9 @@ no-new-exports:
   - importController.test.ts
   - index.ts
   - module.test.ts
+  - shipADrone.ts
 ---
+
 
 
 

@@ -6,7 +6,9 @@ no-new-exports:
   - index.ts
   - testSupport.ts
   - launcherController.test.ts
+  - launcherClassSwitch.test.ts
 ---
+
 
 # launcher
 

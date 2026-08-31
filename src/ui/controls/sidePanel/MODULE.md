@@ -27,7 +27,9 @@ no-new-exports:
   - navSection.ts
   - navSection.test.ts
   - index.ts
+  - droneLink.ts
 ---
+
 
 
 
