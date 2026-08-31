@@ -12,6 +12,9 @@ const frigate: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 400,
   sigRadius: 35,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const battleship: ShipProfile = {
@@ -23,6 +26,9 @@ const battleship: ShipProfile = {
   inertiaModifier: 0.14,
   baseSpeed: 100,
   sigRadius: 470,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const mwd5 = fittingOptions("small").find((m) => m.id === "mwd-5mn")!;
@@ -86,6 +92,9 @@ describe("naked hull", () => {
       inertiaModifier: 2.8,
       baseSpeed: 270,
       sigRadius: 56,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
     };
     const compactAB10: PropulsionStats = { thrust: 15_000_000, speedBonus: 1.25, massAddition: 5_000_000, sigBloom: 0 };
     const stats = fittedStats(thrasher, undefined, compactAB10, conditions(5));
@@ -123,6 +132,9 @@ describe("naked hull", () => {
       inertiaModifier: 3,
       baseSpeed: 340,
       sigRadius: 35,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
     };
     const stats = fittedStats(profile, undefined, ab1, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(stats.maxSpeed).toBeCloseTo(1258.10, 2);

@@ -18,6 +18,9 @@ const SHIP_A_PROFILE: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 300,
   sigRadius: 36,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 const SHIP_B_PROFILE: ShipProfile = {
   id: "603" as ShipId,
@@ -28,6 +31,9 @@ const SHIP_B_PROFILE: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 300,
   sigRadius: 36,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 function createFakePortraitEls(document: Document): PortraitsEls {

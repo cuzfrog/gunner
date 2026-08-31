@@ -25,6 +25,9 @@ const RIFTER: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 365,
   sigRadius: 36,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const THRASHER: ShipProfile = {
@@ -36,6 +39,9 @@ const THRASHER: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 250,
   sigRadius: 120,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 function fakeStorage(): StorageProvider {

@@ -103,6 +103,7 @@ describe("_parseProfile", () => {
       navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
       structure: { mass: "1,067,000 kg" },
       targeting: { sigRadius: "35 m" },
+      drones: { droneCapacity: "25 m³", droneBandwidth: "25 Mbit/sec" },
     };
     const profile = _parseProfile(raw, 0, shipNameToType);
     expect(String(profile.id)).toBe("587");
@@ -112,6 +113,24 @@ describe("_parseProfile", () => {
     expect(profile.mass).toBe(1_067_000);
     expect(profile.baseSpeed).toBe(365);
     expect(profile.sigRadius).toBe(35);
+    expect(profile.droneBandwidth).toBe(25);
+    expect(profile.droneCapacity).toBe(25);
+    expect(profile.maxActiveDrones).toBe(5);
+  });
+
+  test("defaults drone limits to zero when drones block is absent", () => {
+    const raw = {
+      name: "Rifter",
+      faction: "Minmatar Republic",
+      hullType: "Standard Frigates",
+      navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
+      structure: { mass: "1,067,000 kg" },
+      targeting: { sigRadius: "35 m" },
+    };
+    const profile = _parseProfile(raw, 0, shipNameToType);
+    expect(profile.droneBandwidth).toBe(0);
+    expect(profile.droneCapacity).toBe(0);
+    expect(profile.maxActiveDrones).toBe(5);
   });
 
   test("throws for a non-object entry", () => {

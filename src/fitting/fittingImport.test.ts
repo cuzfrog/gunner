@@ -105,6 +105,9 @@ const profile: ShipProfile = {
   inertiaModifier: 0.45,
   baseSpeed: 165,
   sigRadius: 270,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const frigateProfile: ShipProfile = {
@@ -116,6 +119,9 @@ const frigateProfile: ShipProfile = {
   inertiaModifier: 3.2,
   baseSpeed: 365,
   sigRadius: 35,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const bonusProfile: ShipProfile = {
@@ -127,6 +133,9 @@ const bonusProfile: ShipProfile = {
   inertiaModifier: 0.5,
   baseSpeed: 205,
   sigRadius: 130,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const roleBonusProfile: ShipProfile = {
@@ -138,6 +147,9 @@ const roleBonusProfile: ShipProfile = {
   inertiaModifier: 0.51,
   baseSpeed: 195,
   sigRadius: 135,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const abaddonProfile: ShipProfile = {
@@ -149,6 +161,9 @@ const abaddonProfile: ShipProfile = {
   inertiaModifier: 0.14,
   baseSpeed: 89,
   sigRadius: 470,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const kestrelProfile: ShipProfile = {
@@ -160,6 +175,9 @@ const kestrelProfile: ShipProfile = {
   inertiaModifier: 3.1,
   baseSpeed: 325,
   sigRadius: 38,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const propulsionModules: readonly PropulsionModule[] = [

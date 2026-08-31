@@ -14,6 +14,7 @@ interface RawProfile extends ShipIdentity {
   readonly navigation: Readonly<Record<string, string>>;
   readonly structure: Readonly<Record<string, string>>;
   readonly targeting: Readonly<Record<string, string>>;
+  readonly drones?: Readonly<Record<string, string>>;
 }
 
 export interface SdeType {
@@ -152,6 +153,10 @@ function parseProfile(raw: unknown, index: number, shipNameToType: ReadonlyMap<s
 
   const { id, factionId, hullTypeId } = resolveShipIds({ name, faction, hullType }, shipNameToType);
 
+  const drones = record["drones"] as Record<string, unknown> | undefined;
+  const droneBandwidth = drones && typeof drones === "object" && drones["droneBandwidth"] ? parseNumber(drones["droneBandwidth"] as string) : 0;
+  const droneCapacity = drones && typeof drones === "object" && drones["droneCapacity"] ? parseNumber(drones["droneCapacity"] as string) : 0;
+
   return {
     id,
     name,
@@ -161,6 +166,9 @@ function parseProfile(raw: unknown, index: number, shipNameToType: ReadonlyMap<s
     inertiaModifier: parseNumber(hasString(navigation, "inertiaModifier", name)),
     baseSpeed: parseNumber(hasString(navigation, "maxVelocity", name)),
     sigRadius: parseNumber(hasString(targeting, "sigRadius", name)),
+    droneBandwidth,
+    droneCapacity,
+    maxActiveDrones: 5,
   };
 }
 
@@ -182,6 +190,9 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push(`    inertiaModifier: ${p.inertiaModifier},`);
     lines.push(`    baseSpeed: ${p.baseSpeed},`);
     lines.push(`    sigRadius: ${p.sigRadius},`);
+    lines.push(`    droneBandwidth: ${p.droneBandwidth},`);
+    lines.push(`    droneCapacity: ${p.droneCapacity},`);
+    lines.push(`    maxActiveDrones: ${p.maxActiveDrones},`);
     lines.push("  },");
   }
 

@@ -119,6 +119,9 @@ export const RIFTER_PROFILE: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 300,
   sigRadius: 36,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const THRASHER_PROFILE: ShipProfile = {
@@ -130,6 +133,9 @@ const THRASHER_PROFILE: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 250,
   sigRadius: 120,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const BRUTIX_PROFILE: ShipProfile = {
@@ -141,6 +147,9 @@ const BRUTIX_PROFILE: ShipProfile = {
   inertiaModifier: 0.55,
   baseSpeed: 165,
   sigRadius: 300,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const WRAITH_PROFILE: ShipProfile = {
@@ -152,6 +161,9 @@ const WRAITH_PROFILE: ShipProfile = {
   inertiaModifier: 2,
   baseSpeed: 300,
   sigRadius: 36,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const KNOWN_HULLS: readonly ShipProfile[] = [RIFTER_PROFILE, THRASHER_PROFILE, BRUTIX_PROFILE, WRAITH_PROFILE];
