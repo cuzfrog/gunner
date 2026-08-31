@@ -481,6 +481,7 @@ function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSetti
   if (combatant.missileBoosterActivation !== undefined) wire[`${p}MissileBoosterActivation` as const] = combatant.missileBoosterActivation;
   if (combatant.weaponKind !== undefined) wire[`${p}WeaponKind` as const] = combatant.weaponKind;
   if (combatant.missileAmmo !== undefined) wire[`${p}MissileAmmo` as const] = combatant.missileAmmo;
+  if (combatant.droneTypeId !== undefined) wire[`${p}DroneTypeId` as const] = combatant.droneTypeId;
   if (combatant.sig !== undefined && side === "shipA") wire.shipASig = combatant.sig;
 }
 
@@ -514,6 +515,7 @@ function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"
     ammo: sideValue(side, settings.shipAAmmo, settings.shipBAmmo),
     weaponKind: sideValue(side, settings.shipAWeaponKind, settings.shipBWeaponKind),
     missileAmmo: sideValue(side, settings.shipAMissileAmmo, settings.shipBMissileAmmo),
+    droneTypeId: sideValue(side, settings.shipADroneTypeId, settings.shipBDroneTypeId),
   };
 }
 

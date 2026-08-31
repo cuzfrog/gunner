@@ -23,7 +23,7 @@ export interface DpsHintProviderDeps {
 }
 
 interface DpsHintSource {
-  readonly moduleId: TypeId;
+  readonly typeId: TypeId;
   readonly count: number;
   readonly cycleTime: number;
   readonly damageBreakdown: DamageBreakdown;
@@ -76,19 +76,19 @@ function sideFromAnchor(anchor: HTMLElement): Side | undefined {
 }
 
 function turretHintSource(turret: ImportedTurret): DpsHintSource {
-  return { moduleId: turret.moduleId, count: turret.turretCount, cycleTime: turret.cycleTime, damageBreakdown: turret.damageBreakdown };
+  return { typeId: turret.moduleId, count: turret.turretCount, cycleTime: turret.cycleTime, damageBreakdown: turret.damageBreakdown };
 }
 
 function launcherHintSource(launcher: ImportedLauncher): DpsHintSource {
-  return { moduleId: launcher.moduleId, count: launcher.count, cycleTime: launcher.cycleTime, damageBreakdown: launcher.damageBreakdown };
+  return { typeId: launcher.moduleId, count: launcher.count, cycleTime: launcher.cycleTime, damageBreakdown: launcher.damageBreakdown };
 }
 
 function droneHintSource(drone: ImportedDrone): DpsHintSource {
-  return { moduleId: drone.typeId, count: drone.count, cycleTime: drone.cycleTime, damageBreakdown: drone.damageBreakdown };
+  return { typeId: drone.typeId, count: drone.count, cycleTime: drone.cycleTime, damageBreakdown: drone.damageBreakdown };
 }
 
 function buildWeaponGroup(source: DpsHintSource, itemNameCatalog: ItemNameCatalog, language: Language): DpsHintGroup {
-  const name = `${itemNameCatalog.nameForId(source.moduleId, language)} x${source.count}`;
+  const name = `${itemNameCatalog.nameForId(source.typeId, language)} x${source.count}`;
   const { types, ammo } = buildTypeRows(source.damageBreakdown.damageByType);
   const factors = buildFactorRows(source.damageBreakdown.factors, itemNameCatalog, language);
   const cumulative = factors.length > 0 ? factors[factors.length - 1].cumulative : 1;

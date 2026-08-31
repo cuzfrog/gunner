@@ -53,8 +53,9 @@ export class EngagementReadoutImpl implements EngagementReadout {
 
   private updateSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment | undefined, t: (key: string) => string): void {
     this.clearColorClasses(els);
-    if (attack?.turret || attack?.drone) {
-      this.updateHitChanceSide(els, attack, t);
+    const hitChance = attack?.turret?.hit ?? attack?.drone?.hit;
+    if (hitChance) {
+      this.updateHitChanceSide(els, attack!, hitChance, t);
     } else if (attack?.missile) {
       this.updateMissileSide(els, attack, t);
     } else {
@@ -74,10 +75,9 @@ export class EngagementReadoutImpl implements EngagementReadout {
     els.resTimeToImpact.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
   }
 
-  private updateHitChanceSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment, t: (key: string) => string): void {
+  private updateHitChanceSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment, hit: HitChanceBreakdown, t: (key: string) => string): void {
     els.resTurretCards.hidden = false;
     els.resMissileCards.hidden = true;
-    const hit = hitChanceBreakdown(attack);
     setText(els.resHitLabel, t("result.hitChance"));
     setText(els.resTrackPenLabel, t("result.trackingPenalty"));
     setText(els.resRangePenLabel, t("result.rangePenalty"));
@@ -131,11 +131,6 @@ export class EngagementReadoutImpl implements EngagementReadout {
     els.resVelocityFactor.classList.add("is-dim");
     els.resTimeToImpact.classList.add("is-dim");
   }
-}
-
-function hitChanceBreakdown(attack: AttackAssessment): HitChanceBreakdown {
-  if (attack.turret) return attack.turret.hit;
-  return attack.drone!.hit;
 }
 
 function writeDpsFields(els: SideDpsEls, attack: AttackAssessment, t: (key: string) => string): void {

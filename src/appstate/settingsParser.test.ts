@@ -764,6 +764,20 @@ describe("SettingsParser", () => {
     expect(parser.toWire(session)).toEqual(wire);
   });
 
+  test("fromWire and toWire round-trip preserves droneTypeId", () => {
+    const parser = makeParser();
+    const wire: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      shipAWeaponKind: "drone",
+      shipADroneTypeId: toTypeId("24545"),
+    };
+    const session = parser.fromWire(wire);
+    expect(session.shipA.weaponKind).toBe("drone");
+    expect(session.shipA.droneTypeId).toBe(toTypeId("24545"));
+    expect(session.shipB.droneTypeId).toBeUndefined();
+    expect(parser.toWire(session)).toEqual(wire);
+  });
+
   test("absent weaponKind defaults to undefined in session settings", () => {
     const parser = makeParser();
     const session = parser.fromWire(DEFAULT_SETTINGS);

@@ -363,5 +363,19 @@ describe("CanvasRenderer", () => {
       expect(ctx.arcs.some((a) => Math.abs(a[2] - optimalRadius) < 0.5)).toBe(true);
       expect(ctx.arcs.some((a) => Math.abs(a[2] - falloffRadius) < 0.5)).toBe(true);
     });
+
+    test("draws turret and drone rings through the same optimal/falloff path", () => {
+      const canvas = fakeCanvas();
+      const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
+      const shipARange = { kind: "turret" as const, optimal: 5000, falloff: 3000 };
+      const shipBRange = { kind: "drone" as const, optimal: 4000, falloff: 2000 };
+      renderer.draw(rangeSnapshot, frame, { shipA: shipARange, shipB: shipBRange }, []);
+      const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
+      const scale = scaleOf(renderer);
+      const shipAFalloff = (shipARange.optimal + shipARange.falloff) * scale;
+      const shipBFalloff = (shipBRange.optimal + shipBRange.falloff) * scale;
+      expect(ctx.arcs.some((a) => Math.abs(a[2] - shipAFalloff) < 0.5)).toBe(true);
+      expect(ctx.arcs.some((a) => Math.abs(a[2] - shipBFalloff) < 0.5)).toBe(true);
+    });
   });
 });
