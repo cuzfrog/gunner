@@ -30,6 +30,7 @@ import {
   isNonNegative,
   isOptionalBoosterActivations,
   isOptionalBoolean,
+  isOptionalDroneGroups,
   isOptionalEwarActivation,
   isOptionalFittedHullSummary,
   isFiniteNumber,
@@ -222,6 +223,7 @@ export class SettingsParser {
       isOptionalMissileBoosterActivations(s[`${p}MissileBoosterActivation`]) &&
       isOptionalWeaponKind(s[`${p}WeaponKind`]) &&
       isOptionalNonEmptyString(s[`${p}MissileAmmo`]) &&
+      isOptionalDroneGroups(s[`${p}DroneGroups`]) &&
       (side === "shipA" ? isOptionalPositive(s[`${p}Sig`]) : isPositive(s[`${p}Sig`]))
     );
   }

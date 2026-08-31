@@ -218,7 +218,7 @@ function parseDroneGroups(value: string): readonly DroneGroup[] | undefined {
       if (typeof entry !== "object" || entry === null) return undefined;
       const typeId = entry.typeId;
       const count = entry.count;
-      if (typeof typeId !== "string" || typeof count !== "number" || !Number.isFinite(count) || count <= 0) return undefined;
+      if (typeof typeId !== "string" || typeof count !== "number" || !Number.isInteger(count) || count <= 0) return undefined;
       groups.push({ typeId: toTypeId(typeId), count });
     }
     return groups;

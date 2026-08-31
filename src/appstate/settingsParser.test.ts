@@ -802,6 +802,34 @@ describe("SettingsParser", () => {
     expect(parsed!.shipA.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 1 }]);
   });
 
+  test("legacy shipBDroneTypeId migrates to shipBDroneGroups with count 1", () => {
+    const parser = makeParser();
+    const legacy = JSON.stringify({ ...DEFAULT_SETTINGS, shipBDroneTypeId: "24545" });
+    const parsed = parser.parseUserSettings(legacy);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipB.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 1 }]);
+  });
+
+  test("droneTypeId is ignored when droneGroups is already set", () => {
+    const parser = makeParser();
+    const legacy = JSON.stringify({ ...DEFAULT_SETTINGS, shipADroneTypeId: "99999", shipADroneGroups: [{ typeId: toTypeId("24545"), count: 3 }] });
+    const parsed = parser.parseUserSettings(legacy);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 3 }]);
+  });
+
+  test("invalid droneGroups with non-integer count are rejected", () => {
+    const parser = makeParser();
+    const invalid = JSON.stringify({ ...DEFAULT_SETTINGS, shipADroneGroups: [{ typeId: "24545", count: 3.5 }] });
+    expect(parser.parseUserSettings(invalid)).toBeNull();
+  });
+
+  test("invalid droneGroups with zero count are rejected", () => {
+    const parser = makeParser();
+    const invalid = JSON.stringify({ ...DEFAULT_SETTINGS, shipADroneGroups: [{ typeId: "24545", count: 0 }] });
+    expect(parser.parseUserSettings(invalid)).toBeNull();
+  });
+
   test("fromProfile defaults missing ammo to usualForChargeSize(1)", () => {
     const parser = makeParser();
     const { shipAAmmo: _, shipBAmmo: __, ...profileWithoutAmmo } = DEFAULT_PROFILE;

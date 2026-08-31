@@ -1,5 +1,6 @@
 import type { FittedHull, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
 import { toTypeId } from "../gamedata/ids";
+import type { DroneGroup } from "../fitting";
 import type { Language } from "./language";
 import type { SimValueParser } from "../sim";
 import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
@@ -133,6 +134,17 @@ export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 | 
 
 export function isOptionalNonEmptyString(value: unknown): value is string | undefined {
   return value === undefined || (typeof value === "string" && value.length > 0);
+}
+
+export function isOptionalDroneGroups(value: unknown): value is readonly DroneGroup[] | undefined {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every((entry): entry is DroneGroup => {
+    if (typeof entry !== "object" || entry === null) return false;
+    const typeId = entry.typeId;
+    const count = entry.count;
+    return typeof typeId === "string" && typeof count === "number" && Number.isInteger(count) && count > 0;
+  });
 }
 
 export function isOptionalFittingText(value: unknown): value is string | undefined {
