@@ -10,6 +10,7 @@ export type { EngagementFrameComposer, EngagementInput, EngagementView } from ".
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { MissileApplication } from "./missileApplication";
 export type { TurretDamage } from "./turretDamage";
+export { computeExpectedMultiplier } from "./expectedHitMultiplier";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
   AppliedEwarEffect,
@@ -56,6 +57,7 @@ export type {
   TrackingBoosterSpec,
   TrackingDisruptorSpec,
   TurretBoostProjection,
+  TurretApplicationSpec,
   TurretDamageBreakdown,
   TurretScriptSpec,
   TurretSpec,

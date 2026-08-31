@@ -35,6 +35,8 @@ no-new-exports:
   - turretBoosterResolver.test.ts
   - missileBoosterResolver.ts
   - missileBoosterResolver.test.ts
+  - expectedHitMultiplier.ts
+  - expectedHitMultiplier.test.ts
 ---
 
 
