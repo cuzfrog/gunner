@@ -21,6 +21,7 @@ export interface ImportedDrone {
   readonly cycleTime: number;
   readonly bandwidth: number;
   readonly volume: number;
+  readonly controlRange: number;
   readonly damageBreakdown: DamageBreakdown;
 }
 

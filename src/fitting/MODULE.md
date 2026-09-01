@@ -27,6 +27,7 @@ no-new-exports:
   - droneLoadoutValidator.test.ts
   - droneStats.ts
   - droneStats.test.ts
+  - fittingCalculator.test.ts
   - module.ts
   - presetFittings.test.ts
   - presetFittings.ts

@@ -66,6 +66,7 @@ export function importedDroneFixture(overrides: Partial<ImportedDrone> = {}): Im
     cycleTime: 4,
     bandwidth: 5,
     volume: 5,
+    controlRange: 60000,
     damageBreakdown: { damageByType: { thermal: 20 }, factors: [] },
     ...overrides,
   };

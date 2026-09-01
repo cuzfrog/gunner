@@ -10,7 +10,7 @@ import type { MissileSkillModel } from "./missileStats";
 import type { DroneCatalog, ImportedDrone } from "./droneCatalog";
 import type { DroneSkillModel } from "./droneStats";
 import { TRACKING_SKILL_BONUS, OPTIMAL_SKILL_BONUS, FALLOFF_SKILL_BONUS, STANDARD_SIGNATURE_RESOLUTION, sigResolutionClassFromChargeSize } from "./turretStats";
-import type { FittingState } from "./fittingState";
+import type { FittingState, FittedModule } from "./fittingState";
 import type { ItemNameCatalog } from "../gamedata/itemNames";
 import { type DamageBreakdown, type DamageFactor, chargeDamageByType, droneDamageByType, missileDamageByType } from "./damageBreakdown";
 
@@ -420,6 +420,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
     const trackingBonus = this.stacking.apply([...odtlTrackingPercents, ...oteTrackingPercents].map((p) => 1 + p / 100));
     const optimalBonus = this.stacking.apply([...odtlOptimalPercents, ...oteOptimalPercents].map((p) => 1 + p / 100));
     const falloffBonus = this.stacking.apply([...odtlFalloffPercents, ...oteFalloffPercents].map((p) => 1 + p / 100));
+    const controlRange = computeDroneControlRange(fitting.droneBoosterModules, this.db.modules, conditions.skillLevel);
 
     const result: ImportedDrone[] = [];
     for (const group of fitting.droneGroups) {
@@ -452,6 +453,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
         cycleTime: stats.cycleTime,
         bandwidth: stats.bandwidth,
         volume: stats.volume,
+        controlRange,
         damageBreakdown: { damageByType: droneDamageByType(stats), factors },
       });
     }
@@ -639,3 +641,17 @@ function buildDroneDamageFactors(baseMultiplier: number, moduleDamageBonus: numb
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
   return factors;
 }
+
+const DRONE_CONTROL_RANGE_BASE = 20000;
+const DRONE_CONTROL_RANGE_PER_SKILL_LEVEL = 8000;
+
+function computeDroneControlRange(droneBoosterModules: readonly FittedModule[], modules: Readonly<Record<string, FittingModuleStats>>, skillLevel: SkillLevel): number {
+  let bonus = DRONE_CONTROL_RANGE_BASE + skillLevel * DRONE_CONTROL_RANGE_PER_SKILL_LEVEL;
+  for (const mod of droneBoosterModules) {
+    const stats = modules[mod.moduleId];
+    if (stats?.droneControlRangeBonus) bonus += stats.droneControlRangeBonus;
+  }
+  return bonus;
+}
+
+export { computeDroneControlRange as _computeDroneControlRange };

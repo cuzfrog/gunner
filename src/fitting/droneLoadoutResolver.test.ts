@@ -51,6 +51,7 @@ function makeImportedDrone(typeId: string, count: number): ImportedDrone {
     cycleTime: 4,
     bandwidth: 5,
     volume: 5,
+    controlRange: 60000,
     damageBreakdown: { damageByType: { thermal: 10 }, factors: [] },
   };
 }
