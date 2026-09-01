@@ -11,6 +11,7 @@ export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireC
 export type { MissileApplication } from "./missileApplication";
 export type { DroneApplication } from "./droneApplication";
 export type { DroneSimulator, DroneSimConfig } from "./droneSimulator";
+export type { MissileSimulator } from "./missileSimulator";
 export type { TurretDamage } from "./turretDamage";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {

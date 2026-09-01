@@ -25,6 +25,8 @@ no-new-exports:
   - kinematics.test.ts
   - missileApplication.ts
   - missileApplication.test.ts
+  - missileSimulator.ts
+  - missileSimulator.test.ts
   - turretDamage.ts
   - turretDamage.test.ts
   - turretBoosterResolver.ts
