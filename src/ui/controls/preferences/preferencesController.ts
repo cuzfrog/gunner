@@ -23,6 +23,8 @@ export interface PreferencesEls {
   readonly zoomValue: HTMLElement;
   readonly autoZoomCheckbox: HTMLInputElement;
   readonly weaponRangeButton: HTMLButtonElement;
+  readonly droneRangeButton: HTMLButtonElement;
+  readonly droneControlRangeButton: HTMLButtonElement;
 }
 
 export interface PreferencesController {
@@ -32,6 +34,8 @@ export interface PreferencesController {
   getAutoZoom(): boolean;
   getZoomFactor(): number;
   getWeaponRangeVisibility(): WeaponRangeVisibility;
+  getDroneRangeVisibility(): WeaponRangeVisibility;
+  getDroneControlRangeVisibility(): WeaponRangeVisibility;
   setLanguage(language: Language): void;
   applyPreferences(preferences: DisplayPreferences): void;
   restore(preferences: DisplayPreferences): void;
@@ -39,6 +43,8 @@ export interface PreferencesController {
   capture(): DisplayPreferences;
   setTrackingUnit(side: Side, unit: TrackingUnit): void;
   cycleWeaponRange(): void;
+  cycleDroneRange(): void;
+  cycleDroneControlRange(): void;
   onGridBrightnessChange(): void;
   updateGridBrightnessDisplay(value?: number): void;
   onZoomChange(): void;
@@ -47,6 +53,7 @@ export interface PreferencesController {
 }
 
 const WEAPON_RANGE_CYCLE: readonly WeaponRangeVisibility[] = ["both", "shipA", "shipB", "none"];
+const DRONE_RANGE_CYCLE: readonly WeaponRangeVisibility[] = ["both", "shipA", "shipB", "none"];
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
@@ -64,6 +71,8 @@ export class PreferencesControllerImpl implements PreferencesController {
   private readonly canvasSettingsPopupValue: Popup;
   private canvasSettingsOpen = false;
   private weaponRangeVisibility: WeaponRangeVisibility = "both";
+  private droneRangeVisibility: WeaponRangeVisibility = "none";
+  private droneControlRangeVisibility: WeaponRangeVisibility = "none";
 
   constructor(deps: {
     els: PreferencesEls;
@@ -104,6 +113,8 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els.canvasSettingsTrigger.addEventListener("click", () => this.toggleCanvasSettings());
     this.els.zoomSlider.addEventListener("input", () => this.onZoomChange());
     this.els.weaponRangeButton.addEventListener("click", () => this.cycleWeaponRange());
+    this.els.droneRangeButton.addEventListener("click", () => this.cycleDroneRange());
+    this.els.droneControlRangeButton.addEventListener("click", () => this.cycleDroneControlRange());
     this.els.autoZoomCheckbox.addEventListener("change", () => this.onAutoZoomChange());
   }
 
@@ -143,6 +154,8 @@ export class PreferencesControllerImpl implements PreferencesController {
       shipATrackingUnit: this.shipATurretController.trackingUnit(),
       shipBTrackingUnit: this.shipBTurretController.trackingUnit(),
       weaponRangeVisibility: this.weaponRangeVisibility,
+      droneRangeVisibility: this.droneRangeVisibility,
+      droneControlRangeVisibility: this.droneControlRangeVisibility,
       simSpeed: num(this.els.simSpeed),
       gridBrightness: this.getGridBrightness(),
       rangeOverlayVisibility: this.rangeOverlayController.overlayVisibility(),
@@ -155,10 +168,31 @@ export class PreferencesControllerImpl implements PreferencesController {
     return this.weaponRangeVisibility;
   }
 
+  getDroneRangeVisibility(): WeaponRangeVisibility {
+    return this.droneRangeVisibility;
+  }
+
+  getDroneControlRangeVisibility(): WeaponRangeVisibility {
+    return this.droneControlRangeVisibility;
+  }
+
   cycleWeaponRange(): void {
-    const currentIndex = WEAPON_RANGE_CYCLE.indexOf(this.weaponRangeVisibility);
-    this.weaponRangeVisibility = WEAPON_RANGE_CYCLE[(currentIndex + 1) % WEAPON_RANGE_CYCLE.length];
+    this.weaponRangeVisibility = cycleVisibility(WEAPON_RANGE_CYCLE, this.weaponRangeVisibility);
     this.updateWeaponRangeButton();
+    this.savePreferences();
+    this.events.emitDisplayInvalidated();
+  }
+
+  cycleDroneRange(): void {
+    this.droneRangeVisibility = cycleVisibility(DRONE_RANGE_CYCLE, this.droneRangeVisibility);
+    this.updateRangeButton(this.els.droneRangeButton, this.droneRangeVisibility, "label.droneRange");
+    this.savePreferences();
+    this.events.emitDisplayInvalidated();
+  }
+
+  cycleDroneControlRange(): void {
+    this.droneControlRangeVisibility = cycleVisibility(DRONE_RANGE_CYCLE, this.droneControlRangeVisibility);
+    this.updateRangeButton(this.els.droneControlRangeButton, this.droneControlRangeVisibility, "label.droneControlRange");
     this.savePreferences();
     this.events.emitDisplayInvalidated();
   }
@@ -217,6 +251,8 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.i18n.setLanguage(language);
     this.updateLanguageToggle();
     this.updateWeaponRangeButton();
+    this.updateRangeButton(this.els.droneRangeButton, this.droneRangeVisibility, "label.droneRange");
+    this.updateRangeButton(this.els.droneControlRangeButton, this.droneControlRangeVisibility, "label.droneControlRange");
   }
 
   private applyDisplayPreferences(preferences: DisplayPreferences): void {
@@ -224,12 +260,16 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.shipATurretController.setTrackingUnit(preferences.shipATrackingUnit);
     this.shipBTurretController.setTrackingUnit(preferences.shipBTrackingUnit);
     this.weaponRangeVisibility = preferences.weaponRangeVisibility;
+    this.droneRangeVisibility = preferences.droneRangeVisibility;
+    this.droneControlRangeVisibility = preferences.droneControlRangeVisibility;
     this.els.simSpeed.value = String(preferences.simSpeed);
     this.updateGridBrightnessDisplay(preferences.gridBrightness);
     this.rangeOverlayController.restoreVisibility(preferences.rangeOverlayVisibility);
     this.updateUnitToggle("shipA");
     this.updateUnitToggle("shipB");
     this.updateWeaponRangeButton();
+    this.updateRangeButton(this.els.droneRangeButton, this.droneRangeVisibility, "label.droneRange");
+    this.updateRangeButton(this.els.droneControlRangeButton, this.droneControlRangeVisibility, "label.droneControlRange");
     this.els.autoZoomCheckbox.checked = preferences.autoZoom ?? true;
     this.els.zoomSlider.disabled = preferences.autoZoom ?? true;
     this.updateZoomDisplay(preferences.zoomFactor);
@@ -250,11 +290,14 @@ export class PreferencesControllerImpl implements PreferencesController {
   }
 
   private updateWeaponRangeButton(): void {
-    const button = this.els.weaponRangeButton;
-    const visible = this.weaponRangeVisibility !== "none";
+    this.updateRangeButton(this.els.weaponRangeButton, this.weaponRangeVisibility, "label.weaponRange");
+    this.els.weaponRangeButton.setAttribute("data-weapon-range", this.weaponRangeVisibility);
+  }
+
+  private updateRangeButton(button: HTMLButtonElement, visibility: WeaponRangeVisibility, labelKey: string): void {
+    const visible = visibility !== "none";
     button.setAttribute("aria-pressed", String(visible));
-    button.setAttribute("data-weapon-range", this.weaponRangeVisibility);
-    button.textContent = this.i18n.t("label.weaponRange");
+    button.textContent = this.i18n.t(labelKey);
   }
 
   private updateLanguageToggle(): void {
@@ -286,4 +329,9 @@ export class PreferencesControllerImpl implements PreferencesController {
     if (!(domTarget instanceof Element)) return false;
     return this.els.canvasSettingsPopup.contains(domTarget) || this.els.canvasSettingsTrigger.contains(domTarget);
   }
+}
+
+function cycleVisibility(cycle: readonly WeaponRangeVisibility[], current: WeaponRangeVisibility): WeaponRangeVisibility {
+  const index = cycle.indexOf(current);
+  return cycle[(index + 1) % cycle.length];
 }

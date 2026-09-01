@@ -66,6 +66,8 @@ function fakeEls(): PreferencesEls {
     zoomValue: new FakeElement() as unknown as HTMLElement,
     autoZoomCheckbox: new FakeElement() as unknown as HTMLInputElement,
     weaponRangeButton: new FakeElement() as unknown as HTMLButtonElement,
+    droneRangeButton: new FakeElement() as unknown as HTMLButtonElement,
+    droneControlRangeButton: new FakeElement() as unknown as HTMLButtonElement,
   };
 }
 
@@ -259,7 +261,7 @@ describe("PreferencesController", () => {
 
   test("restore does not emit language changed for English", () => {
     const { controller, events } = build();
-    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 1, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 1, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(events.emitLanguageChanged).not.toHaveBeenCalled();
   });
@@ -325,7 +327,7 @@ describe("PreferencesController", () => {
     const { controller, els } = build();
     els.gridBrightnessSlider.value = "0.5";
     els.simSpeed.value = "2";
-    expect(controller.capture()).toEqual({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 2, gridBrightness: 0.5, rangeOverlayVisibility: {}, autoZoom: true, zoomFactor: 1 });
+    expect(controller.capture()).toEqual({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 2, gridBrightness: 0.5, rangeOverlayVisibility: {}, autoZoom: true, zoomFactor: 1 });
   });
 
   test("getWeaponRangeVisibility defaults to both", () => {
@@ -366,7 +368,7 @@ describe("PreferencesController", () => {
 
   test("restore applies the persisted weapon range visibility", () => {
     const { controller, els } = build();
-    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "none", simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "none", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(controller.getWeaponRangeVisibility()).toBe("none");
     expect(els.weaponRangeButton.getAttribute("data-weapon-range")).toBe("none");
@@ -380,7 +382,7 @@ describe("PreferencesController", () => {
 
   test("restore applies range overlay visibility", () => {
     const { controller, rangeOverlayController } = build();
-    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 4, gridBrightness: 0.5, rangeOverlayVisibility: { web: "shipA" }, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 4, gridBrightness: 0.5, rangeOverlayVisibility: { web: "shipA" }, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(rangeOverlayController.restoreVisibility).toHaveBeenCalledWith({ web: "shipA" });
   });
@@ -393,7 +395,7 @@ describe("PreferencesController", () => {
 
   test("restore applies display preferences to the DOM and loads the language pack", async () => {
     const { controller, els, i18n, events, shipATurretController } = build();
-    const preferences: DisplayPreferences = { language: "ja", shipATrackingUnit: "score", shipBTrackingUnit: "score", weaponRangeVisibility: "both", simSpeed: 3, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "ja", shipATrackingUnit: "score", shipBTrackingUnit: "score", weaponRangeVisibility: "both", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 3, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(i18n.setLanguage).toHaveBeenCalledWith("ja");
     expect(shipATurretController.setTrackingUnit).toHaveBeenCalledWith("score");

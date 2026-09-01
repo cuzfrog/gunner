@@ -552,7 +552,7 @@ describe("SessionCodec", () => {
       optimal: settings.shipBOptimal,
       falloff: settings.shipBFalloff,
     });
-    expect(preferences.restore).toHaveBeenCalledWith({ language: "zh", shipATrackingUnit: "score", shipBTrackingUnit: "score", weaponRangeVisibility: "both", simSpeed: 2, gridBrightness: 0.75, autoZoom: true, zoomFactor: 1 });
+    expect(preferences.restore).toHaveBeenCalledWith({ language: "zh", shipATrackingUnit: "score", shipBTrackingUnit: "score", weaponRangeVisibility: "both", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 2, gridBrightness: 0.75, autoZoom: true, zoomFactor: 1 });
     expect(preferences.savePreferences).toHaveBeenCalled();
     expect(i18n.translateDocument).toHaveBeenCalled();
     expect(hintRotator.refresh).toHaveBeenCalled();

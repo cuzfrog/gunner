@@ -105,5 +105,7 @@
 .range-overlay-chip.range-overlay-grappler { color: var(--overlay-grappler); }
 .range-overlay-chip.range-overlay-scrambler { color: var(--overlay-scrambler); }
 .range-overlay-chip.range-overlay-disruptor { color: var(--overlay-disruptor); }
+.range-overlay-chip.drone-range-chip { color: var(--accent-teal); }
+.range-overlay-chip.drone-control-range-chip { color: var(--accent-teal); }
 
 }

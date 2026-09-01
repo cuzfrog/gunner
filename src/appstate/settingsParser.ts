@@ -90,6 +90,8 @@ export class SettingsParser {
       shipATrackingUnit: display.shipATrackingUnit,
       shipBTrackingUnit: display.shipBTrackingUnit,
       weaponRangeVisibility: display.weaponRangeVisibility,
+      droneRangeVisibility: display.droneRangeVisibility,
+      droneControlRangeVisibility: display.droneControlRangeVisibility,
       simSpeed: display.simSpeed,
       gridBrightness: display.gridBrightness,
       autoZoom: display.autoZoom,
@@ -190,6 +192,8 @@ export class SettingsParser {
       isTrackingUnitValue(value.shipATrackingUnit) &&
       isTrackingUnitValue(value.shipBTrackingUnit) &&
       isWeaponRangeVisibilityValue(value.weaponRangeVisibility) &&
+      (value.droneRangeVisibility === undefined || isWeaponRangeVisibilityValue(value.droneRangeVisibility)) &&
+      (value.droneControlRangeVisibility === undefined || isWeaponRangeVisibilityValue(value.droneControlRangeVisibility)) &&
       isPositive(value.simSpeed) &&
       isFiniteNumber(value.gridBrightness) &&
       (value.autoZoom === undefined || typeof value.autoZoom === "boolean") &&
@@ -272,6 +276,8 @@ export class SettingsParser {
     record.language ??= DEFAULT_PREFERENCES.language;
     this.migrateTrackingUnit(record);
     record.weaponRangeVisibility = isWeaponRangeVisibilityValue(record.weaponRangeVisibility) ? record.weaponRangeVisibility : DEFAULT_PREFERENCES.weaponRangeVisibility;
+    record.droneRangeVisibility = isWeaponRangeVisibilityValue(record.droneRangeVisibility) ? record.droneRangeVisibility : DEFAULT_PREFERENCES.droneRangeVisibility;
+    record.droneControlRangeVisibility = isWeaponRangeVisibilityValue(record.droneControlRangeVisibility) ? record.droneControlRangeVisibility : DEFAULT_PREFERENCES.droneControlRangeVisibility;
     record.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
     record.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
     record.autoZoom ??= DEFAULT_PREFERENCES.autoZoom;
@@ -416,6 +422,8 @@ function fromWireSettings(wire: UserSettingsWire): SessionSettings {
       shipATrackingUnit: wire.shipATrackingUnit,
       shipBTrackingUnit: wire.shipBTrackingUnit,
       weaponRangeVisibility: wire.weaponRangeVisibility,
+      droneRangeVisibility: wire.droneRangeVisibility ?? DEFAULT_PREFERENCES.droneRangeVisibility,
+      droneControlRangeVisibility: wire.droneControlRangeVisibility ?? DEFAULT_PREFERENCES.droneControlRangeVisibility,
       simSpeed: wire.simSpeed,
       gridBrightness,
       autoZoom,
@@ -434,6 +442,8 @@ function toWireSettings(session: SessionSettings): UserSettingsWire {
     shipATrackingUnit: session.display.shipATrackingUnit,
     shipBTrackingUnit: session.display.shipBTrackingUnit,
     weaponRangeVisibility: session.display.weaponRangeVisibility,
+    droneRangeVisibility: session.display.droneRangeVisibility,
+    droneControlRangeVisibility: session.display.droneControlRangeVisibility,
     simSpeed: session.display.simSpeed,
     gridBrightness: session.display.gridBrightness,
     autoZoom: session.display.autoZoom,

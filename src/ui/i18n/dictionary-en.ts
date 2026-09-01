@@ -74,6 +74,8 @@ export const EN: LanguageSlice<"en"> = {
   "label.gridBrightness": { en: "Grid brightness" },
   "label.canvasSettings": { en: "Canvas settings" },
   "label.weaponRange": { en: "Weapon range" },
+  "label.droneRange": { en: "Drone range" },
+  "label.droneControlRange": { en: "Drone control" },
   "label.zoom": { en: "Zoom" },
   "label.autoZoom": { en: "Auto-zoom" },
   "label.version": { en: "Version" },

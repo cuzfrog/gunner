@@ -62,6 +62,8 @@ export interface UserSettings {
   shipATrackingUnit: TrackingUnit;
   shipBTrackingUnit: TrackingUnit;
   weaponRangeVisibility: WeaponRangeVisibility;
+  droneRangeVisibility?: WeaponRangeVisibility;
+  droneControlRangeVisibility?: WeaponRangeVisibility;
   shipATracking: number;
   shipASigRes: SigResolutionClass;
   shipAOptimal: number;
@@ -132,6 +134,8 @@ export type ProfileSettings = Omit<
   | "shipATrackingUnit"
   | "shipBTrackingUnit"
   | "weaponRangeVisibility"
+  | "droneRangeVisibility"
+  | "droneControlRangeVisibility"
   | "simSpeed"
   | "gridBrightness"
   | "autoZoom"
@@ -152,6 +156,8 @@ export interface DisplayPreferences {
   readonly shipATrackingUnit: TrackingUnit;
   readonly shipBTrackingUnit: TrackingUnit;
   readonly weaponRangeVisibility: WeaponRangeVisibility;
+  readonly droneRangeVisibility: WeaponRangeVisibility;
+  readonly droneControlRangeVisibility: WeaponRangeVisibility;
   readonly simSpeed: number;
   readonly gridBrightness: number;
   readonly rangeOverlayVisibility?: Record<string, WeaponRangeVisibility>;

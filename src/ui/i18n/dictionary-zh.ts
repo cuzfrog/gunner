@@ -74,6 +74,8 @@ export const ZH: LanguageSlice<"zh"> = {
   "label.gridBrightness": { zh: "网格亮度" },
   "label.canvasSettings": { zh: "画布设置" },
   "label.weaponRange": { zh: "武器射程" },
+  "label.droneRange": { zh: "无人机射程" },
+  "label.droneControlRange": { zh: "无人机控制" },
   "label.zoom": { zh: "缩放" },
   "label.autoZoom": { zh: "自动缩放" },
   "label.version": { zh: "版本" },

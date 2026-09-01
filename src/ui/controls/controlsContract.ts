@@ -72,6 +72,8 @@ export interface Controls {
   getAutoZoom(): boolean;
   getZoomFactor(): number;
   getWeaponRangeVisibility(): WeaponRangeVisibility;
+  getDroneRangeVisibility(): WeaponRangeVisibility;
+  getDroneControlRangeVisibility(): WeaponRangeVisibility;
   getOverlays(): readonly RangeOverlay[];
   hasWeapon(side: Side): boolean;
   update(view: EngagementView, effective: EffectiveReadouts): void;

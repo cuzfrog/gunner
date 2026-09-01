@@ -114,7 +114,9 @@ export class LocalSettingsStore implements SettingsStore {
         language: isLanguage(s.language) ? s.language : DEFAULT_PREFERENCES.language,
         shipATrackingUnit: resolveTrackingUnit(s.shipATrackingUnit, s.trackingUnit),
         shipBTrackingUnit: resolveTrackingUnit(s.shipBTrackingUnit, s.trackingUnit),
-        weaponRangeVisibility: resolveWeaponRangeVisibility(s.weaponRangeVisibility),
+        weaponRangeVisibility: resolveWeaponRangeVisibility(s.weaponRangeVisibility, DEFAULT_PREFERENCES.weaponRangeVisibility),
+        droneRangeVisibility: resolveWeaponRangeVisibility(s.droneRangeVisibility, DEFAULT_PREFERENCES.droneRangeVisibility),
+        droneControlRangeVisibility: resolveWeaponRangeVisibility(s.droneControlRangeVisibility, DEFAULT_PREFERENCES.droneControlRangeVisibility),
         simSpeed: isPositive(s.simSpeed) ? s.simSpeed : DEFAULT_PREFERENCES.simSpeed,
         gridBrightness:
           isOptionalUnitInterval(s.gridBrightness) && s.gridBrightness !== undefined
@@ -181,7 +183,7 @@ function resolveTrackingUnit(perShip: unknown, legacy: unknown): TrackingUnit {
   return DEFAULT_PREFERENCES.shipATrackingUnit;
 }
 
-function resolveWeaponRangeVisibility(value: unknown): WeaponRangeVisibility {
+function resolveWeaponRangeVisibility(value: unknown, fallback: WeaponRangeVisibility): WeaponRangeVisibility {
   if (value === "shipA" || value === "shipB" || value === "both" || value === "none") return value;
-  return DEFAULT_PREFERENCES.weaponRangeVisibility;
+  return fallback;
 }

@@ -11,6 +11,14 @@ import CombatantPortrait from "./CombatantPortrait.astro";
             data-weapon-range="both" aria-pressed="true"
             data-i18n-hint="label.weaponRange" data-i18n-aria-label="label.weaponRange"
             data-hint="Weapon range" aria-label="Weapon range">Weapon range</button>
+    <button type="button" id="drone-range-button" class="range-overlay-chip drone-range-chip"
+            aria-pressed="false"
+            data-i18n-hint="label.droneRange" data-i18n-aria-label="label.droneRange"
+            data-hint="Drone attack range" aria-label="Drone attack range">Drone range</button>
+    <button type="button" id="drone-control-range-button" class="range-overlay-chip drone-control-range-chip"
+            aria-pressed="false"
+            data-i18n-hint="label.droneControlRange" data-i18n-aria-label="label.droneControlRange"
+            data-hint="Drone control range" aria-label="Drone control range">Drone control</button>
   </div>
   <CombatantPortrait id="ship-a-portrait" side="ship-a" />
   <CombatantPortrait id="ship-b-portrait" side="ship-b" />

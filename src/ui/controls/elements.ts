@@ -53,6 +53,8 @@ function createGlobalControlsEls(): GlobalControlsEls {
     zoomValue: el(globalElementId("zoomValue")),
     autoZoomCheckbox: elOf(globalElementId("autoZoomCheckbox"), isHtmlInputElement),
     weaponRangeButton: elOf(globalElementId("weaponRangeButton"), isHtmlButtonElement),
+    droneRangeButton: elOf(globalElementId("droneRangeButton"), isHtmlButtonElement),
+    droneControlRangeButton: elOf(globalElementId("droneControlRangeButton"), isHtmlButtonElement),
     langEn: elOf(globalElementId("langEn"), isHtmlButtonElement),
     langZh: elOf(globalElementId("langZh"), isHtmlButtonElement),
     langJa: elOf(globalElementId("langJa"), isHtmlButtonElement),

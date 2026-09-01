@@ -110,7 +110,7 @@ const frame: EngagementFrame = {
 const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
 
 function gridColorOf(renderer: CanvasRenderer, canvas: HTMLCanvasElement): string {
-  renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, []);
+  renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] });
   return (canvas.getContext("2d") as unknown as { strokeStyles: string[] }).strokeStyles[0];
 }
 
@@ -127,7 +127,7 @@ function cameraScaleFor(shipA: ShipState, shipB: ShipState, clientWidth = 1000, 
     shipB,
     commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
   };
-  renderer.draw(testSnapshot, frame, { shipA: turret, shipB: turret }, []);
+  renderer.draw(testSnapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] });
   return (renderer as unknown as { camera: { scale: number } }).camera.scale;
 }
 
@@ -162,7 +162,7 @@ describe("CanvasRenderer", () => {
   test("draw resizes the canvas buffer to match the displayed size", () => {
     const canvas = fakeCanvas(1000, 400);
     const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
-    renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, []);
+    renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] });
     expect(canvas.width).toBe(1000);
     expect(canvas.height).toBe(400);
   });
@@ -170,7 +170,7 @@ describe("CanvasRenderer", () => {
   test("drawReadouts shows common real-time values and no hit or turret data", () => {
     const canvas = fakeCanvas();
     const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
-    renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, []);
+    renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] });
     const ctx = canvas.getContext("2d") as unknown as { fillTexts: string[] };
     const readouts = ctx.fillTexts.filter((t) => t.startsWith("readout."));
     expect(readouts).toEqual([
@@ -236,7 +236,7 @@ describe("CanvasRenderer", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       const overlay: RangeOverlay = { side: "shipA", kind: "web", radius: 3000 };
-      renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [overlay]);
+      renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [overlay], { shipA: [], shipB: [] });
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       const camera = cameraOf(renderer);
       const expected = screenPosition(canvas, renderer, snapshot.shipA.position);
@@ -249,7 +249,7 @@ describe("CanvasRenderer", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       const overlay: RangeOverlay = { side: "shipA", kind: "grappler", radius: 1000, falloffRadius: 8000 };
-      renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [overlay]);
+      renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [overlay], { shipA: [], shipB: [] });
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][]; dashes: number[][] };
       const camera = cameraOf(renderer);
       const radii = new Set(ctx.arcs.map((a) => a[2]));
@@ -263,7 +263,7 @@ describe("CanvasRenderer", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       renderer.setWeaponRangeVisibility("shipA");
-      renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, []);
+      renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] });
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       const arcsBeforeOverlays = 2;
       expect(ctx.arcs.length).toBe(arcsBeforeOverlays);
@@ -273,7 +273,7 @@ describe("CanvasRenderer", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       const bad: RangeOverlay = { side: "shipA", kind: "web", radius: 0 };
-      renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [bad]);
+      renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [bad], { shipA: [], shipB: [] });
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       expect(ctx.arcs.every((a) => a[2] !== 0)).toBe(true);
     });
@@ -285,7 +285,7 @@ describe("CanvasRenderer", () => {
       const shipBPos = new Vec2(1000, 0);
       const testSnapshot = { ...snapshot, shipA: { ...ship, position: shipAPos }, shipB: { ...ship, position: shipBPos } };
       const overlay: RangeOverlay = { side: "shipB", kind: "scrambler", radius: 3000 };
-      renderer.draw(testSnapshot, frame, { shipA: turret, shipB: turret }, [overlay]);
+      renderer.draw(testSnapshot, frame, { shipA: turret, shipB: turret }, [overlay], { shipA: [], shipB: [] });
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       const expected = screenPosition(canvas, renderer, shipBPos);
       const expectedRadius = overlay.radius * cameraOf(renderer).scale;
@@ -310,7 +310,7 @@ describe("CanvasRenderer", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       renderer.setWeaponRangeVisibility(visibility);
-      renderer.draw(rangeSnapshot, frame, { shipA: shipATurret, shipB: shipBTurret }, []);
+      renderer.draw(rangeSnapshot, frame, { shipA: shipATurret, shipB: shipBTurret }, [], { shipA: [], shipB: [] });
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       return { renderer, arcs: ctx.arcs };
     }
@@ -355,7 +355,7 @@ describe("CanvasRenderer", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       const droneRange = { kind: "drone" as const, optimal: 4000, falloff: 2000 };
-      renderer.draw(rangeSnapshot, frame, { shipA: droneRange, shipB: droneRange }, []);
+      renderer.draw(rangeSnapshot, frame, { shipA: droneRange, shipB: droneRange }, [], { shipA: [], shipB: [] });
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       const scale = scaleOf(renderer);
       const optimalRadius = droneRange.optimal * scale;
@@ -369,7 +369,7 @@ describe("CanvasRenderer", () => {
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       const shipARange = { kind: "turret" as const, optimal: 5000, falloff: 3000 };
       const shipBRange = { kind: "drone" as const, optimal: 4000, falloff: 2000 };
-      renderer.draw(rangeSnapshot, frame, { shipA: shipARange, shipB: shipBRange }, []);
+      renderer.draw(rangeSnapshot, frame, { shipA: shipARange, shipB: shipBRange }, [], { shipA: [], shipB: [] });
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       const scale = scaleOf(renderer);
       const shipAFalloff = (shipARange.optimal + shipARange.falloff) * scale;

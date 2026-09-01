@@ -27,6 +27,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
   shipATrackingUnit: "rad",
   shipBTrackingUnit: "rad",
   weaponRangeVisibility: "both",
+  droneRangeVisibility: "none",
+  droneControlRangeVisibility: "none",
   shipATracking: 0.32,
   shipASigRes: "S",
   shipAOptimal: 5000,
@@ -89,7 +91,7 @@ export const URL_SETTINGS: UserSettings = {
   language: "ja",
 };
 export function profileFrom(settings: UserSettings): ProfileSettings {
-  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, weaponRangeVisibility: ____, simSpeed: _____, gridBrightness: ______, autoZoom: _______, zoomFactor: ________, ...rest } = settings;
+  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, weaponRangeVisibility: ____, droneRangeVisibility: _____d, droneControlRangeVisibility: _____dc, simSpeed: _____, gridBrightness: ______, autoZoom: _______, zoomFactor: ________, ...rest } = settings;
   return rest;
 }
 export const DEFAULT_PROFILE: ProfileSettings = profileFrom(DEFAULT_SETTINGS);

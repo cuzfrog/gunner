@@ -1,5 +1,6 @@
-import type { DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, ShipState, Side, Simulation, WeaponSpec } from "../sim";
-import type { Controls, EffectiveReadouts, Loop, Renderer, WeaponRange, WeaponRanges } from "../ui";
+import { Vec2 } from "../sim";
+import type { DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, ShipState, Side, Simulation, WeaponSpec } from "../sim";
+import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, Renderer, WeaponRange, WeaponRanges } from "../ui";
 
 export interface App {
   start(): void;
@@ -96,8 +97,10 @@ export class AppImpl implements App {
     };
     this.renderer.setGridBrightness(this.controls.getGridBrightness());
     this.renderer.setWeaponRangeVisibility(this.controls.getWeaponRangeVisibility());
+    this.renderer.setDroneRangeVisibility(this.controls.getDroneRangeVisibility());
+    this.renderer.setDroneControlRangeVisibility(this.controls.getDroneControlRangeVisibility());
     this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
-    this.renderer.draw(snapshot, view.frame, this.rendererWeaponRanges(view), this.controls.getOverlays());
+    this.renderer.draw(snapshot, view.frame, this.rendererWeaponRanges(view), this.controls.getOverlays(), this.droneRenderInfo());
     this.controls.update(view, effectiveReadouts);
   }
 
@@ -105,6 +108,13 @@ export class AppImpl implements App {
     return {
       shipA: this.weaponRangeForRenderer(view.effectiveWeapons.shipA, "shipA"),
       shipB: this.weaponRangeForRenderer(view.effectiveWeapons.shipB, "shipB"),
+    };
+  }
+
+  private droneRenderInfo(): DroneRenderInfo {
+    return {
+      shipA: droneGroupRenderInfo(this.droneSimulator.states("shipA"), droneSpecsFrom(this.controls.getWeapons("shipA"))),
+      shipB: droneGroupRenderInfo(this.droneSimulator.states("shipB"), droneSpecsFrom(this.controls.getWeapons("shipB"))),
     };
   }
 
@@ -170,4 +180,14 @@ export class AppImpl implements App {
 
 function droneSpecsFrom(weapons: readonly WeaponSpec[]): readonly DroneSpec[] {
   return weapons.filter((w): w is DroneSpec => w.kind === "drone");
+}
+
+function droneGroupRenderInfo(states: readonly DroneRuntimeState[], specs: readonly DroneSpec[]): readonly DroneGroupRenderInfo[] {
+  const out: DroneGroupRenderInfo[] = [];
+  for (let i = 0; i < specs.length; i++) {
+    const spec = specs[i];
+    const state = states[i];
+    out.push({ position: state?.position ?? new Vec2(0, 0), optimal: spec.optimal, falloff: spec.falloff, controlRange: spec.controlRange });
+  }
+  return out;
 }

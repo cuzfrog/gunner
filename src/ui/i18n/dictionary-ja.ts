@@ -73,6 +73,8 @@ export const JA: LanguageSlice<"ja"> = {
   "label.gridBrightness": { ja: "グリッドの明るさ" },
   "label.canvasSettings": { ja: "キャンバス設定" },
   "label.weaponRange": { ja: "武器射程" },
+  "label.droneRange": { ja: "ドーン射程" },
+  "label.droneControlRange": { ja: "ドーン制御" },
   "label.zoom": { ja: "ズーム" },
   "label.autoZoom": { ja: "自動ズーム" },
   "label.version": { ja: "バージョン" },

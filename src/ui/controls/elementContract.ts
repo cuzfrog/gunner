@@ -65,6 +65,8 @@ const GLOBAL_ELEMENT_DEFINITIONS = {
   zoomValue: { id: "zoom-value", tag: "OUTPUT" as const, defaultValue: undefined },
   autoZoomCheckbox: { id: "auto-zoom", tag: "INPUT" as const, defaultValue: undefined },
   weaponRangeButton: { id: "weapon-range-button", tag: "BUTTON" as const, defaultValue: undefined },
+  droneRangeButton: { id: "drone-range-button", tag: "BUTTON" as const, defaultValue: undefined },
+  droneControlRangeButton: { id: "drone-control-range-button", tag: "BUTTON" as const, defaultValue: undefined },
   langEn: { id: "lang-en", tag: "BUTTON" as const, defaultValue: undefined },
   langZh: { id: "lang-zh", tag: "BUTTON" as const, defaultValue: undefined },
   langJa: { id: "lang-ja", tag: "BUTTON" as const, defaultValue: undefined },
