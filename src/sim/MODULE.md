@@ -35,6 +35,8 @@ no-new-exports:
   - expectedHitMultiplier.test.ts
   - droneApplication.ts
   - droneApplication.test.ts
+  - droneSimulator.ts
+  - droneSimulator.test.ts
   - cradle.ts
   - engagementFrameComposer.ts
   - fireControl.ts
