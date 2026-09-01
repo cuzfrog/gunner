@@ -4,7 +4,7 @@ import type { FittedModule } from "./fittingState";
 import { toTypeId, type TypeId } from "../gamedata/ids";
 
 function fittedModule(moduleId: string): FittedModule {
-  return { moduleId: toTypeId(moduleId), charges: [] };
+  return { moduleId: toTypeId(moduleId), offline: false };
 }
 
 function modules(record: Record<string, Partial<FittingModuleStats>>): Readonly<Record<string, FittingModuleStats>> {

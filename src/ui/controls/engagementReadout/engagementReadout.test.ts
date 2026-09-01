@@ -75,7 +75,7 @@ function fakeShipState(): ShipState {
 
 const DUMMY_TURRET: TurretSpec = { kind: "turret", tracking: 0, sigResolution: 40, optimal: 0, falloff: 0, damagePerShot: 12, cycleTime: 5, turretCount: 1 };
 const DUMMY_MISSILE: MissileSpec = { kind: "missile", damagePerMissile: 100, cycleTime: 10, launcherCount: 2, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 3, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
-const DUMMY_DRONE: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, isSentry: false };
+const DUMMY_DRONE: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, isSentry: false, controlRange: 60000 };
 
 function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipADamage?: { nominalDps: number; appliedDps: number; application: number; volley: number } }) {
   const ship = fakeShipState();
@@ -135,7 +135,7 @@ function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: numb
   const shipAAttack: AttackAssessment = {
     boostedWeapon: DUMMY_DRONE, effectiveWeapon: DUMMY_DRONE,
     damage: shipADamage,
-    drone: { hit: shipAHit, expectedMultiplier: 0.8, inRange: true, orbiting: true },
+    drone: { hit: shipAHit, expectedMultiplier: 0.8, inRange: true, orbiting: true, mode: "orbiting", distanceToTarget: 1000, inControlRange: true },
   };
   return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_DRONE, shipB: undefined } } as unknown as EngagementView;
 }

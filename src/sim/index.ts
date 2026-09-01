@@ -24,6 +24,8 @@ export type {
   DisruptionScriptSpec,
   DisruptorActivation,
   DroneDamageBreakdown,
+  DroneMode,
+  DroneRuntimeState,
   DroneSpec,
   EngagementFrame,
   EwarActivation,

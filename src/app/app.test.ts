@@ -303,12 +303,12 @@ describe("AppImpl", () => {
   test("returns drone readout values when the effective weapon is a drone", () => {
     const drone: DroneSpec = {
       kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500,
-      damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, isSentry: false,
+      damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, isSentry: false, controlRange: 60000,
     };
     const droneAssessment: AttackAssessment = {
       boostedWeapon: drone, effectiveWeapon: drone,
       damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100 },
-      drone: { hit, expectedMultiplier: 1, inRange: true, orbiting: true },
+      drone: { hit, expectedMultiplier: 1, inRange: true, orbiting: true, mode: "orbiting", distanceToTarget: 1000, inControlRange: true },
     };
     const droneView: EngagementView = {
       frame,

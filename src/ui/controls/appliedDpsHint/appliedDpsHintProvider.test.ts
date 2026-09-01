@@ -5,7 +5,7 @@ import type { AppliedDpsHintModel, AppliedDpsHintRenderer } from "./appliedDpsHi
 import { type AppliedDpsHintProviderDeps, AppliedDpsHintProviderImpl } from "./appliedDpsHintProvider";
 
 const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: 100, cycleTime: 5, turretCount: 4 };
-const drone: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, isSentry: false };
+const drone: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, isSentry: false, controlRange: 60000 };
 
 const turretAssessment: AttackAssessment = {
   boostedWeapon: turret, effectiveWeapon: turret,
@@ -16,7 +16,7 @@ const turretAssessment: AttackAssessment = {
 const droneAssessment: AttackAssessment = {
   boostedWeapon: drone, effectiveWeapon: drone,
   damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100 },
-  drone: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8, inRange: true, orbiting: true },
+  drone: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8, inRange: true, orbiting: true, mode: "orbiting", distanceToTarget: 1000, inControlRange: true },
 };
 
 function makeView(weaponAttacks: { shipA: readonly { weapon: TurretSpec | DroneSpec; assessment: AttackAssessment }[]; shipB: readonly never[] }, attacks?: { shipA: AttackAssessment | undefined; shipB: AttackAssessment | undefined }): EngagementView {

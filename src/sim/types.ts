@@ -91,6 +91,16 @@ export interface DroneSpec extends TrackingApplicationSpec {
   readonly maxVelocity: number; // m/s, 0 for sentries
   readonly orbitSpeed: number; // m/s, 0 for sentries
   readonly isSentry: boolean;
+  readonly controlRange: number; // m, ship-to-target max command distance
+}
+
+export type DroneMode = "idle" | "approaching" | "orbiting" | "returning";
+
+export interface DroneRuntimeState {
+  readonly mode: DroneMode;
+  readonly position: Vec2;
+  readonly distanceToTarget: number; // m, drone-to-target
+  readonly inControlRange: boolean; // ship-to-target <= controlRange
 }
 
 export type WeaponSpec = TurretSpec | MissileSpec | DroneSpec;
@@ -121,6 +131,9 @@ export interface DroneDamageBreakdown {
   readonly expectedMultiplier: number;
   readonly inRange: boolean;
   readonly orbiting: boolean; // true for non-sentry drones in range
+  readonly mode: DroneMode;
+  readonly distanceToTarget: number; // m, drone-to-target
+  readonly inControlRange: boolean; // ship-to-target <= controlRange
 }
 
 export interface EngagementFrame {

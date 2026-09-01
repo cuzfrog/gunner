@@ -108,6 +108,6 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
 
   private assessDrone(frame: EngagementFrame, ship: ShipState, opponent: ShipState, drone: DroneSpec, opponentSigRadius: number): AttackAssessment {
     const breakdown = this.droneApplication.compute(frame, drone, opponentSigRadius);
-    return { boostedWeapon: drone, effectiveWeapon: drone, damage: breakdown, drone: { hit: breakdown.hit, expectedMultiplier: breakdown.expectedMultiplier, inRange: breakdown.inRange, orbiting: breakdown.orbiting } };
+    return { boostedWeapon: drone, effectiveWeapon: drone, damage: breakdown, drone: breakdown };
   }
 }
