@@ -90,9 +90,9 @@ describe("DroneController", () => {
 
   test("sentry drones show dashes for orbit speed and max velocity", () => {
     const { document, controller } = buildDrone({
-      droneLoadoutResolver: resolverReturningDrones([importedDroneFixture({ sizeClass: "sentry", maxVelocity: 0, orbitSpeed: 0 })]),
+      droneLoadoutResolver: resolverReturningDrones([importedDroneFixture({ sizeClass: "sentry", maxVelocity: 0, orbitSpeed: 0, orbitRange: 0 })]),
     });
-    controller.applyImported(importedWithDrones([importedDroneFixture({ sizeClass: "sentry" })]), NEUTRAL_CONDITIONS);
+    controller.applyImported(importedWithDrones([importedDroneFixture({ sizeClass: "sentry", orbitRange: 0 })]), NEUTRAL_CONDITIONS);
     expect(getFake(document, "ship-a-drone-orbit-speed").textContent).toBe("-");
     expect(getFake(document, "ship-a-drone-max-velocity").textContent).toBe("-");
   });

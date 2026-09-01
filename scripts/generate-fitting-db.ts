@@ -1223,10 +1223,11 @@ export function buildDroneStats(values: Map<string, number>, type: SdeType): Dro
   const falloff = values.get("falloff") ?? 0;
   const maxVelocity = values.get("maxVelocity") ?? 0;
   const orbitSpeed = values.get("entityCruiseSpeed") ?? 0;
-  const orbitRange = values.get("entityFlyRange") ?? 0;
   const bandwidth = values.get("droneBandwidthUsed") ?? 0;
-  const volume = type.volume ?? bandwidth;
   const sizeClass = droneSizeClassFromStats(maxVelocity, orbitSpeed, bandwidth);
+  const rawOrbitRange = values.get("entityFlyRange") ?? 0;
+  const orbitRange = sizeClass === "sentry" ? 0 : rawOrbitRange;
+  const volume = type.volume ?? bandwidth;
   return {
     sizeClass,
     damageMultiplier,
