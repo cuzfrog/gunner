@@ -90,6 +90,7 @@ export interface DroneSpec extends TrackingApplicationSpec {
   readonly droneCount: number;
   readonly maxVelocity: number; // m/s, 0 for sentries
   readonly orbitSpeed: number; // m/s, 0 for sentries
+  readonly orbitRange: number; // m, distance drones orbit the target (entityFlyRange)
   readonly isSentry: boolean;
   readonly controlRange: number; // m, ship-to-target max command distance
 }

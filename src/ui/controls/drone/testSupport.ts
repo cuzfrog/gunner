@@ -63,6 +63,7 @@ export function importedDroneFixture(overrides: Partial<ImportedDrone> = {}): Im
     falloff: 500,
     maxVelocity: 1200,
     orbitSpeed: 600,
+    orbitRange: 1000,
     cycleTime: 4,
     bandwidth: 5,
     volume: 5,

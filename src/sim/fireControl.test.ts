@@ -77,7 +77,7 @@ const missileBreakdown: MissileDamageBreakdown = {
   timeToImpact: 1.6,
 };
 
-const drone: DroneSpec = { kind: "drone", tracking: 2.0, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, isSentry: false, controlRange: 60000 };
+const drone: DroneSpec = { kind: "drone", tracking: 2.0, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000 };
 
 const droneBreakdownResult: DroneDamageBreakdown & DamageAssessment = {
   hit: { chance: 0.5, trackingTerm: 0, rangeTerm: 0 },

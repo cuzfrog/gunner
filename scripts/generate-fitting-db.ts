@@ -886,6 +886,7 @@ interface DroneStats {
   readonly falloff: number;
   readonly maxVelocity: number;
   readonly orbitSpeed: number;
+  readonly orbitRange: number;
   readonly cycleTime: number;
   readonly bandwidth: number;
   readonly volume: number;
@@ -1222,6 +1223,7 @@ export function buildDroneStats(values: Map<string, number>, type: SdeType): Dro
   const falloff = values.get("falloff") ?? 0;
   const maxVelocity = values.get("maxVelocity") ?? 0;
   const orbitSpeed = values.get("entityCruiseSpeed") ?? 0;
+  const orbitRange = values.get("entityFlyRange") ?? 0;
   const bandwidth = values.get("droneBandwidthUsed") ?? 0;
   const volume = type.volume ?? bandwidth;
   const sizeClass = droneSizeClassFromStats(maxVelocity, orbitSpeed, bandwidth);
@@ -1238,6 +1240,7 @@ export function buildDroneStats(values: Map<string, number>, type: SdeType): Dro
     falloff,
     maxVelocity,
     orbitSpeed,
+    orbitRange,
     cycleTime: speed / 1000,
     bandwidth,
     volume,
@@ -1787,6 +1790,7 @@ export interface DroneStats {
   readonly falloff: number;
   readonly maxVelocity: number;
   readonly orbitSpeed: number;
+  readonly orbitRange: number;
   readonly cycleTime: number;
   readonly bandwidth: number;
   readonly volume: number;

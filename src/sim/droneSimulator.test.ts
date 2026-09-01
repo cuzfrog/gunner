@@ -3,11 +3,11 @@ import { DroneSimulatorImpl } from "./droneSimulator";
 import type { DroneSpec, EngagementFrame, ShipState } from "./types";
 
 function lightDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
-  return { kind: "drone", tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 4000, isSentry: false, controlRange: 60000, ...overrides };
+  return { kind: "drone", tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000, ...overrides };
 }
 
 function sentryDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
-  return { kind: "drone", tracking: 0.0336, sigResolution: 400, optimal: 18000, falloff: 30000, damagePerShot: 105.6, cycleTime: 4, droneCount: 5, maxVelocity: 0, orbitSpeed: 0, isSentry: true, controlRange: 60000, ...overrides };
+  return { kind: "drone", tracking: 0.0336, sigResolution: 400, optimal: 18000, falloff: 30000, damagePerShot: 105.6, cycleTime: 4, droneCount: 5, maxVelocity: 0, orbitSpeed: 0, orbitRange: 0, isSentry: true, controlRange: 60000, ...overrides };
 }
 
 function shipAt(x: number, y: number): ShipState {
@@ -110,7 +110,7 @@ describe("DroneSimulatorImpl", () => {
 
   test("drones reach target and transition to orbiting", () => {
     const sim = new DroneSimulatorImpl();
-    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1000, droneCount: 1 })], shipB: [] });
+    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1000, orbitRange: 1000, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
     for (let i = 0; i < 100; i++) sim.step(0.1, frame(shipPos, targetPos));
@@ -121,7 +121,7 @@ describe("DroneSimulatorImpl", () => {
 
   test("orbiting drones circle the target, not stop", () => {
     const sim = new DroneSimulatorImpl();
-    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1000, orbitSpeed: 1000, droneCount: 1 })], shipB: [] });
+    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1000, orbitRange: 1000, orbitSpeed: 1000, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
     for (let i = 0; i < 30; i++) sim.step(0.1, frame(shipPos, targetPos));
@@ -132,6 +132,37 @@ describe("DroneSimulatorImpl", () => {
     const pos2 = sim.states("shipA")[0].positions[0];
     const moved = pos1.dist(pos2);
     expect(moved).toBeGreaterThan(10);
+  });
+
+  test("orbiting drones spread around the target at different phases", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 5 })], shipB: [] });
+    const shipPos = new Vec2(0, 0);
+    const targetPos = new Vec2(5000, 0);
+    for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos));
+    const states = sim.states("shipA");
+    expect(states[0].mode).toBe("orbiting");
+    const positions = states[0].positions;
+    for (let i = 0; i < positions.length; i++) {
+      for (let j = i + 1; j < positions.length; j++) {
+        const dist = positions[i].dist(positions[j]);
+        expect(dist).toBeGreaterThan(100);
+      }
+    }
+  });
+
+  test("drones maintain orbit range from target while orbiting", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
+    const shipPos = new Vec2(0, 0);
+    const targetPos = new Vec2(5000, 0);
+    for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos));
+    const states = sim.states("shipA");
+    expect(states[0].mode).toBe("orbiting");
+    const pos = states[0].positions[0];
+    const dist = pos.dist(targetPos);
+    expect(dist).toBeGreaterThan(500);
+    expect(dist).toBeLessThan(2000);
   });
 
   test("target leaving control range causes drones to return", () => {

@@ -17,6 +17,7 @@ function makeDroneStats(overrides: { id: string; bandwidth: number; volume: numb
     falloff: 500,
     maxVelocity: 6000,
     orbitSpeed: 1800,
+    orbitRange: 1000,
     cycleTime: 4,
     bandwidth: overrides.bandwidth,
     volume: overrides.volume,

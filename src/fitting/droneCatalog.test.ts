@@ -16,6 +16,7 @@ function drone(overrides: Partial<DroneStats> = {}): DroneStats {
     falloff: 500,
     maxVelocity: 3360,
     orbitSpeed: 4000,
+    orbitRange: 1000,
     cycleTime: 4,
     bandwidth: 5,
     volume: 5,

@@ -48,6 +48,7 @@ function makeImportedDrone(typeId: string, count: number): ImportedDrone {
     falloff: 500,
     maxVelocity: 6000,
     orbitSpeed: 1800,
+    orbitRange: 1000,
     cycleTime: 4,
     bandwidth: 5,
     volume: 5,

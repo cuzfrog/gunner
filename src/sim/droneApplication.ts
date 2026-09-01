@@ -57,13 +57,13 @@ function statefulEffectiveFrame(frame: EngagementFrame, drone: DroneSpec, state:
 }
 
 function orbitingEffectiveFrameFromState(frame: EngagementFrame, drone: DroneSpec, state: DroneRuntimeState): DroneEffectiveFrame {
-  const orbitRange = drone.optimal > 0 ? drone.optimal : state.distanceToTarget;
+  const orbitRange = drone.orbitRange > 0 ? drone.orbitRange : (drone.optimal > 0 ? drone.optimal : state.distanceToTarget);
   const angularVelocity = orbitRange > 0 && drone.orbitSpeed > 0 ? drone.orbitSpeed / orbitRange : 0;
   return { frame: withAngularVelocityAndDistance(frame, angularVelocity, orbitRange), inRange: true, orbiting: true, mode: "orbiting", distanceToTarget: state.distanceToTarget, inControlRange: state.inControlRange };
 }
 
 function orbitingEffectiveFrame(frame: EngagementFrame, drone: DroneSpec): DroneEffectiveFrame {
-  const orbitRange = drone.optimal > 0 ? drone.optimal : frame.distance;
+  const orbitRange = drone.orbitRange > 0 ? drone.orbitRange : (drone.optimal > 0 ? drone.optimal : frame.distance);
   const angularVelocity = orbitRange > 0 && drone.orbitSpeed > 0 ? drone.orbitSpeed / orbitRange : 0;
   return { frame: withAngularVelocityAndDistance(frame, angularVelocity, orbitRange), inRange: true, orbiting: true, mode: "orbiting", distanceToTarget: frame.distance, inControlRange: true };
 }

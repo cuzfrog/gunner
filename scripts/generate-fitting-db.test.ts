@@ -410,14 +410,14 @@ describe("buildDroneStats", () => {
     const stats = buildDroneStats(values({
       damageMultiplier: 1.92, trackingSpeed: 2.178, optimalSigRadius: 25, maxRange: 2100, speed: 4000,
       emDamage: 0, thermalDamage: 20, kineticDamage: 0, explosiveDamage: 0,
-      falloff: 2000, maxVelocity: 3360, entityCruiseSpeed: 660, droneBandwidthUsed: 5,
+      falloff: 2000, maxVelocity: 3360, entityCruiseSpeed: 660, entityFlyRange: 1000, droneBandwidthUsed: 5,
     }), sdeType(5, 2, 5));
     expect(stats).toEqual({
       sizeClass: "light",
       damageMultiplier: 1.92,
       emDamage: 0, thermalDamage: 20, kineticDamage: 0, explosiveDamage: 0,
       tracking: 2.178, sigResolution: 25, optimal: 2100, falloff: 2000,
-      maxVelocity: 3360, orbitSpeed: 660, cycleTime: 4, bandwidth: 5, volume: 5,
+      maxVelocity: 3360, orbitSpeed: 660, orbitRange: 1000, cycleTime: 4, bandwidth: 5, volume: 5,
       metaLevel: 5, metaGroupID: 2,
     });
   });

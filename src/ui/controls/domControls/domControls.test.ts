@@ -160,7 +160,7 @@ describe("DomControls", () => {
     const { controls, cradle } = buildDomControls();
     const turretSpec: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: 12, cycleTime: 5, turretCount: 1 };
     const missileSpec: MissileSpec = { kind: "missile", damagePerMissile: 50, cycleTime: 10, launcherCount: 1, explosionRadius: 50, explosionVelocity: 100, damageReductionFactor: 0.5, maxVelocity: 5000, flightTime: 5, flightRange: 25000 };
-    const droneSpec: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, isSentry: false, controlRange: 60000 };
+    const droneSpec: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
     cradle.cradle.turretControllers.shipA.currentTurretSpecs = vi.fn(() => [turretSpec]);
     cradle.cradle.launcherControllers.shipA.currentMissileSpec = vi.fn(() => missileSpec);
     cradle.cradle.droneControllers.shipA.currentDroneSpecs = vi.fn(() => [droneSpec]);

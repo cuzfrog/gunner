@@ -15,6 +15,7 @@ export interface DroneSimConfig {
 interface DroneBody {
   position: Vec2;
   velocity: Vec2;
+  orbitPhase: number;
 }
 
 interface DroneGroupState {
@@ -24,11 +25,13 @@ interface DroneGroupState {
   distanceToTarget: number;
   inControlRange: boolean;
   deployed: boolean;
+  orbitAngle: number;
 }
 
 const DEPLOY_RADIUS = 1000;
 const DRONE_ACCEL_TAU = 1.0;
-const ORBIT_RADIAL_GAIN = 5.0;
+const SEPARATION_RADIUS = 300;
+const SEPARATION_GAIN = 3.0;
 
 export class DroneSimulatorImpl implements DroneSimulator {
   private groups: Record<Side, DroneGroupState[]> = { shipA: [], shipB: [] };
@@ -55,8 +58,8 @@ export class DroneSimulatorImpl implements DroneSimulator {
 function createGroupState(spec: DroneSpec): DroneGroupState {
   const count = Math.max(1, spec.droneCount);
   const drones: DroneBody[] = [];
-  for (let i = 0; i < count; i++) drones.push({ position: new Vec2(0, 0), velocity: new Vec2(0, 0) });
-  return { spec, drones, mode: "idle", distanceToTarget: 0, inControlRange: false, deployed: false };
+  for (let i = 0; i < count; i++) drones.push({ position: new Vec2(0, 0), velocity: new Vec2(0, 0), orbitPhase: (i / count) * Math.PI * 2 });
+  return { spec, drones, mode: "idle", distanceToTarget: 0, inControlRange: false, deployed: false, orbitAngle: 0 };
 }
 
 function stepSide(groups: DroneGroupState[], shipPos: Vec2, targetPos: Vec2, shipToTargetDistance: number, dt: number): void {
@@ -100,16 +103,27 @@ function stepCombatDrone(group: DroneGroupState, shipPos: Vec2, targetPos: Vec2,
   if (group.mode === "approaching") {
     if (previousMode === "idle") deployDrones(group.drones, shipPos);
     moveDronesToward(group.drones, targetPos, group.spec.maxVelocity, dt);
+    applySeparation(group.drones, dt);
     group.distanceToTarget = averageDistance(group.drones, targetPos);
-    const attackRange = group.spec.optimal > 0 ? group.spec.optimal : 1;
-    if (group.distanceToTarget <= attackRange) group.mode = "orbiting";
+    const orbitRange = effectiveOrbitRange(group.spec);
+    if (group.distanceToTarget <= orbitRange) {
+      group.mode = "orbiting";
+      group.orbitAngle = 0;
+    }
     return;
   }
 
   if (group.mode === "orbiting") {
-    orbitDrones(group.drones, targetPos, group.spec.optimal, group.spec.orbitSpeed, dt);
+    const orbitRange = effectiveOrbitRange(group.spec);
+    const angularVelocity = orbitRange > 0 && group.spec.orbitSpeed > 0 ? group.spec.orbitSpeed / orbitRange : 0;
+    group.orbitAngle += angularVelocity * dt;
+    orbitDrones(group.drones, targetPos, orbitRange, group.spec.orbitSpeed, group.orbitAngle, dt);
     group.distanceToTarget = averageDistance(group.drones, targetPos);
   }
+}
+
+function effectiveOrbitRange(spec: DroneSpec): number {
+  return spec.orbitRange > 0 ? spec.orbitRange : (spec.optimal > 0 ? spec.optimal : 1000);
 }
 
 function deployDrones(drones: DroneBody[], shipPos: Vec2): void {
@@ -136,16 +150,36 @@ function moveDronesToward(drones: DroneBody[], destination: Vec2, maxSpeed: numb
   return allArrived;
 }
 
-function orbitDrones(drones: DroneBody[], targetPos: Vec2, orbitRange: number, orbitSpeed: number, dt: number): void {
-  for (const drone of drones) {
-    const toTarget = targetPos.sub(drone.position);
-    const dist = toTarget.len();
-    const radial = dist > 0 ? toTarget.scale(1 / dist) : new Vec2(1, 0);
-    const tangential = new Vec2(-radial.y, radial.x);
-    const radialError = dist - orbitRange;
-    const desired = tangential.scale(orbitSpeed).add(radial.scale(radialError * ORBIT_RADIAL_GAIN));
+function orbitDrones(drones: DroneBody[], targetPos: Vec2, orbitRange: number, orbitSpeed: number, orbitAngle: number, dt: number): void {
+  for (let i = 0; i < drones.length; i++) {
+    const drone = drones[i];
+    const angle = drone.orbitPhase + orbitAngle;
+    const desiredPos = targetPos.add(new Vec2(Math.cos(angle) * orbitRange, Math.sin(angle) * orbitRange));
+    const toDesired = desiredPos.sub(drone.position);
+    const dist = toDesired.len();
+    if (dist <= 1) { drone.position = desiredPos; continue; }
+    const speed = Math.min(orbitSpeed, dist / dt);
+    const desired = toDesired.norm().scale(speed);
     drone.velocity = accelerateToward(drone.velocity, desired, dt);
-    drone.position = drone.position.add(drone.velocity.scale(dt));
+    const step = drone.velocity.scale(dt);
+    if (step.len() >= dist) drone.position = desiredPos;
+    else drone.position = drone.position.add(step);
+  }
+}
+
+function applySeparation(drones: DroneBody[], dt: number): void {
+  for (let i = 0; i < drones.length; i++) {
+    let separation = new Vec2(0, 0);
+    for (let j = 0; j < drones.length; j++) {
+      if (i === j) continue;
+      const diff = drones[i].position.sub(drones[j].position);
+      const dist = diff.len();
+      if (dist > 0 && dist < SEPARATION_RADIUS) separation = separation.add(diff.norm().scale((SEPARATION_RADIUS - dist) / SEPARATION_RADIUS));
+    }
+    if (separation.len() > 0) {
+      const correction = separation.scale(SEPARATION_GAIN * dt);
+      drones[i].position = drones[i].position.add(correction);
+    }
   }
 }
 

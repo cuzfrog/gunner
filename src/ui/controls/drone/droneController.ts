@@ -329,6 +329,7 @@ function importedDroneToDroneSpec(drone: ImportedDrone): DroneSpec {
     droneCount: drone.count,
     maxVelocity: drone.maxVelocity,
     orbitSpeed: drone.orbitSpeed,
+    orbitRange: drone.orbitRange,
     isSentry: drone.sizeClass === "sentry",
     controlRange: drone.controlRange,
   };

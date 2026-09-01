@@ -18,6 +18,7 @@ export interface ImportedDrone {
   readonly falloff: number;
   readonly maxVelocity: number;
   readonly orbitSpeed: number;
+  readonly orbitRange: number;
   readonly cycleTime: number;
   readonly bandwidth: number;
   readonly volume: number;

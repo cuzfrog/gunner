@@ -450,6 +450,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
         falloff: finalFalloff,
         maxVelocity: skillOutput.maxVelocity,
         orbitSpeed: skillOutput.orbitSpeed,
+        orbitRange: stats.orbitRange,
         cycleTime: stats.cycleTime,
         bandwidth: stats.bandwidth,
         volume: stats.volume,

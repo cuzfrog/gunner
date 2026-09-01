@@ -11,24 +11,24 @@ function frame(distance: number, angularVelocity: number): EngagementFrame {
 }
 
 function lightDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
-  return { kind: "drone", tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, isSentry: false, controlRange: 60000, ...overrides };
+  return { kind: "drone", tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000, ...overrides };
 }
 
 function sentryDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
-  return { kind: "drone", tracking: 0.0336, sigResolution: 400, optimal: 18000, falloff: 30000, damagePerShot: 105.6, cycleTime: 4, droneCount: 5, maxVelocity: 0, orbitSpeed: 0, isSentry: true, controlRange: 60000, ...overrides };
+  return { kind: "drone", tracking: 0.0336, sigResolution: 400, optimal: 18000, falloff: 30000, damagePerShot: 105.6, cycleTime: 4, droneCount: 5, maxVelocity: 0, orbitSpeed: 0, orbitRange: 0, isSentry: true, controlRange: 60000, ...overrides };
 }
 
 const hitChance = new HitChanceImpl();
 const application = new DroneApplicationImpl({ hitChance });
 
 describe("DroneApplicationImpl", () => {
-  test("orbiting drone uses orbit speed for angular velocity at optimal range", () => {
+  test("orbiting drone uses orbit speed for angular velocity at orbit range", () => {
     const drone = lightDrone();
     const result = application.compute(frame(5000, 0), drone, 40);
     expect(result.orbiting).toBe(true);
     expect(result.inRange).toBe(true);
-    const expectedAngularVelocity = drone.orbitSpeed / drone.optimal;
-    const expectedHit = hitChance.compute(frame(drone.optimal, expectedAngularVelocity), drone, 40);
+    const expectedAngularVelocity = drone.orbitSpeed / drone.orbitRange;
+    const expectedHit = hitChance.compute(frame(drone.orbitRange, expectedAngularVelocity), drone, 40);
     expect(result.hit.chance).toBeCloseTo(expectedHit.chance, 10);
   });
 
