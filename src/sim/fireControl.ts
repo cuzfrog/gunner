@@ -8,6 +8,7 @@ import type { DroneApplication } from "./droneApplication";
 import type {
   DamageAssessment,
   DroneDamageBreakdown,
+  DroneRuntimeState,
   DroneSpec,
   EngagementFrame,
   HitChanceBreakdown,
@@ -23,6 +24,7 @@ import type {
 export interface AttackState {
   readonly weapon: WeaponSpec;
   readonly opponentSigRadius: number;
+  readonly droneState?: DroneRuntimeState;
 }
 
 export interface AttackAssessment {
@@ -78,7 +80,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
       return this.assessTurret(frame, ship, opponent, attack.weapon, paintedSig);
     }
     if (attack.weapon.kind === "drone") {
-      return this.assessDrone(frame, ship, opponent, attack.weapon, paintedSig);
+      return this.assessDrone(frame, ship, opponent, attack.weapon, paintedSig, attack.droneState);
     }
     return this.assessMissile(frame, ship, opponent, attack.weapon, paintedSig);
   }
@@ -106,8 +108,8 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     return { boostedWeapon: boosted, effectiveWeapon: boosted, damage, missile: breakdown };
   }
 
-  private assessDrone(frame: EngagementFrame, ship: ShipState, opponent: ShipState, drone: DroneSpec, opponentSigRadius: number): AttackAssessment {
-    const breakdown = this.droneApplication.compute(frame, drone, opponentSigRadius);
+  private assessDrone(frame: EngagementFrame, ship: ShipState, opponent: ShipState, drone: DroneSpec, opponentSigRadius: number, droneState: DroneRuntimeState | undefined): AttackAssessment {
+    const breakdown = this.droneApplication.compute(frame, drone, opponentSigRadius, droneState);
     return { boostedWeapon: drone, effectiveWeapon: drone, damage: breakdown, drone: breakdown };
   }
 }

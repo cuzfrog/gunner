@@ -67,6 +67,7 @@ export class AppImpl implements App {
     const input = {
       weapons: { shipA: this.controls.getWeapons("shipA"), shipB: this.controls.getWeapons("shipB") },
       sigRadii: { shipA: this.controls.getSig("shipA"), shipB: this.controls.getSig("shipB") },
+      droneStates: { shipA: [], shipB: [] },
     };
     const view = this.engagementFrameComposer.compose(snapshot, input);
     const effectiveReadouts: EffectiveReadouts = {

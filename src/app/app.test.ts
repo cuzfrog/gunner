@@ -153,7 +153,7 @@ describe("AppImpl", () => {
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
     expect(renderer.setWeaponRangeVisibility).toHaveBeenCalledWith("both");
-    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 } });
+    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 }, droneStates: { shipA: [], shipB: [] } });
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, []);
     expect(controls.update).toHaveBeenCalledWith(baseView(), {
       shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
