@@ -20,6 +20,11 @@ export interface LauncherGroup {
   readonly count: number;
 }
 
+export interface DroneGroup {
+  readonly typeId: TypeId;
+  readonly count: number;
+}
+
 export interface CargoEntry {
   readonly id: TypeId;
   readonly quantity: number;
@@ -35,6 +40,8 @@ export interface FittingState {
   readonly ewarModules: readonly FittedModule[];
   readonly boosterModules: readonly FittedModule[];
   readonly missileBoosterModules: readonly FittedModule[];
+  readonly droneBoosterModules: readonly FittedModule[];
+  readonly droneGroups: readonly DroneGroup[];
   readonly drones: readonly CargoEntry[];
   readonly cargo: readonly CargoEntry[];
 }
@@ -55,6 +62,7 @@ export class FittingStateFactory {
     const ewarModules: FittedModule[] = [];
     const boosterModules: FittedModule[] = [];
     const missileBoosterModules: FittedModule[] = [];
+    const droneBoosterModules: FittedModule[] = [];
     let propulsionModule: FittedModule | undefined;
     let order = 0;
 
@@ -93,8 +101,18 @@ export class FittingStateFactory {
         continue;
       }
 
+      if (this.db.omnidirectionalTrackingLinks[mod.moduleId] || this.db.omnidirectionalTrackingEnhancers[mod.moduleId]) {
+        droneBoosterModules.push(mod);
+        continue;
+      }
+
       const stats = this.db.modules[mod.moduleId];
       if (!stats) continue;
+
+      if (stats.droneDamageBonus) {
+        droneBoosterModules.push(mod);
+        continue;
+      }
 
       if (stats.propulsion) {
         if (!propulsionModule) propulsionModule = mod;
@@ -109,6 +127,18 @@ export class FittingStateFactory {
       supportModules.push(mod);
     }
 
+    const droneCounts = new Map<TypeId, { count: number; order: number }>();
+    let droneOrder = 0;
+    for (const entry of drones) {
+      if (!this.db.combatDrones[entry.id]) continue;
+      const existing = droneCounts.get(entry.id);
+      if (existing) {
+        existing.count += entry.quantity;
+      } else {
+        droneCounts.set(entry.id, { count: entry.quantity, order: droneOrder++ });
+      }
+    }
+
     return {
       profile,
       hullBonuses,
@@ -119,6 +149,8 @@ export class FittingStateFactory {
       ewarModules,
       boosterModules,
       missileBoosterModules,
+      droneBoosterModules,
+      droneGroups: [...droneCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([typeId, e]) => ({ typeId, count: e.count })),
       drones,
       cargo,
     };

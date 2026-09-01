@@ -12,8 +12,8 @@ export interface RangeOverlay {
   readonly falloffRadius?: number;
 }
 
-export interface TurretRange {
-  readonly kind: "turret";
+export interface OptimalFalloffRange {
+  readonly kind: "turret" | "drone";
   readonly optimal: number;
   readonly falloff: number;
 }
@@ -23,18 +23,32 @@ export interface MissileRange {
   readonly range: number;
 }
 
-export type WeaponRange = TurretRange | MissileRange;
+export type WeaponRange = OptimalFalloffRange | MissileRange;
 
 export interface WeaponRanges {
   readonly shipA: WeaponRange;
   readonly shipB: WeaponRange;
 }
 
+export interface DroneGroupRenderInfo {
+  readonly positions: readonly Vec2[]; // individual drone positions
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly controlRange: number;
+}
+
+export interface DroneRenderInfo {
+  readonly shipA: readonly DroneGroupRenderInfo[];
+  readonly shipB: readonly DroneGroupRenderInfo[];
+}
+
 export interface Renderer {
   setGridBrightness(brightness: number): void;
   setWeaponRangeVisibility(visibility: WeaponRangeVisibility): void;
+  setDroneRangeVisibility(visibility: WeaponRangeVisibility): void;
+  setDroneControlRangeVisibility(visibility: WeaponRangeVisibility): void;
   setManualZoom(autoZoom: boolean, factor: number): void;
-  draw(snapshot: SimSnapshot, frame: EngagementFrame, ranges: WeaponRanges, overlays: readonly RangeOverlay[]): void;
+  draw(snapshot: SimSnapshot, frame: EngagementFrame, ranges: WeaponRanges, overlays: readonly RangeOverlay[], droneInfo: DroneRenderInfo): void;
 }
 
 const COLORS = {
@@ -48,6 +62,7 @@ const COLORS = {
   scrim: withAlpha(PALETTE.bgDeep, 0.7),
   optimalRing: PALETTE.optimalGreen,
   falloffRing: PALETTE.accentOrange,
+  controlRing: PALETTE.accentTeal,
   overlayWeb: PALETTE.overlayWeb,
   overlayGrappler: PALETTE.overlayGrappler,
   overlayScrambler: PALETTE.overlayScrambler,
@@ -71,6 +86,7 @@ const FAR_MARGIN = 1.25;
 const ZOOM_OUT_MARGIN_PX = 80; // keep ships this far from the canvas edge before zooming out
 const MAX_ZOOM_FACTOR = 3; // relative to the far-range fit scale
 const SHIP_ICON_SIZE = 8;
+const DRONE_ICON_SIZE = 2.5;
 const DIRECTION_LINE_LENGTH = SHIP_ICON_SIZE * 4; // 2x the icon's 16px nose-to-tail length
 
 interface Camera {
@@ -85,6 +101,8 @@ export class CanvasRenderer implements Renderer {
   private camera: Camera = { center: new Vec2(0, 0), scale: 1 };
   private gridBrightness = DEFAULT_GRID_BRIGHTNESS;
   private weaponRangeVisibility: WeaponRangeVisibility = "both";
+  private droneRangeVisibility: WeaponRangeVisibility = "none";
+  private droneControlRangeVisibility: WeaponRangeVisibility = "none";
   private autoZoom = true;
   private zoomFactor = 1;
 
@@ -105,17 +123,26 @@ export class CanvasRenderer implements Renderer {
     this.weaponRangeVisibility = visibility;
   }
 
+  setDroneRangeVisibility(visibility: WeaponRangeVisibility): void {
+    this.droneRangeVisibility = visibility;
+  }
+
+  setDroneControlRangeVisibility(visibility: WeaponRangeVisibility): void {
+    this.droneControlRangeVisibility = visibility;
+  }
+
   setManualZoom(autoZoom: boolean, factor: number): void {
     this.autoZoom = autoZoom;
     if (Number.isFinite(factor)) this.zoomFactor = Math.max(0.25, Math.min(4, factor));
   }
 
-  draw(snapshot: SimSnapshot, frame: EngagementFrame, ranges: WeaponRanges, overlays: readonly RangeOverlay[]): void {
+  draw(snapshot: SimSnapshot, frame: EngagementFrame, ranges: WeaponRanges, overlays: readonly RangeOverlay[], droneInfo: DroneRenderInfo): void {
     this.syncBufferSize();
     this.updateCamera(snapshot, ranges);
     this.clear();
     this.drawGrid();
     this.drawWeaponRangeRings(snapshot, ranges);
+    this.drawDroneControlRangeRings(snapshot, droneInfo);
     this.drawRangeOverlays(snapshot, overlays);
     this.drawLineOfSight(snapshot.shipA.position, snapshot.shipB.position, frame.distance);
     this.drawWorldVector(snapshot.shipA.position, snapshot.shipA.velocity, COLORS.shipA);
@@ -123,8 +150,10 @@ export class CanvasRenderer implements Renderer {
     this.drawIntendedDirection(snapshot.shipA.position, snapshot.commands.shipA);
     this.drawIntendedDirection(snapshot.shipB.position, snapshot.commands.shipB);
     this.drawWorldVector(snapshot.shipB.position, frame.transversalVelocity, COLORS.transversal);
+    this.drawDroneRangeRings(droneInfo);
     this.drawShip(snapshot.shipA, COLORS.shipA);
     this.drawShip(snapshot.shipB, COLORS.shipB);
+    this.drawDrones(droneInfo);
     this.drawSpeedLabel(snapshot.shipA, COLORS.shipA, -20);
     this.drawSpeedLabel(snapshot.shipB, COLORS.shipB, 20);
     this.drawReadouts(frame);
@@ -213,13 +242,13 @@ export class CanvasRenderer implements Renderer {
   }
 
   private drawRangeRings(center: Vec2, range: WeaponRange): void {
-    if (range.kind === "turret") {
+    if (range.kind === "missile") {
+      this.drawRingAt(center, range.range, COLORS.optimalRing, [8, 6]);
+    } else {
       this.drawRingAt(center, range.optimal, COLORS.optimalRing, [8, 6]);
       if (range.falloff > 0) {
         this.drawRingAt(center, range.optimal + range.falloff, COLORS.falloffRing, [4, 6]);
       }
-    } else {
-      this.drawRingAt(center, range.range, COLORS.optimalRing, [8, 6]);
     }
   }
 
@@ -232,6 +261,52 @@ export class CanvasRenderer implements Renderer {
         this.drawRingAt(center, overlay.radius + overlay.falloffRadius, color, [2, 6]);
       }
     }
+  }
+
+  private drawDroneControlRangeRings(snapshot: SimSnapshot, droneInfo: DroneRenderInfo): void {
+    if (this.droneControlRangeVisibility === "none") return;
+    if (this.droneControlRangeVisibility === "shipA" || this.droneControlRangeVisibility === "both") {
+      const maxRange = maxControlRange(droneInfo.shipA);
+      if (maxRange > 0) this.drawRingAt(snapshot.shipA.position, maxRange, COLORS.controlRing, [2, 8]);
+    }
+    if (this.droneControlRangeVisibility === "shipB" || this.droneControlRangeVisibility === "both") {
+      const maxRange = maxControlRange(droneInfo.shipB);
+      if (maxRange > 0) this.drawRingAt(snapshot.shipB.position, maxRange, COLORS.controlRing, [2, 8]);
+    }
+  }
+
+  private drawDroneRangeRings(droneInfo: DroneRenderInfo): void {
+    if (this.droneRangeVisibility === "none") return;
+    if (this.droneRangeVisibility === "shipA" || this.droneRangeVisibility === "both") {
+      for (const group of droneInfo.shipA) this.drawDroneGroupRangeRings(group, COLORS.shipA);
+    }
+    if (this.droneRangeVisibility === "shipB" || this.droneRangeVisibility === "both") {
+      for (const group of droneInfo.shipB) this.drawDroneGroupRangeRings(group, COLORS.shipB);
+    }
+  }
+
+  private drawDroneGroupRangeRings(group: DroneGroupRenderInfo, color: string): void {
+    const center = centroidOf(group.positions);
+    if (group.optimal > 0) this.drawRingAt(center, group.optimal, color, [6, 4]);
+    if (group.falloff > 0) this.drawRingAt(center, group.optimal + group.falloff, withAlpha(color, 0.5), [3, 4]);
+  }
+
+  private drawDrones(droneInfo: DroneRenderInfo): void {
+    for (const group of droneInfo.shipA) for (const pos of group.positions) this.drawDroneMarker(pos, COLORS.shipA);
+    for (const group of droneInfo.shipB) for (const pos of group.positions) this.drawDroneMarker(pos, COLORS.shipB);
+  }
+
+  private drawDroneMarker(position: Vec2, color: string): void {
+    const p = this.worldToScreen(position);
+    const s = DRONE_ICON_SIZE;
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 1.5;
+    this.ctx.beginPath();
+    this.ctx.moveTo(p.x - s, p.y - s);
+    this.ctx.lineTo(p.x + s, p.y + s);
+    this.ctx.moveTo(p.x + s, p.y - s);
+    this.ctx.lineTo(p.x - s, p.y + s);
+    this.ctx.stroke();
   }
 
   private drawRingAt(center: Vec2, radius: number, color: string, dash?: number[]): void {
@@ -378,7 +453,20 @@ export class CanvasRenderer implements Renderer {
 }
 
 function weaponRangeMax(range: WeaponRange): number {
-  return range.kind === "turret" ? range.optimal + range.falloff : range.range;
+  return range.kind === "missile" ? range.range : range.optimal + range.falloff;
+}
+
+function maxControlRange(groups: readonly DroneGroupRenderInfo[]): number {
+  let max = 0;
+  for (const group of groups) if (group.controlRange > max) max = group.controlRange;
+  return max;
+}
+
+function centroidOf(positions: readonly Vec2[]): Vec2 {
+  if (positions.length === 0) return new Vec2(0, 0);
+  let x = 0, y = 0;
+  for (const p of positions) { x += p.x; y += p.y; }
+  return new Vec2(x / positions.length, y / positions.length);
 }
 
 function formatTime(s: number): string {

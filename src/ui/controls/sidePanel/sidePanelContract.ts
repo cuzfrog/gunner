@@ -13,6 +13,7 @@ import type { ISidePanelSections } from "./sidePanelSections";
 import type { PanelOverrides } from "./overrides";
 import type { PanelTurretLink } from "./turretLink";
 import type { PanelLauncherLink } from "./launcherLink";
+import type { PanelDroneLink } from "./droneLink";
 import type { SidePanelElements } from "./elements";
 
 export interface SidePanel {
@@ -47,6 +48,8 @@ export interface SidePanel {
   clearLauncher(): void;
   restoreLauncher(): void;
   setLauncherProfile(profile: ShipProfile | undefined): void;
+  clearDrone(): void;
+  restoreDrone(): void;
   renderFittingPopupIfOpen(): void;
   closeFittingPopupIfOpen(): void;
   hideFittingPreview(): void;
@@ -111,5 +114,6 @@ export interface SidePanelDeps {
   overrides: PanelOverrides;
   turretLink: PanelTurretLink;
   launcherLink: PanelLauncherLink;
+  droneLink: PanelDroneLink;
   simValueParser: SimValueParser;
 }

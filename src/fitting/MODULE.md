@@ -4,25 +4,30 @@ no-new-exports:
   - chargeCatalog.ts
   - cradle.ts
   - damageBreakdown.test.ts
-  - damageBreakdown.ts
   - eft.test.ts
   - eft.ts
   - fittingImport.test.ts
   - fittingImport.ts
-  - fittingCalculator.ts
   - fittingOverrides.test.ts
   - fittingOverrides.ts
   - fittingState.test.ts
-  - fittingState.ts
   - gunFamilies.test.ts
   - gunFamilies.ts
-  - index.ts
   - launcherClasses.test.ts
   - launcherClasses.ts
   - missileCatalog.test.ts
   - missileCatalog.ts
   - missileStats.test.ts
   - missileStats.ts
+  - droneCatalog.ts
+  - droneCatalog.test.ts
+  - droneLoadoutResolver.ts
+  - droneLoadoutResolver.test.ts
+  - droneLoadoutValidator.ts
+  - droneLoadoutValidator.test.ts
+  - droneStats.ts
+  - droneStats.test.ts
+  - fittingCalculator.test.ts
   - module.ts
   - presetFittings.test.ts
   - presetFittings.ts
@@ -38,22 +43,25 @@ extracting the fitted ewar loadout (stasis webs, tracking disruptors, and
 scripts) for the `sim` module.
 
 The public boundary is `index.ts`, which exports the `FittingImport`,
-`ChargeCatalog`, `MissileCatalog`, `MissileSkillModel`, `PresetFittings`,
-`GunFamilies`, and `LauncherClasses` abstractions, `ImportedFitting`,
-`ImportedTurret`, `ImportedLauncher`, `CargoCharge`, `ChargeOption`,
-`MissileOption`, `PresetFitting`, `FittingRow`, `FittingSection`,
+`ChargeCatalog`, `MissileCatalog`, `MissileSkillModel`, `DroneCatalog`,
+`DroneSkillModel`, `PresetFittings`, `GunFamilies`, and `LauncherClasses`
+abstractions, `ImportedFitting`, `ImportedTurret`, `ImportedLauncher`,
+`ImportedDrone`, `CargoCharge`, `ChargeOption`, `MissileOption`,
+`DroneOption`, `PresetFitting`, `FittingRow`, `FittingSection`,
 `FittingSummary`, `LauncherClass`, `FittingState`, `FittedModule`,
-`TurretGroup`, `LauncherGroup`, `CargoEntry`, `FittingModuleEntry`,
-`DamageType`, `DamageFactor`, `DamageFactorKind`, `DamageBreakdown`,
-`EMPTY_DAMAGE_BREAKDOWN`, and the module registration.
-`chargeDamageByType` and `missileDamageByType` are sibling-only helpers
-used within the fitting module and are not re-exported through `index.ts`. `FittingState` represents the equipped fitting
-basis (hull, support modules, turret groups, launcher groups, propulsion,
-ewar, boosters, drones, cargo) without computed values.
+`TurretGroup`, `LauncherGroup`, `DroneGroup`, `CargoEntry`,
+`FittingModuleEntry`, `DamageType`, `DamageFactor`, `DamageFactorKind`,
+`DamageBreakdown`, `EMPTY_DAMAGE_BREAKDOWN`, and the module registration.
+`chargeDamageByType`, `missileDamageByType`, and `droneDamageByType` are
+sibling-only helpers used within the fitting module and are not
+re-exported through `index.ts`. `FittingState` represents the equipped
+fitting basis (hull, support modules, turret groups, launcher groups,
+propulsion, ewar, boosters, missile boosters, drone boosters, drone
+groups, drones, cargo) without computed values.
 `FittingStateFactory` builds `FittingState` from resolved module entries
-and `FittingDb`. `FittingCalculator` computes turrets, launchers, hull,
-propulsion, ewar, boosts, and cargo charges from a `FittingState` plus
-`StatConditions`. `FittingOverrides` and `FittingOverridesStore`
+and `FittingDb`. `FittingCalculator` computes turrets, launchers, drones,
+hull, propulsion, ewar, boosts, and cargo charges from a `FittingState`
+plus `StatConditions`. `FittingOverrides` and `FittingOverridesStore`
 represent user fitting-level changes (replacing equipped turret/launcher
 modules, charges, or propulsion). `applyFittingOverrides` patches a
 `FittingState` with overrides, producing a new state for the calculator.
@@ -77,5 +85,8 @@ data (fitting database, module slots, item names, and fitting presets)
 lives in `src/gamedata` and is consumed through typed DI accessors.
 Internal files such as `eft.ts`, `fittingImport.ts`, `chargeCatalog.ts`,
 `gunFamilies.ts`, `launcherClasses.ts`, `missileCatalog.ts`,
-`missileStats.ts`, and `presetFittings.ts` and their sibling tests are
-reached only by their sibling tests and by `module.ts`.
+`missileStats.ts`, `droneCatalog.ts`, `droneStats.ts`, and
+`presetFittings.ts` and their sibling tests are reached only by their
+sibling tests and by `module.ts`.
+
+Gate relaxed: `fittingState.ts`, `fittingCalculator.ts`, `damageBreakdown.ts`, and `index.ts` were removed from `no-new-exports` to add `DroneGroup`, `droneBoosterModules`, `droneGroups`, `resolveDrones`, and `droneDamageByType` alongside the existing turret/missile fitting contracts. These are cross-boundary DTOs and calculator methods consumed by `sim`, `app`, and `ui`.

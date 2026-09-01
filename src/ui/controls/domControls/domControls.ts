@@ -4,7 +4,7 @@ import {
   type WeaponSpec,
 } from "../../../sim";
 import { isEventTargetWithClosest, num } from "../controlsDom";
-import type { Controls, ControlsCallbacks, EffectiveReadouts } from "../controlsContract";
+import type { Controls, ControlsCallbacks, EffectiveReadouts, ViewStore } from "../controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
 import type { EffectiveReadout } from "../effectiveReadout";
 import type { FittingPreviewManager, PopupGroup } from "../popup";
@@ -17,6 +17,7 @@ import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
 import type { Side } from "../side";
 import type { TurretController } from "../turret";
 import type { LauncherController } from "../launcher";
+import type { DroneController } from "../drone";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
@@ -26,6 +27,7 @@ import type { RangeOverlay } from "../../renderer";
 import type { WeaponRangeVisibility } from "../../../appstate";
 import type { RangeOverlayController } from "../rangeOverlay";
 import type { PortraitsController } from "../portraits";
+import type { HoverHintController } from "../hoverHint";
 
 export type { Controls, ControlsCallbacks } from "../controlsContract";
 
@@ -49,6 +51,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   shipBSide: SidePanel;
   turretControllers: Record<Side, TurretController>;
   launcherControllers: Record<Side, LauncherController>;
+  droneControllers: Record<Side, DroneController>;
   weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   importController: ImportController;
   ewarController: EwarController;
@@ -57,13 +60,14 @@ interface DomControlsAllDeps extends DomControlsDeps {
   shareController: ShareController;
   rangeOverlayController: RangeOverlayController;
   portraitsController: PortraitsController;
+  hoverHintController: HoverHintController;
   previewManager: FittingPreviewManager;
   simConfigSource: SimConfigSource;
 }
 
 const READOUT_INTERVAL_MS = 50;
 
-export class DomControls implements Controls, DomControlsHost {
+export class DomControls implements Controls, DomControlsHost, ViewStore {
   private readonly deps: DomControlsDeps;
   private readonly els: DomControlsEls;
   private readonly popupGroup: PopupGroup;
@@ -77,6 +81,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly shipBSide: SidePanel;
   private readonly turretControllers: Record<Side, TurretController>;
   private readonly launcherControllers: Record<Side, LauncherController>;
+  private readonly droneControllers: Record<Side, DroneController>;
   private readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   private readonly importController: ImportController;
   private readonly ewarController: EwarController;
@@ -85,6 +90,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly shareController: ShareController;
   private readonly rangeOverlayController: RangeOverlayController;
   private readonly portraitsController: PortraitsController;
+  private readonly hoverHintController: HoverHintController;
   private readonly previewManager: FittingPreviewManager;
   private readonly simConfigSource: SimConfigSource;
   private readonly now: () => number;
@@ -109,6 +115,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.shipBSide = all.shipBSide;
     this.turretControllers = all.turretControllers;
     this.launcherControllers = all.launcherControllers;
+    this.droneControllers = all.droneControllers;
     this.weaponSystemSwitches = all.weaponSystemSwitches;
     this.importController = all.importController;
     this.ewarController = all.ewarController;
@@ -117,6 +124,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.shareController = all.shareController;
     this.rangeOverlayController = all.rangeOverlayController;
     this.portraitsController = all.portraitsController;
+    this.hoverHintController = all.hoverHintController;
     this.previewManager = all.previewManager;
     this.simConfigSource = all.simConfigSource;
     this.now = all.now;
@@ -216,6 +224,11 @@ export class DomControls implements Controls, DomControlsHost {
 
   getWeapon(side: Side): WeaponSpec | undefined {
     const activeKind = this.weaponSystemSwitches[side].activeKind();
+    if (activeKind === "drone") {
+      const specs = this.droneControllers[side].currentDroneSpecs();
+      if (specs.length > 0) return specs[0];
+      return this.turretControllers[side].currentTurretSpec();
+    }
     if (activeKind === "missile") {
       const missile = this.launcherControllers[side].currentMissileSpec();
       if (missile) return missile;
@@ -227,15 +240,26 @@ export class DomControls implements Controls, DomControlsHost {
   }
   getWeapons(side: Side): readonly WeaponSpec[] {
     const activeKind = this.weaponSystemSwitches[side].activeKind();
-    if (activeKind === "missile") {
+    const weapons: WeaponSpec[] = [];
+    if (activeKind === "drone") {
+      for (const spec of this.droneControllers[side].currentDroneSpecs()) weapons.push(spec);
+    } else if (activeKind === "missile") {
       const missile = this.launcherControllers[side].currentMissileSpec();
-      if (missile) return [missile];
-      return this.turretControllers[side].currentTurretSpecs();
+      if (missile) weapons.push(missile);
+    } else {
+      for (const turret of this.turretControllers[side].currentTurretSpecs()) weapons.push(turret);
     }
-    const turrets = this.turretControllers[side].currentTurretSpecs();
-    if (turrets.length > 0) return turrets;
-    const missile = this.launcherControllers[side].currentMissileSpec();
-    return missile ? [missile] : [];
+    if (activeKind !== "turret") {
+      for (const turret of this.turretControllers[side].currentTurretSpecs()) weapons.push(turret);
+    }
+    if (activeKind !== "missile") {
+      const missile = this.launcherControllers[side].currentMissileSpec();
+      if (missile) weapons.push(missile);
+    }
+    if (activeKind !== "drone") {
+      for (const spec of this.droneControllers[side].currentDroneSpecs()) weapons.push(spec);
+    }
+    return weapons;
   }
   getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
@@ -245,7 +269,9 @@ export class DomControls implements Controls, DomControlsHost {
   getZoomFactor(): number { return this.preferencesController.getZoomFactor(); }
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
   getWeaponRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getWeaponRangeVisibility(); }
-  hasWeapon(side: Side): boolean { return this.turretControllers[side].turret() !== undefined || this.launcherControllers[side].launcher() !== undefined; }
+  getDroneRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneRangeVisibility(); }
+  getDroneControlRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneControlRangeVisibility(); }
+  hasWeapon(side: Side): boolean { return this.turretControllers[side].turret() !== undefined || this.launcherControllers[side].launcher() !== undefined || this.droneControllers[side].drone() !== undefined; }
   update(view: EngagementView, effective: EffectiveReadouts): void {
     this.currentDistanceValue = view.frame.distance;
     this.deps.events.emitDistanceChanged(this.currentDistanceValue);
@@ -253,6 +279,10 @@ export class DomControls implements Controls, DomControlsHost {
     this.applyReadoutsIfReady();
     this.rangeOverlayController.update();
     this.portraitsController.update();
+    this.hoverHintController.refresh();
+  }
+  currentView(): EngagementView | undefined {
+    return this.cachedReadouts?.view;
   }
   setPlaying(playing: boolean): void {
     if (!playing && this.playing && this.cachedReadouts) {

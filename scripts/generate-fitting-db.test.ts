@@ -1,14 +1,14 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildDisruptionScriptStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
+import { buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
 }
 
-function sdeType(metaLevel = 0, metaGroupID = 1): { typeID: number; "typeName_en-us": string; groupID: number; published: number; metaLevel: number; metaGroupID: number } {
-  return { typeID: 0, "typeName_en-us": "", groupID: 0, published: 1, metaLevel, metaGroupID };
+function sdeType(metaLevel = 0, metaGroupID = 1, volume?: number): { typeID: number; "typeName_en-us": string; groupID: number; published: number; metaLevel: number; metaGroupID: number; volume?: number } {
+  return { typeID: 0, "typeName_en-us": "", groupID: 0, published: 1, metaLevel, metaGroupID, volume };
 }
 
 describe("buildStasisWebStats", () => {
@@ -394,6 +394,70 @@ describe("buildMissileStats", () => {
   });
 });
 
+describe("buildDroneStats", () => {
+  test("returns undefined when damageMultiplier is missing", () => {
+    expect(buildDroneStats(values({ trackingSpeed: 2, optimalSigRadius: 25, maxRange: 2100, speed: 4000 }), sdeType())).toBeUndefined();
+  });
+
+  test("returns undefined when all damage attributes are zero", () => {
+    expect(buildDroneStats(values({
+      damageMultiplier: 1.92, trackingSpeed: 2.178, optimalSigRadius: 25, maxRange: 2100, speed: 4000,
+      emDamage: 0, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 0,
+    }), sdeType())).toBeUndefined();
+  });
+
+  test("builds a light combat drone (Hobgoblin II) with both speed fields", () => {
+    const stats = buildDroneStats(values({
+      damageMultiplier: 1.92, trackingSpeed: 2.178, optimalSigRadius: 25, maxRange: 2100, speed: 4000,
+      emDamage: 0, thermalDamage: 20, kineticDamage: 0, explosiveDamage: 0,
+      falloff: 2000, maxVelocity: 3360, entityCruiseSpeed: 660, entityFlyRange: 1000, droneBandwidthUsed: 5,
+    }), sdeType(5, 2, 5));
+    expect(stats).toEqual({
+      sizeClass: "light",
+      damageMultiplier: 1.92,
+      emDamage: 0, thermalDamage: 20, kineticDamage: 0, explosiveDamage: 0,
+      tracking: 2.178, sigResolution: 25, optimal: 2100, falloff: 2000,
+      maxVelocity: 3360, orbitSpeed: 660, orbitRange: 1000, cycleTime: 4, bandwidth: 5, volume: 5,
+      metaLevel: 5, metaGroupID: 2,
+    });
+  });
+
+  test("builds a sentry drone (Garde II) with zero orbit speed", () => {
+    const stats = buildDroneStats(values({
+      damageMultiplier: 1.65, trackingSpeed: 0.0336, optimalSigRadius: 400, maxRange: 18000, speed: 4000,
+      emDamage: 0, thermalDamage: 64, kineticDamage: 0, explosiveDamage: 0,
+      falloff: 30000, maxVelocity: 0.00001, entityCruiseSpeed: 0, droneBandwidthUsed: 25,
+    }), sdeType(5, 2, 25));
+    expect(stats?.sizeClass).toBe("sentry");
+    expect(stats?.maxVelocity).toBe(0.00001);
+    expect(stats?.orbitSpeed).toBe(0);
+  });
+
+  test("classifies medium drone by bandwidth 10", () => {
+    const stats = buildDroneStats(values({
+      damageMultiplier: 1.92, trackingSpeed: 1.2, optimalSigRadius: 50, maxRange: 3000, speed: 4000,
+      thermalDamage: 24, maxVelocity: 1500, entityCruiseSpeed: 500, droneBandwidthUsed: 10,
+    }), sdeType());
+    expect(stats?.sizeClass).toBe("medium");
+  });
+
+  test("classifies heavy drone by bandwidth 25", () => {
+    const stats = buildDroneStats(values({
+      damageMultiplier: 1.92, trackingSpeed: 0.6, optimalSigRadius: 100, maxRange: 4000, speed: 4000,
+      thermalDamage: 48, maxVelocity: 1000, entityCruiseSpeed: 400, droneBandwidthUsed: 25,
+    }), sdeType());
+    expect(stats?.sizeClass).toBe("heavy");
+  });
+
+  test("falls back to bandwidth for volume when type volume is missing", () => {
+    const stats = buildDroneStats(values({
+      damageMultiplier: 1.92, trackingSpeed: 2.178, optimalSigRadius: 25, maxRange: 2100, speed: 4000,
+      thermalDamage: 20, droneBandwidthUsed: 5,
+    }), sdeType());
+    expect(stats?.volume).toBe(5);
+  });
+});
+
 describe("_buildTargetPainterStats", () => {
   test("returns undefined when signatureRadiusBonus is missing", () => {
     expect(_buildTargetPainterStats(values({ maxRange: 36000 }))).toBeUndefined();
@@ -528,6 +592,22 @@ describe("Ballistic Control System in _buildModuleStats", () => {
 
   test("does not extract missile damage stats when no missile effect is present", () => {
     const stats = _buildModuleStats(values({ missileDamageMultiplierBonus: 1.1, speedMultiplier: 0.895 }), effects());
+    expect(stats).toBeUndefined();
+  });
+});
+
+describe("Drone Link Augmentor in _buildModuleStats", () => {
+  function effects(...ids: number[]): Set<number> {
+    return new Set(ids);
+  }
+
+  test("extracts drone control range bonus from droneRangeBonus attribute", () => {
+    const stats = _buildModuleStats(values({ droneRangeBonus: 20000 }), effects());
+    expect(stats).toEqual({ droneControlRangeBonus: 20000 });
+  });
+
+  test("does not extract drone control range when attribute is absent", () => {
+    const stats = _buildModuleStats(values({}), effects());
     expect(stats).toBeUndefined();
   });
 });

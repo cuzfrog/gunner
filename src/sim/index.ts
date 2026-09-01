@@ -6,9 +6,11 @@ export type { Simulation } from "./simulation";
 export type { EwarResolver } from "./ewarResolver";
 export type { TurretBoosterResolver } from "./turretBoosterResolver";
 export type { MissileBoosterResolver } from "./missileBoosterResolver";
-export type { EngagementFrameComposer, EngagementInput, EngagementView } from "./engagementFrameComposer";
+export type { EngagementFrameComposer, EngagementInput, EngagementView, WeaponAttack } from "./engagementFrameComposer";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { MissileApplication } from "./missileApplication";
+export type { DroneApplication } from "./droneApplication";
+export type { DroneSimulator, DroneSimConfig } from "./droneSimulator";
 export type { TurretDamage } from "./turretDamage";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
@@ -22,6 +24,10 @@ export type {
   DisruptionBreakdown,
   DisruptionScriptSpec,
   DisruptorActivation,
+  DroneDamageBreakdown,
+  DroneMode,
+  DroneRuntimeState,
+  DroneSpec,
   EngagementFrame,
   EwarActivation,
   EwarEffectFamily,
@@ -56,6 +62,7 @@ export type {
   TrackingBoosterSpec,
   TrackingDisruptorSpec,
   TurretBoostProjection,
+  TrackingApplicationSpec,
   TurretDamageBreakdown,
   TurretScriptSpec,
   TurretSpec,

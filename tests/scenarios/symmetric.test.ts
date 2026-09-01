@@ -3,6 +3,7 @@ import { EngagementFrameComposerImpl } from "../../src/sim/engagementFrameCompos
 import { HitChanceImpl } from "../../src/sim/hitChance";
 import { KinematicsImpl } from "../../src/sim/kinematics";
 import { MissileApplicationImpl } from "../../src/sim/missileApplication";
+import { DroneApplicationImpl } from "../../src/sim/droneApplication";
 import { MissileBoosterResolverImpl } from "../../src/sim/missileBoosterResolver";
 import { StackingPenaltyImpl } from "../../src/sim/stackingPenalty";
 import { TurretDamageImpl } from "../../src/sim/turretDamage";
@@ -85,7 +86,8 @@ function makeComposer() {
   const ewarResolver = fakeEwarResolver();
   const turretDamage = new TurretDamageImpl();
   const missileApplication = new MissileApplicationImpl();
-  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: new StackingPenaltyImpl() }), turretDamage, missileApplication });
+  const droneApplication = new DroneApplicationImpl({ hitChance });
+  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: new StackingPenaltyImpl() }), turretDamage, missileApplication, droneApplication });
   return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator });
 }
 
@@ -100,7 +102,7 @@ describe("symmetric mutual engagement", () => {
       shipB,
       commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
     };
-    const view = composer.compose(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 } });
+    const view = composer.compose(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 }, droneStates: { shipA: [], shipB: [] } });
     expect(view.attacks.shipA?.turret?.hit.chance).toBe(view.attacks.shipB?.turret?.hit.chance);
     expect(view.frame.shipA.maxSpeed).toBe(view.frame.shipB.maxSpeed);
   });
@@ -115,7 +117,7 @@ describe("symmetric mutual engagement", () => {
       shipB,
       commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
     };
-    const view = composer.compose(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 } });
+    const view = composer.compose(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 }, droneStates: { shipA: [], shipB: [] } });
     expect(view.attacks.shipA?.turret?.hit.chance!).toBeLessThan(view.attacks.shipB?.turret?.hit.chance!);
     expect((view.attacks.shipA?.effectiveWeapon as TurretSpec).tracking).toBe(turret.tracking * 0.5);
     expect((view.attacks.shipB?.effectiveWeapon as TurretSpec).tracking).toBe(turret.tracking);

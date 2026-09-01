@@ -79,6 +79,15 @@ const controlsCradleKeys = {
   dpsHintProvider: "dpsHintProvider",
   ammoHintRenderer: "ammoHintRenderer",
   ammoHintProvider: "ammoHintProvider",
+  shipADroneController: "shipADroneController",
+  shipBDroneController: "shipBDroneController",
+  droneControllers: "droneControllers",
+  droneCatalog: "droneCatalog",
+  droneLoadoutResolver: "droneLoadoutResolver",
+  droneLoadoutValidator: "droneLoadoutValidator",
+  viewStore: "viewStore",
+  appliedDpsHintRenderer: "appliedDpsHintRenderer",
+  appliedDpsHintProvider: "appliedDpsHintProvider",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 
 describe("registerControlsModule", () => {

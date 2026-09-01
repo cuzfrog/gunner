@@ -12,6 +12,7 @@ import { registerEngagementReadoutModule } from "./engagementReadout";
 import { registerHintsModule } from "./hints";
 import { registerImportModule, type ImportController } from "./import";
 import { registerLauncherModule } from "./launcher";
+import { registerDroneModule } from "./drone";
 import { registerPopupModule } from "./popup";
 import { registerPreferencesModule } from "./preferences";
 import { registerProfileModule } from "./profile";
@@ -28,6 +29,7 @@ import { registerPortraitsModule } from "./portraits";
 import { registerHoverHintModule } from "./hoverHint";
 import { registerDpsHintModule, wireDpsHintProvider } from "./dpsHint";
 import { registerAmmoHintModule, wireAmmoHintProvider } from "./ammoHint";
+import { registerAppliedDpsHintModule, wireAppliedDpsHintProvider } from "./appliedDpsHint";
 
 export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   if (!cradle.hasRegistration("now")) {
@@ -39,6 +41,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerHintsModule(cradle);
   registerTurretModule(cradle);
   registerLauncherModule(cradle);
+  registerDroneModule(cradle);
   registerSidePanelModule(cradle);
   registerEwarModule(cradle);
   registerBoosterModule(cradle);
@@ -58,6 +61,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerProfileModule(cradle);
   registerSessionModule(cradle);
   registerDomControlsModule(cradle);
+  registerAppliedDpsHintModule(cradle);
   wire(cradle);
 }
 
@@ -65,6 +69,7 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   const c = cradle.cradle;
   wireDpsHintProvider(cradle);
   wireAmmoHintProvider(cradle);
+  wireAppliedDpsHintProvider(cradle);
   const sides = combatantSidesOf(c.shipASide, c.shipBSide);
   const fittingPopups = { shipA: c.shipAFittingPopup, shipB: c.shipBFittingPopup } as const;
   const host = {

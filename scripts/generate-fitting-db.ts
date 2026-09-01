@@ -36,6 +36,7 @@ interface SdeType {
   published: number;
   metaLevel?: number;
   metaGroupID?: number;
+  volume?: number;
 }
 
 type LocalizedName = { readonly en: string; readonly zh?: string; readonly ja?: string };
@@ -66,7 +67,7 @@ interface SdeTypeDogma {
   dogmaEffects: readonly SdeDogmaEffect[];
 }
 
-type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "turretDamage" | "turretRoF";
+type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "turretDamage" | "turretRoF" | "droneDamage";
 
 interface HullBonusRule {
   readonly attribute: BonusAttribute;
@@ -429,6 +430,24 @@ const BONUS_EFFECTS: Readonly<Record<number, readonly HullBonusRule[]>> = {
   7018: [{ attribute: "turretRoF", bonusAttr: "shipBonusAF", turretSkill: "Small Energy Turret" }],
   7248: [{ attribute: "turretRoF", bonusAttr: "shipBonusMF", skill: "Minmatar Frigate", turretSkill: "Small Projectile Turret" }],
   8094: [{ attribute: "turretRoF", bonusAttr: "shipBonusGD1", skill: "Gallente Destroyer", turretSkill: "Small Hybrid Turret" }],
+  2187: [{ attribute: "droneDamage", bonusAttr: "shipBonusGB2", skill: "Gallente Battleship" }],
+  2188: [{ attribute: "droneDamage", bonusAttr: "shipBonusGC2", skill: "Gallente Cruiser" }],
+  2189: [{ attribute: "droneDamage", bonusAttr: "shipBonusAC2", skill: "Amarr Cruiser" }],
+  4619: [{ attribute: "droneDamage", bonusAttr: "shipBonusGF2", skill: "Gallente Frigate" }],
+  5014: [{ attribute: "droneDamage", bonusAttr: "rookieDroneBonus" }],
+  5295: [{ attribute: "droneDamage", bonusAttr: "shipBonusAD1", skill: "Amarr Destroyer" }],
+  5311: [{ attribute: "droneDamage", bonusAttr: "shipBonusGD1", skill: "Gallente Destroyer" }],
+  5326: [{ attribute: "droneDamage", bonusAttr: "shipBonusABC2", skill: "Amarr Battlecruiser" }],
+  5343: [{ attribute: "droneDamage", bonusAttr: "shipBonusGBC1", skill: "Gallente Battlecruiser" }],
+  5417: [{ attribute: "droneDamage", bonusAttr: "shipBonusAB", skill: "Amarr Battleship" }],
+  5803: [{ attribute: "droneDamage", bonusAttr: "shipBonusRole7" }],
+  5804: [{ attribute: "droneDamage", bonusAttr: "shipBonusRole7" }],
+  5821: [{ attribute: "droneDamage", bonusAttr: "shipBonusRole7" }],
+  8225: [{ attribute: "droneDamage", bonusAttr: "shipRoleBonusDroneDamage" }],
+  8261: [{ attribute: "droneDamage", bonusAttr: "industrialCommandBonusDroneDamage", skill: "Industrial Command Ships" }],
+  8470: [{ attribute: "droneDamage", bonusAttr: "capitalIndustrialCommandBonusDroneDamage", skill: "Capital Industrial Ships" }],
+  11426: [{ attribute: "droneDamage", bonusAttr: "shipBonusAB", skill: "Amarr Battleship" }],
+  12249: [{ attribute: "droneDamage", bonusAttr: "shipBonusGBC1", skill: "Gallente Battlecruiser" }],
 };
 
 const MODULE_GROUPS = new Set([
@@ -456,6 +475,7 @@ const MODULE_GROUPS = new Set([
   782, // Rig Navigation
   786, // Rig Electronic Systems
   1308, // Rig Anchor
+  647, // Drone Control Range Module
 ]);
 
 const SCRIPT_GROUPS = new Set([907]);
@@ -489,6 +509,11 @@ const MISSILE_CHARGE_GROUPS = new Set([
   89, 384, 385, 386, 387, 394, 395, 396, 476, 648, 653, 654, 655, 656, 657, 772, 1019, 1677, 1678,
 ]);
 
+const COMBAT_DRONE_GROUP = 100;
+const OMNIDIRECTIONAL_TRACKING_LINK_GROUP = 646;
+const OMNIDIRECTIONAL_TRACKING_ENHANCER_GROUP = 1292;
+const DRONE_CONTROL_RANGE_MODULE_GROUP = 647;
+
 const RIG_SIG_DRAWBACK_EFFECT = 2716;
 const RIG_AGILITY_DRAWBACK_EFFECT = 2717;
 const SHIP_CATEGORY_ID = 6;
@@ -515,6 +540,10 @@ const DAMAGE_MODULE_EFFECTS: Readonly<Record<number, TurretWeaponGroup>> = {
 // on the skill item is a percentage per level; it is applied as an unpenalized boost.
 // WARHEAD_UPGRADES_SKILL_ID is the missile damage skill, not in SKILL_BONUS_RULES (turret-only).
 const WARHEAD_UPGRADES_SKILL_ID = "20315";
+// Drone skill typeIDs referenced by DroneSkillModelImpl (src/fitting/droneStats.ts).
+// These must stay in sync with the runtime constants so that addSkillNames includes them
+// in the item name packs for display-time resolution via ItemNameCatalog.
+const DRONE_SKILL_IDS = ["3442", "24241", "33699", "3441", "23594"];
 interface SkillBonusRule {
   readonly skillId: number;
   readonly bonusType: "turretDamage" | "turretRoF";
@@ -708,6 +737,8 @@ interface FittingModuleStats {
   readonly targetPainter?: TargetPainterStats;
   readonly missileDamageMultiplier?: number;
   readonly missileCycleTimeMultiplier?: number;
+  readonly droneDamageBonus?: number;
+  readonly droneControlRangeBonus?: number;
 }
 
 type TurretWeaponGroup = "Energy Weapon" | "Hybrid Weapon" | "Projectile Weapon";
@@ -827,6 +858,42 @@ export interface MissileScriptStats {
   readonly flightTimeMultiplier: number;
 }
 
+interface OmnidirectionalTrackingLinkStats {
+  readonly trackingBonusPercent: number;
+  readonly optimalBonusPercent: number;
+  readonly falloffBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+}
+
+interface OmnidirectionalTrackingEnhancerStats {
+  readonly trackingBonusPercent: number;
+  readonly optimalBonusPercent: number;
+  readonly falloffBonusPercent: number;
+}
+
+type DroneSizeClass = "light" | "medium" | "heavy" | "sentry";
+
+interface DroneStats {
+  readonly sizeClass: DroneSizeClass;
+  readonly damageMultiplier: number;
+  readonly emDamage: number;
+  readonly thermalDamage: number;
+  readonly kineticDamage: number;
+  readonly explosiveDamage: number;
+  readonly tracking: number;
+  readonly sigResolution: number;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly maxVelocity: number;
+  readonly orbitSpeed: number;
+  readonly orbitRange: number;
+  readonly cycleTime: number;
+  readonly bandwidth: number;
+  readonly volume: number;
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
+}
+
 function optionalNumber(value: number | undefined): number | undefined {
   if (value === undefined || !Number.isFinite(value) || value === 0) return undefined;
   return value;
@@ -908,6 +975,12 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
     if (missileDamageMultiplier !== undefined) stats.missileDamageMultiplier = missileDamageMultiplier;
     if (missileCycleTimeMultiplier !== undefined) stats.missileCycleTimeMultiplier = missileCycleTimeMultiplier;
   }
+
+  const droneDamageBonus = optionalNumber(values.get("droneDamageBonus"));
+  if (droneDamageBonus !== undefined) stats.droneDamageBonus = droneDamageBonus;
+
+  const droneControlRangeBonus = optionalNumber(values.get("droneRangeBonus"));
+  if (droneControlRangeBonus !== undefined) stats.droneControlRangeBonus = droneControlRangeBonus;
 
   if (Object.keys(stats).length === 0) return undefined;
   return { ...stats };
@@ -1135,6 +1208,72 @@ function damageTypeFromValues(em: number, thermal: number, kinetic: number, expl
   return "explosive";
 }
 
+export function buildDroneStats(values: Map<string, number>, type: SdeType): DroneStats | undefined {
+  const damageMultiplier = values.get("damageMultiplier");
+  const tracking = values.get("trackingSpeed");
+  const sigResolution = values.get("optimalSigRadius");
+  const optimal = values.get("maxRange");
+  const speed = values.get("speed");
+  if (damageMultiplier === undefined || tracking === undefined || sigResolution === undefined || optimal === undefined || speed === undefined) return undefined;
+  const emDamage = values.get("emDamage") ?? 0;
+  const thermalDamage = values.get("thermalDamage") ?? 0;
+  const kineticDamage = values.get("kineticDamage") ?? 0;
+  const explosiveDamage = values.get("explosiveDamage") ?? 0;
+  if (emDamage + thermalDamage + kineticDamage + explosiveDamage <= 0) return undefined;
+  const falloff = values.get("falloff") ?? 0;
+  const maxVelocity = values.get("maxVelocity") ?? 0;
+  const orbitSpeed = values.get("entityCruiseSpeed") ?? 0;
+  const bandwidth = values.get("droneBandwidthUsed") ?? 0;
+  const sizeClass = droneSizeClassFromStats(maxVelocity, orbitSpeed, bandwidth);
+  const rawOrbitRange = values.get("entityFlyRange") ?? 0;
+  const orbitRange = sizeClass === "sentry" ? 0 : rawOrbitRange;
+  const volume = type.volume ?? bandwidth;
+  return {
+    sizeClass,
+    damageMultiplier,
+    emDamage,
+    thermalDamage,
+    kineticDamage,
+    explosiveDamage,
+    tracking,
+    sigResolution,
+    optimal,
+    falloff,
+    maxVelocity,
+    orbitSpeed,
+    orbitRange,
+    cycleTime: speed / 1000,
+    bandwidth,
+    volume,
+    metaLevel: type.metaLevel ?? 0,
+    metaGroupID: type.metaGroupID ?? 1,
+  };
+}
+
+function droneSizeClassFromStats(maxVelocity: number, orbitSpeed: number, bandwidth: number): DroneSizeClass {
+  if (maxVelocity <= 1 && orbitSpeed <= 1) return "sentry";
+  if (bandwidth <= 5) return "light";
+  if (bandwidth <= 10) return "medium";
+  return "heavy";
+}
+
+export function buildOmnidirectionalTrackingLinkStats(values: Map<string, number>): OmnidirectionalTrackingLinkStats | undefined {
+  const trackingBonusPercent = values.get("trackingSpeedBonus");
+  const optimalBonusPercent = values.get("maxRangeBonus");
+  const falloffBonusPercent = values.get("falloffBonus");
+  if (trackingBonusPercent === undefined || optimalBonusPercent === undefined || falloffBonusPercent === undefined) return undefined;
+  const overloadStrengthBonusPercent = values.get("overloadTrackingModuleStrengthBonus") ?? 0;
+  return { trackingBonusPercent, optimalBonusPercent, falloffBonusPercent, overloadStrengthBonusPercent };
+}
+
+export function buildOmnidirectionalTrackingEnhancerStats(values: Map<string, number>): OmnidirectionalTrackingEnhancerStats | undefined {
+  const trackingBonusPercent = values.get("trackingSpeedBonus");
+  const optimalBonusPercent = values.get("maxRangeBonus");
+  const falloffBonusPercent = values.get("falloffBonus");
+  if (trackingBonusPercent === undefined || optimalBonusPercent === undefined || falloffBonusPercent === undefined) return undefined;
+  return { trackingBonusPercent, optimalBonusPercent, falloffBonusPercent };
+}
+
 async function main() {
   const types = await loadMerged<SdeType>("types.");
   const typedogmas = await loadMerged<SdeTypeDogma>("typedogma.");
@@ -1160,8 +1299,11 @@ async function main() {
   const missileGuidanceComputers: Record<string, Row<MissileGuidanceComputerStats>> = {};
   const missileGuidanceEnhancers: Record<string, Row<MissileGuidanceEnhancerStats>> = {};
   const missileScripts: Record<string, Row<MissileScriptStats>> = {};
+  const omnidirectionalTrackingLinks: Record<string, Row<OmnidirectionalTrackingLinkStats>> = {};
+  const omnidirectionalTrackingEnhancers: Record<string, Row<OmnidirectionalTrackingEnhancerStats>> = {};
   const hullBonuses: Record<ShipId, readonly HullBonus[]> = {};
   const drones: Record<string, DroneEntry> = {};
+  const combatDrones: Record<string, Row<DroneStats>> = {};
   const itemNames: Record<string, LocalizedName> = {};
   const idToType = new Map<string, SdeType>();
   const shipNameToId = buildShipNameToId();
@@ -1269,6 +1411,10 @@ async function main() {
 
     if (groups[String(type.groupID)]?.categoryID === DRONE_CATEGORY_ID) {
       drones[id] = { id, name: enName };
+      if (type.groupID === COMBAT_DRONE_GROUP) {
+        const stats = buildDroneStats(values, type);
+        if (stats) combatDrones[id] = { ...stats, id, name: enName };
+      }
       addItemName(itemNames, id, type);
       continue;
     }
@@ -1359,6 +1505,24 @@ async function main() {
       continue;
     }
 
+    if (type.groupID === OMNIDIRECTIONAL_TRACKING_LINK_GROUP) {
+      const stats = buildOmnidirectionalTrackingLinkStats(values);
+      if (stats) {
+        omnidirectionalTrackingLinks[id] = { ...stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
+    if (type.groupID === OMNIDIRECTIONAL_TRACKING_ENHANCER_GROUP) {
+      const stats = buildOmnidirectionalTrackingEnhancerStats(values);
+      if (stats) {
+        omnidirectionalTrackingEnhancers[id] = { ...stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
     if (MODULE_GROUPS.has(type.groupID)) {
       const effects = buildEffectSet(typeDogma);
       if (type.groupID === 46) {
@@ -1376,6 +1540,9 @@ async function main() {
 
   const sortedDrones = Object.fromEntries(
     Object.entries(drones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
+  );
+  const sortedCombatDrones = Object.fromEntries(
+    Object.entries(combatDrones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
   );
 
   const skillMagnitudes = buildSkillMagnitudes(attributeNames, typedogmas);
@@ -1418,6 +1585,8 @@ export interface FittingModuleStats {
   readonly targetPainter?: Omit<TargetPainterStats, "id" | "name">;
   readonly missileDamageMultiplier?: number;
   readonly missileCycleTimeMultiplier?: number;
+  readonly droneDamageBonus?: number;
+  readonly droneControlRangeBonus?: number;
   readonly id: TypeId;
   readonly name: string;
 }
@@ -1439,7 +1608,7 @@ export interface TurretStats {
   readonly name: string;
 }
 
-export type HullBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "turretDamage" | "turretRoF";
+export type HullBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "turretDamage" | "turretRoF" | "droneDamage";
 
 export interface HullBonus {
   readonly attribute: HullBonusAttribute;
@@ -1590,6 +1759,48 @@ export interface MissileScriptStats {
   readonly name: string;
 }
 
+export interface OmnidirectionalTrackingLinkStats {
+  readonly trackingBonusPercent: number;
+  readonly optimalBonusPercent: number;
+  readonly falloffBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export interface OmnidirectionalTrackingEnhancerStats {
+  readonly trackingBonusPercent: number;
+  readonly optimalBonusPercent: number;
+  readonly falloffBonusPercent: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export type DroneSizeClass = "light" | "medium" | "heavy" | "sentry";
+
+export interface DroneStats {
+  readonly sizeClass: DroneSizeClass;
+  readonly damageMultiplier: number;
+  readonly emDamage: number;
+  readonly thermalDamage: number;
+  readonly kineticDamage: number;
+  readonly explosiveDamage: number;
+  readonly tracking: number;
+  readonly sigResolution: number;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly maxVelocity: number;
+  readonly orbitSpeed: number;
+  readonly orbitRange: number;
+  readonly cycleTime: number;
+  readonly bandwidth: number;
+  readonly volume: number;
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
 `;
 
   const scriptDefinitions = `export const SCRIPTS: Readonly<Record<string, TurretScriptStats>> = ${stringifyWithTypeIds(scripts)};
@@ -1614,6 +1825,10 @@ export const MISSILE_GUIDANCE_ENHANCERS: Readonly<Record<string, MissileGuidance
 
 export const MISSILE_SCRIPTS: Readonly<Record<string, MissileScriptStats>> = ${stringifyWithTypeIds(missileScripts)};
 
+export const OMNIDIRECTIONAL_TRACKING_LINKS: Readonly<Record<string, OmnidirectionalTrackingLinkStats>> = ${stringifyWithTypeIds(omnidirectionalTrackingLinks)};
+
+export const OMNIDIRECTIONAL_TRACKING_ENHANCERS: Readonly<Record<string, OmnidirectionalTrackingEnhancerStats>> = ${stringifyWithTypeIds(omnidirectionalTrackingEnhancers)};
+
 `;
 
   const lines: string[] = [
@@ -1635,6 +1850,8 @@ export const MISSILE_SCRIPTS: Readonly<Record<string, MissileScriptStats>> = ${s
     `export const SKILL_BONUSES: readonly SkillBonus[] = ${stringifySkillBonuses(skillMagnitudes)};`,
     ``,
     `export const DRONES: Readonly<Record<string, { readonly id: TypeId; readonly name: string }>> = ${stringifyWithTypeIds(sortedDrones)};`,
+    ``,
+    `export const COMBAT_DRONES: Readonly<Record<string, DroneStats>> = ${stringifyWithTypeIds(sortedCombatDrones)};`,
     ``,
   ];
 
@@ -1658,7 +1875,10 @@ export const MISSILE_SCRIPTS: Readonly<Record<string, MissileScriptStats>> = ${s
     missileGuidanceComputers,
     missileGuidanceEnhancers,
     missileScripts,
+    omnidirectionalTrackingLinks,
+    omnidirectionalTrackingEnhancers,
     drones,
+    combatDrones,
   );
   const filteredItemNames = filterItemNames(itemNames, idToType, groups, dbTableNames);
 
@@ -1682,8 +1902,11 @@ export const MISSILE_SCRIPTS: Readonly<Record<string, MissileScriptStats>> = ${s
     `${Object.keys(missileGuidanceComputers).length} missile guidance computers`,
     `${Object.keys(missileGuidanceEnhancers).length} missile guidance enhancers`,
     `${Object.keys(missileScripts).length} missile scripts`,
+    `${Object.keys(omnidirectionalTrackingLinks).length} omnidirectional tracking links`,
+    `${Object.keys(omnidirectionalTrackingEnhancers).length} omnidirectional tracking enhancers`,
     `${Object.keys(hullBonuses).length} hull bonus sets`,
     `${Object.keys(sortedDrones).length} drones`,
+    `${Object.keys(sortedCombatDrones).length} combat drones`,
   ];
   console.log(`Wrote ${counts.join(", ")} to ${OUT_FILE}`);
   console.log(`Wrote ${Object.keys(filteredItemNames).length} item names to ${I18N_EN_FILE}, ${I18N_ZH_FILE}, ${I18N_JA_FILE}`);
@@ -1723,14 +1946,27 @@ function relevantSkillIds(): readonly string[] {
   const ids = new Set<string>();
   for (const rule of SKILL_BONUS_RULES) ids.add(String(rule.skillId));
   ids.add(WARHEAD_UPGRADES_SKILL_ID);
+  for (const id of DRONE_SKILL_IDS) ids.add(id);
   return [...ids];
 }
+
+// Localized names for skill IDs that are not present in the SDE types table.
+// These skills were introduced in expansions after the SDE snapshot used by this script.
+// When the SDE is updated and these IDs appear in types.0.json, this fallback becomes
+// a no-op because addSkillNames checks the SDE first.
+const SKILL_NAME_FALLBACKS: Readonly<Record<string, LocalizedName>> = {
+  "24241": { en: "Light Drone Operation", zh: "轻型无人机操控理论", ja: "ライトドローンオペレーション" },
+  "33699": { en: "Medium Drone Operation", zh: "中型无人机操控理论", ja: "ミディアムドローンオペレーション" },
+  "23594": { en: "Sentry Drone Interfacing", zh: "岗哨无人机操控理论", ja: "セントリードローンインターフェイス" },
+};
 
 function addSkillNames(itemNames: Record<string, LocalizedName>, types: Readonly<Record<string, SdeType>>): void {
   for (const id of relevantSkillIds()) {
     if (id in itemNames) continue;
     const type = types[id];
-    if (type) addItemName(itemNames, id, type);
+    if (type) { addItemName(itemNames, id, type); continue; }
+    const fallback = SKILL_NAME_FALLBACKS[id];
+    if (fallback) itemNames[id] = fallback;
   }
 }
 
@@ -1751,7 +1987,10 @@ function collectDbTableNames(
   missileGuidanceComputers: Record<string, MissileGuidanceComputerStats>,
   missileGuidanceEnhancers: Record<string, MissileGuidanceEnhancerStats>,
   missileScripts: Record<string, MissileScriptStats>,
+  omnidirectionalTrackingLinks: Record<string, Row<OmnidirectionalTrackingLinkStats>>,
+  omnidirectionalTrackingEnhancers: Record<string, Row<OmnidirectionalTrackingEnhancerStats>>,
   drones: Record<string, DroneEntry>,
+  combatDrones: Record<string, Row<DroneStats>>,
 ): Set<string> {
   return new Set([
     ...Object.keys(fittingModules),
@@ -1770,7 +2009,10 @@ function collectDbTableNames(
     ...Object.keys(missileGuidanceComputers),
     ...Object.keys(missileGuidanceEnhancers),
     ...Object.keys(missileScripts),
+    ...Object.keys(omnidirectionalTrackingLinks),
+    ...Object.keys(omnidirectionalTrackingEnhancers),
     ...Object.keys(drones),
+    ...Object.keys(combatDrones),
     ...relevantSkillIds(),
   ]);
 }

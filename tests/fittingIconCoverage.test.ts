@@ -6,6 +6,8 @@ import { ChargeCatalogImpl } from "../src/fitting/chargeCatalog";
 import { GunFamiliesImpl } from "../src/fitting/gunFamilies";
 import { MissileCatalogImpl } from "../src/fitting/missileCatalog";
 import { MissileSkillModelImpl } from "../src/fitting/missileStats";
+import { DroneCatalogImpl } from "../src/fitting/droneCatalog";
+import { DroneSkillModelImpl } from "../src/fitting/droneStats";
 import { parseEft } from "../src/fitting/eft";
 import { ShipsImpl } from "../src/ships/ships";
 import { StaticShipProfileCatalog } from "../src/gamedata/shipProfiles";
@@ -36,6 +38,8 @@ const chargeCatalog = new ChargeCatalogImpl({ fittingDb: FITTING_DB, gunFamilies
 const stackingPenalty = new TestStackingPenalty();
 const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty });
 const missileCatalog = new MissileCatalogImpl({ fittingDb: FITTING_DB, missileSkillModel });
+const droneSkillModel = new DroneSkillModelImpl();
+const droneCatalog = new DroneCatalogImpl({ fittingDb: FITTING_DB });
 const fittingImport = new FittingImportImpl({
   ships,
   fittingDb: FITTING_DB,
@@ -43,6 +47,8 @@ const fittingImport = new FittingImportImpl({
   gunFamilies,
   missileCatalog,
   missileSkillModel,
+  droneCatalog,
+  droneSkillModel,
   stackingPenalty,
   itemNameCatalog: new StaticItemNameCatalog(),
   itemNameResolver: new StaticItemNameResolver(),

@@ -1,5 +1,7 @@
 import type {
   Autopilot,
+  DroneApplication,
+  DroneSimulator,
   EwarResolver,
   EngagementEvaluator,
   EngagementFrameComposer,
@@ -24,6 +26,8 @@ export interface SimCradle {
   readonly kinematics: Kinematics;
   readonly hitChance: HitChance;
   readonly missileApplication: MissileApplication;
+  readonly droneApplication: DroneApplication;
+  readonly droneSimulator: DroneSimulator;
   readonly turretDamage: TurretDamage;
   readonly reactiveSteering: Autopilot;
   readonly shipBSteering: Autopilot;

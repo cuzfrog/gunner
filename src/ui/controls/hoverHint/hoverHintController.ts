@@ -6,20 +6,25 @@ export interface HoverHintDeps {
   readonly hintEl: HTMLElement;
   readonly timer: Timer;
   readonly showDelayMs?: number;
+  readonly deferredHideMs?: number;
 }
 
 const HINT_SELECTOR = "[data-hint], [data-hint-content]";
 const CONTENT_ATTR = "data-hint-content";
 const STRING_ATTR = "data-hint";
+const DEFERRED_HIDE_MS = 50;
 
 export class HoverHintControllerImpl implements HoverHintController {
   private readonly hintEl: HTMLElement;
   private readonly timer: Timer;
   private readonly document: Document;
   private readonly showDelayMs: number;
+  private readonly deferredHideMs: number;
   private readonly anchored: boolean;
   private readonly providers: Map<string, HintContentProvider> = new Map();
   private showTimer?: TimeoutId;
+  private hideTimer?: TimeoutId;
+  private pendingAnchor: HTMLElement | undefined;
   private currentAnchor: HTMLElement | undefined;
   private currentProvider: HintContentProvider | undefined;
   private previousDescribedBy: string | null = null;
@@ -30,6 +35,7 @@ export class HoverHintControllerImpl implements HoverHintController {
     this.timer = deps.timer;
     this.document = globalThis.document;
     this.showDelayMs = deps.showDelayMs ?? 400;
+    this.deferredHideMs = deps.deferredHideMs ?? DEFERRED_HIDE_MS;
     this.anchored = anchorPositioningSupported();
     this.hintEl.hidden = true;
     this.abortController = new AbortController();
@@ -44,14 +50,28 @@ export class HoverHintControllerImpl implements HoverHintController {
     this.providers.set(key, provider);
   }
 
+  refresh(): void {
+    if (this.currentAnchor === undefined || this.currentProvider === undefined) return;
+    if (this.hintEl.hidden) return;
+    this.hintEl.textContent = "";
+    try {
+      this.currentProvider.render(this.currentAnchor, this.hintEl);
+      if (!this.anchored) this.placeByRect(this.currentAnchor);
+    } catch {
+      this.hide();
+    }
+  }
+
   dispose(): void {
     this.abortController.abort();
     this.clearShowTimer();
+    this.clearHideTimer();
     this.hide();
     this.providers.clear();
   }
 
   private onPointerOver(event: Event): void {
+    this.clearHideTimer();
     const anchor = this.anchorFor(event);
     if (anchor === undefined) this.hide();
     else this.scheduleShow(anchor);
@@ -62,6 +82,10 @@ export class HoverHintControllerImpl implements HoverHintController {
     if (anchor === undefined) return;
     const related = (event as Event & { readonly relatedTarget: EventTarget | null }).relatedTarget;
     if (related instanceof Element && anchor.contains(related)) return;
+    if (related === null && (anchor === this.pendingAnchor || anchor === this.currentAnchor)) {
+      this.scheduleDeferredHide();
+      return;
+    }
     this.hide();
   }
 
@@ -94,12 +118,15 @@ export class HoverHintControllerImpl implements HoverHintController {
   }
 
   private scheduleShow(anchor: HTMLElement): void {
+    if (this.showTimer !== undefined && this.pendingAnchor === anchor) return;
     this.clearShowTimer();
-    this.showTimer = this.timer.setTimeout(() => this.show(anchor), this.showDelayMs);
+    this.pendingAnchor = anchor;
+    this.showTimer = this.timer.setTimeout(() => { this.pendingAnchor = undefined; this.show(anchor); }, this.showDelayMs);
   }
 
   private show(anchor: HTMLElement): void {
     this.clearShowTimer();
+    this.clearHideTimer();
     const contentKey = anchor.getAttribute(CONTENT_ATTR);
     if (contentKey !== null) {
       const provider = this.providers.get(contentKey);
@@ -136,6 +163,7 @@ export class HoverHintControllerImpl implements HoverHintController {
 
   private hide(): void {
     this.clearShowTimer();
+    this.clearHideTimer();
     this.hintEl.hidden = true;
     if (this.currentProvider !== undefined && this.currentAnchor !== undefined) {
       this.currentProvider.hide?.(this.currentAnchor, this.hintEl);
@@ -164,11 +192,24 @@ export class HoverHintControllerImpl implements HoverHintController {
     this.hintEl.style.top = `${rect.bottom + 4}px`;
   }
 
+  private scheduleDeferredHide(): void {
+    this.clearHideTimer();
+    this.hideTimer = this.timer.setTimeout(() => { this.hideTimer = undefined; this.hide(); }, this.deferredHideMs);
+  }
+
+  private clearHideTimer(): void {
+    if (this.hideTimer !== undefined) {
+      this.timer.clearTimeout(this.hideTimer);
+      this.hideTimer = undefined;
+    }
+  }
+
   private clearShowTimer(): void {
     if (this.showTimer !== undefined) {
       this.timer.clearTimeout(this.showTimer);
       this.showTimer = undefined;
     }
+    this.pendingAnchor = undefined;
   }
 }
 

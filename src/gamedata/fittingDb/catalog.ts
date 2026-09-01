@@ -2,6 +2,8 @@ import type { ShipId, TypeId } from "../ids";
 import {
   type ChargeStats,
   type DisruptionScriptStats,
+  type DroneSizeClass,
+  type DroneStats,
   type FittingModuleStats,
   type FittingPropulsionStats,
   type HullBonus,
@@ -11,6 +13,8 @@ import {
   type MissileGuidanceEnhancerStats,
   type MissileScriptStats,
   type MissileStats,
+  type OmnidirectionalTrackingEnhancerStats,
+  type OmnidirectionalTrackingLinkStats,
   type SkillBonus,
   type SkillBonusType,
   type StasisGrapplerStats,
@@ -23,6 +27,7 @@ import {
   type TurretWeaponGroup,
   type WarpScramblerStats,
   CHARGES,
+  COMBAT_DRONES,
   DISRUPTION_SCRIPTS,
   DRONES,
   FITTING_MODULES,
@@ -32,6 +37,8 @@ import {
   MISSILE_GUIDANCE_COMPUTERS,
   MISSILE_GUIDANCE_ENHANCERS,
   MISSILE_SCRIPTS,
+  OMNIDIRECTIONAL_TRACKING_ENHANCERS,
+  OMNIDIRECTIONAL_TRACKING_LINKS,
   SCRIPTS,
   SKILL_BONUSES,
   STASIS_GRAPPLERS,
@@ -46,6 +53,8 @@ import {
 export type {
   ChargeStats,
   DisruptionScriptStats,
+  DroneSizeClass,
+  DroneStats,
   FittingModuleStats,
   FittingPropulsionStats,
   HullBonus,
@@ -55,6 +64,8 @@ export type {
   MissileGuidanceEnhancerStats,
   MissileScriptStats,
   MissileStats,
+  OmnidirectionalTrackingEnhancerStats,
+  OmnidirectionalTrackingLinkStats,
   SkillBonus,
   SkillBonusType,
   StasisGrapplerStats,
@@ -88,9 +99,12 @@ export interface FittingDbData {
   readonly missileGuidanceComputers: Readonly<Record<string, Row<MissileGuidanceComputerStats>>>;
   readonly missileGuidanceEnhancers: Readonly<Record<string, Row<MissileGuidanceEnhancerStats>>>;
   readonly missileScripts: Readonly<Record<string, Row<MissileScriptStats>>>;
+  readonly omnidirectionalTrackingLinks: Readonly<Record<string, Row<OmnidirectionalTrackingLinkStats>>>;
+  readonly omnidirectionalTrackingEnhancers: Readonly<Record<string, Row<OmnidirectionalTrackingEnhancerStats>>>;
   readonly hullBonuses: Readonly<Record<ShipId, readonly HullBonus[]>>;
   readonly skillBonuses: readonly SkillBonus[];
   readonly drones: Readonly<Record<string, DroneEntry>>;
+  readonly combatDrones: Readonly<Record<string, Row<DroneStats>>>;
 }
 
 export type FittingDb = FittingDbData;
@@ -112,7 +126,10 @@ export const FITTING_DB: FittingDbData = {
   missileGuidanceComputers: MISSILE_GUIDANCE_COMPUTERS,
   missileGuidanceEnhancers: MISSILE_GUIDANCE_ENHANCERS,
   missileScripts: MISSILE_SCRIPTS,
+  omnidirectionalTrackingLinks: OMNIDIRECTIONAL_TRACKING_LINKS,
+  omnidirectionalTrackingEnhancers: OMNIDIRECTIONAL_TRACKING_ENHANCERS,
   hullBonuses: HULL_BONUSES,
   skillBonuses: SKILL_BONUSES,
   drones: DRONES,
+  combatDrones: COMBAT_DRONES,
 };

@@ -1,4 +1,5 @@
 import type { DamageFactorKind, DamageType } from "../../../fitting";
+import type { WeaponKind } from "../../../sim";
 import { html } from "../markup";
 
 export interface DpsHintTypeRow {
@@ -26,6 +27,7 @@ export interface DpsHintSummary {
 
 export interface DpsHintGroup {
   readonly name: string;
+  readonly weaponKind: WeaponKind;
   readonly types: readonly DpsHintTypeRow[];
   readonly ammo: number;
   readonly factors: readonly DpsHintFactorRow[];
@@ -70,7 +72,7 @@ function renderGroup(group: DpsHintGroup, t: (key: string) => string): HTMLEleme
   for (const factor of group.factors) {
     el.appendChild(renderFactorRow(factor, t));
   }
-  el.appendChild(renderSummary(group.summary, t));
+  el.appendChild(renderSummary(group.summary, group.weaponKind, t));
   return el;
 }
 
@@ -110,8 +112,9 @@ function renderFactorSource(source: string): HTMLElement {
   return html`<div class="dps-hint-factor-source">${source}</div>` as unknown as HTMLElement;
 }
 
-function renderSummary(summary: DpsHintSummary, t: (key: string) => string): HTMLElement {
+function renderSummary(summary: DpsHintSummary, weaponKind: WeaponKind, t: (key: string) => string): HTMLElement {
   const volleyFormula = `${formatWithCommas(summary.ammo, 1)} × ${formatMultiplier(summary.multiplier)} × ${summary.count} = ${formatWithCommas(summary.volley, 1)}`;
+  const dpsLabel = t(`dpsHint.${weaponKind}Dps`);
   return html`<div class="dps-hint-summary">
     <div class="dps-hint-row dps-hint-summary-row">
       <span class="dps-hint-label">${t("dpsHint.volley")}</span>
@@ -122,7 +125,7 @@ function renderSummary(summary: DpsHintSummary, t: (key: string) => string): HTM
       <span class="dps-hint-value">${formatWithCommas(summary.cycleTime, 2)}s</span>
     </div>
     <div class="dps-hint-row dps-hint-dps-row">
-      <span class="dps-hint-label">${t("dpsHint.dps")}</span>
+      <span class="dps-hint-label">${dpsLabel}</span>
       <span class="dps-hint-value">${formatWithCommas(summary.dps, 1)}</span>
     </div>
   </div>` as unknown as HTMLElement;

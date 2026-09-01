@@ -1,5 +1,5 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
-import type { ChargeCatalog, FittingCalculator, FittingImport, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingImport, PresetFittings } from "../../fitting";
 import type { TypeId } from "../../gamedata/ids";
 import type { Ships } from "../../ships";
 import { registerSimModule, type EwarResolver, type HitChance, type SimCradle } from "../../sim";
@@ -39,6 +39,7 @@ import type { Side } from "./side";
 import { registerSidePanelModule, type SidePanel, type SidePanelHost } from "./sidePanel";
 import type { TurretController, TurretOverrides } from "./turret";
 import type { LauncherController } from "./launcher";
+import type { DroneController } from "./drone";
 
 export { createControlsEls } from "./elements";
 export * from "../testing";
@@ -197,6 +198,9 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     chargeCatalog: asValue(vi.mocked<ChargeCatalog>({ ...mockChargeCatalog(), ...options.chargeCatalog })),
     fittingDb: asValue(mockFittingDb()),
     missileCatalog: asValue(mockMissileCatalog()),
+    droneCatalog: asValue(mockDroneCatalog()),
+    droneLoadoutResolver: asValue(vi.mocked<DroneLoadoutResolver>({ resolve: vi.fn(() => []) })),
+    droneLoadoutValidator: asValue(vi.mocked<DroneLoadoutValidator>({ validate: vi.fn(() => ({ valid: true, totalCount: 0, totalBandwidth: 0, totalVolume: 0, violations: [] })) })),
     launcherClasses: asValue(mockLauncherClasses()),
     fittingCalculator: asValue(vi.mocked<FittingCalculator>({
       resolveTurrets: vi.fn(() => []),
@@ -205,7 +209,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
       resolvePropulsion: vi.fn(() => undefined),
       resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] })),
       resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
-      resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveCargoCharges: vi.fn(() => []),
+      resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveDrones: vi.fn(() => []), resolveCargoCharges: vi.fn(() => []),
     })),
     profileEquality: asValue<ProfileEquality>({ equal() { return true; } }),
     itemNameLoader: asValue({ ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) }),
@@ -306,6 +310,26 @@ class StubLauncherController implements LauncherController {
   }
 }
 
+class StubDroneController implements DroneController {
+  readonly side: Side;
+  popup: Popup = new StubPopup();
+  drone = vi.fn(() => undefined);
+  currentDroneSpecs = vi.fn(() => []);
+  validation = vi.fn(() => undefined);
+  applyImported = vi.fn();
+  restore = vi.fn();
+  clear = vi.fn();
+  capture = vi.fn(() => ({ droneGroups: [] }));
+  isPopupOpen = vi.fn(() => false);
+  openPopup = vi.fn();
+  closePopup = vi.fn();
+  render = vi.fn();
+
+  constructor(side: Side) {
+    this.side = side;
+  }
+}
+
 export function buildSidePanel(
   side: Side = "shipA",
   ships: Ships = mockShips(),
@@ -343,6 +367,8 @@ export function buildSidePanel(
   const shipBTurretController: TurretController = new StubTurretController("shipB");
   const shipALauncherController: LauncherController = new StubLauncherController("shipA");
   const shipBLauncherController: LauncherController = new StubLauncherController("shipB");
+  const shipADroneController: DroneController = new StubDroneController("shipA");
+  const shipBDroneController: DroneController = new StubDroneController("shipB");
 
   const cradle = createContainer<TestControlsCradle>({ injectionMode: InjectionMode.PROXY });
   registerSimModule(cradle);
@@ -359,6 +385,9 @@ export function buildSidePanel(
     shipBTurretController: asValue(shipBTurretController),
     turretControllers: asValue({ shipA: shipATurretController, shipB: shipBTurretController }),
     launcherControllers: asValue({ shipA: shipALauncherController, shipB: shipBLauncherController }),
+    shipADroneController: asValue(shipADroneController),
+    shipBDroneController: asValue(shipBDroneController),
+    droneControllers: asValue({ shipA: shipADroneController, shipB: shipBDroneController }),
     shipATurretOverrides: asValue(shipATurretOverrides),
     shipBTurretOverrides: asValue(shipBTurretOverrides),
     turretOverridesBySide: asValue({ shipA: shipATurretOverrides, shipB: shipBTurretOverrides }),
@@ -385,4 +414,13 @@ export function buildSidePanel(
   const turret = side === "shipA" ? shipATurretController : shipBTurretController;
   const turretOverrides = side === "shipA" ? shipATurretOverrides : shipBTurretOverrides;
   return { document, panel, turret, turretOverrides, host };
+}
+
+function mockDroneCatalog(): DroneCatalog {
+  return {
+    dronesByClass: vi.fn(() => []),
+    usualForClass: vi.fn(() => undefined),
+    has: vi.fn(() => false),
+    idForName: vi.fn(() => undefined),
+  };
 }

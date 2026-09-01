@@ -13,6 +13,9 @@ const profile: ShipProfile = {
   inertiaModifier: 0.45,
   baseSpeed: 165,
   sigRadius: 270,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const hullBonuses: readonly HullBonus[] = FITTING_DB.hullBonuses[profile.id] ?? [];

@@ -12,7 +12,7 @@ import {
   type UserSettings,
   type WeaponRangeVisibility,
 } from "./userSettings";
-import type { SimValueParser } from "../sim";
+import type { SimValueParser, WeaponKind } from "../sim";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { decodeBase64 } from "./urlCodec";
 import { FittingBasis } from "./fittingBasis";
@@ -30,6 +30,7 @@ import {
   isNonNegative,
   isOptionalBoosterActivations,
   isOptionalBoolean,
+  isOptionalDroneGroups,
   isOptionalEwarActivation,
   isOptionalFittedHullSummary,
   isFiniteNumber,
@@ -89,6 +90,8 @@ export class SettingsParser {
       shipATrackingUnit: display.shipATrackingUnit,
       shipBTrackingUnit: display.shipBTrackingUnit,
       weaponRangeVisibility: display.weaponRangeVisibility,
+      droneRangeVisibility: display.droneRangeVisibility,
+      droneControlRangeVisibility: display.droneControlRangeVisibility,
       simSpeed: display.simSpeed,
       gridBrightness: display.gridBrightness,
       autoZoom: display.autoZoom,
@@ -189,6 +192,8 @@ export class SettingsParser {
       isTrackingUnitValue(value.shipATrackingUnit) &&
       isTrackingUnitValue(value.shipBTrackingUnit) &&
       isWeaponRangeVisibilityValue(value.weaponRangeVisibility) &&
+      (value.droneRangeVisibility === undefined || isWeaponRangeVisibilityValue(value.droneRangeVisibility)) &&
+      (value.droneControlRangeVisibility === undefined || isWeaponRangeVisibilityValue(value.droneControlRangeVisibility)) &&
       isPositive(value.simSpeed) &&
       isFiniteNumber(value.gridBrightness) &&
       (value.autoZoom === undefined || typeof value.autoZoom === "boolean") &&
@@ -222,6 +227,7 @@ export class SettingsParser {
       isOptionalMissileBoosterActivations(s[`${p}MissileBoosterActivation`]) &&
       isOptionalWeaponKind(s[`${p}WeaponKind`]) &&
       isOptionalNonEmptyString(s[`${p}MissileAmmo`]) &&
+      isOptionalDroneGroups(s[`${p}DroneGroups`]) &&
       (side === "shipA" ? isOptionalPositive(s[`${p}Sig`]) : isPositive(s[`${p}Sig`]))
     );
   }
@@ -270,6 +276,8 @@ export class SettingsParser {
     record.language ??= DEFAULT_PREFERENCES.language;
     this.migrateTrackingUnit(record);
     record.weaponRangeVisibility = isWeaponRangeVisibilityValue(record.weaponRangeVisibility) ? record.weaponRangeVisibility : DEFAULT_PREFERENCES.weaponRangeVisibility;
+    record.droneRangeVisibility = isWeaponRangeVisibilityValue(record.droneRangeVisibility) ? record.droneRangeVisibility : DEFAULT_PREFERENCES.droneRangeVisibility;
+    record.droneControlRangeVisibility = isWeaponRangeVisibilityValue(record.droneControlRangeVisibility) ? record.droneControlRangeVisibility : DEFAULT_PREFERENCES.droneControlRangeVisibility;
     record.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
     record.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
     record.autoZoom ??= DEFAULT_PREFERENCES.autoZoom;
@@ -414,6 +422,8 @@ function fromWireSettings(wire: UserSettingsWire): SessionSettings {
       shipATrackingUnit: wire.shipATrackingUnit,
       shipBTrackingUnit: wire.shipBTrackingUnit,
       weaponRangeVisibility: wire.weaponRangeVisibility,
+      droneRangeVisibility: wire.droneRangeVisibility ?? DEFAULT_PREFERENCES.droneRangeVisibility,
+      droneControlRangeVisibility: wire.droneControlRangeVisibility ?? DEFAULT_PREFERENCES.droneControlRangeVisibility,
       simSpeed: wire.simSpeed,
       gridBrightness,
       autoZoom,
@@ -432,6 +442,8 @@ function toWireSettings(session: SessionSettings): UserSettingsWire {
     shipATrackingUnit: session.display.shipATrackingUnit,
     shipBTrackingUnit: session.display.shipBTrackingUnit,
     weaponRangeVisibility: session.display.weaponRangeVisibility,
+    droneRangeVisibility: session.display.droneRangeVisibility,
+    droneControlRangeVisibility: session.display.droneControlRangeVisibility,
     simSpeed: session.display.simSpeed,
     gridBrightness: session.display.gridBrightness,
     autoZoom: session.display.autoZoom,
@@ -481,6 +493,7 @@ function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSetti
   if (combatant.missileBoosterActivation !== undefined) wire[`${p}MissileBoosterActivation` as const] = combatant.missileBoosterActivation;
   if (combatant.weaponKind !== undefined) wire[`${p}WeaponKind` as const] = combatant.weaponKind;
   if (combatant.missileAmmo !== undefined) wire[`${p}MissileAmmo` as const] = combatant.missileAmmo;
+  if (combatant.droneGroups !== undefined) wire[`${p}DroneGroups` as const] = combatant.droneGroups;
   if (combatant.sig !== undefined && side === "shipA") wire.shipASig = combatant.sig;
 }
 
@@ -514,6 +527,7 @@ function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"
     ammo: sideValue(side, settings.shipAAmmo, settings.shipBAmmo),
     weaponKind: sideValue(side, settings.shipAWeaponKind, settings.shipBWeaponKind),
     missileAmmo: sideValue(side, settings.shipAMissileAmmo, settings.shipBMissileAmmo),
+    droneGroups: sideValue(side, settings.shipADroneGroups, settings.shipBDroneGroups),
   };
 }
 
@@ -521,6 +535,6 @@ function sideValue<T>(side: "shipA" | "shipB", shipAValue: T, shipBValue: T): T 
   return side === "shipA" ? shipAValue : shipBValue;
 }
 
-function isOptionalWeaponKind(value: unknown): value is "turret" | "missile" | undefined {
-  return value === undefined || value === "turret" || value === "missile";
+function isOptionalWeaponKind(value: unknown): value is WeaponKind | undefined {
+  return value === undefined || value === "turret" || value === "missile" || value === "drone";
 }

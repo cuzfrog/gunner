@@ -86,6 +86,14 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
       this.write(sideEls.trackingReadout, formatDistance(sideValues.explosionRadius, t), false, () => "");
       this.write(sideEls.optimalReadout, `${formatWithCommas(sideValues.explosionVelocity, 0)} m/s`, false, () => "");
       this.write(sideEls.falloffReadout, formatDistance(sideValues.flightRange, t), false, () => "");
+    } else if (sideValues.kind === "drone") {
+      const trackingValue = trackingDisplay.displayFor(sideValues.tracking, sideValues.sigResolution);
+      const tracking = trackingDisplay.unit === "score"
+        ? `${formatNumber(trackingValue, 2)} ${t("label.trackingScore")}`
+        : `${formatNumber(trackingValue, 4)} rad/s`;
+      this.write(sideEls.trackingReadout, tracking, false, () => "");
+      this.write(sideEls.optimalReadout, formatDistance(sideValues.optimal, t), false, () => "");
+      this.write(sideEls.falloffReadout, formatDistance(sideValues.falloff, t), false, () => "");
     } else {
       this.write(sideEls.trackingReadout, "-", false, () => "");
       this.write(sideEls.optimalReadout, "-", false, () => "");

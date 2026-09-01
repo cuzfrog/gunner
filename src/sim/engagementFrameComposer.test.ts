@@ -54,7 +54,7 @@ const frame: EngagementFrame = {
 
 const snapshot: SimSnapshot = { time: 1, shipA, shipB, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
 
-const input = { weapons: { shipA: [shipATurret] as const, shipB: [shipBTurret] as const }, sigRadii: { shipA: 30, shipB: 40 } };
+const input = { weapons: { shipA: [shipATurret] as const, shipB: [shipBTurret] as const }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] } as const };
 
 const shipAAssessment: AttackAssessment = {
   boostedWeapon: boostedTurret,
@@ -87,11 +87,17 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.attacks.shipB).toEqual(shipBAssessment);
     expect(view.effectiveWeapons.shipA).toBe(effectiveTurret);
     expect(view.effectiveWeapons.shipB).toBe(shipBEffectiveTurret);
+    expect(view.weaponAttacks.shipA).toHaveLength(1);
+    expect(view.weaponAttacks.shipA[0].weapon).toBe(shipATurret);
+    expect(view.weaponAttacks.shipA[0].assessment).toEqual(shipAAssessment);
+    expect(view.weaponAttacks.shipB).toHaveLength(1);
+    expect(view.weaponAttacks.shipB[0].weapon).toBe(shipBTurret);
+    expect(view.weaponAttacks.shipB[0].assessment).toEqual(shipBAssessment);
     expect(kinematics.computeEngagement).toHaveBeenCalledWith(shipA, shipB, 1);
     expect(kinematics.computeEngagement).toHaveBeenCalledTimes(1);
     expect(engagementEvaluator.evaluate).toHaveBeenCalledWith(frame, {
-      shipA: { weapon: shipATurret, opponentSigRadius: 40 },
-      shipB: { weapon: shipBTurret, opponentSigRadius: 30 },
+      shipA: { weapon: shipATurret, opponentSigRadius: 40, droneState: undefined },
+      shipB: { weapon: shipBTurret, opponentSigRadius: 30, droneState: undefined },
     });
   });
 
@@ -108,7 +114,7 @@ describe("EngagementFrameComposerImpl", () => {
   test("undefined weapon yields undefined attack and undefined effective weapon", () => {
     const { engagementEvaluator, composer } = makeComposer();
     engagementEvaluator.evaluate.mockReturnValue({ shipA: undefined, shipB: undefined });
-    const view = composer.compose(snapshot, { weapons: { shipA: [], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 } });
+    const view = composer.compose(snapshot, { weapons: { shipA: [], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] } });
     expect(view.attacks.shipA).toBeUndefined();
     expect(view.attacks.shipB).toBeUndefined();
     expect(view.effectiveWeapons.shipA).toBeUndefined();
@@ -130,7 +136,7 @@ describe("EngagementFrameComposerImpl", () => {
       if (attacks.shipA?.weapon === secondTurret) return { shipA: secondAssessment, shipB: undefined };
       return { shipA: undefined, shipB: undefined };
     });
-    const multiInput = { weapons: { shipA: [shipATurret, secondTurret] as const, shipB: [] as const }, sigRadii: { shipA: 30, shipB: 40 } };
+    const multiInput = { weapons: { shipA: [shipATurret, secondTurret] as const, shipB: [] as const }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] } as const };
     const view = composer.compose(snapshot, multiInput);
     expect(view.attacks.shipA).toBeDefined();
     expect(view.attacks.shipA!.damage.nominalDps).toBe(shipADamage.nominalDps + secondDamage.nominalDps);
@@ -138,5 +144,11 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.attacks.shipA!.damage.volley).toBe(shipADamage.volley + secondDamage.volley);
     expect(view.attacks.shipA!.effectiveWeapon).toBe(effectiveTurret);
     expect(view.attacks.shipB).toBeUndefined();
+    expect(view.weaponAttacks.shipA).toHaveLength(2);
+    expect(view.weaponAttacks.shipA[0].weapon).toBe(shipATurret);
+    expect(view.weaponAttacks.shipA[0].assessment).toEqual(shipAAssessment);
+    expect(view.weaponAttacks.shipA[1].weapon).toBe(secondTurret);
+    expect(view.weaponAttacks.shipA[1].assessment).toEqual(secondAssessment);
+    expect(view.weaponAttacks.shipB).toHaveLength(0);
   });
 });

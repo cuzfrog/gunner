@@ -1,14 +1,14 @@
-import type { EngagementFrame, HitChanceBreakdown, TurretSpec } from "./types";
+import type { EngagementFrame, HitChanceBreakdown, TrackingApplicationSpec } from "./types";
 
 export interface HitChance {
-  compute(frame: EngagementFrame, turret: TurretSpec, opponentSigRadius: number): HitChanceBreakdown;
-  findBestDistance(transversalSpeed: number, turret: TurretSpec, opponentSigRadius: number): number;
+  compute(frame: EngagementFrame, spec: TrackingApplicationSpec, opponentSigRadius: number): HitChanceBreakdown;
+  findBestDistance(transversalSpeed: number, spec: TrackingApplicationSpec, opponentSigRadius: number): number;
 }
 
 export class HitChanceImpl implements HitChance {
-  compute(frame: EngagementFrame, turret: TurretSpec, opponentSigRadius: number): HitChanceBreakdown {
+  compute(frame: EngagementFrame, spec: TrackingApplicationSpec, opponentSigRadius: number): HitChanceBreakdown {
     const { angularVelocity, distance } = frame;
-    const { tracking, sigResolution, optimal, falloff } = turret;
+    const { tracking, sigResolution, optimal, falloff } = spec;
 
     let trackingTerm = 0;
     if (tracking > 0 && opponentSigRadius > 0) {
@@ -40,8 +40,8 @@ export class HitChanceImpl implements HitChance {
    *   E(d) = (A / d)^2 + ((max(0, d - optimal)) / falloff)^2
    * where A = (transversalSpeed * sigRes) / (tracking * opponentSig).
    */
-  findBestDistance(transversalSpeed: number, turret: TurretSpec, opponentSigRadius: number): number {
-    const { tracking, sigResolution, optimal, falloff } = turret;
+  findBestDistance(transversalSpeed: number, spec: TrackingApplicationSpec, opponentSigRadius: number): number {
+    const { tracking, sigResolution, optimal, falloff } = spec;
 
     if (transversalSpeed <= 0 || tracking <= 0 || opponentSigRadius <= 0 || falloff <= 0) {
       return optimal;

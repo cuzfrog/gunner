@@ -3,6 +3,8 @@ export { FITTING_DB } from "./catalog";
 export type {
   ChargeStats,
   DisruptionScriptStats,
+  DroneSizeClass,
+  DroneStats,
   FittingModuleStats,
   FittingPropulsionStats,
   HullBonus,
@@ -12,6 +14,8 @@ export type {
   MissileGuidanceEnhancerStats,
   MissileScriptStats,
   MissileStats,
+  OmnidirectionalTrackingEnhancerStats,
+  OmnidirectionalTrackingLinkStats,
   SkillBonus,
   SkillBonusType,
   StasisGrapplerStats,
@@ -26,6 +30,7 @@ export type {
 } from "./fittingDb";
 export {
   CHARGES,
+  COMBAT_DRONES,
   DISRUPTION_SCRIPTS,
   DRONES,
   FITTING_MODULES,
@@ -35,6 +40,8 @@ export {
   MISSILE_GUIDANCE_COMPUTERS,
   MISSILE_GUIDANCE_ENHANCERS,
   MISSILE_SCRIPTS,
+  OMNIDIRECTIONAL_TRACKING_ENHANCERS,
+  OMNIDIRECTIONAL_TRACKING_LINKS,
   SCRIPTS,
   SKILL_BONUSES,
   STASIS_GRAPPLERS,

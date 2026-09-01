@@ -14,6 +14,7 @@ interface RawProfile extends ShipIdentity {
   readonly navigation: Readonly<Record<string, string>>;
   readonly structure: Readonly<Record<string, string>>;
   readonly targeting: Readonly<Record<string, string>>;
+  readonly drones?: Readonly<Record<string, string>>;
 }
 
 export interface SdeType {
@@ -39,6 +40,7 @@ const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticd
 const OUTPUT_PATH = "src/gamedata/shipProfiles/profiles.ts";
 const SHIP_CATEGORY_ID = 6;
 const LEGACY_PREFIX = "legacy";
+const DEFAULT_MAX_ACTIVE_DRONES = 5;
 
 function parseNumber(input: string): number {
   const match = input.match(/[\d,.]+(?:\.\d+)?/);
@@ -61,6 +63,30 @@ function hasString(value: Record<string, unknown>, key: string, context: string)
   const field = value[key];
   if (typeof field !== "string") throw new Error(`${context}: missing or invalid ${key}`);
   return field;
+}
+
+interface DroneLimits {
+  readonly bandwidth: number;
+  readonly capacity: number;
+  readonly maxActive: number;
+}
+
+function parseDroneLimits(dronesBlock: unknown, shipName: string): DroneLimits {
+  if (!dronesBlock || typeof dronesBlock !== "object") return { bandwidth: 0, capacity: 0, maxActive: 0 };
+  const drones = dronesBlock as Record<string, unknown>;
+  const bandwidthRaw = hasString(drones, "droneBandwidth", `${shipName} drones`);
+  const capacityRaw = hasString(drones, "droneCapacity", `${shipName} drones`);
+  const bandwidth = bandwidthRaw.trim() === "" ? 0 : parseRangeValue(bandwidthRaw);
+  const capacity = capacityRaw.trim() === "" ? 0 : parseRangeValue(capacityRaw);
+  if (bandwidth <= 0 && capacity <= 0) return { bandwidth: 0, capacity: 0, maxActive: 0 };
+  return { bandwidth, capacity, maxActive: DEFAULT_MAX_ACTIVE_DRONES };
+}
+
+function parseRangeValue(input: string): number {
+  const matches = input.match(/[\d,.]+(?:\.\d+)?/g);
+  if (!matches || matches.length === 0) throw new Error(`Cannot parse number from "${input}"`);
+  const values = matches.map((m) => Number(m.replaceAll(",", "")));
+  return Math.max(...values);
 }
 
 function slugify(input: string): string {
@@ -152,6 +178,8 @@ function parseProfile(raw: unknown, index: number, shipNameToType: ReadonlyMap<s
 
   const { id, factionId, hullTypeId } = resolveShipIds({ name, faction, hullType }, shipNameToType);
 
+  const droneLimits = parseDroneLimits(record["drones"], name);
+
   return {
     id,
     name,
@@ -161,6 +189,9 @@ function parseProfile(raw: unknown, index: number, shipNameToType: ReadonlyMap<s
     inertiaModifier: parseNumber(hasString(navigation, "inertiaModifier", name)),
     baseSpeed: parseNumber(hasString(navigation, "maxVelocity", name)),
     sigRadius: parseNumber(hasString(targeting, "sigRadius", name)),
+    droneBandwidth: droneLimits.bandwidth,
+    droneCapacity: droneLimits.capacity,
+    maxActiveDrones: droneLimits.maxActive,
   };
 }
 
@@ -182,6 +213,9 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push(`    inertiaModifier: ${p.inertiaModifier},`);
     lines.push(`    baseSpeed: ${p.baseSpeed},`);
     lines.push(`    sigRadius: ${p.sigRadius},`);
+    lines.push(`    droneBandwidth: ${p.droneBandwidth},`);
+    lines.push(`    droneCapacity: ${p.droneCapacity},`);
+    lines.push(`    maxActiveDrones: ${p.maxActiveDrones},`);
     lines.push("  },");
   }
 
@@ -214,7 +248,7 @@ async function main(): Promise<void> {
   console.log(`Generated ${OUTPUT_PATH} with ${profiles.length} profiles.`);
 }
 
-export { buildShipNameToType as _buildShipNameToType, parseProfile as _parseProfile, resolveShipIds as _resolveShipIds, slugify as _slugify };
+export { buildShipNameToType as _buildShipNameToType, parseDroneLimits as _parseDroneLimits, parseProfile as _parseProfile, resolveShipIds as _resolveShipIds, slugify as _slugify };
 
 if (import.meta.main) {
   main().catch((error) => {

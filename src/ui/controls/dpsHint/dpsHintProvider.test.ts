@@ -1,7 +1,8 @@
 import { type FakeElement, fakeDocument } from "../../testing";
-import type { DamageBreakdown, ImportedLauncher, ImportedTurret } from "../../../fitting";
+import type { DamageBreakdown, ImportedDrone, ImportedLauncher, ImportedTurret } from "../../../fitting";
 import type { ItemNameCatalog } from "../../../gamedata";
 import type { I18n } from "../../i18n";
+import type { DroneController } from "../drone";
 import type { LauncherController } from "../launcher";
 import type { TurretController } from "../turret";
 import type { DpsHintRenderer } from "./dpsHintRenderer";
@@ -26,6 +27,15 @@ const LAUNCHER_BREAKDOWN: DamageBreakdown = {
   factors: [
     { kind: "base", multiplier: 1 },
     { kind: "skill", multiplier: 1.1, skillIds: ["20315" as never] },
+  ],
+};
+
+const DRONE_BREAKDOWN: DamageBreakdown = {
+  damageByType: { thermal: 20 },
+  factors: [
+    { kind: "base", multiplier: 1 },
+    { kind: "skill", multiplier: 1.1, skillIds: ["3436" as never] },
+    { kind: "module", multiplier: 1.3, moduleIds: ["438" as never] },
   ],
 };
 
@@ -84,6 +94,36 @@ function makeLauncherController(launcher?: ImportedLauncher): LauncherController
   return { launcher: vi.fn(() => launcher) } as unknown as LauncherController;
 }
 
+function makeDrone(droneBreakdown: DamageBreakdown = DRONE_BREAKDOWN): ImportedDrone {
+  return {
+    typeId: "400" as never,
+    name: "Hobgoblin II",
+    sizeClass: "light",
+    count: 5,
+    damageMultiplier: 2,
+    emDamage: 0,
+    thermalDamage: 20,
+    kineticDamage: 0,
+    explosiveDamage: 0,
+    tracking: 0.1,
+    sigResolution: 40,
+    optimal: 1000,
+    falloff: 500,
+    maxVelocity: 6000,
+    orbitSpeed: 1800,
+    orbitRange: 1000,
+    cycleTime: 4,
+    bandwidth: 5,
+    volume: 5,
+    controlRange: 60000,
+    damageBreakdown: droneBreakdown,
+  } as unknown as ImportedDrone;
+}
+
+function makeDroneController(drone?: ImportedDrone): DroneController {
+  return { drone: vi.fn(() => drone) } as unknown as DroneController;
+}
+
 function makeRenderer(): DpsHintRenderer {
   const renderer = new DpsHintRendererImpl({ t: (key) => key });
   return renderer as unknown as DpsHintRenderer;
@@ -94,6 +134,7 @@ function makeDeps(overrides: Partial<DpsHintProviderDeps> = {}): DpsHintProvider
     i18n: makeI18n(),
     turretControllers: { shipA: makeTurretController(), shipB: makeTurretController() },
     launcherControllers: { shipA: makeLauncherController(), shipB: makeLauncherController() },
+    droneControllers: { shipA: makeDroneController(), shipB: makeDroneController() },
     itemNameCatalog: makeItemNameCatalog(),
     dpsHintRenderer: makeRenderer(),
     ...overrides,
@@ -289,5 +330,50 @@ describe("DpsHintProviderImpl", () => {
     const container = globalThis.document.createElement("div");
     provider.render(anchor, container);
     expect(catalog.nameForId).toHaveBeenCalledWith("20315", "en");
+  });
+
+  test("renders drone group for ship A", () => {
+    const drone = makeDrone();
+    const provider = new DpsHintProviderImpl(makeDeps({
+      droneControllers: { shipA: makeDroneController(drone), shipB: makeDroneController() },
+    }));
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(container.children.length).toBe(1);
+    const root = container.children[0] as unknown as FakeElement;
+    const group = elementChildren(root)[0];
+    const nameEl = elementChildren(group)[0];
+    expect(nameEl.textContent).toBe("Item-400 x5");
+  });
+
+  test("renders drone group alongside turret and launcher groups", () => {
+    const turret = makeTurret();
+    const launcher = makeLauncher();
+    const drone = makeDrone();
+    const provider = new DpsHintProviderImpl(makeDeps({
+      turretControllers: { shipA: makeTurretController(turret), shipB: makeTurretController() },
+      launcherControllers: { shipA: makeLauncherController(launcher), shipB: makeLauncherController() },
+      droneControllers: { shipA: makeDroneController(drone), shipB: makeDroneController() },
+    }));
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    const root = container.children[0] as unknown as FakeElement;
+    expect(elementChildren(root).length).toBe(3);
+  });
+
+  test("resolves drone skill and module factor sources via itemNameCatalog", () => {
+    const drone = makeDrone();
+    const catalog = makeItemNameCatalog();
+    const provider = new DpsHintProviderImpl(makeDeps({
+      droneControllers: { shipA: makeDroneController(drone), shipB: makeDroneController() },
+      itemNameCatalog: catalog,
+    }));
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(catalog.nameForId).toHaveBeenCalledWith("3436", "en");
+    expect(catalog.nameForId).toHaveBeenCalledWith("438", "en");
   });
 });

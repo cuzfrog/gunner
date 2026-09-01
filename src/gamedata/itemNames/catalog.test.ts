@@ -64,4 +64,19 @@ describe("StaticItemNameCatalog", () => {
     const unknownId = "999999" as TypeId;
     expect(catalog.nameForId(unknownId, "zh")).toBe(unknownId);
   });
+
+  test("nameForId resolves drone skill ids to localized names", () => {
+    const droneSkillIds = ["3442", "24241", "33699", "3441", "23594"] as const;
+    for (const id of droneSkillIds) {
+      const en = catalog.nameForId(id as TypeId, "en");
+      const zh = catalog.nameForId(id as TypeId, "zh");
+      const ja = catalog.nameForId(id as TypeId, "ja");
+      expect(en).not.toBe(id);
+      expect(zh).not.toBe(id);
+      expect(ja).not.toBe(id);
+      expect(en.length).toBeGreaterThan(0);
+      expect(zh.length).toBeGreaterThan(0);
+      expect(ja.length).toBeGreaterThan(0);
+    }
+  });
 });

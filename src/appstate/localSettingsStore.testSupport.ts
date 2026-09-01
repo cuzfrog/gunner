@@ -27,6 +27,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
   shipATrackingUnit: "rad",
   shipBTrackingUnit: "rad",
   weaponRangeVisibility: "both",
+  droneRangeVisibility: "none",
+  droneControlRangeVisibility: "none",
   shipATracking: 0.32,
   shipASigRes: "S",
   shipAOptimal: 5000,
@@ -89,7 +91,7 @@ export const URL_SETTINGS: UserSettings = {
   language: "ja",
 };
 export function profileFrom(settings: UserSettings): ProfileSettings {
-  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, weaponRangeVisibility: ____, simSpeed: _____, gridBrightness: ______, autoZoom: _______, zoomFactor: ________, ...rest } = settings;
+  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, weaponRangeVisibility: ____, droneRangeVisibility: _____d, droneControlRangeVisibility: _____dc, simSpeed: _____, gridBrightness: ______, autoZoom: _______, zoomFactor: ________, ...rest } = settings;
   return rest;
 }
 export const DEFAULT_PROFILE: ProfileSettings = profileFrom(DEFAULT_SETTINGS);
@@ -119,6 +121,9 @@ export const RIFTER_PROFILE: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 300,
   sigRadius: 36,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const THRASHER_PROFILE: ShipProfile = {
@@ -130,6 +135,9 @@ const THRASHER_PROFILE: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 250,
   sigRadius: 120,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const BRUTIX_PROFILE: ShipProfile = {
@@ -141,6 +149,9 @@ const BRUTIX_PROFILE: ShipProfile = {
   inertiaModifier: 0.55,
   baseSpeed: 165,
   sigRadius: 300,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const WRAITH_PROFILE: ShipProfile = {
@@ -152,6 +163,9 @@ const WRAITH_PROFILE: ShipProfile = {
   inertiaModifier: 2,
   baseSpeed: 300,
   sigRadius: 36,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
 };
 
 const KNOWN_HULLS: readonly ShipProfile[] = [RIFTER_PROFILE, THRASHER_PROFILE, BRUTIX_PROFILE, WRAITH_PROFILE];
@@ -202,6 +216,8 @@ const EMPTY_FITTING_STATE: FittingState = {
   propulsionModule: undefined,
   ewarModules: [],
   boosterModules: [], missileBoosterModules: [],
+  droneBoosterModules: [],
+  droneGroups: [],
   drones: [],
   cargo: [],
 };
@@ -227,6 +243,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     turretCount: 1,
     damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
   },
+  drones: [],
   cargoCharges: [],
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },

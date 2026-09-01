@@ -9,6 +9,7 @@ import type { Side } from "../side";
 import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
 import type { ShipATurret } from "./shipATurret";
 import type { ShipALauncher } from "./shipALauncher";
+import type { ShipADrone } from "./shipADrone";
 import { EftSideImporter } from "./eftSideImporter";
 import { ProfileTextImporter } from "./profileTextImporter";
 import type { ImportController, ImportEls } from "./importControllerContract";
@@ -27,6 +28,7 @@ export class ImportControllerImpl implements ImportController {
   private readonly profileTextCodec: ProfileTextCodec;
   private readonly turrets: Record<Side, ShipATurret>;
   private readonly launchers: Record<Side, ShipALauncher>;
+  private readonly drones: Record<Side, ShipADrone>;
   private readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   private readonly eftSideImporter: EftSideImporter;
   private readonly profileTextImporter: ProfileTextImporter;
@@ -46,6 +48,7 @@ export class ImportControllerImpl implements ImportController {
     shipBSide: SidePanel;
     turrets: Record<Side, ShipATurret>;
     launchers: Record<Side, ShipALauncher>;
+    drones: Record<Side, ShipADrone>;
     weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
     profileController: ProfileController;
     profileTextCodec: ProfileTextCodec;
@@ -61,6 +64,7 @@ export class ImportControllerImpl implements ImportController {
     this.shipBSide = deps.shipBSide;
     this.turrets = deps.turrets;
     this.launchers = deps.launchers;
+    this.drones = deps.drones;
     this.weaponSystemSwitches = deps.weaponSystemSwitches;
     this.profileController = deps.profileController;
     this.profileTextCodec = deps.profileTextCodec;
@@ -71,6 +75,7 @@ export class ImportControllerImpl implements ImportController {
       shipBSide: deps.shipBSide,
       turrets: deps.turrets,
       launchers: deps.launchers,
+      drones: deps.drones,
       weaponSystemSwitches: deps.weaponSystemSwitches,
       fittingImport: deps.fittingImport,
     });

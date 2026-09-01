@@ -6,7 +6,7 @@ export interface WeaponSystemSwitch {
   readonly side: Side;
   activeKind(): WeaponKind;
   setActiveKind(kind: WeaponKind): void;
-  autoToggle(hasTurret: boolean, hasLauncher: boolean): void;
+  autoToggle(hasTurret: boolean, hasLauncher: boolean, hasDrone: boolean): void;
   refresh(): void;
   clear(): void;
 }
@@ -18,6 +18,7 @@ export interface WeaponSystemSwitchDeps {
   readonly droneButton: HTMLButtonElement;
   readonly turretPanel: HTMLElement;
   readonly launcherPanel: HTMLElement;
+  readonly dronePanel: HTMLElement;
   readonly events: UiEvents;
 }
 
@@ -28,6 +29,7 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
   private readonly droneButton: HTMLButtonElement;
   private readonly turretPanel: HTMLElement;
   private readonly launcherPanel: HTMLElement;
+  private readonly dronePanel: HTMLElement;
   private readonly events: UiEvents;
   private kind: WeaponKind = "turret";
 
@@ -38,9 +40,11 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
     this.droneButton = deps.droneButton;
     this.turretPanel = deps.turretPanel;
     this.launcherPanel = deps.launcherPanel;
+    this.dronePanel = deps.dronePanel;
     this.events = deps.events;
     this.turretButton.addEventListener("click", () => this.onSelect("turret"));
     this.missileButton.addEventListener("click", () => this.onSelect("missile"));
+    this.droneButton.addEventListener("click", () => this.onSelect("drone"));
     this.refresh();
   }
 
@@ -53,20 +57,23 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
     this.refresh();
   }
 
-  autoToggle(hasTurret: boolean, hasLauncher: boolean): void {
-    if (hasLauncher && !hasTurret) this.kind = "missile";
-    else if (hasTurret && !hasLauncher) this.kind = "turret";
+  autoToggle(hasTurret: boolean, hasLauncher: boolean, hasDrone: boolean): void {
+    if (hasDrone && !hasTurret && !hasLauncher) this.kind = "drone";
+    else if (hasLauncher && !hasTurret && !hasDrone) this.kind = "missile";
+    else if (hasTurret && !hasLauncher && !hasDrone) this.kind = "turret";
     this.refresh();
   }
 
   refresh(): void {
     this.turretButton.disabled = false;
     this.missileButton.disabled = false;
-    this.droneButton.disabled = true;
+    this.droneButton.disabled = false;
     this.turretPanel.hidden = this.kind !== "turret";
     this.launcherPanel.hidden = this.kind !== "missile";
+    this.dronePanel.hidden = this.kind !== "drone";
     this.turretButton.setAttribute("aria-pressed", String(this.kind === "turret"));
     this.missileButton.setAttribute("aria-pressed", String(this.kind === "missile"));
+    this.droneButton.setAttribute("aria-pressed", String(this.kind === "drone"));
   }
 
   clear(): void {

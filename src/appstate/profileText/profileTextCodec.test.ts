@@ -58,6 +58,16 @@ describe("profileTextCodec", () => {
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });
 
+  test("round-trips a profile with droneGroups", () => {
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAWeaponKind: "drone", shipADroneGroups: [{ typeId: toTypeId("24545"), count: 5 }] };
+    expect(codec.parse(codec.serialize(profile))).toEqual(profile);
+  });
+
+  test("round-trips a profile with multiple drone groups", () => {
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAWeaponKind: "drone", shipADroneGroups: [{ typeId: toTypeId("24545"), count: 3 }, { typeId: toTypeId("80001"), count: 2 }] };
+    expect(codec.parse(codec.serialize(profile))).toEqual(profile);
+  });
+
   test("fitting body preserves blank lines and empty slot stubs", () => {
     const fitting = `[Rifter, Brawler]
 5MN Y-T8 Compact Microwarpdrive
@@ -125,7 +135,7 @@ describe("profileTextCodec", () => {
 
   test("a profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
-version=13
+version=14
 shipA.tracking=0.32
 shipA.sigRes=S
 shipA.optimal=5000

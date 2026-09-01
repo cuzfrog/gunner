@@ -1,5 +1,6 @@
 import type { FittedHull, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
 import { toTypeId } from "../gamedata/ids";
+import type { DroneGroup } from "../fitting";
 import type { Language } from "./language";
 import type { SimValueParser } from "../sim";
 import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
@@ -127,12 +128,23 @@ export function isOptionalUnitInterval(value: unknown): value is number | undefi
   return value === undefined || (isFiniteNumber(value) && value >= 0 && value <= 1);
 }
 
-export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 {
-  return value === 5 || value === 6 || value === 7 || value === 8 || value === 9 || value === 10 || value === 11 || value === 12 || value === 13;
+export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 {
+  return value === 5 || value === 6 || value === 7 || value === 8 || value === 9 || value === 10 || value === 11 || value === 12 || value === 13 || value === 14;
 }
 
 export function isOptionalNonEmptyString(value: unknown): value is string | undefined {
   return value === undefined || (typeof value === "string" && value.length > 0);
+}
+
+export function isOptionalDroneGroups(value: unknown): value is readonly DroneGroup[] | undefined {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every((entry): entry is DroneGroup => {
+    if (typeof entry !== "object" || entry === null) return false;
+    const typeId = entry.typeId;
+    const count = entry.count;
+    return typeof typeId === "string" && typeof count === "number" && Number.isInteger(count) && count > 0;
+  });
 }
 
 export function isOptionalFittingText(value: unknown): value is string | undefined {
@@ -220,7 +232,7 @@ export function isOptionalRangeOverlayVisibility(value: unknown): value is Recor
 }
 
 export function stripDisplayPreferences(value: ProfileSettings): ProfileSettings {
-  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, weaponRangeVisibility: ____, simSpeed: _____, gridBrightness: ______, rangeOverlayVisibility: _______, autoZoom: ________, zoomFactor: _________, ...rest } = value as Record<string, unknown>;
+  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, weaponRangeVisibility: ____, droneRangeVisibility: _____d, droneControlRangeVisibility: _____dc, simSpeed: _____, gridBrightness: ______, rangeOverlayVisibility: _______, autoZoom: ________, zoomFactor: _________, ...rest } = value as Record<string, unknown>;
   return rest as ProfileSettings;
 }
 

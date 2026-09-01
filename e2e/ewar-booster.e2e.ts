@@ -142,7 +142,7 @@ test.describe("EWAR and boosters", () => {
     await page.locator("#ship-a-ewar-trigger").click();
     await expect(page.locator("#ship-a-ewar-popup")).toBeHidden();
     await page.waitForTimeout(200);
-    const ewarChip = page.locator("#range-overlay-legend .range-overlay-chip:not(.weapon-range-chip)").first();
+    const ewarChip = page.locator("#range-overlay-legend .range-overlay-chip:not(.weapon-range-chip):not(.drone-range-chip):not(.drone-control-range-chip)").first();
     await expect(ewarChip).toBeVisible();
     const initialState = await ewarChip.getAttribute("aria-pressed");
     await ewarChip.click();

@@ -1,7 +1,7 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import { Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView } from "../../../sim";
+import { Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
 import type { Ships } from "../../../ships";
 import type { EffectiveReadouts } from "../controlsContract";
 import { USER_SETTINGS_VERSION } from "../../../appstate";
@@ -58,7 +58,7 @@ function makeView(distance: number): EngagementView {
     relPosition: new Vec2(0, distance), distance, relVelocity: new Vec2(0, 0),
     radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
   };
-  return { frame, attacks: { shipA: undefined, shipB: undefined }, effectiveWeapons: { shipA: undefined, shipB: undefined } };
+  return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined } };
 }
 
 function baseSettings(): UserSettings {
@@ -154,6 +154,40 @@ describe("DomControls", () => {
     cradle.cradle.shipATurretController.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(controls.hasWeapon("shipA")).toBe(true);
     expect(controls.hasWeapon("shipB")).toBe(false);
+  });
+
+  test("getWeapons returns all equipped weapons with active kind first", () => {
+    const { controls, cradle } = buildDomControls();
+    const turretSpec: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: 12, cycleTime: 5, turretCount: 1 };
+    const missileSpec: MissileSpec = { kind: "missile", damagePerMissile: 50, cycleTime: 10, launcherCount: 1, explosionRadius: 50, explosionVelocity: 100, damageReductionFactor: 0.5, maxVelocity: 5000, flightTime: 5, flightRange: 25000 };
+    const droneSpec: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+    cradle.cradle.turretControllers.shipA.currentTurretSpecs = vi.fn(() => [turretSpec]);
+    cradle.cradle.launcherControllers.shipA.currentMissileSpec = vi.fn(() => missileSpec);
+    cradle.cradle.droneControllers.shipA.currentDroneSpecs = vi.fn(() => [droneSpec]);
+    cradle.cradle.weaponSystemSwitches.shipA.setActiveKind("turret");
+    const turretActive = controls.getWeapons("shipA");
+    expect(turretActive[0]).toBe(turretSpec);
+    expect(turretActive).toContain(missileSpec);
+    expect(turretActive).toContain(droneSpec);
+    expect(turretActive.length).toBe(3);
+    cradle.cradle.weaponSystemSwitches.shipA.setActiveKind("missile");
+    const missileActive = controls.getWeapons("shipA");
+    expect(missileActive[0]).toBe(missileSpec);
+    expect(missileActive).toContain(turretSpec);
+    expect(missileActive).toContain(droneSpec);
+    cradle.cradle.weaponSystemSwitches.shipA.setActiveKind("drone");
+    const droneActive = controls.getWeapons("shipA");
+    expect(droneActive[0]).toBe(droneSpec);
+    expect(droneActive).toContain(turretSpec);
+    expect(droneActive).toContain(missileSpec);
+  });
+
+  test("getWeapons returns empty array when no weapons are equipped", () => {
+    const { controls, cradle } = buildDomControls();
+    cradle.cradle.turretControllers.shipA.currentTurretSpecs = vi.fn(() => []);
+    cradle.cradle.launcherControllers.shipA.currentMissileSpec = vi.fn(() => undefined);
+    cradle.cradle.droneControllers.shipA.currentDroneSpecs = vi.fn(() => []);
+    expect(controls.getWeapons("shipA")).toHaveLength(0);
   });
 
   test("config invalidation refreshes the profile action bar dirty state", () => {

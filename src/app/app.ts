@@ -1,5 +1,6 @@
-import type { EngagementFrameComposer, EngagementView, EwarResolver, ShipState, Side, Simulation, WeaponSpec } from "../sim";
-import type { Controls, EffectiveReadouts, Loop, Renderer, TurretRange, MissileRange, WeaponRange, WeaponRanges } from "../ui";
+import { Vec2 } from "../sim";
+import type { DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, ShipState, Side, Simulation, WeaponSpec } from "../sim";
+import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, Renderer, WeaponRange, WeaponRanges } from "../ui";
 
 export interface App {
   start(): void;
@@ -9,6 +10,7 @@ export interface App {
 export class AppImpl implements App {
   private readonly controls: Controls;
   private readonly simulation: Simulation;
+  private readonly droneSimulator: DroneSimulator;
   private readonly engagementFrameComposer: EngagementFrameComposer;
   private readonly ewarResolver: EwarResolver;
   private readonly renderer: Renderer;
@@ -17,6 +19,7 @@ export class AppImpl implements App {
   constructor(deps: {
     controls: Controls;
     simulation: Simulation;
+    droneSimulator: DroneSimulator;
     engagementFrameComposer: EngagementFrameComposer;
     ewarResolver: EwarResolver;
     renderer: Renderer;
@@ -24,6 +27,7 @@ export class AppImpl implements App {
   }) {
     this.controls = deps.controls;
     this.simulation = deps.simulation;
+    this.droneSimulator = deps.droneSimulator;
     this.engagementFrameComposer = deps.engagementFrameComposer;
     this.ewarResolver = deps.ewarResolver;
     this.renderer = deps.renderer;
@@ -36,11 +40,13 @@ export class AppImpl implements App {
     this.controls.setCallbacks({
       onReset: () => {
         this.simulation.reset(this.controls.getConfig());
+        this.droneSimulator.reset(this.droneSimConfig());
         this.loop.reset();
         this.renderFrame();
       },
       onConfigChange: () => {
         this.simulation.update(this.controls.getConfig());
+        this.droneSimulator.reset(this.droneSimConfig());
         this.renderFrame();
       },
       onDisplayChange: () => this.renderFrame(),
@@ -54,29 +60,47 @@ export class AppImpl implements App {
       },
       onSpeedChange: (speed) => this.loop.setSpeed(speed),
     });
+    this.droneSimulator.reset(this.droneSimConfig());
     this.renderFrame();
   }
 
   tick(dt: number): void {
     this.simulation.step(dt);
+    const snapshot = this.simulation.snapshot();
+    const input = this.engagementInput(snapshot);
+    const view = this.engagementFrameComposer.compose(snapshot, input);
+    this.droneSimulator.step(dt, view.frame);
     this.renderFrame();
+  }
+
+  private droneSimConfig(): DroneSimConfig {
+    return {
+      shipA: droneSpecsFrom(this.controls.getWeapons("shipA")),
+      shipB: droneSpecsFrom(this.controls.getWeapons("shipB")),
+    };
+  }
+
+  private engagementInput(snapshot: ReturnType<Simulation["snapshot"]>): EngagementInput {
+    return {
+      weapons: { shipA: this.controls.getWeapons("shipA"), shipB: this.controls.getWeapons("shipB") },
+      sigRadii: { shipA: this.controls.getSig("shipA"), shipB: this.controls.getSig("shipB") },
+      droneStates: { shipA: this.droneSimulator.states("shipA"), shipB: this.droneSimulator.states("shipB") },
+    };
   }
 
   private renderFrame(): void {
     const snapshot = this.simulation.snapshot();
-    const input = {
-      weapons: { shipA: this.controls.getWeapons("shipA"), shipB: this.controls.getWeapons("shipB") },
-      sigRadii: { shipA: this.controls.getSig("shipA"), shipB: this.controls.getSig("shipB") },
-    };
-    const view = this.engagementFrameComposer.compose(snapshot, input);
+    const view = this.engagementFrameComposer.compose(snapshot, this.engagementInput(snapshot));
     const effectiveReadouts: EffectiveReadouts = {
       shipA: this.sideReadoutValues(snapshot.shipA, snapshot.shipB, view, "shipA"),
       shipB: this.sideReadoutValues(snapshot.shipB, snapshot.shipA, view, "shipB"),
     };
     this.renderer.setGridBrightness(this.controls.getGridBrightness());
     this.renderer.setWeaponRangeVisibility(this.controls.getWeaponRangeVisibility());
+    this.renderer.setDroneRangeVisibility(this.controls.getDroneRangeVisibility());
+    this.renderer.setDroneControlRangeVisibility(this.controls.getDroneControlRangeVisibility());
     this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
-    this.renderer.draw(snapshot, view.frame, this.rendererWeaponRanges(view), this.controls.getOverlays());
+    this.renderer.draw(snapshot, view.frame, this.rendererWeaponRanges(view), this.controls.getOverlays(), this.droneRenderInfo());
     this.controls.update(view, effectiveReadouts);
   }
 
@@ -87,8 +111,16 @@ export class AppImpl implements App {
     };
   }
 
+  private droneRenderInfo(): DroneRenderInfo {
+    return {
+      shipA: droneGroupRenderInfo(this.droneSimulator.states("shipA"), droneSpecsFrom(this.controls.getWeapons("shipA"))),
+      shipB: droneGroupRenderInfo(this.droneSimulator.states("shipB"), droneSpecsFrom(this.controls.getWeapons("shipB"))),
+    };
+  }
+
   private weaponRangeForRenderer(weapon: WeaponSpec | undefined, side: Side): WeaponRange {
     if (weapon?.kind === "turret") return { kind: "turret", optimal: weapon.optimal, falloff: weapon.falloff };
+    if (weapon?.kind === "drone") return { kind: "drone", optimal: weapon.optimal, falloff: weapon.falloff };
     if (weapon?.kind === "missile") return { kind: "missile", range: weapon.flightRange };
     const fallback = this.controls.getWeapon(side);
     if (fallback?.kind === "missile") return { kind: "missile", range: fallback.flightRange };
@@ -131,6 +163,31 @@ export class AppImpl implements App {
         falloffBreakdown: disruption,
       };
     }
+    if (effectiveWeapon?.kind === "drone") {
+      return {
+        kind: "drone",
+        speed: ship.maxSpeed,
+        tracking: effectiveWeapon.tracking,
+        optimal: effectiveWeapon.optimal,
+        falloff: effectiveWeapon.falloff,
+        sigResolution: effectiveWeapon.sigResolution,
+        speedBreakdown,
+      };
+    }
     return { kind: "none", speed: ship.maxSpeed, speedBreakdown };
   }
+}
+
+function droneSpecsFrom(weapons: readonly WeaponSpec[]): readonly DroneSpec[] {
+  return weapons.filter((w): w is DroneSpec => w.kind === "drone");
+}
+
+function droneGroupRenderInfo(states: readonly DroneRuntimeState[], specs: readonly DroneSpec[]): readonly DroneGroupRenderInfo[] {
+  const out: DroneGroupRenderInfo[] = [];
+  for (let i = 0; i < specs.length; i++) {
+    const spec = specs[i];
+    const state = states[i];
+    out.push({ positions: state?.positions ?? [new Vec2(0, 0)], optimal: spec.optimal, falloff: spec.falloff, controlRange: spec.controlRange });
+  }
+  return out;
 }

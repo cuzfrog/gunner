@@ -69,7 +69,7 @@ function makeMockProfileTextCodec(): ProfileTextCodec {
       const trimmed = text.trimStart();
       if (!trimmed.startsWith("# gunner v1")) return undefined;
       return {
-        version: 13,
+        version: 14,
         shipATracking: 0.32,
         shipASigRes: "S",
         shipAOptimal: 5000,
@@ -183,6 +183,7 @@ export function buildImportController(document: Document) {
     shipBSide: shipBPanel as unknown as SidePanel,
     turrets,
     launchers,
+    drones: { shipA: { applyImported: vi.fn() }, shipB: { applyImported: vi.fn() } },
     weaponSystemSwitches,
     profileController: profileController as unknown as ProfileController,
     profileTextCodec,

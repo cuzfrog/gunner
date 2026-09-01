@@ -56,12 +56,15 @@ export interface SimSnapshot {
   readonly commands: { readonly shipA: Vec2; readonly shipB: Vec2 };
 }
 
-export interface TurretSpec {
-  readonly kind: "turret";
-  readonly tracking: number; // rad/s (old-system tracking speed)
+export interface TrackingApplicationSpec {
+  readonly tracking: number; // rad/s
   readonly sigResolution: number; // m
   readonly optimal: number; // m
   readonly falloff: number; // m
+}
+
+export interface TurretSpec extends TrackingApplicationSpec {
+  readonly kind: "turret";
   readonly damagePerShot: number; // base damage of one turret shot
   readonly cycleTime: number; // seconds
   readonly turretCount: number;
@@ -80,8 +83,30 @@ export interface MissileSpec {
   readonly flightRange: number; // maxVelocity * flightTime, computed by the producer
 }
 
-export type WeaponSpec = TurretSpec | MissileSpec;
-export type WeaponKind = "turret" | "missile";
+export interface DroneSpec extends TrackingApplicationSpec {
+  readonly kind: "drone";
+  readonly damagePerShot: number; // base damage of one drone per cycle
+  readonly cycleTime: number; // seconds
+  readonly droneCount: number;
+  readonly maxVelocity: number; // m/s, 0 for sentries
+  readonly orbitSpeed: number; // m/s, 0 for sentries
+  readonly orbitRange: number; // m, distance drones orbit the target (entityFlyRange)
+  readonly isSentry: boolean;
+  readonly controlRange: number; // m, ship-to-target max command distance
+}
+
+export type DroneMode = "idle" | "engaging" | "returning";
+
+export interface DroneRuntimeState {
+  readonly mode: DroneMode;
+  readonly positions: readonly Vec2[]; // individual drone positions
+  readonly distanceToTarget: number; // m, group-average drone-to-target
+  readonly distanceToSlot: number; // m, group-average distance to desired orbit position
+  readonly inControlRange: boolean; // ship-to-target <= controlRange
+}
+
+export type WeaponSpec = TurretSpec | MissileSpec | DroneSpec;
+export type WeaponKind = "turret" | "missile" | "drone";
 
 export interface DamageAssessment {
   readonly nominalDps: number;
@@ -101,6 +126,16 @@ export interface MissileDamageBreakdown {
   readonly velocityTerm: number; // (S/E * Ve/Vt)^drfNorm
   readonly inRange: boolean; // distance <= flightRange
   readonly timeToImpact: number; // seconds
+}
+
+export interface DroneDamageBreakdown {
+  readonly hit: HitChanceBreakdown;
+  readonly expectedMultiplier: number;
+  readonly inRange: boolean;
+  readonly inWeaponRange: boolean; // target within optimal + 3*falloff
+  readonly mode: DroneMode;
+  readonly distanceToTarget: number; // m, drone-to-target
+  readonly inControlRange: boolean; // ship-to-target <= controlRange
 }
 
 export interface EngagementFrame {

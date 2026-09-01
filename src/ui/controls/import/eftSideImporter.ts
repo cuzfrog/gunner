@@ -4,12 +4,14 @@ import type { Side } from "../side";
 import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
 import type { ShipATurret } from "./shipATurret";
 import type { ShipALauncher } from "./shipALauncher";
+import type { ShipADrone } from "./shipADrone";
 
 interface EftSideImporterDeps {
   readonly shipASide: SidePanel;
   readonly shipBSide: SidePanel;
   readonly turrets: Record<Side, ShipATurret>;
   readonly launchers: Record<Side, ShipALauncher>;
+  readonly drones: Record<Side, ShipADrone>;
   readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   readonly fittingImport: FittingImport;
 }
@@ -19,6 +21,7 @@ export class EftSideImporter {
   private readonly shipBSide: SidePanel;
   private readonly turrets: Record<Side, ShipATurret>;
   private readonly launchers: Record<Side, ShipALauncher>;
+  private readonly drones: Record<Side, ShipADrone>;
   private readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   private readonly fittingImport: FittingImport;
 
@@ -27,6 +30,7 @@ export class EftSideImporter {
     this.shipBSide = deps.shipBSide;
     this.turrets = deps.turrets;
     this.launchers = deps.launchers;
+    this.drones = deps.drones;
     this.weaponSystemSwitches = deps.weaponSystemSwitches;
     this.fittingImport = deps.fittingImport;
   }
@@ -51,7 +55,8 @@ export class EftSideImporter {
     panel.sections.hull.applyImportedFitting(this.fittedHullSummary(side, imported));
     this.turrets[side].applyImported(imported, conditions);
     this.launchers[side].applyImported(imported, conditions);
-    this.weaponSystemSwitches[side].autoToggle(imported.turret !== undefined, imported.launcher !== undefined);
+    this.drones[side].applyImported(imported, conditions);
+    this.weaponSystemSwitches[side].autoToggle(imported.turret !== undefined, imported.launcher !== undefined, imported.drones.length > 0);
     if (persist) {
       panel.lastCommittedHull = imported.profile.id;
     }

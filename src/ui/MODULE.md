@@ -20,6 +20,7 @@ no-new-exports:
 
 
 
+
 # ui
 
 Browser presentation and input: DOM form controls, canvas renderer, requestAnimationFrame loop, and the i18n/icons sub-modules. Persistence is handled by the top-level `appstate` module, which is consumed through its index. The `testing/` sub-module is test-only: fake DOM, mocks, and shared fixtures.
@@ -29,3 +30,5 @@ Browser presentation and input: DOM form controls, canvas renderer, requestAnima
 The `appstate` module owns persistence (`LocalSettingsStore`), saved fittings (`LocalSavedFittings`), and profile sharing (`profileText`). The `i18n/` sub-module owns language switching, the dictionary, and localized hint/lore content data. The `icons/` sub-module owns the static image catalog; `iconIds.ts` and `droneIconIds.ts` are generated data files internal to that module.
 
 DI wiring: `module.ts` composes the `controls`, `i18n`, `appstate`, and `icons` modules and registers `renderer`, `loop`, and `timer` against the singleton `container` in `src/container.ts`. The `canvas` consumed by `renderer` and the `Ships` domain service are provided by the composition root. `PanelConfigurationMemory` is a per-side in-memory store (registered as `shipAPanelMemory`/`shipBPanelMemory` in the turret module alongside other per-side stores) that remembers the last turret, launcher, and propulsion selection per dimension, separate from calculation and overrides.
+
+Gate relaxed: `renderer.ts` and `index.ts` were removed from `no-new-exports` to replace `TurretRange` with `OptimalFalloffRange` (kind: `"turret" | "drone"`) alongside the existing `MissileRange` union member, and to add `DroneRenderInfo` and `DroneGroupRenderInfo` for drone position/range rendering. Drones share the optimal/falloff ring model with turrets, so a single `OptimalFalloffRange` type encodes both weapon kinds without duplicating the structure. `DroneRenderInfo` carries per-group drone positions and ranges consumed by the renderer and the app layer.

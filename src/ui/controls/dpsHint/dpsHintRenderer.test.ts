@@ -7,6 +7,7 @@ function makeModel(): DpsHintModel {
     groups: [
       {
         name: "Pulse Laser x4",
+        weaponKind: "turret",
         types: [
           { type: "em", iconUrl: "images/icons/damage-em.png", damage: 30, percent: 0.6 },
           { type: "thermal", iconUrl: "images/icons/damage-thermal.png", damage: 20, percent: 0.4 },
@@ -141,6 +142,7 @@ describe("DpsHintRendererImpl", () => {
     const model: DpsHintModel = {
       groups: [{
         name: "Group",
+        weaponKind: "turret",
         types: [],
         ammo: 10,
         factors: [{ kind: "module", multiplier: 1.5, cumulative: 1.5, sources: ["Heat Sink II x2", "Damage Control II"] }],
@@ -176,7 +178,7 @@ describe("DpsHintRendererImpl", () => {
     expect(elementChildren(cycleRow)[1].textContent).toBe("3.50s");
     const dpsRow = summaryChildren[2];
     expect(dpsRow.className).toContain("dps-hint-dps-row");
-    expect(elementChildren(dpsRow)[0].textContent).toBe("dpsHint.dps");
+    expect(elementChildren(dpsRow)[0].textContent).toBe("dpsHint.turretDps");
     expect(elementChildren(dpsRow)[1].textContent).toBe("245.1");
   });
 
@@ -185,8 +187,8 @@ describe("DpsHintRendererImpl", () => {
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
     const model: DpsHintModel = {
       groups: [
-        { name: "Group A", types: [], ammo: 0, factors: [], summary: { ammo: 0, multiplier: 1, count: 0, volley: 0, cycleTime: 1, dps: 0 } },
-        { name: "Group B", types: [], ammo: 0, factors: [], summary: { ammo: 0, multiplier: 1, count: 0, volley: 0, cycleTime: 1, dps: 0 } },
+        { name: "Group A", weaponKind: "turret", types: [], ammo: 0, factors: [], summary: { ammo: 0, multiplier: 1, count: 0, volley: 0, cycleTime: 1, dps: 0 } },
+        { name: "Group B", weaponKind: "missile", types: [], ammo: 0, factors: [], summary: { ammo: 0, multiplier: 1, count: 0, volley: 0, cycleTime: 1, dps: 0 } },
       ],
     };
     renderer.render(model, container as unknown as HTMLElement);

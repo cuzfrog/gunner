@@ -23,6 +23,7 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
       shipBSide: proxy.shipBSide,
       turretControllers: proxy.turretControllers,
       launcherControllers: proxy.launcherControllers,
+      droneControllers: proxy.droneControllers,
       weaponSystemSwitches: proxy.weaponSystemSwitches,
       importController: proxy.importController,
       ewarController: proxy.ewarController,
@@ -31,9 +32,11 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
       shareController: proxy.shareController,
       rangeOverlayController: proxy.rangeOverlayController,
       portraitsController: proxy.portraitsController,
+      hoverHintController: proxy.hoverHintController,
       previewManager: proxy.previewManager,
       simConfigSource: proxy.simConfigSource,
     })).singleton(),
+    viewStore: asFunction((proxy: ControlsCradle) => proxy.controls).singleton(),
   });
 }
 

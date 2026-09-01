@@ -99,6 +99,8 @@ export function resolveBoosterScript(value: string, resolver: ItemNameResolver, 
 export function normalizeLegacySettings(record: Record<string, unknown>): void {
   normalizeLegacyOverrides(record, "attackerOverrides", "shipAOverrides");
   normalizeLegacyOverrides(record, "targetOverrides", "shipBOverrides");
+  migrateDroneTypeIdToGroups(record, "shipADroneTypeId", "shipADroneGroups");
+  migrateDroneTypeIdToGroups(record, "shipBDroneTypeId", "shipBDroneGroups");
   const entries = Object.entries(record);
   for (const [oldKey, value] of entries) {
     if (oldKey === "version" || oldKey === "language" || oldKey === "trackingUnit" || oldKey === "simSpeed") continue;
@@ -177,4 +179,13 @@ function sidePrefixFor(oldKey: string): string | undefined {
 function lowerFirst(value: string): string {
   if (value.length === 0) return value;
   return value.charAt(0).toLowerCase() + value.slice(1);
+}
+
+function migrateDroneTypeIdToGroups(record: Record<string, unknown>, oldKey: string, newKey: string): void {
+  const typeId = record[oldKey];
+  if (typeId === undefined) return;
+  if (typeof typeId === "string" && !(newKey in record)) {
+    record[newKey] = [{ typeId, count: 1 }];
+  }
+  delete record[oldKey];
 }

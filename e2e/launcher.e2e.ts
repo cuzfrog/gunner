@@ -75,8 +75,8 @@ test.describe("launcher configuration", () => {
     await expect(page.locator("#ship-a-launcher-attributes-popup")).toBeHidden();
   });
 
-  test("drone button is disabled", async ({ cleanPage: page }) => {
-    await expect(page.locator("#ship-a-weapon-system-drone")).toBeDisabled();
+  test("drone button is enabled alongside turret and missile", async ({ cleanPage: page }) => {
+    await expect(page.locator("#ship-a-weapon-system-drone")).toBeEnabled();
   });
 
   test("weapon overload button toggles and increases launcher DPS", async ({ cleanPage: page }) => {

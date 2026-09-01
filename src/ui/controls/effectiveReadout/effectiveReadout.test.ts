@@ -4,7 +4,7 @@ import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { TrackingInput } from "../trackingInput";
 import type { Side } from "../side";
-import type { MissileReadoutValues, NoWeaponReadoutValues } from "../controlsContract";
+import type { DroneReadoutValues, MissileReadoutValues, NoWeaponReadoutValues } from "../controlsContract";
 import type { EffectiveReadout } from "./effectiveReadout";
 import { EffectiveReadoutImpl } from "./effectiveReadout";
 import { _formatSpeed, _isAffected as _isNegative, _readNumber } from "./effectiveReadout";
@@ -439,5 +439,34 @@ describe("EffectiveReadoutImpl no-weapon branch", () => {
     expect(els.shipA.trackingReadout.textContent).toBe("-");
     expect(els.shipA.optimalReadout.textContent).toBe("-");
     expect(els.shipA.falloffReadout.textContent).toBe("-");
+  });
+});
+
+describe("EffectiveReadoutImpl drone branch", () => {
+  test("renders drone tracking/optimal/falloff without negative state", () => {
+    const els = fakeEls();
+    const i18n = fakeI18n();
+    const trackingDisplays = fakeTrackingDisplays(0.32, "rad");
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingDisplays, fittingImport: fakeFittingImport() });
+    const drone: DroneReadoutValues = {
+      kind: "drone", speed: 400, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40,
+    };
+    readout.update({ shipA: drone, shipB: sideValues() });
+    expect(els.shipA.trackingReadout.textContent).toBe("0.15 rad/s");
+    expect(els.shipA.optimalReadout.textContent).toBe("1,000 m");
+    expect(els.shipA.falloffReadout.textContent).toBe("500 m");
+    expect(els.shipA.trackingReadout.classList.add).not.toHaveBeenCalled();
+  });
+
+  test("renders drone tracking in score unit when tracking display is in score mode", () => {
+    const els = fakeEls();
+    const i18n = fakeI18n();
+    const trackingDisplays = fakeTrackingDisplays(0.32, "score");
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingDisplays, fittingImport: fakeFittingImport() });
+    const drone: DroneReadoutValues = {
+      kind: "drone", speed: 400, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40,
+    };
+    readout.update({ shipA: drone, shipB: sideValues() });
+    expect(els.shipA.trackingReadout.textContent).toBe("150 Score");
   });
 });

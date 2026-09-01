@@ -1,9 +1,10 @@
 import type { AutopilotMode, SigResolutionClass, WeaponKind } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
 import type { ShipId, TypeId } from "../gamedata/ids";
+import type { DroneGroup } from "../fitting";
 import type { Language } from "./language";
 
-export const USER_SETTINGS_VERSION = 13 as const;
+export const USER_SETTINGS_VERSION = 14 as const;
 export const PROPULSION_NONE = "none" as const;
 export type TrackingUnit = "rad" | "score";
 export type WeaponRangeVisibility = "shipA" | "shipB" | "both" | "none";
@@ -61,6 +62,8 @@ export interface UserSettings {
   shipATrackingUnit: TrackingUnit;
   shipBTrackingUnit: TrackingUnit;
   weaponRangeVisibility: WeaponRangeVisibility;
+  droneRangeVisibility?: WeaponRangeVisibility;
+  droneControlRangeVisibility?: WeaponRangeVisibility;
   shipATracking: number;
   shipASigRes: SigResolutionClass;
   shipAOptimal: number;
@@ -119,6 +122,8 @@ export interface UserSettings {
   shipBWeaponKind?: WeaponKind;
   shipAMissileAmmo?: TypeId;
   shipBMissileAmmo?: TypeId;
+  shipADroneGroups?: readonly DroneGroup[];
+  shipBDroneGroups?: readonly DroneGroup[];
   simSpeed: number;
   language: Language;
 }
@@ -129,6 +134,8 @@ export type ProfileSettings = Omit<
   | "shipATrackingUnit"
   | "shipBTrackingUnit"
   | "weaponRangeVisibility"
+  | "droneRangeVisibility"
+  | "droneControlRangeVisibility"
   | "simSpeed"
   | "gridBrightness"
   | "autoZoom"
@@ -149,6 +156,8 @@ export interface DisplayPreferences {
   readonly shipATrackingUnit: TrackingUnit;
   readonly shipBTrackingUnit: TrackingUnit;
   readonly weaponRangeVisibility: WeaponRangeVisibility;
+  readonly droneRangeVisibility: WeaponRangeVisibility;
+  readonly droneControlRangeVisibility: WeaponRangeVisibility;
   readonly simSpeed: number;
   readonly gridBrightness: number;
   readonly rangeOverlayVisibility?: Record<string, WeaponRangeVisibility>;

@@ -14,7 +14,7 @@ import {
   isPositive,
   isSkillLevel,
 } from "../validators";
-import type { ChargeCatalog } from "../../fitting";
+import type { ChargeCatalog, DroneGroup } from "../../fitting";
 import { toTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
 import type { Ships } from "../../ships";
 import { resolveAmmoId, resolveHullId } from "../settingsCompat";
@@ -48,8 +48,9 @@ export function parseScalarValue(
     return ships.parsePropulsionId(value);
   }
   if (field === "shipAAmmo" || field === "shipBAmmo") return resolveLegacyAmmoId(value, chargeCatalog);
-  if (field === "shipAWeaponKind" || field === "shipBWeaponKind") return value === "turret" || value === "missile" ? value : undefined;
+  if (field === "shipAWeaponKind" || field === "shipBWeaponKind") return value === "turret" || value === "missile" || value === "drone" ? value : undefined;
   if (field === "shipAMissileAmmo" || field === "shipBMissileAmmo") return toTypeId(value);
+  if (field === "shipADroneGroups" || field === "shipBDroneGroups") return parseDroneGroups(value);
 
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
@@ -176,9 +177,11 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
     shipAAmmo: raw.shipAAmmo,
     shipAWeaponKind: raw.shipAWeaponKind,
     shipAMissileAmmo: raw.shipAMissileAmmo,
+    shipADroneGroups: raw.shipADroneGroups,
     shipBAmmo: raw.shipBAmmo,
     shipBWeaponKind: raw.shipBWeaponKind,
     shipBMissileAmmo: raw.shipBMissileAmmo,
+    shipBDroneGroups: raw.shipBDroneGroups,
     shipBSkillLevel: raw.shipBSkillLevel,
     shipBOverload: raw.shipBOverload,
     shipBHullId: raw.shipBHullId,
@@ -203,4 +206,23 @@ function resolveLegacyHullId(value: string, ships: Ships): ShipId | undefined {
 
 function resolveLegacyAmmoId(value: string, chargeCatalog: ChargeCatalog): TypeId {
   return resolveAmmoId(value, chargeCatalog) ?? chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
+}
+
+function parseDroneGroups(value: string): readonly DroneGroup[] | undefined {
+  if (value === "") return undefined;
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!Array.isArray(parsed)) return undefined;
+    const groups: DroneGroup[] = [];
+    for (const entry of parsed) {
+      if (typeof entry !== "object" || entry === null) return undefined;
+      const typeId = entry.typeId;
+      const count = entry.count;
+      if (typeof typeId !== "string" || typeof count !== "number" || !Number.isInteger(count) || count <= 0) return undefined;
+      groups.push({ typeId: toTypeId(typeId), count });
+    }
+    return groups;
+  } catch {
+    return undefined;
+  }
 }

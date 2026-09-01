@@ -7,6 +7,7 @@ import type { SidePanelDeps } from "./sidePanelContract";
 import { createPanelOverrides } from "./overrides";
 import { createPanelTurretLink } from "./turretLink";
 import { createPanelLauncherLink } from "./launcherLink";
+import { createPanelDroneLink } from "./droneLink";
 import { WeaponSystemSwitchImpl } from "./weaponSystemSwitch";
 
 export function registerSidePanelModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
@@ -30,6 +31,7 @@ function createWeaponSystemSwitch(side: Side, deps: ControlsCradle): WeaponSyste
     droneButton: deps.els[side].weaponSystemDrone,
     turretPanel: deps.els[side].turretPanel,
     launcherPanel: deps.els[side].launcherPanel,
+    dronePanel: deps.els[side].dronePanel,
     events: deps.uiEvents,
   });
 }
@@ -48,6 +50,7 @@ function sideDeps<T extends ControlsCradle>(proxy: T, side: Side): SidePanelDeps
     overrides: createPanelOverrides(side, proxy.turretOverridesBySide),
     turretLink: createPanelTurretLink(side, proxy.turretControllers, proxy.popupGroup),
     launcherLink: createPanelLauncherLink(side, proxy.launcherControllers, proxy.popupGroup),
+    droneLink: createPanelDroneLink(side, proxy.droneControllers, proxy.popupGroup),
     simValueParser: proxy.simValueParser,
   };
 }

@@ -11,6 +11,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.14,
     baseSpeed: 89,
     sigRadius: 470,
+    droneBandwidth: 75,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "22448" as ShipProfile["id"],
@@ -21,6 +24,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.71,
     baseSpeed: 158,
     sigRadius: 265,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "2836" as ShipProfile["id"],
@@ -31,6 +37,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.457,
     baseSpeed: 228,
     sigRadius: 120,
+    droneBandwidth: 50,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "23919" as ShipProfile["id"],
@@ -41,6 +50,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.035,
     baseSpeed: 80,
     sigRadius: 18870,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "32872" as ShipProfile["id"],
@@ -51,6 +63,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.85,
     baseSpeed: 245,
     sigRadius: 72,
+    droneBandwidth: 35,
+    droneCapacity: 60,
+    maxActiveDrones: 5,
   },
   {
     id: "91849" as ShipProfile["id"],
@@ -61,6 +76,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.71,
     baseSpeed: 260,
     sigRadius: 72,
+    droneBandwidth: 35,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "32848" as ShipProfile["id"],
@@ -71,6 +89,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.76,
     baseSpeed: 265,
     sigRadius: 68,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "78366" as ShipProfile["id"],
@@ -81,6 +102,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.65,
     baseSpeed: 160,
     sigRadius: 310,
+    droneBandwidth: 20,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "11134" as ShipProfile["id"],
@@ -91,6 +115,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11188" as ShipProfile["id"],
@@ -101,6 +128,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.89,
     baseSpeed: 282,
     sigRadius: 47,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "89807" as ShipProfile["id"],
@@ -111,6 +141,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.45,
     baseSpeed: 225,
     sigRadius: 215,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "28848" as ShipProfile["id"],
@@ -121,6 +154,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.055,
     baseSpeed: 78,
     sigRadius: 9880,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "642" as ShipProfile["id"],
@@ -131,6 +167,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.119,
     baseSpeed: 113,
     sigRadius: 380,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "11936" as ShipProfile["id"],
@@ -141,6 +180,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.136,
     baseSpeed: 94,
     sigRadius: 400,
+    droneBandwidth: 125,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "17726" as ShipProfile["id"],
@@ -151,6 +193,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.115,
     baseSpeed: 120,
     sigRadius: 370,
+    droneBandwidth: 75,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "37604" as ShipProfile["id"],
@@ -161,6 +206,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.042,
     baseSpeed: 80,
     sigRadius: 10.5,
+    droneBandwidth: 125,
+    droneCapacity: 600,
+    maxActiveDrones: 5,
   },
   {
     id: "29266" as ShipProfile["id"],
@@ -171,6 +219,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11969" as ShipProfile["id"],
@@ -181,6 +232,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.59,
     baseSpeed: 207,
     sigRadius: 155,
+    droneBandwidth: 40,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "628" as ShipProfile["id"],
@@ -191,6 +245,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.56,
     baseSpeed: 200,
     sigRadius: 130,
+    droneBandwidth: 50,
+    droneCapacity: 150,
+    maxActiveDrones: 5,
   },
   {
     id: "23757" as ShipProfile["id"],
@@ -201,6 +258,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.041,
     baseSpeed: 80,
     sigRadius: 9920,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11202" as ShipProfile["id"],
@@ -211,6 +271,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.45,
     baseSpeed: 425,
     sigRadius: 35,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "28850" as ShipProfile["id"],
@@ -221,6 +284,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.055,
     baseSpeed: 84,
     sigRadius: 9800,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "643" as ShipProfile["id"],
@@ -231,6 +297,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.13,
     baseSpeed: 100,
     sigRadius: 450,
+    droneBandwidth: 125,
+    droneCapacity: 375,
+    maxActiveDrones: 5,
   },
   {
     id: "11938" as ShipProfile["id"],
@@ -241,6 +310,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.136,
     baseSpeed: 94,
     sigRadius: 400,
+    droneBandwidth: 125,
+    droneCapacity: 150,
+    maxActiveDrones: 5,
   },
   {
     id: "32305" as ShipProfile["id"],
@@ -251,6 +323,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.13,
     baseSpeed: 105,
     sigRadius: 400,
+    droneBandwidth: 125,
+    droneCapacity: 275,
+    maxActiveDrones: 5,
   },
   {
     id: "17922" as ShipProfile["id"],
@@ -261,6 +336,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.55,
     baseSpeed: 215,
     sigRadius: 130,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "22466" as ShipProfile["id"],
@@ -271,6 +349,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.69,
     baseSpeed: 165,
     sigRadius: 300,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "33468" as ShipProfile["id"],
@@ -281,6 +362,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.87,
     baseSpeed: 312,
     sigRadius: 35,
+    droneBandwidth: 25,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "608" as ShipProfile["id"],
@@ -291,6 +375,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.8,
     baseSpeed: 420,
     sigRadius: 35,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "625" as ShipProfile["id"],
@@ -301,6 +388,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.56,
     baseSpeed: 235,
     sigRadius: 90,
+    droneBandwidth: 20,
+    droneCapacity: 20,
+    maxActiveDrones: 5,
   },
   {
     id: "29337" as ShipProfile["id"],
@@ -311,6 +401,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.38,
     baseSpeed: 245,
     sigRadius: 120,
+    droneBandwidth: 15,
+    droneCapacity: 15,
+    maxActiveDrones: 5,
   },
   {
     id: "81040" as ShipProfile["id"],
@@ -321,6 +414,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.063,
     baseSpeed: 60,
     sigRadius: 10660,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11567" as ShipProfile["id"],
@@ -331,6 +427,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.034,
     baseSpeed: 60,
     sigRadius: 22760,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "78576" as ShipProfile["id"],
@@ -341,6 +440,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.031,
     baseSpeed: 95,
     sigRadius: 23.2,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "88001" as ShipProfile["id"],
@@ -351,6 +453,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.08,
     baseSpeed: 115,
     sigRadius: 400,
+    droneBandwidth: 50,
+    droneCapacity: 250,
+    maxActiveDrones: 5,
   },
   {
     id: "648" as ShipProfile["id"],
@@ -361,6 +466,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.94,
     baseSpeed: 127,
     sigRadius: 190,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "77283" as ShipProfile["id"],
@@ -371,6 +479,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.044,
     baseSpeed: 75,
     sigRadius: 11900,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "582" as ShipProfile["id"],
@@ -381,6 +492,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.1,
     baseSpeed: 370,
     sigRadius: 35,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "33820" as ShipProfile["id"],
@@ -391,6 +505,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.098,
     baseSpeed: 148,
     sigRadius: 370,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "11985" as ShipProfile["id"],
@@ -401,6 +518,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.505,
     baseSpeed: 205,
     sigRadius: 70,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "630" as ShipProfile["id"],
@@ -411,6 +531,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.51,
     baseSpeed: 260,
     sigRadius: 120,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "74316" as ShipProfile["id"],
@@ -421,6 +544,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.47,
     baseSpeed: 300,
     sigRadius: 120,
+    droneBandwidth: 20,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "1944" as ShipProfile["id"],
@@ -431,6 +557,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.95,
     baseSpeed: 110,
     sigRadius: 215,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "17920" as ShipProfile["id"],
@@ -441,6 +570,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.125,
     baseSpeed: 101,
     sigRadius: 400,
+    droneBandwidth: 100,
+    droneCapacity: 150,
+    maxActiveDrones: 5,
   },
   {
     id: "37480" as ShipProfile["id"],
@@ -451,6 +583,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.3,
     baseSpeed: 345,
     sigRadius: 60,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "632" as ShipProfile["id"],
@@ -461,6 +596,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.48,
     baseSpeed: 190,
     sigRadius: 150,
+    droneBandwidth: 10,
+    droneCapacity: 10,
+    maxActiveDrones: 5,
   },
   {
     id: "64034" as ShipProfile["id"],
@@ -471,6 +609,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 20,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "34328" as ShipProfile["id"],
@@ -481,6 +622,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.108,
     baseSpeed: 65,
     sigRadius: 10200,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "598" as ShipProfile["id"],
@@ -491,6 +635,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.1,
     baseSpeed: 365,
     sigRadius: 36,
+    droneBandwidth: 10,
+    droneCapacity: 10,
+    maxActiveDrones: 5,
   },
   {
     id: "12013" as ShipProfile["id"],
@@ -501,6 +648,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.55,
     baseSpeed: 220,
     sigRadius: 130,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "16229" as ShipProfile["id"],
@@ -511,6 +661,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.68,
     baseSpeed: 160,
     sigRadius: 305,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "33151" as ShipProfile["id"],
@@ -521,6 +674,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.63,
     baseSpeed: 165,
     sigRadius: 305,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "599" as ShipProfile["id"],
@@ -531,6 +687,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.9,
     baseSpeed: 415,
     sigRadius: 33,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "12731" as ShipProfile["id"],
@@ -541,6 +700,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 80,
     sigRadius: 165,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11192" as ShipProfile["id"],
@@ -551,6 +713,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.27,
     baseSpeed: 306,
     sigRadius: 50,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "42246" as ShipProfile["id"],
@@ -561,6 +726,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.6,
     baseSpeed: 375,
     sigRadius: 35,
+    droneBandwidth: 10,
+    droneCapacity: 30,
+    maxActiveDrones: 5,
   },
   {
     id: "45647" as ShipProfile["id"],
@@ -571,6 +739,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.038,
     baseSpeed: 75,
     sigRadius: 12000,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "17619" as ShipProfile["id"],
@@ -581,6 +752,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.3,
     baseSpeed: 360,
     sigRadius: 40,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "672" as ShipProfile["id"],
@@ -591,6 +765,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "32788" as ShipProfile["id"],
@@ -601,6 +778,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.5,
     baseSpeed: 350,
     sigRadius: 37,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "621" as ShipProfile["id"],
@@ -611,6 +791,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.47,
     baseSpeed: 230,
     sigRadius: 125,
+    droneBandwidth: 10,
+    droneCapacity: 10,
+    maxActiveDrones: 5,
   },
   {
     id: "17634" as ShipProfile["id"],
@@ -621,6 +804,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.51,
     baseSpeed: 210,
     sigRadius: 125,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "16240" as ShipProfile["id"],
@@ -631,6 +817,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.76,
     baseSpeed: 265,
     sigRadius: 68,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "73796" as ShipProfile["id"],
@@ -641,6 +830,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.65,
     baseSpeed: 280,
     sigRadius: 68,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "633" as ShipProfile["id"],
@@ -651,6 +843,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.505,
     baseSpeed: 210,
     sigRadius: 135,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "85086" as ShipProfile["id"],
@@ -661,6 +856,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.55,
     baseSpeed: 170,
     sigRadius: 250,
+    droneBandwidth: 50,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "11993" as ShipProfile["id"],
@@ -671,6 +869,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.463,
     baseSpeed: 220,
     sigRadius: 135,
+    droneBandwidth: 15,
+    droneCapacity: 15,
+    maxActiveDrones: 5,
   },
   {
     id: "33675" as ShipProfile["id"],
@@ -681,6 +882,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.6,
     baseSpeed: 170,
     sigRadius: 160,
+    droneBandwidth: 20,
+    droneCapacity: 150,
+    maxActiveDrones: 5,
   },
   {
     id: "20185" as ShipProfile["id"],
@@ -691,6 +895,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.063,
     baseSpeed: 60,
     sigRadius: 10600,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11182" as ShipProfile["id"],
@@ -701,6 +908,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.77,
     baseSpeed: 381,
     sigRadius: 46,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "42243" as ShipProfile["id"],
@@ -711,6 +921,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.04,
     baseSpeed: 80,
     sigRadius: 11800,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "23915" as ShipProfile["id"],
@@ -721,6 +934,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.042,
     baseSpeed: 75,
     sigRadius: 10070,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "33397" as ShipProfile["id"],
@@ -731,6 +947,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.12,
     baseSpeed: 440,
     sigRadius: 30,
+    droneBandwidth: 15,
+    droneCapacity: 30,
+    maxActiveDrones: 5,
   },
   {
     id: "27299" as ShipProfile["id"],
@@ -741,6 +960,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "27301" as ShipProfile["id"],
@@ -751,6 +973,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "27303" as ShipProfile["id"],
@@ -761,6 +986,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "27305" as ShipProfile["id"],
@@ -771,6 +999,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11196" as ShipProfile["id"],
@@ -781,6 +1012,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.15,
     baseSpeed: 480,
     sigRadius: 30,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "22468" as ShipProfile["id"],
@@ -791,6 +1025,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.7,
     baseSpeed: 170,
     sigRadius: 240,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "85229" as ShipProfile["id"],
@@ -801,6 +1038,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.48,
     baseSpeed: 240,
     sigRadius: 120,
+    droneBandwidth: 20,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "16236" as ShipProfile["id"],
@@ -811,6 +1051,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.77,
     baseSpeed: 255,
     sigRadius: 62,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "73789" as ShipProfile["id"],
@@ -821,6 +1064,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.78,
     baseSpeed: 260,
     sigRadius: 65,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "583" as ShipProfile["id"],
@@ -831,6 +1077,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.9,
     baseSpeed: 400,
     sigRadius: 33,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "34317" as ShipProfile["id"],
@@ -841,6 +1090,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3,
     baseSpeed: 250,
     sigRadius: 65,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "32876" as ShipProfile["id"],
@@ -851,6 +1103,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.7,
     baseSpeed: 235,
     sigRadius: 69,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "91857" as ShipProfile["id"],
@@ -861,6 +1116,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.565,
     baseSpeed: 250,
     sigRadius: 69,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "16238" as ShipProfile["id"],
@@ -871,6 +1129,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.78,
     baseSpeed: 250,
     sigRadius: 65,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "73795" as ShipProfile["id"],
@@ -881,6 +1142,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.78,
     baseSpeed: 255,
     sigRadius: 65,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "34496" as ShipProfile["id"],
@@ -891,6 +1155,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 20,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "17476" as ShipProfile["id"],
@@ -901,6 +1168,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.6,
     baseSpeed: 150,
     sigRadius: 200,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "12729" as ShipProfile["id"],
@@ -911,6 +1181,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.51,
     baseSpeed: 160,
     sigRadius: 115,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11176" as ShipProfile["id"],
@@ -921,6 +1194,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.25,
     baseSpeed: 430,
     sigRadius: 35,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "2161" as ShipProfile["id"],
@@ -931,6 +1207,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.35,
     baseSpeed: 350,
     sigRadius: 38,
+    droneBandwidth: 15,
+    droneCapacity: 45,
+    maxActiveDrones: 5,
   },
   {
     id: "37453" as ShipProfile["id"],
@@ -941,6 +1220,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.35,
     baseSpeed: 340,
     sigRadius: 38,
+    droneBandwidth: 10,
+    droneCapacity: 20,
+    maxActiveDrones: 5,
   },
   {
     id: "17926" as ShipProfile["id"],
@@ -951,6 +1233,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.4,
     baseSpeed: 340,
     sigRadius: 35,
+    droneBandwidth: 10,
+    droneCapacity: 10,
+    maxActiveDrones: 5,
   },
   {
     id: "11184" as ShipProfile["id"],
@@ -961,6 +1246,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.2,
     baseSpeed: 455,
     sigRadius: 32,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "20125" as ShipProfile["id"],
@@ -971,6 +1259,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.61,
     baseSpeed: 205,
     sigRadius: 145,
+    droneBandwidth: 50,
+    droneCapacity: 150,
+    maxActiveDrones: 5,
   },
   {
     id: "77726" as ShipProfile["id"],
@@ -981,6 +1272,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.457,
     baseSpeed: 235,
     sigRadius: 115,
+    droneBandwidth: 50,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "16231" as ShipProfile["id"],
@@ -991,6 +1285,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.68,
     baseSpeed: 180,
     sigRadius: 250,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "72811" as ShipProfile["id"],
@@ -1001,6 +1298,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.68,
     baseSpeed: 180,
     sigRadius: 250,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "17720" as ShipProfile["id"],
@@ -1011,6 +1311,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.45,
     baseSpeed: 263,
     sigRadius: 115,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "42242" as ShipProfile["id"],
@@ -1021,6 +1324,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.038,
     baseSpeed: 85,
     sigRadius: 11500,
+    droneBandwidth: 125,
+    droneCapacity: 600,
+    maxActiveDrones: 5,
   },
   {
     id: "47269" as ShipProfile["id"],
@@ -1031,6 +1337,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3,
     baseSpeed: 350,
     sigRadius: 32,
+    droneBandwidth: 15,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "22474" as ShipProfile["id"],
@@ -1041,6 +1350,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.7,
     baseSpeed: 150,
     sigRadius: 265,
+    droneBandwidth: 50,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "17928" as ShipProfile["id"],
@@ -1051,6 +1363,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.2,
     baseSpeed: 385,
     sigRadius: 35,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "37457" as ShipProfile["id"],
@@ -1061,6 +1376,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.5,
     baseSpeed: 405,
     sigRadius: 34,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "12023" as ShipProfile["id"],
@@ -1071,6 +1389,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.475,
     baseSpeed: 250,
     sigRadius: 120,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "81046" as ShipProfile["id"],
@@ -1081,6 +1402,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.59,
     baseSpeed: 265,
     sigRadius: 115,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "12017" as ShipProfile["id"],
@@ -1091,6 +1415,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.51,
     baseSpeed: 215,
     sigRadius: 140,
+    droneBandwidth: 25,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "645" as ShipProfile["id"],
@@ -1101,6 +1428,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.125,
     baseSpeed: 109,
     sigRadius: 465,
+    droneBandwidth: 125,
+    droneCapacity: 375,
+    maxActiveDrones: 5,
   },
   {
     id: "32307" as ShipProfile["id"],
@@ -1111,6 +1441,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.12,
     baseSpeed: 110,
     sigRadius: 455,
+    droneBandwidth: 125,
+    droneCapacity: 400,
+    maxActiveDrones: 5,
   },
   {
     id: "32874" as ShipProfile["id"],
@@ -1121,6 +1454,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.87,
     baseSpeed: 240,
     sigRadius: 66,
+    droneBandwidth: 25,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "91775" as ShipProfile["id"],
@@ -1131,6 +1467,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.73,
     baseSpeed: 255,
     sigRadius: 66,
+    droneBandwidth: 25,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "24698" as ShipProfile["id"],
@@ -1141,6 +1480,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.65,
     baseSpeed: 150,
     sigRadius: 295,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "33153" as ShipProfile["id"],
@@ -1151,6 +1493,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.53,
     baseSpeed: 180,
     sigRadius: 295,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "17932" as ShipProfile["id"],
@@ -1161,6 +1506,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.1,
     baseSpeed: 460,
     sigRadius: 30,
+    droneBandwidth: 15,
+    droneCapacity: 20,
+    maxActiveDrones: 5,
   },
   {
     id: "52254" as ShipProfile["id"],
@@ -1171,6 +1519,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.88,
     baseSpeed: 325,
     sigRadius: 62,
+    droneBandwidth: 10,
+    droneCapacity: 20,
+    maxActiveDrones: 5,
   },
   {
     id: "49711" as ShipProfile["id"],
@@ -1181,6 +1532,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.74,
     baseSpeed: 163,
     sigRadius: 255,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "12011" as ShipProfile["id"],
@@ -1191,6 +1545,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.576,
     baseSpeed: 160,
     sigRadius: 140,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "3532" as ShipProfile["id"],
@@ -1201,6 +1558,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.45,
     baseSpeed: 404,
     sigRadius: 33,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "617" as ShipProfile["id"],
@@ -1211,6 +1571,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.35,
     baseSpeed: 360,
     sigRadius: 46,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "legacy-eidolon" as ShipProfile["id"],
@@ -1221,6 +1584,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.155,
     baseSpeed: 250,
     sigRadius: 400,
+    droneBandwidth: 125,
+    droneCapacity: 375,
+    maxActiveDrones: 5,
   },
   {
     id: "37135" as ShipProfile["id"],
@@ -1231,6 +1597,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.4,
     baseSpeed: 420,
     sigRadius: 40,
+    droneBandwidth: 15,
+    droneCapacity: 30,
+    maxActiveDrones: 5,
   },
   {
     id: "44995" as ShipProfile["id"],
@@ -1241,6 +1610,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.55,
     baseSpeed: 190,
     sigRadius: 120,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "12044" as ShipProfile["id"],
@@ -1251,6 +1623,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.922,
     baseSpeed: 306,
     sigRadius: 37,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "22442" as ShipProfile["id"],
@@ -1261,6 +1636,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.704,
     baseSpeed: 150,
     sigRadius: 300,
+    droneBandwidth: 125,
+    droneCapacity: 300,
+    maxActiveDrones: 5,
   },
   {
     id: "655" as ShipProfile["id"],
@@ -1271,6 +1649,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.9,
     baseSpeed: 120,
     sigRadius: 195,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "671" as ShipProfile["id"],
@@ -1281,6 +1662,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.037,
     baseSpeed: 70,
     sigRadius: 23205,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "22460" as ShipProfile["id"],
@@ -1291,6 +1675,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.7,
     baseSpeed: 316,
     sigRadius: 78,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "32790" as ShipProfile["id"],
@@ -1301,6 +1688,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.61,
     baseSpeed: 200,
     sigRadius: 75,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "589" as ShipProfile["id"],
@@ -1311,6 +1701,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.85,
     baseSpeed: 410,
     sigRadius: 31,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "634" as ShipProfile["id"],
@@ -1321,6 +1714,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.61,
     baseSpeed: 240,
     sigRadius: 80,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "29344" as ShipProfile["id"],
@@ -1331,6 +1727,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.44,
     baseSpeed: 270,
     sigRadius: 120,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "11957" as ShipProfile["id"],
@@ -1341,6 +1740,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.64,
     baseSpeed: 192,
     sigRadius: 175,
+    droneBandwidth: 10,
+    droneCapacity: 10,
+    maxActiveDrones: 5,
   },
   {
     id: "17841" as ShipProfile["id"],
@@ -1351,6 +1753,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.135,
     baseSpeed: 375,
     sigRadius: 42,
+    droneBandwidth: 15,
+    droneCapacity: 30,
+    maxActiveDrones: 5,
   },
   {
     id: "20189" as ShipProfile["id"],
@@ -1361,6 +1766,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.063,
     baseSpeed: 81,
     sigRadius: 10390,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "16227" as ShipProfile["id"],
@@ -1371,6 +1779,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.66,
     baseSpeed: 145,
     sigRadius: 325,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "72812" as ShipProfile["id"],
@@ -1381,6 +1792,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.69,
     baseSpeed: 170,
     sigRadius: 325,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "35781" as ShipProfile["id"],
@@ -1391,6 +1805,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.6,
     baseSpeed: 240,
     sigRadius: 130,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "22464" as ShipProfile["id"],
@@ -1401,6 +1818,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.6,
     baseSpeed: 315,
     sigRadius: 80,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "32207" as ShipProfile["id"],
@@ -1411,6 +1831,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.056,
     baseSpeed: 355,
     sigRadius: 33,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "92824" as ShipProfile["id"],
@@ -1421,6 +1844,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.039,
     baseSpeed: 80,
     sigRadius: 10.67,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11129" as ShipProfile["id"],
@@ -1431,6 +1857,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "33816" as ShipProfile["id"],
@@ -1441,6 +1870,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.2,
     baseSpeed: 415,
     sigRadius: 32,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "legacy-gecko" as ShipProfile["id"],
@@ -1451,6 +1883,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 100,
     baseSpeed: 1820,
     sigRadius: 100,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "74141" as ShipProfile["id"],
@@ -1461,6 +1896,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.5,
     baseSpeed: 460,
     sigRadius: 33,
+    droneBandwidth: 10,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "17715" as ShipProfile["id"],
@@ -1471,6 +1909,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.66,
     baseSpeed: 195,
     sigRadius: 145,
+    droneBandwidth: 20,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "3756" as ShipProfile["id"],
@@ -1481,6 +1922,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.45,
     baseSpeed: 135,
     sigRadius: 275,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "11940" as ShipProfile["id"],
@@ -1491,6 +1935,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.2,
     baseSpeed: 500,
     sigRadius: 30,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "28710" as ShipProfile["id"],
@@ -1501,6 +1948,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.077,
     baseSpeed: 100,
     sigRadius: 450,
+    droneBandwidth: 25,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "21097" as ShipProfile["id"],
@@ -1511,6 +1961,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "584" as ShipProfile["id"],
@@ -1521,6 +1974,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.5,
     baseSpeed: 325,
     sigRadius: 42,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "37455" as ShipProfile["id"],
@@ -1531,6 +1987,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.45,
     baseSpeed: 335,
     sigRadius: 42,
+    droneBandwidth: 25,
+    droneCapacity: 35,
+    maxActiveDrones: 5,
   },
   {
     id: "11987" as ShipProfile["id"],
@@ -1541,6 +2000,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.61,
     baseSpeed: 209,
     sigRadius: 70,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "11011" as ShipProfile["id"],
@@ -1551,6 +2013,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.546,
     baseSpeed: 180,
     sigRadius: 140,
+    droneBandwidth: 125,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "21628" as ShipProfile["id"],
@@ -1561,6 +2026,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "24696" as ShipProfile["id"],
@@ -1571,6 +2039,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.57,
     baseSpeed: 175,
     sigRadius: 270,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "33155" as ShipProfile["id"],
@@ -1581,6 +2052,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.52,
     baseSpeed: 175,
     sigRadius: 270,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "11381" as ShipProfile["id"],
@@ -1591,6 +2065,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.633,
     baseSpeed: 281,
     sigRadius: 37,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11379" as ShipProfile["id"],
@@ -1601,6 +2078,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.768,
     baseSpeed: 290,
     sigRadius: 39,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "35683" as ShipProfile["id"],
@@ -1611,6 +2091,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 6,
     baseSpeed: 180,
     sigRadius: 70,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "22852" as ShipProfile["id"],
@@ -1621,6 +2104,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.035,
     baseSpeed: 85,
     sigRadius: 18640,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11172" as ShipProfile["id"],
@@ -1631,6 +2117,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.142,
     baseSpeed: 330,
     sigRadius: 49,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "33079" as ShipProfile["id"],
@@ -1641,6 +2130,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.45,
     baseSpeed: 310,
     sigRadius: 48,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "legacy-herald" as ShipProfile["id"],
@@ -1651,6 +2143,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0,
     baseSpeed: 0,
     sigRadius: 0,
+    droneBandwidth: 20,
+    droneCapacity: 60,
+    maxActiveDrones: 5,
   },
   {
     id: "22452" as ShipProfile["id"],
@@ -1661,6 +2156,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.6,
     baseSpeed: 310,
     sigRadius: 75,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "605" as ShipProfile["id"],
@@ -1671,6 +2169,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.57,
     baseSpeed: 340,
     sigRadius: 40,
+    droneBandwidth: 15,
+    droneCapacity: 35,
+    maxActiveDrones: 5,
   },
   {
     id: "72904" as ShipProfile["id"],
@@ -1681,6 +2182,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.57,
     baseSpeed: 345,
     sigRadius: 40,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "651" as ShipProfile["id"],
@@ -1691,6 +2195,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.85,
     baseSpeed: 130,
     sigRadius: 185,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "12034" as ShipProfile["id"],
@@ -1701,6 +2208,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.4,
     baseSpeed: 310,
     sigRadius: 38,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "77281" as ShipProfile["id"],
@@ -1711,6 +2221,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.045,
     baseSpeed: 75,
     sigRadius: 12100,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11961" as ShipProfile["id"],
@@ -1721,6 +2234,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.57,
     baseSpeed: 240,
     sigRadius: 120,
+    droneBandwidth: 40,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "22544" as ShipProfile["id"],
@@ -1731,6 +2247,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.6,
     baseSpeed: 160,
     sigRadius: 200,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "24702" as ShipProfile["id"],
@@ -1741,6 +2260,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.67,
     baseSpeed: 180,
     sigRadius: 250,
+    droneBandwidth: 40,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "33157" as ShipProfile["id"],
@@ -1751,6 +2273,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.61,
     baseSpeed: 185,
     sigRadius: 250,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "48636" as ShipProfile["id"],
@@ -1761,6 +2286,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.15,
     baseSpeed: 390,
     sigRadius: 35,
+    droneBandwidth: 15,
+    droneCapacity: 30,
+    maxActiveDrones: 5,
   },
   {
     id: "11387" as ShipProfile["id"],
@@ -1771,6 +2299,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.93,
     baseSpeed: 375,
     sigRadius: 39,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "24690" as ShipProfile["id"],
@@ -1781,6 +2312,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.118,
     baseSpeed: 115,
     sigRadius: 485,
+    droneBandwidth: 125,
+    droneCapacity: 175,
+    maxActiveDrones: 5,
   },
   {
     id: "601" as ShipProfile["id"],
@@ -1791,6 +2325,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.5,
     baseSpeed: 295,
     sigRadius: 52,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "52252" as ShipProfile["id"],
@@ -1801,6 +2338,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.64,
     baseSpeed: 220,
     sigRadius: 120,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "607" as ShipProfile["id"],
@@ -1811,6 +2351,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.15,
     baseSpeed: 330,
     sigRadius: 41,
+    droneBandwidth: 20,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "72913" as ShipProfile["id"],
@@ -1821,6 +2364,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.15,
     baseSpeed: 345,
     sigRadius: 41,
+    droneBandwidth: 20,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "615" as ShipProfile["id"],
@@ -1831,6 +2377,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.45,
     baseSpeed: 330,
     sigRadius: 50,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "35779" as ShipProfile["id"],
@@ -1841,6 +2390,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.3,
     baseSpeed: 450,
     sigRadius: 35,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "596" as ShipProfile["id"],
@@ -1851,6 +2403,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.45,
     baseSpeed: 300,
     sigRadius: 50,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "12753" as ShipProfile["id"],
@@ -1861,6 +2416,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 90,
     sigRadius: 160,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "17703" as ShipProfile["id"],
@@ -1871,6 +2429,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.3,
     baseSpeed: 350,
     sigRadius: 38,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "594" as ShipProfile["id"],
@@ -1881,6 +2442,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.15,
     baseSpeed: 340,
     sigRadius: 42,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "32844" as ShipProfile["id"],
@@ -1891,6 +2455,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.76,
     baseSpeed: 265,
     sigRadius: 68,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "32985" as ShipProfile["id"],
@@ -1901,6 +2468,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.15,
     baseSpeed: 330,
     sigRadius: 41,
+    droneBandwidth: 20,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "590" as ShipProfile["id"],
@@ -1911,6 +2481,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.55,
     baseSpeed: 405,
     sigRadius: 34,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "32842" as ShipProfile["id"],
@@ -1921,6 +2494,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.76,
     baseSpeed: 265,
     sigRadius: 68,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "32840" as ShipProfile["id"],
@@ -1931,6 +2507,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.76,
     baseSpeed: 265,
     sigRadius: 68,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "30842" as ShipProfile["id"],
@@ -1941,6 +2520,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "12042" as ShipProfile["id"],
@@ -1951,6 +2533,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.868,
     baseSpeed: 308,
     sigRadius: 39,
+    droneBandwidth: 25,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "12005" as ShipProfile["id"],
@@ -1961,6 +2546,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.565,
     baseSpeed: 175,
     sigRadius: 145,
+    droneBandwidth: 125,
+    droneCapacity: 375,
+    maxActiveDrones: 5,
   },
   {
     id: "657" as ShipProfile["id"],
@@ -1971,6 +2559,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.87,
     baseSpeed: 105,
     sigRadius: 220,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "legacy-ixion" as ShipProfile["id"],
@@ -1981,6 +2572,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.65,
     baseSpeed: 220,
     sigRadius: 101,
+    droneBandwidth: 10,
+    droneCapacity: 10,
+    maxActiveDrones: 5,
   },
   {
     id: "34828" as ShipProfile["id"],
@@ -1991,6 +2585,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 6,
     baseSpeed: 180,
     sigRadius: 70,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11400" as ShipProfile["id"],
@@ -2001,6 +2598,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.176,
     baseSpeed: 368,
     sigRadius: 34,
+    droneBandwidth: 10,
+    droneCapacity: 20,
+    maxActiveDrones: 5,
   },
   {
     id: "77284" as ShipProfile["id"],
@@ -2011,6 +2611,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.045,
     baseSpeed: 70,
     sigRadius: 12000,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11174" as ShipProfile["id"],
@@ -2021,6 +2624,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.1,
     baseSpeed: 350,
     sigRadius: 43,
+    droneBandwidth: 10,
+    droneCapacity: 10,
+    maxActiveDrones: 5,
   },
   {
     id: "602" as ShipProfile["id"],
@@ -2031,6 +2637,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.27,
     baseSpeed: 325,
     sigRadius: 38,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "78369" as ShipProfile["id"],
@@ -2041,6 +2650,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.59,
     baseSpeed: 200,
     sigRadius: 225,
+    droneBandwidth: 75,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "49710" as ShipProfile["id"],
@@ -2051,6 +2663,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.92,
     baseSpeed: 320,
     sigRadius: 58,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "37458" as ShipProfile["id"],
@@ -2061,6 +2676,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.95,
     baseSpeed: 370,
     sigRadius: 35,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "11194" as ShipProfile["id"],
@@ -2071,6 +2689,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.86,
     baseSpeed: 315,
     sigRadius: 47,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "45649" as ShipProfile["id"],
@@ -2081,6 +2702,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.0315,
     baseSpeed: 65,
     sigRadius: 23590,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "28661" as ShipProfile["id"],
@@ -2091,6 +2715,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.074,
     baseSpeed: 105,
     sigRadius: 420,
+    droneBandwidth: 50,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "654" as ShipProfile["id"],
@@ -2101,6 +2728,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.92,
     baseSpeed: 120,
     sigRadius: 210,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11971" as ShipProfile["id"],
@@ -2111,6 +2741,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.56,
     baseSpeed: 220,
     sigRadius: 150,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "60764" as ShipProfile["id"],
@@ -2121,6 +2754,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.48,
     baseSpeed: 230,
     sigRadius: 135,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "29986" as ShipProfile["id"],
@@ -2131,6 +2767,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.52,
     baseSpeed: 185,
     sigRadius: 170,
+    droneBandwidth: 50,
+    droneCapacity: 200,
+    maxActiveDrones: 5,
   },
   {
     id: "33513" as ShipProfile["id"],
@@ -2141,6 +2780,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "47271" as ShipProfile["id"],
@@ -2151,6 +2793,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.163,
     baseSpeed: 125,
     sigRadius: 370,
+    droneBandwidth: 100,
+    droneCapacity: 250,
+    maxActiveDrones: 5,
   },
   {
     id: "3764" as ShipProfile["id"],
@@ -2161,6 +2806,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.035,
     baseSpeed: 60,
     sigRadius: 23590,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "37606" as ShipProfile["id"],
@@ -2171,6 +2819,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.042,
     baseSpeed: 85,
     sigRadius: 10.4,
+    droneBandwidth: 125,
+    droneCapacity: 500,
+    maxActiveDrones: 5,
   },
   {
     id: "45645" as ShipProfile["id"],
@@ -2181,6 +2832,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.038,
     baseSpeed: 80,
     sigRadius: 11700,
+    droneBandwidth: 50,
+    droneCapacity: 250,
+    maxActiveDrones: 5,
   },
   {
     id: "29990" as ShipProfile["id"],
@@ -2191,6 +2845,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.54,
     baseSpeed: 185,
     sigRadius: 160,
+    droneBandwidth: 40,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "17738" as ShipProfile["id"],
@@ -2201,6 +2858,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.096,
     baseSpeed: 161,
     sigRadius: 380,
+    droneBandwidth: 100,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "22548" as ShipProfile["id"],
@@ -2211,6 +2871,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.7,
     baseSpeed: 130,
     sigRadius: 200,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "24694" as ShipProfile["id"],
@@ -2221,6 +2884,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.111,
     baseSpeed: 120,
     sigRadius: 400,
+    droneBandwidth: 100,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "29248" as ShipProfile["id"],
@@ -2231,6 +2897,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.8,
     baseSpeed: 350,
     sigRadius: 39,
+    droneBandwidth: 15,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "72907" as ShipProfile["id"],
@@ -2241,6 +2910,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.8,
     baseSpeed: 350,
     sigRadius: 39,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "37483" as ShipProfile["id"],
@@ -2251,6 +2923,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.2,
     baseSpeed: 325,
     sigRadius: 67,
+    droneBandwidth: 35,
+    droneCapacity: 60,
+    maxActiveDrones: 5,
   },
   {
     id: "11186" as ShipProfile["id"],
@@ -2261,6 +2936,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.05,
     baseSpeed: 470,
     sigRadius: 33,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "3516" as ShipProfile["id"],
@@ -2271,6 +2949,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.43,
     baseSpeed: 295,
     sigRadius: 40,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "624" as ShipProfile["id"],
@@ -2281,6 +2962,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.476,
     baseSpeed: 205,
     sigRadius: 130,
+    droneBandwidth: 15,
+    droneCapacity: 15,
+    maxActiveDrones: 5,
   },
   {
     id: "78367" as ShipProfile["id"],
@@ -2291,6 +2975,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.7,
     baseSpeed: 255,
     sigRadius: 73,
+    droneBandwidth: 10,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "652" as ShipProfile["id"],
@@ -2301,6 +2988,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.91,
     baseSpeed: 120,
     sigRadius: 180,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "12032" as ShipProfile["id"],
@@ -2311,6 +3001,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.5,
     baseSpeed: 280,
     sigRadius: 41,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "44996" as ShipProfile["id"],
@@ -2321,6 +3014,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.07,
     baseSpeed: 110,
     sigRadius: 330,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "12747" as ShipProfile["id"],
@@ -2331,6 +3027,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 120,
     sigRadius: 150,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "609" as ShipProfile["id"],
@@ -2341,6 +3040,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.25,
     baseSpeed: 375,
     sigRadius: 40,
+    droneBandwidth: 20,
+    droneCapacity: 30,
+    maxActiveDrones: 5,
   },
   {
     id: "37456" as ShipProfile["id"],
@@ -2351,6 +3053,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.35,
     baseSpeed: 335,
     sigRadius: 40,
+    droneBandwidth: 25,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "616" as ShipProfile["id"],
@@ -2361,6 +3066,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.1,
     baseSpeed: 400,
     sigRadius: 30,
+    droneBandwidth: 10,
+    droneCapacity: 10,
+    maxActiveDrones: 5,
   },
   {
     id: "641" as ShipProfile["id"],
@@ -2371,6 +3079,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.114,
     baseSpeed: 122,
     sigRadius: 380,
+    droneBandwidth: 75,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "13202" as ShipProfile["id"],
@@ -2381,6 +3092,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.122,
     baseSpeed: 115,
     sigRadius: 400,
+    droneBandwidth: 125,
+    droneCapacity: 175,
+    maxActiveDrones: 5,
   },
   {
     id: "17728" as ShipProfile["id"],
@@ -2391,6 +3105,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.105,
     baseSpeed: 135,
     sigRadius: 385,
+    droneBandwidth: 125,
+    droneCapacity: 175,
+    maxActiveDrones: 5,
   },
   {
     id: "78333" as ShipProfile["id"],
@@ -2401,6 +3118,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.475,
     baseSpeed: 322.3,
     sigRadius: 50,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "603" as ShipProfile["id"],
@@ -2411,6 +3131,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.6,
     baseSpeed: 320,
     sigRadius: 39,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "77114" as ShipProfile["id"],
@@ -2421,6 +3144,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.8,
     baseSpeed: 300,
     sigRadius: 35,
+    droneBandwidth: 15,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "656" as ShipProfile["id"],
@@ -2431,6 +3157,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.94,
     baseSpeed: 120,
     sigRadius: 205,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "32811" as ShipProfile["id"],
@@ -2441,6 +3170,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.9,
     baseSpeed: 120,
     sigRadius: 220,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "4363" as ShipProfile["id"],
@@ -2451,6 +3183,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.9,
     baseSpeed: 120,
     sigRadius: 220,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "4388" as ShipProfile["id"],
@@ -2461,6 +3196,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.9,
     baseSpeed: 120,
     sigRadius: 220,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "32209" as ShipProfile["id"],
@@ -2471,6 +3209,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.51,
     baseSpeed: 210,
     sigRadius: 130,
+    droneBandwidth: 30,
+    droneCapacity: 30,
+    maxActiveDrones: 5,
   },
   {
     id: "11132" as ShipProfile["id"],
@@ -2481,6 +3222,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 500,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "37605" as ShipProfile["id"],
@@ -2491,6 +3235,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.043,
     baseSpeed: 75,
     sigRadius: 10.7,
+    droneBandwidth: 125,
+    droneCapacity: 500,
+    maxActiveDrones: 5,
   },
   {
     id: "623" as ShipProfile["id"],
@@ -2501,6 +3248,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.52,
     baseSpeed: 190,
     sigRadius: 135,
+    droneBandwidth: 15,
+    droneCapacity: 15,
+    maxActiveDrones: 5,
   },
   {
     id: "42241" as ShipProfile["id"],
@@ -2511,6 +3261,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.03,
     baseSpeed: 65,
     sigRadius: 24000,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "45534" as ShipProfile["id"],
@@ -2521,6 +3274,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.6,
     baseSpeed: 220,
     sigRadius: 40,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "33395" as ShipProfile["id"],
@@ -2531,6 +3287,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.47,
     baseSpeed: 260,
     sigRadius: 90,
+    droneBandwidth: 25,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "92283" as ShipProfile["id"],
@@ -2541,6 +3300,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4,
     baseSpeed: 250,
     sigRadius: 150,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "19724" as ShipProfile["id"],
@@ -2551,6 +3313,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.045,
     baseSpeed: 75,
     sigRadius: 11300,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "73792" as ShipProfile["id"],
@@ -2561,6 +3326,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.045,
     baseSpeed: 75,
     sigRadius: 1130,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "12015" as ShipProfile["id"],
@@ -2571,6 +3339,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.571,
     baseSpeed: 235,
     sigRadius: 125,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "24700" as ShipProfile["id"],
@@ -2581,6 +3352,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.7,
     baseSpeed: 145,
     sigRadius: 305,
+    droneBandwidth: 100,
+    droneCapacity: 200,
+    maxActiveDrones: 5,
   },
   {
     id: "72869" as ShipProfile["id"],
@@ -2591,6 +3365,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.67,
     baseSpeed: 160,
     sigRadius: 305,
+    droneBandwidth: 100,
+    droneCapacity: 300,
+    maxActiveDrones: 5,
   },
   {
     id: "4306" as ShipProfile["id"],
@@ -2601,6 +3378,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.525,
     baseSpeed: 195,
     sigRadius: 215,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "19722" as ShipProfile["id"],
@@ -2611,6 +3391,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.045,
     baseSpeed: 80,
     sigRadius: 11000,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "73787" as ShipProfile["id"],
@@ -2621,6 +3404,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.045,
     baseSpeed: 80,
     sigRadius: 11000,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "592" as ShipProfile["id"],
@@ -2631,6 +3417,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.75,
     baseSpeed: 410,
     sigRadius: 36,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "33099" as ShipProfile["id"],
@@ -2641,6 +3430,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.8,
     baseSpeed: 270,
     sigRadius: 56,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11377" as ShipProfile["id"],
@@ -2651,6 +3443,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.6,
     baseSpeed: 275,
     sigRadius: 42,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "650" as ShipProfile["id"],
@@ -2661,6 +3456,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.78,
     baseSpeed: 130,
     sigRadius: 185,
+    droneBandwidth: 15,
+    droneCapacity: 30,
+    maxActiveDrones: 5,
   },
   {
     id: "52250" as ShipProfile["id"],
@@ -2671,6 +3469,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.9,
     baseSpeed: 283,
     sigRadius: 36,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "33472" as ShipProfile["id"],
@@ -2681,6 +3482,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.35,
     baseSpeed: 70,
     sigRadius: 420,
+    droneBandwidth: 125,
+    droneCapacity: 500,
+    maxActiveDrones: 5,
   },
   {
     id: "24483" as ShipProfile["id"],
@@ -2691,6 +3495,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.039,
     baseSpeed: 85,
     sigRadius: 9865,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "22470" as ShipProfile["id"],
@@ -2701,6 +3508,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.65,
     baseSpeed: 150,
     sigRadius: 285,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "17736" as ShipProfile["id"],
@@ -2711,6 +3521,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.122,
     baseSpeed: 114,
     sigRadius: 370,
+    droneBandwidth: 75,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "37607" as ShipProfile["id"],
@@ -2721,6 +3534,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.042,
     baseSpeed: 80,
     sigRadius: 10.6,
+    droneBandwidth: 125,
+    droneCapacity: 600,
+    maxActiveDrones: 5,
   },
   {
     id: "2998" as ShipProfile["id"],
@@ -2731,6 +3547,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 155,
     sigRadius: 250,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "28846" as ShipProfile["id"],
@@ -2741,6 +3560,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.055,
     baseSpeed: 96,
     sigRadius: 9700,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "23913" as ShipProfile["id"],
@@ -2751,6 +3573,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.036,
     baseSpeed: 80,
     sigRadius: 19010,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "20187" as ShipProfile["id"],
@@ -2761,6 +3586,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.063,
     baseSpeed: 65,
     sigRadius: 10610,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "12745" as ShipProfile["id"],
@@ -2771,6 +3599,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 110,
     sigRadius: 165,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "89607" as ShipProfile["id"],
@@ -2781,6 +3612,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.675,
     baseSpeed: 150,
     sigRadius: 300,
+    droneBandwidth: 125,
+    droneCapacity: 600,
+    maxActiveDrones: 5,
   },
   {
     id: "2006" as ShipProfile["id"],
@@ -2791,6 +3625,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.43,
     baseSpeed: 260,
     sigRadius: 115,
+    droneBandwidth: 40,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "17709" as ShipProfile["id"],
@@ -2801,6 +3638,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.43,
     baseSpeed: 265,
     sigRadius: 100,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "11989" as ShipProfile["id"],
@@ -2811,6 +3651,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.56,
     baseSpeed: 245,
     sigRadius: 65,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "11995" as ShipProfile["id"],
@@ -2821,6 +3664,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.55,
     baseSpeed: 200,
     sigRadius: 150,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "635" as ShipProfile["id"],
@@ -2831,6 +3677,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.65,
     baseSpeed: 250,
     sigRadius: 100,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "4302" as ShipProfile["id"],
@@ -2841,6 +3690,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.495,
     baseSpeed: 200,
     sigRadius: 210,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "28606" as ShipProfile["id"],
@@ -2851,6 +3703,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.2,
     baseSpeed: 60,
     sigRadius: 1000,
+    droneBandwidth: 50,
+    droneCapacity: 200,
+    maxActiveDrones: 5,
   },
   {
     id: "33818" as ShipProfile["id"],
@@ -2861,6 +3716,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.48,
     baseSpeed: 230,
     sigRadius: 135,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "620" as ShipProfile["id"],
@@ -2871,6 +3729,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.61,
     baseSpeed: 210,
     sigRadius: 95,
+    droneBandwidth: 20,
+    droneCapacity: 20,
+    maxActiveDrones: 5,
   },
   {
     id: "29340" as ShipProfile["id"],
@@ -2881,6 +3742,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.385,
     baseSpeed: 260,
     sigRadius: 115,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "89649" as ShipProfile["id"],
@@ -2891,6 +3755,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.6,
     baseSpeed: 300,
     sigRadius: 80,
+    droneBandwidth: 25,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "44993" as ShipProfile["id"],
@@ -2901,6 +3768,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.6,
     baseSpeed: 340,
     sigRadius: 30,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "28659" as ShipProfile["id"],
@@ -2911,6 +3781,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.069,
     baseSpeed: 100,
     sigRadius: 420,
+    droneBandwidth: 25,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "22440" as ShipProfile["id"],
@@ -2921,6 +3794,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.064,
     baseSpeed: 182,
     sigRadius: 288,
+    droneBandwidth: 125,
+    droneCapacity: 175,
+    maxActiveDrones: 5,
   },
   {
     id: "legacy-penitence" as ShipProfile["id"],
@@ -2931,6 +3807,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0,
     baseSpeed: 0,
     sigRadius: 0,
+    droneBandwidth: 50,
+    droneCapacity: 300,
+    maxActiveDrones: 5,
   },
   {
     id: "91174" as ShipProfile["id"],
@@ -2941,6 +3820,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3,
     baseSpeed: 210,
     sigRadius: 80,
+    droneBandwidth: 20,
+    droneCapacity: 60,
+    maxActiveDrones: 5,
   },
   {
     id: "17718" as ShipProfile["id"],
@@ -2951,6 +3833,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.62,
     baseSpeed: 228,
     sigRadius: 120,
+    droneBandwidth: 15,
+    droneCapacity: 15,
+    maxActiveDrones: 5,
   },
   {
     id: "legacy-phantom" as ShipProfile["id"],
@@ -2961,6 +3846,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.65,
     baseSpeed: 300,
     sigRadius: 100,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "12021" as ShipProfile["id"],
@@ -2971,6 +3859,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.58,
     baseSpeed: 205,
     sigRadius: 160,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "19726" as ShipProfile["id"],
@@ -2981,6 +3872,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.045,
     baseSpeed: 70,
     sigRadius: 11200,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "73793" as ShipProfile["id"],
@@ -2991,6 +3885,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.045,
     baseSpeed: 70,
     sigRadius: 11200,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11965" as ShipProfile["id"],
@@ -3001,6 +3898,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.61,
     baseSpeed: 198,
     sigRadius: 150,
+    droneBandwidth: 50,
+    droneCapacity: 150,
+    maxActiveDrones: 5,
   },
   {
     id: "89240" as ShipProfile["id"],
@@ -3011,6 +3911,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3,
     baseSpeed: 200,
     sigRadius: 80,
+    droneBandwidth: 20,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "89647" as ShipProfile["id"],
@@ -3021,6 +3924,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3,
     baseSpeed: 210,
     sigRadius: 80,
+    droneBandwidth: 20,
+    droneCapacity: 80,
+    maxActiveDrones: 5,
   },
   {
     id: "37481" as ShipProfile["id"],
@@ -3031,6 +3937,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.4,
     baseSpeed: 330,
     sigRadius: 64,
+    droneBandwidth: 25,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "42244" as ShipProfile["id"],
@@ -3041,6 +3950,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1.5,
     baseSpeed: 100,
     sigRadius: 300,
+    droneBandwidth: 50,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "47466" as ShipProfile["id"],
@@ -3051,6 +3963,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.1,
     baseSpeed: 75,
     sigRadius: 465,
+    droneBandwidth: 100,
+    droneCapacity: 225,
+    maxActiveDrones: 5,
   },
   {
     id: "2863" as ShipProfile["id"],
@@ -3061,6 +3976,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.7,
     baseSpeed: 200,
     sigRadius: 150,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "586" as ShipProfile["id"],
@@ -3071,6 +3989,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.58,
     baseSpeed: 360,
     sigRadius: 38,
+    droneBandwidth: 15,
+    droneCapacity: 35,
+    maxActiveDrones: 5,
   },
   {
     id: "72903" as ShipProfile["id"],
@@ -3081,6 +4002,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.58,
     baseSpeed: 385,
     sigRadius: 38,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "17480" as ShipProfile["id"],
@@ -3091,6 +4015,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.64,
     baseSpeed: 100,
     sigRadius: 200,
+    droneBandwidth: 50,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "16233" as ShipProfile["id"],
@@ -3101,6 +4028,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.57,
     baseSpeed: 170,
     sigRadius: 270,
+    droneBandwidth: 75,
+    droneCapacity: 225,
+    maxActiveDrones: 5,
   },
   {
     id: "72872" as ShipProfile["id"],
@@ -3111,6 +4041,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.57,
     baseSpeed: 170,
     sigRadius: 270,
+    droneBandwidth: 50,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "12733" as ShipProfile["id"],
@@ -3121,6 +4054,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.52,
     baseSpeed: 170,
     sigRadius: 110,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "33697" as ShipProfile["id"],
@@ -3131,6 +4067,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3,
     baseSpeed: 380,
     sigRadius: 40,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "29988" as ShipProfile["id"],
@@ -3141,6 +4080,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.56,
     baseSpeed: 230,
     sigRadius: 190,
+    droneBandwidth: 125,
+    droneCapacity: 300,
+    maxActiveDrones: 5,
   },
   {
     id: "20183" as ShipProfile["id"],
@@ -3151,6 +4093,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.063,
     baseSpeed: 70,
     sigRadius: 10520,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "12735" as ShipProfile["id"],
@@ -3161,6 +4106,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.485,
     baseSpeed: 220,
     sigRadius: 105,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "597" as ShipProfile["id"],
@@ -3171,6 +4119,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.9,
     baseSpeed: 355,
     sigRadius: 37,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "12038" as ShipProfile["id"],
@@ -3181,6 +4132,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.4,
     baseSpeed: 300,
     sigRadius: 40,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "85236" as ShipProfile["id"],
@@ -3191,6 +4145,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.051,
     baseSpeed: 182,
     sigRadius: 288,
+    droneBandwidth: 50,
+    droneCapacity: 175,
+    maxActiveDrones: 5,
   },
   {
     id: "32846" as ShipProfile["id"],
@@ -3201,6 +4158,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.76,
     baseSpeed: 265,
     sigRadius: 68,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "42245" as ShipProfile["id"],
@@ -3211,6 +4171,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.52,
     baseSpeed: 250,
     sigRadius: 70,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "23773" as ShipProfile["id"],
@@ -3221,6 +4184,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.036,
     baseSpeed: 80,
     sigRadius: 22430,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "60765" as ShipProfile["id"],
@@ -3231,6 +4197,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.1,
     baseSpeed: 440,
     sigRadius: 32,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11963" as ShipProfile["id"],
@@ -3241,6 +4210,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.59,
     baseSpeed: 230,
     sigRadius: 125,
+    droneBandwidth: 40,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "11178" as ShipProfile["id"],
@@ -3251,6 +4223,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.4,
     baseSpeed: 420,
     sigRadius: 34,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "17918" as ShipProfile["id"],
@@ -3261,6 +4236,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.128,
     baseSpeed: 94,
     sigRadius: 450,
+    droneBandwidth: 50,
+    droneCapacity: 175,
+    maxActiveDrones: 5,
   },
   {
     id: "34151" as ShipProfile["id"],
@@ -3271,6 +4249,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.128,
     baseSpeed: 94,
     sigRadius: 450,
+    droneBandwidth: 50,
+    droneCapacity: 175,
+    maxActiveDrones: 5,
   },
   {
     id: "638" as ShipProfile["id"],
@@ -3281,6 +4262,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.12,
     baseSpeed: 113,
     sigRadius: 410,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "17636" as ShipProfile["id"],
@@ -3291,6 +4275,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.12,
     baseSpeed: 123,
     sigRadius: 410,
+    droneBandwidth: 75,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "26840" as ShipProfile["id"],
@@ -3301,6 +4288,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.128,
     baseSpeed: 94,
     sigRadius: 460,
+    droneBandwidth: 125,
+    droneCapacity: 150,
+    maxActiveDrones: 5,
   },
   {
     id: "588" as ShipProfile["id"],
@@ -3311,6 +4301,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.35,
     baseSpeed: 310,
     sigRadius: 48,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "22428" as ShipProfile["id"],
@@ -3321,6 +4314,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.072,
     baseSpeed: 117,
     sigRadius: 333,
+    droneBandwidth: 125,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "17812" as ShipProfile["id"],
@@ -3331,6 +4327,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.2,
     baseSpeed: 410,
     sigRadius: 35,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11393" as ShipProfile["id"],
@@ -3341,6 +4340,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.128,
     baseSpeed: 275,
     sigRadius: 35,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "17478" as ShipProfile["id"],
@@ -3351,6 +4353,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.7,
     baseSpeed: 125,
     sigRadius: 200,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "19720" as ShipProfile["id"],
@@ -3361,6 +4366,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.044,
     baseSpeed: 75,
     sigRadius: 11100,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "73790" as ShipProfile["id"],
@@ -3371,6 +4379,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.044,
     baseSpeed: 75,
     sigRadius: 11100,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "3514" as ShipProfile["id"],
@@ -3381,6 +4392,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.035,
     baseSpeed: 80,
     sigRadius: 18870,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "28844" as ShipProfile["id"],
@@ -3391,6 +4405,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.055,
     baseSpeed: 72,
     sigRadius: 9930,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "587" as ShipProfile["id"],
@@ -3401,6 +4418,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.2,
     baseSpeed: 365,
     sigRadius: 35,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "92284" as ShipProfile["id"],
@@ -3411,6 +4431,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4,
     baseSpeed: 250,
     sigRadius: 150,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "49712" as ShipProfile["id"],
@@ -3421,6 +4444,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.68,
     baseSpeed: 236,
     sigRadius: 100,
+    droneBandwidth: 50,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "24688" as ShipProfile["id"],
@@ -3431,6 +4457,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.136,
     baseSpeed: 89,
     sigRadius: 500,
+    droneBandwidth: 75,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "11959" as ShipProfile["id"],
@@ -3441,6 +4470,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.61,
     baseSpeed: 194,
     sigRadius: 170,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "28352" as ShipProfile["id"],
@@ -3451,6 +4483,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.07,
     baseSpeed: 60,
     sigRadius: 11500,
+    droneBandwidth: 125,
+    droneCapacity: 8800,
+    maxActiveDrones: 5,
   },
   {
     id: "629" as ShipProfile["id"],
@@ -3461,6 +4496,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.5,
     baseSpeed: 210,
     sigRadius: 125,
+    droneBandwidth: 40,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "22456" as ShipProfile["id"],
@@ -3471,6 +4509,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.7,
     baseSpeed: 320,
     sigRadius: 70,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "12019" as ShipProfile["id"],
@@ -3481,6 +4522,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.567,
     baseSpeed: 200,
     sigRadius: 135,
+    droneBandwidth: 50,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "92822" as ShipProfile["id"],
@@ -3491,6 +4535,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.041,
     baseSpeed: 80,
     sigRadius: 10.64,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "87381" as ShipProfile["id"],
@@ -3501,6 +4548,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.04,
     baseSpeed: 90,
     sigRadius: 10,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "32987" as ShipProfile["id"],
@@ -3511,6 +4561,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.8,
     baseSpeed: 350,
     sigRadius: 39,
+    droneBandwidth: 15,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "37460" as ShipProfile["id"],
@@ -3521,6 +4574,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.85,
     baseSpeed: 415,
     sigRadius: 33,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "11978" as ShipProfile["id"],
@@ -3531,6 +4587,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.55,
     baseSpeed: 253,
     sigRadius: 65,
+    droneBandwidth: 45,
+    droneCapacity: 45,
+    maxActiveDrones: 5,
   },
   {
     id: "640" as ShipProfile["id"],
@@ -3541,6 +4600,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.116,
     baseSpeed: 94,
     sigRadius: 480,
+    droneBandwidth: 75,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "4005" as ShipProfile["id"],
@@ -3551,6 +4613,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.116,
     baseSpeed: 94,
     sigRadius: 480,
+    droneBandwidth: 75,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "32309" as ShipProfile["id"],
@@ -3561,6 +4626,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.125,
     baseSpeed: 103,
     sigRadius: 465,
+    droneBandwidth: 75,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "631" as ShipProfile["id"],
@@ -3571,6 +4639,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.57,
     baseSpeed: 260,
     sigRadius: 75,
+    droneBandwidth: 45,
+    droneCapacity: 45,
+    maxActiveDrones: 5,
   },
   {
     id: "29336" as ShipProfile["id"],
@@ -3581,6 +4652,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.44,
     baseSpeed: 280,
     sigRadius: 90,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "11190" as ShipProfile["id"],
@@ -3591,6 +4665,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.25,
     baseSpeed: 340,
     sigRadius: 41,
+    droneBandwidth: 20,
+    droneCapacity: 60,
+    maxActiveDrones: 5,
   },
   {
     id: "78414" as ShipProfile["id"],
@@ -3601,6 +4678,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.467,
     baseSpeed: 325,
     sigRadius: 39,
+    droneBandwidth: 25,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "85062" as ShipProfile["id"],
@@ -3611,6 +4691,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.2,
     baseSpeed: 375,
     sigRadius: 30,
+    droneBandwidth: 10,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "19744" as ShipProfile["id"],
@@ -3621,6 +4704,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.86,
     baseSpeed: 125,
     sigRadius: 175,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11942" as ShipProfile["id"],
@@ -3631,6 +4717,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.2,
     baseSpeed: 450,
     sigRadius: 30,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "92823" as ShipProfile["id"],
@@ -3641,6 +4730,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.045,
     baseSpeed: 70,
     sigRadius: 10.79,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "22430" as ShipProfile["id"],
@@ -3651,6 +4743,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.0513,
     baseSpeed: 117,
     sigRadius: 378,
+    droneBandwidth: 125,
+    droneCapacity: 400,
+    maxActiveDrones: 5,
   },
   {
     id: "22546" as ShipProfile["id"],
@@ -3661,6 +4756,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.64,
     baseSpeed: 110,
     sigRadius: 200,
+    droneBandwidth: 50,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "89808" as ShipProfile["id"],
@@ -3671,6 +4769,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 6,
     baseSpeed: 180,
     sigRadius: 70,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "54731" as ShipProfile["id"],
@@ -3681,6 +4782,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.6,
     baseSpeed: 330,
     sigRadius: 37,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "585" as ShipProfile["id"],
@@ -3691,6 +4795,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.83,
     baseSpeed: 430,
     sigRadius: 30,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "22444" as ShipProfile["id"],
@@ -3701,6 +4808,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.704,
     baseSpeed: 165,
     sigRadius: 240,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "legacy-specter" as ShipProfile["id"],
@@ -3711,6 +4821,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.1,
     baseSpeed: 300,
     sigRadius: 30,
+    droneBandwidth: 20,
+    droneCapacity: 20,
+    maxActiveDrones: 5,
   },
   {
     id: "81008" as ShipProfile["id"],
@@ -3721,6 +4834,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.8,
     baseSpeed: 175,
     sigRadius: 195,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "622" as ShipProfile["id"],
@@ -3731,6 +4847,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.5,
     baseSpeed: 290,
     sigRadius: 100,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "17713" as ShipProfile["id"],
@@ -3741,6 +4860,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.465,
     baseSpeed: 250,
     sigRadius: 100,
+    droneBandwidth: 40,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "11198" as ShipProfile["id"],
@@ -3751,6 +4873,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.5,
     baseSpeed: 435,
     sigRadius: 31,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "37482" as ShipProfile["id"],
@@ -3761,6 +4886,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.6,
     baseSpeed: 335,
     sigRadius: 69,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "54732" as ShipProfile["id"],
@@ -3771,6 +4899,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.52,
     baseSpeed: 200,
     sigRadius: 130,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "33470" as ShipProfile["id"],
@@ -3781,6 +4912,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.47,
     baseSpeed: 182,
     sigRadius: 150,
+    droneBandwidth: 100,
+    droneCapacity: 400,
+    maxActiveDrones: 5,
   },
   {
     id: "33553" as ShipProfile["id"],
@@ -3791,6 +4925,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.47,
     baseSpeed: 195,
     sigRadius: 140,
+    droneBandwidth: 125,
+    droneCapacity: 400,
+    maxActiveDrones: 5,
   },
   {
     id: "17924" as ShipProfile["id"],
@@ -3801,6 +4938,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.5,
     baseSpeed: 340,
     sigRadius: 33,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "32983" as ShipProfile["id"],
@@ -3811,6 +4951,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.57,
     baseSpeed: 340,
     sigRadius: 40,
+    droneBandwidth: 15,
+    droneCapacity: 35,
+    maxActiveDrones: 5,
   },
   {
     id: "42685" as ShipProfile["id"],
@@ -3821,6 +4964,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.85,
     baseSpeed: 220,
     sigRadius: 65,
+    droneBandwidth: 20,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "34562" as ShipProfile["id"],
@@ -3831,6 +4977,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.8,
     baseSpeed: 240,
     sigRadius: 60,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "33081" as ShipProfile["id"],
@@ -3841,6 +4990,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.5,
     baseSpeed: 295,
     sigRadius: 50,
+    droneBandwidth: 15,
+    droneCapacity: 15,
+    maxActiveDrones: 5,
   },
   {
     id: "4308" as ShipProfile["id"],
@@ -3851,6 +5003,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.45,
     baseSpeed: 235,
     sigRadius: 220,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "32878" as ShipProfile["id"],
@@ -3861,6 +5016,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.9,
     baseSpeed: 255,
     sigRadius: 60,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "91858" as ShipProfile["id"],
@@ -3871,6 +5029,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.755,
     baseSpeed: 270,
     sigRadius: 50,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11200" as ShipProfile["id"],
@@ -3881,6 +5042,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.25,
     baseSpeed: 420,
     sigRadius: 36,
+    droneBandwidth: 10,
+    droneCapacity: 10,
+    maxActiveDrones: 5,
   },
   {
     id: "33190" as ShipProfile["id"],
@@ -3891,6 +5055,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.8,
     baseSpeed: 350,
     sigRadius: 39,
+    droneBandwidth: 15,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "649" as ShipProfile["id"],
@@ -3901,6 +5068,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.97,
     baseSpeed: 115,
     sigRadius: 230,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "639" as ShipProfile["id"],
@@ -3911,6 +5081,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.116,
     baseSpeed: 127,
     sigRadius: 360,
+    droneBandwidth: 75,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "17732" as ShipProfile["id"],
@@ -3921,6 +5094,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.115,
     baseSpeed: 130,
     sigRadius: 350,
+    droneBandwidth: 75,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "26842" as ShipProfile["id"],
@@ -3931,6 +5107,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.12,
     baseSpeed: 120,
     sigRadius: 340,
+    droneBandwidth: 125,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "29984" as ShipProfile["id"],
@@ -3941,6 +5120,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.52,
     baseSpeed: 170,
     sigRadius: 180,
+    droneBandwidth: 25,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "92282" as ShipProfile["id"],
@@ -3951,6 +5133,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4,
     baseSpeed: 250,
     sigRadius: 150,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "37459" as ShipProfile["id"],
@@ -3961,6 +5146,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.7,
     baseSpeed: 410,
     sigRadius: 36,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "23911" as ShipProfile["id"],
@@ -3971,6 +5159,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.039,
     baseSpeed: 80,
     sigRadius: 9960,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "85087" as ShipProfile["id"],
@@ -3981,6 +5172,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.75,
     baseSpeed: 255,
     sigRadius: 60,
+    droneBandwidth: 25,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "627" as ShipProfile["id"],
@@ -3991,6 +5185,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.49,
     baseSpeed: 250,
     sigRadius: 120,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "16242" as ShipProfile["id"],
@@ -4001,6 +5198,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.8,
     baseSpeed: 270,
     sigRadius: 56,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "73794" as ShipProfile["id"],
@@ -4011,6 +5211,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 2.75,
     baseSpeed: 293,
     sigRadius: 56,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "54733" as ShipProfile["id"],
@@ -4021,6 +5224,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.136,
     baseSpeed: 95,
     sigRadius: 485,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "48635" as ShipProfile["id"],
@@ -4031,6 +5237,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.48,
     baseSpeed: 265,
     sigRadius: 115,
+    droneBandwidth: 50,
+    droneCapacity: 100,
+    maxActiveDrones: 5,
   },
   {
     id: "591" as ShipProfile["id"],
@@ -4041,6 +5250,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.1,
     baseSpeed: 335,
     sigRadius: 35,
+    droneBandwidth: 10,
+    droneCapacity: 20,
+    maxActiveDrones: 5,
   },
   {
     id: "4310" as ShipProfile["id"],
@@ -4051,6 +5263,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.54,
     baseSpeed: 250,
     sigRadius: 195,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "81047" as ShipProfile["id"],
@@ -4061,6 +5276,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1,
     baseSpeed: 100,
     sigRadius: 170,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "593" as ShipProfile["id"],
@@ -4071,6 +5289,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.44,
     baseSpeed: 315,
     sigRadius: 41,
+    droneBandwidth: 25,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "644" as ShipProfile["id"],
@@ -4081,6 +5302,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.11,
     baseSpeed: 130,
     sigRadius: 330,
+    droneBandwidth: 100,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "32311" as ShipProfile["id"],
@@ -4091,6 +5315,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.11,
     baseSpeed: 138,
     sigRadius: 320,
+    droneBandwidth: 125,
+    droneCapacity: 200,
+    maxActiveDrones: 5,
   },
   {
     id: "2834" as ShipProfile["id"],
@@ -4101,6 +5328,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.467,
     baseSpeed: 320,
     sigRadius: 39,
+    droneBandwidth: 25,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "11999" as ShipProfile["id"],
@@ -4111,6 +5341,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.504,
     baseSpeed: 295,
     sigRadius: 115,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "77288" as ShipProfile["id"],
@@ -4121,6 +5354,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.045,
     baseSpeed: 80,
     sigRadius: 11800,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "3518" as ShipProfile["id"],
@@ -4131,6 +5367,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.51,
     baseSpeed: 209,
     sigRadius: 135,
+    droneBandwidth: 25,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "42126" as ShipProfile["id"],
@@ -4141,6 +5380,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.032,
     baseSpeed: 75,
     sigRadius: 24800,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "28665" as ShipProfile["id"],
@@ -4151,6 +5393,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.071,
     baseSpeed: 110,
     sigRadius: 360,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "47270" as ShipProfile["id"],
@@ -4161,6 +5406,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.45,
     baseSpeed: 240,
     sigRadius: 110,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "42124" as ShipProfile["id"],
@@ -4171,6 +5419,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.038,
     baseSpeed: 80,
     sigRadius: 12000,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "606" as ShipProfile["id"],
@@ -4181,6 +5432,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.35,
     baseSpeed: 305,
     sigRadius: 54,
+    droneBandwidth: 10,
+    droneCapacity: 10,
+    maxActiveDrones: 5,
   },
   {
     id: "42125" as ShipProfile["id"],
@@ -4191,6 +5445,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.031,
     baseSpeed: 85,
     sigRadius: 20300,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "11365" as ShipProfile["id"],
@@ -4201,6 +5458,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.264,
     baseSpeed: 295,
     sigRadius: 37,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "32880" as ShipProfile["id"],
@@ -4211,6 +5471,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.6,
     baseSpeed: 335,
     sigRadius: 40,
+    droneBandwidth: 10,
+    droneCapacity: 10,
+    maxActiveDrones: 5,
   },
   {
     id: "89648" as ShipProfile["id"],
@@ -4221,6 +5484,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.5,
     baseSpeed: 350,
     sigRadius: 40,
+    droneBandwidth: 10,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "626" as ShipProfile["id"],
@@ -4231,6 +5497,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.56,
     baseSpeed: 195,
     sigRadius: 145,
+    droneBandwidth: 75,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "17843" as ShipProfile["id"],
@@ -4241,6 +5510,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.51,
     baseSpeed: 210,
     sigRadius: 130,
+    droneBandwidth: 75,
+    droneCapacity: 200,
+    maxActiveDrones: 5,
   },
   {
     id: "32989" as ShipProfile["id"],
@@ -4251,6 +5523,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.58,
     baseSpeed: 360,
     sigRadius: 38,
+    droneBandwidth: 15,
+    droneCapacity: 35,
+    maxActiveDrones: 5,
   },
   {
     id: "12743" as ShipProfile["id"],
@@ -4261,6 +5536,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.54,
     baseSpeed: 165,
     sigRadius: 120,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "45531" as ShipProfile["id"],
@@ -4271,6 +5549,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.59,
     baseSpeed: 220,
     sigRadius: 155,
+    droneBandwidth: 50,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "34590" as ShipProfile["id"],
@@ -4281,6 +5562,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4,
     baseSpeed: 250,
     sigRadius: 150,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "3766" as ShipProfile["id"],
@@ -4291,6 +5575,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.22,
     baseSpeed: 410,
     sigRadius: 34,
+    droneBandwidth: 5,
+    droneCapacity: 5,
+    maxActiveDrones: 5,
   },
   {
     id: "37454" as ShipProfile["id"],
@@ -4301,6 +5588,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.22,
     baseSpeed: 400,
     sigRadius: 34,
+    droneBandwidth: 15,
+    droneCapacity: 15,
+    maxActiveDrones: 5,
   },
   {
     id: "17722" as ShipProfile["id"],
@@ -4311,6 +5601,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.48,
     baseSpeed: 242,
     sigRadius: 130,
+    droneBandwidth: 50,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "17740" as ShipProfile["id"],
@@ -4321,6 +5614,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.083,
     baseSpeed: 132,
     sigRadius: 400,
+    droneBandwidth: 125,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "33083" as ShipProfile["id"],
@@ -4331,6 +5627,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4.35,
     baseSpeed: 340,
     sigRadius: 52,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "45530" as ShipProfile["id"],
@@ -4341,6 +5640,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 4,
     baseSpeed: 350,
     sigRadius: 42,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "legacy-visitant" as ShipProfile["id"],
@@ -4351,6 +5653,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.65,
     baseSpeed: 220,
     sigRadius: 160,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "22446" as ShipProfile["id"],
@@ -4361,6 +5666,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.67,
     baseSpeed: 140,
     sigRadius: 285,
+    droneBandwidth: 25,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "33673" as ShipProfile["id"],
@@ -4371,6 +5679,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.7,
     baseSpeed: 430,
     sigRadius: 35,
+    droneBandwidth: 10,
+    droneCapacity: 40,
+    maxActiveDrones: 5,
   },
   {
     id: "22436" as ShipProfile["id"],
@@ -4381,6 +5692,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.068,
     baseSpeed: 106,
     sigRadius: 405,
+    droneBandwidth: 75,
+    droneCapacity: 75,
+    maxActiveDrones: 5,
   },
   {
     id: "11371" as ShipProfile["id"],
@@ -4391,6 +5705,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.456,
     baseSpeed: 375,
     sigRadius: 33,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "17930" as ShipProfile["id"],
@@ -4401,6 +5718,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.8,
     baseSpeed: 320,
     sigRadius: 40,
+    droneBandwidth: 10,
+    droneCapacity: 25,
+    maxActiveDrones: 5,
   },
   {
     id: "legacy-wraith" as ShipProfile["id"],
@@ -4411,6 +5731,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 3.1,
     baseSpeed: 325,
     sigRadius: 30,
+    droneBandwidth: 15,
+    droneCapacity: 15,
+    maxActiveDrones: 5,
   },
   {
     id: "653" as ShipProfile["id"],
@@ -4421,6 +5744,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.81,
     baseSpeed: 140,
     sigRadius: 155,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "23917" as ShipProfile["id"],
@@ -4431,6 +5757,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.036,
     baseSpeed: 75,
     sigRadius: 19470,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "92825" as ShipProfile["id"],
@@ -4441,6 +5770,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.039,
     baseSpeed: 85,
     sigRadius: 10.59,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "49713" as ShipProfile["id"],
@@ -4451,6 +5783,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.72,
     baseSpeed: 238,
     sigRadius: 70,
+    droneBandwidth: 75,
+    droneCapacity: 125,
+    maxActiveDrones: 5,
   },
   {
     id: "12003" as ShipProfile["id"],
@@ -4461,6 +5796,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.553,
     baseSpeed: 210,
     sigRadius: 125,
+    droneBandwidth: 25,
+    droneCapacity: 50,
+    maxActiveDrones: 5,
   },
   {
     id: "2078" as ShipProfile["id"],
@@ -4471,6 +5809,9 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 1000,
     baseSpeed: 300,
     sigRadius: 25,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
   {
     id: "52907" as ShipProfile["id"],
@@ -4481,5 +5822,8 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     inertiaModifier: 0.044,
     baseSpeed: 75,
     sigRadius: 10000,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
   },
 ] as const;

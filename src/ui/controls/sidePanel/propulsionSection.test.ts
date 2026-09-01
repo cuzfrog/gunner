@@ -154,6 +154,8 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
     restoreTurret: vi.fn(),
     clearLauncher: vi.fn(),
     restoreLauncher: vi.fn(),
+    clearDrone: vi.fn(),
+    restoreDrone: vi.fn(),
   } as unknown as SidePanel);
 
   const i18n = mockI18n();

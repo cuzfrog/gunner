@@ -23,6 +23,9 @@ export interface ShipProfile {
   readonly inertiaModifier: number;
   readonly baseSpeed: number;
   readonly sigRadius: number;
+  readonly droneBandwidth: number;
+  readonly droneCapacity: number;
+  readonly maxActiveDrones: number;
 }
 
 export type SkillLevel = 0 | 1 | 2 | 3 | 4 | 5;

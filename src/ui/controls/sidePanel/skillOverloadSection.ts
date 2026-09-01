@@ -104,6 +104,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     if (this.panel.profile && this.panel.fittingText) {
       this.panel.restoreTurret();
       this.panel.restoreLauncher();
+      this.panel.restoreDrone();
     }
     this.panel.host.persistConfigChange(this.panel.profile !== undefined);
   }

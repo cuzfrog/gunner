@@ -50,9 +50,16 @@ no-new-exports:
   - turret/sigResIcons.ts
   - turret/turretController.ts
   - turret/turretControllerContract.ts
+  - drone/droneController.ts
+  - drone/droneControllerContract.ts
+  - drone/droneController.test.ts
+  - drone/testSupport.ts
+  - drone/module.ts
+  - drone/index.ts
+  - import/shipADrone.ts
+  - sidePanel/droneLink.ts
   - choiceGroup.test.ts
   - trackingInput.ts
-  - controlsContract.ts
   - testSupport.ts
   - controlsFormat.test.ts
   - trackingInput.test.ts
@@ -68,7 +75,11 @@ no-new-exports:
   - shared/selectableList.test.ts
   - shared/MODULE.md
   - choiceGroup.ts
+  - controlsContract.ts
+  - controlsFormat.ts
+  - damageTypeIcons.ts
 ---
+
 
 
 
@@ -81,7 +92,7 @@ no-new-exports:
 
 DOM form controls, input orchestration, and popups for the gunner UI.
 
-The module is organized into sub-modules: `session`, `turret`, `popup`, `import`, `share`, `hints`, `sidePanel`, `ewar`, `booster`, `missileBooster`, `rangeOverlay`, `portraits`, `confirm`, `domControls`, `effectiveReadout`, `engagementReadout`, `preferences`, and `profile`. `DomControls` exposes the `Controls` facade. `EffectiveReadout` updates per-frame effective attribute suffixes for speed, tracking, optimal and falloff. `SimConfigSource` lives in `session` and owns `getConfig()` assembly from the two side panels, preferences, EWAR, boosters, missile boosters, and the initial distance source.
+The module is organized into sub-modules: `session`, `turret`, `popup`, `import`, `share`, `hints`, `sidePanel`, `ewar`, `booster`, `missileBooster`, `rangeOverlay`, `portraits`, `confirm`, `domControls`, `effectiveReadout`, `engagementReadout`, `preferences`, `profile`, and `drone`. `DomControls` exposes the `Controls` facade. `EffectiveReadout` updates per-frame effective attribute suffixes for speed, tracking, optimal and falloff. `SimConfigSource` lives in `session` and owns `getConfig()` assembly from the two side panels, preferences, EWAR, boosters, missile boosters, and the initial distance source.
 
 The public surface is `Controls`, `ControlsCallbacks`, `ControlsCradle`, `registerControlsModule`, `EffectiveReadouts` (used by `Controls.update`), and `Side`.
 `index.ts` re-exports these cross-boundary types. `elementContract.ts` is the single source of truth for control element ids, tags, and default values. `createControlsEls()` consumes it, and `index.ts` re-exports `DEFAULT_VALUES` and `TAG_BY_ID` for test/runtime contracts.
@@ -91,3 +102,5 @@ Each sub-module owns its DOM element collection through a private `collectXxxEls
 `module.ts` composes the full graph declaratively in the DI container. Registration order is acyclic and driven by feature registration: `hints` → `turret` → `sidePanel` → `ewar` → `booster` → `missileBooster` → `rangeOverlay` → `portraits` → `popup` → `import` → `share` → `confirm` → `engagementReadout` → `effectiveReadout` → `preferences` → `profile` → `session` → `domControls` → `combatantSide.wireCombatantSide` binds `SidePanel.setFittingPopup`, `SidePanel.setFittingPreview`, `SidePanel.setImporter`, and the `SidePanelHost`.
 
 `SidePanel.setFittingPopup`, `setFittingPreview`, and `setImporter` remain setter-based because the fitting popup, preview manager, and import controller all depend on the side panels, so passing them through the constructor would create a dependency cycle. `ProfileController.snapshotSource` is supplied through the constructor as a deferred closure over `sessionCodec.capture()`, removing the previous `setSnapshotSource` back-edge. `shipASide` and `shipBSide` are registered independently in the DI cradle and wired side-by-side by `combatantSide.wireCombatantSide`.
+
+Gate relaxed: `controlsContract.ts` was removed from `no-new-exports` to add `DroneReadoutValues` alongside the existing `TurretReadoutValues`/`MissileReadoutValues`/`NoWeaponReadoutValues` union members. The drone readout values carry tracking/optimal/falloff/sigResolution (drones share the turret hit-chance model) without boosted/disrupted variants since drones have no tracking computer or disruptor mechanics. `ViewStore` was added to `controlsContract.ts` as a narrow DI interface for the Applied DPS hint provider; it is consumed only within the controls module so no `index.ts` re-export is needed.

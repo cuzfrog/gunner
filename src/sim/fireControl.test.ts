@@ -1,12 +1,13 @@
 import { Vec2 } from "./vec2";
 import { EngagementEvaluatorImpl } from "./fireControl";
+import type { DroneApplication } from "./droneApplication";
 import type { EwarResolver } from "./ewarResolver";
 import type { HitChance } from "./hitChance";
 import type { MissileApplication } from "./missileApplication";
 import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import type { TurretDamage } from "./turretDamage";
-import type { DamageAssessment, EngagementFrame, HitChanceBreakdown, MissileDamageBreakdown, MissileSpec, ShipState, TurretSpec } from "./types";
+import type { DamageAssessment, DroneDamageBreakdown, DroneSpec, EngagementFrame, HitChanceBreakdown, MissileDamageBreakdown, MissileSpec, ShipState, TurretSpec } from "./types";
 
 const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
 const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
@@ -76,6 +77,22 @@ const missileBreakdown: MissileDamageBreakdown = {
   timeToImpact: 1.6,
 };
 
+const drone: DroneSpec = { kind: "drone", tracking: 2.0, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+
+const droneBreakdownResult: DroneDamageBreakdown & DamageAssessment = {
+  hit: { chance: 0.5, trackingTerm: 0, rangeTerm: 0 },
+  expectedMultiplier: 1.0,
+  inRange: true,
+  inWeaponRange: true,
+  mode: "engaging",
+  distanceToTarget: 1500,
+  inControlRange: true,
+  nominalDps: 48,
+  appliedDps: 48,
+  application: 1.0,
+  volley: 192,
+};
+
 function makeEvaluator(): {
   hitChance: HitChance;
   ewarResolver: EwarResolver;
@@ -83,6 +100,7 @@ function makeEvaluator(): {
   missileBoosterResolver: MissileBoosterResolver;
   turretDamage: TurretDamage;
   missileApplication: MissileApplication;
+  droneApplication: DroneApplication;
   evaluator: EngagementEvaluatorImpl;
 } {
   const hitChance = vi.mocked<HitChance>({ compute: vi.fn(() => hit), findBestDistance: vi.fn() });
@@ -101,8 +119,9 @@ function makeEvaluator(): {
   const missileBoosterResolver = vi.mocked<MissileBoosterResolver>({ boostedMissile: vi.fn((m) => m) });
   const turretDamage = vi.mocked<TurretDamage>({ compute: vi.fn(() => ({ hit, expectedMultiplier: 0.8, ...turretDamageResult })) });
   const missileApplication = vi.mocked<MissileApplication>({ compute: vi.fn(() => missileBreakdown) });
-  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, turretDamage, missileApplication });
-  return { hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, turretDamage, missileApplication, evaluator };
+  const droneApplication = vi.mocked<DroneApplication>({ compute: vi.fn(() => droneBreakdownResult) });
+  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, turretDamage, missileApplication, droneApplication });
+  return { hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, turretDamage, missileApplication, droneApplication, evaluator };
 }
 
 describe("EngagementEvaluatorImpl", () => {

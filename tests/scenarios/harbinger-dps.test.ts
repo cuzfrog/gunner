@@ -4,6 +4,8 @@ import { FittingImportImpl } from "../../src/fitting/fittingImport";
 import { GunFamiliesImpl } from "../../src/fitting/gunFamilies";
 import { MissileCatalogImpl } from "../../src/fitting/missileCatalog";
 import { MissileSkillModelImpl } from "../../src/fitting/missileStats";
+import { DroneCatalogImpl } from "../../src/fitting/droneCatalog";
+import { DroneSkillModelImpl } from "../../src/fitting/droneStats";
 import { StaticItemNameCatalog, StaticItemNameResolver } from "../../src/gamedata/itemNames";
 import { MODULE_SLOT_CATALOG } from "../../src/gamedata/moduleSlots";
 import { FITTING_DB } from "../../src/gamedata/fittingDb";
@@ -17,6 +19,7 @@ import { HitChanceImpl } from "../../src/sim/hitChance";
 import { KinematicsImpl } from "../../src/sim/kinematics";
 import { MissileApplicationImpl } from "../../src/sim/missileApplication";
 import { MissileBoosterResolverImpl } from "../../src/sim/missileBoosterResolver";
+import { DroneApplicationImpl } from "../../src/sim/droneApplication";
 import { TurretDamageImpl } from "../../src/sim/turretDamage";
 import { Vec2 } from "../../src/sim/vec2";
 import { SIG_RESOLUTIONS, type ShipState, type SimSnapshot, type TurretSpec, type MissileSpec } from "../../src/sim/types";
@@ -29,11 +32,13 @@ const chargeCatalog = new ChargeCatalogImpl({ fittingDb: FITTING_DB, gunFamilies
 const stacking = new StackingPenaltyImpl();
 const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty: stacking });
 const missileCatalog = new MissileCatalogImpl({ fittingDb: FITTING_DB, missileSkillModel });
+const droneSkillModel = new DroneSkillModelImpl();
+const droneCatalog = new DroneCatalogImpl({ fittingDb: FITTING_DB });
 const itemNameCatalog = new StaticItemNameCatalog();
 const itemNameResolver = new StaticItemNameResolver();
 
 const importer = new FittingImportImpl({
-  ships, fittingDb: FITTING_DB, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel,
+  ships, fittingDb: FITTING_DB, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel,
   stackingPenalty: stacking, itemNameCatalog, itemNameResolver,
   moduleSlotCatalog: MODULE_SLOT_CATALOG,
 });
@@ -72,7 +77,8 @@ function makeComposer() {
   const kinematics = new KinematicsImpl();
   const turretDamage = new TurretDamageImpl();
   const missileApplication = new MissileApplicationImpl();
-  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver: noEwarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: stacking }), turretDamage, missileApplication });
+  const droneApplication = new DroneApplicationImpl({ hitChance });
+  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver: noEwarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: stacking }), turretDamage, missileApplication, droneApplication });
   return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator });
 }
 
@@ -117,7 +123,7 @@ describe("Harbinger DPS cross-check (all skills 5, no overload)", () => {
     const result = importer.importFitting(HARBINGER_FIT, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const turret = turretSpecFromImported(result!.turret!);
     const composer = makeComposer();
-    const view = composer.compose(snapshot(), { weapons: { shipA: [turret], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 } });
+    const view = composer.compose(snapshot(), { weapons: { shipA: [turret], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] } });
     expect(view.attacks.shipA).toBeDefined();
     const expectedNominalDps = (turret.damagePerShot * turret.turretCount) / turret.cycleTime;
     expect(view.attacks.shipA!.damage.nominalDps).toBeCloseTo(expectedNominalDps, 6);
@@ -129,7 +135,7 @@ describe("mixed turret + launcher DPS summation through sim", () => {
     const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 125, optimal: 10_000, falloff: 5_000, damagePerShot: 100, cycleTime: 5, turretCount: 4 };
     const missile: MissileSpec = { kind: "missile", damagePerMissile: 150, cycleTime: 10, launcherCount: 2, explosionRadius: 50, explosionVelocity: 100, damageReductionFactor: 4.5, maxVelocity: 5000, flightTime: 10, flightRange: 50_000 };
     const composer = makeComposer();
-    const view = composer.compose(snapshot(), { weapons: { shipA: [turret, missile], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 } });
+    const view = composer.compose(snapshot(), { weapons: { shipA: [turret, missile], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] } });
     expect(view.attacks.shipA).toBeDefined();
     const expectedTurretDps = (100 * 4) / 5;
     const expectedMissileDps = (150 * 2) / 10;
