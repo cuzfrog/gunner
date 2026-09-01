@@ -164,8 +164,9 @@ function orbitDrones(drones: DroneBody[], targetPos: Vec2, orbitRange: number, o
     drone.velocity = accelerateToward(drone.velocity, desired, dt);
     const maxStep = orbitSpeed * dt;
     const step = drone.velocity.scale(dt);
-    if (step.len() > maxStep) drone.position = drone.position.add(step.norm().scale(maxStep));
-    else drone.position = drone.position.add(step);
+    const capped = step.len() > maxStep ? step.norm().scale(maxStep) : step;
+    if (capped.len() >= dist) drone.position = desiredPos;
+    else drone.position = drone.position.add(capped);
   }
 }
 

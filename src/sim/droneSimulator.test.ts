@@ -309,4 +309,24 @@ describe("DroneSimulatorImpl", () => {
     }
     expect(sim.states("shipA")[0].mode).toBe("orbiting");
   });
+
+  test("orbit step is capped to orbitSpeed even with high residual velocity", () => {
+    const orbitSpeed = 500;
+    const dt = 0.1;
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed, droneCount: 1 })], shipB: [] });
+    const shipPos = new Vec2(0, 0);
+    const targetPos = new Vec2(5000, 0);
+    for (let i = 0; i < 200; i++) sim.step(dt, frame(shipPos, targetPos));
+    expect(sim.states("shipA")[0].mode).toBe("orbiting");
+    let prevPos = new Vec2(sim.states("shipA")[0].positions[0].x, sim.states("shipA")[0].positions[0].y);
+    const maxStep = orbitSpeed * dt + 1;
+    for (let i = 0; i < 50; i++) {
+      sim.step(dt, frame(shipPos, targetPos));
+      const pos = sim.states("shipA")[0].positions[0];
+      const moved = pos.dist(prevPos);
+      expect(moved).toBeLessThanOrEqual(maxStep);
+      prevPos = new Vec2(pos.x, pos.y);
+    }
+  });
 });
