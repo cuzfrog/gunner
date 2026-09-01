@@ -98,8 +98,8 @@ export type DroneMode = "idle" | "approaching" | "orbiting" | "returning";
 
 export interface DroneRuntimeState {
   readonly mode: DroneMode;
-  readonly position: Vec2;
-  readonly distanceToTarget: number; // m, drone-to-target
+  readonly positions: readonly Vec2[]; // individual drone positions
+  readonly distanceToTarget: number; // m, group-average drone-to-target
   readonly inControlRange: boolean; // ship-to-target <= controlRange
 }
 

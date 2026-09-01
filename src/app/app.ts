@@ -187,7 +187,7 @@ function droneGroupRenderInfo(states: readonly DroneRuntimeState[], specs: reado
   for (let i = 0; i < specs.length; i++) {
     const spec = specs[i];
     const state = states[i];
-    out.push({ position: state?.position ?? new Vec2(0, 0), optimal: spec.optimal, falloff: spec.falloff, controlRange: spec.controlRange });
+    out.push({ positions: state?.positions ?? [new Vec2(0, 0)], optimal: spec.optimal, falloff: spec.falloff, controlRange: spec.controlRange });
   }
   return out;
 }

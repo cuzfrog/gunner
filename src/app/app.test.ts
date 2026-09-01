@@ -326,7 +326,7 @@ describe("AppImpl", () => {
     controls.getWeapons.mockReturnValue([drone]);
     app = new AppImpl({ controls, simulation, droneSimulator, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "drone", optimal: 1000, falloff: 500 }, shipB: { kind: "drone", optimal: 1000, falloff: 500 } }, [], { shipA: [{ position: new Vec2(0, 0), optimal: 1000, falloff: 500, controlRange: 60000 }], shipB: [{ position: new Vec2(0, 0), optimal: 1000, falloff: 500, controlRange: 60000 }] });
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "drone", optimal: 1000, falloff: 500 }, shipB: { kind: "drone", optimal: 1000, falloff: 500 } }, [], { shipA: [{ positions: [new Vec2(0, 0)], optimal: 1000, falloff: 500, controlRange: 60000 }], shipB: [{ positions: [new Vec2(0, 0)], optimal: 1000, falloff: 500, controlRange: 60000 }] });
     expect(controls.update).toHaveBeenCalledWith(droneView, {
       shipA: { kind: "drone", speed: 0, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40, speedBreakdown: emptySpeedBreakdown },
       shipB: { kind: "drone", speed: 0, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40, speedBreakdown: emptySpeedBreakdown },

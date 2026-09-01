@@ -31,7 +31,7 @@ export interface WeaponRanges {
 }
 
 export interface DroneGroupRenderInfo {
-  readonly position: Vec2;
+  readonly positions: readonly Vec2[]; // individual drone positions
   readonly optimal: number;
   readonly falloff: number;
   readonly controlRange: number;
@@ -86,7 +86,7 @@ const FAR_MARGIN = 1.25;
 const ZOOM_OUT_MARGIN_PX = 80; // keep ships this far from the canvas edge before zooming out
 const MAX_ZOOM_FACTOR = 3; // relative to the far-range fit scale
 const SHIP_ICON_SIZE = 8;
-const DRONE_ICON_SIZE = 5;
+const DRONE_ICON_SIZE = 2.5;
 const DIRECTION_LINE_LENGTH = SHIP_ICON_SIZE * 4; // 2x the icon's 16px nose-to-tail length
 
 interface Camera {
@@ -286,13 +286,14 @@ export class CanvasRenderer implements Renderer {
   }
 
   private drawDroneGroupRangeRings(group: DroneGroupRenderInfo, color: string): void {
-    if (group.optimal > 0) this.drawRingAt(group.position, group.optimal, color, [6, 4]);
-    if (group.falloff > 0) this.drawRingAt(group.position, group.optimal + group.falloff, withAlpha(color, 0.5), [3, 4]);
+    const center = centroidOf(group.positions);
+    if (group.optimal > 0) this.drawRingAt(center, group.optimal, color, [6, 4]);
+    if (group.falloff > 0) this.drawRingAt(center, group.optimal + group.falloff, withAlpha(color, 0.5), [3, 4]);
   }
 
   private drawDrones(droneInfo: DroneRenderInfo): void {
-    for (const group of droneInfo.shipA) this.drawDroneMarker(group.position, COLORS.shipA);
-    for (const group of droneInfo.shipB) this.drawDroneMarker(group.position, COLORS.shipB);
+    for (const group of droneInfo.shipA) for (const pos of group.positions) this.drawDroneMarker(pos, COLORS.shipA);
+    for (const group of droneInfo.shipB) for (const pos of group.positions) this.drawDroneMarker(pos, COLORS.shipB);
   }
 
   private drawDroneMarker(position: Vec2, color: string): void {
@@ -459,6 +460,13 @@ function maxControlRange(groups: readonly DroneGroupRenderInfo[]): number {
   let max = 0;
   for (const group of groups) if (group.controlRange > max) max = group.controlRange;
   return max;
+}
+
+function centroidOf(positions: readonly Vec2[]): Vec2 {
+  if (positions.length === 0) return new Vec2(0, 0);
+  let x = 0, y = 0;
+  for (const p of positions) { x += p.x; y += p.y; }
+  return new Vec2(x / positions.length, y / positions.length);
 }
 
 function formatTime(s: number): string {
