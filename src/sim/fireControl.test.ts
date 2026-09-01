@@ -77,6 +77,8 @@ const missileBreakdown: MissileDamageBreakdown = {
   timeToImpact: 1.6,
 };
 
+const missileApplicationResult = { application: 0.8, signatureTerm: 1, velocityTerm: 0.8 };
+
 const drone: DroneSpec = { kind: "drone", tracking: 2.0, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000 };
 
 const droneBreakdownResult: DroneDamageBreakdown & DamageAssessment = {
@@ -118,7 +120,7 @@ function makeEvaluator(): {
   const turretBoosterResolver = vi.mocked<TurretBoosterResolver>({ boostedTurret: vi.fn(() => boostedTurret) });
   const missileBoosterResolver = vi.mocked<MissileBoosterResolver>({ boostedMissile: vi.fn((m) => m) });
   const turretDamage = vi.mocked<TurretDamage>({ compute: vi.fn(() => ({ hit, expectedMultiplier: 0.8, ...turretDamageResult })) });
-  const missileApplication = vi.mocked<MissileApplication>({ compute: vi.fn(() => missileBreakdown) });
+  const missileApplication = vi.mocked<MissileApplication>({ compute: vi.fn(() => missileApplicationResult) });
   const droneApplication = vi.mocked<DroneApplication>({ compute: vi.fn(() => droneBreakdownResult) });
   const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, turretDamage, missileApplication, droneApplication });
   return { hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, turretDamage, missileApplication, droneApplication, evaluator };
@@ -173,7 +175,7 @@ describe("EngagementEvaluatorImpl", () => {
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(((200 * 2) / 10) * 0.8, 10);
     expect(result.shipA?.damage.volley).toBe(400);
     expect(result.shipA?.turret).toBeUndefined();
-    expect(missileApplication.compute).toHaveBeenCalledWith(frame, missile, frame.shipB, 40);
+    expect(missileApplication.compute).toHaveBeenCalledWith(missile, 0, 40);
     expect(ewarResolver.disruptedTurret).not.toHaveBeenCalled();
     expect(turretBoosterResolver.boostedTurret).not.toHaveBeenCalled();
     expect(missileBoosterResolver.boostedMissile).toHaveBeenCalledWith(missile, undefined);
@@ -191,7 +193,7 @@ describe("EngagementEvaluatorImpl", () => {
     const { ewarResolver, missileApplication, evaluator } = makeEvaluator();
     vi.mocked(ewarResolver.sigMultiplier).mockReturnValue(1.3);
     const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 100 } });
-    expect(missileApplication.compute).toHaveBeenCalledWith(frame, missile, frame.shipB, 130);
+    expect(missileApplication.compute).toHaveBeenCalledWith(missile, 0, 130);
     expect(ewarResolver.sigMultiplier).toHaveBeenCalledWith(frame.shipA.ewar, 6000);
   });
 
@@ -209,16 +211,17 @@ describe("EngagementEvaluatorImpl", () => {
     const boostedMissile: MissileSpec = { ...missile, explosionRadius: 30, explosionVelocity: 150 };
     vi.mocked(missileBoosterResolver.boostedMissile).mockReturnValue(boostedMissile);
     evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40 } });
-    expect(missileApplication.compute).toHaveBeenCalledWith(frame, boostedMissile, frame.shipB, 40);
+    expect(missileApplication.compute).toHaveBeenCalledWith(boostedMissile, 0, 40);
   });
 
   test("zeros missile applied DPS when out of range", () => {
     const { missileApplication, evaluator } = makeEvaluator();
-    vi.mocked(missileApplication.compute).mockReturnValue({ ...missileBreakdown, inRange: false });
-    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40 } });
+    const shortRangeMissile: MissileSpec = { ...missile, flightRange: 5000, maxVelocity: 1000, flightTime: 5 };
+    const result = evaluator.evaluate(frame, { shipA: { weapon: shortRangeMissile, opponentSigRadius: 40 } });
     expect(result.shipA?.damage.appliedDps).toBe(0);
     expect(result.shipA?.damage.application).toBe(0);
     expect(result.shipA?.damage.nominalDps).toBeCloseTo(40, 10);
+    expect(result.shipA?.missile?.inRange).toBe(false);
   });
 
   test("returns empty result when no attacks are requested", () => {
