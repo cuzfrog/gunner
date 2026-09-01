@@ -1,7 +1,7 @@
 import { DroneApplicationImpl } from "./droneApplication";
 import { HitChanceImpl } from "./hitChance";
 import { Vec2 } from "./vec2";
-import type { DroneSpec, EngagementFrame, ShipState } from "./types";
+import type { DroneRuntimeState, DroneSpec, EngagementFrame, ShipState } from "./types";
 
 const shipA: ShipState = { id: "shipA", maxSpeed: 0, mass: 1_000_000, inertiaModifier: 1, mode: "orbit", desiredRange: 1000, aggressivity: 1, position: new Vec2(0, 0), velocity: new Vec2(0, 0) };
 const shipB: ShipState = { id: "shipB", maxSpeed: 0, mass: 1_000_000, inertiaModifier: 1, mode: "orbit", desiredRange: 1000, aggressivity: 1, position: new Vec2(0, 5000), velocity: new Vec2(0, 0) };
@@ -98,5 +98,95 @@ describe("DroneApplicationImpl", () => {
     const result = application.compute(frame(5000, 0), drone, 25);
     expect(result.hit.chance).toBe(0);
     expect(result.appliedDps).toBe(0);
+  });
+
+  describe("control range", () => {
+    test("sentry out of control range has zero applied DPS", () => {
+      const drone = sentryDrone({ controlRange: 10000 });
+      const result = application.compute(frame(15000, 0), drone, 400);
+      expect(result.inControlRange).toBe(false);
+      expect(result.inRange).toBe(false);
+      expect(result.appliedDps).toBe(0);
+    });
+
+    test("sentry in control range and weapon range applies damage", () => {
+      const drone = sentryDrone({ controlRange: 60000 });
+      const result = application.compute(frame(15000, 0), drone, 400);
+      expect(result.inControlRange).toBe(true);
+      expect(result.inRange).toBe(true);
+      expect(result.appliedDps).toBeGreaterThan(0);
+    });
+
+    test("sentry with state uses state inControlRange", () => {
+      const drone = sentryDrone({ controlRange: 10000 });
+      const state: DroneRuntimeState = { mode: "orbiting", position: new Vec2(0, 0), distanceToTarget: 15000, inControlRange: true };
+      const result = application.compute(frame(15000, 0), drone, 400, state);
+      expect(result.inControlRange).toBe(true);
+      expect(result.inRange).toBe(true);
+    });
+
+    test("sentry with state out of control range has zero DPS", () => {
+      const drone = sentryDrone({ controlRange: 60000 });
+      const state: DroneRuntimeState = { mode: "orbiting", position: new Vec2(0, 0), distanceToTarget: 70000, inControlRange: false };
+      const result = application.compute(frame(70000, 0), drone, 400, state);
+      expect(result.inControlRange).toBe(false);
+      expect(result.inRange).toBe(false);
+      expect(result.appliedDps).toBe(0);
+    });
+  });
+
+  describe("stateful mobile drones", () => {
+    test("idle drone has zero applied DPS", () => {
+      const drone = lightDrone();
+      const state: DroneRuntimeState = { mode: "idle", position: new Vec2(0, 0), distanceToTarget: 50000, inControlRange: true };
+      const result = application.compute(frame(5000, 0), drone, 40, state);
+      expect(result.mode).toBe("idle");
+      expect(result.inRange).toBe(false);
+      expect(result.appliedDps).toBe(0);
+    });
+
+    test("approaching drone has zero applied DPS", () => {
+      const drone = lightDrone();
+      const state: DroneRuntimeState = { mode: "approaching", position: new Vec2(1000, 0), distanceToTarget: 49000, inControlRange: true };
+      const result = application.compute(frame(5000, 0), drone, 40, state);
+      expect(result.mode).toBe("approaching");
+      expect(result.inRange).toBe(false);
+      expect(result.appliedDps).toBe(0);
+    });
+
+    test("returning drone has zero applied DPS", () => {
+      const drone = lightDrone();
+      const state: DroneRuntimeState = { mode: "returning", position: new Vec2(1000, 0), distanceToTarget: 49000, inControlRange: false };
+      const result = application.compute(frame(5000, 0), drone, 40, state);
+      expect(result.mode).toBe("returning");
+      expect(result.inRange).toBe(false);
+      expect(result.appliedDps).toBe(0);
+    });
+
+    test("orbiting drone in control range applies damage", () => {
+      const drone = lightDrone();
+      const state: DroneRuntimeState = { mode: "orbiting", position: new Vec2(0, 1500), distanceToTarget: 1500, inControlRange: true };
+      const result = application.compute(frame(5000, 0), drone, 40, state);
+      expect(result.mode).toBe("orbiting");
+      expect(result.inRange).toBe(true);
+      expect(result.appliedDps).toBeGreaterThan(0);
+    });
+
+    test("orbiting drone out of control range still reports mode but no range", () => {
+      const drone = lightDrone();
+      const state: DroneRuntimeState = { mode: "orbiting", position: new Vec2(0, 1500), distanceToTarget: 1500, inControlRange: false };
+      const result = application.compute(frame(5000, 0), drone, 40, state);
+      expect(result.mode).toBe("orbiting");
+      expect(result.inControlRange).toBe(false);
+    });
+
+    test("legacy path without state applies damage as before", () => {
+      const drone = lightDrone();
+      const result = application.compute(frame(5000, 0), drone, 40);
+      expect(result.mode).toBe("orbiting");
+      expect(result.inControlRange).toBe(true);
+      expect(result.inRange).toBe(true);
+      expect(result.appliedDps).toBeGreaterThan(0);
+    });
   });
 });
