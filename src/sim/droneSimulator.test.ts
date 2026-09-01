@@ -33,7 +33,7 @@ function makeGroup(spec: DroneSpec, position: Vec2, mode: DroneMode): TestGroupS
 
 describe("DroneSimulatorImpl", () => {
   test("reset places all drones at idle at origin", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone()], shipB: [lightDrone(), lightDrone()] });
     const statesA = sim.states("shipA");
     expect(statesA).toHaveLength(1);
@@ -46,7 +46,7 @@ describe("DroneSimulatorImpl", () => {
   });
 
   test("drones start at idle and produce zero applied state", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone()], shipB: [] });
     const states = sim.states("shipA");
     expect(states[0].mode).toBe("idle");
@@ -54,7 +54,7 @@ describe("DroneSimulatorImpl", () => {
   });
 
   test("target within control range transitions idle to approaching", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone()], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
@@ -65,7 +65,7 @@ describe("DroneSimulatorImpl", () => {
   });
 
   test("target outside control range keeps drones idle", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ controlRange: 40000 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
@@ -76,7 +76,7 @@ describe("DroneSimulatorImpl", () => {
   });
 
   test("drones travel toward target at maxVelocity", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ maxVelocity: 3000, optimal: 1000 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
@@ -90,7 +90,7 @@ describe("DroneSimulatorImpl", () => {
   });
 
   test("drones produce zero attack DPS before reaching target", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ maxVelocity: 3000, optimal: 1000 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
@@ -101,7 +101,7 @@ describe("DroneSimulatorImpl", () => {
   });
 
   test("drones reach target and transition to orbiting", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1000 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
@@ -112,7 +112,7 @@ describe("DroneSimulatorImpl", () => {
   });
 
   test("target leaving control range causes drones to return", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ maxVelocity: 1000, optimal: 1000, controlRange: 50000 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetNear = new Vec2(3000, 0);
@@ -124,7 +124,7 @@ describe("DroneSimulatorImpl", () => {
   });
 
   test("returning drones arrive at ship and become idle", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ maxVelocity: 1000, optimal: 1000, controlRange: 50000 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetNear = new Vec2(3000, 0);
@@ -139,7 +139,7 @@ describe("DroneSimulatorImpl", () => {
   });
 
   test("each drone group tracks its own position independently", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     const drone1 = lightDrone({ maxVelocity: 3000, optimal: 1000 });
     const drone2 = lightDrone({ maxVelocity: 6000, optimal: 1000 });
     sim.reset({ shipA: [drone1, drone2], shipB: [] });
@@ -152,7 +152,7 @@ describe("DroneSimulatorImpl", () => {
   });
 
   test("sentry drones stay at ship position with orbiting mode", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [sentryDrone()], shipB: [] });
     const shipPos = new Vec2(1000, 2000);
     const targetPos = new Vec2(50000, 0);
@@ -163,7 +163,7 @@ describe("DroneSimulatorImpl", () => {
   });
 
   test("sentry drones report inControlRange based on ship-to-target distance", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [sentryDrone({ controlRange: 40000 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetFar = new Vec2(50000, 0);
@@ -175,7 +175,7 @@ describe("DroneSimulatorImpl", () => {
   });
 
   test("shipB drones target shipA", () => {
-    const sim = new DroneSimulatorImpl({});
+    const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [], shipB: [lightDrone({ maxVelocity: 3000, optimal: 1000 })] });
     const shipAPos = new Vec2(0, 0);
     const shipBPos = new Vec2(50000, 0);

@@ -114,6 +114,7 @@ function makeDrone(droneBreakdown: DamageBreakdown = DRONE_BREAKDOWN): ImportedD
     cycleTime: 4,
     bandwidth: 5,
     volume: 5,
+    controlRange: 60000,
     damageBreakdown: droneBreakdown,
   } as unknown as ImportedDrone;
 }

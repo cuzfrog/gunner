@@ -20,14 +20,10 @@ interface DroneGroupState {
   inControlRange: boolean;
 }
 
-interface DroneSimulatorDeps {
-  // No external deps — pure stateful simulation
-}
-
 export class DroneSimulatorImpl implements DroneSimulator {
   private groups: Record<Side, DroneGroupState[]> = { shipA: [], shipB: [] };
 
-  constructor(_deps: DroneSimulatorDeps) {}
+  constructor() {}
 
   reset(config: DroneSimConfig): void {
     this.groups = {
@@ -117,10 +113,6 @@ function stepCombatDrone(group: DroneGroupState, shipPos: Vec2, targetPos: Vec2,
   }
 
   if (group.mode === "orbiting") {
-    if (!inControlRange) {
-      group.mode = "returning";
-      return;
-    }
     group.distanceToTarget = group.spec.optimal > 0 ? group.spec.optimal : group.position.dist(targetPos);
   }
 }

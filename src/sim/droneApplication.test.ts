@@ -109,6 +109,14 @@ describe("DroneApplicationImpl", () => {
       expect(result.appliedDps).toBe(0);
     });
 
+    test("sentry in weapon range but out of control range has zero applied DPS (legacy path)", () => {
+      const drone = sentryDrone({ controlRange: 10000, optimal: 20000, falloff: 10000 });
+      const result = application.compute(frame(15000, 0), drone, 400);
+      expect(result.inControlRange).toBe(false);
+      expect(result.inRange).toBe(false);
+      expect(result.appliedDps).toBe(0);
+    });
+
     test("sentry in control range and weapon range applies damage", () => {
       const drone = sentryDrone({ controlRange: 60000 });
       const result = application.compute(frame(15000, 0), drone, 400);
