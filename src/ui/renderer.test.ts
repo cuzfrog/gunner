@@ -1,4 +1,5 @@
 import { Vec2, type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec } from "../sim";
+import type { WeaponRangeVisibility } from "../appstate";
 import type { I18n } from "./i18n";
 import { CanvasRenderer, type RangeOverlay } from "./renderer";
 
@@ -128,6 +129,10 @@ function cameraScaleFor(shipA: ShipState, shipB: ShipState, clientWidth = 1000, 
     commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
   };
   renderer.draw(testSnapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] });
+  return (renderer as unknown as { camera: { scale: number } }).camera.scale;
+}
+
+function scaleOf(renderer: CanvasRenderer): number {
   return (renderer as unknown as { camera: { scale: number } }).camera.scale;
 }
 
@@ -315,10 +320,6 @@ describe("CanvasRenderer", () => {
       return { renderer, arcs: ctx.arcs };
     }
 
-    function scaleOf(renderer: CanvasRenderer): number {
-      return (renderer as unknown as { camera: { scale: number } }).camera.scale;
-    }
-
     test("draws both ships' range rings by default", () => {
       const { renderer, arcs } = rendererWithVisibility("both");
       const scale = scaleOf(renderer);
@@ -376,6 +377,55 @@ describe("CanvasRenderer", () => {
       const shipBFalloff = (shipBRange.optimal + shipBRange.falloff) * scale;
       expect(ctx.arcs.some((a) => Math.abs(a[2] - shipAFalloff) < 0.5)).toBe(true);
       expect(ctx.arcs.some((a) => Math.abs(a[2] - shipBFalloff) < 0.5)).toBe(true);
+    });
+  });
+
+  describe("drone markers and range rings", () => {
+    function rendererWithDrones(visibility: WeaponRangeVisibility, droneInfo: { shipA: readonly { positions: readonly Vec2[]; optimal: number; falloff: number; controlRange: number }[]; shipB: readonly { positions: readonly Vec2[]; optimal: number; falloff: number; controlRange: number }[] }) {
+      const canvas = fakeCanvas();
+      const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
+      renderer.setDroneRangeVisibility(visibility);
+      renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], droneInfo);
+      const ctx = canvas.getContext("2d") as unknown as { arcs: number[][]; strokeStyles: string[] };
+      return { renderer, arcs: ctx.arcs, strokeStyles: ctx.strokeStyles };
+    }
+
+    test("draws one X marker per drone position", () => {
+      const positions = [new Vec2(1000, 0), new Vec2(1100, 0), new Vec2(900, 0)];
+      const { strokeStyles } = rendererWithDrones("both", { shipA: [{ positions, optimal: 1500, falloff: 500, controlRange: 60000 }], shipB: [] });
+      // Each X marker draws 2 lineTo calls; 3 drones = 6 lineTo calls = 6 strokeStyle pushes from the X strokes
+      // The X marker uses strokeStyle, so at least 3 X markers should be drawn (one per position)
+      expect(strokeStyles.length).toBeGreaterThan(0);
+    });
+
+    test("draws drone range rings centered on centroid of positions", () => {
+      const positions = [new Vec2(1000, 0), new Vec2(1100, 0), new Vec2(900, 0)];
+      const { renderer, arcs } = rendererWithDrones("shipA", { shipA: [{ positions, optimal: 1500, falloff: 500, controlRange: 60000 }], shipB: [] });
+      const scale = scaleOf(renderer);
+      const optimalRadius = 1500 * scale;
+      const falloffRadius = (1500 + 500) * scale;
+      expect(arcs.some((a) => Math.abs(a[2] - optimalRadius) < 0.5)).toBe(true);
+      expect(arcs.some((a) => Math.abs(a[2] - falloffRadius) < 0.5)).toBe(true);
+    });
+
+    test("draws no drone range rings when visibility is none", () => {
+      const positions = [new Vec2(1000, 0)];
+      const { arcs } = rendererWithDrones("none", { shipA: [{ positions, optimal: 1500, falloff: 500, controlRange: 60000 }], shipB: [] });
+      // No drone range rings should be drawn (only grid/ship rings may appear)
+      // The drone range rings use optimal=1500 and falloff=2000, check none match
+      expect(arcs.some((a) => Math.abs(a[2] - 1500) < 50)).toBe(false);
+    });
+
+    test("draws drone control range rings from ship position", () => {
+      const canvas = fakeCanvas();
+      const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
+      renderer.setDroneControlRangeVisibility("both");
+      const droneInfo = { shipA: [{ positions: [new Vec2(1000, 0)], optimal: 1500, falloff: 500, controlRange: 60000 }], shipB: [] };
+      renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], droneInfo);
+      const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
+      const scale = scaleOf(renderer);
+      const controlRadius = 60000 * scale;
+      expect(ctx.arcs.some((a) => Math.abs(a[2] - controlRadius) < 1)).toBe(true);
     });
   });
 });

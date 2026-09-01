@@ -129,9 +129,9 @@ function moveDronesToward(drones: DroneBody[], destination: Vec2, maxSpeed: numb
     allArrived = false;
     const desired = toDest.norm().scale(maxSpeed);
     drone.velocity = accelerateToward(drone.velocity, desired, dt);
-    const step = drone.velocity.len() * dt;
-    if (step >= dist) { drone.position = destination; drone.velocity = new Vec2(0, 0); }
-    else drone.position = drone.position.add(drone.velocity.norm().scale(step));
+    const step = drone.velocity.scale(dt);
+    if (step.len() >= dist) { drone.position = destination; drone.velocity = new Vec2(0, 0); }
+    else drone.position = drone.position.add(step);
   }
   return allArrived;
 }
@@ -160,5 +160,3 @@ function averageDistance(drones: readonly DroneBody[], target: Vec2): number {
   for (const drone of drones) sum += drone.position.dist(target);
   return sum / drones.length;
 }
-
-export { stepSide as _stepSide, stepCombatDrone as _stepCombatDrone, stepSentry as _stepSentry };
