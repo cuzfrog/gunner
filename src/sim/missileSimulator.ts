@@ -1,5 +1,4 @@
 import { Vec2 } from "./vec2";
-import { MissileApplicationImpl } from "./missileApplication";
 import type { MissileApplication } from "./missileApplication";
 import type {
   EngagementFrame,
@@ -47,10 +46,16 @@ export class MissileSimulatorImpl implements MissileSimulator {
   private readonly application: MissileApplication;
   private sides: Record<Side, SideState> = { shipA: emptySide(), shipB: emptySide() };
   private time: number;
+  private lastFrameShipA: Vec2;
+  private lastFrameShipB: Vec2;
+  private lastFrameDistance: number;
 
-  constructor() {
-    this.application = new MissileApplicationImpl();
+  constructor({ missileApplication }: { missileApplication: MissileApplication }) {
+    this.application = missileApplication;
     this.time = 0;
+    this.lastFrameShipA = new Vec2(0, 0);
+    this.lastFrameShipB = new Vec2(0, 0);
+    this.lastFrameDistance = 0;
   }
 
   reset(_config: MissileSimConfig): void {
@@ -76,9 +81,9 @@ export class MissileSimulatorImpl implements MissileSimulator {
     const inFlight = state.entities.filter((m) => m.weaponIndex === weaponIndex);
     const weaponImpacts = state.impacts.filter((m) => m.weaponIndex === weaponIndex);
     const lastImpact = weaponImpacts.length > 0 ? toSummary(weaponImpacts[weaponImpacts.length - 1]) : undefined;
-    const nearestTimeToImpact = inFlight.length > 0 ? minTimeToImpact(inFlight, this.targetPos(side, this.sides[side])) : 0;
+    const nearestTimeToImpact = inFlight.length > 0 ? minTimeToImpact(inFlight, this.targetPos(side)) : 0;
     const spec = inFlight.length > 0 ? inFlight[0].spec : undefined;
-    const interceptable = spec ? this.canIntercept(spec, this.targetDistance(side)) : false;
+    const interceptable = spec ? this.canIntercept(spec, this.targetDistance()) : false;
     return {
       inFlightCount: inFlight.length,
       nearestTimeToImpact,
@@ -90,11 +95,11 @@ export class MissileSimulatorImpl implements MissileSimulator {
 
   private stepSide(side: Side, dt: number, frame: EngagementFrame, shipPos: Vec2, targetPos: Vec2, targetVel: Vec2, launches: readonly MissileLaunchSpec[]): void {
     const state = this.sides[side];
-    this.handleLaunches(state, side, shipPos, targetPos, launches, dt);
+    this.handleLaunches(state, side, shipPos, launches, dt);
     this.advanceEntities(state, dt, targetPos, targetVel, side);
   }
 
-  private handleLaunches(state: SideState, side: Side, shipPos: Vec2, _targetPos: Vec2, launches: readonly MissileLaunchSpec[], dt: number): void {
+  private handleLaunches(state: SideState, side: Side, shipPos: Vec2, launches: readonly MissileLaunchSpec[], dt: number): void {
     for (const launch of launches) {
       const cooldown = state.cooldowns.get(launch.weaponIndex) ?? 0;
       if (cooldown > 0) {
@@ -146,17 +151,13 @@ export class MissileSimulatorImpl implements MissileSimulator {
     return distance <= spec.flightRange;
   }
 
-  private targetPos(side: Side, _state: SideState): Vec2 {
+  private targetPos(side: Side): Vec2 {
     return side === "shipA" ? this.lastFrameShipB : this.lastFrameShipA;
   }
 
-  private targetDistance(side: Side): number {
-    return side === "shipA" ? this.lastFrameDistance : this.lastFrameDistance;
+  private targetDistance(): number {
+    return this.lastFrameDistance;
   }
-
-  private lastFrameShipA: Vec2 = new Vec2(0, 0);
-  private lastFrameShipB: Vec2 = new Vec2(0, 0);
-  private lastFrameDistance: number = 0;
 }
 
 function emptySide(): SideState {

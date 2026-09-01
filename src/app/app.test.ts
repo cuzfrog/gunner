@@ -10,6 +10,8 @@ import {
   type EwarProjection,
   type EwarResolver,
   type HitChanceBreakdown,
+  type MissileBoosterResolver,
+  type MissileSimulator,
   type ShipConfig,
   type ShipState,
   type SimConfig,
@@ -42,6 +44,8 @@ const controls = vi.mocked<Controls>({
 });
 const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
 const droneSimulator = vi.mocked<DroneSimulator>({ reset: vi.fn(), step: vi.fn(), states: vi.fn(() => []) });
+const missileSimulator = vi.mocked<MissileSimulator>({ reset: vi.fn(), step: vi.fn(), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, rollingAppliedDps: 0, interceptable: false })) });
+const missileBoosterResolver = vi.mocked<MissileBoosterResolver>({ boostedMissile: vi.fn((m) => m) });
 const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn() });
 const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setDroneRangeVisibility: vi.fn(), setDroneControlRangeVisibility: vi.fn(), setManualZoom: vi.fn() });
 const loop = vi.mocked<Loop>({
@@ -142,7 +146,7 @@ describe("AppImpl", () => {
     controls.hasWeapon.mockReturnValue(true);
     ewarResolver.speedBreakdown.mockReturnValue(emptySpeedBreakdown);
     ewarResolver.disruptionBreakdown.mockReturnValue(emptyDisruptionBreakdown);
-    app = new AppImpl({ controls, simulation, droneSimulator, engagementFrameComposer, ewarResolver, renderer, loop });
+    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, renderer, loop });
   });
 
   function callbacks(): ControlsCallbacks {
@@ -157,7 +161,7 @@ describe("AppImpl", () => {
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
     expect(renderer.setWeaponRangeVisibility).toHaveBeenCalledWith("both");
-    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 }, droneStates: { shipA: [], shipB: [] } });
+    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] } });
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, [], { shipA: [], shipB: [] });
     expect(controls.update).toHaveBeenCalledWith(baseView(), {
       shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
@@ -185,7 +189,7 @@ describe("AppImpl", () => {
     };
     simulation.snapshot.mockReturnValue(boostedSnapshot);
     engagementFrameComposer.compose.mockReturnValue(view);
-    app = new AppImpl({ controls, simulation, droneSimulator, engagementFrameComposer, ewarResolver, renderer, loop });
+    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, { shipA: { kind: "turret", optimal: 6000, falloff: 4000 }, shipB: { kind: "turret", optimal: 6000, falloff: 4000 } }, [], { shipA: [], shipB: [] });
     expect(controls.update).toHaveBeenCalledWith(view, {
@@ -197,7 +201,7 @@ describe("AppImpl", () => {
   test("falls back to the view's effective weapon when the composer returns no assessment", () => {
     const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret } };
     engagementFrameComposer.compose.mockReturnValue(view);
-    app = new AppImpl({ controls, simulation, droneSimulator, engagementFrameComposer, ewarResolver, renderer, loop });
+    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, [], { shipA: [], shipB: [] });
     expect(controls.update).toHaveBeenCalledWith(view, {
@@ -211,6 +215,7 @@ describe("AppImpl", () => {
     app.tick(0.1);
     expect(simulation.step).toHaveBeenCalledWith(0.1);
     expect(droneSimulator.step).toHaveBeenCalledWith(0.1, frame);
+    expect(missileSimulator.step).toHaveBeenCalledWith(0.1, frame, { shipA: [], shipB: [] });
     expect(engagementFrameComposer.compose).toHaveBeenCalledTimes(3);
     expect(renderer.draw).toHaveBeenCalledTimes(2);
   });
@@ -219,6 +224,7 @@ describe("AppImpl", () => {
     app.start();
     callbacks().onReset();
     expect(simulation.reset).toHaveBeenCalledWith(config);
+    expect(missileSimulator.reset).toHaveBeenCalled();
     expect(loop.reset).toHaveBeenCalled();
     expect(renderer.draw).toHaveBeenCalledTimes(2);
   });
@@ -324,7 +330,7 @@ describe("AppImpl", () => {
     engagementFrameComposer.compose.mockReturnValue(droneView);
     controls.getWeapon.mockReturnValue(drone);
     controls.getWeapons.mockReturnValue([drone]);
-    app = new AppImpl({ controls, simulation, droneSimulator, engagementFrameComposer, ewarResolver, renderer, loop });
+    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "drone", optimal: 1000, falloff: 500 }, shipB: { kind: "drone", optimal: 1000, falloff: 500 } }, [], { shipA: [{ positions: [new Vec2(0, 0)], optimal: 1000, falloff: 500, controlRange: 60000 }], shipB: [{ positions: [new Vec2(0, 0)], optimal: 1000, falloff: 500, controlRange: 60000 }] });
     expect(controls.update).toHaveBeenCalledWith(droneView, {

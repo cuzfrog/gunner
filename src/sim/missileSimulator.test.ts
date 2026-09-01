@@ -1,5 +1,6 @@
 import { Vec2 } from "./vec2";
 import { MissileSimulatorImpl } from "./missileSimulator";
+import { MissileApplicationImpl } from "./missileApplication";
 import type { EngagementFrame, MissileLaunchSpec, MissileSpec, ShipState } from "./types";
 
 const lightMissile: MissileSpec = {
@@ -55,7 +56,7 @@ function launchSpec(weaponIndex: number, boosted: MissileSpec, paintedTargetSig:
 
 describe("MissileSimulatorImpl", () => {
   test("reset clears all entities and impact logs", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     sim.step(0.1, frame(new Vec2(0, 0), new Vec2(1000, 0)), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
     expect(sim.states("shipA").length).toBeGreaterThan(0);
@@ -67,7 +68,7 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("launches a missile on first step when launch spec is provided", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     sim.step(0.1, frame(new Vec2(0, 0), new Vec2(1000, 0)), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
     const states = sim.states("shipA");
@@ -77,7 +78,7 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("missile spawns at launcher ship position", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     const shipPos = new Vec2(500, 200);
     sim.step(0.1, frame(shipPos, new Vec2(1000, 200)), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
@@ -88,14 +89,14 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("missile does not launch when no launch spec provided", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     sim.step(0.1, frame(new Vec2(0, 0), new Vec2(1000, 0)), { shipA: [], shipB: [] });
     expect(sim.states("shipA")).toHaveLength(0);
   });
 
   test("respects cycle time between launches", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
     sim.step(0.1, frame(new Vec2(0, 0), new Vec2(1000, 0)), launches);
@@ -105,7 +106,7 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("launches second volley after cycle time elapses", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     const farTarget = new Vec2(100000, 0);
     const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
@@ -115,7 +116,7 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("missile accelerates from zero toward max velocity", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     const f = frame(new Vec2(0, 0), new Vec2(100000, 0));
     sim.step(0.1, f, { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
@@ -127,7 +128,7 @@ describe("MissileSimulatorImpl", () => {
 
   test("missile approaches max velocity over time", () => {
     const longFlightMissile: MissileSpec = { ...lightMissile, flightTime: 30, flightRange: 3750 * 30 };
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [longFlightMissile], shipB: [] });
     const farFrame = frame(new Vec2(0, 0), new Vec2(1000000, 0));
     const launches = { shipA: [launchSpec(0, longFlightMissile, 40)], shipB: [] };
@@ -139,7 +140,7 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("missile moves toward target", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     const targetPos = new Vec2(10000, 0);
     sim.step(0.1, frame(new Vec2(0, 0), targetPos), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
@@ -148,7 +149,7 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("missile intercepts stationary target within signature radius", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     const targetPos = new Vec2(1000, 0);
     const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
@@ -166,7 +167,7 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("records impact damage scaled by launcherCount", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [heavyMissile], shipB: [] });
     const targetPos = new Vec2(1000, 0);
     const launches = { shipA: [launchSpec(0, heavyMissile, 200)], shipB: [] };
@@ -184,7 +185,7 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("missile expires without impact when fuel runs out", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     const farTarget = new Vec2(1000000, 0);
     const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
@@ -199,7 +200,7 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("tracks multiple weapon indices independently", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile, heavyMissile], shipB: [] });
     const launches = {
       shipA: [launchSpec(0, lightMissile, 40), launchSpec(1, heavyMissile, 200)],
@@ -214,7 +215,7 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("facts report inFlightCount per weapon index", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile, heavyMissile], shipB: [] });
     const launches = {
       shipA: [launchSpec(0, lightMissile, 40), launchSpec(1, heavyMissile, 200)],
@@ -227,21 +228,21 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("interceptable is true when target is within reachable range", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     sim.step(0.1, frame(new Vec2(0, 0), new Vec2(10000, 0)), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
     expect(sim.facts("shipA", 0).interceptable).toBe(true);
   });
 
   test("interceptable is false when target is beyond flight range", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     sim.step(0.1, frame(new Vec2(0, 0), new Vec2(100000, 0)), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
     expect(sim.facts("shipA", 0).interceptable).toBe(false);
   });
 
   test("rolling DPS accumulates from repeated impacts", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     const targetPos = new Vec2(1000, 0);
     const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
@@ -253,14 +254,14 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("rolling DPS is zero before any impact", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     sim.step(0.1, frame(new Vec2(0, 0), new Vec2(10000, 0)), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
     expect(sim.facts("shipA", 0).rollingAppliedDps).toBe(0);
   });
 
   test("trail records recent positions for rendering", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
     sim.step(0.1, frame(new Vec2(0, 0), new Vec2(100000, 0)), launches);
@@ -270,7 +271,7 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("supports both sides simultaneously", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [heavyMissile] });
     const launches = {
       shipA: [launchSpec(0, lightMissile, 40)],
@@ -284,7 +285,7 @@ describe("MissileSimulatorImpl", () => {
   });
 
   test("missile chases moving target (spiral path)", () => {
-    const sim = new MissileSimulatorImpl();
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
     let targetPos = new Vec2(5000, 0);
