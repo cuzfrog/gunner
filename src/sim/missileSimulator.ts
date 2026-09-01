@@ -68,8 +68,8 @@ export class MissileSimulatorImpl implements MissileSimulator {
     this.lastFrameShipA = frame.shipA.position;
     this.lastFrameShipB = frame.shipB.position;
     this.lastFrameDistance = frame.distance;
-    this.stepSide("shipA", dt, frame, frame.shipA.position, frame.shipB.position, frame.shipB.velocity, launches.shipA);
-    this.stepSide("shipB", dt, frame, frame.shipB.position, frame.shipA.position, frame.shipA.velocity, launches.shipB);
+    this.stepSide("shipA", dt, frame.shipA.position, frame.shipB.position, frame.shipB.velocity, launches.shipA);
+    this.stepSide("shipB", dt, frame.shipB.position, frame.shipA.position, frame.shipA.velocity, launches.shipB);
   }
 
   states(side: Side): readonly MissileRuntimeState[] {
@@ -93,13 +93,13 @@ export class MissileSimulatorImpl implements MissileSimulator {
     };
   }
 
-  private stepSide(side: Side, dt: number, frame: EngagementFrame, shipPos: Vec2, targetPos: Vec2, targetVel: Vec2, launches: readonly MissileLaunchSpec[]): void {
+  private stepSide(side: Side, dt: number, shipPos: Vec2, targetPos: Vec2, targetVel: Vec2, launches: readonly MissileLaunchSpec[]): void {
     const state = this.sides[side];
-    this.handleLaunches(state, side, shipPos, launches, dt);
+    this.handleLaunches(state, shipPos, launches, dt);
     this.advanceEntities(state, dt, targetPos, targetVel, side);
   }
 
-  private handleLaunches(state: SideState, side: Side, shipPos: Vec2, launches: readonly MissileLaunchSpec[], dt: number): void {
+  private handleLaunches(state: SideState, shipPos: Vec2, launches: readonly MissileLaunchSpec[], dt: number): void {
     for (const launch of launches) {
       const cooldown = state.cooldowns.get(launch.weaponIndex) ?? 0;
       if (cooldown > 0) {
