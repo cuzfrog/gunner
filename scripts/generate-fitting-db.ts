@@ -475,6 +475,7 @@ const MODULE_GROUPS = new Set([
   782, // Rig Navigation
   786, // Rig Electronic Systems
   1308, // Rig Anchor
+  647, // Drone Control Range Module
 ]);
 
 const SCRIPT_GROUPS = new Set([907]);
@@ -511,6 +512,7 @@ const MISSILE_CHARGE_GROUPS = new Set([
 const COMBAT_DRONE_GROUP = 100;
 const OMNIDIRECTIONAL_TRACKING_LINK_GROUP = 646;
 const OMNIDIRECTIONAL_TRACKING_ENHANCER_GROUP = 1292;
+const DRONE_CONTROL_RANGE_MODULE_GROUP = 647;
 
 const RIG_SIG_DRAWBACK_EFFECT = 2716;
 const RIG_AGILITY_DRAWBACK_EFFECT = 2717;
@@ -736,6 +738,7 @@ interface FittingModuleStats {
   readonly missileDamageMultiplier?: number;
   readonly missileCycleTimeMultiplier?: number;
   readonly droneDamageBonus?: number;
+  readonly droneControlRangeBonus?: number;
 }
 
 type TurretWeaponGroup = "Energy Weapon" | "Hybrid Weapon" | "Projectile Weapon";
@@ -974,6 +977,9 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
 
   const droneDamageBonus = optionalNumber(values.get("droneDamageBonus"));
   if (droneDamageBonus !== undefined) stats.droneDamageBonus = droneDamageBonus;
+
+  const droneControlRangeBonus = optionalNumber(values.get("droneRangeBonus"));
+  if (droneControlRangeBonus !== undefined) stats.droneControlRangeBonus = droneControlRangeBonus;
 
   if (Object.keys(stats).length === 0) return undefined;
   return { ...stats };
@@ -1576,6 +1582,7 @@ export interface FittingModuleStats {
   readonly missileDamageMultiplier?: number;
   readonly missileCycleTimeMultiplier?: number;
   readonly droneDamageBonus?: number;
+  readonly droneControlRangeBonus?: number;
   readonly id: TypeId;
   readonly name: string;
 }

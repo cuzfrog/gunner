@@ -596,6 +596,22 @@ describe("Ballistic Control System in _buildModuleStats", () => {
   });
 });
 
+describe("Drone Link Augmentor in _buildModuleStats", () => {
+  function effects(...ids: number[]): Set<number> {
+    return new Set(ids);
+  }
+
+  test("extracts drone control range bonus from droneRangeBonus attribute", () => {
+    const stats = _buildModuleStats(values({ droneRangeBonus: 20000 }), effects());
+    expect(stats).toEqual({ droneControlRangeBonus: 20000 });
+  });
+
+  test("does not extract drone control range when attribute is absent", () => {
+    const stats = _buildModuleStats(values({}), effects());
+    expect(stats).toBeUndefined();
+  });
+});
+
 describe("_writeI18nFiles", () => {
   let tempDir: string;
 
