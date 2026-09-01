@@ -135,7 +135,7 @@ function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: numb
   const shipAAttack: AttackAssessment = {
     boostedWeapon: DUMMY_DRONE, effectiveWeapon: DUMMY_DRONE,
     damage: shipADamage,
-    drone: { hit: shipAHit, expectedMultiplier: 0.8, inRange: true, orbiting: true, mode: "orbiting", distanceToTarget: 1000, inControlRange: true },
+    drone: { hit: shipAHit, expectedMultiplier: 0.8, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true },
   };
   return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_DRONE, shipB: undefined } } as unknown as EngagementView;
 }

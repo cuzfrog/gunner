@@ -23,6 +23,7 @@ interface DroneGroupState {
   readonly drones: DroneBody[];
   mode: DroneMode;
   distanceToTarget: number;
+  distanceToSlot: number;
   inControlRange: boolean;
   deployed: boolean;
   orbitAngle: number;
@@ -32,7 +33,6 @@ const DEPLOY_RADIUS = 1000;
 const DRONE_ACCEL_TAU = 1.0;
 const SEPARATION_RADIUS = 300;
 const SEPARATION_GAIN = 3.0;
-const RE_ENGAGE_FACTOR = 1.5;
 
 export class DroneSimulatorImpl implements DroneSimulator {
   private groups: Record<Side, DroneGroupState[]> = { shipA: [], shipB: [] };
@@ -52,7 +52,7 @@ export class DroneSimulatorImpl implements DroneSimulator {
   }
 
   states(side: Side): readonly DroneRuntimeState[] {
-    return this.groups[side].map((g) => ({ mode: g.mode, positions: g.drones.map((d) => d.position), distanceToTarget: g.distanceToTarget, inControlRange: g.inControlRange }));
+    return this.groups[side].map((g) => ({ mode: g.mode, positions: g.drones.map((d) => d.position), distanceToTarget: g.distanceToTarget, distanceToSlot: g.distanceToSlot, inControlRange: g.inControlRange }));
   }
 }
 
@@ -60,7 +60,7 @@ function createGroupState(spec: DroneSpec): DroneGroupState {
   const count = Math.max(1, spec.droneCount);
   const drones: DroneBody[] = [];
   for (let i = 0; i < count; i++) drones.push({ position: new Vec2(0, 0), velocity: new Vec2(0, 0), orbitPhase: (i / count) * Math.PI * 2 });
-  return { spec, drones, mode: "idle", distanceToTarget: 0, inControlRange: false, deployed: false, orbitAngle: 0 };
+  return { spec, drones, mode: "idle", distanceToTarget: 0, distanceToSlot: 0, inControlRange: false, deployed: false, orbitAngle: 0 };
 }
 
 function stepSide(groups: DroneGroupState[], shipPos: Vec2, targetPos: Vec2, shipToTargetDistance: number, dt: number): void {
@@ -76,21 +76,23 @@ function stepSentry(group: DroneGroupState, shipPos: Vec2, targetPos: Vec2): voi
     for (const drone of group.drones) drone.position = shipPos;
     group.deployed = true;
   }
-  group.mode = "orbiting";
+  group.mode = "engaging";
   group.distanceToTarget = group.drones[0].position.dist(targetPos);
+  group.distanceToSlot = 0;
 }
 
 function stepCombatDrone(group: DroneGroupState, shipPos: Vec2, targetPos: Vec2, inControlRange: boolean, dt: number): void {
   const previousMode = group.mode;
   if (!inControlRange) {
-    if (previousMode === "approaching" || previousMode === "orbiting") group.mode = "returning";
+    if (previousMode === "engaging") group.mode = "returning";
   } else {
-    if (previousMode === "idle" || previousMode === "returning") group.mode = "approaching";
+    if (previousMode === "idle" || previousMode === "returning") group.mode = "engaging";
   }
 
   if (group.mode === "idle") {
     for (const drone of group.drones) { drone.position = shipPos; drone.velocity = new Vec2(0, 0); }
     group.distanceToTarget = shipPos.dist(targetPos);
+    group.distanceToSlot = 0;
     return;
   }
 
@@ -98,29 +100,19 @@ function stepCombatDrone(group: DroneGroupState, shipPos: Vec2, targetPos: Vec2,
     const allAtShip = moveDronesToward(group.drones, shipPos, group.spec.maxVelocity, dt);
     if (allAtShip) group.mode = "idle";
     group.distanceToTarget = averageDistance(group.drones, targetPos);
+    group.distanceToSlot = 0;
     return;
   }
 
-  if (group.mode === "approaching") {
+  if (group.mode === "engaging") {
     if (previousMode === "idle") deployDrones(group.drones, shipPos);
-    moveDronesToward(group.drones, targetPos, group.spec.maxVelocity, dt);
-    applySeparation(group.drones, dt);
-    group.distanceToTarget = averageDistance(group.drones, targetPos);
-    const orbitRange = effectiveOrbitRange(group.spec);
-    if (group.distanceToTarget <= orbitRange) {
-      group.mode = "orbiting";
-      group.orbitAngle = 0;
-    }
-    return;
-  }
-
-  if (group.mode === "orbiting") {
     const orbitRange = effectiveOrbitRange(group.spec);
     const angularVelocity = orbitRange > 0 && group.spec.orbitSpeed > 0 ? group.spec.orbitSpeed / orbitRange : 0;
     group.orbitAngle += angularVelocity * dt;
-    orbitDrones(group.drones, targetPos, orbitRange, group.spec.orbitSpeed, group.orbitAngle, dt);
+    engageDrones(group.drones, targetPos, orbitRange, group.spec.orbitSpeed, group.spec.maxVelocity, group.orbitAngle, dt);
+    applySeparation(group.drones, dt);
     group.distanceToTarget = averageDistance(group.drones, targetPos);
-    if (group.distanceToTarget > orbitRange * RE_ENGAGE_FACTOR) group.mode = "approaching";
+    group.distanceToSlot = averageDistanceToSlot(group.drones, targetPos, orbitRange, group.orbitAngle);
   }
 }
 
@@ -152,7 +144,7 @@ function moveDronesToward(drones: DroneBody[], destination: Vec2, maxSpeed: numb
   return allArrived;
 }
 
-function orbitDrones(drones: DroneBody[], targetPos: Vec2, orbitRange: number, orbitSpeed: number, orbitAngle: number, dt: number): void {
+function engageDrones(drones: DroneBody[], targetPos: Vec2, orbitRange: number, orbitSpeed: number, maxVelocity: number, orbitAngle: number, dt: number): void {
   for (let i = 0; i < drones.length; i++) {
     const drone = drones[i];
     const angle = drone.orbitPhase + orbitAngle;
@@ -160,9 +152,11 @@ function orbitDrones(drones: DroneBody[], targetPos: Vec2, orbitRange: number, o
     const toDesired = desiredPos.sub(drone.position);
     const dist = toDesired.len();
     if (dist <= 1) { drone.position = desiredPos; continue; }
-    const desired = toDesired.norm().scale(orbitSpeed);
+    const mwdFactor = Math.min(dist / orbitRange, 1);
+    const speed = orbitSpeed + (maxVelocity - orbitSpeed) * mwdFactor;
+    const desired = toDesired.norm().scale(speed);
     drone.velocity = accelerateToward(drone.velocity, desired, dt);
-    const maxStep = orbitSpeed * dt;
+    const maxStep = speed * dt;
     const step = drone.velocity.scale(dt);
     const capped = step.len() > maxStep ? step.norm().scale(maxStep) : step;
     if (capped.len() >= dist) drone.position = desiredPos;
@@ -195,5 +189,16 @@ function averageDistance(drones: readonly DroneBody[], target: Vec2): number {
   if (drones.length === 0) return 0;
   let sum = 0;
   for (const drone of drones) sum += drone.position.dist(target);
+  return sum / drones.length;
+}
+
+function averageDistanceToSlot(drones: readonly DroneBody[], targetPos: Vec2, orbitRange: number, orbitAngle: number): number {
+  if (drones.length === 0) return 0;
+  let sum = 0;
+  for (const drone of drones) {
+    const angle = drone.orbitPhase + orbitAngle;
+    const slot = targetPos.add(new Vec2(Math.cos(angle) * orbitRange, Math.sin(angle) * orbitRange));
+    sum += drone.position.dist(slot);
+  }
   return sum / drones.length;
 }

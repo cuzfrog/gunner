@@ -313,7 +313,7 @@ describe("AppImpl", () => {
     const droneAssessment: AttackAssessment = {
       boostedWeapon: drone, effectiveWeapon: drone,
       damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100 },
-      drone: { hit, expectedMultiplier: 1, inRange: true, orbiting: true, mode: "orbiting", distanceToTarget: 1000, inControlRange: true },
+      drone: { hit, expectedMultiplier: 1, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true },
     };
     const droneView: EngagementView = {
       frame,

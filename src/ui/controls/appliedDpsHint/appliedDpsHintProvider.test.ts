@@ -16,7 +16,7 @@ const turretAssessment: AttackAssessment = {
 const droneAssessment: AttackAssessment = {
   boostedWeapon: drone, effectiveWeapon: drone,
   damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100 },
-  drone: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8, inRange: true, orbiting: true, mode: "orbiting", distanceToTarget: 1000, inControlRange: true },
+  drone: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true },
 };
 
 function makeView(weaponAttacks: { shipA: readonly { weapon: TurretSpec | DroneSpec; assessment: AttackAssessment }[]; shipB: readonly never[] }, attacks?: { shipA: AttackAssessment | undefined; shipB: AttackAssessment | undefined }): EngagementView {

@@ -95,12 +95,13 @@ export interface DroneSpec extends TrackingApplicationSpec {
   readonly controlRange: number; // m, ship-to-target max command distance
 }
 
-export type DroneMode = "idle" | "approaching" | "orbiting" | "returning";
+export type DroneMode = "idle" | "engaging" | "returning";
 
 export interface DroneRuntimeState {
   readonly mode: DroneMode;
   readonly positions: readonly Vec2[]; // individual drone positions
   readonly distanceToTarget: number; // m, group-average drone-to-target
+  readonly distanceToSlot: number; // m, group-average distance to desired orbit position
   readonly inControlRange: boolean; // ship-to-target <= controlRange
 }
 
@@ -131,7 +132,7 @@ export interface DroneDamageBreakdown {
   readonly hit: HitChanceBreakdown;
   readonly expectedMultiplier: number;
   readonly inRange: boolean;
-  readonly orbiting: boolean; // true for non-sentry drones in range
+  readonly inWeaponRange: boolean; // target within optimal + 3*falloff
   readonly mode: DroneMode;
   readonly distanceToTarget: number; // m, drone-to-target
   readonly inControlRange: boolean; // ship-to-target <= controlRange

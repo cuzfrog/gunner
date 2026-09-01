@@ -3,11 +3,11 @@ import { DroneSimulatorImpl } from "./droneSimulator";
 import type { DroneSpec, EngagementFrame, ShipState } from "./types";
 
 function lightDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
-  return { kind: "drone", tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000, ...overrides };
+  return { kind: "drone" as const, tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000, ...overrides };
 }
 
 function sentryDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
-  return { kind: "drone", tracking: 0.0336, sigResolution: 400, optimal: 18000, falloff: 30000, damagePerShot: 105.6, cycleTime: 4, droneCount: 5, maxVelocity: 0, orbitSpeed: 0, orbitRange: 0, isSentry: true, controlRange: 60000, ...overrides };
+  return { kind: "drone" as const, tracking: 0.0336, sigResolution: 400, optimal: 18000, falloff: 30000, damagePerShot: 105.6, cycleTime: 4, droneCount: 5, maxVelocity: 0, orbitSpeed: 0, orbitRange: 0, isSentry: true, controlRange: 60000, ...overrides };
 }
 
 function shipAt(x: number, y: number): ShipState {
@@ -42,14 +42,14 @@ describe("DroneSimulatorImpl", () => {
     expect(states[0].inControlRange).toBe(false);
   });
 
-  test("target within control range transitions idle to approaching", () => {
+  test("target within control range transitions idle to engaging", () => {
     const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone()], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
     sim.step(0.1, frame(shipPos, targetPos));
     const states = sim.states("shipA");
-    expect(states[0].mode).toBe("approaching");
+    expect(states[0].mode).toBe("engaging");
     expect(states[0].inControlRange).toBe(true);
   });
 
@@ -71,7 +71,7 @@ describe("DroneSimulatorImpl", () => {
     const targetPos = new Vec2(50000, 0);
     sim.step(0.001, frame(shipPos, targetPos));
     const states = sim.states("shipA");
-    expect(states[0].mode).toBe("approaching");
+    expect(states[0].mode).toBe("engaging");
     for (const pos of states[0].positions) {
       const dist = pos.dist(shipPos);
       expect(dist).toBeGreaterThan(900);
@@ -97,36 +97,37 @@ describe("DroneSimulatorImpl", () => {
     expect(traveled2).toBeGreaterThan(traveled);
   });
 
-  test("drones produce zero attack DPS before reaching target", () => {
+  test("drones in engaging mode report distance to target before reaching orbit", () => {
     const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ maxVelocity: 3000, optimal: 1000 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
     sim.step(1, frame(shipPos, targetPos));
     const states = sim.states("shipA");
-    expect(states[0].mode).toBe("approaching");
+    expect(states[0].mode).toBe("engaging");
     expect(states[0].distanceToTarget).toBeGreaterThan(1000);
   });
 
-  test("drones reach target and transition to orbiting", () => {
+  test("drones reach target and settle near orbit range", () => {
     const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1000, orbitRange: 1000, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 100; i++) sim.step(0.1, frame(shipPos, targetPos));
+    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos));
     const states = sim.states("shipA");
-    expect(states[0].mode).toBe("orbiting");
+    expect(states[0].mode).toBe("engaging");
     expect(states[0].distanceToTarget).toBeLessThan(3000);
+    expect(states[0].distanceToSlot).toBeLessThan(1000);
   });
 
-  test("orbiting drones circle the target, not stop", () => {
+  test("engaging drones circle the target, not stop", () => {
     const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1000, orbitRange: 1000, orbitSpeed: 1000, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
     for (let i = 0; i < 30; i++) sim.step(0.1, frame(shipPos, targetPos));
     const states = sim.states("shipA");
-    expect(states[0].mode).toBe("orbiting");
+    expect(states[0].mode).toBe("engaging");
     const pos1 = states[0].positions[0];
     sim.step(0.5, frame(shipPos, targetPos));
     const pos2 = sim.states("shipA")[0].positions[0];
@@ -134,14 +135,14 @@ describe("DroneSimulatorImpl", () => {
     expect(moved).toBeGreaterThan(10);
   });
 
-  test("orbiting drones spread around the target at different phases", () => {
+  test("engaging drones spread around the target at different phases", () => {
     const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 5 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
     for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos));
     const states = sim.states("shipA");
-    expect(states[0].mode).toBe("orbiting");
+    expect(states[0].mode).toBe("engaging");
     const positions = states[0].positions;
     for (let i = 0; i < positions.length; i++) {
       for (let j = i + 1; j < positions.length; j++) {
@@ -151,14 +152,14 @@ describe("DroneSimulatorImpl", () => {
     }
   });
 
-  test("drones maintain orbit range from target while orbiting", () => {
+  test("drones maintain orbit range from target while engaging", () => {
     const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
     for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos));
     const states = sim.states("shipA");
-    expect(states[0].mode).toBe("orbiting");
+    expect(states[0].mode).toBe("engaging");
     const pos = states[0].positions[0];
     const dist = pos.dist(targetPos);
     expect(dist).toBeGreaterThan(500);
@@ -171,7 +172,7 @@ describe("DroneSimulatorImpl", () => {
     const shipPos = new Vec2(0, 0);
     const targetNear = new Vec2(3000, 0);
     for (let i = 0; i < 100; i++) sim.step(0.1, frame(shipPos, targetNear));
-    expect(sim.states("shipA")[0].mode).toBe("orbiting");
+    expect(sim.states("shipA")[0].mode).toBe("engaging");
     const targetFar = new Vec2(60000, 0);
     sim.step(0.1, frame(shipPos, targetFar));
     expect(sim.states("shipA")[0].mode).toBe("returning");
@@ -183,7 +184,7 @@ describe("DroneSimulatorImpl", () => {
     const shipPos = new Vec2(0, 0);
     const targetNear = new Vec2(3000, 0);
     for (let i = 0; i < 100; i++) sim.step(0.1, frame(shipPos, targetNear));
-    expect(sim.states("shipA")[0].mode).toBe("orbiting");
+    expect(sim.states("shipA")[0].mode).toBe("engaging");
     const targetFar = new Vec2(60000, 0);
     sim.step(0.1, frame(shipPos, targetFar));
     expect(sim.states("shipA")[0].mode).toBe("returning");
@@ -252,65 +253,81 @@ describe("DroneSimulatorImpl", () => {
     sim.step(0.001, frame(shipAPos, shipBPos));
     sim.step(1, frame(shipAPos, shipBPos));
     const states = sim.states("shipB");
-    expect(states[0].mode).toBe("approaching");
+    expect(states[0].mode).toBe("engaging");
     const pos = states[0].positions[0];
     expect(pos.x).toBeLessThan(shipBPos.x);
   });
 
-  test("orbiting drones re-approach when fast target outruns orbit speed", () => {
+  test("fast target increases distanceToSlot as drones fall behind orbit position", () => {
     const sim = new DroneSimulatorImpl();
-    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
+    sim.reset({ shipA: [lightDrone({ maxVelocity: 1500, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     let targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos));
-    expect(sim.states("shipA")[0].mode).toBe("orbiting");
+    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos));
+    const settledSlotDist = sim.states("shipA")[0].distanceToSlot;
+    expect(settledSlotDist).toBeLessThan(1000);
     const targetSpeed = 2000;
-    let reApproached = false;
     for (let i = 0; i < 100; i++) {
       targetPos = new Vec2(targetPos.x + targetSpeed * 0.1, 0);
       sim.step(0.1, frame(shipPos, targetPos));
-      if (sim.states("shipA")[0].mode === "approaching") reApproached = true;
     }
-    expect(reApproached).toBe(true);
+    const chasingSlotDist = sim.states("shipA")[0].distanceToSlot;
+    expect(chasingSlotDist).toBeGreaterThan(settledSlotDist);
   });
 
-  test("re-approaching drones catch up and re-enter orbiting", () => {
+  test("drones catch up and reduce distanceToSlot when target stops", () => {
     const sim = new DroneSimulatorImpl();
-    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
+    sim.reset({ shipA: [lightDrone({ maxVelocity: 1500, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     let targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos));
-    expect(sim.states("shipA")[0].mode).toBe("orbiting");
+    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos));
     const targetSpeed = 2000;
-    let reApproached = false;
-    let reOrbited = false;
     for (let i = 0; i < 100; i++) {
       targetPos = new Vec2(targetPos.x + targetSpeed * 0.1, 0);
       sim.step(0.1, frame(shipPos, targetPos));
-      const mode = sim.states("shipA")[0].mode;
-      if (mode === "approaching") reApproached = true;
-      if (reApproached && mode === "orbiting") reOrbited = true;
     }
-    expect(reApproached).toBe(true);
-    expect(reOrbited).toBe(true);
+    const chasingSlotDist = sim.states("shipA")[0].distanceToSlot;
+    expect(chasingSlotDist).toBeGreaterThan(200);
+    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos));
+    const settledSlotDist = sim.states("shipA")[0].distanceToSlot;
+    expect(settledSlotDist).toBeLessThan(chasingSlotDist);
+    expect(settledSlotDist).toBeLessThan(1000);
   });
 
-  test("drones do not re-approach when target is slow", () => {
+  test("slow target keeps drones near orbit slot", () => {
     const sim = new DroneSimulatorImpl();
-    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
+    sim.reset({ shipA: [lightDrone({ maxVelocity: 1500, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     let targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos));
-    expect(sim.states("shipA")[0].mode).toBe("orbiting");
+    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos));
     const targetSpeed = 100;
     for (let i = 0; i < 200; i++) {
       targetPos = new Vec2(targetPos.x + targetSpeed * 0.1, 0);
       sim.step(0.1, frame(shipPos, targetPos));
     }
-    expect(sim.states("shipA")[0].mode).toBe("orbiting");
+    expect(sim.states("shipA")[0].distanceToSlot).toBeLessThan(1000);
   });
 
-  test("orbit step is capped to orbitSpeed even with high residual velocity", () => {
+  test("drone speed is capped to maxVelocity even with high residual velocity", () => {
+    const maxVelocity = 50000;
+    const dt = 0.1;
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [lightDrone({ maxVelocity, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
+    const shipPos = new Vec2(0, 0);
+    const targetPos = new Vec2(5000, 0);
+    sim.step(0.001, frame(shipPos, targetPos));
+    let prevPos = new Vec2(sim.states("shipA")[0].positions[0].x, sim.states("shipA")[0].positions[0].y);
+    const maxStep = maxVelocity * dt + 1;
+    for (let i = 0; i < 50; i++) {
+      sim.step(dt, frame(shipPos, targetPos));
+      const pos = sim.states("shipA")[0].positions[0];
+      const moved = pos.dist(prevPos);
+      expect(moved).toBeLessThanOrEqual(maxStep);
+      prevPos = new Vec2(pos.x, pos.y);
+    }
+  });
+
+  test("drone speed near orbit slot is capped to orbitSpeed", () => {
     const orbitSpeed = 500;
     const dt = 0.1;
     const sim = new DroneSimulatorImpl();
@@ -318,7 +335,7 @@ describe("DroneSimulatorImpl", () => {
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
     for (let i = 0; i < 200; i++) sim.step(dt, frame(shipPos, targetPos));
-    expect(sim.states("shipA")[0].mode).toBe("orbiting");
+    expect(sim.states("shipA")[0].distanceToSlot).toBeLessThan(200);
     let prevPos = new Vec2(sim.states("shipA")[0].positions[0].x, sim.states("shipA")[0].positions[0].y);
     const maxStep = orbitSpeed * dt + 1;
     for (let i = 0; i < 50; i++) {
