@@ -6,6 +6,7 @@ import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
 import type { RangeOverlayController } from "../rangeOverlay";
 import type { TurretController } from "../turret";
+import type { DroneController } from "../drone";
 import type { Side } from "../side";
 import type { ItemNameLoader } from "../../../gamedata";
 
@@ -53,7 +54,6 @@ export interface PreferencesController {
 }
 
 const WEAPON_RANGE_CYCLE: readonly WeaponRangeVisibility[] = ["both", "shipA", "shipB", "none"];
-const DRONE_RANGE_CYCLE: readonly WeaponRangeVisibility[] = ["both", "shipA", "shipB", "none"];
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
@@ -64,6 +64,8 @@ export class PreferencesControllerImpl implements PreferencesController {
   private readonly settingsStore: SettingsStore;
   private readonly shipATurretController: TurretController;
   private readonly shipBTurretController: TurretController;
+  private readonly shipADroneController: DroneController;
+  private readonly shipBDroneController: DroneController;
   private readonly events: UiEvents;
   private readonly rangeOverlayController: RangeOverlayController;
   private readonly popupGroup: PopupGroup;
@@ -80,6 +82,8 @@ export class PreferencesControllerImpl implements PreferencesController {
     settingsStore: SettingsStore;
     shipATurretController: TurretController;
     shipBTurretController: TurretController;
+    shipADroneController: DroneController;
+    shipBDroneController: DroneController;
     events: UiEvents;
     rangeOverlayController: RangeOverlayController;
     popupGroup: PopupGroup;
@@ -90,6 +94,8 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.settingsStore = deps.settingsStore;
     this.shipATurretController = deps.shipATurretController;
     this.shipBTurretController = deps.shipBTurretController;
+    this.shipADroneController = deps.shipADroneController;
+    this.shipBDroneController = deps.shipBDroneController;
     this.events = deps.events;
     this.rangeOverlayController = deps.rangeOverlayController;
     this.popupGroup = deps.popupGroup;
@@ -184,14 +190,14 @@ export class PreferencesControllerImpl implements PreferencesController {
   }
 
   cycleDroneRange(): void {
-    this.droneRangeVisibility = cycleVisibility(DRONE_RANGE_CYCLE, this.droneRangeVisibility);
+    this.droneRangeVisibility = cycleDroneVisibility(this.shipADroneController, this.shipBDroneController, this.droneRangeVisibility);
     this.updateRangeButton(this.els.droneRangeButton, this.droneRangeVisibility, "label.droneRange");
     this.savePreferences();
     this.events.emitDisplayInvalidated();
   }
 
   cycleDroneControlRange(): void {
-    this.droneControlRangeVisibility = cycleVisibility(DRONE_RANGE_CYCLE, this.droneControlRangeVisibility);
+    this.droneControlRangeVisibility = cycleDroneVisibility(this.shipADroneController, this.shipBDroneController, this.droneControlRangeVisibility);
     this.updateRangeButton(this.els.droneControlRangeButton, this.droneControlRangeVisibility, "label.droneControlRange");
     this.savePreferences();
     this.events.emitDisplayInvalidated();
@@ -334,4 +340,20 @@ export class PreferencesControllerImpl implements PreferencesController {
 function cycleVisibility(cycle: readonly WeaponRangeVisibility[], current: WeaponRangeVisibility): WeaponRangeVisibility {
   const index = cycle.indexOf(current);
   return cycle[(index + 1) % cycle.length];
+}
+
+function cycleDroneVisibility(shipA: DroneController, shipB: DroneController, current: WeaponRangeVisibility): WeaponRangeVisibility {
+  const hasA = shipA.currentDroneSpecs().length > 0;
+  const hasB = shipB.currentDroneSpecs().length > 0;
+  const cycle = droneRangeCycle(hasA, hasB);
+  const index = cycle.indexOf(current);
+  if (index < 0) return cycle[0];
+  return cycle[(index + 1) % cycle.length];
+}
+
+function droneRangeCycle(hasA: boolean, hasB: boolean): readonly WeaponRangeVisibility[] {
+  if (hasA && hasB) return ["both", "shipA", "shipB", "none"];
+  if (hasA) return ["both", "shipA", "none"];
+  if (hasB) return ["both", "shipB", "none"];
+  return ["none"];
 }
