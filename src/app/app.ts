@@ -1,5 +1,5 @@
 import { Vec2 } from "../sim";
-import type { DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, MissileBoosterResolver, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, ShipState, Side, Simulation, WeaponSpec } from "../sim";
+import type { DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, MissileAttackFacts, MissileBoosterResolver, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, ShipState, Side, Simulation, WeaponSpec } from "../sim";
 import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, MissileRenderCollection, Renderer, WeaponRange, WeaponRanges } from "../ui";
 
 export interface App {
@@ -106,9 +106,9 @@ export class AppImpl implements App {
     };
   }
 
-  private missileFactsFor(side: Side): readonly import("../sim").MissileAttackFacts[] {
+  private missileFactsFor(side: Side): readonly MissileAttackFacts[] {
     const weapons = this.controls.getWeapons(side);
-    const facts: import("../sim").MissileAttackFacts[] = [];
+    const facts: MissileAttackFacts[] = [];
     let missileIndex = 0;
     for (const weapon of weapons) {
       if (weapon.kind === "missile") {

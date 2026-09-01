@@ -224,6 +224,32 @@ describe("EngagementEvaluatorImpl", () => {
     expect(result.shipA?.missile?.inRange).toBe(false);
   });
 
+  test("uses missile facts for applied DPS when facts are provided", () => {
+    const { missileApplication, evaluator } = makeEvaluator();
+    const facts = { inFlightCount: 2, nearestTimeToImpact: 1.5, lastImpact: { application: 0.6, signatureTerm: 1, velocityTerm: 0.6, time: 1.0 }, rollingAppliedDps: 12, interceptable: true };
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: facts } });
+    expect(result.shipA?.damage.appliedDps).toBe(12);
+    expect(result.shipA?.damage.application).toBeCloseTo(12 / ((200 * 2) / 10), 10);
+    expect(result.shipA?.missile?.inRange).toBe(true);
+    expect(result.shipA?.missile?.timeToImpact).toBe(1.5);
+    expect(result.shipA?.missile?.application).toBe(0.6);
+    expect(result.shipA?.missile?.signatureTerm).toBe(1);
+    expect(result.shipA?.missile?.velocityTerm).toBe(0.6);
+    expect(missileApplication.compute).not.toHaveBeenCalled();
+  });
+
+  test("uses missile facts with no last impact for zero application breakdown", () => {
+    const { evaluator } = makeEvaluator();
+    const facts = { inFlightCount: 1, nearestTimeToImpact: 2.0, lastImpact: undefined, rollingAppliedDps: 0, interceptable: true };
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: facts } });
+    expect(result.shipA?.damage.appliedDps).toBe(0);
+    expect(result.shipA?.missile?.application).toBe(0);
+    expect(result.shipA?.missile?.signatureTerm).toBe(1);
+    expect(result.shipA?.missile?.velocityTerm).toBe(1);
+    expect(result.shipA?.missile?.inRange).toBe(true);
+    expect(result.shipA?.missile?.timeToImpact).toBe(2.0);
+  });
+
   test("returns empty result when no attacks are requested", () => {
     const { hitChance, ewarResolver, evaluator } = makeEvaluator();
     const result = evaluator.evaluate(frame, {});
