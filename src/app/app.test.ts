@@ -2,6 +2,7 @@ import {
   Vec2,
   type AttackAssessment,
   type DisruptionBreakdown,
+  type DroneSimulator,
   type DroneSpec,
   type EngagementFrame,
   type EngagementFrameComposer,
@@ -38,6 +39,7 @@ const controls = vi.mocked<Controls>({
   setCallbacks: vi.fn(),
 });
 const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
+const droneSimulator = vi.mocked<DroneSimulator>({ reset: vi.fn(), step: vi.fn(), states: vi.fn(() => []) });
 const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn() });
 const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setManualZoom: vi.fn() });
 const loop = vi.mocked<Loop>({
@@ -138,7 +140,7 @@ describe("AppImpl", () => {
     controls.hasWeapon.mockReturnValue(true);
     ewarResolver.speedBreakdown.mockReturnValue(emptySpeedBreakdown);
     ewarResolver.disruptionBreakdown.mockReturnValue(emptyDisruptionBreakdown);
-    app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
+    app = new AppImpl({ controls, simulation, droneSimulator, engagementFrameComposer, ewarResolver, renderer, loop });
   });
 
   function callbacks(): ControlsCallbacks {
@@ -181,7 +183,7 @@ describe("AppImpl", () => {
     };
     simulation.snapshot.mockReturnValue(boostedSnapshot);
     engagementFrameComposer.compose.mockReturnValue(view);
-    app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
+    app = new AppImpl({ controls, simulation, droneSimulator, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, { shipA: { kind: "turret", optimal: 6000, falloff: 4000 }, shipB: { kind: "turret", optimal: 6000, falloff: 4000 } }, []);
     expect(controls.update).toHaveBeenCalledWith(view, {
@@ -193,7 +195,7 @@ describe("AppImpl", () => {
   test("falls back to the view's effective weapon when the composer returns no assessment", () => {
     const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret } };
     engagementFrameComposer.compose.mockReturnValue(view);
-    app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
+    app = new AppImpl({ controls, simulation, droneSimulator, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, []);
     expect(controls.update).toHaveBeenCalledWith(view, {
@@ -206,7 +208,8 @@ describe("AppImpl", () => {
     app.start();
     app.tick(0.1);
     expect(simulation.step).toHaveBeenCalledWith(0.1);
-    expect(engagementFrameComposer.compose).toHaveBeenCalledTimes(2);
+    expect(droneSimulator.step).toHaveBeenCalledWith(0.1, frame);
+    expect(engagementFrameComposer.compose).toHaveBeenCalledTimes(3);
     expect(renderer.draw).toHaveBeenCalledTimes(2);
   });
 
@@ -319,7 +322,7 @@ describe("AppImpl", () => {
     engagementFrameComposer.compose.mockReturnValue(droneView);
     controls.getWeapon.mockReturnValue(drone);
     controls.getWeapons.mockReturnValue([drone]);
-    app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
+    app = new AppImpl({ controls, simulation, droneSimulator, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "drone", optimal: 1000, falloff: 500 }, shipB: { kind: "drone", optimal: 1000, falloff: 500 } }, []);
     expect(controls.update).toHaveBeenCalledWith(droneView, {
