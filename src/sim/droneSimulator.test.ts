@@ -25,10 +25,11 @@ interface TestGroupState {
   mode: DroneMode;
   distanceToTarget: number;
   inControlRange: boolean;
+  deployed: boolean;
 }
 
 function makeGroup(spec: DroneSpec, position: Vec2, mode: DroneMode): TestGroupState {
-  return { spec, position, mode, distanceToTarget: 0, inControlRange: false };
+  return { spec, position, mode, distanceToTarget: 0, inControlRange: false, deployed: false };
 }
 
 describe("DroneSimulatorImpl", () => {
@@ -151,15 +152,17 @@ describe("DroneSimulatorImpl", () => {
     expect(states[1].position.x).toBeCloseTo(6000, 0);
   });
 
-  test("sentry drones stay at ship position with orbiting mode", () => {
+  test("sentry drones deploy at initial ship position and stay fixed", () => {
     const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [sentryDrone()], shipB: [] });
-    const shipPos = new Vec2(1000, 2000);
+    const deployPos = new Vec2(1000, 2000);
     const targetPos = new Vec2(50000, 0);
-    sim.step(0.1, frame(shipPos, targetPos));
-    const states = sim.states("shipA");
-    expect(states[0].mode).toBe("orbiting");
-    expect(states[0].position).toEqual(shipPos);
+    sim.step(0.1, frame(deployPos, targetPos));
+    expect(sim.states("shipA")[0].position).toEqual(deployPos);
+    const shipMoved = new Vec2(5000, 5000);
+    sim.step(0.1, frame(shipMoved, targetPos));
+    expect(sim.states("shipA")[0].position).toEqual(deployPos);
+    expect(sim.states("shipA")[0].distanceToTarget).toBeCloseTo(deployPos.dist(targetPos), 0);
   });
 
   test("sentry drones report inControlRange based on ship-to-target distance", () => {
@@ -208,14 +211,25 @@ describe("_moveToward", () => {
 });
 
 describe("_stepSentry", () => {
-  test("places sentry at ship position with orbiting mode", () => {
+  test("deploys sentry at ship position on first step", () => {
     const group = makeGroup(sentryDrone(), new Vec2(0, 0), "idle");
     const shipPos = new Vec2(100, 200);
     const targetPos = new Vec2(50000, 0);
-    _stepSentry(group, shipPos, targetPos, true);
+    _stepSentry(group, shipPos, targetPos);
     expect(group.mode).toBe("orbiting");
     expect(group.position).toEqual(shipPos);
     expect(group.distanceToTarget).toBeCloseTo(shipPos.dist(targetPos), 0);
+  });
+
+  test("sentry stays at deployed position when ship moves", () => {
+    const group = makeGroup(sentryDrone(), new Vec2(0, 0), "idle");
+    const deployPos = new Vec2(100, 200);
+    const targetPos = new Vec2(50000, 0);
+    _stepSentry(group, deployPos, targetPos);
+    const shipMoved = new Vec2(5000, 5000);
+    _stepSentry(group, shipMoved, targetPos);
+    expect(group.position).toEqual(deployPos);
+    expect(group.distanceToTarget).toBeCloseTo(deployPos.dist(targetPos), 0);
   });
 });
 

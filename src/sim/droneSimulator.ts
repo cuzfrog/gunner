@@ -18,6 +18,7 @@ interface DroneGroupState {
   mode: DroneMode;
   distanceToTarget: number;
   inControlRange: boolean;
+  deployed: boolean;
 }
 
 export class DroneSimulatorImpl implements DroneSimulator {
@@ -43,7 +44,7 @@ export class DroneSimulatorImpl implements DroneSimulator {
 }
 
 function createGroupState(spec: DroneSpec): DroneGroupState {
-  return { spec, position: new Vec2(0, 0), mode: "idle", distanceToTarget: 0, inControlRange: false };
+  return { spec, position: new Vec2(0, 0), mode: "idle", distanceToTarget: 0, inControlRange: false, deployed: false };
 }
 
 function stepSide(groups: DroneGroupState[], shipPos: Vec2, targetPos: Vec2, shipToTargetDistance: number, dt: number): void {
@@ -53,17 +54,20 @@ function stepSide(groups: DroneGroupState[], shipPos: Vec2, targetPos: Vec2, shi
     group.inControlRange = inControlRange;
 
     if (group.spec.isSentry) {
-      stepSentry(group, shipPos, targetPos, inControlRange);
+      stepSentry(group, shipPos, targetPos);
     } else {
       stepCombatDrone(group, shipPos, targetPos, inControlRange, dt);
     }
   }
 }
 
-function stepSentry(group: DroneGroupState, shipPos: Vec2, targetPos: Vec2, inControlRange: boolean): void {
-  group.position = shipPos;
+function stepSentry(group: DroneGroupState, shipPos: Vec2, targetPos: Vec2): void {
+  if (!group.deployed) {
+    group.position = shipPos;
+    group.deployed = true;
+  }
   group.mode = "orbiting";
-  group.distanceToTarget = shipPos.dist(targetPos);
+  group.distanceToTarget = group.position.dist(targetPos);
 }
 
 function stepCombatDrone(group: DroneGroupState, shipPos: Vec2, targetPos: Vec2, inControlRange: boolean, dt: number): void {
