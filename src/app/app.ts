@@ -174,8 +174,8 @@ export class AppImpl implements App {
 
   private missileRenderInfo(): MissileRenderCollection {
     return {
-      shipA: this.missileSimulator.states("shipA").map((m) => ({ position: m.position, trail: m.trail })),
-      shipB: this.missileSimulator.states("shipB").map((m) => ({ position: m.position, trail: m.trail })),
+      shipA: this.missileSimulator.states("shipA").map((m) => ({ position: m.position, velocity: m.velocity, trail: m.trail })),
+      shipB: this.missileSimulator.states("shipB").map((m) => ({ position: m.position, velocity: m.velocity, trail: m.trail })),
     };
   }
 

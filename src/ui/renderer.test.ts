@@ -12,11 +12,13 @@ function fakeI18n(): I18n {
   };
 }
 
-function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[]; arcs: number[][]; dashes: number[][]; fillTexts: string[] } {
+function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[]; arcs: number[][]; dashes: number[][]; fillTexts: string[]; moveTos: number[][]; lineTos: number[][] } {
   const strokeStyles: string[] = [];
   const arcs: number[][] = [];
   const dashes: number[][] = [];
   const fillTexts: string[] = [];
+  const moveTos: number[][] = [];
+  const lineTos: number[][] = [];
   const methods = [
     "fillRect",
     "strokeRect",
@@ -39,6 +41,8 @@ function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[]; arc
     arcs,
     dashes,
     fillTexts,
+    moveTos,
+    lineTos,
     strokeStyle: "",
     fillStyle: "",
     lineWidth: 0,
@@ -50,6 +54,8 @@ function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[]; arc
     shipB[method] = () => {};
   }
   shipB.arc = (...args: number[]) => arcs.push(args);
+  shipB.moveTo = (...args: number[]) => moveTos.push(args);
+  shipB.lineTo = (...args: number[]) => lineTos.push(args);
   shipB.setLineDash = (dash: number[]) => dashes.push(dash);
   shipB.fillText = (text: string) => fillTexts.push(text);
   shipB.measureText = () => ({ width: 0 });
@@ -62,7 +68,7 @@ function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[]; arc
       o[p as string] = v;
       return true;
     },
-  }) as unknown as CanvasRenderingContext2D & { strokeStyles: string[]; arcs: number[][]; dashes: number[][]; fillTexts: string[] };
+  }) as unknown as CanvasRenderingContext2D & { strokeStyles: string[]; arcs: number[][]; dashes: number[][]; fillTexts: string[]; moveTos: number[][]; lineTos: number[][] };
 }
 
 function fakeCanvas(clientWidth = 0, clientHeight = 0): HTMLCanvasElement {
@@ -430,23 +436,23 @@ describe("CanvasRenderer", () => {
   });
 
   describe("missile markers", () => {
-    test("draws one filled arc per missile position", () => {
+    test("draws one short line per missile position oriented along velocity", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       const missileInfo = {
-        shipA: [{ position: new Vec2(1000, 0), trail: [new Vec2(900, 0), new Vec2(950, 0)] }],
-        shipB: [{ position: new Vec2(2000, 0), trail: [] }],
+        shipA: [{ position: new Vec2(1000, 0), velocity: new Vec2(3000, 0), trail: [new Vec2(900, 0), new Vec2(950, 0)] }],
+        shipB: [{ position: new Vec2(2000, 0), velocity: new Vec2(0, 3000), trail: [] }],
       };
       renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] }, missileInfo);
-      const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
+      const ctx = canvas.getContext("2d") as unknown as { moveTos: number[][]; lineTos: number[][] };
       const scale = scaleOf(renderer);
       const camera = (renderer as unknown as { camera: { center: Vec2; scale: number } }).camera;
       const expectedAx = canvas.width / 2 + (1000 - camera.center.x) * scale;
       const expectedAy = canvas.height / 2 - (0 - camera.center.y) * scale;
       const expectedBx = canvas.width / 2 + (2000 - camera.center.x) * scale;
       const expectedBy = canvas.height / 2 - (0 - camera.center.y) * scale;
-      expect(ctx.arcs.some((a) => Math.abs(a[0] - expectedAx) < 1 && Math.abs(a[1] - expectedAy) < 1)).toBe(true);
-      expect(ctx.arcs.some((a) => Math.abs(a[0] - expectedBx) < 1 && Math.abs(a[1] - expectedBy) < 1)).toBe(true);
+      expect(ctx.lineTos.some((l) => Math.abs(l[0] - expectedAx) < 1 && Math.abs(l[1] - expectedAy) < 1)).toBe(true);
+      expect(ctx.lineTos.some((l) => Math.abs(l[0] - expectedBx) < 1 && Math.abs(l[1] - expectedBy) < 1)).toBe(true);
     });
 
     test("draws no missile markers when missileInfo is undefined", () => {
@@ -454,8 +460,7 @@ describe("CanvasRenderer", () => {
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] });
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
-      const missileArcs = ctx.arcs.filter((a) => a[2] === 2);
-      expect(missileArcs).toHaveLength(0);
+      expect(ctx.arcs.filter((a) => a[2] === 2)).toHaveLength(0);
     });
   });
 });

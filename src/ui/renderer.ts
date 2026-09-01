@@ -44,6 +44,7 @@ export interface DroneRenderInfo {
 
 export interface MissileRenderInfo {
   readonly position: Vec2;
+  readonly velocity: Vec2;
   readonly trail: readonly Vec2[];
 }
 
@@ -330,10 +331,15 @@ export class CanvasRenderer implements Renderer {
       this.ctx.stroke();
       this.ctx.globalAlpha = 1;
     }
-    this.ctx.fillStyle = color;
+    const speed = missile.velocity.len();
+    const dir = speed > 0 ? missile.velocity.scale(1 / speed) : new Vec2(1, 0);
+    const tail = p.sub(dir.scale(MISSILE_ICON_SIZE));
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 1.5;
     this.ctx.beginPath();
-    this.ctx.arc(p.x, p.y, MISSILE_ICON_SIZE, 0, Math.PI * 2);
-    this.ctx.fill();
+    this.ctx.moveTo(tail.x, tail.y);
+    this.ctx.lineTo(p.x, p.y);
+    this.ctx.stroke();
   }
 
   private drawDroneMarker(position: Vec2, color: string): void {
