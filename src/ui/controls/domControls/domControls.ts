@@ -27,6 +27,7 @@ import type { RangeOverlay } from "../../renderer";
 import type { WeaponRangeVisibility } from "../../../appstate";
 import type { RangeOverlayController } from "../rangeOverlay";
 import type { PortraitsController } from "../portraits";
+import type { HoverHintController } from "../hoverHint";
 
 export type { Controls, ControlsCallbacks } from "../controlsContract";
 
@@ -59,6 +60,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   shareController: ShareController;
   rangeOverlayController: RangeOverlayController;
   portraitsController: PortraitsController;
+  hoverHintController: HoverHintController;
   previewManager: FittingPreviewManager;
   simConfigSource: SimConfigSource;
 }
@@ -88,6 +90,7 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   private readonly shareController: ShareController;
   private readonly rangeOverlayController: RangeOverlayController;
   private readonly portraitsController: PortraitsController;
+  private readonly hoverHintController: HoverHintController;
   private readonly previewManager: FittingPreviewManager;
   private readonly simConfigSource: SimConfigSource;
   private readonly now: () => number;
@@ -121,6 +124,7 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     this.shareController = all.shareController;
     this.rangeOverlayController = all.rangeOverlayController;
     this.portraitsController = all.portraitsController;
+    this.hoverHintController = all.hoverHintController;
     this.previewManager = all.previewManager;
     this.simConfigSource = all.simConfigSource;
     this.now = all.now;
@@ -275,6 +279,7 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     this.applyReadoutsIfReady();
     this.rangeOverlayController.update();
     this.portraitsController.update();
+    this.hoverHintController.refresh();
   }
   currentView(): EngagementView | undefined {
     return this.cachedReadouts?.view;

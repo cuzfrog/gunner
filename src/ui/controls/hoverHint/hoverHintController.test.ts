@@ -4,13 +4,21 @@ import type { HintContentProvider } from "./hintContentProvider";
 import { HoverHintControllerImpl } from "./hoverHintController";
 
 class ControllableTimer implements Timer {
-  private callback?: () => void;
-  setTimeout = vi.fn((cb: () => void): TimeoutId => { this.callback = cb; return 1; });
-  clearTimeout = vi.fn(() => { this.callback = undefined; });
+  private nextId = 1;
+  private callbacks = new Map<TimeoutId, () => void>();
+  setTimeout = vi.fn((cb: () => void): TimeoutId => { const id = this.nextId++; this.callbacks.set(id, cb); return id; });
+  clearTimeout = vi.fn((id: TimeoutId) => { this.callbacks.delete(id); });
   setInterval = vi.fn((): TimeoutId => 0);
   clearInterval = vi.fn();
-  fire(): void { this.callback?.(); }
-  hasPending(): boolean { return this.callback !== undefined; }
+  fire(): void {
+    let lastId: TimeoutId | undefined;
+    for (const id of this.callbacks.keys()) lastId = id;
+    if (lastId === undefined) return;
+    const cb = this.callbacks.get(lastId);
+    this.callbacks.delete(lastId);
+    cb?.();
+  }
+  hasPending(): boolean { return this.callbacks.size > 0; }
 }
 
 function dispatch(document: Document, type: string, target: unknown, relatedTarget: unknown = null): void {
@@ -71,9 +79,46 @@ describe("HoverHintControllerImpl", () => {
     dispatch(document, "pointerover", anchor);
     dispatch(document, "pointerout", anchor, null);
 
-    expect(timer.hasPending()).toBe(false);
+    expect(timer.hasPending()).toBe(true);
     expect(hintEl.hidden).toBe(true);
+    timer.fire();
+    expect(timer.hasPending()).toBe(false);
     expect(anchor.getAttribute("aria-describedby")).toBe(null);
+  });
+
+  test("deferred hide from null relatedTarget is cancelled by pointerover on same anchor", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    new HoverHintControllerImpl({ hintEl, timer });
+
+    dispatch(document, "pointerover", anchor);
+    dispatch(document, "pointerout", anchor, null);
+    dispatch(document, "pointerover", anchor);
+
+    expect(timer.hasPending()).toBe(true);
+    timer.fire();
+    expect(hintEl.hidden).toBe(false);
+    expect(hintEl.textContent).toBe("effect text");
+  });
+
+  test("scheduleShow does not reset timer when same anchor is hovered again", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    new HoverHintControllerImpl({ hintEl, timer });
+
+    dispatch(document, "pointerover", anchor);
+    const initialCallCount = timer.setTimeout.mock.calls.length;
+    dispatch(document, "pointerover", anchor);
+    dispatch(document, "pointerover", anchor);
+
+    expect(timer.setTimeout.mock.calls.length).toBe(initialCallCount);
+    expect(timer.hasPending()).toBe(true);
   });
 
   test("does not hide when pointer moves within the same anchor", () => {
@@ -374,8 +419,65 @@ describe("HoverHintControllerImpl", () => {
     timer.fire();
     dispatch(document, "pointerout", anchor, null);
 
+    expect(hintEl.hidden).toBe(false);
+    timer.fire();
     expect(hintEl.hidden).toBe(true);
     expect(anchor.getAttribute("aria-describedby")).toBe(null);
+  });
+
+  test("refresh re-renders current provider content", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint-content", "dps");
+    let value = "first";
+    const provider: HintContentProvider = { render: (_a, container) => { container.textContent = value; } };
+    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    controller.registerContentProvider("dps", provider);
+
+    dispatch(document, "focusin", anchor);
+    expect(hintEl.textContent).toBe("first");
+
+    value = "second";
+    controller.refresh();
+    expect(hintEl.textContent).toBe("second");
+  });
+
+  test("refresh is a no-op when no hint is shown", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
+    const provider: HintContentProvider = { render: vi.fn() };
+    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    controller.registerContentProvider("dps", provider);
+
+    controller.refresh();
+    expect(provider.render).not.toHaveBeenCalled();
+  });
+
+  test("refresh hides hint when provider render throws", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint-content", "dps");
+    let shouldThrow = false;
+    const provider: HintContentProvider = {
+      render: (_a, container) => {
+        if (shouldThrow) throw new Error("boom");
+        container.textContent = "ok";
+      },
+    };
+    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    controller.registerContentProvider("dps", provider);
+
+    dispatch(document, "focusin", anchor);
+    expect(hintEl.hidden).toBe(false);
+
+    shouldThrow = true;
+    controller.refresh();
+    expect(hintEl.hidden).toBe(true);
   });
 
   test("restores original aria-describedby on hide via provider path", () => {

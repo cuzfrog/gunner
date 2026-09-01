@@ -32,6 +32,7 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
       shareController: proxy.shareController,
       rangeOverlayController: proxy.rangeOverlayController,
       portraitsController: proxy.portraitsController,
+      hoverHintController: proxy.hoverHintController,
       previewManager: proxy.previewManager,
       simConfigSource: proxy.simConfigSource,
     })).singleton(),
