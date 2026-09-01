@@ -256,4 +256,57 @@ describe("DroneSimulatorImpl", () => {
     const pos = states[0].positions[0];
     expect(pos.x).toBeLessThan(shipBPos.x);
   });
+
+  test("orbiting drones re-approach when fast target outruns orbit speed", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
+    const shipPos = new Vec2(0, 0);
+    let targetPos = new Vec2(5000, 0);
+    for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos));
+    expect(sim.states("shipA")[0].mode).toBe("orbiting");
+    const targetSpeed = 2000;
+    let reApproached = false;
+    for (let i = 0; i < 100; i++) {
+      targetPos = new Vec2(targetPos.x + targetSpeed * 0.1, 0);
+      sim.step(0.1, frame(shipPos, targetPos));
+      if (sim.states("shipA")[0].mode === "approaching") reApproached = true;
+    }
+    expect(reApproached).toBe(true);
+  });
+
+  test("re-approaching drones catch up and re-enter orbiting", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
+    const shipPos = new Vec2(0, 0);
+    let targetPos = new Vec2(5000, 0);
+    for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos));
+    expect(sim.states("shipA")[0].mode).toBe("orbiting");
+    const targetSpeed = 2000;
+    let reApproached = false;
+    let reOrbited = false;
+    for (let i = 0; i < 100; i++) {
+      targetPos = new Vec2(targetPos.x + targetSpeed * 0.1, 0);
+      sim.step(0.1, frame(shipPos, targetPos));
+      const mode = sim.states("shipA")[0].mode;
+      if (mode === "approaching") reApproached = true;
+      if (reApproached && mode === "orbiting") reOrbited = true;
+    }
+    expect(reApproached).toBe(true);
+    expect(reOrbited).toBe(true);
+  });
+
+  test("drones do not re-approach when target is slow", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
+    const shipPos = new Vec2(0, 0);
+    let targetPos = new Vec2(5000, 0);
+    for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos));
+    expect(sim.states("shipA")[0].mode).toBe("orbiting");
+    const targetSpeed = 100;
+    for (let i = 0; i < 200; i++) {
+      targetPos = new Vec2(targetPos.x + targetSpeed * 0.1, 0);
+      sim.step(0.1, frame(shipPos, targetPos));
+    }
+    expect(sim.states("shipA")[0].mode).toBe("orbiting");
+  });
 });

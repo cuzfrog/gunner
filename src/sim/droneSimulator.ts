@@ -32,6 +32,7 @@ const DEPLOY_RADIUS = 1000;
 const DRONE_ACCEL_TAU = 1.0;
 const SEPARATION_RADIUS = 300;
 const SEPARATION_GAIN = 3.0;
+const RE_ENGAGE_FACTOR = 1.5;
 
 export class DroneSimulatorImpl implements DroneSimulator {
   private groups: Record<Side, DroneGroupState[]> = { shipA: [], shipB: [] };
@@ -119,6 +120,7 @@ function stepCombatDrone(group: DroneGroupState, shipPos: Vec2, targetPos: Vec2,
     group.orbitAngle += angularVelocity * dt;
     orbitDrones(group.drones, targetPos, orbitRange, group.spec.orbitSpeed, group.orbitAngle, dt);
     group.distanceToTarget = averageDistance(group.drones, targetPos);
+    if (group.distanceToTarget > orbitRange * RE_ENGAGE_FACTOR) group.mode = "approaching";
   }
 }
 
@@ -158,11 +160,11 @@ function orbitDrones(drones: DroneBody[], targetPos: Vec2, orbitRange: number, o
     const toDesired = desiredPos.sub(drone.position);
     const dist = toDesired.len();
     if (dist <= 1) { drone.position = desiredPos; continue; }
-    const speed = Math.min(orbitSpeed, dist / dt);
-    const desired = toDesired.norm().scale(speed);
+    const desired = toDesired.norm().scale(orbitSpeed);
     drone.velocity = accelerateToward(drone.velocity, desired, dt);
+    const maxStep = orbitSpeed * dt;
     const step = drone.velocity.scale(dt);
-    if (step.len() >= dist) drone.position = desiredPos;
+    if (step.len() > maxStep) drone.position = drone.position.add(step.norm().scale(maxStep));
     else drone.position = drone.position.add(step);
   }
 }
