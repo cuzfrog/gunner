@@ -190,6 +190,22 @@ describe("MissileSimulatorImpl", () => {
     expect(sim.states("shipA").filter((m) => m.weaponIndex === 0)).toHaveLength(0);
   });
 
+  test("missile expires when it has traveled flightRange from launch position", () => {
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    const longFlightMissile: MissileSpec = { ...lightMissile, flightTime: 30, flightRange: 3750 * 30 };
+    sim.reset({ shipA: [longFlightMissile], shipB: [] });
+    const farTarget = new Vec2(1000000, 0);
+    const launches = { shipA: [launchSpec(0, longFlightMissile, 40)], shipB: [] };
+    const noLaunches = { shipA: [], shipB: [] };
+    sim.step(0.1, frame(new Vec2(0, 0), farTarget), launches);
+    expect(sim.states("shipA")).toHaveLength(1);
+    for (let i = 0; i < 500; i++) {
+      sim.step(0.1, frame(new Vec2(0, 0), farTarget), noLaunches);
+    }
+    const remaining = sim.states("shipA").filter((m) => m.weaponIndex === 0);
+    expect(remaining).toHaveLength(0);
+  });
+
   test("tracks multiple weapon indices independently", () => {
     const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile, heavyMissile], shipB: [] });
@@ -241,12 +257,14 @@ describe("MissileSimulatorImpl", () => {
     expect(facts.interceptable).toBe(true);
   });
 
-  test("predicted application is zero when not interceptable", () => {
+  test("predicted application is zero when not interceptable but velocity term is still computed", () => {
     const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
-    sim.step(0.1, frame(new Vec2(0, 0), new Vec2(100000, 0)), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
-    expect(sim.facts("shipA", 0).predicted.application).toBe(0);
-    expect(sim.facts("shipA", 0).interceptable).toBe(false);
+    sim.step(0.1, frame(new Vec2(0, 0), new Vec2(100000, 0), new Vec2(0, 0), new Vec2(0, 500), 0, 1000), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
+    const facts = sim.facts("shipA", 0);
+    expect(facts.predicted.application).toBe(0);
+    expect(facts.interceptable).toBe(false);
+    expect(facts.predicted.velocityTerm).toBeLessThan(1);
   });
 
   test("predicted application decreases for fast-moving target", () => {

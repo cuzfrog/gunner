@@ -25,6 +25,7 @@ const NO_APPLICATION: MissileApplicationResult = { application: 0, signatureTerm
 
 interface MissileBody {
   position: Vec2;
+  launchPos: Vec2;
   velocity: Vec2;
   fuel: number;
   trail: Vec2[];
@@ -89,7 +90,7 @@ export class MissileSimulatorImpl implements MissileSimulator {
     const interceptable = spec ? distance <= spec.flightRange : false;
     const eta = spec && spec.maxVelocity > 0 ? distance / spec.maxVelocity : 0;
     const nearestTimeToImpact = inFlight.length > 0 ? minTimeToImpact(inFlight, this.targetPos(side)) : eta;
-    const predicted = interceptable && spec ? this.predictApplication(state, spec, weaponIndex, eta) : NO_APPLICATION;
+    const predicted = spec ? this.predictApplication(state, spec, weaponIndex, eta, interceptable) : NO_APPLICATION;
     return { inFlightCount: inFlight.length, nearestTimeToImpact, predicted, interceptable };
   }
 
@@ -126,6 +127,7 @@ export class MissileSimulatorImpl implements MissileSimulator {
     for (const missile of state.entities) {
       missile.fuel -= dt;
       if (missile.fuel <= 0) continue;
+      if (missile.position.dist(missile.launchPos) >= missile.spec.flightRange) continue;
       const toTarget = targetPos.sub(missile.position);
       const dist = toTarget.len();
       if (dist <= missile.paintedSig) continue;
@@ -140,13 +142,14 @@ export class MissileSimulatorImpl implements MissileSimulator {
     state.entities = survivors;
   }
 
-  private predictApplication(state: SideState, spec: MissileSpec, weaponIndex: number, eta: number): MissileApplicationResult {
+  private predictApplication(state: SideState, spec: MissileSpec, weaponIndex: number, eta: number, interceptable: boolean): MissileApplicationResult {
     const paintedSig = state.lastPaintedSig.get(weaponIndex) ?? 0;
     if (paintedSig <= 0) return NO_APPLICATION;
-    const currentSpeed = state.lastTargetVelocity.len();
     const predictedVel = state.lastTargetVelocity.add(state.targetAcceleration.scale(eta));
     const predictedSpeed = Math.min(predictedVel.len(), state.lastTargetMaxSpeed);
-    return this.application.compute(spec, predictedSpeed, paintedSig);
+    const result = this.application.compute(spec, predictedSpeed, paintedSig);
+    if (!interceptable) return { application: 0, signatureTerm: result.signatureTerm, velocityTerm: result.velocityTerm };
+    return result;
   }
 
   private targetPos(side: Side): Vec2 {
@@ -163,7 +166,7 @@ function emptySide(): SideState {
 }
 
 function createMissile(shipPos: Vec2, launch: MissileLaunchSpec): MissileBody {
-  return { position: shipPos, velocity: new Vec2(0, 0), fuel: launch.boosted.flightTime, trail: [], weaponIndex: launch.weaponIndex, spec: launch.boosted, paintedSig: launch.paintedTargetSig };
+  return { position: shipPos, launchPos: shipPos, velocity: new Vec2(0, 0), fuel: launch.boosted.flightTime, trail: [], weaponIndex: launch.weaponIndex, spec: launch.boosted, paintedSig: launch.paintedTargetSig };
 }
 
 function accelerateToward(current: Vec2, desired: Vec2, dt: number): Vec2 {
