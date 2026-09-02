@@ -10,10 +10,10 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 11px;
+  gap: 10px;
   border-bottom: 1px solid var(--border-dim);
   margin-bottom: 4px;
-  padding-bottom: 9px;
+  padding-bottom: 8px;
 }
 
 .app-header-left {
@@ -24,7 +24,7 @@
 }
 
 .app-version-text {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-dim);
 }
 
@@ -32,13 +32,13 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 11px;
+  gap: 10px;
 }
 
 .app-title {
   margin: 0;
   font-family: "Chakra Petch", sans-serif;
-  font-size: 22px;
+  font-size: 20px;
   color: var(--accent-teal);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -46,7 +46,7 @@
 
 .app-subtitle {
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .app-lang-toggle {
@@ -55,7 +55,8 @@
 }
 
 .app-lang-toggle > .btn {
-  font-size: 13px;
+  font-size: 12px;
+  min-height: 24px;
   white-space: nowrap;
 }
 
