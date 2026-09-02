@@ -43,8 +43,8 @@ const controls = vi.mocked<Controls>({
   setCallbacks: vi.fn(),
 });
 const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
-const droneSimulator = vi.mocked<DroneSimulator>({ reset: vi.fn(), step: vi.fn(), states: vi.fn(() => []) });
-const missileSimulator = vi.mocked<MissileSimulator>({ reset: vi.fn(), step: vi.fn(), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, smoothedApplication: 0, interceptable: false })) });
+const droneSimulator = vi.mocked<DroneSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), states: vi.fn(() => []) });
+const missileSimulator = vi.mocked<MissileSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, smoothedApplication: 0, interceptable: false })) });
 const missileBoosterResolver = vi.mocked<MissileBoosterResolver>({ boostedMissile: vi.fn((m) => m) });
 const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn() });
 const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setDroneRangeVisibility: vi.fn(), setDroneControlRangeVisibility: vi.fn(), setManualZoom: vi.fn() });
@@ -231,8 +231,14 @@ describe("AppImpl", () => {
 
   test("config change updates the simulation and renders without restarting the loop", () => {
     app.start();
+    droneSimulator.reset.mockClear();
+    missileSimulator.reset.mockClear();
     callbacks().onConfigChange();
     expect(simulation.update).toHaveBeenCalledWith(config);
+    expect(droneSimulator.update).toHaveBeenCalled();
+    expect(missileSimulator.update).toHaveBeenCalled();
+    expect(droneSimulator.reset).not.toHaveBeenCalled();
+    expect(missileSimulator.reset).not.toHaveBeenCalled();
     expect(loop.reset).not.toHaveBeenCalled();
     expect(renderer.draw).toHaveBeenCalledTimes(2);
   });

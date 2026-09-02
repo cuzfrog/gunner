@@ -14,6 +14,7 @@ import type {
 
 export interface MissileSimulator {
   reset(config: MissileSimConfig): void;
+  update(config: MissileSimConfig): void;
   step(dt: number, frame: EngagementFrame, launches: Record<Side, readonly MissileLaunchSpec[]>): void;
   states(side: Side): readonly MissileRuntimeState[];
   facts(side: Side, weaponIndex: number): MissileAttackFacts;
@@ -64,6 +65,10 @@ export class MissileSimulatorImpl implements MissileSimulator {
   reset(_config: MissileSimConfig): void {
     this.sides = { shipA: emptySide(), shipB: emptySide() };
     this.time = 0;
+  }
+
+  update(_config: MissileSimConfig): void {
+    // Weapon specs are pushed per-step via launches; no state needs to change on config update.
   }
 
   step(dt: number, frame: EngagementFrame, launches: Record<Side, readonly MissileLaunchSpec[]>): void {

@@ -53,8 +53,8 @@ export class AppImpl implements App {
       },
       onConfigChange: () => {
         this.simulation.update(this.controls.getConfig());
-        this.droneSimulator.reset(this.droneSimConfig());
-        this.missileSimulator.reset(this.missileSimConfig());
+        this.droneSimulator.update(this.droneSimConfig());
+        this.missileSimulator.update(this.missileSimConfig());
         this.renderFrame();
       },
       onDisplayChange: () => this.renderFrame(),

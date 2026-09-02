@@ -3,6 +3,7 @@ import type { DroneMode, DroneRuntimeState, DroneSpec, EngagementFrame, Side } f
 
 export interface DroneSimulator {
   reset(config: DroneSimConfig): void;
+  update(config: DroneSimConfig): void;
   step(dt: number, frame: EngagementFrame): void;
   states(side: Side): readonly DroneRuntimeState[];
 }
@@ -46,6 +47,13 @@ export class DroneSimulatorImpl implements DroneSimulator {
     };
   }
 
+  update(config: DroneSimConfig): void {
+    this.groups = {
+      shipA: mergeGroups(this.groups.shipA, config.shipA),
+      shipB: mergeGroups(this.groups.shipB, config.shipB),
+    };
+  }
+
   step(dt: number, frame: EngagementFrame): void {
     stepSide(this.groups.shipA, frame.shipA.position, frame.shipB.position, frame.distance, dt);
     stepSide(this.groups.shipB, frame.shipB.position, frame.shipA.position, frame.distance, dt);
@@ -61,6 +69,14 @@ function createGroupState(spec: DroneSpec): DroneGroupState {
   const drones: DroneBody[] = [];
   for (let i = 0; i < count; i++) drones.push({ position: new Vec2(0, 0), velocity: new Vec2(0, 0), orbitPhase: (i / count) * Math.PI * 2 });
   return { spec, drones, mode: "idle", distanceToTarget: 0, distanceToSlot: 0, inControlRange: false, deployed: false, orbitAngle: 0 };
+}
+
+function mergeGroups(existing: DroneGroupState[], specs: readonly DroneSpec[]): DroneGroupState[] {
+  return specs.map((spec, i) => {
+    const prev = existing[i];
+    if (!prev || prev.spec.droneCount !== spec.droneCount) return createGroupState(spec);
+    return { ...prev, spec };
+  });
 }
 
 function stepSide(groups: DroneGroupState[], shipPos: Vec2, targetPos: Vec2, shipToTargetDistance: number, dt: number): void {
