@@ -42,13 +42,24 @@ export interface DroneRenderInfo {
   readonly shipB: readonly DroneGroupRenderInfo[];
 }
 
+export interface MissileRenderInfo {
+  readonly position: Vec2;
+  readonly velocity: Vec2;
+  readonly trail: readonly Vec2[];
+}
+
+export interface MissileRenderCollection {
+  readonly shipA: readonly MissileRenderInfo[];
+  readonly shipB: readonly MissileRenderInfo[];
+}
+
 export interface Renderer {
   setGridBrightness(brightness: number): void;
   setWeaponRangeVisibility(visibility: WeaponRangeVisibility): void;
   setDroneRangeVisibility(visibility: WeaponRangeVisibility): void;
   setDroneControlRangeVisibility(visibility: WeaponRangeVisibility): void;
   setManualZoom(autoZoom: boolean, factor: number): void;
-  draw(snapshot: SimSnapshot, frame: EngagementFrame, ranges: WeaponRanges, overlays: readonly RangeOverlay[], droneInfo: DroneRenderInfo): void;
+  draw(snapshot: SimSnapshot, frame: EngagementFrame, ranges: WeaponRanges, overlays: readonly RangeOverlay[], droneInfo: DroneRenderInfo, missileInfo?: MissileRenderCollection): void;
 }
 
 const COLORS = {
@@ -87,6 +98,7 @@ const ZOOM_OUT_MARGIN_PX = 80; // keep ships this far from the canvas edge befor
 const MAX_ZOOM_FACTOR = 3; // relative to the far-range fit scale
 const SHIP_ICON_SIZE = 8;
 const DRONE_ICON_SIZE = 2.5;
+const MISSILE_ICON_SIZE = 2;
 const DIRECTION_LINE_LENGTH = SHIP_ICON_SIZE * 4; // 2x the icon's 16px nose-to-tail length
 
 interface Camera {
@@ -136,7 +148,7 @@ export class CanvasRenderer implements Renderer {
     if (Number.isFinite(factor)) this.zoomFactor = Math.max(0.25, Math.min(4, factor));
   }
 
-  draw(snapshot: SimSnapshot, frame: EngagementFrame, ranges: WeaponRanges, overlays: readonly RangeOverlay[], droneInfo: DroneRenderInfo): void {
+  draw(snapshot: SimSnapshot, frame: EngagementFrame, ranges: WeaponRanges, overlays: readonly RangeOverlay[], droneInfo: DroneRenderInfo, missileInfo?: MissileRenderCollection): void {
     this.syncBufferSize();
     this.updateCamera(snapshot, ranges);
     this.clear();
@@ -154,6 +166,7 @@ export class CanvasRenderer implements Renderer {
     this.drawShip(snapshot.shipA, COLORS.shipA);
     this.drawShip(snapshot.shipB, COLORS.shipB);
     this.drawDrones(droneInfo);
+    if (missileInfo) this.drawMissiles(missileInfo);
     this.drawSpeedLabel(snapshot.shipA, COLORS.shipA, -20);
     this.drawSpeedLabel(snapshot.shipB, COLORS.shipB, 20);
     this.drawReadouts(frame);
@@ -294,6 +307,39 @@ export class CanvasRenderer implements Renderer {
   private drawDrones(droneInfo: DroneRenderInfo): void {
     for (const group of droneInfo.shipA) for (const pos of group.positions) this.drawDroneMarker(pos, COLORS.shipA);
     for (const group of droneInfo.shipB) for (const pos of group.positions) this.drawDroneMarker(pos, COLORS.shipB);
+  }
+
+  private drawMissiles(missileInfo: MissileRenderCollection): void {
+    for (const m of missileInfo.shipA) this.drawMissile(m, COLORS.shipA);
+    for (const m of missileInfo.shipB) this.drawMissile(m, COLORS.shipB);
+  }
+
+  private drawMissile(missile: MissileRenderInfo, color: string): void {
+    const p = this.worldToScreen(missile.position);
+    if (missile.trail.length > 1) {
+      this.ctx.strokeStyle = color;
+      this.ctx.lineWidth = 1;
+      this.ctx.globalAlpha = 0.5;
+      this.ctx.beginPath();
+      const first = this.worldToScreen(missile.trail[0]);
+      this.ctx.moveTo(first.x, first.y);
+      for (let i = 1; i < missile.trail.length; i++) {
+        const t = this.worldToScreen(missile.trail[i]);
+        this.ctx.lineTo(t.x, t.y);
+      }
+      this.ctx.lineTo(p.x, p.y);
+      this.ctx.stroke();
+      this.ctx.globalAlpha = 1;
+    }
+    const speed = missile.velocity.len();
+    const dir = speed > 0 ? missile.velocity.scale(1 / speed) : new Vec2(1, 0);
+    const tail = p.sub(dir.scale(MISSILE_ICON_SIZE));
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 1.5;
+    this.ctx.beginPath();
+    this.ctx.moveTo(tail.x, tail.y);
+    this.ctx.lineTo(p.x, p.y);
+    this.ctx.stroke();
   }
 
   private drawDroneMarker(position: Vec2, color: string): void {

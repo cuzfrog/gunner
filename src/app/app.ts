@@ -1,6 +1,6 @@
 import { Vec2 } from "../sim";
-import type { DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, ShipState, Side, Simulation, WeaponSpec } from "../sim";
-import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, Renderer, WeaponRange, WeaponRanges } from "../ui";
+import type { DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, MissileAttackFacts, MissileBoosterResolver, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, ShipState, Side, Simulation, WeaponSpec } from "../sim";
+import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, MissileRenderCollection, Renderer, WeaponRange, WeaponRanges } from "../ui";
 
 export interface App {
   start(): void;
@@ -11,8 +11,10 @@ export class AppImpl implements App {
   private readonly controls: Controls;
   private readonly simulation: Simulation;
   private readonly droneSimulator: DroneSimulator;
+  private readonly missileSimulator: MissileSimulator;
   private readonly engagementFrameComposer: EngagementFrameComposer;
   private readonly ewarResolver: EwarResolver;
+  private readonly missileBoosterResolver: MissileBoosterResolver;
   private readonly renderer: Renderer;
   private readonly loop: Loop;
 
@@ -20,16 +22,20 @@ export class AppImpl implements App {
     controls: Controls;
     simulation: Simulation;
     droneSimulator: DroneSimulator;
+    missileSimulator: MissileSimulator;
     engagementFrameComposer: EngagementFrameComposer;
     ewarResolver: EwarResolver;
+    missileBoosterResolver: MissileBoosterResolver;
     renderer: Renderer;
     loop: Loop;
   }) {
     this.controls = deps.controls;
     this.simulation = deps.simulation;
     this.droneSimulator = deps.droneSimulator;
+    this.missileSimulator = deps.missileSimulator;
     this.engagementFrameComposer = deps.engagementFrameComposer;
     this.ewarResolver = deps.ewarResolver;
+    this.missileBoosterResolver = deps.missileBoosterResolver;
     this.renderer = deps.renderer;
     this.loop = deps.loop;
   }
@@ -41,12 +47,14 @@ export class AppImpl implements App {
       onReset: () => {
         this.simulation.reset(this.controls.getConfig());
         this.droneSimulator.reset(this.droneSimConfig());
+        this.missileSimulator.reset(this.missileSimConfig());
         this.loop.reset();
         this.renderFrame();
       },
       onConfigChange: () => {
         this.simulation.update(this.controls.getConfig());
-        this.droneSimulator.reset(this.droneSimConfig());
+        this.droneSimulator.update(this.droneSimConfig());
+        this.missileSimulator.update(this.missileSimConfig());
         this.renderFrame();
       },
       onDisplayChange: () => this.renderFrame(),
@@ -61,6 +69,7 @@ export class AppImpl implements App {
       onSpeedChange: (speed) => this.loop.setSpeed(speed),
     });
     this.droneSimulator.reset(this.droneSimConfig());
+    this.missileSimulator.reset(this.missileSimConfig());
     this.renderFrame();
   }
 
@@ -70,6 +79,7 @@ export class AppImpl implements App {
     const input = this.engagementInput(snapshot);
     const view = this.engagementFrameComposer.compose(snapshot, input);
     this.droneSimulator.step(dt, view.frame);
+    this.missileSimulator.step(dt, view.frame, this.missileLaunchSpecs(view));
     this.renderFrame();
   }
 
@@ -80,12 +90,56 @@ export class AppImpl implements App {
     };
   }
 
+  private missileSimConfig(): MissileSimConfig {
+    return {
+      shipA: missileSpecsFrom(this.controls.getWeapons("shipA")),
+      shipB: missileSpecsFrom(this.controls.getWeapons("shipB")),
+    };
+  }
+
   private engagementInput(snapshot: ReturnType<Simulation["snapshot"]>): EngagementInput {
     return {
       weapons: { shipA: this.controls.getWeapons("shipA"), shipB: this.controls.getWeapons("shipB") },
       sigRadii: { shipA: this.controls.getSig("shipA"), shipB: this.controls.getSig("shipB") },
       droneStates: { shipA: this.droneSimulator.states("shipA"), shipB: this.droneSimulator.states("shipB") },
+      missileFacts: { shipA: this.missileFactsFor("shipA"), shipB: this.missileFactsFor("shipB") },
     };
+  }
+
+  private missileFactsFor(side: Side): readonly MissileAttackFacts[] {
+    const weapons = this.controls.getWeapons(side);
+    const facts: MissileAttackFacts[] = [];
+    let missileIndex = 0;
+    for (const weapon of weapons) {
+      if (weapon.kind === "missile") {
+        facts.push(this.missileSimulator.facts(side, missileIndex));
+        missileIndex++;
+      }
+    }
+    return facts;
+  }
+
+  private missileLaunchSpecs(view: EngagementView): Record<Side, readonly MissileLaunchSpec[]> {
+    return {
+      shipA: this.buildLaunchSpecs("shipA", view),
+      shipB: this.buildLaunchSpecs("shipB", view),
+    };
+  }
+
+  private buildLaunchSpecs(side: Side, view: EngagementView): readonly MissileLaunchSpec[] {
+    const weapons = this.controls.getWeapons(side);
+    const shipState = side === "shipA" ? view.frame.shipA : view.frame.shipB;
+    const opponentSig = side === "shipA" ? this.controls.getSig("shipB") : this.controls.getSig("shipA");
+    const paintedSig = opponentSig * this.ewarResolver.sigMultiplier(shipState.ewar, view.frame.distance);
+    const specs: MissileLaunchSpec[] = [];
+    let missileIndex = 0;
+    for (const weapon of weapons) {
+      if (weapon.kind !== "missile") continue;
+      const boosted = this.missileBoosterResolver.boostedMissile(weapon, shipState.missileBoosts);
+      specs.push({ weaponIndex: missileIndex, boosted, paintedTargetSig: paintedSig });
+      missileIndex++;
+    }
+    return specs;
   }
 
   private renderFrame(): void {
@@ -100,7 +154,7 @@ export class AppImpl implements App {
     this.renderer.setDroneRangeVisibility(this.controls.getDroneRangeVisibility());
     this.renderer.setDroneControlRangeVisibility(this.controls.getDroneControlRangeVisibility());
     this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
-    this.renderer.draw(snapshot, view.frame, this.rendererWeaponRanges(view), this.controls.getOverlays(), this.droneRenderInfo());
+    this.renderer.draw(snapshot, view.frame, this.rendererWeaponRanges(view), this.controls.getOverlays(), this.droneRenderInfo(), this.missileRenderInfo());
     this.controls.update(view, effectiveReadouts);
   }
 
@@ -115,6 +169,13 @@ export class AppImpl implements App {
     return {
       shipA: droneGroupRenderInfo(this.droneSimulator.states("shipA"), droneSpecsFrom(this.controls.getWeapons("shipA"))),
       shipB: droneGroupRenderInfo(this.droneSimulator.states("shipB"), droneSpecsFrom(this.controls.getWeapons("shipB"))),
+    };
+  }
+
+  private missileRenderInfo(): MissileRenderCollection {
+    return {
+      shipA: this.missileSimulator.states("shipA").map((m) => ({ position: m.position, velocity: m.velocity, trail: m.trail })),
+      shipB: this.missileSimulator.states("shipB").map((m) => ({ position: m.position, velocity: m.velocity, trail: m.trail })),
     };
   }
 
@@ -180,6 +241,10 @@ export class AppImpl implements App {
 
 function droneSpecsFrom(weapons: readonly WeaponSpec[]): readonly DroneSpec[] {
   return weapons.filter((w): w is DroneSpec => w.kind === "drone");
+}
+
+function missileSpecsFrom(weapons: readonly WeaponSpec[]): readonly MissileSpec[] {
+  return weapons.filter((w): w is MissileSpec => w.kind === "missile");
 }
 
 function droneGroupRenderInfo(states: readonly DroneRuntimeState[], specs: readonly DroneSpec[]): readonly DroneGroupRenderInfo[] {

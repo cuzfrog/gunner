@@ -1,11 +1,12 @@
 import type { AttackAssessment, AttackState, EngagementEvaluator } from "./fireControl";
 import type { Kinematics } from "./kinematics";
-import type { DamageAssessment, DroneRuntimeState, EngagementFrame, Side, SimSnapshot, WeaponSpec } from "./types";
+import type { DamageAssessment, DroneRuntimeState, EngagementFrame, MissileAttackFacts, Side, SimSnapshot, WeaponSpec } from "./types";
 
 export interface EngagementInput {
   readonly weapons: Record<Side, readonly WeaponSpec[]>;
   readonly sigRadii: Record<Side, number>;
   readonly droneStates: Record<Side, readonly DroneRuntimeState[]>;
+  readonly missileFacts: Record<Side, readonly MissileAttackFacts[]>;
 }
 
 export interface WeaponAttack {
@@ -42,8 +43,8 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
     const shipBWeapons = input.weapons.shipB;
     if (shipAWeapons.length <= 1 && shipBWeapons.length <= 1) {
       const attacks = this.engagementEvaluator.evaluate(frame, {
-        shipA: shipAWeapons.length === 1 ? { weapon: shipAWeapons[0], opponentSigRadius: input.sigRadii.shipB, droneState: droneStateFor(input.droneStates.shipA, shipAWeapons[0], 0) } : undefined,
-        shipB: shipBWeapons.length === 1 ? { weapon: shipBWeapons[0], opponentSigRadius: input.sigRadii.shipA, droneState: droneStateFor(input.droneStates.shipB, shipBWeapons[0], 0) } : undefined,
+        shipA: shipAWeapons.length === 1 ? { weapon: shipAWeapons[0], opponentSigRadius: input.sigRadii.shipB, droneState: droneStateFor(input.droneStates.shipA, shipAWeapons[0], 0), missileFacts: missileFactsFor(input.missileFacts.shipA, shipAWeapons[0], 0) } : undefined,
+        shipB: shipBWeapons.length === 1 ? { weapon: shipBWeapons[0], opponentSigRadius: input.sigRadii.shipA, droneState: droneStateFor(input.droneStates.shipB, shipBWeapons[0], 0), missileFacts: missileFactsFor(input.missileFacts.shipB, shipBWeapons[0], 0) } : undefined,
       });
       const weaponAttacks: Record<Side, readonly WeaponAttack[]> = {
         shipA: weaponAttacksFrom(attacks.shipA, shipAWeapons[0]),
@@ -55,8 +56,8 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
       };
       return { frame, attacks, weaponAttacks, effectiveWeapons };
     }
-    const shipAResult = this.assessSide(frame, "shipA", shipAWeapons, input.sigRadii.shipB, input.droneStates.shipA);
-    const shipBResult = this.assessSide(frame, "shipB", shipBWeapons, input.sigRadii.shipA, input.droneStates.shipB);
+    const shipAResult = this.assessSide(frame, "shipA", shipAWeapons, input.sigRadii.shipB, input.droneStates.shipA, input.missileFacts.shipA);
+    const shipBResult = this.assessSide(frame, "shipB", shipBWeapons, input.sigRadii.shipA, input.droneStates.shipB, input.missileFacts.shipB);
     const attacks: Record<Side, AttackAssessment | undefined> = { shipA: shipAResult.combined, shipB: shipBResult.combined };
     const weaponAttacks: Record<Side, readonly WeaponAttack[]> = { shipA: shipAResult.weaponAttacks, shipB: shipBResult.weaponAttacks };
     const effectiveWeapons: Record<Side, WeaponSpec | undefined> = {
@@ -66,13 +67,16 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
     return { frame, attacks, weaponAttacks, effectiveWeapons };
   }
 
-  private assessSide(frame: EngagementFrame, side: Side, weapons: readonly WeaponSpec[], opponentSigRadius: number, droneStates: readonly DroneRuntimeState[]): { combined: AttackAssessment | undefined; weaponAttacks: readonly WeaponAttack[] } {
+  private assessSide(frame: EngagementFrame, side: Side, weapons: readonly WeaponSpec[], opponentSigRadius: number, droneStates: readonly DroneRuntimeState[], missileFacts: readonly MissileAttackFacts[]): { combined: AttackAssessment | undefined; weaponAttacks: readonly WeaponAttack[] } {
     const weaponAttacks: WeaponAttack[] = [];
     let droneIndex = 0;
+    let missileIndex = 0;
     for (const weapon of weapons) {
       const droneState = droneStateFor(droneStates, weapon, droneIndex);
+      const facts = missileFactsFor(missileFacts, weapon, missileIndex);
       if (weapon.kind === "drone") droneIndex++;
-      const assessment = this.engagementEvaluator.evaluate(frame, singleAttack(side, { weapon, opponentSigRadius, droneState }))[side];
+      if (weapon.kind === "missile") missileIndex++;
+      const assessment = this.engagementEvaluator.evaluate(frame, singleAttack(side, { weapon, opponentSigRadius, droneState, missileFacts: facts }))[side];
       if (assessment) weaponAttacks.push({ weapon, assessment });
     }
     if (weaponAttacks.length === 0) return { combined: undefined, weaponAttacks: [] };
@@ -106,4 +110,9 @@ function sumDamage(acc: DamageAssessment, weaponAttack: WeaponAttack): DamageAss
 function droneStateFor(states: readonly DroneRuntimeState[], weapon: WeaponSpec, index: number): DroneRuntimeState | undefined {
   if (weapon.kind !== "drone") return undefined;
   return states[index];
+}
+
+function missileFactsFor(facts: readonly MissileAttackFacts[], weapon: WeaponSpec, index: number): MissileAttackFacts | undefined {
+  if (weapon.kind !== "missile") return undefined;
+  return facts[index];
 }

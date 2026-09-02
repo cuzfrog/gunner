@@ -120,12 +120,44 @@ export interface TurretDamageBreakdown {
   readonly expectedMultiplier: number;
 }
 
+export interface MissileApplicationResult {
+  readonly application: number;
+  readonly signatureTerm: number; // S/E
+  readonly velocityTerm: number; // (S/E * Ve/Vt)^drf
+}
+
 export interface MissileDamageBreakdown {
   readonly application: number;
   readonly signatureTerm: number; // S/E
   readonly velocityTerm: number; // (S/E * Ve/Vt)^drfNorm
-  readonly inRange: boolean; // distance <= flightRange
-  readonly timeToImpact: number; // seconds
+  readonly inRange: boolean; // interceptable with remaining fuel
+  readonly timeToImpact: number; // seconds, nearest in-flight ETA
+}
+
+export interface MissileRuntimeState {
+  readonly position: Vec2;
+  readonly velocity: Vec2;
+  readonly trail: readonly Vec2[];
+  readonly side: Side;
+  readonly weaponIndex: number;
+}
+
+export interface MissileAttackFacts {
+  readonly inFlightCount: number;
+  readonly nearestTimeToImpact: number;
+  readonly predicted: MissileApplicationResult;
+  readonly interceptable: boolean;
+}
+
+export interface MissileLaunchSpec {
+  readonly weaponIndex: number;
+  readonly boosted: MissileSpec;
+  readonly paintedTargetSig: number;
+}
+
+export interface MissileSimConfig {
+  readonly shipA: readonly MissileSpec[];
+  readonly shipB: readonly MissileSpec[];
 }
 
 export interface DroneDamageBreakdown {

@@ -346,4 +346,30 @@ describe("DroneSimulatorImpl", () => {
       prevPos = new Vec2(pos.x, pos.y);
     }
   });
+
+  test("update preserves drone positions when spec count is unchanged", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [lightDrone({ optimal: 1000 })], shipB: [] });
+    const targetPos = new Vec2(5000, 0);
+    for (let i = 0; i < 100; i++) sim.step(0.1, frame(new Vec2(0, 0), targetPos));
+    const positionsBefore = sim.states("shipA")[0].positions.map((p) => new Vec2(p.x, p.y));
+    const modeBefore = sim.states("shipA")[0].mode;
+    sim.update({ shipA: [lightDrone({ optimal: 2000 })], shipB: [] });
+    const positionsAfter = sim.states("shipA")[0].positions;
+    expect(sim.states("shipA")[0].mode).toBe(modeBefore);
+    expect(positionsAfter).toHaveLength(positionsBefore.length);
+    for (let i = 0; i < positionsBefore.length; i++) {
+      expect(positionsAfter[i].x).toBeCloseTo(positionsBefore[i].x, 5);
+      expect(positionsAfter[i].y).toBeCloseTo(positionsBefore[i].y, 5);
+    }
+  });
+
+  test("update rebuilds group when drone count changes", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [lightDrone({ droneCount: 5 })], shipB: [] });
+    for (let i = 0; i < 100; i++) sim.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)));
+    sim.update({ shipA: [lightDrone({ droneCount: 3 })], shipB: [] });
+    expect(sim.states("shipA")[0].positions).toHaveLength(3);
+    expect(sim.states("shipA")[0].mode).toBe("idle");
+  });
 });

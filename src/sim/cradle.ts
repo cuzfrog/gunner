@@ -9,6 +9,7 @@ import type {
   Kinematics,
   MissileApplication,
   MissileBoosterResolver,
+  MissileSimulator,
   SimValueParser,
   Simulation,
   StackingPenalty,
@@ -28,6 +29,7 @@ export interface SimCradle {
   readonly missileApplication: MissileApplication;
   readonly droneApplication: DroneApplication;
   readonly droneSimulator: DroneSimulator;
+  readonly missileSimulator: MissileSimulator;
   readonly turretDamage: TurretDamage;
   readonly reactiveSteering: Autopilot;
   readonly shipBSteering: Autopilot;
