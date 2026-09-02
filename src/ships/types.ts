@@ -1,4 +1,5 @@
 import type { FactionId, HullTypeId, ShipId, TypeId } from "../gamedata/ids";
+import type { DamageResists } from "../sim";
 
 export type HullTier = "small" | "medium" | "large" | "capital";
 
@@ -26,6 +27,13 @@ export interface ShipProfile {
   readonly droneBandwidth: number;
   readonly droneCapacity: number;
   readonly maxActiveDrones: number;
+  readonly shieldHp: number;
+  readonly shieldRechargeTime: number; // seconds
+  readonly armorHp: number;
+  readonly hullHp: number;
+  readonly shieldResists: DamageResists;
+  readonly armorResists: DamageResists;
+  readonly hullResists: DamageResists;
 }
 
 export type SkillLevel = 0 | 1 | 2 | 3 | 4 | 5;
