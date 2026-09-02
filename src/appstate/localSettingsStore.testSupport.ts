@@ -1,4 +1,4 @@
-import { registerSimModule, type SimCradle, type SimValueParser } from "../sim";
+import { EMPTY_DEFENSE_SPEC, registerSimModule, type SimCradle, type SimValueParser } from "../sim";
 import { createContainer, InjectionMode } from "awilix";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
 import { toShipId, toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
@@ -239,6 +239,7 @@ const EMPTY_FITTING_STATE: FittingState = {
   profile: RIFTER_PROFILE,
   hullBonuses: [],
   supportModules: [],
+  defenseModules: [],
   turretGroups: [],
   launcherGroups: [],
   propulsionModule: undefined,
@@ -276,6 +277,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
+  defense: EMPTY_DEFENSE_SPEC,
 };
 export function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();

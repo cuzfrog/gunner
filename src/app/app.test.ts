@@ -1,4 +1,6 @@
 import {
+  EMPTY_DEFENSE_ASSESSMENT,
+  EMPTY_DEFENSE_SPEC,
   Vec2,
   ZERO_DAMAGE,
   type AttackAssessment,
@@ -29,6 +31,7 @@ const controls = vi.mocked<Controls>({
   getWeapon: vi.fn(),
   getWeapons: vi.fn(),
   getSig: vi.fn(),
+  getDefense: vi.fn(() => EMPTY_DEFENSE_SPEC),
   getConfig: vi.fn(),
   getSpeed: vi.fn(),
   getGridBrightness: vi.fn(),
@@ -113,7 +116,7 @@ function baseView(): EngagementView {
     damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, appliedByType: ZERO_DAMAGE },
     turret: { hit, expectedMultiplier: 1 },
   };
-  return { frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret } };
+  return { frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT } };
 }
 
 function sideReadoutValues(
@@ -162,7 +165,7 @@ describe("AppImpl", () => {
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
     expect(renderer.setWeaponRangeVisibility).toHaveBeenCalledWith("both");
-    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] } });
+    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC } });
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] });
     expect(controls.update).toHaveBeenCalledWith(baseView(), {
       shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
@@ -187,6 +190,7 @@ describe("AppImpl", () => {
       attacks: { shipA: assessment, shipB: assessment },
       weaponAttacks: { shipA: [], shipB: [] },
       effectiveWeapons: { shipA: effectiveTurret, shipB: effectiveTurret },
+      defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
     };
     simulation.snapshot.mockReturnValue(boostedSnapshot);
     engagementFrameComposer.compose.mockReturnValue(view);
@@ -200,7 +204,7 @@ describe("AppImpl", () => {
   });
 
   test("falls back to the view's effective weapon when the composer returns no assessment", () => {
-    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret } };
+    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT } };
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, renderer, loop });
     app.start();
@@ -333,6 +337,7 @@ describe("AppImpl", () => {
       attacks: { shipA: droneAssessment, shipB: droneAssessment },
       weaponAttacks: { shipA: [], shipB: [] },
       effectiveWeapons: { shipA: drone, shipB: drone },
+      defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
     };
     engagementFrameComposer.compose.mockReturnValue(droneView);
     controls.getWeapon.mockReturnValue(drone);

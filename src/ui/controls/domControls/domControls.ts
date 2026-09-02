@@ -1,7 +1,9 @@
 import {
+  type DefenseSpec,
   type EngagementView,
   type SimConfig,
   type WeaponSpec,
+  EMPTY_DEFENSE_SPEC,
 } from "../../../sim";
 import { isEventTargetWithClosest, num } from "../controlsDom";
 import type { Controls, ControlsCallbacks, EffectiveReadouts, ViewStore } from "../controlsContract";
@@ -262,6 +264,13 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     return weapons;
   }
   getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
+  getDefense(side: Side): DefenseSpec {
+    const panel = this.sideFor(side);
+    const fittingText = panel.fittingText;
+    if (!fittingText) return EMPTY_DEFENSE_SPEC;
+    const imported = panel.fittingImport.importFitting(fittingText, panel.skillConditions());
+    return imported?.defense ?? EMPTY_DEFENSE_SPEC;
+  }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
   getGridBrightness(): number { return this.preferencesController.getGridBrightness(); }

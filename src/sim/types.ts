@@ -441,3 +441,36 @@ export interface CombatantConfig extends ShipConfig {
   readonly boosts?: TurretBoostProjection;
   readonly missileBoosts?: MissileBoosterProjection;
 }
+
+export interface DefenseLayerSpec {
+  readonly hp: number;
+  readonly resists: DamageResists;
+}
+
+export interface RepairerSpec {
+  readonly layer: DefenseLayer;
+  readonly amount: number;
+  readonly cycleTime: number;
+  readonly capacitorNeed: number;
+  readonly heatDamage: number;
+  readonly overload: { readonly amountMultiplier: number; readonly cycleTimeMultiplier: number };
+  readonly ancillary?: { readonly chargeMultiplier: number; readonly shots: number; readonly reloadTime: number };
+}
+
+export interface DefenseSpec {
+  readonly layers: Readonly<Record<DefenseLayer, DefenseLayerSpec>>;
+  readonly shieldRechargeTime: number;
+  readonly repairers: readonly RepairerSpec[];
+}
+
+export const ZERO_RESISTS: DamageResists = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
+
+export const EMPTY_DEFENSE_SPEC: DefenseSpec = {
+  layers: {
+    shield: { hp: 0, resists: ZERO_RESISTS },
+    armor: { hp: 0, resists: ZERO_RESISTS },
+    hull: { hp: 0, resists: ZERO_RESISTS },
+  },
+  shieldRechargeTime: 0,
+  repairers: [],
+};

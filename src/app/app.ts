@@ -103,6 +103,7 @@ export class AppImpl implements App {
       sigRadii: { shipA: this.controls.getSig("shipA"), shipB: this.controls.getSig("shipB") },
       droneStates: { shipA: this.droneSimulator.states("shipA"), shipB: this.droneSimulator.states("shipB") },
       missileFacts: { shipA: this.missileFactsFor("shipA"), shipB: this.missileFactsFor("shipB") },
+      defenses: { shipA: this.controls.getDefense("shipA"), shipB: this.controls.getDefense("shipB") },
     };
   }
 

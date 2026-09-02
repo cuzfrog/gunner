@@ -67,7 +67,11 @@ groups, drones, cargo) without computed values.
 `FittingStateFactory` builds `FittingState` from resolved module entries
 and `FittingDb`. `FittingCalculator` computes turrets, launchers, drones,
 hull, propulsion, ewar, boosts, and cargo charges from a `FittingState`
-plus `StatConditions`. `FittingOverrides` and `FittingOverridesStore`
+plus `StatConditions`. `DefenseCalculator` resolves `DefenseSpec` (layer
+HP, resists, shield recharge, repairers) from `FittingState.defenseModules`
+plus `ShipProfile` and `StatConditions`, paralleling `FittingCalculator`'s
+weapon resolution. `ImportedFitting.defense` carries the resolved
+`DefenseSpec` for downstream sim and UI consumption. `FittingOverrides` and `FittingOverridesStore`
 represent user fitting-level changes (replacing equipped turret/launcher
 modules, charges, or propulsion). `applyFittingOverrides` patches a
 `FittingState` with overrides, producing a new state for the calculator.
@@ -95,4 +99,4 @@ Internal files such as `eft.ts`, `fittingImport.ts`, `chargeCatalog.ts`,
 `presetFittings.ts` and their sibling tests are reached only by their
 sibling tests and by `module.ts`.
 
-Gate relaxed: `fittingState.ts`, `fittingCalculator.ts`, `damageBreakdown.ts`, and `index.ts` were removed from `no-new-exports` to add `DroneGroup`, `droneBoosterModules`, `droneGroups`, `resolveDrones`, and `droneDamageByType` alongside the existing turret/missile fitting contracts, and to re-export `DefenseModuleStats`, `DefenseLayer`, `DefenseRepairerOverload`, `DefenseAncillary` from `gamedata/fittingDb` and `DamageResists` from `sim` for downstream defense-simulator consumption. These are cross-boundary DTOs and calculator methods consumed by `sim`, `app`, and `ui`.
+Gate relaxed: `fittingState.ts`, `fittingCalculator.ts`, `damageBreakdown.ts`, `defenseCalculator.ts`, and `index.ts` were removed from `no-new-exports` to add `DroneGroup`, `droneBoosterModules`, `droneGroups`, `resolveDrones`, and `droneDamageByType` alongside the existing turret/missile fitting contracts, and to re-export `DefenseModuleStats`, `DefenseLayer`, `DefenseRepairerOverload`, `DefenseAncillary` from `gamedata/fittingDb` and `DamageResists` from `sim` for downstream defense-simulator consumption. `defenseCalculator.ts` exports `DefenseCalculator` for `FittingImport` and DI registration. These are cross-boundary DTOs and calculator methods consumed by `sim`, `app`, and `ui`.

@@ -1,6 +1,7 @@
 import type { AttackAssessment, AttackState, EngagementEvaluator } from "./fireControl";
 import type { Kinematics } from "./kinematics";
-import type { DamageAssessment, DroneRuntimeState, EngagementFrame, MissileAttackFacts, Side, SimSnapshot, WeaponSpec } from "./types";
+import type { DefenseAssessor, DefenseAssessment } from "./defenseAssessment";
+import type { DamageAssessment, DefenseSpec, DroneRuntimeState, EngagementFrame, MissileAttackFacts, Side, SimSnapshot, WeaponSpec } from "./types";
 import { ZERO_DAMAGE, damageVectorAdd } from "./types";
 
 export interface EngagementInput {
@@ -8,6 +9,7 @@ export interface EngagementInput {
   readonly sigRadii: Record<Side, number>;
   readonly droneStates: Record<Side, readonly DroneRuntimeState[]>;
   readonly missileFacts: Record<Side, readonly MissileAttackFacts[]>;
+  readonly defenses: Record<Side, DefenseSpec>;
 }
 
 export interface WeaponAttack {
@@ -20,6 +22,7 @@ export interface EngagementView {
   readonly attacks: Record<Side, AttackAssessment | undefined>;
   readonly weaponAttacks: Record<Side, readonly WeaponAttack[]>;
   readonly effectiveWeapons: Record<Side, WeaponSpec | undefined>;
+  readonly defenses: Record<Side, DefenseAssessment>;
 }
 
 export interface EngagementFrameComposer {
@@ -29,13 +32,16 @@ export interface EngagementFrameComposer {
 export class EngagementFrameComposerImpl implements EngagementFrameComposer {
   private readonly kinematics: Kinematics;
   private readonly engagementEvaluator: EngagementEvaluator;
+  private readonly defenseAssessor: DefenseAssessor;
 
-  constructor({ kinematics, engagementEvaluator }: {
+  constructor({ kinematics, engagementEvaluator, defenseAssessor }: {
     kinematics: Kinematics;
     engagementEvaluator: EngagementEvaluator;
+    defenseAssessor: DefenseAssessor;
   }) {
     this.kinematics = kinematics;
     this.engagementEvaluator = engagementEvaluator;
+    this.defenseAssessor = defenseAssessor;
   }
 
   compose(snapshot: SimSnapshot, input: EngagementInput): EngagementView {
@@ -55,7 +61,8 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
         shipA: attacks.shipA?.effectiveWeapon ?? shipAWeapons[0],
         shipB: attacks.shipB?.effectiveWeapon ?? shipBWeapons[0],
       };
-      return { frame, attacks, weaponAttacks, effectiveWeapons };
+      const defenses = this.assessDefenses(input, attacks);
+      return { frame, attacks, weaponAttacks, effectiveWeapons, defenses };
     }
     const shipAResult = this.assessSide(frame, "shipA", shipAWeapons, input.sigRadii.shipB, input.droneStates.shipA, input.missileFacts.shipA);
     const shipBResult = this.assessSide(frame, "shipB", shipBWeapons, input.sigRadii.shipA, input.droneStates.shipB, input.missileFacts.shipB);
@@ -65,7 +72,17 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
       shipA: attacks.shipA?.effectiveWeapon ?? shipAWeapons[0],
       shipB: attacks.shipB?.effectiveWeapon ?? shipBWeapons[0],
     };
-    return { frame, attacks, weaponAttacks, effectiveWeapons };
+    const defenses = this.assessDefenses(input, attacks);
+    return { frame, attacks, weaponAttacks, effectiveWeapons, defenses };
+  }
+
+  private assessDefenses(input: EngagementInput, attacks: Record<Side, AttackAssessment | undefined>): Record<Side, DefenseAssessment> {
+    const shipAIncoming = attacks.shipB?.damage.appliedByType ?? ZERO_DAMAGE;
+    const shipBIncoming = attacks.shipA?.damage.appliedByType ?? ZERO_DAMAGE;
+    return {
+      shipA: this.defenseAssessor.assess(input.defenses.shipA, shipAIncoming),
+      shipB: this.defenseAssessor.assess(input.defenses.shipB, shipBIncoming),
+    };
   }
 
   private assessSide(frame: EngagementFrame, side: Side, weapons: readonly WeaponSpec[], opponentSigRadius: number, droneStates: readonly DroneRuntimeState[], missileFacts: readonly MissileAttackFacts[]): { combined: AttackAssessment | undefined; weaponAttacks: readonly WeaponAttack[] } {

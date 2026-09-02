@@ -23,7 +23,9 @@ import type { DroneCatalog } from "./droneCatalog";
 import type { DroneSkillModel } from "./droneStats";
 import { FittingStateFactory, type FittingState, type FittingModuleEntry, type CargoEntry } from "./fittingState";
 import { FittingCalculatorImpl, type FittingCalculator } from "./fittingCalculator";
+import { DefenseCalculatorImpl, type DefenseCalculator } from "./defenseCalculator";
 import type { FittingDb, FittingModuleStats, HullBonus } from "../gamedata/fittingDb";
+import type { DefenseSpec } from "../sim";
 
 export type { FittingDb } from "../gamedata/fittingDb";
 export type { ImportedTurret, ImportedLauncher, CargoCharge } from "./chargeCatalog";
@@ -65,6 +67,7 @@ export interface ImportedFitting {
   readonly boosts: BoostLoadout;
   readonly missileBoosts: MissileBoosterLoadout;
   readonly hullBonuses: readonly HullBonus[];
+  readonly defense: DefenseSpec;
 }
 
 export interface PropulsionVariant {
@@ -91,6 +94,7 @@ export class FittingImportImpl implements FittingImport {
   private readonly moduleSlotCatalog: ModuleSlotCatalog;
   private readonly fittingStateFactory: FittingStateFactory;
   private readonly calculator: FittingCalculator;
+  private readonly defenseCalculator: DefenseCalculator;
 
   constructor({
     ships,
@@ -126,6 +130,7 @@ export class FittingImportImpl implements FittingImport {
     this.moduleSlotCatalog = moduleSlotCatalog;
     this.fittingStateFactory = new FittingStateFactory(fittingDb);
     this.calculator = new FittingCalculatorImpl({ fittingDb, ships, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog });
+    this.defenseCalculator = new DefenseCalculatorImpl({ fittingDb, stackingPenalty });
   }
 
   propulsionVariantNames(module: PropulsionModule): readonly PropulsionVariant[] {
@@ -177,6 +182,7 @@ export class FittingImportImpl implements FittingImport {
     const ewar = this.calculator.resolveEwar(fittingState);
     const boosts = this.calculator.resolveBoosts(fittingState);
     const missileBoosts = this.calculator.resolveMissileBoosts(fittingState);
+    const defense = this.defenseCalculator.resolve(fittingState, conditions);
 
     return {
       profile: resolved.profile,
@@ -193,6 +199,7 @@ export class FittingImportImpl implements FittingImport {
       boosts,
       missileBoosts,
       hullBonuses,
+      defense,
     };
   }
 

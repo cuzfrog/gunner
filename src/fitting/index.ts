@@ -16,6 +16,7 @@ export type { GunFamilies, GunFamily } from "./gunFamilies";
 export type { LauncherClass, LauncherClasses } from "./launcherClasses";
 export type { FittingState, FittedModule, TurretGroup, LauncherGroup, DroneGroup, CargoEntry, FittingModuleEntry } from "./fittingState";
 export type { FittingCalculator, HullSideAggregation, PropulsionResult } from "./fittingCalculator";
+export type { DefenseCalculator } from "./defenseCalculator";
 export type { FittingOverrides, FittingOverridesStore } from "./fittingOverrides";
 export { applyFittingOverrides, FittingOverridesStoreImpl } from "./fittingOverrides";
 export type { FittingCradle } from "./cradle";

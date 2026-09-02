@@ -4,7 +4,7 @@ import type { FittingDb, LauncherStats, TurretStats } from "../../gamedata/fitti
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
 import type { HitChance, SigResolutionClass } from "../../sim";
-import { ZERO_DAMAGE } from "../../sim";
+import { EMPTY_DEFENSE_SPEC, ZERO_DAMAGE } from "../../sim";
 import type { Language } from "../i18n";
 import type { ClipboardProvider, SavedFittings, SessionSettings, SettingsParser, SettingsStore } from "../../appstate";
 import type { DisplayPreferences, ProfileSettings, UserSettings } from "../../appstate";
@@ -157,6 +157,7 @@ const EMPTY_FITTING_STATE: FittingState = {
   profile: RIFTER,
   hullBonuses: [],
   supportModules: [],
+  defenseModules: [],
   turretGroups: [],
   launcherGroups: [],
   propulsionModule: undefined,
@@ -183,6 +184,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
+  defense: EMPTY_DEFENSE_SPEC,
 };
 export const IMPORTED_RIFTER_WITH_CARGO: ImportedFitting = { ...IMPORTED_RIFTER, cargoCharges: [{ id: "21898" as TypeId, quantity: 2000 }] };
 

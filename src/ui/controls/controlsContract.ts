@@ -1,4 +1,4 @@
-import type { DisruptionBreakdown, EngagementView, SimConfig, SpeedBreakdown, WeaponSpec } from "../../sim";
+import type { DefenseSpec, DisruptionBreakdown, EngagementView, SimConfig, SpeedBreakdown, WeaponSpec } from "../../sim";
 import type { WeaponRangeVisibility } from "../../appstate";
 import type { RangeOverlay } from "../renderer";
 import type { Side } from "./side";
@@ -66,6 +66,7 @@ export interface Controls {
   getWeapon(side: Side): WeaponSpec | undefined;
   getWeapons(side: Side): readonly WeaponSpec[];
   getSig(side: Side): number;
+  getDefense(side: Side): DefenseSpec;
   getConfig(): SimConfig;
   getSpeed(): number;
   getGridBrightness(): number;

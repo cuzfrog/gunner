@@ -87,7 +87,9 @@ describe("FittingStateFactory", () => {
       entry("1600mm Steel Plates I"),
     ], [], []);
     expect(state.turretGroups.length).toBe(1);
-    expect(state.supportModules.length).toBe(3);
+    expect(state.supportModules.length).toBe(2);
+    expect(state.defenseModules.length).toBe(1);
+    expect(state.defenseModules[0].moduleId).toBe(moduleId("1600mm Steel Plates I"));
     expect(state.supportModules.every((m) => m.moduleId !== moduleId("Heavy Pulse Laser II"))).toBe(true);
   });
 

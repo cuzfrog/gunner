@@ -34,6 +34,7 @@ export interface FittingState {
   readonly profile: ShipProfile;
   readonly hullBonuses: readonly HullBonus[];
   readonly supportModules: readonly FittedModule[];
+  readonly defenseModules: readonly FittedModule[];
   readonly turretGroups: readonly TurretGroup[];
   readonly launcherGroups: readonly LauncherGroup[];
   readonly propulsionModule?: FittedModule;
@@ -59,6 +60,7 @@ export class FittingStateFactory {
     const turretCounts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
     const launcherCounts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
     const supportModules: FittedModule[] = [];
+    const defenseModules: FittedModule[] = [];
     const ewarModules: FittedModule[] = [];
     const boosterModules: FittedModule[] = [];
     const missileBoosterModules: FittedModule[] = [];
@@ -119,6 +121,11 @@ export class FittingStateFactory {
         continue;
       }
 
+      if (stats.defense) {
+        defenseModules.push(mod);
+        continue;
+      }
+
       if (this.isEwarModule(mod.moduleId)) {
         ewarModules.push(mod);
         continue;
@@ -143,6 +150,7 @@ export class FittingStateFactory {
       profile,
       hullBonuses,
       supportModules,
+      defenseModules,
       turretGroups: [...turretCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([moduleId, e]) => ({ moduleId, chargeId: e.chargeId, count: e.count })),
       launcherGroups: [...launcherCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([moduleId, e]) => ({ moduleId, chargeId: e.chargeId, count: e.count })),
       propulsionModule,

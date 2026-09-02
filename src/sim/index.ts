@@ -7,6 +7,8 @@ export type { EwarResolver } from "./ewarResolver";
 export type { TurretBoosterResolver } from "./turretBoosterResolver";
 export type { MissileBoosterResolver } from "./missileBoosterResolver";
 export type { EngagementFrameComposer, EngagementInput, EngagementView, WeaponAttack } from "./engagementFrameComposer";
+export type { DefenseAssessor, DefenseAssessment, LayerEhp } from "./defenseAssessment";
+export { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { MissileApplication } from "./missileApplication";
 export type { DroneApplication } from "./droneApplication";
@@ -26,6 +28,9 @@ export type {
   DamageType,
   DamageVector,
   DefenseLayer,
+  DefenseLayerSpec,
+  DefenseSpec,
+  RepairerSpec,
   DisruptionBreakdown,
   DisruptionScriptSpec,
   DisruptorActivation,
@@ -81,7 +86,7 @@ export type {
   WeaponKind,
   WeaponSpec,
 } from "./types";
-export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, DAMAGE_TYPES, EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, SIG_RESOLUTIONS, ZERO_DAMAGE, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum } from "./types";
+export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, DAMAGE_TYPES, EMPTY_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, SIG_RESOLUTIONS, ZERO_DAMAGE, ZERO_RESISTS, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum } from "./types";
 export type { SimValueParser } from "./simValueParser";
 export { Vec2 } from "./vec2";
 export type { SimCradle } from "./cradle";

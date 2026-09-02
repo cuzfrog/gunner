@@ -15,6 +15,8 @@ import { ShipsImpl } from "../../src/ships/ships";
 import { StackingPenaltyImpl } from "../../src/sim/stackingPenalty";
 import { EngagementEvaluatorImpl } from "../../src/sim/fireControl";
 import { EngagementFrameComposerImpl } from "../../src/sim/engagementFrameComposer";
+import { DefenseAssessorImpl } from "../../src/sim/defenseAssessment";
+import { EMPTY_DEFENSE_SPEC } from "../../src/sim";
 import { HitChanceImpl } from "../../src/sim/hitChance";
 import { KinematicsImpl } from "../../src/sim/kinematics";
 import { MissileApplicationImpl } from "../../src/sim/missileApplication";
@@ -79,7 +81,7 @@ function makeComposer() {
   const missileApplication = new MissileApplicationImpl();
   const droneApplication = new DroneApplicationImpl({ hitChance });
   const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver: noEwarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: stacking }), turretDamage, missileApplication, droneApplication });
-  return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator });
+  return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor: new DefenseAssessorImpl() });
 }
 
 function stationaryShip(id: "shipA" | "shipB"): ShipState {
@@ -123,7 +125,7 @@ describe("Harbinger DPS cross-check (all skills 5, no overload)", () => {
     const result = importer.importFitting(HARBINGER_FIT, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const turret = turretSpecFromImported(result!.turret!);
     const composer = makeComposer();
-    const view = composer.compose(snapshot(), { weapons: { shipA: [turret], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] } });
+    const view = composer.compose(snapshot(), { weapons: { shipA: [turret], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC } });
     expect(view.attacks.shipA).toBeDefined();
     const expectedNominalDps = (damageVectorSum(turret.damagePerShot) * turret.turretCount) / turret.cycleTime;
     expect(view.attacks.shipA!.damage.nominalDps).toBeCloseTo(expectedNominalDps, 6);
@@ -135,7 +137,7 @@ describe("mixed turret + launcher DPS summation through sim", () => {
     const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 125, optimal: 10_000, falloff: 5_000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
     const missile: MissileSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 150, explosive: 0 }, cycleTime: 10, launcherCount: 2, explosionRadius: 50, explosionVelocity: 100, damageReductionFactor: 4.5, maxVelocity: 5000, flightTime: 10, flightRange: 50_000 };
     const composer = makeComposer();
-    const view = composer.compose(snapshot(), { weapons: { shipA: [turret, missile], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] } });
+    const view = composer.compose(snapshot(), { weapons: { shipA: [turret, missile], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC } });
     expect(view.attacks.shipA).toBeDefined();
     const expectedTurretDps = (100 * 4) / 5;
     const expectedMissileDps = (150 * 2) / 10;
