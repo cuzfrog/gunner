@@ -226,7 +226,7 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("uses missile facts for applied DPS when facts are provided", () => {
     const { missileApplication, evaluator } = makeEvaluator();
-    const facts = { inFlightCount: 2, nearestTimeToImpact: 1.5, lastImpact: { application: 0.6, signatureTerm: 1, velocityTerm: 0.6, time: 1.0 }, smoothedApplication: 0.5, interceptable: true };
+    const facts = { inFlightCount: 2, nearestTimeToImpact: 1.5, predicted: { application: 0.5, signatureTerm: 1, velocityTerm: 0.6 }, interceptable: true };
     const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: facts } });
     const nominalDps = (200 * 2) / 10;
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(nominalDps * 0.5, 10);
@@ -239,9 +239,9 @@ describe("EngagementEvaluatorImpl", () => {
     expect(missileApplication.compute).not.toHaveBeenCalled();
   });
 
-  test("uses missile facts with no last impact for zero application breakdown", () => {
+  test("uses missile facts with zero predicted application", () => {
     const { evaluator } = makeEvaluator();
-    const facts = { inFlightCount: 1, nearestTimeToImpact: 2.0, lastImpact: undefined, smoothedApplication: 0, interceptable: true };
+    const facts = { inFlightCount: 1, nearestTimeToImpact: 2.0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: true };
     const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: facts } });
     expect(result.shipA?.damage.appliedDps).toBe(0);
     expect(result.shipA?.missile?.application).toBe(0);

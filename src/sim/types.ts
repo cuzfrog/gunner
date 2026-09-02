@@ -142,28 +142,10 @@ export interface MissileRuntimeState {
   readonly weaponIndex: number;
 }
 
-export interface MissileImpact {
-  readonly time: number;
-  readonly side: Side;
-  readonly weaponIndex: number;
-  readonly damage: number; // volley * application
-  readonly application: number;
-  readonly signatureTerm: number;
-  readonly velocityTerm: number;
-}
-
-export interface MissileImpactSummary {
-  readonly application: number;
-  readonly signatureTerm: number;
-  readonly velocityTerm: number;
-  readonly time: number;
-}
-
 export interface MissileAttackFacts {
   readonly inFlightCount: number;
   readonly nearestTimeToImpact: number;
-  readonly lastImpact?: MissileImpactSummary;
-  readonly smoothedApplication: number;
+  readonly predicted: MissileApplicationResult;
   readonly interceptable: boolean;
 }
 

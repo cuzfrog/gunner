@@ -45,8 +45,6 @@ export type {
   MissileBoosterSpec,
   MissileDamageBreakdown,
   MissileEnhancerSpec,
-  MissileImpact,
-  MissileImpactSummary,
   MissileLaunchSpec,
   MissileRuntimeState,
   MissileScriptSpec,
