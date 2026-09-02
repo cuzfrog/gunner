@@ -9,6 +9,7 @@ import TurretPanel from "./TurretPanel.astro";
 import LauncherPanel from "./LauncherPanel.astro";
 import DronePanel from "./DronePanel.astro";
 import EwarField from "./EwarField.astro";
+import DefenseField from "./DefenseField.astro";
 import PropulsionGroup from "./PropulsionGroup.astro";
 import SkillsField from "./SkillsField.astro";
 
@@ -45,12 +46,13 @@ const modeSecond = side === "shipA"
     <DronePanel idPrefix={idPrefix} />
 
     <EwarField idPrefix={idPrefix} />
+    <DefenseField idPrefix={idPrefix} />
   </div>
 
   <hr class="side-panel-divider">
 
   <FormField i18n="label.signatureRadius" text="Signature radius">
-    <InputWithUnit id={`${idPrefix}-sig`} value={sig} min="1" unit="m" />
+    <InputWithUnit id={`${idPrefix}-sig`} value={sig} min="1" unit="m" extraClass="input-with-unit-has-effective" effectiveId={`effective-${idPrefix}-sig`} />
   </FormField>
 
   <PropulsionGroup idPrefix={idPrefix} side={side} />

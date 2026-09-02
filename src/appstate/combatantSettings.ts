@@ -1,5 +1,5 @@
 import type { AutopilotMode, SigResolutionClass, WeaponKind } from "../sim";
-import type { SkillLevel } from "../ships";
+import type { DefenseSkills, SkillLevel } from "../ships";
 import type { ShipId, TypeId } from "../gamedata/ids";
 import type { DroneGroup } from "../fitting";
 import {
@@ -11,6 +11,9 @@ import {
   type StoredBoosterActivation,
   type StoredEwarActivation,
   type StoredMissileBoosterActivation,
+  type StoredRahActivation,
+  type StoredRepairMode,
+  type StoredRepairerActivation,
 } from "./userSettings";
 
 export interface CombatantSettings {
@@ -21,8 +24,10 @@ export interface CombatantSettings {
   readonly inertia: number;
   readonly aggressivity: number;
   readonly skillLevel?: SkillLevel;
+  readonly defenseSkills?: DefenseSkills;
   readonly overload: boolean;
   readonly weaponOverload: boolean;
+  readonly damageEnabled: boolean;
   readonly hull?: ShipId;
   readonly propulsion?: PropulsionSelection;
   readonly fitting?: string;
@@ -31,6 +36,9 @@ export interface CombatantSettings {
   readonly ewarActivation?: StoredEwarActivation;
   readonly boosterActivation?: readonly StoredBoosterActivation[];
   readonly missileBoosterActivation?: readonly StoredMissileBoosterActivation[];
+  readonly repMode?: StoredRepairMode;
+  readonly repairerActivation?: readonly StoredRepairerActivation[];
+  readonly rahActivation?: StoredRahActivation;
   readonly sig?: number;
   readonly tracking: number;
   readonly sigRes: SigResolutionClass;

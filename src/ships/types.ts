@@ -38,10 +38,49 @@ export interface ShipProfile {
 
 export type SkillLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
+export interface DefenseSkills {
+  readonly shieldManagement: SkillLevel;
+  readonly shieldOperation: SkillLevel;
+  readonly hullUpgrades: SkillLevel;
+  readonly mechanics: SkillLevel;
+  readonly shieldCompensationEm: SkillLevel;
+  readonly shieldCompensationThermal: SkillLevel;
+  readonly shieldCompensationKinetic: SkillLevel;
+  readonly shieldCompensationExplosive: SkillLevel;
+  readonly armorCompensationEm: SkillLevel;
+  readonly armorCompensationThermal: SkillLevel;
+  readonly armorCompensationKinetic: SkillLevel;
+  readonly armorCompensationExplosive: SkillLevel;
+  readonly armorResistancePhasing: SkillLevel;
+  readonly tacticalShieldManipulation: SkillLevel;
+  readonly thermodynamics: SkillLevel;
+}
+
 export interface StatConditions {
   readonly skillLevel: SkillLevel;
   readonly overloaded: boolean;
   readonly weaponOverloaded: boolean;
+  readonly defenseSkills?: DefenseSkills;
+}
+
+export function defaultDefenseSkills(level: SkillLevel): DefenseSkills {
+  return {
+    shieldManagement: level,
+    shieldOperation: level,
+    hullUpgrades: level,
+    mechanics: level,
+    shieldCompensationEm: level,
+    shieldCompensationThermal: level,
+    shieldCompensationKinetic: level,
+    shieldCompensationExplosive: level,
+    armorCompensationEm: level,
+    armorCompensationThermal: level,
+    armorCompensationKinetic: level,
+    armorCompensationExplosive: level,
+    armorResistancePhasing: level,
+    tacticalShieldManipulation: level,
+    thermodynamics: level,
+  };
 }
 
 export interface PropulsionStats {

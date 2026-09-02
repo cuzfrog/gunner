@@ -13,11 +13,15 @@ import {
   type StoredBoosterActivation,
   type StoredEwarActivation,
   type StoredMissileBoosterActivation,
+  type StoredRahActivation,
+  type StoredRepairMode,
+  type StoredRepairerActivation,
   type UserSettings,
 } from "../../../appstate";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
+import type { DefenseController } from "../defense";
 import type { LauncherController } from "../launcher";
 import type { DroneController } from "../drone";
 import type { WeaponSystemSwitch } from "../sidePanel";
@@ -63,6 +67,7 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
   private readonly missileBoosterController: MissileBoosterController;
+  private readonly defenseController: DefenseController;
   private readonly fittingImport: FittingImport;
   private readonly parser: SettingsParser;
   private readonly pristineSettings: SessionSettings;
@@ -86,6 +91,7 @@ export class SessionCodecImpl implements SessionCodec {
     ewarController: EwarController;
     boosterController: BoosterController;
     missileBoosterController: MissileBoosterController;
+    defenseController: DefenseController;
     fittingImport: FittingImport;
     parser: SettingsParser;
   }) {
@@ -107,6 +113,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.ewarController = deps.ewarController;
     this.boosterController = deps.boosterController;
     this.missileBoosterController = deps.missileBoosterController;
+    this.defenseController = deps.defenseController;
     this.fittingImport = deps.fittingImport;
     this.parser = deps.parser;
     this.pristineSettings = this.parser.fromWire(this.capture());
@@ -147,8 +154,10 @@ export class SessionCodecImpl implements SessionCodec {
       shipAInertia: shipA.inertia,
       shipASig: shipA.sig ?? 1,
       shipASkillLevel: shipA.skillLevel,
+      shipADefenseSkills: shipA.defenseSkills,
       shipAOverload: shipA.overload,
       shipAWeaponOverload: shipA.weaponOverload,
+      shipADamageEnabled: this.defenseController.damageEnabled("shipA"),
       shipAHullId: shipA.hull,
       shipAPropulsion: shipA.propulsion,
       shipAFitting: shipA.fitting,
@@ -162,8 +171,10 @@ export class SessionCodecImpl implements SessionCodec {
       shipBMass: shipB.mass,
       shipBInertia: shipB.inertia,
       shipBSkillLevel: shipB.skillLevel,
+      shipBDefenseSkills: shipB.defenseSkills,
       shipBOverload: shipB.overload,
       shipBWeaponOverload: shipB.weaponOverload,
+      shipBDamageEnabled: this.defenseController.damageEnabled("shipB"),
       shipBSig: shipB.sig ?? 1,
       shipBHullId: shipB.hull,
       shipBPropulsion: shipB.propulsion,
@@ -184,6 +195,12 @@ export class SessionCodecImpl implements SessionCodec {
       shipBBoosterActivation: this.boosterController.capture("shipB"),
       shipAMissileBoosterActivation: this.missileBoosterController.capture("shipA"),
       shipBMissileBoosterActivation: this.missileBoosterController.capture("shipB"),
+      shipARepMode: this.defenseController.repairMode("shipA"),
+      shipBRepMode: this.defenseController.repairMode("shipB"),
+      shipARepairerActivation: this.defenseController.repairerActivation("shipA"),
+      shipBRepairerActivation: this.defenseController.repairerActivation("shipB"),
+      shipARahActivation: this.defenseController.rahActivation("shipA"),
+      shipBRahActivation: this.defenseController.rahActivation("shipB"),
     };
   }
 
@@ -289,6 +306,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.restoreBooster("shipB", settings.shipB.fitting, settings.shipB.boosterActivation);
     this.restoreMissileBooster("shipA", settings.shipA.fitting, settings.shipA.missileBoosterActivation);
     this.restoreMissileBooster("shipB", settings.shipB.fitting, settings.shipB.missileBoosterActivation);
+    this.defenseController.restore("shipA", settings.shipA.damageEnabled, settings.shipA.repMode, settings.shipA.repairerActivation, settings.shipA.rahActivation);
+    this.defenseController.restore("shipB", settings.shipB.damageEnabled, settings.shipB.repMode, settings.shipB.repairerActivation, settings.shipB.rahActivation);
   }
 
   restoreStartup(startup: StartupState): void {
@@ -344,8 +363,10 @@ function sidePanelStateOf(combatant: CombatantSettings): SidePanelState {
     range: combatant.range,
     aggressivity: combatant.aggressivity,
     skillLevel: combatant.skillLevel,
+    defenseSkills: combatant.defenseSkills,
     overload: combatant.overload,
     weaponOverload: combatant.weaponOverload,
+    damageEnabled: combatant.damageEnabled,
     hull: combatant.hull,
     propulsion: combatant.propulsion,
     fitting: combatant.fitting,

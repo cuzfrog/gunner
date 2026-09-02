@@ -93,6 +93,19 @@ describe("profileTextCodec", () => {
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });
 
+  test("round-trips a profile with custom defense skills", () => {
+    const profile: ProfileSettings = {
+      ...MINIMAL_PROFILE,
+      shipADefenseSkills: {
+        shieldManagement: 3, shieldOperation: 4, hullUpgrades: 5, mechanics: 2,
+        shieldCompensationEm: 1, shieldCompensationThermal: 1, shieldCompensationKinetic: 1, shieldCompensationExplosive: 1,
+        armorCompensationEm: 1, armorCompensationThermal: 1, armorCompensationKinetic: 1, armorCompensationExplosive: 1,
+        armorResistancePhasing: 1, tacticalShieldManipulation: 1, thermodynamics: 1,
+      },
+    };
+    expect(codec.parse(codec.serialize(profile))).toEqual(profile);
+  });
+
   test("migrates legacy v6 enum disruptor scripts in profile text", () => {
     const base = codec.serialize(MINIMAL_PROFILE);
     const shipAEwar = JSON.stringify({ webs: [true], disruptors: [{ active: true, script: "trackingSpeed" }] });

@@ -2,6 +2,7 @@ import { fakeDocument, getFake } from "../../testing";
 import { UiEventsImpl } from "../../events";
 import type { EwarProjection, EwarResolver, SpeedBreakdown, DisruptionBreakdown } from "../../../sim";
 import type { EwarController } from "../ewar";
+import type { DefenseController } from "../defense";
 import type { ImageCatalog } from "../../icons";
 import type { ShipProfile } from "../../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId } from "../../../gamedata/ids";
@@ -113,16 +114,37 @@ function buildController() {
     t: vi.fn((key: string) => key),
     translateDocument: vi.fn(),
   });
+  const defenseController = vi.mocked<DefenseController>({
+    setDefenseSpec: vi.fn(),
+    spec: vi.fn(() => undefined),
+    updateAssessments: vi.fn(),
+    updateDefenseView: vi.fn(),
+    updateSummaries: vi.fn(),
+    render: vi.fn(),
+    signaturePenalty: vi.fn(() => 0),
+    updateEffectiveSig: vi.fn(),
+    damageEnabled: vi.fn(() => true),
+    setDamageEnabled: vi.fn(),
+    repairMode: vi.fn(() => "auto" as const),
+    setRepairMode: vi.fn(),
+    repairerActivation: vi.fn(() => []),
+    setRepairerActivation: vi.fn(),
+    rahActivation: vi.fn(() => undefined),
+    setRahActivation: vi.fn(),
+    restore: vi.fn(),
+    cyclingEffects: vi.fn(() => []),
+  });
   const controller = new PortraitsControllerImpl({
     els,
     imageCatalog,
     ewarController,
     ewarResolver,
+    defenseController,
     combatantProfiles,
     events,
     i18n,
   });
-  return { controller, els, profiles, projections, ewarController, ewarResolver, imageCatalog, events, createElementSpy, i18n };
+  return { controller, els, profiles, projections, ewarController, ewarResolver, defenseController, imageCatalog, events, createElementSpy, i18n };
 }
 
 describe("PortraitsController", () => {

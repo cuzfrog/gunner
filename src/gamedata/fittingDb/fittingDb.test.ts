@@ -372,6 +372,7 @@ describe("fittingDb", () => {
 
   test("includes Drake missile damage hull bonuses for heavy and heavy assault missiles", () => {
     expect(HULL_BONUSES["24698" as ShipId]).toEqual([
+      { attribute: "shieldResist", magnitude: -4, skill: "Caldari Battlecruiser" },
       { attribute: "missileDamage", magnitude: 10, skill: "Caldari Battlecruiser", launcherGroup: 771 },
       { attribute: "missileDamage", magnitude: 10, skill: "Caldari Battlecruiser", launcherGroup: 510 },
     ]);

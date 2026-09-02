@@ -1,9 +1,9 @@
-import type { FittedHull, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
+import type { DefenseSkills, FittedHull, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
 import { toTypeId } from "../gamedata/ids";
 import type { DroneGroup } from "../fitting";
 import type { Language } from "./language";
 import type { SimValueParser } from "../sim";
-import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
+import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation, StoredRahActivation, StoredRepairMode, StoredRepairerActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
 
 export function isLanguage(value: unknown): value is Language {
   return value === "en" || value === "zh" || value === "ja";
@@ -45,10 +45,33 @@ export function isOptionalMissileBoosterActivations(value: unknown): boolean {
   return value.every(isStoredMissileBoosterActivation);
 }
 
+export function isOptionalRepairMode(value: unknown): value is StoredRepairMode | undefined {
+  return value === undefined || value === "auto" || value === "manual";
+}
+
+export function isOptionalRepairerActivations(value: unknown): value is readonly StoredRepairerActivation[] | undefined {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every(isStoredRepairerActivation);
+}
+
+export function isOptionalRahActivation(value: unknown): value is StoredRahActivation | undefined {
+  if (value === undefined) return true;
+  if (!isRecord(value)) return false;
+  const item = value;
+  return typeof item.active === "boolean" && typeof item.overloaded === "boolean";
+}
+
 function isStoredMissileBoosterActivation(value: unknown): value is StoredMissileBoosterActivation {
   if (!isRecord(value)) return false;
   const item = value;
   return typeof item.active === "boolean" && (item.overloaded === undefined || typeof item.overloaded === "boolean") && isStoredBoosterScript(item.script);
+}
+
+function isStoredRepairerActivation(value: unknown): value is StoredRepairerActivation {
+  if (!isRecord(value)) return false;
+  const item = value;
+  return typeof item.active === "boolean" && (item.overloaded === undefined || typeof item.overloaded === "boolean");
 }
 
 function isTypeIdString(value: string): boolean {
@@ -98,6 +121,19 @@ export function isSkillLevel(value: unknown): value is SkillLevel {
 
 export function isOptionalSkillLevel(value: unknown): value is SkillLevel | undefined {
   return value === undefined || isSkillLevel(value);
+}
+
+export function isDefenseSkills(value: unknown): value is DefenseSkills {
+  if (!isRecord(value)) return false;
+  const keys: readonly (keyof DefenseSkills)[] = ["shieldManagement", "shieldOperation", "hullUpgrades", "mechanics", "shieldCompensationEm", "shieldCompensationThermal", "shieldCompensationKinetic", "shieldCompensationExplosive", "armorCompensationEm", "armorCompensationThermal", "armorCompensationKinetic", "armorCompensationExplosive", "armorResistancePhasing", "tacticalShieldManipulation", "thermodynamics"];
+  for (const key of keys) {
+    if (!isSkillLevel(value[key])) return false;
+  }
+  return true;
+}
+
+export function isOptionalDefenseSkills(value: unknown): value is DefenseSkills | undefined {
+  return value === undefined || isDefenseSkills(value);
 }
 
 export function isOptionalBoolean(value: unknown): value is boolean | undefined {

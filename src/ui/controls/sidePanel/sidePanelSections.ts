@@ -1,6 +1,7 @@
 import type { ImportedFitting } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type {
+  DefenseSkills,
   FittedHull,
   PropulsionId,
   PropulsionModule,
@@ -57,6 +58,10 @@ export interface ISkillOverloadSection {
   closeSkillPopup(): void;
   isSkillPopupOpen(): boolean;
   onSkillChoiceInput(): void;
+  currentDefenseSkills(): DefenseSkills | undefined;
+  setDefenseSkills(skills: DefenseSkills): void;
+  resetDefenseSkills(): void;
+  renderDefenseSkills(): void;
 }
 
 export interface IPropulsionSection {

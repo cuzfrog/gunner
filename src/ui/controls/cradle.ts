@@ -16,6 +16,7 @@ import type { HintRotator } from "./hints";
 import type { BoosterController } from "./booster";
 import type { MissileBoosterController } from "./missileBooster";
 import type { EwarController } from "./ewar";
+import type { DefenseController } from "./defense";
 import type { ImportController } from "./import";
 import type { ConfirmController } from "./confirm";
 import type { FittingPopupController, FittingPreview, FittingPreviewManager, PopupGroup } from "./popup";
@@ -104,6 +105,7 @@ export interface ControlsCradle {
   readonly shipAFittingPopup: FittingPopupController;
   readonly shipBFittingPopup: FittingPopupController;
   readonly ewarController: EwarController;
+  readonly defenseController: DefenseController;
   readonly boosterController: BoosterController;
   readonly missileBoosterController: MissileBoosterController;
   readonly portraitsController: PortraitsController;

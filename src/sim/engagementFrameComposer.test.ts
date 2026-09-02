@@ -5,7 +5,7 @@ import type { Kinematics } from "./kinematics";
 import type { AttackAssessment } from "./fireControl";
 import type { DefenseAssessor } from "./defenseAssessment";
 import { DefenseAssessorImpl } from "./defenseAssessment";
-import { type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec, EMPTY_DEFENSE_SPEC, ZERO_DAMAGE, damageVectorAdd } from "./types";
+import { type DefenseSpec, type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec, EMPTY_DEFENSE_SPEC, ZERO_DAMAGE, damageVectorAdd } from "./types";
 
 const shipATurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const shipBTurret: TurretSpec = { kind: "turret", tracking: 0.28, sigResolution: 125, optimal: 8000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
@@ -56,7 +56,7 @@ const frame: EngagementFrame = {
 
 const snapshot: SimSnapshot = { time: 1, shipA, shipB, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
 
-const input = { weapons: { shipA: [shipATurret] as const, shipB: [shipBTurret] as const }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] } as const, missileFacts: { shipA: [], shipB: [] } as const, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC } as const };
+const input = { weapons: { shipA: [shipATurret] as const, shipB: [shipBTurret] as const }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] } as const, missileFacts: { shipA: [], shipB: [] } as const, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC } as const, overloaded: { shipA: false, shipB: false } as const };
 
 const shipAAssessment: AttackAssessment = {
   boostedWeapon: boostedTurret,
@@ -117,7 +117,7 @@ describe("EngagementFrameComposerImpl", () => {
   test("undefined weapon yields undefined attack and undefined effective weapon", () => {
     const { engagementEvaluator, composer } = makeComposer();
     engagementEvaluator.evaluate.mockReturnValue({ shipA: undefined, shipB: undefined });
-    const view = composer.compose(snapshot, { weapons: { shipA: [], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC } });
+    const view = composer.compose(snapshot, { weapons: { shipA: [], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false } });
     expect(view.attacks.shipA).toBeUndefined();
     expect(view.attacks.shipB).toBeUndefined();
     expect(view.effectiveWeapons.shipA).toBeUndefined();
@@ -139,7 +139,7 @@ describe("EngagementFrameComposerImpl", () => {
       if (attacks.shipA?.weapon === secondTurret) return { shipA: secondAssessment, shipB: undefined };
       return { shipA: undefined, shipB: undefined };
     });
-    const multiInput = { weapons: { shipA: [shipATurret, secondTurret] as const, shipB: [] as const }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] } as const, missileFacts: { shipA: [], shipB: [] } as const, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC } as const };
+    const multiInput = { weapons: { shipA: [shipATurret, secondTurret] as const, shipB: [] as const }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] } as const, missileFacts: { shipA: [], shipB: [] } as const, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC } as const, overloaded: { shipA: false, shipB: false } as const };
     const view = composer.compose(snapshot, multiInput);
     expect(view.attacks.shipA).toBeDefined();
     expect(view.attacks.shipA!.damage.nominalDps).toBe(shipADamage.nominalDps + secondDamage.nominalDps);
@@ -168,9 +168,45 @@ describe("EngagementFrameComposerImpl", () => {
       if (attacks.shipA?.weapon === shipBTurret) return { shipA: secondAssessment, shipB: undefined };
       return { shipA: undefined, shipB: undefined };
     });
-    const multiInput = { weapons: { shipA: [shipATurret, shipBTurret] as const, shipB: [] as const }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] } as const, missileFacts: { shipA: [], shipB: [] } as const, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC } as const };
+    const multiInput = { weapons: { shipA: [shipATurret, shipBTurret] as const, shipB: [] as const }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] } as const, missileFacts: { shipA: [], shipB: [] } as const, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC } as const, overloaded: { shipA: false, shipB: false } as const };
     const view = composer.compose(snapshot, multiInput);
     expect(view.attacks.shipA).toBeDefined();
     expect(view.attacks.shipA!.damage.appliedByType).toEqual(damageVectorAdd(firstByType, secondByType));
+  });
+
+  test("defenses are forwarded with correct appliedByType routing and overload flag", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    const shipAAttackByType = { em: 100, thermal: 0, kinetic: 0, explosive: 0 };
+    const shipBAttackByType = { em: 0, thermal: 100, kinetic: 0, explosive: 0 };
+    engagementEvaluator.evaluate.mockReturnValue({
+      shipA: { ...shipAAssessment, damage: { ...shipADamage, appliedByType: shipAAttackByType } },
+      shipB: { ...shipBAssessment, damage: { ...shipBDamage, appliedByType: shipBAttackByType } },
+    });
+    const shipADefense: DefenseSpec = {
+      layers: {
+        shield: { hp: 1000, resists: { em: 0.5, thermal: 0, kinetic: 0, explosive: 0 } },
+        armor: { hp: 1000, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
+        hull: { hp: 1000, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
+      },
+      shieldRechargeTime: 100,
+      repairers: [{ layer: "shield", amount: 100, cycleTime: 5, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1.15, cycleTimeMultiplier: 0.85 } }],
+      signaturePenalty: 0,
+    };
+    const shipBDefense: DefenseSpec = {
+      layers: {
+        shield: { hp: 1000, resists: { em: 0, thermal: 0.5, kinetic: 0, explosive: 0 } },
+        armor: { hp: 1000, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
+        hull: { hp: 1000, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
+      },
+      shieldRechargeTime: 100,
+      repairers: [],
+      signaturePenalty: 0,
+    };
+    const defenseInput = { weapons: { shipA: [shipATurret] as const, shipB: [shipBTurret] as const }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] } as const, missileFacts: { shipA: [], shipB: [] } as const, defenses: { shipA: shipADefense, shipB: shipBDefense } as const, overloaded: { shipA: true, shipB: false } as const };
+    const view = composer.compose(snapshot, defenseInput);
+    expect(view.defenses.shipA.layers.shield.ehp).toBeCloseTo(1000, 2);
+    expect(view.defenses.shipB.layers.shield.ehp).toBeCloseTo(1000, 2);
+    expect(view.defenses.shipA.repairPerSecond.shield).toBeCloseTo((100 * 1.15) / (5 * 0.85), 5);
+    expect(view.defenses.shipB.repairPerSecond.shield).toBe(0);
   });
 });

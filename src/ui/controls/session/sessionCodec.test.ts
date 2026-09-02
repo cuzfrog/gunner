@@ -28,6 +28,7 @@ import type { TrackingInput } from "../trackingInput";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
+import type { DefenseController } from "../defense";
 import type { LauncherController } from "../launcher";
 import type { DroneController } from "../drone";
 import type { WeaponSystemSwitch } from "../sidePanel";
@@ -56,12 +57,14 @@ function panelStateFrom(settings: UserSettings, side: "shipA" | "shipB"): SidePa
     skillLevel: side === "shipA" ? settings.shipASkillLevel : settings.shipBSkillLevel,
     overload: side === "shipA" ? settings.shipAOverload ?? true : settings.shipBOverload ?? true,
     weaponOverload: side === "shipA" ? settings.shipAWeaponOverload ?? false : settings.shipBWeaponOverload ?? false,
+    damageEnabled: side === "shipA" ? settings.shipADamageEnabled ?? true : settings.shipBDamageEnabled ?? true,
     hull: side === "shipA" ? settings.shipAHullId : settings.shipBHullId,
     propulsion: side === "shipA" ? settings.shipAPropulsion : settings.shipBPropulsion,
     fitting: side === "shipA" ? settings.shipAFitting : settings.shipBFitting,
     overrides: side === "shipA" ? (settings.shipAOverrides ?? {}) : (settings.shipBOverrides ?? {}),
     fittedHull,
     sig: side === "shipA" ? settings.shipASig : settings.shipBSig,
+    defenseSkills: undefined,
   };
 }
 
@@ -133,6 +136,7 @@ function sidePanelStateWithDefaults(state: Partial<SidePanelState>): SidePanelSt
     fitting: undefined,
     overrides: {},
     fittedHull: undefined,
+    defenseSkills: undefined,
     ...state,
   };
 }
@@ -185,6 +189,29 @@ function mockMissileBoosterController(): MissileBoosterController {
     render: vi.fn(),
     updateSummaries: vi.fn(),
   } as unknown as MissileBoosterController;
+}
+
+function mockDefenseController(): DefenseController {
+  return {
+    setDefenseSpec: vi.fn(),
+    spec: vi.fn(() => undefined),
+    updateAssessments: vi.fn(),
+    updateDefenseView: vi.fn(),
+    updateSummaries: vi.fn(),
+    render: vi.fn(),
+    signaturePenalty: vi.fn(() => 0),
+    updateEffectiveSig: vi.fn(),
+    damageEnabled: vi.fn(() => true),
+    setDamageEnabled: vi.fn(),
+    repairMode: vi.fn(() => "auto" as const),
+    setRepairMode: vi.fn(),
+    repairerActivation: vi.fn(() => []),
+    setRepairerActivation: vi.fn(),
+    rahActivation: vi.fn(() => undefined),
+    setRahActivation: vi.fn(),
+    restore: vi.fn(),
+    cyclingEffects: vi.fn(() => []),
+  } as unknown as DefenseController;
 }
 
 function mockFittingImport(): FittingImport {
@@ -323,6 +350,7 @@ function buildCodec(options: {
   ewarController?: Partial<EwarController>;
   boosterController?: Partial<BoosterController>;
   missileBoosterController?: Partial<MissileBoosterController>;
+  defenseController?: Partial<DefenseController>;
   fittingImport?: Partial<FittingImport>;
   parser?: Partial<SettingsParser>;
   events?: UiEvents;
@@ -360,6 +388,7 @@ function buildCodec(options: {
   const ewarController = { ...mockEwarController(), ...options.ewarController } as unknown as EwarController;
   const boosterController = { ...mockBoosterController(), ...options.boosterController } as unknown as BoosterController;
   const missileBoosterController = { ...mockMissileBoosterController(), ...options.missileBoosterController } as unknown as MissileBoosterController;
+  const defenseController = { ...mockDefenseController(), ...options.defenseController } as unknown as DefenseController;
   const fittingImport = { ...mockFittingImport(), ...options.fittingImport } as unknown as FittingImport;
   const parser = { ...mockParser(), ...options.parser } as unknown as SettingsParser;
   const events = options.events ?? new UiEventsImpl();
@@ -384,10 +413,11 @@ function buildCodec(options: {
     ewarController,
     boosterController,
     missileBoosterController,
+    defenseController,
     fittingImport,
     parser,
   });
-  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, fittingImport, parser };
+  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, defenseController, fittingImport, parser };
 }
 
 function makeProfile(): ProfileSettings {
@@ -697,8 +727,8 @@ describe("SessionCodec", () => {
   });
 
   test("resetToDefaults clears the selected profile and ship state back to pristine", () => {
-    const pristineShipA = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
-    const pristineShipB = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
+    const pristineShipA = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, weaponOverload: false, damageEnabled: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
+    const pristineShipB = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, weaponOverload: false, damageEnabled: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
     const shipA = mockSidePanel("shipA", pristineShipA);
     const shipB = mockSidePanel("shipB", pristineShipB);
     const clearSelectedProfile = vi.fn();
@@ -848,5 +878,23 @@ describe("SessionCodec", () => {
     expect(clearSelectedProfile).toHaveBeenCalled();
     expect(onSessionReset).toHaveBeenCalled();
     expect(onStartupDefaultsApplied).toHaveBeenCalled();
+  });
+
+  test("capture and restore round-trips defense repair mode and activation state", () => {
+    const defenseController = mockDefenseController();
+    defenseController.damageEnabled = vi.fn(() => true);
+    defenseController.repairMode = vi.fn(() => "manual" as const);
+    defenseController.repairerActivation = vi.fn(() => [{ active: false, overloaded: true }]);
+    defenseController.rahActivation = vi.fn(() => ({ active: true, overloaded: false }));
+    const { codec } = buildCodec({ defenseController });
+    const captured = codec.capture();
+    expect(captured.shipARepMode).toBe("manual");
+    expect(captured.shipBRepMode).toBe("manual");
+    expect(captured.shipARepairerActivation).toEqual([{ active: false, overloaded: true }]);
+    expect(captured.shipARahActivation).toEqual({ active: true, overloaded: false });
+    const session = codec.fromProfile(codec.captureProfile());
+    codec.restore(session, "");
+    expect(defenseController.restore).toHaveBeenCalledWith("shipA", true, "manual", [{ active: false, overloaded: true }], { active: true, overloaded: false });
+    expect(defenseController.restore).toHaveBeenCalledWith("shipB", true, "manual", [{ active: false, overloaded: true }], { active: true, overloaded: false });
   });
 });

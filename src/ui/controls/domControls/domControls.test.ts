@@ -1,7 +1,7 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import { EMPTY_DEFENSE_ASSESSMENT, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
 import type { Ships } from "../../../ships";
 import type { EffectiveReadouts } from "../controlsContract";
 import { USER_SETTINGS_VERSION } from "../../../appstate";
@@ -59,6 +59,22 @@ function makeView(distance: number): EngagementView {
     radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
   };
   return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT } };
+}
+
+function mockDefenseView(): DefenseView {
+  const emptyPools = { shield: 0, armor: 0, hull: 0 };
+  const emptyPercentages = { shield: 0, armor: 0, hull: 0 };
+  return {
+    pools: { shipA: emptyPools, shipB: emptyPools },
+    poolPercentages: { shipA: emptyPercentages, shipB: emptyPercentages },
+    dead: { shipA: false, shipB: false },
+    deadAt: { shipA: undefined, shipB: undefined },
+    damageEnabled: { shipA: true, shipB: true },
+    shieldRegenPerSecond: { shipA: 0, shipB: 0 },
+    repairers: { shipA: [], shipB: [] },
+    repairMode: { shipA: "auto", shipB: "auto" },
+    rah: { shipA: undefined, shipB: undefined },
+  };
 }
 
 function baseSettings(): UserSettings {
@@ -387,7 +403,7 @@ describe("DomControls", () => {
     const sideA = sideReadoutValues(300, 0.32, 1000, 3000, 0.32, 2000, 3000);
     const sideB = sideReadoutValues(150, 0.32, 1000, 3000, 0.32, 1000, 3000);
     const effective: EffectiveReadouts = { shipA: sideA, shipB: sideB };
-    controls.update(view, effective);
+    controls.update(view, effective, mockDefenseView());
     expect(getFake(document, "effective-ship-a-speed").textContent).toBe("300 m/s");
     expect(getFake(document, "effective-ship-b-speed").textContent).toBe("150 m/s");
     expect(getFake(document, "effective-ship-a-tracking").textContent).toBe("0.32 rad/s");
@@ -441,8 +457,8 @@ describe("DomControls", () => {
     const engagementUpdate = vi.spyOn(cradle.cradle.engagementReadout, "update");
     const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
     const { view, effective } = readoutFixtures();
-    controls.update(view, effective);
-    controls.update(view, effective);
+    controls.update(view, effective, mockDefenseView());
+    controls.update(view, effective, mockDefenseView());
     expect(engagementUpdate).toHaveBeenCalledTimes(2);
     expect(effectiveUpdate).toHaveBeenCalledTimes(2);
   });
@@ -454,11 +470,11 @@ describe("DomControls", () => {
     const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
     const { view, effective } = readoutFixtures();
     controls.setPlaying(true);
-    controls.update(view, effective);
+    controls.update(view, effective, mockDefenseView());
     fakeNow = 10;
-    controls.update(view, effective);
+    controls.update(view, effective, mockDefenseView());
     fakeNow = 60;
-    controls.update(view, effective);
+    controls.update(view, effective, mockDefenseView());
     expect(engagementUpdate).toHaveBeenCalledTimes(2);
     expect(effectiveUpdate).toHaveBeenCalledTimes(2);
   });
@@ -470,9 +486,9 @@ describe("DomControls", () => {
     const { view, effective } = readoutFixtures();
     const effective2: EffectiveReadouts = { ...effective, shipB: { ...effective.shipB, speed: 50 } };
     controls.setPlaying(true);
-    controls.update(view, effective);
+    controls.update(view, effective, mockDefenseView());
     fakeNow = 10;
-    controls.update(view, effective2);
+    controls.update(view, effective2, mockDefenseView());
     controls.setPlaying(false);
     expect(effectiveUpdate).toHaveBeenLastCalledWith(effective2);
     expect(effectiveUpdate).toHaveBeenCalledTimes(2);

@@ -21,5 +21,6 @@ const { idPrefix } = Astro.props;
   <select class="input-field" id={`${idPrefix}-skills`} hidden></select>
   <PopupBox id={`${idPrefix}-skill-popup`} extraClass="skill-popup" position="above" align="both">
     <div class="skill-tuner" id={`${idPrefix}-skill-options`} role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
+    <div class="defense-skills" id={`${idPrefix}-defense-skills`} role="group" data-i18n-aria-label="label.defenseSkills" aria-label="Defense skills"></div>
   </PopupBox>
 </div>

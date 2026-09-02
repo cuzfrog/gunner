@@ -455,12 +455,24 @@ export interface RepairerSpec {
   readonly heatDamage: number;
   readonly overload: { readonly amountMultiplier: number; readonly cycleTimeMultiplier: number };
   readonly ancillary?: { readonly chargeMultiplier: number; readonly shots: number; readonly reloadTime: number };
+  readonly moduleId?: TypeId;
+}
+
+export interface RahSpec {
+  readonly cycleTime: number;
+  readonly shiftAmount: number;
+  readonly baseResists: DamageResists;
+  readonly overloadCycleTimeMultiplier: number;
+  readonly armorResistsWithoutRah: DamageResists;
+  readonly moduleId?: TypeId;
 }
 
 export interface DefenseSpec {
   readonly layers: Readonly<Record<DefenseLayer, DefenseLayerSpec>>;
   readonly shieldRechargeTime: number;
   readonly repairers: readonly RepairerSpec[];
+  readonly signaturePenalty: number;
+  readonly rah?: RahSpec;
 }
 
 export const ZERO_RESISTS: DamageResists = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
@@ -473,4 +485,5 @@ export const EMPTY_DEFENSE_SPEC: DefenseSpec = {
   },
   shieldRechargeTime: 0,
   repairers: [],
+  signaturePenalty: 0,
 };

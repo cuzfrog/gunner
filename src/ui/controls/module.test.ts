@@ -62,6 +62,7 @@ const controlsCradleKeys = {
   simConfigSource: "simConfigSource",
   importController: "importController",
   ewarController: "ewarController",
+  defenseController: "defenseController",
   boosterController: "boosterController",
   missileBoosterController: "missileBoosterController",
   portraitsController: "portraitsController",

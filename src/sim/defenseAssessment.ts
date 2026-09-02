@@ -1,5 +1,4 @@
-import type { DamageVector, DefenseLayer, DefenseSpec, RepairerSpec } from "./types";
-import { DAMAGE_TYPES } from "./types";
+import { type DamageVector, type DefenseLayer, type DefenseLayerSpec, type DefenseSpec, type RepairerSpec, DAMAGE_TYPES } from "./types";
 
 export interface LayerEhp {
   readonly layer: DefenseLayer;
@@ -15,7 +14,7 @@ export interface DefenseAssessment {
 }
 
 export interface DefenseAssessor {
-  assess(spec: DefenseSpec, incoming: DamageVector): DefenseAssessment;
+  assess(spec: DefenseSpec, incoming: DamageVector, overloaded: boolean): DefenseAssessment;
 }
 
 export const EMPTY_DEFENSE_ASSESSMENT: DefenseAssessment = {
@@ -30,7 +29,7 @@ export const EMPTY_DEFENSE_ASSESSMENT: DefenseAssessment = {
 };
 
 export class DefenseAssessorImpl implements DefenseAssessor {
-  assess(spec: DefenseSpec, incoming: DamageVector): DefenseAssessment {
+  assess(spec: DefenseSpec, incoming: DamageVector, overloaded: boolean): DefenseAssessment {
     const totalIncoming = sumVector(incoming);
     const shares = totalIncoming > 0 ? normalizeShares(incoming, totalIncoming) : uniformShares();
 
@@ -39,7 +38,7 @@ export class DefenseAssessorImpl implements DefenseAssessor {
     const hullEhp = computeLayerEhp(spec.layers.hull, shares);
     const totalEhp = shieldEhp + armorEhp + hullEhp;
 
-    const repairPerSecond = computeRepairPerSecond(spec.repairers);
+    const repairPerSecond = computeRepairPerSecond(spec.repairers, overloaded);
     const shieldRegenPerSecond = computeShieldRegen(spec);
 
     return {
@@ -55,20 +54,20 @@ export class DefenseAssessorImpl implements DefenseAssessor {
   }
 }
 
-function computeLayerEhp(layer: { readonly hp: number; readonly resists: Readonly<Record<keyof DamageVector, number>> }, shares: Readonly<Record<keyof DamageVector, number>>): number {
-  let ehp = 0;
+function computeLayerEhp(layer: DefenseLayerSpec, shares: Readonly<Record<keyof DamageVector, number>>): number {
+  let effectiveResonance = 0;
   for (const type of DAMAGE_TYPES) {
-    const share = shares[type];
-    const resist = layer.resists[type];
-    ehp += layer.hp * share / (1 - resist);
+    effectiveResonance += shares[type] * (1 - layer.resists[type]);
   }
-  return ehp;
+  return effectiveResonance > 0 ? layer.hp / effectiveResonance : 0;
 }
 
-function computeRepairPerSecond(repairers: readonly RepairerSpec[]): Readonly<Record<DefenseLayer, number>> {
+function computeRepairPerSecond(repairers: readonly RepairerSpec[], overloaded: boolean): Readonly<Record<DefenseLayer, number>> {
   const result: Record<DefenseLayer, number> = { shield: 0, armor: 0, hull: 0 };
   for (const rep of repairers) {
-    result[rep.layer] += rep.amount / rep.cycleTime;
+    const amount = overloaded ? rep.amount * rep.overload.amountMultiplier : rep.amount;
+    const cycleTime = overloaded ? rep.cycleTime * rep.overload.cycleTimeMultiplier : rep.cycleTime;
+    result[rep.layer] += amount / cycleTime;
   }
   return result;
 }

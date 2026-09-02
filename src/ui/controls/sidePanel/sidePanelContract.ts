@@ -1,5 +1,5 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
-import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
+import type { DefenseSkills, ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
 import type { AutopilotMode, SimValueParser } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -67,8 +67,10 @@ export interface SidePanelState {
   readonly range: number;
   readonly aggressivity: number;
   readonly skillLevel: SkillLevel | undefined;
+  readonly defenseSkills?: DefenseSkills;
   readonly overload: boolean;
   readonly weaponOverload: boolean;
+  readonly damageEnabled?: boolean;
   readonly hull: ShipId | undefined;
   readonly propulsion: PropulsionSelection | undefined;
   readonly fitting: string | undefined;

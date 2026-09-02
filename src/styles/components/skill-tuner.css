@@ -46,4 +46,49 @@
   border-color: var(--accent-orange);
   color: var(--accent-orange);
 }
+
+.defense-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.defense-skill-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.defense-skill-label {
+  flex: 0 0 auto;
+  width: 140px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.defense-skill-options {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 2px;
+}
+
+.defense-skill-options > .btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 2px 0;
+  font-size: 10px;
+}
+
+.defense-skill-options [aria-pressed="true"] {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
 }

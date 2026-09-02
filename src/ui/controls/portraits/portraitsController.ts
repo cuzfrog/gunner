@@ -4,6 +4,7 @@ import type { ImageCatalog } from "../../icons";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import type { EwarController } from "../ewar";
+import type { DefenseController } from "../defense";
 import type { Side } from "../side";
 import type { CombatantProfiles, PortraitsEls, PortraitsController } from "./portraitsControllerContract";
 import { html } from "../markup";
@@ -23,6 +24,7 @@ export class PortraitsControllerImpl implements PortraitsController {
   private readonly imageCatalog: ImageCatalog;
   private readonly ewarController: EwarController;
   private readonly ewarResolver: EwarResolver;
+  private readonly defenseController: DefenseController;
   private readonly combatantProfiles: CombatantProfiles;
   private readonly events: UiEvents;
   private readonly i18n: I18n;
@@ -35,6 +37,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     imageCatalog: ImageCatalog;
     ewarController: EwarController;
     ewarResolver: EwarResolver;
+    defenseController: DefenseController;
     combatantProfiles: CombatantProfiles;
     events: UiEvents;
     i18n: I18n;
@@ -43,6 +46,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     this.imageCatalog = deps.imageCatalog;
     this.ewarController = deps.ewarController;
     this.ewarResolver = deps.ewarResolver;
+    this.defenseController = deps.defenseController;
     this.combatantProfiles = deps.combatantProfiles;
     this.events = deps.events;
     this.i18n = deps.i18n;
@@ -73,7 +77,9 @@ export class PortraitsControllerImpl implements PortraitsController {
     const speedBreakdown = this.ewarResolver.speedBreakdown(projection, this.distance);
     const disruptionBreakdown = this.ewarResolver.disruptionBreakdown(projection, this.distance);
     const portraitEffects = buildPortraitEffects(speedBreakdown, disruptionBreakdown, this.i18n);
-    const key = buildDiffKey(profile.id, portraitEffects);
+    const defenseEffects = this.defenseController.cyclingEffects(side);
+    const allEffects = [...portraitEffects, ...defenseEffects];
+    const key = buildDiffKey(profile.id, allEffects);
     if (state.lastKey === key) return;
     state.lastKey = key;
     if (root.hidden) root.hidden = false;
@@ -83,7 +89,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     }
     effects.innerHTML = "";
     const icons = document.createDocumentFragment();
-    for (const effect of portraitEffects) {
+    for (const effect of allEffects) {
       const iconUrl = this.imageCatalog.itemIconUrl(effect.moduleId);
       if (iconUrl === undefined) continue;
       const img = html`<img class="portrait-effect-icon" src=${iconUrl} alt="" data-hint=${effect.hint}>` as unknown as HTMLImageElement;

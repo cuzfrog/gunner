@@ -106,6 +106,7 @@ export class SidePanelImpl implements SidePanel {
       this.sections.hull.refreshHullInputs();
       this.sections.hull.updateHullHint();
       this.sections.skill.renderSkillOptions();
+      this.sections.skill.renderDefenseSkills();
     });
   }
 
@@ -177,6 +178,7 @@ export class SidePanelImpl implements SidePanel {
       inertia: num(this.els.inertia),
       ...nav,
       skillLevel: this.sections.skill.currentSkillLevel(),
+      defenseSkills: this.sections.skill.currentDefenseSkills(),
       overload: this.els.overload.checked,
       weaponOverload: this.sections.skill.isWeaponOverloaded(),
       hull: this.profile?.id,
@@ -197,6 +199,8 @@ export class SidePanelImpl implements SidePanel {
     this.sections.nav.restore({ mode: state.mode, range: state.range, aggressivity: state.aggressivity });
     this.sections.hull.loadHull(state.hull, state.propulsion);
     this.sections.skill.setSkillLevel(state.skillLevel ?? 5);
+    if (state.defenseSkills) this.sections.skill.setDefenseSkills(state.defenseSkills);
+    else this.sections.skill.resetDefenseSkills();
     this.sections.skill.setOverloadActive(state.overload);
     this.sections.skill.setWeaponOverloaded(state.weaponOverload);
     this.sections.skill.setOverloadDisabled();

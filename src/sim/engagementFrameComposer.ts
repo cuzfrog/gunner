@@ -1,15 +1,14 @@
 import type { AttackAssessment, AttackState, EngagementEvaluator } from "./fireControl";
 import type { Kinematics } from "./kinematics";
 import type { DefenseAssessor, DefenseAssessment } from "./defenseAssessment";
-import type { DamageAssessment, DefenseSpec, DroneRuntimeState, EngagementFrame, MissileAttackFacts, Side, SimSnapshot, WeaponSpec } from "./types";
-import { ZERO_DAMAGE, damageVectorAdd } from "./types";
-
+import { type DamageAssessment, type DefenseSpec, type DroneRuntimeState, type EngagementFrame, type MissileAttackFacts, type Side, type SimSnapshot, type WeaponSpec, ZERO_DAMAGE, damageVectorAdd } from "./types";
 export interface EngagementInput {
   readonly weapons: Record<Side, readonly WeaponSpec[]>;
   readonly sigRadii: Record<Side, number>;
   readonly droneStates: Record<Side, readonly DroneRuntimeState[]>;
   readonly missileFacts: Record<Side, readonly MissileAttackFacts[]>;
   readonly defenses: Record<Side, DefenseSpec>;
+  readonly overloaded: Record<Side, boolean>;
 }
 
 export interface WeaponAttack {
@@ -80,8 +79,8 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
     const shipAIncoming = attacks.shipB?.damage.appliedByType ?? ZERO_DAMAGE;
     const shipBIncoming = attacks.shipA?.damage.appliedByType ?? ZERO_DAMAGE;
     return {
-      shipA: this.defenseAssessor.assess(input.defenses.shipA, shipAIncoming),
-      shipB: this.defenseAssessor.assess(input.defenses.shipB, shipBIncoming),
+      shipA: this.defenseAssessor.assess(input.defenses.shipA, shipAIncoming, input.overloaded.shipA),
+      shipB: this.defenseAssessor.assess(input.defenses.shipB, shipBIncoming, input.overloaded.shipB),
     };
   }
 

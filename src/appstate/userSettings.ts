@@ -1,5 +1,5 @@
 import type { AutopilotMode, SigResolutionClass, WeaponKind } from "../sim";
-import type { FittedHull, PropulsionId, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
+import type { DefenseSkills, FittedHull, PropulsionId, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
 import type { ShipId, TypeId } from "../gamedata/ids";
 import type { DroneGroup } from "../fitting";
 import type { Language } from "./language";
@@ -28,6 +28,18 @@ export interface StoredMissileBoosterActivation {
   readonly active: boolean;
   readonly overloaded: boolean;
   readonly script: StoredDisruptionScript;
+}
+
+export type StoredRepairMode = "auto" | "manual";
+
+export interface StoredRepairerActivation {
+  readonly active: boolean;
+  readonly overloaded: boolean;
+}
+
+export interface StoredRahActivation {
+  readonly active: boolean;
+  readonly overloaded: boolean;
 }
 
 export interface FittedHullSummary {
@@ -87,8 +99,10 @@ export interface UserSettings {
   shipAMass: number;
   shipAInertia: number;
   shipASkillLevel?: SkillLevel;
+  shipADefenseSkills?: DefenseSkills;
   shipAOverload?: boolean;
   shipAWeaponOverload?: boolean;
+  shipADamageEnabled?: boolean;
   initialDistance: number;
   shipBSpeed: number;
   shipBMode: AutopilotMode;
@@ -98,8 +112,10 @@ export interface UserSettings {
   shipASig?: number;
   shipBSig: number;
   shipBSkillLevel?: SkillLevel;
+  shipBDefenseSkills?: DefenseSkills;
   shipBOverload?: boolean;
   shipBWeaponOverload?: boolean;
+  shipBDamageEnabled?: boolean;
   shipAHullId?: ShipId;
   shipAPropulsion?: PropulsionSelection;
   shipBHullId?: ShipId;
@@ -116,6 +132,12 @@ export interface UserSettings {
   shipBBoosterActivation?: readonly StoredBoosterActivation[];
   shipAMissileBoosterActivation?: readonly StoredMissileBoosterActivation[];
   shipBMissileBoosterActivation?: readonly StoredMissileBoosterActivation[];
+  shipARepMode?: StoredRepairMode;
+  shipBRepMode?: StoredRepairMode;
+  shipARepairerActivation?: readonly StoredRepairerActivation[];
+  shipBRepairerActivation?: readonly StoredRepairerActivation[];
+  shipARahActivation?: StoredRahActivation;
+  shipBRahActivation?: StoredRahActivation;
   shipAAmmo: TypeId;
   shipBAmmo: TypeId;
   shipAWeaponKind?: WeaponKind;

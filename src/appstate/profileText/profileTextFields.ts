@@ -1,9 +1,10 @@
 import type { DroneGroup } from "../../fitting";
-import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation } from "../userSettings";
+import type { DefenseSkills } from "../../ships";
+import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation, StoredRahActivation, StoredRepairMode, StoredRepairerActivation } from "../userSettings";
 
 export type Side = "shipA" | "shipB";
 export type ScalarField = keyof Omit<ProfileSettings, "shipAFitting" | "shipBFitting" | "shipAOverrides" | "shipBOverrides">;
-export type ScalarValue = string | number | boolean | FittedHullSummary | StoredEwarActivation | readonly StoredBoosterActivation[] | readonly StoredMissileBoosterActivation[] | readonly DroneGroup[];
+export type ScalarValue = string | number | boolean | FittedHullSummary | StoredEwarActivation | readonly StoredBoosterActivation[] | readonly StoredMissileBoosterActivation[] | readonly StoredRepairerActivation[] | StoredRahActivation | StoredRepairMode | readonly DroneGroup[] | DefenseSkills;
 
 export const GLOBAL_FIELDS: readonly ScalarField[] = [
   "version",
@@ -19,13 +20,19 @@ export const SHIP_A_FIELDS: readonly ScalarField[] = [
   "shipAInertia",
   "shipASig",
   "shipASkillLevel",
+  "shipADefenseSkills",
   "shipAOverload",
+  "shipAWeaponOverload",
+  "shipADamageEnabled",
   "shipAHullId",
   "shipAPropulsion",
   "shipAFittedHull",
   "shipAEwarActivation",
   "shipABoosterActivation",
   "shipAMissileBoosterActivation",
+  "shipARepMode",
+  "shipARepairerActivation",
+  "shipARahActivation",
   "shipATracking",
   "shipASigRes",
   "shipAOptimal",
@@ -45,13 +52,19 @@ export const SHIP_B_FIELDS: readonly ScalarField[] = [
   "shipBInertia",
   "shipBSig",
   "shipBSkillLevel",
+  "shipBDefenseSkills",
   "shipBOverload",
+  "shipBWeaponOverload",
+  "shipBDamageEnabled",
   "shipBHullId",
   "shipBPropulsion",
   "shipBFittedHull",
   "shipBEwarActivation",
   "shipBBoosterActivation",
   "shipBMissileBoosterActivation",
+  "shipBRepMode",
+  "shipBRepairerActivation",
+  "shipBRahActivation",
   "shipBTracking",
   "shipBSigRes",
   "shipBOptimal",

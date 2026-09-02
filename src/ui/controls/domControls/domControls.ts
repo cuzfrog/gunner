@@ -1,5 +1,6 @@
 import {
   type DefenseSpec,
+  type DefenseView,
   type EngagementView,
   type SimConfig,
   type WeaponSpec,
@@ -21,12 +22,13 @@ import type { TurretController } from "../turret";
 import type { LauncherController } from "../launcher";
 import type { DroneController } from "../drone";
 import type { EwarController } from "../ewar";
+import type { DefenseController } from "../defense";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
 import type { ImportController } from "../import";
 import type { ShareController } from "../share";
 import type { RangeOverlay } from "../../renderer";
-import type { WeaponRangeVisibility } from "../../../appstate";
+import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation, WeaponRangeVisibility } from "../../../appstate";
 import type { RangeOverlayController } from "../rangeOverlay";
 import type { PortraitsController } from "../portraits";
 import type { HoverHintController } from "../hoverHint";
@@ -57,6 +59,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   importController: ImportController;
   ewarController: EwarController;
+  defenseController: DefenseController;
   boosterController: BoosterController;
   missileBoosterController: MissileBoosterController;
   shareController: ShareController;
@@ -87,6 +90,7 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   private readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   private readonly importController: ImportController;
   private readonly ewarController: EwarController;
+  private readonly defenseController: DefenseController;
   private readonly boosterController: BoosterController;
   private readonly missileBoosterController: MissileBoosterController;
   private readonly shareController: ShareController;
@@ -121,6 +125,7 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     this.weaponSystemSwitches = all.weaponSystemSwitches;
     this.importController = all.importController;
     this.ewarController = all.ewarController;
+    this.defenseController = all.defenseController;
     this.boosterController = all.boosterController;
     this.missileBoosterController = all.missileBoosterController;
     this.shareController = all.shareController;
@@ -149,6 +154,8 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     this.hullDatalist.populate();
     this.shipASide.sections.skill.renderSkillOptions();
     this.shipBSide.sections.skill.renderSkillOptions();
+    this.shipASide.sections.skill.renderDefenseSkills();
+    this.shipBSide.sections.skill.renderDefenseSkills();
     this.els.play.addEventListener("click", () => this.onPlayPause());
     this.els.reset.addEventListener("click", () => this.onReset());
     this.els.simSpeed.addEventListener("change", () => this.onSpeedChange(this.preferencesController.getSpeed()));
@@ -165,6 +172,7 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     this.shipASide.sections.skill.setOverloadDisabled();
     this.shipBSide.sections.skill.setOverloadDisabled();
     this.ewarController.updateSummaries();
+    this.defenseController.updateSummaries();
     this.boosterController.updateSummaries();
     this.missileBoosterController.updateSummaries();
     this.rangeOverlayController.render();
@@ -265,12 +273,13 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   }
   getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
   getDefense(side: Side): DefenseSpec {
-    const panel = this.sideFor(side);
-    const fittingText = panel.fittingText;
-    if (!fittingText) return EMPTY_DEFENSE_SPEC;
-    const imported = panel.fittingImport.importFitting(fittingText, panel.skillConditions());
-    return imported?.defense ?? EMPTY_DEFENSE_SPEC;
+    return this.defenseController.spec(side) ?? EMPTY_DEFENSE_SPEC;
   }
+  getDamageEnabled(side: Side): boolean { return this.defenseController.damageEnabled(side); }
+  getRepairMode(side: Side): StoredRepairMode { return this.defenseController.repairMode(side); }
+  getRepairerActivation(side: Side): readonly StoredRepairerActivation[] { return this.defenseController.repairerActivation(side); }
+  getRahActivation(side: Side): StoredRahActivation | undefined { return this.defenseController.rahActivation(side); }
+  getOverloaded(side: Side): boolean { return this.sideFor(side).skillConditions().overloaded; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
   getGridBrightness(): number { return this.preferencesController.getGridBrightness(); }
@@ -281,10 +290,11 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   getDroneRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneRangeVisibility(); }
   getDroneControlRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneControlRangeVisibility(); }
   hasWeapon(side: Side): boolean { return this.turretControllers[side].turret() !== undefined || this.launcherControllers[side].launcher() !== undefined || this.droneControllers[side].drone() !== undefined; }
-  update(view: EngagementView, effective: EffectiveReadouts): void {
+  update(view: EngagementView, effective: EffectiveReadouts, defenseView: DefenseView): void {
     this.currentDistanceValue = view.frame.distance;
     this.deps.events.emitDistanceChanged(this.currentDistanceValue);
     this.cachedReadouts = { view, effective };
+    this.defenseController.updateDefenseView(defenseView);
     this.applyReadoutsIfReady();
     this.rangeOverlayController.update();
     this.portraitsController.update();
@@ -315,6 +325,9 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   private applyReadouts(view: EngagementView, effective: EffectiveReadouts): void {
     this.engagementReadout.update(view, (key) => this.deps.i18n.t(key));
     this.effectiveReadout.update(effective);
+    this.defenseController.updateAssessments(view);
+    this.defenseController.updateEffectiveSig("shipA", this.getSig("shipA"));
+    this.defenseController.updateEffectiveSig("shipB", this.getSig("shipB"));
   }
 
   private onDocumentPointerDown(event: PointerEvent): void {

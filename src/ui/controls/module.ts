@@ -22,6 +22,7 @@ import type { Side } from "./side";
 import { registerSidePanelModule } from "./sidePanel";
 import { registerTurretModule } from "./turret";
 import { registerEwarModule } from "./ewar";
+import { registerDefenseModule } from "./defense";
 import { registerBoosterModule } from "./booster";
 import { registerMissileBoosterModule } from "./missileBooster";
 import { registerRangeOverlayModule } from "./rangeOverlay";
@@ -44,6 +45,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerDroneModule(cradle);
   registerSidePanelModule(cradle);
   registerEwarModule(cradle);
+  registerDefenseModule(cradle);
   registerBoosterModule(cradle);
   registerMissileBoosterModule(cradle);
   registerRangeOverlayModule(cradle);

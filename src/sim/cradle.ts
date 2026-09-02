@@ -1,6 +1,7 @@
 import type {
   Autopilot,
   DefenseAssessor,
+  DefenseSimulator,
   DroneApplication,
   DroneSimulator,
   EwarResolver,
@@ -39,5 +40,6 @@ export interface SimCradle {
   readonly engagementEvaluator: EngagementEvaluator;
   readonly engagementFrameComposer: EngagementFrameComposer;
   readonly defenseAssessor: DefenseAssessor;
+  readonly defenseSimulator: DefenseSimulator;
   readonly simConfig: SimConfig;
 }

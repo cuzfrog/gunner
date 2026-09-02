@@ -1,6 +1,7 @@
 import { asClass, type AwilixContainer } from "awilix";
 import { ReactiveAutopilot } from "./autopilot";
 import { DefenseAssessorImpl } from "./defenseAssessment";
+import { DefenseSimulatorImpl } from "./defenseSimulator";
 import { DroneApplicationImpl } from "./droneApplication";
 import { DroneSimulatorImpl } from "./droneSimulator";
 import { MissileSimulatorImpl } from "./missileSimulator";
@@ -40,5 +41,6 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     engagementEvaluator: asClass(EngagementEvaluatorImpl).singleton(),
     engagementFrameComposer: asClass(EngagementFrameComposerImpl).singleton(),
     defenseAssessor: asClass(DefenseAssessorImpl).singleton(),
+    defenseSimulator: asClass(DefenseSimulatorImpl).singleton(),
   });
 }

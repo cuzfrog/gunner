@@ -1,6 +1,6 @@
 import type { App } from "./app";
 import type { Controls, Loop, Renderer } from "../ui";
-import type { DroneSimulator, EngagementFrameComposer, EwarResolver, MissileBoosterResolver, MissileSimulator, Simulation } from "../sim";
+import type { DefenseSimulator, DroneSimulator, EngagementFrameComposer, EwarResolver, MissileBoosterResolver, MissileSimulator, Simulation } from "../sim";
 
 export interface AppCradle {
   readonly app: App;
@@ -8,6 +8,7 @@ export interface AppCradle {
   readonly simulation: Simulation;
   readonly droneSimulator: DroneSimulator;
   readonly missileSimulator: MissileSimulator;
+  readonly defenseSimulator: DefenseSimulator;
   readonly engagementFrameComposer: EngagementFrameComposer;
   readonly ewarResolver: EwarResolver;
   readonly missileBoosterResolver: MissileBoosterResolver;

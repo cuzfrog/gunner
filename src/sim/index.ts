@@ -9,6 +9,7 @@ export type { MissileBoosterResolver } from "./missileBoosterResolver";
 export type { EngagementFrameComposer, EngagementInput, EngagementView, WeaponAttack } from "./engagementFrameComposer";
 export type { DefenseAssessor, DefenseAssessment, LayerEhp } from "./defenseAssessment";
 export { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
+export type { DefenseSimulator, DefenseView, DefensePoolState, DefenseSimConfig, RepairerViewState, RahViewState, RepairMode } from "./defenseSimulator";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { MissileApplication } from "./missileApplication";
 export type { DroneApplication } from "./droneApplication";
@@ -30,6 +31,7 @@ export type {
   DefenseLayer,
   DefenseLayerSpec,
   DefenseSpec,
+  RahSpec,
   RepairerSpec,
   DisruptionBreakdown,
   DisruptionScriptSpec,

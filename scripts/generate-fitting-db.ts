@@ -68,7 +68,7 @@ interface SdeTypeDogma {
   dogmaEffects: readonly SdeDogmaEffect[];
 }
 
-type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "turretDamage" | "turretRoF" | "droneDamage" | "armorResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
+type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "turretDamage" | "turretRoF" | "droneDamage" | "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
 
 interface HullBonusRule {
   readonly attribute: BonusAttribute;
@@ -452,7 +452,18 @@ const BONUS_EFFECTS: Readonly<Record<number, readonly HullBonusRule[]>> = {
   // Defensive hull bonuses
   909: [{ attribute: "armorHpPercent", bonusAttr: "shipBonusAC2", skill: "Amarr Cruiser" }],
   2465: [{ attribute: "armorResist", bonusAttr: "shipBonusAB", skill: "Amarr Battleship" }],
-  2602: [{ attribute: "armorResist", bonusAttr: "shipBonusCB2", skill: "Caldari Battleship" }],
+  2602: [{ attribute: "shieldResist", bonusAttr: "shipBonus2CB", skill: "Caldari Battleship" }],
+  2603: [{ attribute: "shieldResist", bonusAttr: "shipBonus2CB", skill: "Caldari Battleship" }],
+  2604: [{ attribute: "shieldResist", bonusAttr: "shipBonus2CB", skill: "Caldari Battleship" }],
+  2605: [{ attribute: "shieldResist", bonusAttr: "shipBonus2CB", skill: "Caldari Battleship" }],
+  1812: [{ attribute: "shieldResist", bonusAttr: "shipBonusCC2", skill: "Caldari Cruiser" }],
+  1813: [{ attribute: "shieldResist", bonusAttr: "shipBonusCC2", skill: "Caldari Cruiser" }],
+  1814: [{ attribute: "shieldResist", bonusAttr: "shipBonusCC2", skill: "Caldari Cruiser" }],
+  1815: [{ attribute: "shieldResist", bonusAttr: "shipBonusCC2", skill: "Caldari Cruiser" }],
+  5335: [{ attribute: "shieldResist", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser" }],
+  5336: [{ attribute: "shieldResist", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser" }],
+  5337: [{ attribute: "shieldResist", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser" }],
+  5338: [{ attribute: "shieldResist", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser" }],
   3331: [{ attribute: "armorHpPercent", bonusAttr: "eliteBonusCommandShips1", skill: "Command Ships" }],
   3592: [{ attribute: "hullHpPercent", bonusAttr: "eliteBonusJumpFreighter1", skill: "Jump Freighters" }],
   3678: [{ attribute: "shieldHpPercent", bonusAttr: "eliteBonusJumpFreighter1", skill: "Jump Freighters" }],
@@ -1952,7 +1963,7 @@ export interface TurretStats {
   readonly name: string;
 }
 
-export type HullBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "turretDamage" | "turretRoF" | "droneDamage" | "armorResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
+export type HullBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "turretDamage" | "turretRoF" | "droneDamage" | "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
 
 export interface HullBonus {
   readonly attribute: HullBonusAttribute;

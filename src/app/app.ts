@@ -1,5 +1,5 @@
-import { Vec2 } from "../sim";
-import type { DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, MissileAttackFacts, MissileBoosterResolver, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, ShipState, Side, Simulation, WeaponSpec } from "../sim";
+import { Vec2, ZERO_DAMAGE } from "../sim";
+import type { DamageVector, DefenseSimConfig, DefenseSimulator, DefenseView, DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, MissileAttackFacts, MissileBoosterResolver, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, ShipState, Side, Simulation, WeaponSpec } from "../sim";
 import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, MissileRenderCollection, Renderer, WeaponRange, WeaponRanges } from "../ui";
 
 export interface App {
@@ -12,6 +12,7 @@ export class AppImpl implements App {
   private readonly simulation: Simulation;
   private readonly droneSimulator: DroneSimulator;
   private readonly missileSimulator: MissileSimulator;
+  private readonly defenseSimulator: DefenseSimulator;
   private readonly engagementFrameComposer: EngagementFrameComposer;
   private readonly ewarResolver: EwarResolver;
   private readonly missileBoosterResolver: MissileBoosterResolver;
@@ -23,6 +24,7 @@ export class AppImpl implements App {
     simulation: Simulation;
     droneSimulator: DroneSimulator;
     missileSimulator: MissileSimulator;
+    defenseSimulator: DefenseSimulator;
     engagementFrameComposer: EngagementFrameComposer;
     ewarResolver: EwarResolver;
     missileBoosterResolver: MissileBoosterResolver;
@@ -33,6 +35,7 @@ export class AppImpl implements App {
     this.simulation = deps.simulation;
     this.droneSimulator = deps.droneSimulator;
     this.missileSimulator = deps.missileSimulator;
+    this.defenseSimulator = deps.defenseSimulator;
     this.engagementFrameComposer = deps.engagementFrameComposer;
     this.ewarResolver = deps.ewarResolver;
     this.missileBoosterResolver = deps.missileBoosterResolver;
@@ -48,6 +51,7 @@ export class AppImpl implements App {
         this.simulation.reset(this.controls.getConfig());
         this.droneSimulator.reset(this.droneSimConfig());
         this.missileSimulator.reset(this.missileSimConfig());
+        this.defenseSimulator.reset(this.defenseSimConfig());
         this.loop.reset();
         this.renderFrame();
       },
@@ -55,6 +59,7 @@ export class AppImpl implements App {
         this.simulation.update(this.controls.getConfig());
         this.droneSimulator.update(this.droneSimConfig());
         this.missileSimulator.update(this.missileSimConfig());
+        this.defenseSimulator.update(this.defenseSimConfig());
         this.renderFrame();
       },
       onDisplayChange: () => this.renderFrame(),
@@ -70,6 +75,7 @@ export class AppImpl implements App {
     });
     this.droneSimulator.reset(this.droneSimConfig());
     this.missileSimulator.reset(this.missileSimConfig());
+    this.defenseSimulator.reset(this.defenseSimConfig());
     this.renderFrame();
   }
 
@@ -80,6 +86,12 @@ export class AppImpl implements App {
     const view = this.engagementFrameComposer.compose(snapshot, input);
     this.droneSimulator.step(dt, view.frame);
     this.missileSimulator.step(dt, view.frame, this.missileLaunchSpecs(view));
+    this.defenseSimulator.step(dt, this.defenseIncoming(view));
+    const defenseView = this.defenseSimulator.view();
+    if (defenseView.dead.shipA || defenseView.dead.shipB) {
+      this.loop.stop();
+      this.controls.setPlaying(false);
+    }
     this.renderFrame();
   }
 
@@ -97,6 +109,24 @@ export class AppImpl implements App {
     };
   }
 
+  private defenseSimConfig(): DefenseSimConfig {
+    return {
+      shipA: this.controls.getDefense("shipA"),
+      shipB: this.controls.getDefense("shipB"),
+      damageEnabled: { shipA: this.controls.getDamageEnabled("shipA"), shipB: this.controls.getDamageEnabled("shipB") },
+      repairMode: { shipA: this.controls.getRepairMode("shipA"), shipB: this.controls.getRepairMode("shipB") },
+      repairerActivation: { shipA: this.controls.getRepairerActivation("shipA"), shipB: this.controls.getRepairerActivation("shipB") },
+      rahActivation: { shipA: this.controls.getRahActivation("shipA"), shipB: this.controls.getRahActivation("shipB") },
+    };
+  }
+
+  private defenseIncoming(view: EngagementView): Record<Side, DamageVector> {
+    return {
+      shipA: view.attacks.shipB?.damage.appliedByType ?? ZERO_DAMAGE,
+      shipB: view.attacks.shipA?.damage.appliedByType ?? ZERO_DAMAGE,
+    };
+  }
+
   private engagementInput(snapshot: ReturnType<Simulation["snapshot"]>): EngagementInput {
     return {
       weapons: { shipA: this.controls.getWeapons("shipA"), shipB: this.controls.getWeapons("shipB") },
@@ -104,6 +134,7 @@ export class AppImpl implements App {
       droneStates: { shipA: this.droneSimulator.states("shipA"), shipB: this.droneSimulator.states("shipB") },
       missileFacts: { shipA: this.missileFactsFor("shipA"), shipB: this.missileFactsFor("shipB") },
       defenses: { shipA: this.controls.getDefense("shipA"), shipB: this.controls.getDefense("shipB") },
+      overloaded: { shipA: this.controls.getOverloaded("shipA"), shipB: this.controls.getOverloaded("shipB") },
     };
   }
 
@@ -155,8 +186,8 @@ export class AppImpl implements App {
     this.renderer.setDroneRangeVisibility(this.controls.getDroneRangeVisibility());
     this.renderer.setDroneControlRangeVisibility(this.controls.getDroneControlRangeVisibility());
     this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
-    this.renderer.draw(snapshot, view.frame, this.rendererWeaponRanges(view), this.controls.getOverlays(), this.droneRenderInfo(), this.missileRenderInfo());
-    this.controls.update(view, effectiveReadouts);
+    this.renderer.draw(snapshot, view.frame, this.rendererWeaponRanges(view), this.controls.getOverlays(), this.droneRenderInfo(), this.missileRenderInfo(), this.defenseSimulator.view());
+    this.controls.update(view, effectiveReadouts, this.defenseSimulator.view());
   }
 
   private rendererWeaponRanges(view: EngagementView): WeaponRanges {
