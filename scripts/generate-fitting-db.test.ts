@@ -1,7 +1,7 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
+import { buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats } from "./generate-fitting-db";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
@@ -718,5 +718,139 @@ describe("_writeI18nFiles", () => {
     await _writeI18nFiles(itemNames, "2026-08-24", paths);
     const zhCollisions = parseExport(paths.collisionZhFile, "ITEM_NAME_COLLISIONS_ZH");
     expect(zhCollisions).toEqual({ "same-zh": "B" });
+  });
+});
+
+describe("_buildDefenseStats", () => {
+  test("Damage Control II extracts shield, armor, and hull resists from resonances", () => {
+    expect(_buildDefenseStats(values({
+      armorEmDamageResonance: 0.85, armorExplosiveDamageResonance: 0.85, armorKineticDamageResonance: 0.85, armorThermalDamageResonance: 0.85,
+      shieldEmDamageResonance: 0.875, shieldExplosiveDamageResonance: 0.875, shieldKineticDamageResonance: 0.875, shieldThermalDamageResonance: 0.875,
+      hullEmDamageResonance: 0.6, hullExplosiveDamageResonance: 0.6, hullKineticDamageResonance: 0.6, hullThermalDamageResonance: 0.6,
+    }), new Set([2302]), 0)).toEqual({
+      kind: "damageControl",
+      shieldResists: { em: 0.125, thermal: 0.125, kinetic: 0.125, explosive: 0.125 },
+      armorResists: { em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 },
+      hullResists: { em: 0.4, thermal: 0.4, kinetic: 0.4, explosive: 0.4 },
+    });
+  });
+
+  test("EM Shield Hardener II extracts active shield resist bonus with overload", () => {
+    expect(_buildDefenseStats(values({
+      emDamageResistanceBonus: -55, explosiveDamageResistanceBonus: 0, kineticDamageResistanceBonus: 0, thermalDamageResistanceBonus: 0,
+      duration: 10000, capacitorNeed: 20, heatDamage: 3.4, overloadHardeningBonus: 20,
+    }), new Set([5230]), 0)).toEqual({
+      kind: "resistModule",
+      layer: "shield",
+      active: true,
+      resistBonus: { em: 55, thermal: 0, kinetic: 0, explosive: 0 },
+      overloadResistBonus: { em: 20, thermal: 20, kinetic: 20, explosive: 20 },
+      cycleTime: 10,
+      capacitorNeed: 20,
+      heatDamage: 3.4,
+    });
+  });
+
+  test("Multispectrum Energized Membrane II extracts passive armor resist bonus", () => {
+    expect(_buildDefenseStats(values({
+      emDamageResistanceBonus: -20, thermalDamageResistanceBonus: -20, kineticDamageResistanceBonus: -20, explosiveDamageResistanceBonus: -20,
+    }), new Set([2041]), 0)).toEqual({
+      kind: "resistModule",
+      layer: "armor",
+      active: false,
+      resistBonus: { em: 20, thermal: 20, kinetic: 20, explosive: 20 },
+    });
+  });
+
+  test("Large Shield Booster II extracts shield repair amount with overload multipliers", () => {
+    expect(_buildDefenseStats(values({
+      shieldBonus: 276, duration: 4000, capacitorNeed: 160, heatDamage: 1.3, overloadShieldBonus: 10, overloadSelfDurationBonus: -15,
+    }), new Set([4]), 0)).toEqual({
+      kind: "repairer",
+      layer: "shield",
+      amount: 276,
+      cycleTime: 4,
+      capacitorNeed: 160,
+      heatDamage: 1.3,
+      overload: { amountMultiplier: 1.1, cycleTimeMultiplier: 0.85 },
+    });
+  });
+
+  test("Large Armor Repairer II extracts armor repair amount with overload multipliers", () => {
+    expect(_buildDefenseStats(values({
+      armorDamageAmount: 920, duration: 15000, capacitorNeed: 400, heatDamage: 5.4, overloadArmorDamageAmount: 10, overloadSelfDurationBonus: -15,
+    }), new Set([27]), 62)).toEqual({
+      kind: "repairer",
+      layer: "armor",
+      amount: 920,
+      cycleTime: 15,
+      capacitorNeed: 400,
+      heatDamage: 5.4,
+      overload: { amountMultiplier: 1.1, cycleTimeMultiplier: 0.85 },
+    });
+  });
+
+  test("Large Ancillary Shield Booster extracts ancillary charge multiplier and reload time", () => {
+    expect(_buildDefenseStats(values({
+      shieldBonus: 390, duration: 4000, capacitorNeed: 528, heatDamage: 1.3, overloadShieldBonus: 10, overloadSelfDurationBonus: -15, chargeSize: 2, reloadTime: 60000,
+    }), new Set([4936]), 1156)).toMatchObject({
+      kind: "repairer",
+      layer: "shield",
+      amount: 390,
+      cycleTime: 4,
+      ancillary: { chargeMultiplier: 2, shots: 0, reloadTime: 60 },
+    });
+  });
+
+  test("Medium Ancillary Armor Repairer extracts ancillary charge multiplier and reload time", () => {
+    expect(_buildDefenseStats(values({
+      armorDamageAmount: 207, duration: 12000, capacitorNeed: 160, heatDamage: 5.3, overloadArmorDamageAmount: 10, overloadSelfDurationBonus: -15, chargedArmorDamageMultiplier: 3, reloadTime: 60000,
+    }), new Set([5275]), 1199)).toMatchObject({
+      kind: "repairer",
+      layer: "armor",
+      amount: 207,
+      cycleTime: 12,
+      ancillary: { chargeMultiplier: 3, shots: 0, reloadTime: 60 },
+    });
+  });
+
+  test("Reactive Armor Hardener extracts base armor resists and shift amount", () => {
+    expect(_buildDefenseStats(values({
+      armorEmDamageResonance: 0.85, armorExplosiveDamageResonance: 0.85, armorKineticDamageResonance: 0.85, armorThermalDamageResonance: 0.85,
+      resistanceShiftAmount: 6, duration: 10000, capacitorNeed: 42, overloadSelfDurationBonus: -15,
+    }), new Set([4928]), 1150)).toEqual({
+      kind: "rah",
+      baseArmorResists: { em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 },
+      resistanceShiftAmount: 6,
+      cycleTime: 10,
+      capacitorNeed: 42,
+      overloadCycleTimeMultiplier: 0.85,
+    });
+  });
+
+  test("1600mm Steel Plates II extracts armor HP bonus", () => {
+    expect(_buildDefenseStats(values({ armorHPBonusAdd: 4800, massAddition: 3750000 }), new Set([1959]), 0)).toEqual({
+      kind: "armorPlate",
+      armorHpAdd: 4800,
+    });
+  });
+
+  test("Medium Shield Extender II extracts shield HP and signature radius penalty", () => {
+    expect(_buildDefenseStats(values({ capacityBonus: 1100, signatureRadiusAdd: 7 }), new Set([21]), 0)).toEqual({
+      kind: "shieldExtender",
+      shieldHpAdd: 1100,
+      sigRadiusPenalty: 7,
+    });
+  });
+
+  test("Shield Boost Amplifier II extracts boost multiplier", () => {
+    expect(_buildDefenseStats(values({ shieldBoostMultiplier: 36 }), new Set([1720]), 0)).toEqual({
+      kind: "boostAmplifier",
+      multiplier: 1.36,
+    });
+  });
+
+  test("returns undefined when no defense effects are present", () => {
+    expect(_buildDefenseStats(values({}), new Set([999]), 0)).toBeUndefined();
   });
 });

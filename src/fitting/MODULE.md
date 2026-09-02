@@ -52,7 +52,9 @@ abstractions, `ImportedFitting`, `ImportedTurret`, `ImportedLauncher`,
 `TurretGroup`, `LauncherGroup`, `DroneGroup`, `CargoEntry`,
 `FittingModuleEntry`, `DamageType` (re-exported from `sim`),
 `DamageFactor`, `DamageFactorKind`, `DamageBreakdown`,
-`EMPTY_DAMAGE_BREAKDOWN`, and the module registration.
+`EMPTY_DAMAGE_BREAKDOWN`, `DefenseModuleStats`, `DefenseResists`,
+`DefenseLayer`, `DefenseRepairerOverload`, `DefenseAncillary` (re-exported
+from `gamedata/fittingDb`), and the module registration.
 `chargeDamageByType`, `missileDamageByType`, and `droneDamageByType` are
 sibling-only helpers used within the fitting module and are not
 re-exported through `index.ts`. `ImportedTurret.damagePerShot` and

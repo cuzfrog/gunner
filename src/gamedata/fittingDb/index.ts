@@ -2,6 +2,11 @@ export type { FittingDb, FittingDbData } from "./catalog";
 export { FITTING_DB } from "./catalog";
 export type {
   ChargeStats,
+  DefenseAncillary,
+  DefenseLayer,
+  DefenseModuleStats,
+  DefenseRepairerOverload,
+  DefenseResists,
   DisruptionScriptStats,
   DroneSizeClass,
   DroneStats,
