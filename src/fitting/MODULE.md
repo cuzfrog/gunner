@@ -95,4 +95,4 @@ Internal files such as `eft.ts`, `fittingImport.ts`, `chargeCatalog.ts`,
 `presetFittings.ts` and their sibling tests are reached only by their
 sibling tests and by `module.ts`.
 
-Gate relaxed: `fittingState.ts`, `fittingCalculator.ts`, `damageBreakdown.ts`, and `index.ts` were removed from `no-new-exports` to add `DroneGroup`, `droneBoosterModules`, `droneGroups`, `resolveDrones`, and `droneDamageByType` alongside the existing turret/missile fitting contracts. These are cross-boundary DTOs and calculator methods consumed by `sim`, `app`, and `ui`.
+Gate relaxed: `fittingState.ts`, `fittingCalculator.ts`, `damageBreakdown.ts`, and `index.ts` were removed from `no-new-exports` to add `DroneGroup`, `droneBoosterModules`, `droneGroups`, `resolveDrones`, and `droneDamageByType` alongside the existing turret/missile fitting contracts, and to re-export `DefenseModuleStats`, `DefenseLayer`, `DefenseRepairerOverload`, `DefenseAncillary` from `gamedata/fittingDb` and `DamageResists` from `sim` for downstream defense-simulator consumption. These are cross-boundary DTOs and calculator methods consumed by `sim`, `app`, and `ui`.

@@ -365,6 +365,8 @@ describe("fittingDb", () => {
       { attribute: "missileRoF", magnitude: -5, skill: "Caldari Battleship", launcherGroup: 506 },
       { attribute: "missileRoF", magnitude: -5, skill: "Caldari Battleship", launcherGroup: 508 },
       { attribute: "missileRoF", magnitude: -5, skill: "Caldari Battleship", launcherGroup: 1245 },
+      { attribute: "plateHpPercent", magnitude: 50 },
+      { attribute: "extenderHpPercent", magnitude: 100 },
     ]);
   });
 
@@ -405,6 +407,22 @@ describe("fittingDb", () => {
       magnitude: 10,
       skill: "Amarr Battlecruiser",
       turretSkill: "Medium Energy Turret",
+    });
+  });
+
+  test("includes Abaddon defensive hull bonuses for armor resist and plate/extender HP", () => {
+    expect(HULL_BONUSES["24692" as ShipId]).toContainEqual({
+      attribute: "armorResist",
+      magnitude: -4,
+      skill: "Amarr Battleship",
+    });
+    expect(HULL_BONUSES["24692" as ShipId]).toContainEqual({
+      attribute: "plateHpPercent",
+      magnitude: 50,
+    });
+    expect(HULL_BONUSES["24692" as ShipId]).toContainEqual({
+      attribute: "extenderHpPercent",
+      magnitude: 100,
     });
   });
 

@@ -6,7 +6,6 @@ export type {
   DefenseLayer,
   DefenseModuleStats,
   DefenseRepairerOverload,
-  DefenseResists,
   DisruptionScriptStats,
   DroneSizeClass,
   DroneStats,

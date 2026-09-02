@@ -743,8 +743,8 @@ describe("_buildDefenseStats", () => {
       kind: "resistModule",
       layer: "shield",
       active: true,
-      resistBonus: { em: 55, thermal: 0, kinetic: 0, explosive: 0 },
-      overloadResistBonus: { em: 20, thermal: 20, kinetic: 20, explosive: 20 },
+      resistBonus: { em: 0.55, thermal: 0, kinetic: 0, explosive: 0 },
+      overloadBonusMultiplier: 1.2,
       cycleTime: 10,
       capacitorNeed: 20,
       heatDamage: 3.4,
@@ -758,7 +758,7 @@ describe("_buildDefenseStats", () => {
       kind: "resistModule",
       layer: "armor",
       active: false,
-      resistBonus: { em: 20, thermal: 20, kinetic: 20, explosive: 20 },
+      resistBonus: { em: 0.2, thermal: 0.2, kinetic: 0.2, explosive: 0.2 },
     });
   });
 
@@ -798,7 +798,7 @@ describe("_buildDefenseStats", () => {
       layer: "shield",
       amount: 390,
       cycleTime: 4,
-      ancillary: { chargeMultiplier: 2, shots: 0, reloadTime: 60 },
+      ancillary: { chargeMultiplier: 1, shots: 0, reloadTime: 60 },
     });
   });
 
@@ -850,7 +850,41 @@ describe("_buildDefenseStats", () => {
     });
   });
 
+  test("Hull Repairer extracts structure repair amount with no overload", () => {
+    expect(_buildDefenseStats(values({ structureDamageAmount: 500, duration: 12000, capacitorNeed: 80 }), new Set([26]), 0)).toEqual({
+      kind: "repairer",
+      layer: "hull",
+      amount: 500,
+      cycleTime: 12,
+      capacitorNeed: 80,
+      heatDamage: undefined,
+      overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 },
+    });
+  });
+
   test("returns undefined when no defense effects are present", () => {
     expect(_buildDefenseStats(values({}), new Set([999]), 0)).toBeUndefined();
+  });
+
+  test("Shield Recharger II extracts recharge multiplier", () => {
+    expect(_buildDefenseStats(values({ rechargeratebonus: -15 }), new Set([50]), 0)).toEqual({
+      kind: "rechargeModule",
+      rechargeMultiplier: 0.85,
+    });
+  });
+
+  test("Damage Control resonances are rounded to 6 decimals", () => {
+    const stats = _buildDefenseStats(values({
+      shieldEmDamageResonance: 0.8575, shieldThermalDamageResonance: 0.8575,
+      shieldKineticDamageResonance: 0.8575, shieldExplosiveDamageResonance: 0.8575,
+    }), new Set([2302]), 0);
+    expect(stats?.shieldResists).toEqual({ em: 0.1425, thermal: 0.1425, kinetic: 0.1425, explosive: 0.1425 });
+  });
+
+  test("dispatch prioritizes passive resist over shield extender for effect 21 + 2052", () => {
+    const stats = _buildDefenseStats(values({ emDamageResistanceBonus: -25, capacityBonus: 1000 }), new Set([21, 2052]), 0);
+    expect(stats?.kind).toBe("resistModule");
+    expect(stats?.layer).toBe("shield");
+    expect(stats?.active).toBe(false);
   });
 });

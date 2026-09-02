@@ -1,7 +1,7 @@
 export type { FittingDb, FittingImport, FittingRow, FittingSection, FittingSummary, ImportedFitting, ImportedTurret, ImportedLauncher } from "./fittingImport";
-export type { DefenseModuleStats, DefenseResists, DefenseLayer, DefenseRepairerOverload, DefenseAncillary } from "../gamedata/fittingDb";
+export type { DefenseModuleStats, DefenseLayer, DefenseRepairerOverload, DefenseAncillary } from "../gamedata/fittingDb";
 export type { CargoCharge, ChargeCatalog, ChargeOption, ImportedTurretBase } from "./chargeCatalog";
-export type { DamageType } from "../sim";
+export type { DamageType, DamageResists } from "../sim";
 export type { DamageFactor, DamageFactorKind, DamageBreakdown } from "./damageBreakdown";
 export { EMPTY_DAMAGE_BREAKDOWN } from "./damageBreakdown";
 export type { MissileCatalog, MissileOption } from "./missileCatalog";
