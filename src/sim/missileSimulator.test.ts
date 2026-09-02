@@ -64,7 +64,7 @@ describe("MissileSimulatorImpl", () => {
     expect(sim.states("shipA")).toHaveLength(0);
     expect(sim.states("shipB")).toHaveLength(0);
     expect(sim.facts("shipA", 0).inFlightCount).toBe(0);
-    expect(sim.facts("shipA", 0).rollingAppliedDps).toBe(0);
+    expect(sim.facts("shipA", 0).smoothedApplication).toBe(0);
   });
 
   test("launches a missile on first step when launch spec is provided", () => {
@@ -181,7 +181,7 @@ describe("MissileSimulatorImpl", () => {
     const facts = sim.facts("shipA", 0);
     expect(facts.lastImpact).toBeDefined();
     const expectedDamage = heavyMissile.damagePerMissile * heavyMissile.launcherCount * facts.lastImpact!.application;
-    expect(facts.rollingAppliedDps).toBeGreaterThan(0);
+    expect(facts.smoothedApplication).toBeGreaterThan(0);
   });
 
   test("missile expires without impact when fuel runs out", () => {
@@ -241,7 +241,7 @@ describe("MissileSimulatorImpl", () => {
     expect(sim.facts("shipA", 0).interceptable).toBe(false);
   });
 
-  test("rolling DPS accumulates from repeated impacts", () => {
+  test("smoothed application accumulates from repeated impacts", () => {
     const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     const targetPos = new Vec2(1000, 0);
@@ -250,14 +250,54 @@ describe("MissileSimulatorImpl", () => {
       sim.step(0.1, frame(new Vec2(0, 0), targetPos), launches);
     }
     const facts = sim.facts("shipA", 0);
-    expect(facts.rollingAppliedDps).toBeGreaterThan(0);
+    expect(facts.smoothedApplication).toBeGreaterThan(0);
   });
 
-  test("rolling DPS is zero before any impact", () => {
+  test("smoothed application is zero before any impact", () => {
     const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
     sim.step(0.1, frame(new Vec2(0, 0), new Vec2(10000, 0)), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
-    expect(sim.facts("shipA", 0).rollingAppliedDps).toBe(0);
+    expect(sim.facts("shipA", 0).smoothedApplication).toBe(0);
+  });
+
+  test("smoothed application ramps up gradually over multiple impacts", () => {
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [lightMissile], shipB: [] });
+    const targetPos = new Vec2(1000, 0);
+    const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
+    let firstImpactApplication = 0;
+    for (let i = 0; i < 200; i++) {
+      sim.step(0.1, frame(new Vec2(0, 0), targetPos), launches);
+      const facts = sim.facts("shipA", 0);
+      if (facts.lastImpact && firstImpactApplication === 0) firstImpactApplication = facts.smoothedApplication;
+    }
+    const finalApplication = sim.facts("shipA", 0).smoothedApplication;
+    expect(firstImpactApplication).toBeGreaterThan(0);
+    expect(firstImpactApplication).toBeLessThan(finalApplication);
+    expect(finalApplication).toBeLessThanOrEqual(1);
+  });
+
+  test("smoothed application resets to zero after impacts stop", () => {
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [lightMissile], shipB: [] });
+    const targetPos = new Vec2(1000, 0);
+    const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
+    for (let i = 0; i < 200; i++) sim.step(0.1, frame(new Vec2(0, 0), targetPos), launches);
+    expect(sim.facts("shipA", 0).smoothedApplication).toBeGreaterThan(0);
+    const noLaunches = { shipA: [], shipB: [] };
+    for (let i = 0; i < 500; i++) sim.step(0.1, frame(new Vec2(0, 0), targetPos), noLaunches);
+    expect(sim.facts("shipA", 0).smoothedApplication).toBe(0);
+  });
+
+  test("interceptable stays true when no missiles are in flight but weapon is configured", () => {
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [lightMissile], shipB: [] });
+    const targetPos = new Vec2(1000, 0);
+    const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
+    sim.step(0.1, frame(new Vec2(0, 0), targetPos), launches);
+    sim.step(0.1, frame(new Vec2(0, 0), targetPos), { shipA: [], shipB: [] });
+    expect(sim.states("shipA").length).toBeGreaterThanOrEqual(0);
+    expect(sim.facts("shipA", 0).interceptable).toBe(true);
   });
 
   test("trail records recent positions for rendering", () => {

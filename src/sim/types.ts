@@ -163,7 +163,7 @@ export interface MissileAttackFacts {
   readonly inFlightCount: number;
   readonly nearestTimeToImpact: number;
   readonly lastImpact?: MissileImpactSummary;
-  readonly rollingAppliedDps: number;
+  readonly smoothedApplication: number;
   readonly interceptable: boolean;
 }
 

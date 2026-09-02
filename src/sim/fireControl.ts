@@ -100,10 +100,10 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     const nominalDps = boosted.cycleTime > 0 ? (boosted.damagePerMissile * boosted.launcherCount) / boosted.cycleTime : 0;
     const volley = boosted.damagePerMissile * boosted.launcherCount;
     if (facts) {
-      const appliedDps = facts.rollingAppliedDps;
-      const application = nominalDps > 0 ? appliedDps / nominalDps : 0;
+      const application = facts.smoothedApplication;
+      const appliedDps = nominalDps * application;
       const breakdown: MissileDamageBreakdown = {
-        application: facts.lastImpact?.application ?? 0,
+        application,
         signatureTerm: facts.lastImpact?.signatureTerm ?? 1,
         velocityTerm: facts.lastImpact?.velocityTerm ?? 1,
         inRange: facts.interceptable,

@@ -21,9 +21,9 @@ export interface MissileSimulator {
 
 const ACCEL_TAU = 0.5;
 const TRAIL_MAX = 8;
-const ROLLING_WINDOW_MIN = 10;
-const ROLLING_WINDOW_MAX = 60;
-const ROLLING_WINDOW_CYCLES = 3;
+const EWMA_TAU_CYCLES = 3;
+const IMPACT_TIMEOUT_CYCLES = 2;
+const IMPACT_KEEP_SECONDS = 60;
 
 interface MissileBody {
   position: Vec2;
@@ -39,7 +39,10 @@ interface SideState {
   entities: MissileBody[];
   cooldowns: Map<number, number>;
   impacts: MissileImpact[];
-  firstLaunchTime: Map<number, number>;
+  smoothedApplication: Map<number, number>;
+  lastImpactTime: Map<number, number>;
+  lastImpactSummary: Map<number, MissileImpactSummary>;
+  weaponSpecs: Map<number, MissileSpec>;
 }
 
 export class MissileSimulatorImpl implements MissileSimulator {
@@ -79,16 +82,14 @@ export class MissileSimulatorImpl implements MissileSimulator {
   facts(side: Side, weaponIndex: number): MissileAttackFacts {
     const state = this.sides[side];
     const inFlight = state.entities.filter((m) => m.weaponIndex === weaponIndex);
-    const weaponImpacts = state.impacts.filter((m) => m.weaponIndex === weaponIndex);
-    const lastImpact = weaponImpacts.length > 0 ? toSummary(weaponImpacts[weaponImpacts.length - 1]) : undefined;
     const nearestTimeToImpact = inFlight.length > 0 ? minTimeToImpact(inFlight, this.targetPos(side)) : 0;
-    const spec = inFlight.length > 0 ? inFlight[0].spec : undefined;
+    const spec = state.weaponSpecs.get(weaponIndex);
     const interceptable = spec ? this.canIntercept(spec, this.targetDistance()) : false;
     return {
       inFlightCount: inFlight.length,
       nearestTimeToImpact,
-      lastImpact,
-      rollingAppliedDps: rollingDps(state.impacts, weaponIndex, this.time, state.firstLaunchTime.get(weaponIndex), spec?.cycleTime ?? 0),
+      lastImpact: state.lastImpactSummary.get(weaponIndex),
+      smoothedApplication: state.smoothedApplication.get(weaponIndex) ?? 0,
       interceptable,
     };
   }
@@ -97,17 +98,18 @@ export class MissileSimulatorImpl implements MissileSimulator {
     const state = this.sides[side];
     this.handleLaunches(state, shipPos, launches, dt);
     this.advanceEntities(state, dt, targetPos, targetVel, side);
+    this.expireStaleApplications(state);
   }
 
   private handleLaunches(state: SideState, shipPos: Vec2, launches: readonly MissileLaunchSpec[], dt: number): void {
     for (const launch of launches) {
+      state.weaponSpecs.set(launch.weaponIndex, launch.boosted);
       const cooldown = state.cooldowns.get(launch.weaponIndex) ?? 0;
       if (cooldown > 0) {
         const remaining = cooldown - dt;
         state.cooldowns.set(launch.weaponIndex, Math.max(0, remaining));
         if (remaining > 0) continue;
       }
-      if (!state.firstLaunchTime.has(launch.weaponIndex)) state.firstLaunchTime.set(launch.weaponIndex, this.time);
       state.entities.push(createMissile(shipPos, launch));
       state.cooldowns.set(launch.weaponIndex, launch.boosted.cycleTime);
     }
@@ -122,10 +124,7 @@ export class MissileSimulatorImpl implements MissileSimulator {
       const dist = toTarget.len();
       const paintedSig = missile.paintedSig;
       if (dist <= paintedSig) {
-        const targetSpeed = targetVel.len();
-        const result = this.application.compute(missile.spec, targetSpeed, paintedSig);
-        const damage = missile.spec.damagePerMissile * missile.spec.launcherCount * result.application;
-        state.impacts.push({ time: this.time, side, weaponIndex: missile.weaponIndex, damage, application: result.application, signatureTerm: result.signatureTerm, velocityTerm: result.velocityTerm });
+        this.recordImpact(state, missile, targetVel, side);
         continue;
       }
       const desired = toTarget.norm().scale(missile.spec.maxVelocity);
@@ -133,10 +132,7 @@ export class MissileSimulatorImpl implements MissileSimulator {
       const step = missile.velocity.scale(dt);
       const stepLen = step.len();
       if (stepLen >= dist) {
-        const targetSpeed = targetVel.len();
-        const result = this.application.compute(missile.spec, targetSpeed, paintedSig);
-        const damage = missile.spec.damagePerMissile * missile.spec.launcherCount * result.application;
-        state.impacts.push({ time: this.time, side, weaponIndex: missile.weaponIndex, damage, application: result.application, signatureTerm: result.signatureTerm, velocityTerm: result.velocityTerm });
+        this.recordImpact(state, missile, targetVel, side);
         continue;
       }
       missile.position = missile.position.add(step);
@@ -145,6 +141,34 @@ export class MissileSimulatorImpl implements MissileSimulator {
     }
     state.entities = survivors;
     pruneImpacts(state.impacts, this.time);
+  }
+
+  private recordImpact(state: SideState, missile: MissileBody, targetVel: Vec2, side: Side): void {
+    const targetSpeed = targetVel.len();
+    const result = this.application.compute(missile.spec, targetSpeed, missile.paintedSig);
+    const damage = missile.spec.damagePerMissile * missile.spec.launcherCount * result.application;
+    const weaponIndex = missile.weaponIndex;
+    state.impacts.push({ time: this.time, side, weaponIndex, damage, application: result.application, signatureTerm: result.signatureTerm, velocityTerm: result.velocityTerm });
+    state.lastImpactSummary.set(weaponIndex, { application: result.application, signatureTerm: result.signatureTerm, velocityTerm: result.velocityTerm, time: this.time });
+    const prevSmoothed = state.smoothedApplication.get(weaponIndex) ?? 0;
+    const prevImpactTime = state.lastImpactTime.get(weaponIndex);
+    const dtSincePrev = prevImpactTime !== undefined ? this.time - prevImpactTime : missile.spec.cycleTime;
+    const tau = EWMA_TAU_CYCLES * missile.spec.cycleTime;
+    const alpha = 1 - Math.exp(-dtSincePrev / tau);
+    state.smoothedApplication.set(weaponIndex, prevSmoothed * (1 - alpha) + result.application * alpha);
+    state.lastImpactTime.set(weaponIndex, this.time);
+  }
+
+  private expireStaleApplications(state: SideState): void {
+    for (const [weaponIndex, lastTime] of state.lastImpactTime) {
+      const spec = state.weaponSpecs.get(weaponIndex);
+      if (!spec) continue;
+      const timeout = (IMPACT_TIMEOUT_CYCLES * spec.cycleTime) + spec.flightTime;
+      if (this.time - lastTime > timeout) {
+        state.smoothedApplication.delete(weaponIndex);
+        state.lastImpactTime.delete(weaponIndex);
+      }
+    }
   }
 
   private canIntercept(spec: MissileSpec, distance: number): boolean {
@@ -161,7 +185,7 @@ export class MissileSimulatorImpl implements MissileSimulator {
 }
 
 function emptySide(): SideState {
-  return { entities: [], cooldowns: new Map(), impacts: [], firstLaunchTime: new Map() };
+  return { entities: [], cooldowns: new Map(), impacts: [], smoothedApplication: new Map(), lastImpactTime: new Map(), lastImpactSummary: new Map(), weaponSpecs: new Map() };
 }
 
 function createMissile(shipPos: Vec2, launch: MissileLaunchSpec): MissileBody {
@@ -178,10 +202,6 @@ function pushTrail(trail: Vec2[], pos: Vec2): void {
   if (trail.length > TRAIL_MAX) trail.shift();
 }
 
-function toSummary(impact: MissileImpact): MissileImpactSummary {
-  return { application: impact.application, signatureTerm: impact.signatureTerm, velocityTerm: impact.velocityTerm, time: impact.time };
-}
-
 function minTimeToImpact(entities: readonly MissileBody[], targetPos: Vec2): number {
   let min = Infinity;
   for (const m of entities) {
@@ -193,20 +213,7 @@ function minTimeToImpact(entities: readonly MissileBody[], targetPos: Vec2): num
   return min === Infinity ? 0 : min;
 }
 
-function rollingDps(impacts: readonly MissileImpact[], weaponIndex: number, currentTime: number, firstLaunchTime: number | undefined, cycleTime: number): number {
-  const weaponImpacts = impacts.filter((m) => m.weaponIndex === weaponIndex);
-  if (weaponImpacts.length === 0) return 0;
-  const window = Math.min(Math.max(ROLLING_WINDOW_MIN, ROLLING_WINDOW_CYCLES * cycleTime), ROLLING_WINDOW_MAX);
-  const windowStart = currentTime - window;
-  const inWindow = weaponImpacts.filter((m) => m.time >= windowStart);
-  if (inWindow.length === 0) return 0;
-  const totalDamage = inWindow.reduce((sum, m) => sum + m.damage, 0);
-  const elapsed = firstLaunchTime !== undefined ? currentTime - firstLaunchTime : window;
-  const effectiveWindow = Math.min(window, Math.max(elapsed, 0.1));
-  return totalDamage / effectiveWindow;
-}
-
 function pruneImpacts(impacts: MissileImpact[], currentTime: number): void {
-  const cutoff = currentTime - ROLLING_WINDOW_MAX;
+  const cutoff = currentTime - IMPACT_KEEP_SECONDS;
   while (impacts.length > 0 && impacts[0].time < cutoff) impacts.shift();
 }
