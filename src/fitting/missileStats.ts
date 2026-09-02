@@ -1,10 +1,11 @@
 import type { HullBonus, LauncherStats, MissileStats } from "../gamedata/fittingDb";
 import { toTypeId, type TypeId } from "../gamedata/ids";
-import type { StackingPenalty } from "../sim";
+import { type DamageVector, type StackingPenalty, damageVectorFromPartial, damageVectorScale } from "../sim";
 import type { SkillLevel } from "../ships";
+import { missileDamageByType } from "./damageBreakdown";
 
 export interface MissileSkillOutput {
-  readonly damagePerMissile: number;
+  readonly damagePerMissile: DamageVector;
   readonly cycleTime: number;
   readonly explosionRadius: number;
   readonly explosionVelocity: number;
@@ -56,7 +57,7 @@ export class MissileSkillModelImpl implements MissileSkillModel {
     const hullRofMultiplier = rofPercent.length > 0 ? this.stacking.apply(rofPercent.map((p) => 1 + p)) : 1;
 
     return {
-      damagePerMissile: missile.damage * skillDamageMultiplier * hullDamageMultiplier,
+      damagePerMissile: damageVectorScale(damageVectorFromPartial(missileDamageByType(missile)), skillDamageMultiplier * hullDamageMultiplier),
       cycleTime: launcher.rateOfFire * skillRofMultiplier * hullRofMultiplier,
       explosionRadius: missile.explosionRadius * skillExplosionRadiusMultiplier,
       explosionVelocity: missile.explosionVelocity * skillExplosionVelocityMultiplier,

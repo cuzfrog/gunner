@@ -7,13 +7,13 @@ import type { MissileApplication } from "./missileApplication";
 import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import type { TurretDamage } from "./turretDamage";
-import type { DamageAssessment, DroneDamageBreakdown, DroneSpec, EngagementFrame, HitChanceBreakdown, MissileDamageBreakdown, MissileSpec, ShipState, TurretSpec } from "./types";
+import { type DamageAssessment, type DroneDamageBreakdown, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE } from "./types";
 
-const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
-const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
-const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.05, sigResolution: 40, optimal: 4000, falloff: 4000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
+const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.05, sigResolution: 40, optimal: 4000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const hit: HitChanceBreakdown = { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 };
-const turretDamageResult: DamageAssessment = { nominalDps: 20, appliedDps: 16, application: 0.8, volley: 100 };
+const turretDamageResult: DamageAssessment = { nominalDps: 20, appliedDps: 16, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE };
 
 const shipA: ShipState = {
   id: "shipA",
@@ -58,7 +58,7 @@ const frame: EngagementFrame = {
 
 const missile: MissileSpec = {
   kind: "missile",
-  damagePerMissile: 200,
+  damagePerMissile: { em: 0, thermal: 0, kinetic: 200, explosive: 0 },
   cycleTime: 10,
   launcherCount: 2,
   explosionRadius: 40,
@@ -79,7 +79,7 @@ const missileBreakdown: MissileDamageBreakdown = {
 
 const missileApplicationResult = { application: 0.8, signatureTerm: 1, velocityTerm: 0.8 };
 
-const drone: DroneSpec = { kind: "drone", tracking: 2.0, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+const drone: DroneSpec = { kind: "drone", tracking: 2.0, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 38.4, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000 };
 
 const droneBreakdownResult: DroneDamageBreakdown & DamageAssessment = {
   hit: { chance: 0.5, trackingTerm: 0, rangeTerm: 0 },
@@ -93,6 +93,7 @@ const droneBreakdownResult: DroneDamageBreakdown & DamageAssessment = {
   appliedDps: 48,
   application: 1.0,
   volley: 192,
+  appliedByType: ZERO_DAMAGE,
 };
 
 function makeEvaluator(): {
@@ -154,7 +155,7 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("applies own boosts before enemy disruption for turrets", () => {
     const { ewarResolver, turretBoosterResolver, evaluator } = makeEvaluator();
-    const boosted: TurretSpec = { kind: "turret", tracking: 0.12, sigResolution: 40, optimal: 5500, falloff: 5500, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
+    const boosted: TurretSpec = { kind: "turret", tracking: 0.12, sigResolution: 40, optimal: 5500, falloff: 5500, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
     vi.mocked(turretBoosterResolver.boostedTurret).mockReturnValue(boosted);
     const shipAWithBoosts = { ...shipA, boosts: { loadout: { computers: [], scripts: [] } } };
     const frameWithBoosts = { ...frame, shipA: shipAWithBoosts };

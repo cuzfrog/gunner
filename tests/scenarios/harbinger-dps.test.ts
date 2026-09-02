@@ -22,7 +22,7 @@ import { MissileBoosterResolverImpl } from "../../src/sim/missileBoosterResolver
 import { DroneApplicationImpl } from "../../src/sim/droneApplication";
 import { TurretDamageImpl } from "../../src/sim/turretDamage";
 import { Vec2 } from "../../src/sim/vec2";
-import { SIG_RESOLUTIONS, type ShipState, type SimSnapshot, type TurretSpec, type MissileSpec } from "../../src/sim/types";
+import { SIG_RESOLUTIONS, damageVectorSum, type ShipState, type SimSnapshot, type TurretSpec, type MissileSpec } from "../../src/sim/types";
 import type { EwarResolver } from "../../src/sim/ewarResolver";
 import type { TurretBoosterResolver } from "../../src/sim/turretBoosterResolver";
 
@@ -101,7 +101,7 @@ describe("Harbinger DPS cross-check (all skills 5, no overload)", () => {
     expect(result!.turret).toBeDefined();
     expect(result!.turret!.turretCount).toBe(6);
 
-    const nominalDps = (result!.turret!.damagePerShot * result!.turret!.turretCount) / result!.turret!.cycleTime;
+    const nominalDps = (damageVectorSum(result!.turret!.damagePerShot) * result!.turret!.turretCount) / result!.turret!.cycleTime;
     expect(nominalDps).toBeCloseTo(705.31, 1);
   });
 
@@ -125,15 +125,15 @@ describe("Harbinger DPS cross-check (all skills 5, no overload)", () => {
     const composer = makeComposer();
     const view = composer.compose(snapshot(), { weapons: { shipA: [turret], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] } });
     expect(view.attacks.shipA).toBeDefined();
-    const expectedNominalDps = (turret.damagePerShot * turret.turretCount) / turret.cycleTime;
+    const expectedNominalDps = (damageVectorSum(turret.damagePerShot) * turret.turretCount) / turret.cycleTime;
     expect(view.attacks.shipA!.damage.nominalDps).toBeCloseTo(expectedNominalDps, 6);
   });
 });
 
 describe("mixed turret + launcher DPS summation through sim", () => {
   test("sums nominalDps across a turret group and a missile group", () => {
-    const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 125, optimal: 10_000, falloff: 5_000, damagePerShot: 100, cycleTime: 5, turretCount: 4 };
-    const missile: MissileSpec = { kind: "missile", damagePerMissile: 150, cycleTime: 10, launcherCount: 2, explosionRadius: 50, explosionVelocity: 100, damageReductionFactor: 4.5, maxVelocity: 5000, flightTime: 10, flightRange: 50_000 };
+    const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 125, optimal: 10_000, falloff: 5_000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
+    const missile: MissileSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 150, explosive: 0 }, cycleTime: 10, launcherCount: 2, explosionRadius: 50, explosionVelocity: 100, damageReductionFactor: 4.5, maxVelocity: 5000, flightTime: 10, flightRange: 50_000 };
     const composer = makeComposer();
     const view = composer.compose(snapshot(), { weapons: { shipA: [turret, missile], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] } });
     expect(view.attacks.shipA).toBeDefined();

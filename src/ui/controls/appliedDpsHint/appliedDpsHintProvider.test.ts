@@ -1,21 +1,21 @@
 import { type FakeElement, fakeDocument } from "../../testing";
-import type { AttackAssessment, EngagementView, TurretSpec, DroneSpec } from "../../../sim";
+import { ZERO_DAMAGE, type AttackAssessment, type EngagementView, type TurretSpec, type DroneSpec } from "../../../sim";
 import type { ViewStore } from "../controlsContract";
 import type { AppliedDpsHintModel, AppliedDpsHintRenderer } from "./appliedDpsHintRenderer";
 import { type AppliedDpsHintProviderDeps, AppliedDpsHintProviderImpl } from "./appliedDpsHintProvider";
 
-const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: 100, cycleTime: 5, turretCount: 4 };
-const drone: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
+const drone: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
 
 const turretAssessment: AttackAssessment = {
   boostedWeapon: turret, effectiveWeapon: turret,
-  damage: { nominalDps: 80, appliedDps: 64, application: 0.8, volley: 400 },
+  damage: { nominalDps: 80, appliedDps: 64, application: 0.8, volley: 400, appliedByType: ZERO_DAMAGE },
   turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8 },
 };
 
 const droneAssessment: AttackAssessment = {
   boostedWeapon: drone, effectiveWeapon: drone,
-  damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100 },
+  damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE },
   drone: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true },
 };
 

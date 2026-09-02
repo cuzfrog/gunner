@@ -1,6 +1,6 @@
 import { MissileSkillModelImpl } from "./missileStats";
 import type { HullBonus, LauncherStats, MissileStats } from "../gamedata/fittingDb";
-import type { StackingPenalty } from "../sim";
+import { type StackingPenalty, damageVectorSum } from "../sim";
 import type { SkillLevel } from "../ships";
 import { toTypeId } from "../gamedata/ids";
 
@@ -39,7 +39,7 @@ beforeEach(() => {
 describe("MissileSkillModelImpl", () => {
   test("skill level 0 returns base missile and launcher stats unchanged", () => {
     const result = model().compute(launcher(16, 509), missile(), [], 0);
-    expect(result.damagePerMissile).toBe(83);
+    expect(damageVectorSum(result.damagePerMissile)).toBe(83);
     expect(result.cycleTime).toBe(16);
     expect(result.explosionRadius).toBe(50);
     expect(result.explosionVelocity).toBe(202);
@@ -50,7 +50,7 @@ describe("MissileSkillModelImpl", () => {
 
   test("skill level 5 applies damage bonus from Warhead Upgrades (2%/lvl)", () => {
     const result = model().compute(launcher(16, 509), missile(), [], 5);
-    expect(result.damagePerMissile).toBeCloseTo(83 * (1 + 0.02 * 5), 6);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * (1 + 0.02 * 5), 6);
     expect(result.skillDamageId).toBe(toTypeId("20315"));
   });
 
@@ -86,7 +86,7 @@ describe("MissileSkillModelImpl", () => {
     ];
     stacking.apply.mockReturnValue(1.25);
     const result = model().compute(launcher(16, 509), missile(), bonuses, 5);
-    expect(result.damagePerMissile).toBeCloseTo(83 * (1 + 0.02 * 5) * 1.25, 6);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * (1 + 0.02 * 5) * 1.25, 6);
   });
 
   test("hull missile damage bonus only applies when launcherGroup matches", () => {
@@ -94,7 +94,7 @@ describe("MissileSkillModelImpl", () => {
       { attribute: "missileDamage", magnitude: 5, skill: "Caldari Frigate", launcherGroup: 510 },
     ];
     const result = model().compute(launcher(16, 509), missile(), bonuses, 5);
-    expect(result.damagePerMissile).toBeCloseTo(83 * (1 + 0.02 * 5), 6);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * (1 + 0.02 * 5), 6);
   });
 
   test("hull missile damage bonus applies when launcherGroup is absent (universal)", () => {
@@ -103,7 +103,7 @@ describe("MissileSkillModelImpl", () => {
     ];
     stacking.apply.mockReturnValue(1.25);
     const result = model().compute(launcher(12, 510), missile({ launcherGroup: 510 }), bonuses, 5);
-    expect(result.damagePerMissile).toBeCloseTo(83 * (1 + 0.02 * 5) * 1.25, 6);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * (1 + 0.02 * 5) * 1.25, 6);
   });
 
   test("hull missile ROF bonus is applied as a multiplier to cycle time", () => {
@@ -132,7 +132,7 @@ describe("MissileSkillModelImpl", () => {
 
   test("skill level 3 applies partial bonuses", () => {
     const result = model().compute(launcher(16, 509), missile(), [], 3);
-    expect(result.damagePerMissile).toBeCloseTo(83 * (1 + 0.02 * 3), 6);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * (1 + 0.02 * 3), 6);
     const rofMultiplier = (1 - 0.02 * 3) * (1 - 0.03 * 3);
     expect(result.cycleTime).toBeCloseTo(16 * rofMultiplier, 6);
     expect(result.explosionRadius).toBeCloseTo(50 * (1 - 0.05 * 3), 6);

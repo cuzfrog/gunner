@@ -3,11 +3,11 @@ import { DroneSimulatorImpl } from "./droneSimulator";
 import type { DroneSpec, EngagementFrame, ShipState } from "./types";
 
 function lightDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
-  return { kind: "drone" as const, tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000, ...overrides };
+  return { kind: "drone" as const, tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 38.4, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000, ...overrides };
 }
 
 function sentryDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
-  return { kind: "drone" as const, tracking: 0.0336, sigResolution: 400, optimal: 18000, falloff: 30000, damagePerShot: 105.6, cycleTime: 4, droneCount: 5, maxVelocity: 0, orbitSpeed: 0, orbitRange: 0, isSentry: true, controlRange: 60000, ...overrides };
+  return { kind: "drone" as const, tracking: 0.0336, sigResolution: 400, optimal: 18000, falloff: 30000, damagePerShot: { em: 0, thermal: 0, kinetic: 105.6, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 0, orbitSpeed: 0, orbitRange: 0, isSentry: true, controlRange: 60000, ...overrides };
 }
 
 function shipAt(x: number, y: number): ShipState {

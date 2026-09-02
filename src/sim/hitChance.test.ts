@@ -1,6 +1,6 @@
 import { Vec2 } from "./vec2";
 import { HitChanceImpl } from "./hitChance";
-import type { EngagementFrame, ShipState, TurretSpec } from "./types";
+import { type EngagementFrame, type ShipState, type TurretSpec, ZERO_DAMAGE } from "./types";
 
 const hitChance = new HitChanceImpl();
 
@@ -10,7 +10,7 @@ const defaultTurret: TurretSpec = {
   sigResolution: 40,
   optimal: 5000,
   falloff: 5000,
-  damagePerShot: 0,
+  damagePerShot: ZERO_DAMAGE,
   cycleTime: 1,
   turretCount: 1,
 };

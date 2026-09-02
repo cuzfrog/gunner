@@ -4,6 +4,7 @@ import type { FittingDb, LauncherStats, TurretStats } from "../../gamedata/fitti
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
 import type { HitChance, SigResolutionClass } from "../../sim";
+import { ZERO_DAMAGE } from "../../sim";
 import type { Language } from "../i18n";
 import type { ClipboardProvider, SavedFittings, SessionSettings, SettingsParser, SettingsStore } from "../../appstate";
 import type { DisplayPreferences, ProfileSettings, UserSettings } from "../../appstate";
@@ -139,7 +140,7 @@ export const TURRET: ImportedTurret = {
   base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
   moduleId: "486" as TypeId,
   damageMultiplier: 3,
-  damagePerShot: 12,
+  damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 },
   cycleTime: 5,
   turretCount: 1,
   damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,

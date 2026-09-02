@@ -3,7 +3,7 @@ import type { ChargeCatalog, FittingCalculator, FittingImport, FittingOverridesS
 import { FittingOverridesStoreImpl, EMPTY_DAMAGE_BREAKDOWN } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { Ships } from "../../../ships";
-import { registerSimModule, type SigResolutionClass, type SimCradle, type SimValueParser } from "../../../sim";
+import { registerSimModule, type SigResolutionClass, type SimCradle, type SimValueParser, damageVectorScale } from "../../../sim";
 import { createContainer, InjectionMode } from "awilix";
 import type { I18n, Language } from "../../i18n";
 import { UiEventsImpl } from "../../events";
@@ -165,7 +165,7 @@ export function buildTurret(
         tracking: TURRET.base.tracking * trackingMultiplier,
         optimal: TURRET.base.optimal * rangeMultiplier,
         falloff: TURRET.base.falloff * falloffMultiplier,
-        damagePerShot: TURRET.damageMultiplier * (charge ? 20 : TURRET.damagePerShot / TURRET.damageMultiplier),
+        damagePerShot: charge ? damageVectorScale({ em: 0, thermal: 0, kinetic: 20, explosive: 0 }, TURRET.damageMultiplier) : TURRET.damagePerShot,
       };
     })),
     resolveLauncher: vi.fn(() => undefined),

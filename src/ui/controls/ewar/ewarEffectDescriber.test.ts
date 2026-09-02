@@ -1,10 +1,9 @@
 import { toTypeId } from "../../../gamedata/ids";
-import type { DisruptionScriptSpec, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec, TurretSpec } from "../../../sim";
-import type { EwarResolver } from "../../../sim";
+import { ZERO_DAMAGE, type DisruptionScriptSpec, type EwarProjection, type EwarResolver, type StasisGrapplerSpec, type StasisWebSpec, type TargetPainterSpec, type TrackingDisruptorSpec, type TurretSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 import { EwarEffectDescriberImpl } from "./ewarEffectDescriber";
 
-const unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
+const unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 
 const resolver = vi.mocked<EwarResolver>({
   speedMultiplier: vi.fn(),

@@ -1,6 +1,7 @@
 import type { AttackAssessment, AttackState, EngagementEvaluator } from "./fireControl";
 import type { Kinematics } from "./kinematics";
 import type { DamageAssessment, DroneRuntimeState, EngagementFrame, MissileAttackFacts, Side, SimSnapshot, WeaponSpec } from "./types";
+import { ZERO_DAMAGE, damageVectorAdd } from "./types";
 
 export interface EngagementInput {
   readonly weapons: Record<Side, readonly WeaponSpec[]>;
@@ -82,7 +83,7 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
     if (weaponAttacks.length === 0) return { combined: undefined, weaponAttacks: [] };
     if (weaponAttacks.length === 1) return { combined: weaponAttacks[0].assessment, weaponAttacks };
     const primary = weaponAttacks[0].assessment;
-    const totalDamage = weaponAttacks.reduce<DamageAssessment>(sumDamage, { nominalDps: 0, appliedDps: 0, application: 0, volley: 0 });
+    const totalDamage = weaponAttacks.reduce<DamageAssessment>(sumDamage, { nominalDps: 0, appliedDps: 0, application: 0, volley: 0, appliedByType: ZERO_DAMAGE });
     return { combined: { ...primary, damage: totalDamage }, weaponAttacks };
   }
 }
@@ -104,6 +105,7 @@ function sumDamage(acc: DamageAssessment, weaponAttack: WeaponAttack): DamageAss
     appliedDps,
     application: nominalDps > 0 ? appliedDps / nominalDps : 0,
     volley: acc.volley + weaponAttack.assessment.damage.volley,
+    appliedByType: damageVectorAdd(acc.appliedByType, weaponAttack.assessment.damage.appliedByType),
   };
 }
 

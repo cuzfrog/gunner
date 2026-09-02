@@ -15,6 +15,7 @@ import {
   type TrackingDisruptorSpec,
   type TurretSpec,
   type WarpScramblerSpec,
+  ZERO_DAMAGE,
 } from "./types";
 
 const stacking = new StackingPenaltyImpl();
@@ -38,7 +39,7 @@ const defaultTurret: TurretSpec = {
   sigResolution: 40,
   optimal: 5000,
   falloff: 5000,
-  damagePerShot: 0,
+  damagePerShot: ZERO_DAMAGE,
   cycleTime: 1,
   turretCount: 1,
 };

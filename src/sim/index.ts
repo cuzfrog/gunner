@@ -22,6 +22,10 @@ export type {
   BoostLoadout,
   CombatantConfig,
   DamageAssessment,
+  DamageResists,
+  DamageType,
+  DamageVector,
+  DefenseLayer,
   DisruptionBreakdown,
   DisruptionScriptSpec,
   DisruptorActivation,
@@ -77,7 +81,7 @@ export type {
   WeaponKind,
   WeaponSpec,
 } from "./types";
-export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, SIG_RESOLUTIONS } from "./types";
+export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, DAMAGE_TYPES, EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, SIG_RESOLUTIONS, ZERO_DAMAGE, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum } from "./types";
 export type { SimValueParser } from "./simValueParser";
 export { Vec2 } from "./vec2";
 export type { SimCradle } from "./cradle";

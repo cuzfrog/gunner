@@ -3,17 +3,17 @@ import { EngagementFrameComposerImpl } from "./engagementFrameComposer";
 import type { EngagementEvaluator } from "./fireControl";
 import type { Kinematics } from "./kinematics";
 import type { AttackAssessment } from "./fireControl";
-import type { EngagementFrame, ShipState, SimSnapshot, TurretSpec } from "./types";
+import { type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec, ZERO_DAMAGE } from "./types";
 
-const shipATurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
-const shipBTurret: TurretSpec = { kind: "turret", tracking: 0.28, sigResolution: 125, optimal: 8000, falloff: 4000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
-const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
-const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
-const shipBEffectiveTurret: TurretSpec = { kind: "turret", tracking: 0.3, sigResolution: 125, optimal: 8500, falloff: 4000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
+const shipATurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const shipBTurret: TurretSpec = { kind: "turret", tracking: 0.28, sigResolution: 125, optimal: 8000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const shipBEffectiveTurret: TurretSpec = { kind: "turret", tracking: 0.3, sigResolution: 125, optimal: 8500, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const hit = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
 const shipBHit = { chance: 0.7, trackingTerm: 0.2, rangeTerm: 0.3 };
-const shipADamage = { nominalDps: 20, appliedDps: 20, application: 1, volley: 100 };
-const shipBDamage = { nominalDps: 20, appliedDps: 14, application: 0.7, volley: 100 };
+const shipADamage = { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, appliedByType: ZERO_DAMAGE };
+const shipBDamage = { nominalDps: 20, appliedDps: 14, application: 0.7, volley: 100, appliedByType: ZERO_DAMAGE };
 
 const shipA: ShipState = {
   id: "shipA",
@@ -123,8 +123,8 @@ describe("EngagementFrameComposerImpl", () => {
 
   test("multiple weapons on one side sum DPS while keeping primary weapon details", () => {
     const { engagementEvaluator, composer } = makeComposer();
-    const secondTurret: TurretSpec = { kind: "turret", tracking: 0.2, sigResolution: 125, optimal: 7000, falloff: 3000, damagePerShot: 50, cycleTime: 4, turretCount: 2 };
-    const secondDamage = { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100 };
+    const secondTurret: TurretSpec = { kind: "turret", tracking: 0.2, sigResolution: 125, optimal: 7000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 50, explosive: 0 }, cycleTime: 4, turretCount: 2 };
+    const secondDamage = { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE };
     const secondAssessment: AttackAssessment = {
       boostedWeapon: secondTurret,
       effectiveWeapon: secondTurret,

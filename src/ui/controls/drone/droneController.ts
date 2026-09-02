@@ -1,7 +1,8 @@
 import type { DroneCatalog, DroneGroup, DroneLoadoutContext, DroneLoadoutResolver, DroneLoadoutValidation, DroneLoadoutValidator, FittingImport, ImportedDrone, ImportedFitting } from "../../../fitting";
 import type { DroneSizeClass } from "../../../gamedata/fittingDb";
 import type { TypeId } from "../../../gamedata/ids";
-import type { DroneSpec } from "../../../sim";
+import type { DamageVector, DroneSpec } from "../../../sim";
+import { damageVectorScale, damageVectorSum } from "../../../sim";
 import type { StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -164,7 +165,7 @@ export class DroneControllerImpl implements DroneController {
     setText(this.els.tracking, formatNumber(drone.tracking, 4));
     setText(this.els.optimal, formatDistance(drone.optimal, t));
     setText(this.els.falloff, formatDistance(drone.falloff, t));
-    setText(this.els.damage, formatWithCommas(droneDamagePerShot(drone), 1));
+    setText(this.els.damage, formatWithCommas(damageVectorSum(droneDamagePerShot(drone)), 1));
     setText(this.els.cycleTime, `${formatNumber(drone.cycleTime, 2)} s`);
     setText(this.els.count, String(this.totalCount()));
     if (drone.sizeClass === "sentry") {
@@ -335,6 +336,6 @@ function importedDroneToDroneSpec(drone: ImportedDrone): DroneSpec {
   };
 }
 
-function droneDamagePerShot(drone: ImportedDrone): number {
-  return (drone.emDamage + drone.thermalDamage + drone.kineticDamage + drone.explosiveDamage) * drone.damageMultiplier;
+function droneDamagePerShot(drone: ImportedDrone): DamageVector {
+  return damageVectorScale({ em: drone.emDamage, thermal: drone.thermalDamage, kinetic: drone.kineticDamage, explosive: drone.explosiveDamage }, drone.damageMultiplier);
 }

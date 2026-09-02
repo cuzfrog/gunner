@@ -1,7 +1,7 @@
 import { MissileCatalogImpl } from "./missileCatalog";
 import { MissileSkillModelImpl } from "./missileStats";
 import type { FittingDb, HullBonus, LauncherStats, MissileStats } from "../gamedata/fittingDb";
-import type { StackingPenalty } from "../sim";
+import { type StackingPenalty, damageVectorSum } from "../sim";
 import type { SkillLevel } from "../ships";
 import { toTypeId, type TypeId } from "../gamedata/ids";
 import type { ImportedLauncher } from "./chargeCatalog";
@@ -47,7 +47,7 @@ function importedLauncher(overrides: Partial<ImportedLauncher> = {}): ImportedLa
     count: 1,
     chargeId: SCOURGE_LIGHT.id,
     chargeName: SCOURGE_LIGHT.name,
-    damagePerMissile: 83,
+    damagePerMissile: { em: 0, thermal: 0, kinetic: 83, explosive: 0 },
     cycleTime: 16,
     explosionRadius: 50,
     explosionVelocity: 202,
@@ -90,7 +90,7 @@ describe("MissileCatalogImpl", () => {
     const result = catalog().withCharge(base, SCOURGE_FURY_LIGHT.id, [], 5);
     expect(result.chargeId).toBe(SCOURGE_FURY_LIGHT.id);
     expect(result.chargeName).toBe(SCOURGE_FURY_LIGHT.name);
-    expect(result.damagePerMissile).toBeCloseTo(145 * (1 + 0.02 * 5), 6);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(145 * (1 + 0.02 * 5), 6);
     expect(result.explosionRadius).toBeCloseTo(75 * (1 - 0.05 * 5), 6);
     expect(result.damageReductionFactor).toBe(2.6);
   });
@@ -138,7 +138,7 @@ describe("MissileCatalogImpl", () => {
     stacking.apply.mockReturnValue(1.25);
     const base = importedLauncher();
     const result = catalog().withCharge(base, SCOURGE_LIGHT.id, bonuses, 5);
-    expect(result.damagePerMissile).toBeCloseTo(83 * (1 + 0.02 * 5) * 1.25, 6);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * (1 + 0.02 * 5) * 1.25, 6);
   });
 
   test("equivalentInGroups finds a stem-matching missile in the target charge groups", () => {

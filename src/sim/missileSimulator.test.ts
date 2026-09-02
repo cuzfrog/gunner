@@ -5,7 +5,7 @@ import type { EngagementFrame, MissileLaunchSpec, MissileSpec, ShipState } from 
 
 const lightMissile: MissileSpec = {
   kind: "missile",
-  damagePerMissile: 83,
+  damagePerMissile: { em: 0, thermal: 0, kinetic: 83, explosive: 0 },
   cycleTime: 4,
   launcherCount: 1,
   explosionRadius: 40,
@@ -18,7 +18,7 @@ const lightMissile: MissileSpec = {
 
 const heavyMissile: MissileSpec = {
   kind: "missile",
-  damagePerMissile: 149,
+  damagePerMissile: { em: 0, thermal: 0, kinetic: 149, explosive: 0 },
   cycleTime: 8,
   launcherCount: 2,
   explosionRadius: 140,

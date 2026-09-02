@@ -21,6 +21,7 @@ import type {
   TurretSpec,
   WeaponSpec,
 } from "./types";
+import { ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 export interface AttackState {
   readonly weapon: WeaponSpec;
@@ -97,11 +98,13 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
 
   private assessMissile(frame: EngagementFrame, ship: ShipState, opponent: ShipState, missile: MissileSpec, opponentSigRadius: number, facts?: MissileAttackFacts): AttackAssessment {
     const boosted = this.missileBoosters.boostedMissile(missile, ship.missileBoosts);
-    const nominalDps = boosted.cycleTime > 0 ? (boosted.damagePerMissile * boosted.launcherCount) / boosted.cycleTime : 0;
-    const volley = boosted.damagePerMissile * boosted.launcherCount;
+    const missileDamage = damageVectorSum(boosted.damagePerMissile);
+    const nominalDps = boosted.cycleTime > 0 ? (missileDamage * boosted.launcherCount) / boosted.cycleTime : 0;
+    const volley = missileDamage * boosted.launcherCount;
     if (facts) {
       const application = facts.predicted.application;
       const appliedDps = nominalDps * application;
+      const appliedByType = damageVectorScale(boosted.damagePerMissile, (boosted.launcherCount * application) / Math.max(boosted.cycleTime, 0));
       const breakdown: MissileDamageBreakdown = {
         application,
         signatureTerm: facts.predicted.signatureTerm,
@@ -109,14 +112,15 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
         inRange: facts.interceptable,
         timeToImpact: facts.nearestTimeToImpact,
       };
-      return { boostedWeapon: boosted, effectiveWeapon: boosted, damage: { nominalDps, appliedDps, application, volley }, missile: breakdown };
+      return { boostedWeapon: boosted, effectiveWeapon: boosted, damage: { nominalDps, appliedDps, application, volley, appliedByType }, missile: breakdown };
     }
     const result = this.missileApplication.compute(boosted, opponent.velocity.len(), opponentSigRadius);
     const inRange = frame.distance <= boosted.flightRange;
     const timeToImpact = boosted.maxVelocity > 0 ? frame.distance / boosted.maxVelocity : 0;
     const breakdown: MissileDamageBreakdown = { ...result, inRange, timeToImpact };
     const appliedDps = inRange ? nominalDps * result.application : 0;
-    return { boostedWeapon: boosted, effectiveWeapon: boosted, damage: { nominalDps, appliedDps, application: inRange ? result.application : 0, volley }, missile: breakdown };
+    const appliedByType = inRange ? damageVectorScale(boosted.damagePerMissile, (boosted.launcherCount * result.application) / Math.max(boosted.cycleTime, 0)) : ZERO_DAMAGE;
+    return { boostedWeapon: boosted, effectiveWeapon: boosted, damage: { nominalDps, appliedDps, application: inRange ? result.application : 0, volley, appliedByType }, missile: breakdown };
   }
 
   private assessDrone(frame: EngagementFrame, ship: ShipState, opponent: ShipState, drone: DroneSpec, opponentSigRadius: number, droneState: DroneRuntimeState | undefined): AttackAssessment {

@@ -238,7 +238,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
     moduleId: toTypeId("486"),
     damageMultiplier: 3,
-    damagePerShot: 12,
+    damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 },
     cycleTime: 5,
     turretCount: 1,
     damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,

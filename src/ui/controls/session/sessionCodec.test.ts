@@ -11,7 +11,7 @@ import {
 import type { ChargeCatalog } from "../../../fitting";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { ImportedTurret } from "../../../fitting";
-import { type AutopilotMode, type SigResolutionClass, type TurretSpec } from "../../../sim";
+import { ZERO_DAMAGE, type AutopilotMode, type SigResolutionClass, type TurretSpec } from "../../../sim";
 import { SessionCodecImpl } from "./sessionCodec";
 import { createControlsEls, fakeDocument, FakeElement, fakeTrackingInput, mockParser } from "../testSupport";
 import { UiEventsImpl, type UiEvents } from "../../events";
@@ -220,7 +220,7 @@ class FakeTurretController implements TurretController {
     sigResolution: 40,
     optimal: 1000,
     falloff: 3000,
-    damagePerShot: 0,
+    damagePerShot: ZERO_DAMAGE,
     cycleTime: 1,
     turretCount: 1,
   }));

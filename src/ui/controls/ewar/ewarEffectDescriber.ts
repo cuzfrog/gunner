@@ -1,5 +1,6 @@
 import type { EwarResolver } from "../../../sim";
 import type { DisruptionScriptSpec, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TurretSpec, TrackingDisruptorSpec } from "../../../sim";
+import { ZERO_DAMAGE } from "../../../sim";
 import type { I18n } from "../../i18n";
 
 export interface EwarEffectDescriber {
@@ -22,7 +23,7 @@ export interface EwarEffectDescriber {
 export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   private readonly resolver: EwarResolver;
   private readonly i18n: I18n;
-  private readonly unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
+  private readonly unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 
   constructor(deps: { ewarResolver: EwarResolver; i18n: I18n }) {
     this.resolver = deps.ewarResolver;

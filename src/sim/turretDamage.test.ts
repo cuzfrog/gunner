@@ -1,5 +1,5 @@
 import { TurretDamageImpl } from "./turretDamage";
-import type { HitChanceBreakdown, TurretSpec } from "./types";
+import { type HitChanceBreakdown, type TurretSpec, ZERO_DAMAGE } from "./types";
 
 const turret: TurretSpec = {
   kind: "turret",
@@ -7,7 +7,7 @@ const turret: TurretSpec = {
   sigResolution: 40,
   optimal: 5000,
   falloff: 5000,
-  damagePerShot: 100,
+  damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 },
   cycleTime: 5,
   turretCount: 4,
 };
@@ -60,7 +60,7 @@ describe("TurretDamageImpl", () => {
   });
 
   test("zero damagePerShot yields zero DPS and volley", () => {
-    const zeroTurret: TurretSpec = { ...turret, damagePerShot: 0 };
+    const zeroTurret: TurretSpec = { ...turret, damagePerShot: ZERO_DAMAGE };
     const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
     const result = damage.compute(hit, zeroTurret);
     expect(result.nominalDps).toBe(0);

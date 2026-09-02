@@ -1,4 +1,5 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
+import { damageVectorSum } from "../../../sim";
 import { buildLauncher, importedLauncherFixture } from "./testSupport";
 import { FakeElement, getFake, IMPORTED_RIFTER } from "../testSupport";
 import type { ImportedFitting, LauncherClass, LauncherClasses } from "../../../fitting";
@@ -30,7 +31,7 @@ function rocketLauncherFixture(count: number): ImportedLauncher {
     count,
     chargeId: SCOURGE_ROCKET_ID,
     chargeName: "Scourge Rocket",
-    damagePerMissile: 45,
+    damagePerMissile: { em: 0, thermal: 0, kinetic: 45, explosive: 0 },
     cycleTime: 4,
     explosionRadius: 20,
     explosionVelocity: 170,
@@ -48,7 +49,7 @@ function lightLauncherFixture(count: number): ImportedLauncher {
     count,
     chargeId: LIGHT_AMMO_ID,
     chargeName: "Scourge Light Missile",
-    damagePerMissile: 83,
+    damagePerMissile: { em: 0, thermal: 0, kinetic: 83, explosive: 0 },
     cycleTime: 16,
     explosionRadius: 50,
     explosionVelocity: 170,
@@ -93,7 +94,7 @@ describe("LauncherController class switch", () => {
 
     const specBefore = controller.currentMissileSpec()!;
     expect(specBefore).toBeDefined();
-    const dpsBefore = specBefore.damagePerMissile * specBefore.launcherCount / specBefore.cycleTime;
+    const dpsBefore = damageVectorSum(specBefore.damagePerMissile) * specBefore.launcherCount / specBefore.cycleTime;
 
     let configInvalidated = false;
     events.onConfigInvalidated(() => { configInvalidated = true; });
@@ -102,9 +103,9 @@ describe("LauncherController class switch", () => {
 
     const specAfter = controller.currentMissileSpec()!;
     expect(configInvalidated).toBe(true);
-    const dpsAfter = specAfter.damagePerMissile * specAfter.launcherCount / specAfter.cycleTime;
+    const dpsAfter = damageVectorSum(specAfter.damagePerMissile) * specAfter.launcherCount / specAfter.cycleTime;
     expect(dpsAfter).toBeGreaterThan(dpsBefore);
-    expect(specAfter.damagePerMissile).toBe(45);
+    expect(damageVectorSum(specAfter.damagePerMissile)).toBe(45);
     expect(specAfter.cycleTime).toBe(4);
   });
 
@@ -124,7 +125,7 @@ describe("LauncherController class switch", () => {
     expect(controller.launcher()?.moduleId).toBe(ROCKET_MODULE_ID);
 
     const spec = controller.currentMissileSpec()!;
-    expect(spec.damagePerMissile).toBe(45);
+    expect(damageVectorSum(spec.damagePerMissile)).toBe(45);
     expect(controller.ammoId()).toBe(SCOURGE_ROCKET_ID);
     expect(panelMemory.recallLauncher("rocket")?.moduleId).toBe(ROCKET_MODULE_ID);
   });

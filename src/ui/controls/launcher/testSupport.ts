@@ -75,7 +75,7 @@ export function importedLauncherFixture(overrides: Partial<ImportedLauncher> = {
     count: 2,
     chargeId: "206" as TypeId,
     chargeName: "Scourge Light Missile",
-    damagePerMissile: 83,
+    damagePerMissile: { em: 0, thermal: 0, kinetic: 83, explosive: 0 },
     cycleTime: 16,
     explosionRadius: 50,
     explosionVelocity: 170,

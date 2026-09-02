@@ -1,5 +1,6 @@
 import {
   Vec2,
+  ZERO_DAMAGE,
   type AttackAssessment,
   type DisruptionBreakdown,
   type DroneSimulator,
@@ -96,7 +97,7 @@ const frame: EngagementFrame = {
   transversalSpeed: 0,
   angularVelocity: 0,
 };
-const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
+const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
 const shipConfig: ShipConfig = { id: "shipA", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1 };
 const config: SimConfig = {
@@ -109,7 +110,7 @@ function baseView(): EngagementView {
   const assessment: AttackAssessment = {
     boostedWeapon: turret,
     effectiveWeapon: turret,
-    damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0 },
+    damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, appliedByType: ZERO_DAMAGE },
     turret: { hit, expectedMultiplier: 1 },
   };
   return { frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret } };
@@ -170,15 +171,15 @@ describe("AppImpl", () => {
   });
 
   test("renderFrame passes per-side effective attribute values and boosted baselines from view", () => {
-    const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
-    const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
+    const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+    const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
     const boostedShipA = { ...ship, maxSpeed: 250 };
     const boostedShipB = { ...ship, id: "shipB" as const, maxSpeed: 120 };
     const boostedSnapshot = { ...snapshot, shipA: boostedShipA, shipB: boostedShipB };
     const assessment: AttackAssessment = {
       boostedWeapon: boostedTurret,
       effectiveWeapon: effectiveTurret,
-      damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0 },
+      damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, appliedByType: ZERO_DAMAGE },
       turret: { hit, expectedMultiplier: 1 },
     };
     const view: EngagementView = {
@@ -320,11 +321,11 @@ describe("AppImpl", () => {
   test("returns drone readout values when the effective weapon is a drone", () => {
     const drone: DroneSpec = {
       kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500,
-      damagePerShot: 20, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000,
+      damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000,
     };
     const droneAssessment: AttackAssessment = {
       boostedWeapon: drone, effectiveWeapon: drone,
-      damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100 },
+      damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE },
       drone: { hit, expectedMultiplier: 1, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true },
     };
     const droneView: EngagementView = {

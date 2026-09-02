@@ -1,7 +1,7 @@
 import { DroneApplicationImpl } from "./droneApplication";
 import { HitChanceImpl } from "./hitChance";
 import { Vec2 } from "./vec2";
-import type { DroneRuntimeState, DroneSpec, EngagementFrame, ShipState } from "./types";
+import { type DroneRuntimeState, type DroneSpec, type EngagementFrame, type ShipState, ZERO_DAMAGE } from "./types";
 
 const shipA: ShipState = { id: "shipA", maxSpeed: 0, mass: 1_000_000, inertiaModifier: 1, mode: "orbit", desiredRange: 1000, aggressivity: 1, position: new Vec2(0, 0), velocity: new Vec2(0, 0) };
 const shipB: ShipState = { id: "shipB", maxSpeed: 0, mass: 1_000_000, inertiaModifier: 1, mode: "orbit", desiredRange: 1000, aggressivity: 1, position: new Vec2(0, 5000), velocity: new Vec2(0, 0) };
@@ -11,11 +11,11 @@ function frame(distance: number, angularVelocity: number): EngagementFrame {
 }
 
 function lightDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
-  return { kind: "drone" as const, tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: 38.4, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000, ...overrides };
+  return { kind: "drone" as const, tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 38.4, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000, ...overrides };
 }
 
 function sentryDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
-  return { kind: "drone" as const, tracking: 0.0336, sigResolution: 400, optimal: 18000, falloff: 30000, damagePerShot: 105.6, cycleTime: 4, droneCount: 5, maxVelocity: 0, orbitSpeed: 0, orbitRange: 0, isSentry: true, controlRange: 60000, ...overrides };
+  return { kind: "drone" as const, tracking: 0.0336, sigResolution: 400, optimal: 18000, falloff: 30000, damagePerShot: { em: 0, thermal: 0, kinetic: 105.6, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 0, orbitSpeed: 0, orbitRange: 0, isSentry: true, controlRange: 60000, ...overrides };
 }
 
 const hitChance = new HitChanceImpl();
@@ -72,7 +72,7 @@ describe("DroneApplicationImpl", () => {
   });
 
   test("zero damage drone produces zero DPS", () => {
-    const drone = lightDrone({ damagePerShot: 0 });
+    const drone = lightDrone({ damagePerShot: ZERO_DAMAGE });
     const result = application.compute(frame(5000, 0), drone, 40);
     expect(result.nominalDps).toBe(0);
     expect(result.appliedDps).toBe(0);
@@ -87,7 +87,7 @@ describe("DroneApplicationImpl", () => {
   });
 
   test("nominal DPS is damagePerShot * droneCount / cycleTime", () => {
-    const drone = lightDrone({ damagePerShot: 100, cycleTime: 5, droneCount: 3 });
+    const drone = lightDrone({ damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, droneCount: 3 });
     const result = application.compute(frame(5000, 0), drone, 40);
     expect(result.nominalDps).toBeCloseTo(60, 6);
     expect(result.volley).toBe(300);

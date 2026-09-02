@@ -2,7 +2,7 @@ import type { TypeId } from "../gamedata/ids";
 import type { FittingDb, FittingModuleStats, HullBonus, LauncherStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, TurretWeaponGroup, WarpScramblerStats, DisruptionScriptStats } from "../gamedata/fittingDb";
 import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
 import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec } from "../sim";
-import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT } from "../sim";
+import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, ZERO_DAMAGE, damageVectorFromPartial, damageVectorScale } from "../sim";
 import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher } from "./chargeCatalog";
 import type { GunFamily, GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
@@ -168,14 +168,13 @@ export class FittingCalculatorImpl implements FittingCalculator {
         base,
         moduleId: group.moduleId,
         damageMultiplier: finalDamageMultiplier,
-        damagePerShot: 0,
+        damagePerShot: ZERO_DAMAGE,
         cycleTime: finalCycleTime,
         turretCount: group.count,
         damageBreakdown: { damageByType: {}, factors },
       };
       const selectedCharge = chargeId && this.db.charges[chargeId] ? chargeId : this.chargeCatalog.usualForTurret(turretForChargeSelection);
       const charge = this.db.charges[selectedCharge] ?? {};
-      const chargeDamage = (charge.emDamage ?? 0) + (charge.thermalDamage ?? 0) + (charge.kineticDamage ?? 0) + (charge.explosiveDamage ?? 0);
 
       result.push({
         tracking: base.tracking * (charge.trackingMultiplier ?? 1),
@@ -187,7 +186,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
         base,
         moduleId: group.moduleId,
         damageMultiplier: finalDamageMultiplier,
-        damagePerShot: finalDamageMultiplier * chargeDamage,
+        damagePerShot: damageVectorScale(damageVectorFromPartial(chargeDamageByType(charge)), finalDamageMultiplier),
         cycleTime: finalCycleTime,
         turretCount: group.count,
         damageBreakdown: { damageByType: chargeDamageByType(charge), factors },
@@ -239,7 +238,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       count: bestGroup.count,
       chargeId,
       chargeName: missileStats.name,
-      damagePerMissile: output.damagePerMissile * bcsDamageBonus,
+      damagePerMissile: damageVectorScale(output.damagePerMissile, bcsDamageBonus),
       cycleTime: output.cycleTime * bcsCycleTimeBonus * launcherOverloadCycle,
       explosionRadius: output.explosionRadius,
       explosionVelocity: output.explosionVelocity,

@@ -2,6 +2,7 @@ import { join } from "path";
 import type { PropulsionModule, ShipNameLanguage, ShipProfile, Ships, StatConditions } from "../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { DisruptionScriptSpec, StackingPenalty } from "../sim";
+import { damageVectorSum } from "../sim";
 import { ChargeCatalogImpl } from "./chargeCatalog";
 import { DroneCatalogImpl } from "./droneCatalog";
 import { DroneSkillModelImpl } from "./droneStats";
@@ -1188,7 +1189,7 @@ Ballistic Control System I`,
     const baseCycle = withoutBcs!.launcher!.cycleTime;
     const bcsDamageMultiplier = stackingPenalty.apply([1.07, 1.07]);
     const bcsCycleMultiplier = stackingPenalty.apply([0.92, 0.92]);
-    expect(withBcs!.launcher!.damagePerMissile).toBeCloseTo(baseDamage * bcsDamageMultiplier, 6);
+    expect(damageVectorSum(withBcs!.launcher!.damagePerMissile)).toBeCloseTo(damageVectorSum(baseDamage) * bcsDamageMultiplier, 6);
     expect(withBcs!.launcher!.cycleTime).toBeCloseTo(baseCycle * bcsCycleMultiplier, 6);
   });
 
@@ -1368,7 +1369,7 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
     expect(result!.launcher!.count).toBe(3);
     expect(result!.launcher!.name).toBe("Arbalest Compact Light Missile Launcher");
     expect(result!.launcher!.chargeName).toBe("Caldari Navy Inferno Light Missile");
-    expect(result!.launcher!.damagePerMissile).toBeGreaterThan(0);
+    expect(damageVectorSum(result!.launcher!.damagePerMissile)).toBeGreaterThan(0);
     expect(result!.launcher!.cycleTime).toBeGreaterThan(0);
     expect(result!.launcher!.explosionRadius).toBeGreaterThan(0);
     expect(result!.launcher!.maxVelocity).toBeGreaterThan(0);
@@ -1391,7 +1392,7 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
     const skillDamageMultiplier = 1 + 0.02 * 4;
     const hullDamagePercent = 5 * 4;
     const hullDamageMultiplier = stackingPenalty.apply([1 + hullDamagePercent / 100]);
-    expect(result!.launcher!.damagePerMissile).toBeCloseTo(baseDamage * skillDamageMultiplier * hullDamageMultiplier, 4);
+    expect(damageVectorSum(result!.launcher!.damagePerMissile)).toBeCloseTo(baseDamage * skillDamageMultiplier * hullDamageMultiplier, 4);
     const skillRofMultiplier = (1 - 0.02 * 4) * (1 - 0.03 * 4);
     expect(result!.launcher!.cycleTime).toBeCloseTo(13.6 * skillRofMultiplier, 4);
   });

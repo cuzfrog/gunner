@@ -3,7 +3,7 @@ import type { MissileSpec } from "./types";
 
 const missile: MissileSpec = {
   kind: "missile",
-  damagePerMissile: 100,
+  damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 },
   cycleTime: 10,
   launcherCount: 1,
   explosionRadius: 40,

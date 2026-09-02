@@ -9,11 +9,12 @@ import { StackingPenaltyImpl } from "../../src/sim/stackingPenalty";
 import { TurretDamageImpl } from "../../src/sim/turretDamage";
 import { Vec2 } from "../../src/sim/vec2";
 import { toTypeId } from "../../src/gamedata/ids";
+import { ZERO_DAMAGE } from "../../src/sim";
 import type { EwarProjection, ShipState, SimSnapshot, TurretSpec } from "../../src/sim/types";
 import type { EwarResolver } from "../../src/sim/ewarResolver";
 import type { TurretBoosterResolver } from "../../src/sim/turretBoosterResolver";
 
-const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 10_000, falloff: 5_000, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
+const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 10_000, falloff: 5_000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 
 function shipState(id: "shipA" | "shipB", ewar?: EwarProjection): ShipState {
   return {

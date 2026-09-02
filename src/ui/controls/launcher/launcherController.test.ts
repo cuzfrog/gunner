@@ -1,5 +1,6 @@
 import { buildLauncher, importedLauncherFixture } from "./testSupport";
 import { FakeElement, getFake, IMPORTED_RIFTER } from "../testSupport";
+import { damageVectorSum } from "../../../sim";
 import type { ImportedFitting } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 
@@ -115,7 +116,7 @@ describe("LauncherController", () => {
     const spec = controller.currentMissileSpec();
     expect(spec).toBeDefined();
     expect(spec!.kind).toBe("missile");
-    expect(spec!.damagePerMissile).toBe(83);
+    expect(damageVectorSum(spec!.damagePerMissile)).toBe(83);
     expect(spec!.launcherCount).toBe(2);
     expect(spec!.flightRange).toBe(3750 * 5);
   });

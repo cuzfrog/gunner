@@ -6,6 +6,30 @@ export type SigResolutionClass = keyof typeof SIG_RESOLUTIONS;
 
 export type Side = "shipA" | "shipB";
 
+export type DamageType = "em" | "thermal" | "kinetic" | "explosive";
+export type DamageVector = Readonly<Record<DamageType, number>>;
+export type DamageResists = Readonly<Record<DamageType, number>>;
+export type DefenseLayer = "shield" | "armor" | "hull";
+
+export const ZERO_DAMAGE: DamageVector = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
+export const DAMAGE_TYPES: readonly DamageType[] = ["em", "thermal", "kinetic", "explosive"];
+
+export function damageVectorSum(vec: DamageVector): number {
+  return vec.em + vec.thermal + vec.kinetic + vec.explosive;
+}
+
+export function damageVectorScale(vec: DamageVector, factor: number): DamageVector {
+  return { em: vec.em * factor, thermal: vec.thermal * factor, kinetic: vec.kinetic * factor, explosive: vec.explosive * factor };
+}
+
+export function damageVectorAdd(a: DamageVector, b: DamageVector): DamageVector {
+  return { em: a.em + b.em, thermal: a.thermal + b.thermal, kinetic: a.kinetic + b.kinetic, explosive: a.explosive + b.explosive };
+}
+
+export function damageVectorFromPartial(partial: Readonly<Partial<Record<DamageType, number>>>): DamageVector {
+  return { em: partial.em ?? 0, thermal: partial.thermal ?? 0, kinetic: partial.kinetic ?? 0, explosive: partial.explosive ?? 0 };
+}
+
 export const AGGRESSIVITY_MIN = 0.01;
 export const AGGRESSIVITY_MAX = 100;
 
@@ -65,14 +89,14 @@ export interface TrackingApplicationSpec {
 
 export interface TurretSpec extends TrackingApplicationSpec {
   readonly kind: "turret";
-  readonly damagePerShot: number; // base damage of one turret shot
+  readonly damagePerShot: DamageVector;
   readonly cycleTime: number; // seconds
   readonly turretCount: number;
 }
 
 export interface MissileSpec {
   readonly kind: "missile";
-  readonly damagePerMissile: number;
+  readonly damagePerMissile: DamageVector;
   readonly cycleTime: number; // seconds
   readonly launcherCount: number;
   readonly explosionRadius: number;
@@ -85,7 +109,7 @@ export interface MissileSpec {
 
 export interface DroneSpec extends TrackingApplicationSpec {
   readonly kind: "drone";
-  readonly damagePerShot: number; // base damage of one drone per cycle
+  readonly damagePerShot: DamageVector; // base damage of one drone per cycle
   readonly cycleTime: number; // seconds
   readonly droneCount: number;
   readonly maxVelocity: number; // m/s, 0 for sentries
@@ -113,6 +137,7 @@ export interface DamageAssessment {
   readonly appliedDps: number;
   readonly application: number; // 0..1, applied/nominal
   readonly volley: number; // per cycle, all launchers/turrets
+  readonly appliedByType: DamageVector;
 }
 
 export interface TurretDamageBreakdown {

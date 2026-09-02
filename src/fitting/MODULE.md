@@ -50,11 +50,15 @@ abstractions, `ImportedFitting`, `ImportedTurret`, `ImportedLauncher`,
 `DroneOption`, `PresetFitting`, `FittingRow`, `FittingSection`,
 `FittingSummary`, `LauncherClass`, `FittingState`, `FittedModule`,
 `TurretGroup`, `LauncherGroup`, `DroneGroup`, `CargoEntry`,
-`FittingModuleEntry`, `DamageType`, `DamageFactor`, `DamageFactorKind`,
-`DamageBreakdown`, `EMPTY_DAMAGE_BREAKDOWN`, and the module registration.
+`FittingModuleEntry`, `DamageType` (re-exported from `sim`),
+`DamageFactor`, `DamageFactorKind`, `DamageBreakdown`,
+`EMPTY_DAMAGE_BREAKDOWN`, and the module registration.
 `chargeDamageByType`, `missileDamageByType`, and `droneDamageByType` are
 sibling-only helpers used within the fitting module and are not
-re-exported through `index.ts`. `FittingState` represents the equipped
+re-exported through `index.ts`. `ImportedTurret.damagePerShot` and
+`ImportedLauncher.damagePerMissile` are `DamageVector` (from `sim`),
+carrying per-type damage through the fitting pipeline so the sim and UI
+consume the same typed data. `FittingState` represents the equipped
 fitting basis (hull, support modules, turret groups, launcher groups,
 propulsion, ewar, boosters, missile boosters, drone boosters, drone
 groups, drones, cargo) without computed values.
