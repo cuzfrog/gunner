@@ -1,5 +1,5 @@
 import { TurretDamageImpl } from "./turretDamage";
-import { type HitChanceBreakdown, type TurretSpec, ZERO_DAMAGE } from "./types";
+import { type HitChanceBreakdown, type TurretSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 const turret: TurretSpec = {
   kind: "turret",
@@ -73,5 +73,14 @@ describe("TurretDamageImpl", () => {
     const hit: HitChanceBreakdown = { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.2 };
     const result = damage.compute(hit, turret);
     expect(result.hit).toBe(hit);
+  });
+
+  test("appliedByType carries per-type applied DPS scaled by expectedMultiplier", () => {
+    const multiTypeTurret: TurretSpec = { ...turret, damagePerShot: { em: 10, thermal: 20, kinetic: 30, explosive: 40 } };
+    const hit: HitChanceBreakdown = { chance: 0.5, trackingTerm: 1, rangeTerm: 0 };
+    const result = damage.compute(hit, multiTypeTurret);
+    const expected = damageVectorScale(multiTypeTurret.damagePerShot, (multiTypeTurret.turretCount * result.expectedMultiplier) / multiTypeTurret.cycleTime);
+    expect(result.appliedByType).toEqual(expected);
+    expect(damageVectorSum(result.appliedByType)).toBeCloseTo(result.appliedDps, 10);
   });
 });

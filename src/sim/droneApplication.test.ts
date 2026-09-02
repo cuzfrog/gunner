@@ -1,7 +1,7 @@
 import { DroneApplicationImpl } from "./droneApplication";
 import { HitChanceImpl } from "./hitChance";
 import { Vec2 } from "./vec2";
-import { type DroneRuntimeState, type DroneSpec, type EngagementFrame, type ShipState, ZERO_DAMAGE } from "./types";
+import { type DroneRuntimeState, type DroneSpec, type EngagementFrame, type ShipState, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 const shipA: ShipState = { id: "shipA", maxSpeed: 0, mass: 1_000_000, inertiaModifier: 1, mode: "orbit", desiredRange: 1000, aggressivity: 1, position: new Vec2(0, 0), velocity: new Vec2(0, 0) };
 const shipB: ShipState = { id: "shipB", maxSpeed: 0, mass: 1_000_000, inertiaModifier: 1, mode: "orbit", desiredRange: 1000, aggressivity: 1, position: new Vec2(0, 5000), velocity: new Vec2(0, 0) };
@@ -220,5 +220,13 @@ describe("DroneApplicationImpl", () => {
       expect(result.inRange).toBe(true);
       expect(result.appliedDps).toBeGreaterThan(0);
     });
+  });
+
+  test("appliedByType carries per-type applied DPS scaled by expectedMultiplier", () => {
+    const drone = lightDrone({ damagePerShot: { em: 15, thermal: 0, kinetic: 25, explosive: 10 } });
+    const result = application.compute(frame(5000, 0), drone, 40);
+    const expected = damageVectorScale(drone.damagePerShot, (drone.droneCount * result.expectedMultiplier) / drone.cycleTime);
+    expect(result.appliedByType).toEqual(expected);
+    expect(damageVectorSum(result.appliedByType)).toBeCloseTo(result.appliedDps, 10);
   });
 });

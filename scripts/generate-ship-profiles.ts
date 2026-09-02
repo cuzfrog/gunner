@@ -52,8 +52,6 @@ const LEGACY_PREFIX = "legacy";
 const DEFAULT_MAX_ACTIVE_DRONES = 5;
 const SHIELD_RECHARGE_RATE_MS = 1_000_000; // SDE stores shieldRechargeRate in microseconds
 
-const DEFENSE_ATTRIBUTE_NAMES = ["shieldCapacity", "shieldRechargeRate", "armorHP", "hp", "armorEmDamageResonance", "armorThermalDamageResonance", "armorKineticDamageResonance", "armorExplosiveDamageResonance", "shieldEmDamageResonance", "shieldThermalDamageResonance", "shieldKineticDamageResonance", "shieldExplosiveDamageResonance", "emDamageResonance", "thermalDamageResonance", "kineticDamageResonance", "explosiveDamageResonance"] as const;
-
 function parseNumber(input: string): number {
   const match = input.match(/[\d,.]+(?:\.\d+)?/);
   if (!match) throw new Error(`Cannot parse number from "${input}"`);
@@ -130,7 +128,14 @@ async function loadMerged<T>(prefix: string, sdeDir = SDE_DIR): Promise<Record<s
   return all;
 }
 
-async function loadSdeData(sdeDir = SDE_DIR): Promise<{ types: Record<string, SdeType>; groups: Record<string, SdeGroup>; typedogmas: Record<string, SdeTypeDogma>; attributeNames: Map<number, string> }> {
+interface SdeData {
+  readonly types: Record<string, SdeType>;
+  readonly groups: Record<string, SdeGroup>;
+  readonly typedogmas: Record<string, SdeTypeDogma>;
+  readonly attributeNames: Map<number, string>;
+}
+
+async function loadSdeData(sdeDir = SDE_DIR): Promise<SdeData> {
   const [types, groups, typedogmas, attributes] = await Promise.all([
     loadMerged<SdeType>("types", sdeDir),
     loadMerged<SdeGroup>("groups", sdeDir),
@@ -154,9 +159,9 @@ interface DefenseData {
   readonly shieldRechargeTime: number;
   readonly armorHp: number;
   readonly hullHp: number;
-  readonly shieldResists: { readonly em: number; readonly thermal: number; readonly kinetic: number; readonly explosive: number };
-  readonly armorResists: { readonly em: number; readonly thermal: number; readonly kinetic: number; readonly explosive: number };
-  readonly hullResists: { readonly em: number; readonly thermal: number; readonly kinetic: number; readonly explosive: number };
+  readonly shieldResists: Resists;
+  readonly armorResists: Resists;
+  readonly hullResists: Resists;
 }
 
 function extractDefenseData(typeId: string, typedogmas: Record<string, SdeTypeDogma>, attributeNames: Map<number, string>): DefenseData {
@@ -187,7 +192,9 @@ function buildAttributeValues(attributeNames: Map<number, string>, typeDogma: Sd
   return values;
 }
 
-function resistsFromResonances(values: Map<string, number>, prefix: string): { readonly em: number; readonly thermal: number; readonly kinetic: number; readonly explosive: number } {
+type Resists = { readonly em: number; readonly thermal: number; readonly kinetic: number; readonly explosive: number };
+
+function resistsFromResonances(values: Map<string, number>, prefix: string): Resists {
   const emAttr = prefix ? `${prefix}EmDamageResonance` : "emDamageResonance";
   const thermalAttr = prefix ? `${prefix}ThermalDamageResonance` : "thermalDamageResonance";
   const kineticAttr = prefix ? `${prefix}KineticDamageResonance` : "kineticDamageResonance";
@@ -241,7 +248,13 @@ function resolveShipIds(
   };
 }
 
-function parseProfile(raw: unknown, index: number, shipNameToType: ReadonlyMap<string, SdeType>, typedogmas: Record<string, SdeTypeDogma>, attributeNames: Map<number, string>): ShipProfile {
+function parseProfile(
+  raw: unknown,
+  index: number,
+  shipNameToType: ReadonlyMap<string, SdeType>,
+  typedogmas: Record<string, SdeTypeDogma>,
+  attributeNames: Map<number, string>,
+): ShipProfile {
   if (!raw || typeof raw !== "object") throw new Error(`Entry ${index} is not an object`);
   const record = raw as Record<string, unknown>;
 
@@ -317,7 +330,7 @@ function buildSource(profiles: readonly ShipProfile[]): string {
   return lines.join("\n");
 }
 
-function formatResists(resists: { readonly em: number; readonly thermal: number; readonly kinetic: number; readonly explosive: number }): string {
+function formatResists(resists: Resists): string {
   return `{ em: ${resists.em}, thermal: ${resists.thermal}, kinetic: ${resists.kinetic}, explosive: ${resists.explosive} }`;
 }
 
@@ -345,7 +358,15 @@ async function main(): Promise<void> {
   console.log(`Generated ${OUTPUT_PATH} with ${profiles.length} profiles.`);
 }
 
-export { buildAttributeNameMap as _buildAttributeNameMap, buildShipNameToType as _buildShipNameToType, extractDefenseData as _extractDefenseData, parseDroneLimits as _parseDroneLimits, parseProfile as _parseProfile, resolveShipIds as _resolveShipIds, slugify as _slugify };
+export {
+  buildAttributeNameMap as _buildAttributeNameMap,
+  buildShipNameToType as _buildShipNameToType,
+  extractDefenseData as _extractDefenseData,
+  parseDroneLimits as _parseDroneLimits,
+  parseProfile as _parseProfile,
+  resolveShipIds as _resolveShipIds,
+  slugify as _slugify,
+};
 
 if (import.meta.main) {
   main().catch((error) => {

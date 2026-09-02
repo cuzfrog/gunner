@@ -83,7 +83,8 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
     if (weaponAttacks.length === 0) return { combined: undefined, weaponAttacks: [] };
     if (weaponAttacks.length === 1) return { combined: weaponAttacks[0].assessment, weaponAttacks };
     const primary = weaponAttacks[0].assessment;
-    const totalDamage = weaponAttacks.reduce<DamageAssessment>(sumDamage, { nominalDps: 0, appliedDps: 0, application: 0, volley: 0, appliedByType: ZERO_DAMAGE });
+    const initialDamage: DamageAssessment = { nominalDps: 0, appliedDps: 0, application: 0, volley: 0, appliedByType: ZERO_DAMAGE };
+    const totalDamage = weaponAttacks.reduce<DamageAssessment>(sumDamage, initialDamage);
     return { combined: { ...primary, damage: totalDamage }, weaponAttacks };
   }
 }

@@ -56,8 +56,9 @@ export class MissileSkillModelImpl implements MissileSkillModel {
     const hullDamageMultiplier = damagePercent.length > 0 ? this.stacking.apply(damagePercent.map((p) => 1 + p)) : 1;
     const hullRofMultiplier = rofPercent.length > 0 ? this.stacking.apply(rofPercent.map((p) => 1 + p)) : 1;
 
+    const damageMultiplier = skillDamageMultiplier * hullDamageMultiplier;
     return {
-      damagePerMissile: damageVectorScale(damageVectorFromPartial(missileDamageByType(missile)), skillDamageMultiplier * hullDamageMultiplier),
+      damagePerMissile: damageVectorScale(damageVectorFromPartial(missileDamageByType(missile)), damageMultiplier),
       cycleTime: launcher.rateOfFire * skillRofMultiplier * hullRofMultiplier,
       explosionRadius: missile.explosionRadius * skillExplosionRadiusMultiplier,
       explosionVelocity: missile.explosionVelocity * skillExplosionVelocityMultiplier,

@@ -3,7 +3,7 @@ import { EngagementFrameComposerImpl } from "./engagementFrameComposer";
 import type { EngagementEvaluator } from "./fireControl";
 import type { Kinematics } from "./kinematics";
 import type { AttackAssessment } from "./fireControl";
-import { type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec, ZERO_DAMAGE } from "./types";
+import { type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec, ZERO_DAMAGE, damageVectorAdd } from "./types";
 
 const shipATurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const shipBTurret: TurretSpec = { kind: "turret", tracking: 0.28, sigResolution: 125, optimal: 8000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
@@ -150,5 +150,24 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.weaponAttacks.shipA[1].weapon).toBe(secondTurret);
     expect(view.weaponAttacks.shipA[1].assessment).toEqual(secondAssessment);
     expect(view.weaponAttacks.shipB).toHaveLength(0);
+  });
+
+  test("combined damage.appliedByType is the component-wise sum of the two input vectors", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    const firstByType = { em: 12, thermal: 8, kinetic: 0, explosive: 4 };
+    const secondByType = { em: 3, thermal: 0, kinetic: 20, explosive: 7 };
+    const firstDamage = { nominalDps: 24, appliedDps: 24, application: 1, volley: 100, appliedByType: firstByType };
+    const secondDamage = { nominalDps: 30, appliedDps: 30, application: 1, volley: 100, appliedByType: secondByType };
+    const firstAssessment: AttackAssessment = { boostedWeapon: boostedTurret, effectiveWeapon: effectiveTurret, damage: firstDamage, turret: { hit, expectedMultiplier: 1 } };
+    const secondAssessment: AttackAssessment = { boostedWeapon: boostedTurret, effectiveWeapon: effectiveTurret, damage: secondDamage, turret: { hit, expectedMultiplier: 1 } };
+    engagementEvaluator.evaluate.mockImplementation((_frame, attacks) => {
+      if (attacks.shipA?.weapon === shipATurret) return { shipA: firstAssessment, shipB: undefined };
+      if (attacks.shipA?.weapon === shipBTurret) return { shipA: secondAssessment, shipB: undefined };
+      return { shipA: undefined, shipB: undefined };
+    });
+    const multiInput = { weapons: { shipA: [shipATurret, shipBTurret] as const, shipB: [] as const }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] } as const, missileFacts: { shipA: [], shipB: [] } as const };
+    const view = composer.compose(snapshot, multiInput);
+    expect(view.attacks.shipA).toBeDefined();
+    expect(view.attacks.shipA!.damage.appliedByType).toEqual(damageVectorAdd(firstByType, secondByType));
   });
 });
