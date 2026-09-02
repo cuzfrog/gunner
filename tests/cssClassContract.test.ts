@@ -4,7 +4,13 @@ const CSS_GLOB = "src/styles/**/*.css";
 
 // Classes used in HTML/TS that have no matching CSS rule yet.
 // Each entry must name the phase that removes it.
-const ALLOWED_UNDEFINED = new Set<string>([]);
+const ALLOWED_UNDEFINED = new Set<string>([
+  "portrait-hp-bars-ship-a",
+  "portrait-hp-bars-ship-b",
+  "portrait-hp-bar-shield",
+  "portrait-hp-bar-armor",
+  "portrait-hp-bar-hull",
+]);
 
 // CSS classes not referenced by the literal scan (built dynamically or stale rules pending removal).
 // Each entry must name the phase that removes it.

@@ -1,4 +1,4 @@
-import { fakeDocument, getFake } from "../../testing";
+import { fakeDocument, getFake, FakeElement } from "../../testing";
 import { UiEventsImpl } from "../../events";
 import type { EwarProjection, EwarResolver, SpeedBreakdown, DisruptionBreakdown } from "../../../sim";
 import type { EwarController } from "../ewar";
@@ -492,5 +492,74 @@ describe("PortraitsController", () => {
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
     expect(icon.getAttribute("data-hint")).toBe("ewar.hover.tracking -45% · ewar.hover.optimal -17%");
+  });
+
+  describe("HP bars", () => {
+    function hpFillWidth(els: PortraitsEls, side: "shipA" | "shipB", layerIndex: number): string {
+      const container = side === "shipA" ? els.shipAHpBars : els.shipBHpBars;
+      const bars = container.querySelectorAll(".portrait-hp-bar");
+      const fill = bars[layerIndex].querySelector(".portrait-hp-fill") as unknown as FakeElement;
+      return (fill.style as unknown as Record<string, string>).width ?? "";
+    }
+
+    test("undefined hpPercentages hides HP bars", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue(undefined);
+      controller.update();
+      expect(els.shipAHpBars.hidden).toBe(true);
+    });
+
+    test("defined hpPercentages shows HP bars", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 1, armor: 1, hull: 1 });
+      controller.update();
+      expect(els.shipAHpBars.hidden).toBe(false);
+    });
+
+    test("full HP sets all fill widths to 0%", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 1, armor: 1, hull: 1 });
+      controller.update();
+      expect(hpFillWidth(els, "shipA", 0)).toBe("0%");
+      expect(hpFillWidth(els, "shipA", 1)).toBe("0%");
+      expect(hpFillWidth(els, "shipA", 2)).toBe("0%");
+    });
+
+    test("partial damage sets fill widths to lost percentage", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 0.5, armor: 1, hull: 0.25 });
+      controller.update();
+      expect(hpFillWidth(els, "shipA", 0)).toBe("50%");
+      expect(hpFillWidth(els, "shipA", 1)).toBe("0%");
+      expect(hpFillWidth(els, "shipA", 2)).toBe("75%");
+    });
+
+    test("dead ship (all 0) sets all fill widths to 100%", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 0, armor: 0, hull: 0 });
+      controller.update();
+      expect(hpFillWidth(els, "shipA", 0)).toBe("100%");
+      expect(hpFillWidth(els, "shipA", 1)).toBe("100%");
+      expect(hpFillWidth(els, "shipA", 2)).toBe("100%");
+    });
+
+    test("transition from undefined to defined shows bars and updates fills", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue(undefined);
+      controller.update();
+      expect(els.shipAHpBars.hidden).toBe(true);
+      defenseController.hpPercentages.mockReturnValue({ shield: 0.5, armor: 0.5, hull: 0.5 });
+      controller.update();
+      expect(els.shipAHpBars.hidden).toBe(false);
+      expect(hpFillWidth(els, "shipA", 0)).toBe("50%");
+      expect(hpFillWidth(els, "shipA", 1)).toBe("50%");
+      expect(hpFillWidth(els, "shipA", 2)).toBe("50%");
+    });
   });
 });

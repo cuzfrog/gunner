@@ -59,27 +59,21 @@
   margin-top: 2px;
 }
 
-.portrait-hp-bars-ship-a { }
-.portrait-hp-bars-ship-b { }
-
 .portrait-hp-bar {
   position: relative;
   height: 3px;
-  background: var(--danger-red);
-  opacity: 0.6;
+  background: var(--text-primary);
+  opacity: 0.7;
   border-radius: 1px;
   overflow: hidden;
 }
 
-.portrait-hp-bar-shield { }
-.portrait-hp-bar-armor { }
-.portrait-hp-bar-hull { }
-
 .portrait-hp-fill {
   display: block;
   height: 100%;
-  background: var(--text-primary);
-  opacity: 0.7;
+  margin-left: auto;
+  background: var(--danger-red);
+  opacity: 0.8;
 }
 
 .portrait-effects {

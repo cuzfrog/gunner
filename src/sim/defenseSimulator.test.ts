@@ -165,6 +165,7 @@ describe("DefenseSimulatorImpl", () => {
     expect(view.dead.shipA).toBe(false);
     expect(view.dead.shipB).toBe(false);
     expect(view.deadAt.shipA).toBeUndefined();
+    expect(view.poolPercentages.shipA).toEqual({ shield: 1, armor: 1, hull: 1 });
   });
 
   test("damage-disable: damage not applied, pools stay full", () => {
@@ -208,6 +209,16 @@ describe("DefenseSimulatorImpl", () => {
     expect(view.pools.shipA.armor).toBe(300);
     expect(view.pools.shipA.hull).toBe(200);
     expect(view.dead.shipA).toBe(false);
+  });
+
+  test("update from empty spec (no fitting) to real spec initializes pools to full", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 0, hullHp: 0 })));
+    expect(sim.view().pools.shipA).toEqual({ shield: 0, armor: 0, hull: 0 });
+    sim.update(config(spec({ shieldHp: 1000, armorHp: 800, hullHp: 600 })));
+    const view = sim.view();
+    expect(view.pools.shipA).toEqual({ shield: 1000, armor: 800, hull: 600 });
+    expect(view.poolPercentages.shipA).toEqual({ shield: 1, armor: 1, hull: 1 });
   });
 
   test("update preserves dead state", () => {

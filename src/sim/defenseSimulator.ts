@@ -269,9 +269,9 @@ function mergePools(prev: SidePools, spec: DefenseSpec, damageEnabled: boolean, 
   const armorMax = spec.layers.armor.hp;
   const hullMax = spec.layers.hull.hp;
   return {
-    shield: clampPool(prev.shield, shieldMax),
-    armor: clampPool(prev.armor, armorMax),
-    hull: clampPool(prev.hull, hullMax),
+    shield: mergePool(prev.shield, prev.shieldMax, shieldMax),
+    armor: mergePool(prev.armor, prev.armorMax, armorMax),
+    hull: mergePool(prev.hull, prev.hullMax, hullMax),
     shieldMax,
     armorMax,
     hullMax,
@@ -287,6 +287,11 @@ function mergePools(prev: SidePools, spec: DefenseSpec, damageEnabled: boolean, 
     rahSpec,
     rahState,
   };
+}
+
+function mergePool(current: number, prevMax: number, newMax: number): number {
+  if (prevMax <= 0) return newMax;
+  return clampPool(current, newMax);
 }
 
 function createRepairerStates(specs: readonly RepairerSpec[], activation: readonly RepairerActivationEntry[]): RepairerState[] {
@@ -596,9 +601,9 @@ function rahView(pools: SidePools): RahViewState | undefined {
 
 function poolPercentages(pools: SidePools): Readonly<Record<DefenseLayer, number>> {
   return {
-    shield: pools.shieldMax > 0 ? pools.shield / pools.shieldMax : 0,
-    armor: pools.armorMax > 0 ? pools.armor / pools.armorMax : 0,
-    hull: pools.hullMax > 0 ? pools.hull / pools.hullMax : 0,
+    shield: pools.shieldMax > 0 ? pools.shield / pools.shieldMax : 1,
+    armor: pools.armorMax > 0 ? pools.armor / pools.armorMax : 1,
+    hull: pools.hullMax > 0 ? pools.hull / pools.hullMax : 1,
   };
 }
 

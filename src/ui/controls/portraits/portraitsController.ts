@@ -154,7 +154,8 @@ function updateHpBars(container: HTMLElement, percentages: Readonly<Record<Defen
   for (let i = 0; i < HP_BAR_LAYERS.length && i < bars.length; i++) {
     const fill = bars[i].querySelector<HTMLElement>(".portrait-hp-fill");
     if (!fill) continue;
-    const pct = percentages ? percentages[HP_BAR_LAYERS[i]] : 0;
-    fill.style.width = `${Math.max(0, Math.min(1, pct)) * 100}%`;
+    const pct = percentages ? percentages[HP_BAR_LAYERS[i]] : 1;
+    const lost = Math.max(0, Math.min(1, 1 - pct));
+    fill.style.width = `${lost * 100}%`;
   }
 }
