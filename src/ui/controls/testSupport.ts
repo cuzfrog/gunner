@@ -82,6 +82,20 @@ function addPortraitChildren(document: Document): void {
     image.tagName = "IMG";
     image.className = "portrait-image";
     root.appendChild(image);
+    const hpBars = new FakeElement();
+    hpBars.tagName = "DIV";
+    hpBars.className = "portrait-hp-bars";
+    for (const layer of ["shield", "armor", "hull"]) {
+      const bar = new FakeElement();
+      bar.tagName = "DIV";
+      bar.className = `portrait-hp-bar portrait-hp-bar-${layer}`;
+      const fill = new FakeElement();
+      fill.tagName = "SPAN";
+      fill.className = "portrait-hp-fill";
+      bar.appendChild(fill);
+      hpBars.appendChild(bar);
+    }
+    root.appendChild(hpBars);
     const effects = new FakeElement();
     effects.tagName = "DIV";
     effects.className = "portrait-effects";

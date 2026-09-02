@@ -212,7 +212,7 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     const armorDamageByType = applyDamage(pools, incoming, dt);
     stepRepairers(pools, dt);
     stepRah(pools, dt, armorDamageByType);
-    if (pools.hull <= 0) {
+    if (pools.hullMax > 0 && pools.hull <= 0) {
       pools.hull = 0;
       pools.dead = true;
       pools.deadAt = this.time;

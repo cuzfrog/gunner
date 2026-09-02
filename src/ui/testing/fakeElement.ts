@@ -127,6 +127,22 @@ export class FakeElement {
     }
     return this.children[0] ?? null;
   }
+  querySelectorAll(selector: string): FakeElement[] {
+    if (selector.startsWith(".")) {
+      const className = selector.slice(1).split(/[.:\s>+~\[]/)[0];
+      return collectByClassName(this, className);
+    }
+    return [];
+  }
+}
+
+function collectByClassName(root: FakeElement, className: string): FakeElement[] {
+  const results: FakeElement[] = [];
+  for (const child of root.children) {
+    if (child.className.split(" ").includes(className)) results.push(child);
+    results.push(...collectByClassName(child, className));
+  }
+  return results;
 }
 
 function parseAttrSelector(token: string): { name: string; value: string | undefined } | undefined {

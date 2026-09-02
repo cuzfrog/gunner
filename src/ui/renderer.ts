@@ -1,4 +1,4 @@
-import { Vec2, type DefensePoolState, type DefenseView, type EngagementFrame, type ShipState, type SimSnapshot } from "../sim";
+import { Vec2, type DefenseView, type EngagementFrame, type ShipState, type SimSnapshot } from "../sim";
 import type { WeaponRangeVisibility } from "../appstate";
 import type { I18n } from "./i18n";
 import { PALETTE, withAlpha } from "./palette";
@@ -167,10 +167,6 @@ export class CanvasRenderer implements Renderer {
     this.drawShip(snapshot.shipB, COLORS.shipB);
     this.drawDrones(droneInfo);
     if (missileInfo) this.drawMissiles(missileInfo);
-    if (defenseView) {
-      this.drawHpBars(snapshot.shipA.position, defenseView.pools.shipA, defenseView.poolPercentages.shipA, -20);
-      this.drawHpBars(snapshot.shipB.position, defenseView.pools.shipB, defenseView.poolPercentages.shipB, 20);
-    }
     this.drawSpeedLabel(snapshot.shipA, COLORS.shipA, -20);
     this.drawSpeedLabel(snapshot.shipB, COLORS.shipB, 20);
     this.drawReadouts(frame);
@@ -463,30 +459,6 @@ export class CanvasRenderer implements Renderer {
     const p = this.worldToScreen(ship.position);
     const speed = Math.round(ship.velocity.len());
     this.drawTextAt(p.x, p.y + dy, `${formatWithCommas(speed)} m/s`, color, true, 11);
-  }
-
-  private drawHpBars(position: Vec2, pools: DefensePoolState, percentages: Readonly<Record<"shield" | "armor" | "hull", number>>, dy: number): void {
-    const p = this.worldToScreen(position);
-    const barWidth = 40;
-    const barHeight = 3;
-    const gap = 1;
-    const layers: readonly { readonly pct: number; readonly current: number }[] = [
-      { pct: percentages.shield, current: pools.shield },
-      { pct: percentages.armor, current: pools.armor },
-      { pct: percentages.hull, current: pools.hull },
-    ];
-    const totalHeight = layers.length * barHeight + (layers.length - 1) * gap;
-    let y = p.y + dy - totalHeight / 2;
-    for (const layer of layers) {
-      const remainingWidth = barWidth * layer.pct;
-      this.ctx.fillStyle = withAlpha(PALETTE.dangerRed, 0.6);
-      this.ctx.fillRect(p.x - barWidth / 2, y, barWidth, barHeight);
-      if (remainingWidth > 0) {
-        this.ctx.fillStyle = withAlpha(PALETTE.textPrimary, 0.7);
-        this.ctx.fillRect(p.x - barWidth / 2, y, remainingWidth, barHeight);
-      }
-      y += barHeight + gap;
-    }
   }
 
   private drawReadouts(frame: EngagementFrame): void {

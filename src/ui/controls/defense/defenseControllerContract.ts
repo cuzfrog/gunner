@@ -1,4 +1,4 @@
-import type { DefenseAssessment, DefenseSpec, DefenseView, EngagementView } from "../../../sim";
+import type { DefenseAssessment, DefenseLayer, DefenseSpec, DefenseView, EngagementView } from "../../../sim";
 import type { TypeId } from "../../../gamedata/ids";
 import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation } from "../../../appstate";
 import type { Side } from "../side";
@@ -37,4 +37,5 @@ export interface DefenseController {
   setRahActivation(side: Side, active: boolean, overloaded: boolean): void;
   restore(side: Side, enabled: boolean, repMode?: StoredRepairMode, repairerActivation?: readonly StoredRepairerActivation[], rahActivation?: StoredRahActivation): void;
   cyclingEffects(side: Side): readonly { readonly moduleId: TypeId; readonly hint: string }[];
+  hpPercentages(side: Side): Readonly<Record<DefenseLayer, number>> | undefined;
 }

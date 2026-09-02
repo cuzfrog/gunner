@@ -157,6 +157,16 @@ describe("DefenseSimulatorImpl", () => {
     expect(view2.deadAt.shipA).toBe(1);
   });
 
+  test("zero-HP spec (no fitting) does not trigger death", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 0, hullHp: 0 })));
+    sim.step(1, { shipA: ZERO_DAMAGE, shipB: ZERO_DAMAGE });
+    const view = sim.view();
+    expect(view.dead.shipA).toBe(false);
+    expect(view.dead.shipB).toBe(false);
+    expect(view.deadAt.shipA).toBeUndefined();
+  });
+
   test("damage-disable: damage not applied, pools stay full", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 500, armorHp: 500, hullHp: 500 }), undefined, { shipA: false, shipB: true }));

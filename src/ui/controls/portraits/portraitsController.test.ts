@@ -56,6 +56,17 @@ function createFakePortraitEls(document: Document): PortraitsEls {
   const shipAImage = document.createElement("img");
   shipAImage.className = "portrait-image";
   shipARoot.appendChild(shipAImage);
+  const shipAHpBars = document.createElement("div");
+  shipAHpBars.className = "portrait-hp-bars";
+  for (const layer of ["shield", "armor", "hull"]) {
+    const bar = document.createElement("div");
+    bar.className = `portrait-hp-bar portrait-hp-bar-${layer}`;
+    const fill = document.createElement("span");
+    fill.className = "portrait-hp-fill";
+    bar.appendChild(fill);
+    shipAHpBars.appendChild(bar);
+  }
+  shipARoot.appendChild(shipAHpBars);
   const shipAEffects = document.createElement("div");
   shipAEffects.className = "portrait-effects";
   shipARoot.appendChild(shipAEffects);
@@ -63,6 +74,17 @@ function createFakePortraitEls(document: Document): PortraitsEls {
   const shipBImage = document.createElement("img");
   shipBImage.className = "portrait-image";
   shipBRoot.appendChild(shipBImage);
+  const shipBHpBars = document.createElement("div");
+  shipBHpBars.className = "portrait-hp-bars";
+  for (const layer of ["shield", "armor", "hull"]) {
+    const bar = document.createElement("div");
+    bar.className = `portrait-hp-bar portrait-hp-bar-${layer}`;
+    const fill = document.createElement("span");
+    fill.className = "portrait-hp-fill";
+    bar.appendChild(fill);
+    shipBHpBars.appendChild(bar);
+  }
+  shipBRoot.appendChild(shipBHpBars);
   const shipBEffects = document.createElement("div");
   shipBEffects.className = "portrait-effects";
   shipBRoot.appendChild(shipBEffects);
@@ -73,6 +95,8 @@ function createFakePortraitEls(document: Document): PortraitsEls {
     shipBImage: shipBImage as unknown as HTMLImageElement,
     shipAEffects,
     shipBEffects,
+    shipAHpBars,
+    shipBHpBars,
   };
 }
 
@@ -133,6 +157,7 @@ function buildController() {
     setRahActivation: vi.fn(),
     restore: vi.fn(),
     cyclingEffects: vi.fn(() => []),
+    hpPercentages: vi.fn(() => undefined),
   });
   const controller = new PortraitsControllerImpl({
     els,

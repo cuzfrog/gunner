@@ -155,6 +155,10 @@ export class DefenseControllerImpl implements DefenseController {
     return effects;
   }
 
+  hpPercentages(side: Side): Readonly<Record<DefenseLayer, number>> | undefined {
+    return this.defenseView?.poolPercentages[side];
+  }
+
   render(): void {
     this.renderSide("shipA");
     this.renderSide("shipB");

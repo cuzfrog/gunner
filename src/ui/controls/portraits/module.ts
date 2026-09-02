@@ -44,6 +44,10 @@ function collectPortraitsEls(els: ControlsElements): PortraitsEls {
   if (!shipAEffects) throw new Error("Missing .portrait-effects in #ship-a-portrait");
   const shipBEffects = els.shipB.portrait.querySelector<HTMLElement>(".portrait-effects");
   if (!shipBEffects) throw new Error("Missing .portrait-effects in #ship-b-portrait");
+  const shipAHpBars = els.shipA.portrait.querySelector<HTMLElement>(".portrait-hp-bars");
+  if (!shipAHpBars) throw new Error("Missing .portrait-hp-bars in #ship-a-portrait");
+  const shipBHpBars = els.shipB.portrait.querySelector<HTMLElement>(".portrait-hp-bars");
+  if (!shipBHpBars) throw new Error("Missing .portrait-hp-bars in #ship-b-portrait");
   return {
     shipA: els.shipA.portrait,
     shipB: els.shipB.portrait,
@@ -51,5 +55,7 @@ function collectPortraitsEls(els: ControlsElements): PortraitsEls {
     shipBImage,
     shipAEffects,
     shipBEffects,
+    shipAHpBars,
+    shipBHpBars,
   };
 }

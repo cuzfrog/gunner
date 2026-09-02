@@ -1,5 +1,5 @@
 import type { ShipId, TypeId } from "../../../gamedata/ids";
-import type { DisruptionBreakdown, EwarResolver, SpeedBreakdown, StatEffectAttribution } from "../../../sim";
+import type { DefenseLayer, DisruptionBreakdown, EwarResolver, SpeedBreakdown, StatEffectAttribution } from "../../../sim";
 import type { ImageCatalog } from "../../icons";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
@@ -18,6 +18,8 @@ interface PortraitEffect {
   readonly moduleId: TypeId;
   readonly hint: string;
 }
+
+const HP_BAR_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
 
 export class PortraitsControllerImpl implements PortraitsController {
   private readonly els: PortraitsEls;
@@ -64,10 +66,12 @@ export class PortraitsControllerImpl implements PortraitsController {
     const root = side === "shipA" ? this.els.shipA : this.els.shipB;
     const image = side === "shipA" ? this.els.shipAImage : this.els.shipBImage;
     const effects = side === "shipA" ? this.els.shipAEffects : this.els.shipBEffects;
+    const hpBars = side === "shipA" ? this.els.shipAHpBars : this.els.shipBHpBars;
     const profile = this.combatantProfiles.profile(side);
     if (profile === undefined) {
       root.hidden = true;
       effects.hidden = true;
+      hpBars.hidden = true;
       state.lastKey = "";
       state.lastId = "";
       return;
@@ -79,7 +83,9 @@ export class PortraitsControllerImpl implements PortraitsController {
     const portraitEffects = buildPortraitEffects(speedBreakdown, disruptionBreakdown, this.i18n);
     const defenseEffects = this.defenseController.cyclingEffects(side);
     const allEffects = [...portraitEffects, ...defenseEffects];
-    const key = buildDiffKey(profile.id, allEffects);
+    const hpPercentages = this.defenseController.hpPercentages(side);
+    const hpKey = hpPercentages ? HP_BAR_LAYERS.map((l) => `${l}:${Math.round(hpPercentages[l] * 100)}`).join(",") : "";
+    const key = `${buildDiffKey(profile.id, allEffects)}|${hpKey}`;
     if (state.lastKey === key) return;
     state.lastKey = key;
     if (root.hidden) root.hidden = false;
@@ -87,6 +93,8 @@ export class PortraitsControllerImpl implements PortraitsController {
       state.lastId = profile.id;
       image.src = this.imageCatalog.shipImageUrl(profile.id) ?? "";
     }
+    updateHpBars(hpBars, hpPercentages);
+    hpBars.hidden = hpPercentages === undefined;
     effects.innerHTML = "";
     const icons = document.createDocumentFragment();
     for (const effect of allEffects) {
@@ -139,4 +147,14 @@ function accumulateDisruption(map: Map<TypeId, { tracking: number; optimal: numb
     map.set(entry.moduleId, existing);
   }
   existing[channel] = entry.multiplier;
+}
+
+function updateHpBars(container: HTMLElement, percentages: Readonly<Record<DefenseLayer, number>> | undefined): void {
+  const bars = container.querySelectorAll<HTMLElement>(".portrait-hp-bar");
+  for (let i = 0; i < HP_BAR_LAYERS.length && i < bars.length; i++) {
+    const fill = bars[i].querySelector<HTMLElement>(".portrait-hp-fill");
+    if (!fill) continue;
+    const pct = percentages ? percentages[HP_BAR_LAYERS[i]] : 0;
+    fill.style.width = `${Math.max(0, Math.min(1, pct)) * 100}%`;
+  }
 }

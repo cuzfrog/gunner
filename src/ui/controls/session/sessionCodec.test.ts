@@ -211,6 +211,7 @@ function mockDefenseController(): DefenseController {
     setRahActivation: vi.fn(),
     restore: vi.fn(),
     cyclingEffects: vi.fn(() => []),
+    hpPercentages: vi.fn(() => undefined),
   } as unknown as DefenseController;
 }
 
