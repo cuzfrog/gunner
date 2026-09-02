@@ -3,8 +3,8 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 0 6px;
+  gap: 9px;
+  padding: 4px 0 7px;
   border-bottom: 1px solid var(--border-dim);
 }
 
@@ -24,10 +24,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  min-width: 240px;
-  padding: 0 12px;
-  font-size: 13px;
+  gap: 9px;
+  min-width: 264px;
+  padding: 0 13px;
+  font-size: 14px;
   text-transform: none;
   letter-spacing: 0;
 }
@@ -37,14 +37,14 @@
 }
 
 .profile-bar > .icon-button {
-  padding: 0 8px;
+  padding: 0 9px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
 .profile-share-status {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-secondary);
   margin-left: 4px;
 }
@@ -85,8 +85,8 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 240px;
-  max-height: 240px;
+  min-width: 264px;
+  max-height: 264px;
   padding: 4px;
   white-space: nowrap;
 }
@@ -94,19 +94,19 @@
 .profile-menu-item[aria-current="true"] {
   border-left: 2px solid var(--accent-teal);
   color: var(--accent-teal);
-  padding-left: 6px;
+  padding-left: 7px;
 }
 
 .new-profile-popup {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-width: 260px;
-  padding: 12px;
+  gap: 13px;
+  min-width: 286px;
+  padding: 13px;
 }
 
 .new-profile-dirty-note {
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--warn-yellow);
@@ -115,12 +115,12 @@
 .new-profile-section {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
 .new-profile-group-label {
   font-family: "Chakra Petch", sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -130,7 +130,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 7px;
   width: 100%;
 }
 
@@ -143,34 +143,34 @@
 .new-profile-name {
   box-sizing: border-box;
   width: 100%;
-  padding: 0 8px;
+  padding: 0 9px;
   background-color: var(--bg-panel);
   border: 1px solid var(--border-dim);
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 14px;
   border-radius: 2px;
-  min-height: 28px;
+  min-height: 31px;
 }
 
 .confirm-popup {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-width: 240px;
-  padding: 12px;
+  gap: 13px;
+  min-width: 264px;
+  padding: 13px;
 }
 
 .confirm-message {
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .confirm-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 9px;
 }
 
-.confirm-buttons > .btn { min-width: 80px; }
+.confirm-buttons > .btn { min-width: 88px; }
 
 }

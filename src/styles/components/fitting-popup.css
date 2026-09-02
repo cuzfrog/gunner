@@ -4,11 +4,11 @@
 .fitting-group-label {
   display: block;
   font-family: "Chakra Petch", sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin: 6px 0 4px;
+  margin: 7px 0 4px;
 }
 
 .fitting-list {
@@ -31,12 +31,12 @@
   display: flex;
   align-items: center;
   min-width: 0;
-  padding: 4px 6px;
+  padding: 4px 7px;
   background: transparent;
   border: none;
   color: var(--text-primary);
   font-family: "Saira", sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   text-align: left;
   cursor: pointer;
   border-radius: 2px;
@@ -61,15 +61,15 @@
 .fitting-item-name { flex: 1; }
 
 .fitting-delete {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
 }
 
 .fitting-delete:hover { color: var(--danger-red); }
 
 .fitting-item-eye {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   opacity: 0;
 }
 
@@ -77,8 +77,8 @@
 
 .fitting-empty {
   margin: 0;
-  padding: 8px;
-  font-size: 11px;
+  padding: 9px;
+  font-size: 12px;
   color: var(--text-dim);
   text-align: center;
   text-transform: none;

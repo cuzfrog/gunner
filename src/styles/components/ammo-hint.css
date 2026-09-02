@@ -3,20 +3,20 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 160px;
+  min-width: 176px;
 }
 
 .ammo-hint-row {
   display: grid;
-  grid-template-columns: 16px 1fr auto;
+  grid-template-columns: 18px 1fr auto;
   align-items: center;
   gap: 4px;
   font-variant-numeric: tabular-nums;
 }
 
 .ammo-hint-type-icon {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
 }
 

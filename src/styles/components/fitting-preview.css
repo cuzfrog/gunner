@@ -2,27 +2,27 @@
 .fitting-preview {
   position: absolute;
   z-index: calc(var(--z-popup) + 1);
-  width: 300px;
+  width: 330px;
   max-height: 60vh;
 }
 
 .preview-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 9px;
+  margin-bottom: 9px;
 }
 
 .preview-header > .hull-ship-image {
-  width: 48px;
-  height: 48px;
+  width: 53px;
+  height: 53px;
 }
 
 .preview-close {
   align-self: flex-start;
   margin-left: auto;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
 }
 
 .preview-titles {
@@ -34,21 +34,21 @@
 .preview-hull {
   display: block;
   font-family: "Chakra Petch", sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--accent-teal);
 }
 
 .preview-fitting {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-secondary);
 }
 
-.preview-section { margin-top: 6px; }
+.preview-section { margin-top: 7px; }
 
 .preview-section-label {
   font-family: "Chakra Petch", sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -58,7 +58,7 @@
 .preview-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   padding: 3px 0;
 }
 
@@ -69,8 +69,8 @@
 
 .preview-icon {
   display: none;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
   background: var(--bg-inset);
   border: 1px solid var(--border-dim);
@@ -89,21 +89,21 @@
 
 .preview-name {
   flex: 1;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-primary);
 }
 
 .preview-charge {
   flex: none;
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: 12px;
   margin-left: 4px;
 }
 
 .preview-charge-icon {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   object-fit: contain;
   flex-shrink: 0;
   margin-left: 4px;
@@ -112,6 +112,6 @@
 .preview-quantity {
   flex: none;
   color: var(--text-dim);
-  font-size: 10px;
+  font-size: 11px;
 }
 }

@@ -63,7 +63,7 @@ Three fonts, loaded once in `src/layouts/Layout.astro`:
 | `"Saira", sans-serif` | Body base font, list item names, plain prose |
 | `"Share Tech Mono", monospace` | All numeric/data values, inputs, telemetry, version text |
 
-Type scale (do not invent sizes): 9–10px micro-labels/hints, 11px secondary labels, 12px small body/subtitle, 13px body/buttons, 14px base (`body`) and input values, 18px result values, 28px emphasized hit chance.
+Type scale (do not invent sizes): 10–11px micro-labels/hints, 12px secondary labels, 13px small body/subtitle, 14px body/buttons, 15px base (`body`) and input values, 20px result values, 31px emphasized hit chance.
 
 Label treatment pattern: uppercase + letter-spacing `0.05em` (labels) / `0.08em` (panel & footer headings) / `0.1em` (`h1`). Data values and hints reset this with `text-transform: none; letter-spacing: 0`.
 
@@ -71,19 +71,19 @@ Label treatment pattern: uppercase + letter-spacing `0.05em` (labels) / `0.08em`
 
 - Border radius: `2px` everywhere (buttons, panels, inputs, sliders). Only avatars use `50%`.
 - Borders: `1px solid var(--border-dim)` default. Side-accented panels use `border-left: 2px solid <side accent>`.
-- Popup shadow: `0 4px 16px rgba(0,0,0,.45)`; upward-opening popups flip to `0 -4px 16px ...`.
+- Popup shadow: `0 4px 18px rgba(0,0,0,.45)`; upward-opening popups flip to `0 -4px 18px ...`.
 - Z-index: popups overlay at `z-index: 30`; nothing else elevates.
-- Panel padding `12px`; grid gaps `8px` (inner fields) / `10px` (results) / `14px` (main columns).
-- Canvas overlays inset by `--canvas-overlay-inset` (24px): positions the range legend and combatant portraits inside the canvas frame.
+- Panel padding `13px`; grid gaps `9px` (inner fields) / `11px` (results) / `15px` (main columns).
+- Canvas overlays inset by `--canvas-overlay-inset` (26px): positions the range legend and combatant portraits inside the canvas frame.
 
 ### Control heights
 
 | Context | min-height |
 |---|---|
-| Compact toggles, triggers, gear/icon buttons | 22–24px |
-| Panel inputs, selects | 28px |
-| Profile bar controls | 30px |
-| Main playback controls | 32px |
+| Compact toggles, triggers, gear/icon buttons | 24–26px |
+| Panel inputs, selects | 31px |
+| Profile bar controls | 33px |
+| Main playback controls | 35px |
 
 ## Components
 
@@ -126,7 +126,7 @@ Custom-styled `.form-slider` (range inputs): 4px track filled via `linear-gradie
 
 ### Canvas overlays
 
-`.range-overlay-legend` sits top-right inside the canvas frame at the overlay inset. `.combatant-portrait` anchors a side portrait at the same inset, `88px` above the canvas bottom (`152px` at ≤480px to clear the wrapped control bar). `.portrait-effects` is an absolutely positioned popover centered below the portrait (`top: calc(100% + 6px)`); effect icons are `.portrait-effect-icon` images that opt back into pointer events with a help cursor.
+`.range-overlay-legend` sits top-right inside the canvas frame at the overlay inset. `.combatant-portrait` anchors a side portrait at the same inset, `97px` above the canvas bottom (`167px` at ≤528px to clear the wrapped control bar). `.portrait-effects` is an absolutely positioned popover centered below the portrait (`top: calc(100% + 7px)`); effect icons are `.portrait-effect-icon` images that opt back into pointer events with a help cursor.
 
 ## Interaction & accessibility conventions
 
@@ -147,9 +147,9 @@ Keep JS-side styling minimal and token-aligned:
 
 ## Layout & responsive
 
-- Page: `.container` max-width 1400px centered. Main layout is a 3-column grid (attacker panel / canvas / target panel).
-- Breakpoints: `1100px` (narrower columns), `900px` (single column, results become horizontal scroller), `480px` (footer stacks and portrait offset). At viewports `901px` and wider the control bar uses a three-column grid so the zoom group is centered exactly; below that it wraps with flex.
-- Fluid alternatives replace viewport-specific component rules where possible: `.form-field-row` collapses with `auto-fit`/`minmax(min(100%, 110px), 1fr)` so two columns survive the narrowest 1100px side-panel track, `.control-bar` wraps with flex, and the zoom slider shrinks with `min-width`; the remaining 480px rules only style the page-level footer and canvas overlays.
+- Page: `.container` max-width 1540px centered. Main layout is a 3-column grid (attacker panel / canvas / target panel).
+- Breakpoints: `1210px` (narrower columns), `990px` (single column, results become horizontal scroller), `528px` (footer stacks and portrait offset). At viewports `991px` and wider the control bar uses a three-column grid so the zoom group is centered exactly; below that it wraps with flex.
+- Fluid alternatives replace viewport-specific component rules where possible: `.form-field-row` collapses with `auto-fit`/`minmax(min(100%, 121px), 1fr)` so two columns survive the narrowest 1210px side-panel track, `.control-bar` wraps with flex, and the zoom slider shrinks with `min-width`; the remaining 528px rules only style the page-level footer and canvas overlays.
 - Footer: 5-column info grid collapsing progressively across breakpoints.
 
 ## Checklist for new UI work

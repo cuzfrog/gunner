@@ -3,7 +3,7 @@
   display: block;
   flex: 1 1 auto;
   text-align: left;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -16,14 +16,14 @@
 .ewar-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   padding: 2px;
 }
 
 .ewar-module-toggle {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   flex: 1 1 auto;
   min-width: 0;
   padding: 4px;
@@ -45,21 +45,21 @@
 }
 
 .ewar-module-toggle .ewar-module-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .ewar-module-toggle .ewar-module-name {
   flex: 1 1 auto;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .ewar-script-gear, .ewar-overload-button {
-  flex: 0 0 22px;
-  min-width: 22px;
-  min-height: 22px;
+  flex: 0 0 24px;
+  min-width: 24px;
+  min-height: 24px;
   padding: 0;
 }
 
@@ -72,7 +72,7 @@
   border-color: var(--accent-orange);
   color: var(--accent-orange);
   background: var(--accent-orange-12);
-  box-shadow: 0 0 8px var(--accent-orange-35);
+  box-shadow: 0 0 9px var(--accent-orange-35);
 }
 
 .ewar-script-gear[aria-expanded="true"] {
@@ -84,12 +84,12 @@
   top: 0;
   right: 0;
   z-index: calc(var(--z-popup) + 1);
-  min-width: 140px;
+  min-width: 154px;
 }
 
 .ewar-script-popup-label {
-  padding: 4px 6px;
-  font-size: 11px;
+  padding: 4px 7px;
+  font-size: 12px;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -100,23 +100,23 @@
 .ewar-script-option {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   width: 100%;
-  padding: 4px 6px;
+  padding: 4px 7px;
   background: transparent;
   border: 1px solid transparent;
   border-radius: 2px;
   color: var(--text-primary);
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   text-align: left;
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .ewar-script-option .ewar-script-icon {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   flex: none;
 }
 
@@ -141,7 +141,7 @@
 .ewar-summary-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   flex: 0 0 auto;
 }
 
@@ -152,14 +152,14 @@
 }
 
 .ewar-summary-icon {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .ewar-summary-count {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--accent-teal);
   text-transform: uppercase;
   letter-spacing: 0;

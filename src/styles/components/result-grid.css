@@ -9,13 +9,13 @@
 .result-side {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   flex: 1 1 0;
   min-width: 0;
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
-  padding: 4px 8px;
+  padding: 4px 9px;
 }
 
 .result-side-a { border-left: 2px solid var(--accent-teal); }
@@ -36,16 +36,16 @@
 }
 
 .result-hero-value {
-  font-size: 14px;
-  line-height: 17px;
+  font-size: 15px;
+  line-height: 19px;
   font-family: "Chakra Petch", sans-serif;
   text-align: right;
   min-width: 5ch;
 }
 
 .result-hero-application {
-  font-size: 14px;
-  line-height: 17px;
+  font-size: 15px;
+  line-height: 19px;
   font-family: "Chakra Petch", sans-serif;
   text-align: left;
   min-width: 8ch;
@@ -53,16 +53,16 @@
 
 .result-side-support {
   display: flex;
-  gap: 8px;
+  gap: 9px;
   flex: 1 1 auto;
   min-width: 0;
 }
 
 .result-side-weapon {
   display: flex;
-  gap: 8px;
+  gap: 9px;
   flex: 1 1 auto;
-  min-width: 300px;
+  min-width: 330px;
 }
 
 .result-side-weapon[hidden] { display: none; }
@@ -75,22 +75,22 @@
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
-  padding: 4px 10px;
+  padding: 4px 11px;
   flex: 0 0 auto;
-  min-width: 80px;
+  min-width: 88px;
 }
 
 .result-metric {
   display: flex;
   flex-direction: column;
   flex: 1 1 0;
-  min-width: 80px;
+  min-width: 88px;
 }
 
 .result-card-label {
   display: block;
-  font-size: 10px;
-  line-height: 13px;
+  font-size: 11px;
+  line-height: 14px;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -101,16 +101,16 @@
 
 .result-card-value {
   display: block;
-  font-size: 14px;
-  line-height: 17px;
+  font-size: 15px;
+  line-height: 19px;
   color: var(--text-primary);
   white-space: nowrap;
 }
 
 .result-metric-label {
   display: block;
-  font-size: 10px;
-  line-height: 13px;
+  font-size: 11px;
+  line-height: 14px;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -121,8 +121,8 @@
 
 .result-metric-value {
   display: block;
-  font-size: 14px;
-  line-height: 17px;
+  font-size: 15px;
+  line-height: 19px;
   color: var(--text-primary);
   white-space: nowrap;
 }

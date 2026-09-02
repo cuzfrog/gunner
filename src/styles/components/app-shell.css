@@ -1,8 +1,8 @@
 @layer components {
 .app-container {
-  max-width: 1400px;
+  max-width: 1540px;
   margin: 0 auto;
-  padding: 12px;
+  padding: 13px;
 }
 
 .app-header {
@@ -10,21 +10,21 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 11px;
   border-bottom: 1px solid var(--border-dim);
   margin-bottom: 4px;
-  padding-bottom: 8px;
+  padding-bottom: 9px;
 }
 
 .app-header-left {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 4px 10px;
+  gap: 4px 11px;
 }
 
 .app-version-text {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-dim);
 }
 
@@ -32,13 +32,13 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 11px;
 }
 
 .app-title {
   margin: 0;
   font-family: "Chakra Petch", sans-serif;
-  font-size: 20px;
+  font-size: 22px;
   color: var(--accent-teal);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -46,7 +46,7 @@
 
 .app-subtitle {
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .app-lang-toggle {
@@ -55,7 +55,7 @@
 }
 
 .app-lang-toggle > .btn {
-  font-size: 12px;
+  font-size: 13px;
   white-space: nowrap;
 }
 
@@ -78,8 +78,8 @@
 
 .app-main {
   display: grid;
-  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(280px, 320px);
-  gap: 14px;
+  grid-template-columns: minmax(308px, 352px) minmax(0, 1fr) minmax(308px, 352px);
+  gap: 15px;
 }
 
 }

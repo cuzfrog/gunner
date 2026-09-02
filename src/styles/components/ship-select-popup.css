@@ -9,9 +9,9 @@
 
 .ship-select-popup > .ship-select-hint {
   display: block;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-secondary);
-  min-height: 14px;
+  min-height: 15px;
   margin-top: 4px;
 }
 

@@ -3,7 +3,7 @@
   display: block;
   flex: 1 1 auto;
   text-align: left;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -16,20 +16,20 @@
 .defense-layer-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   padding: 2px;
 }
 
 .defense-layer-label {
-  flex: 0 0 60px;
-  font-size: 12px;
+  flex: 0 0 66px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
 .defense-resist-grid {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   flex: 1 1 auto;
 }
 
@@ -40,14 +40,14 @@
 }
 
 .defense-resist-icon {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .defense-resist-value {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-primary);
   white-space: nowrap;
 }
@@ -55,19 +55,19 @@
 .defense-hp-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   padding: 2px;
 }
 
 .defense-hp-label {
-  flex: 0 0 60px;
-  font-size: 12px;
+  flex: 0 0 66px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
 .defense-hp-value {
   flex: 1 1 auto;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-primary);
   text-align: right;
 }
@@ -75,19 +75,19 @@
 .defense-ehp-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   padding: 2px;
 }
 
 .defense-ehp-label {
-  flex: 0 0 60px;
-  font-size: 12px;
+  flex: 0 0 66px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
 .defense-ehp-value {
   flex: 1 1 auto;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--accent-teal);
   text-align: right;
 }
@@ -95,19 +95,19 @@
 .defense-repairer-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   padding: 2px;
 }
 
 .defense-repairer-name {
-  flex: 0 0 60px;
-  font-size: 12px;
+  flex: 0 0 66px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
 .defense-repairer-stats {
   flex: 1 1 auto;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-primary);
   text-align: right;
 }
@@ -115,7 +115,7 @@
 .defense-summary-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   flex: 0 0 auto;
 }
 
@@ -126,7 +126,7 @@
 }
 
 .defense-summary-count {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--accent-teal);
   text-transform: uppercase;
   letter-spacing: 0;
@@ -136,9 +136,9 @@
 .defense-damage-toggle {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  font-size: 12px;
+  gap: 7px;
+  padding: 4px 9px;
+  font-size: 13px;
   color: var(--text-primary);
   background: transparent;
   border: 1px solid var(--border-subtle);
@@ -161,8 +161,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 8px;
-  font-size: 11px;
+  padding: 3px 9px;
+  font-size: 12px;
   color: var(--text-secondary);
   background: transparent;
   border: 1px solid var(--border-subtle);
@@ -182,19 +182,19 @@
 .defense-module-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   padding: 2px;
 }
 
 .defense-module-name {
-  flex: 0 0 60px;
-  font-size: 12px;
+  flex: 0 0 66px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
 .defense-module-status {
   flex: 1 1 auto;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-tertiary);
 }
 
@@ -206,8 +206,8 @@
 }
 
 .defense-module-toggle {
-  padding: 3px 8px;
-  font-size: 11px;
+  padding: 3px 9px;
+  font-size: 12px;
   color: var(--text-secondary);
   background: transparent;
   border: 1px solid var(--border-subtle);
@@ -225,8 +225,8 @@
 }
 
 .defense-module-overload {
-  padding: 3px 8px;
-  font-size: 11px;
+  padding: 3px 9px;
+  font-size: 12px;
   color: var(--text-secondary);
   background: transparent;
   border: 1px solid var(--border-subtle);
