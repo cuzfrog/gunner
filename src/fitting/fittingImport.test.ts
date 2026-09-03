@@ -309,7 +309,11 @@ const db: FittingDb = {
   missileGuidanceEnhancers: {},
   missileScripts: {},
   hullBonuses: {},
-  skillBonuses: [],
+  skillBonuses: [
+    { skillId: toTypeId("3312"), bonusType: "turretTracking", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
+    { skillId: toTypeId("3311"), bonusType: "turretOptimal", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
+    { skillId: toTypeId("3317"), bonusType: "turretFalloff", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
+  ],
   drones: {},
   combatDrones: {},
   omnidirectionalTrackingLinks: {},
@@ -334,7 +338,11 @@ const hullBonusDb: FittingDb = {
       { attribute: "turretDamage", magnitude: 10, scalesWithHullSkill: true, moduleSkillId: toTypeId("3306") },
     ],
   },
-  skillBonuses: [],
+  skillBonuses: [
+    { skillId: toTypeId("3312"), bonusType: "turretTracking", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
+    { skillId: toTypeId("3311"), bonusType: "turretOptimal", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
+    { skillId: toTypeId("3317"), bonusType: "turretFalloff", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
+  ],
 };
 
 const gunFamilies = new GunFamiliesImpl({ fittingDb: db });

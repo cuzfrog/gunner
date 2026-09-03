@@ -9,7 +9,7 @@ import type { MissileCatalog } from "./missileCatalog";
 import type { MissileSkillModel } from "./missileStats";
 import type { DroneCatalog, ImportedDrone } from "./droneCatalog";
 import type { DroneSkillModel } from "./droneStats";
-import { TRACKING_SKILL_BONUS, OPTIMAL_SKILL_BONUS, FALLOFF_SKILL_BONUS, STANDARD_SIGNATURE_RESOLUTION, sigResolutionClassFromChargeSize } from "./turretStats";
+import { STANDARD_SIGNATURE_RESOLUTION, sigResolutionClassFromChargeSize } from "./turretStats";
 import type { FittingState, FittedModule } from "./fittingState";
 import type { ItemNameCatalog } from "../gamedata/itemNames";
 import { type DamageBreakdown, type DamageFactor, chargeDamageByType, droneDamageByType, missileDamageByType } from "./damageBreakdown";
@@ -144,9 +144,9 @@ export class FittingCalculatorImpl implements FittingCalculator {
 
       const sigResClass = sigResolutionClassFromChargeSize(turret.chargeSize);
       const sigRes = SIG_RESOLUTIONS[sigResClass];
-      const skillTrackingMultiplier = 1 + TRACKING_SKILL_BONUS * skillLevel;
-      const skillOptimalMultiplier = 1 + OPTIMAL_SKILL_BONUS * skillLevel;
-      const skillFalloffMultiplier = 1 + FALLOFF_SKILL_BONUS * skillLevel;
+      const skillTrackingMultiplier = computeSkillMultiplier(this.db.skillBonuses, turret, "turretTracking", skillLevel);
+      const skillOptimalMultiplier = computeSkillMultiplier(this.db.skillBonuses, turret, "turretOptimal", skillLevel);
+      const skillFalloffMultiplier = computeSkillMultiplier(this.db.skillBonuses, turret, "turretFalloff", skillLevel);
 
       const trackingScore = turret.tracking * skillTrackingMultiplier * trackingBonus;
       const optimalScore = turret.optimal * skillOptimalMultiplier * optimalBonus;
@@ -577,6 +577,18 @@ function computeSkillRoFMultiplier(skillBonuses: readonly SkillBonus[], turret: 
   let multiplier = 1;
   for (const bonus of skillBonuses) {
     if (bonus.bonusType !== "turretRoF") continue;
+    if (bonus.appliesTo !== "module") continue;
+    if (bonus.requiredSkillId !== undefined && !turret.requiredSkillIds.includes(bonus.requiredSkillId)) continue;
+    if (bonus.moduleGroupId !== undefined && bonus.moduleGroupId !== turret.groupID) continue;
+    multiplier *= 1 + (bonus.magnitudePerLevel * skillLevel) / 100;
+  }
+  return multiplier;
+}
+
+function computeSkillMultiplier(skillBonuses: readonly SkillBonus[], turret: TurretStats, bonusType: SkillBonus["bonusType"], skillLevel: number): number {
+  let multiplier = 1;
+  for (const bonus of skillBonuses) {
+    if (bonus.bonusType !== bonusType) continue;
     if (bonus.appliesTo !== "module") continue;
     if (bonus.requiredSkillId !== undefined && !turret.requiredSkillIds.includes(bonus.requiredSkillId)) continue;
     if (bonus.moduleGroupId !== undefined && bonus.moduleGroupId !== turret.groupID) continue;
