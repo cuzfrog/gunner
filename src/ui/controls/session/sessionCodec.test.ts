@@ -898,4 +898,16 @@ describe("SessionCodec", () => {
     expect(defenseController.restore).toHaveBeenCalledWith("shipA", true, "manual", [{ active: false, overloaded: true }], { active: true, overloaded: false });
     expect(defenseController.restore).toHaveBeenCalledWith("shipB", true, "manual", [{ active: false, overloaded: true }], { active: true, overloaded: false });
   });
+
+  test("restore sets defense spec from fitting text", () => {
+    const defenseController = mockDefenseController();
+    const fittingImport = mockFittingImport();
+    const defenseSpec = { layers: { shield: { hp: 1000, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } }, armor: { hp: 800, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } }, hull: { hp: 600, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } } }, shieldRechargeTime: 100, repairers: [], signaturePenalty: 0 };
+    vi.mocked(fittingImport.importFitting).mockReturnValue({ defense: defenseSpec } as unknown as ReturnType<FittingImport["importFitting"]>);
+    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: "[Rifter, test]\n\n", overrides: {}, fittedHull: undefined });
+    const { codec } = buildCodec({ defenseController, fittingImport, shipA });
+    const session = codec.fromProfile(codec.captureProfile());
+    codec.restore(session, "");
+    expect(defenseController.setDefenseSpec).toHaveBeenCalledWith("shipA", defenseSpec);
+  });
 });

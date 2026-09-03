@@ -240,6 +240,13 @@ export class SessionCodecImpl implements SessionCodec {
     this.ewarController.restore(side, loadout, activation);
   }
 
+  private restoreDefense(side: Side, fitting: string | undefined, enabled: boolean, repMode: StoredRepairMode, repairerActivation: readonly StoredRepairerActivation[], rahActivation: StoredRahActivation | undefined): void {
+    const panel = side === "shipA" ? this.shipASide : this.shipBSide;
+    const defense = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.defense : undefined;
+    if (defense) this.defenseController.setDefenseSpec(side, defense);
+    this.defenseController.restore(side, enabled, repMode, repairerActivation, rahActivation);
+  }
+
   private restoreBooster(side: Side, fitting: string | undefined, activation: readonly StoredBoosterActivation[] | undefined): void {
     const panel = side === "shipA" ? this.shipASide : this.shipBSide;
     const loadout = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.boosts : undefined;
@@ -306,8 +313,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.restoreBooster("shipB", settings.shipB.fitting, settings.shipB.boosterActivation);
     this.restoreMissileBooster("shipA", settings.shipA.fitting, settings.shipA.missileBoosterActivation);
     this.restoreMissileBooster("shipB", settings.shipB.fitting, settings.shipB.missileBoosterActivation);
-    this.defenseController.restore("shipA", settings.shipA.damageEnabled, settings.shipA.repMode, settings.shipA.repairerActivation, settings.shipA.rahActivation);
-    this.defenseController.restore("shipB", settings.shipB.damageEnabled, settings.shipB.repMode, settings.shipB.repairerActivation, settings.shipB.rahActivation);
+    this.restoreDefense("shipA", settings.shipA.fitting, settings.shipA.damageEnabled, settings.shipA.repMode ?? "auto", settings.shipA.repairerActivation ?? [], settings.shipA.rahActivation);
+    this.restoreDefense("shipB", settings.shipB.fitting, settings.shipB.damageEnabled, settings.shipB.repMode ?? "auto", settings.shipB.repairerActivation ?? [], settings.shipB.rahActivation);
   }
 
   restoreStartup(startup: StartupState): void {

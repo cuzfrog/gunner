@@ -86,7 +86,8 @@ export class AppImpl implements App {
     const view = this.engagementFrameComposer.compose(snapshot, input);
     this.droneSimulator.step(dt, view.frame);
     this.missileSimulator.step(dt, view.frame, this.missileLaunchSpecs(view));
-    this.defenseSimulator.step(dt, this.defenseIncoming(view));
+    const incoming = this.defenseIncoming(view);
+    this.defenseSimulator.step(dt, incoming);
     const defenseView = this.defenseSimulator.view();
     if (defenseView.dead.shipA || defenseView.dead.shipB) {
       this.loop.stop();
