@@ -316,8 +316,8 @@ export class DefenseControllerImpl implements DefenseController {
       const repairer = spec.repairers[i];
       const repairerView = repairerViews[i];
       const activation = this.repairerActivationState[side][i] ?? { active: true, overloaded: true };
-      const activeButton = html`<button class="defense-module-toggle" aria-pressed=${activation.active ? "true" : "false"} disabled=${autoMode ? true : false}>${this.i18n.t(activation.active ? "defense.module.active" : "defense.module.inactive")}</button>`;
-      const overloadButton = html`<button class="defense-module-overload" aria-pressed=${activation.overloaded ? "true" : "false"} disabled=${autoMode ? true : false}>${this.i18n.t("defense.module.overload")}</button>`;
+      const activeButton = html`<button class="defense-module-toggle" aria-pressed=${activation.active ? "true" : "false"} disabled=${autoMode ? "" : false}>${this.i18n.t(activation.active ? "defense.module.active" : "defense.module.inactive")}</button>`;
+      const overloadButton = html`<button class="defense-module-overload" aria-pressed=${activation.overloaded ? "true" : "false"} disabled=${autoMode ? "" : false}>${this.i18n.t("defense.module.overload")}</button>`;
       activeButton.addEventListener("click", () => { this.setRepairerActivation(side, i, !activation.active, activation.overloaded); this.renderSide(side); });
       overloadButton.addEventListener("click", () => { this.setRepairerActivation(side, i, activation.active, !activation.overloaded); this.renderSide(side); });
       const statusParts: string[] = [];
@@ -339,8 +339,8 @@ export class DefenseControllerImpl implements DefenseController {
     if (!spec.rah) return;
     const autoMode = this.repairModeState[side] === "auto";
     const activation = this.rahActivationState[side] ?? { active: true, overloaded: true };
-    const activeButton = html`<button class="defense-module-toggle" aria-pressed=${activation.active ? "true" : "false"} disabled=${autoMode ? true : false}>${this.i18n.t(activation.active ? "defense.module.active" : "defense.module.inactive")}</button>`;
-    const overloadButton = html`<button class="defense-module-overload" aria-pressed=${activation.overloaded ? "true" : "false"} disabled=${autoMode ? true : false}>${this.i18n.t("defense.module.overload")}</button>`;
+    const activeButton = html`<button class="defense-module-toggle" aria-pressed=${activation.active ? "true" : "false"} disabled=${autoMode ? "" : false}>${this.i18n.t(activation.active ? "defense.module.active" : "defense.module.inactive")}</button>`;
+    const overloadButton = html`<button class="defense-module-overload" aria-pressed=${activation.overloaded ? "true" : "false"} disabled=${autoMode ? "" : false}>${this.i18n.t("defense.module.overload")}</button>`;
     activeButton.addEventListener("click", () => { this.setRahActivation(side, !activation.active, activation.overloaded); this.renderSide(side); });
     overloadButton.addEventListener("click", () => { this.setRahActivation(side, activation.active, !activation.overloaded); this.renderSide(side); });
     const row = html`<div class="defense-module-row"><span class="defense-module-name">${this.i18n.t("defense.rah")}</span><span class="defense-module-controls">${activeButton}${overloadButton}</span></div>`;

@@ -561,5 +561,19 @@ describe("PortraitsController", () => {
       expect(hpFillWidth(els, "shipA", 1)).toBe("50%");
       expect(hpFillWidth(els, "shipA", 2)).toBe("50%");
     });
+
+    test("sub-percent damage updates fill widths without other state changes", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 0.9999, armor: 1, hull: 1 });
+      controller.update();
+      const before = hpFillWidth(els, "shipA", 0);
+      expect(before).toContain("0.00999");
+      defenseController.hpPercentages.mockReturnValue({ shield: 0.999, armor: 1, hull: 1 });
+      controller.update();
+      const after = hpFillWidth(els, "shipA", 0);
+      expect(after).toContain("0.1000");
+      expect(after).not.toBe(before);
+    });
   });
 });

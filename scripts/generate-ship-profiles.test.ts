@@ -162,7 +162,7 @@ describe("_parseProfile", () => {
     };
     const profile = _parseProfile(raw, 0, shipNameToType, typedogmas, attributeNames);
     expect(profile.shieldHp).toBe(375);
-    expect(profile.shieldRechargeTime).toBeCloseTo(0.625, 3);
+    expect(profile.shieldRechargeTime).toBe(625);
     expect(profile.armorHp).toBe(250);
     expect(profile.hullHp).toBe(400);
     expect(profile.shieldResists).toEqual({ em: 0.5, thermal: 0.4, kinetic: 0.3, explosive: 0.25 });
@@ -282,7 +282,7 @@ describe("_extractDefenseData", () => {
     };
     const defense = _extractDefenseData("24692", typedogmas, makeAttributeNames());
     expect(defense.shieldHp).toBe(7700);
-    expect(defense.shieldRechargeTime).toBe(2.5);
+    expect(defense.shieldRechargeTime).toBe(2500);
     expect(defense.armorHp).toBe(9350);
     expect(defense.hullHp).toBe(8800);
     expect(defense.shieldResists).toEqual({ em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 });

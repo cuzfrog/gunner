@@ -1,5 +1,5 @@
 import { test, expect, loadFittingText, FITTING_THRASHER, FITTING_CERBERUS } from "./fixtures";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 async function importViaPaste(page: Page, side: "ship-a" | "ship-b", eftText: string): Promise<void> {
   await page.evaluate(() => {
@@ -181,4 +181,19 @@ test.describe("canvas settings and playback", () => {
     await expect(portraitB).toBeVisible();
     await expect(portraitB.locator("img")).toBeVisible();
   });
+
+  test("portrait hp bars drain under sustained fire", async ({ cleanPage: page }) => {
+    test.setTimeout(90000);
+    await loadBothSides(page);
+    const shieldBar = page.locator(".portrait-hp-bars-ship-a .portrait-hp-bar-shield");
+    await expect(shieldBar).toBeVisible();
+    const shieldFill = shieldBar.locator(".portrait-hp-fill");
+    await expect.poll(async () => portraitLossPercent(shieldFill)).toBe(0);
+    await page.locator("#play").click();
+    await expect.poll(async () => portraitLossPercent(shieldFill), { timeout: 45000 }).toBeGreaterThan(20);
+  });
 });
+
+async function portraitLossPercent(fill: Locator): Promise<number> {
+  return fill.evaluate((el) => parseFloat(el.style.width));
+}

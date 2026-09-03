@@ -50,7 +50,7 @@ const OUTPUT_PATH = "src/gamedata/shipProfiles/profiles.ts";
 const SHIP_CATEGORY_ID = 6;
 const LEGACY_PREFIX = "legacy";
 const DEFAULT_MAX_ACTIVE_DRONES = 5;
-const SHIELD_RECHARGE_RATE_MS = 1_000_000; // SDE stores shieldRechargeRate in microseconds
+const SHIELD_RECHARGE_RATE_MS = 1_000; // SDE stores shieldRechargeRate in milliseconds
 
 function parseNumber(input: string): number {
   const match = input.match(/[\d,.]+(?:\.\d+)?/);

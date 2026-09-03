@@ -84,8 +84,9 @@ export class PortraitsControllerImpl implements PortraitsController {
     const defenseEffects = this.defenseController.cyclingEffects(side);
     const allEffects = [...portraitEffects, ...defenseEffects];
     const hpPercentages = this.defenseController.hpPercentages(side);
-    const hpKey = hpPercentages ? HP_BAR_LAYERS.map((l) => `${l}:${Math.round(hpPercentages[l] * 100)}`).join(",") : "";
-    const key = `${buildDiffKey(profile.id, allEffects)}|${hpKey}`;
+    updateHpBars(hpBars, hpPercentages);
+    hpBars.hidden = hpPercentages === undefined;
+    const key = buildDiffKey(profile.id, allEffects);
     if (state.lastKey === key) return;
     state.lastKey = key;
     if (root.hidden) root.hidden = false;
@@ -93,8 +94,6 @@ export class PortraitsControllerImpl implements PortraitsController {
       state.lastId = profile.id;
       image.src = this.imageCatalog.shipImageUrl(profile.id) ?? "";
     }
-    updateHpBars(hpBars, hpPercentages);
-    hpBars.hidden = hpPercentages === undefined;
     effects.innerHTML = "";
     const icons = document.createDocumentFragment();
     for (const effect of allEffects) {
