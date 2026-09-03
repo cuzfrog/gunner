@@ -28,6 +28,7 @@ export interface AttackState {
   readonly opponentSigRadius: number;
   readonly droneState?: DroneRuntimeState;
   readonly missileFacts?: MissileAttackFacts;
+  readonly locked?: boolean;
 }
 
 export interface AttackAssessment {
@@ -79,13 +80,16 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
 
   private assess(frame: EngagementFrame, ship: ShipState, opponent: ShipState, attack: AttackState): AttackAssessment {
     const paintedSig = attack.opponentSigRadius * this.ewarResolver.sigMultiplier(ship.ewar, frame.distance);
+    let assessment: AttackAssessment;
     if (attack.weapon.kind === "turret") {
-      return this.assessTurret(frame, ship, opponent, attack.weapon, paintedSig);
+      assessment = this.assessTurret(frame, ship, opponent, attack.weapon, paintedSig);
+    } else if (attack.weapon.kind === "drone") {
+      assessment = this.assessDrone(frame, ship, opponent, attack.weapon, paintedSig, attack.droneState);
+    } else {
+      assessment = this.assessMissile(frame, ship, opponent, attack.weapon, paintedSig, attack.missileFacts);
     }
-    if (attack.weapon.kind === "drone") {
-      return this.assessDrone(frame, ship, opponent, attack.weapon, paintedSig, attack.droneState);
-    }
-    return this.assessMissile(frame, ship, opponent, attack.weapon, paintedSig, attack.missileFacts);
+    if (attack.locked === false) return zeroAppliedDps(assessment);
+    return assessment;
   }
 
   private assessTurret(frame: EngagementFrame, ship: ShipState, opponent: ShipState, turret: TurretSpec, opponentSigRadius: number): AttackAssessment {
@@ -135,4 +139,10 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     const breakdown = this.droneApplication.compute(frame, drone, opponentSigRadius, droneState);
     return { boostedWeapon: drone, effectiveWeapon: drone, damage: breakdown, drone: breakdown };
   }
+}
+
+function zeroAppliedDps(assessment: AttackAssessment): AttackAssessment {
+  const { nominalDps } = assessment.damage;
+  const zeroed: DamageAssessment = { nominalDps, appliedDps: 0, application: 0, volley: assessment.damage.volley, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+  return { ...assessment, damage: zeroed };
 }

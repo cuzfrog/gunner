@@ -8,6 +8,7 @@ import { ZERO_DAMAGE } from "./types";
 
 const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
+const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };
 
 function shipState(id: "shipA" | "shipB"): ShipState {
   return { id, maxSpeed: 100, mass: 1_000_000, inertiaModifier: 1, mode: "orbit", desiredRange: 1000, aggressivity: 1, position: new Vec2(0, 0), velocity: new Vec2(0, 0) };
@@ -27,6 +28,7 @@ function makeView(shipAAttacks: readonly WeaponAttack[], shipBAttacks: readonly 
     weaponAttacks: { shipA: shipAAttacks, shipB: shipBAttacks },
     effectiveWeapons: { shipA: turret, shipB: turret },
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+    locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
   };
 }
 

@@ -10,6 +10,7 @@ import { EngagementEvaluatorImpl } from "./fireControl";
 import { EngagementFrameComposerImpl } from "./engagementFrameComposer";
 import { MissileBoosterResolverImpl } from "./missileBoosterResolver";
 import { SensorBoosterResolverImpl } from "./sensorBoosterResolver";
+import { LockClockImpl } from "./lockClock";
 import { TurretBoosterResolverImpl } from "./turretBoosterResolver";
 import { HitChanceImpl } from "./hitChance";
 import { KinematicsImpl } from "./kinematics";
@@ -48,5 +49,6 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     defenseSimulator: asClass(DefenseSimulatorImpl).singleton(),
     rngFactory: asClass(Mulberry32RngFactory).singleton(),
     weaponClock: asClass(WeaponClockImpl).singleton(),
+    lockClock: asClass(LockClockImpl).singleton(),
   });
 }

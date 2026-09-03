@@ -9,6 +9,7 @@ import type {
   EngagementFrameComposer,
   HitChance,
   Kinematics,
+  LockClock,
   MissileApplication,
   MissileBoosterResolver,
   MissileSimulator,
@@ -47,5 +48,6 @@ export interface SimCradle {
   readonly defenseSimulator: DefenseSimulator;
   readonly rngFactory: RngFactory;
   readonly weaponClock: WeaponClock;
+  readonly lockClock: LockClock;
   readonly simConfig: SimConfig;
 }

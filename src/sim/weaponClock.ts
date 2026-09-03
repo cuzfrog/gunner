@@ -41,11 +41,28 @@ export class WeaponClockImpl implements WeaponClock {
 
   step(dt: number, view: EngagementView): readonly DamageEvent[] {
     const events: DamageEvent[] = [];
-    const shipAEvents = this.stepSide("shipA", dt, view.weaponAttacks.shipA, "shipB");
-    const shipBEvents = this.stepSide("shipB", dt, view.weaponAttacks.shipB, "shipA");
-    for (const event of shipAEvents) events.push(event);
-    for (const event of shipBEvents) events.push(event);
+    if (view.locks.shipA.status === "locked") {
+      const shipAEvents = this.stepSide("shipA", dt, view.weaponAttacks.shipA, "shipB");
+      for (const event of shipAEvents) events.push(event);
+    } else {
+      this.clearCooldowns("shipA", view.weaponAttacks.shipA);
+    }
+    if (view.locks.shipB.status === "locked") {
+      const shipBEvents = this.stepSide("shipB", dt, view.weaponAttacks.shipB, "shipA");
+      for (const event of shipBEvents) events.push(event);
+    } else {
+      this.clearCooldowns("shipB", view.weaponAttacks.shipB);
+    }
     return events;
+  }
+
+  private clearCooldowns(source: Side, attacks: readonly WeaponAttack[]): void {
+    const clock = this.sides[source];
+    const signature = weaponSignature(attacks);
+    if (signature !== clock.weaponSignature) {
+      clock.cooldowns.clear();
+      clock.weaponSignature = signature;
+    }
   }
 
   private stepSide(source: Side, dt: number, attacks: readonly WeaponAttack[], target: Side): readonly DamageEvent[] {

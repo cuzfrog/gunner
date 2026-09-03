@@ -351,6 +351,18 @@ export interface SensorSpec {
   readonly maxLockedTargets: number;
 }
 
+export type LockStatus = "idle" | "locking" | "locked";
+
+export interface LockState {
+  readonly status: LockStatus;
+  readonly progress: number;
+  readonly remaining: number;
+  readonly lockTime: number;
+  readonly inRange: boolean;
+}
+
+export const IDLE_LOCK: LockState = { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: false };
+
 export interface TrackingBoosterSpec {
   readonly moduleName: string;
   readonly moduleId: TypeId;
