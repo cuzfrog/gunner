@@ -5,7 +5,7 @@ import { GunFamiliesImpl, type GunFamily } from "./gunFamilies";
 
 const gunFamilies = new GunFamiliesImpl({ fittingDb: FITTING_DB });
 
-const FAMILIES: readonly GunFamily[] = ["pulseLaser", "beamLaser", "railgun", "blaster", "autocannon", "artillery"];
+const FAMILIES: readonly GunFamily[] = ["pulseLaser", "beamLaser", "railgun", "blaster", "autocannon", "artillery", "disintegrator"];
 
 const REPRESENTATIVE_CANONICALS: { readonly family: GunFamily; readonly S: string; readonly M: string; readonly L: string; readonly XL: string }[] = [
   { family: "pulseLaser", S: "Gatling Pulse Laser I", M: "Heavy Pulse Laser I", L: "Mega Pulse Laser I", XL: "Dual Giga Pulse Laser I" },

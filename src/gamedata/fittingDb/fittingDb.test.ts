@@ -472,9 +472,9 @@ describe("fittingDb", () => {
   });
 
   test("includes Surgical Strike damage bonus for all weapon groups", () => {
-    const energy = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.weaponGroup === "Energy Weapon");
-    const projectile = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.weaponGroup === "Projectile Weapon");
-    const hybrid = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.weaponGroup === "Hybrid Weapon");
+    const energy = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.moduleGroupId === 53);
+    const projectile = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.moduleGroupId === 55);
+    const hybrid = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.moduleGroupId === 74);
     expect(energy).toBeDefined();
     expect(energy!.bonusType).toBe("turretDamage");
     expect(energy!.magnitudePerLevel).toBe(3);
@@ -483,60 +483,130 @@ describe("fittingDb", () => {
   });
 
   test("includes Medium Energy Turret damage bonus", () => {
-    const mediumEnergy = SKILL_BONUSES.find((b) => b.turretSkill === "Medium Energy Turret");
+    const mediumEnergy = SKILL_BONUSES.find((b) => b.requiredSkillId === toTypeId("3306"));
     expect(mediumEnergy).toBeDefined();
     expect(mediumEnergy!.bonusType).toBe("turretDamage");
     expect(mediumEnergy!.magnitudePerLevel).toBe(5);
   });
 
   test("includes Large Hybrid Turret damage bonus", () => {
-    const largeHybrid = SKILL_BONUSES.find((b) => b.turretSkill === "Large Hybrid Turret");
+    const largeHybrid = SKILL_BONUSES.find((b) => b.requiredSkillId === toTypeId("3307"));
     expect(largeHybrid).toBeDefined();
     expect(largeHybrid!.bonusType).toBe("turretDamage");
     expect(largeHybrid!.magnitudePerLevel).toBe(5);
   });
 
   test("includes Capital Energy Turret damage bonus", () => {
-    const capitalEnergy = SKILL_BONUSES.find((b) => b.turretSkill === "Capital Energy Turret");
+    const capitalEnergy = SKILL_BONUSES.find((b) => b.requiredSkillId === toTypeId("20327"));
     expect(capitalEnergy).toBeDefined();
     expect(capitalEnergy!.bonusType).toBe("turretDamage");
     expect(capitalEnergy!.magnitudePerLevel).toBe(5);
   });
 
   test("includes all 12 turret size skills", () => {
-    const turretSkills = SKILL_BONUSES.filter((b) => b.turretSkill !== undefined).map((b) => b.turretSkill);
-    expect(turretSkills).toEqual(expect.arrayContaining([
-      "Small Energy Turret", "Small Hybrid Turret", "Small Projectile Turret",
-      "Medium Energy Turret", "Medium Hybrid Turret", "Medium Projectile Turret",
-      "Large Energy Turret", "Large Hybrid Turret", "Large Projectile Turret",
-      "Capital Energy Turret", "Capital Hybrid Turret", "Capital Projectile Turret",
-    ]));
+    const turretSizeSkillIds = new Set(["3301", "3302", "3303", "3304", "3305", "3306", "3307", "3308", "3309", "20327", "21666", "21667"].map((s) => toTypeId(s)));
+    const turretSkills = SKILL_BONUSES.filter((b) => b.requiredSkillId !== undefined && turretSizeSkillIds.has(b.requiredSkillId)).map((b) => b.requiredSkillId);
+    expect(turretSkills).toEqual(expect.arrayContaining([...turretSizeSkillIds]));
   });
 
   test("includes Medium Pulse Laser Specialization damage bonus", () => {
-    const medPulseSpec = SKILL_BONUSES.find((b) => b.specializationSkill === "Medium Pulse Laser Specialization");
+    const medPulseSpec = SKILL_BONUSES.find((b) => b.requiredSkillId === toTypeId("12214"));
     expect(medPulseSpec).toBeDefined();
     expect(medPulseSpec!.bonusType).toBe("turretDamage");
     expect(medPulseSpec!.magnitudePerLevel).toBe(2);
   });
 
   test("includes all 24 turret specialization skills", () => {
-    const specSkills = SKILL_BONUSES.filter((b) => b.specializationSkill !== undefined).map((b) => b.specializationSkill);
+    const specSkillIds = new Set(["11082", "11083", "11084", "12201", "12202", "12203", "12204", "12205", "12206", "12207", "12208", "12209", "12210", "12211", "12212", "12213", "12214", "12215", "41403", "41404", "41405", "41406", "41407", "41408"].map((s) => toTypeId(s)));
+    const specSkills = SKILL_BONUSES.filter((b) => b.requiredSkillId !== undefined && specSkillIds.has(b.requiredSkillId)).map((b) => b.requiredSkillId);
     expect(specSkills.length).toBe(24);
-    expect(specSkills).toEqual(expect.arrayContaining([
-      "Small Beam Laser Specialization", "Small Pulse Laser Specialization",
-      "Medium Beam Laser Specialization", "Medium Pulse Laser Specialization",
-      "Large Beam Laser Specialization", "Large Pulse Laser Specialization",
-      "Capital Beam Laser Specialization", "Capital Pulse Laser Specialization",
-      "Small Railgun Specialization", "Small Blaster Specialization",
-      "Medium Railgun Specialization", "Medium Blaster Specialization",
-      "Large Railgun Specialization", "Large Blaster Specialization",
-      "Capital Railgun Specialization", "Capital Blaster Specialization",
-      "Small Autocannon Specialization", "Small Artillery Specialization",
-      "Medium Autocannon Specialization", "Medium Artillery Specialization",
-      "Large Autocannon Specialization", "Large Artillery Specialization",
-      "Capital Autocannon Specialization", "Capital Artillery Specialization",
-    ]));
+    expect(specSkills).toEqual(expect.arrayContaining([...specSkillIds]));
+  });
+
+  test("includes Light Missiles damage bonus", () => {
+    const lightMissiles = SKILL_BONUSES.find((b) => b.skillId === toTypeId("3321") && b.bonusType === "missileDamage");
+    expect(lightMissiles).toBeDefined();
+    expect(lightMissiles!.magnitudePerLevel).toBe(5);
+    expect(lightMissiles!.appliesTo).toBe("charge");
+    expect(lightMissiles!.requiredSkillId).toBe(toTypeId("3321"));
+  });
+
+  test("includes Warhead Upgrades damage bonus", () => {
+    const warhead = SKILL_BONUSES.find((b) => b.skillId === toTypeId("20315") && b.bonusType === "missileDamage");
+    expect(warhead).toBeDefined();
+    expect(warhead!.magnitudePerLevel).toBe(2);
+    expect(warhead!.appliesTo).toBe("charge");
+    expect(warhead!.requiredSkillId).toBe(toTypeId("3319"));
+  });
+
+  test("includes Missile Launcher Operation ROF bonus", () => {
+    const mlo = SKILL_BONUSES.find((b) => b.skillId === toTypeId("3319") && b.bonusType === "missileRoF");
+    expect(mlo).toBeDefined();
+    expect(mlo!.magnitudePerLevel).toBe(-2);
+    expect(mlo!.appliesTo).toBe("module");
+  });
+
+  test("includes Rapid Launch ROF bonus", () => {
+    const rapidLaunch = SKILL_BONUSES.find((b) => b.skillId === toTypeId("21071") && b.bonusType === "missileRoF");
+    expect(rapidLaunch).toBeDefined();
+    expect(rapidLaunch!.magnitudePerLevel).toBe(-3);
+    expect(rapidLaunch!.appliesTo).toBe("module");
+  });
+
+  test("includes Light Missile Specialization ROF bonus", () => {
+    const lightSpec = SKILL_BONUSES.find((b) => b.skillId === toTypeId("20210") && b.bonusType === "missileRoF");
+    expect(lightSpec).toBeDefined();
+    expect(lightSpec!.magnitudePerLevel).toBe(-2);
+    expect(lightSpec!.appliesTo).toBe("module");
+  });
+
+  test("includes Missile Bombardment flight time bonus", () => {
+    const bombardment = SKILL_BONUSES.find((b) => b.skillId === toTypeId("12441") && b.bonusType === "missileFlightTime");
+    expect(bombardment).toBeDefined();
+    expect(bombardment!.magnitudePerLevel).toBe(10);
+    expect(bombardment!.appliesTo).toBe("charge");
+  });
+
+  test("includes Missile Projection velocity bonus", () => {
+    const projection = SKILL_BONUSES.find((b) => b.skillId === toTypeId("12442") && b.bonusType === "missileVelocity");
+    expect(projection).toBeDefined();
+    expect(projection!.magnitudePerLevel).toBe(10);
+    expect(projection!.appliesTo).toBe("charge");
+  });
+
+  test("includes Guided Precision explosion radius bonus", () => {
+    const precision = SKILL_BONUSES.find((b) => b.skillId === toTypeId("20312") && b.bonusType === "missileExplosionRadius");
+    expect(precision).toBeDefined();
+    expect(precision!.magnitudePerLevel).toBe(-5);
+    expect(precision!.appliesTo).toBe("charge");
+  });
+
+  test("includes Target Navigation Prediction explosion velocity bonus", () => {
+    const targetNav = SKILL_BONUSES.find((b) => b.skillId === toTypeId("20314") && b.bonusType === "missileExplosionVelocity");
+    expect(targetNav).toBeDefined();
+    expect(targetNav!.magnitudePerLevel).toBe(10);
+    expect(targetNav!.appliesTo).toBe("charge");
+  });
+
+  test("includes Motion Prediction tracking bonus", () => {
+    const motionPred = SKILL_BONUSES.find((b) => b.skillId === toTypeId("3312") && b.bonusType === "turretTracking");
+    expect(motionPred).toBeDefined();
+    expect(motionPred!.magnitudePerLevel).toBe(5);
+    expect(motionPred!.appliesTo).toBe("module");
+  });
+
+  test("includes Sharpshooter optimal range bonus", () => {
+    const sharpshooter = SKILL_BONUSES.find((b) => b.skillId === toTypeId("3311") && b.bonusType === "turretOptimal");
+    expect(sharpshooter).toBeDefined();
+    expect(sharpshooter!.magnitudePerLevel).toBe(5);
+    expect(sharpshooter!.appliesTo).toBe("module");
+  });
+
+  test("includes Trajectory Analysis falloff bonus", () => {
+    const trajectory = SKILL_BONUSES.find((b) => b.skillId === toTypeId("3317") && b.bonusType === "turretFalloff");
+    expect(trajectory).toBeDefined();
+    expect(trajectory!.magnitudePerLevel).toBe(5);
+    expect(trajectory!.appliesTo).toBe("module");
   });
 
   test("Heavy Pulse Laser II has Medium Pulse Laser Specialization", () => {

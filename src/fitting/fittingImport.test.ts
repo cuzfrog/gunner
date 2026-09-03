@@ -285,8 +285,8 @@ const db: FittingDb = {
     "Gyrostabilizer II": row("Gyrostabilizer II", "Gyrostabilizer II", { turretDamageMultiplier: 1.15, turretSpeedMultiplier: 0.89, turretWeaponGroup: "Projectile Weapon" }),
   },
   turrets: {
-    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", requiredSkillIds: [toTypeId("3300"), toTypeId("3306"), toTypeId("12214")], metaLevel: 5, metaGroupID: 2 }),
-    "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, damageMultiplier: 3, cycleTime: 5, turretSkill: "Small Projectile Turret", requiredSkillIds: [toTypeId("3300"), toTypeId("3302"), toTypeId("11079")], metaLevel: 5, metaGroupID: 2 }),
+    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", requiredSkillIds: [toTypeId("3300"), toTypeId("3306"), toTypeId("12214")], groupID: 53, metaLevel: 5, metaGroupID: 2 }),
+    "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, damageMultiplier: 3, cycleTime: 5, turretSkill: "Small Projectile Turret", requiredSkillIds: [toTypeId("3300"), toTypeId("3302"), toTypeId("11079")], groupID: 55, metaLevel: 5, metaGroupID: 2 }),
   },
   charges: {
     "Conflagration M": row("Conflagration M", "Conflagration M", { trackingMultiplier: 0.7, rangeMultiplier: 0.5 }),
@@ -346,15 +346,15 @@ const droneSkillModel = new DroneSkillModelImpl();
 const droneCatalog = new DroneCatalogImpl({ fittingDb: db });
 
 const mockSkillBonuses: readonly SkillBonus[] = [
-  { skillId: "3300" as TypeId, bonusType: "turretRoF", magnitudePerLevel: -2 },
-  { skillId: "3310" as TypeId, bonusType: "turretRoF", magnitudePerLevel: -4 },
-  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, weaponGroup: "Energy Weapon" },
-  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, weaponGroup: "Projectile Weapon" },
-  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, weaponGroup: "Hybrid Weapon" },
-  { skillId: "3306" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, turretSkill: "Medium Energy Turret" },
-  { skillId: "3305" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, turretSkill: "Medium Projectile Turret" },
-  { skillId: "3302" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, turretSkill: "Small Projectile Turret" },
-  { skillId: "12214" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 2, specializationSkill: "Medium Pulse Laser Specialization" },
+  { skillId: "3300" as TypeId, bonusType: "turretRoF", magnitudePerLevel: -2, appliesTo: "module" },
+  { skillId: "3310" as TypeId, bonusType: "turretRoF", magnitudePerLevel: -4, appliesTo: "module" },
+  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, moduleGroupId: 53, appliesTo: "module" },
+  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, moduleGroupId: 55, appliesTo: "module" },
+  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, moduleGroupId: 74, appliesTo: "module" },
+  { skillId: "3306" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, requiredSkillId: toTypeId("3306"), appliesTo: "module" },
+  { skillId: "3305" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, requiredSkillId: toTypeId("3305"), appliesTo: "module" },
+  { skillId: "3302" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, requiredSkillId: toTypeId("3302"), appliesTo: "module" },
+  { skillId: "12214" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 2, requiredSkillId: toTypeId("12214"), appliesTo: "module" },
 ];
 
 const skillBonusDb: FittingDb = {

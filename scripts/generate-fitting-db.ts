@@ -81,6 +81,7 @@ interface SdeTypeDogma {
 }
 
 type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity" | "turretDamage" | "turretRoF" | "droneDamage" | "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
+type SkillBonusType = "turretDamage" | "turretRoF" | "turretTracking" | "turretOptimal" | "turretFalloff" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity";
 
 // DELETED: BONUS_EFFECTS map is being replaced by data-driven derivation from modifierInfo.
 // The NON_SCALING_EFFECT_IDS set below preserves the only information that cannot be derived
@@ -163,7 +164,7 @@ const MISSILE_SCRIPT_GROUP = 1400;
 const MISSILE_DAMAGE_EFFECT = 763;
 const MISSILE_ROF_EFFECT = 889;
 
-const TURRET_GROUPS = new Set([53, 55, 74]);
+const TURRET_GROUPS = new Set([53, 55, 74, 1986]);
 
 // Maps SDE dogma attribute IDs to internal combat bonus categories. Used by
 // buildHullBonuses to derive bonuses from modifierInfo. Context-dependent
@@ -192,6 +193,7 @@ const COMBAT_ATTRIBUTE_MAP: Readonly<Record<number, BonusAttribute>> = {
 const MISSILE_HULL_SKILL_IDS = new Set([3319, 3320, 3321, 3322, 3323, 3324, 3325, 3326, 25719, 20209, 20210, 20211, 20212, 20213, 25718, 41409, 41410, 21071, 20315, 12441, 12442, 20314]);
 const DRONE_HULL_SKILL_IDS = new Set([3436, 3442, 24241, 33699, 23594, 23069]);
 const TURRET_SKILL_IDS = new Set([3301, 3302, 3303, 3304, 3305, 3306, 3307, 3308, 3309, 20327, 21666, 21667]);
+const TURRET_SUPPORT_SKILL_IDS = new Set([3300, 3310, 3311, 3312, 3315, 3317]);
 const LAUNCHER_GROUP_IDS = new Set([506, 507, 508, 509, 510, 511, 512, 771, 1245, 1579, 1624]);
 
 const CHARGE_GROUPS = new Set([
@@ -256,64 +258,13 @@ const DAMAGE_MODULE_EFFECTS: Readonly<Record<number, TurretWeaponGroup>> = {
 
 // Skill typeIDs that provide turret damage or rate-of-fire bonuses. The bonus attribute
 // on the skill item is a percentage per level; it is applied as an unpenalized boost.
-// WARHEAD_UPGRADES_SKILL_ID is the missile damage skill, not in SKILL_BONUS_RULES (turret-only).
-const WARHEAD_UPGRADES_SKILL_ID = "20315";
 // Drone skill typeIDs referenced by DroneSkillModelImpl (src/fitting/droneStats.ts).
 // These must stay in sync with the runtime constants so that addSkillNames includes them
 // in the item name packs for display-time resolution via ItemNameCatalog.
 const DRONE_SKILL_IDS = ["3442", "24241", "33699", "3441", "23594"];
-interface SkillBonusRule {
-  readonly skillId: number;
-  readonly bonusType: "turretDamage" | "turretRoF";
-  readonly bonusAttr: string;
-  readonly weaponGroup?: TurretWeaponGroup;
-  readonly turretSkill?: string;
-  readonly specializationSkill?: string;
-}
-
-const SKILL_BONUS_RULES: readonly SkillBonusRule[] = [
-  { skillId: 3300, bonusType: "turretRoF", bonusAttr: "turretSpeeBonus" },
-  { skillId: 3310, bonusType: "turretRoF", bonusAttr: "rofBonus" },
-  { skillId: 3315, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", weaponGroup: "Energy Weapon" },
-  { skillId: 3315, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", weaponGroup: "Projectile Weapon" },
-  { skillId: 3315, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", weaponGroup: "Hybrid Weapon" },
-  { skillId: 3301, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Small Hybrid Turret" },
-  { skillId: 3302, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Small Projectile Turret" },
-  { skillId: 3303, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Small Energy Turret" },
-  { skillId: 3304, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Medium Hybrid Turret" },
-  { skillId: 3305, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Medium Projectile Turret" },
-  { skillId: 3306, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Medium Energy Turret" },
-  { skillId: 3307, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Large Hybrid Turret" },
-  { skillId: 3308, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Large Projectile Turret" },
-  { skillId: 3309, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Large Energy Turret" },
-  { skillId: 20327, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Capital Energy Turret" },
-  { skillId: 21666, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Capital Hybrid Turret" },
-  { skillId: 21667, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Capital Projectile Turret" },
-  { skillId: 11082, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Railgun Specialization" },
-  { skillId: 11083, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Beam Laser Specialization" },
-  { skillId: 11084, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Autocannon Specialization" },
-  { skillId: 12201, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Artillery Specialization" },
-  { skillId: 12202, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Artillery Specialization" },
-  { skillId: 12203, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Artillery Specialization" },
-  { skillId: 12204, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Beam Laser Specialization" },
-  { skillId: 12205, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Beam Laser Specialization" },
-  { skillId: 12206, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Railgun Specialization" },
-  { skillId: 12207, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Railgun Specialization" },
-  { skillId: 12208, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Autocannon Specialization" },
-  { skillId: 12209, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Autocannon Specialization" },
-  { skillId: 12210, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Blaster Specialization" },
-  { skillId: 12211, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Blaster Specialization" },
-  { skillId: 12212, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Blaster Specialization" },
-  { skillId: 12213, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Pulse Laser Specialization" },
-  { skillId: 12214, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Pulse Laser Specialization" },
-  { skillId: 12215, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Pulse Laser Specialization" },
-  { skillId: 41403, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Autocannon Specialization" },
-  { skillId: 41404, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Artillery Specialization" },
-  { skillId: 41405, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Blaster Specialization" },
-  { skillId: 41406, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Railgun Specialization" },
-  { skillId: 41407, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Pulse Laser Specialization" },
-  { skillId: 41408, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Beam Laser Specialization" },
-];
+// Legacy effects with empty modifierInfo that need special handling in buildSkillBonuses.
+const LEGACY_MISSILE_DAMAGE_EFFECTS = new Set([660, 661, 662, 668]);
+const LEGACY_ROF_EFFECT = 1851;
 
 function stringifyWithTypeIds<T>(value: T): string {
   return JSON.stringify(value)
@@ -333,21 +284,20 @@ function stringifyHullBonusArray(bonuses: readonly HullBonus[]): string {
   return json.replace(/"(chargeSkillId|moduleSkillId)":"(\d+)"/g, '"$1":"$2" as TypeId');
 }
 
-function stringifySkillBonuses(skillMagnitudes: ReadonlyMap<number, ReadonlyMap<string, number>>): string {
-  const entries = SKILL_BONUS_RULES.map((rule) => {
-    const attrs = skillMagnitudes.get(rule.skillId);
-    const magnitude = attrs?.get(rule.bonusAttr);
-    if (magnitude === undefined) return null;
+function stringifySkillBonuses(bonuses: readonly RawSkillBonus[]): string {
+  const entries = bonuses.map((b) => {
     const obj: Record<string, unknown> = {
-      skillId: String(rule.skillId),
-      bonusType: rule.bonusType,
-      magnitudePerLevel: magnitude,
+      skillId: String(b.skillId),
+      bonusType: b.bonusType,
+      magnitudePerLevel: b.magnitudePerLevel,
+      appliesTo: b.appliesTo,
     };
-    if (rule.weaponGroup !== undefined) obj.weaponGroup = rule.weaponGroup;
-    if (rule.turretSkill !== undefined) obj.turretSkill = rule.turretSkill;
-    if (rule.specializationSkill !== undefined) obj.specializationSkill = rule.specializationSkill;
-    return JSON.stringify(obj).replace(/"skillId":"(\d+)"/, '"skillId":"$1" as TypeId');
-  }).filter((entry): entry is string => entry !== null);
+    if (b.requiredSkillId !== undefined) obj.requiredSkillId = String(b.requiredSkillId);
+    if (b.moduleGroupId !== undefined) obj.moduleGroupId = b.moduleGroupId;
+    return JSON.stringify(obj)
+      .replace(/"skillId":"(\d+)"/, '"skillId":"$1" as TypeId')
+      .replace(/"requiredSkillId":"(\d+)"/, '"requiredSkillId":"$1" as TypeId');
+  });
   return `[${entries.join(",")}]`;
 }
 
@@ -412,18 +362,118 @@ function buildEffectSet(typeDogma: SdeTypeDogma | undefined): Set<number> {
   return effects;
 }
 
-function buildSkillMagnitudes(
+function buildSkillBonuses(
   attributeNames: Map<number, string>,
   typedogmas: Record<string, SdeTypeDogma>,
-): ReadonlyMap<number, ReadonlyMap<string, number>> {
-  const result = new Map<number, ReadonlyMap<string, number>>();
-  const skillIds = new Set(SKILL_BONUS_RULES.map((rule) => rule.skillId));
-  for (const skillId of skillIds) {
-    const typeDogma = typedogmas[String(skillId)];
-    const values = buildAttributeValues(attributeNames, typeDogma);
-    result.set(skillId, values);
+  types: Record<string, SdeType>,
+  groups: Record<string, SdeGroup>,
+  dogmaEffects: Record<string, SdeDogmaEffect>,
+): readonly RawSkillBonus[] {
+  const skillGroupIds = new Set<number>();
+  for (const g of Object.values(groups)) {
+    if (g.categoryID === 16) skillGroupIds.add(g.groupID);
   }
-  return result;
+  const bonuses: RawSkillBonus[] = [];
+  const seen = new Set<string>();
+  for (const [sid, type] of Object.entries(types)) {
+    if (!skillGroupIds.has(type.groupID)) continue;
+    const skillId = Number(sid);
+    const typeDogma = typedogmas[sid];
+    if (!typeDogma) continue;
+    const skillAttrValues = buildAttributeValueMap(typeDogma);
+    const effectIds = typeDogma.dogmaEffects.map((e) => e.effectID);
+    for (const eid of effectIds) {
+      const eff = dogmaEffects[String(eid)];
+      if (!eff) continue;
+      if (LEGACY_MISSILE_DAMAGE_EFFECTS.has(eid)) {
+        const magnitude = skillAttrValues.get(292);
+        if (magnitude === undefined || magnitude === 0) continue;
+        const key = `missileDamage:${sid}:${sid}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        bonuses.push({ skillId: sid, bonusType: "missileDamage", magnitudePerLevel: magnitude, requiredSkillId: sid, appliesTo: "charge" });
+        continue;
+      }
+      if (eid === LEGACY_ROF_EFFECT) {
+        const magnitude = skillAttrValues.get(293);
+        if (magnitude === undefined || magnitude === 0) continue;
+        const bonusType = MISSILE_HULL_SKILL_IDS.has(skillId) ? "missileRoF" : "turretRoF";
+        const key = `${bonusType}:${sid}:${sid}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        bonuses.push({ skillId: sid, bonusType, magnitudePerLevel: magnitude, requiredSkillId: sid, appliesTo: "module" });
+        continue;
+      }
+      for (const modifier of eff.modifierInfo ?? []) {
+        if (modifier.func === "ItemModifier") continue;
+        const base = COMBAT_ATTRIBUTE_MAP[modifier.modifiedAttributeID];
+        if (base === undefined) continue;
+        const resolved = resolveSkillBonusAttribute(base, modifier, attributeNames);
+        if (resolved === undefined) continue;
+        const magnitude = skillAttrValues.get(modifier.modifyingAttributeID);
+        if (magnitude === undefined || !Number.isFinite(magnitude) || magnitude === 0) continue;
+        const filter = resolveSkillBonusFilter(modifier);
+        if (!filter) continue;
+        const key = `${resolved}:${sid}:${filter.requiredSkillId ?? ""}:${filter.moduleGroupId ?? ""}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        bonuses.push({ skillId: sid, bonusType: resolved, magnitudePerLevel: magnitude, ...filter });
+      }
+    }
+  }
+  return bonuses.sort((a, b) => Number(a.skillId) - Number(b.skillId));
+}
+
+interface RawSkillBonus {
+  readonly skillId: string;
+  readonly bonusType: SkillBonusType;
+  readonly magnitudePerLevel: number;
+  readonly requiredSkillId?: string;
+  readonly moduleGroupId?: number;
+  readonly appliesTo: "module" | "charge";
+}
+
+function resolveSkillBonusFilter(modifier: SdeDogmaEffectModifier): { requiredSkillId?: string; moduleGroupId?: number; appliesTo: "module" | "charge" } | undefined {
+  if (modifier.func === "LocationRequiredSkillModifier") {
+    return { requiredSkillId: String(modifier.skillTypeID), appliesTo: "module" };
+  }
+  if (modifier.func === "OwnerRequiredSkillModifier") {
+    return { requiredSkillId: String(modifier.skillTypeID), appliesTo: "charge" };
+  }
+  if (modifier.func === "LocationGroupModifier") {
+    return { moduleGroupId: modifier.groupID, appliesTo: "module" };
+  }
+  return undefined;
+}
+
+function resolveSkillBonusAttribute(
+  base: BonusAttribute,
+  modifier: SdeDogmaEffectModifier,
+  attributeNames: Map<number, string>,
+): SkillBonusType | undefined {
+  const skillId = modifier.skillTypeID;
+  if (base === "turretRoF") {
+    if (skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return "missileRoF";
+    return "turretRoF";
+  }
+  if (base === "maxVelocity") {
+    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return undefined;
+    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return "missileVelocity";
+    return undefined;
+  }
+  if (base === "turretOptimal") {
+    if (skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return undefined;
+    if (skillId !== undefined && !TURRET_SKILL_IDS.has(skillId) && !TURRET_SUPPORT_SKILL_IDS.has(skillId) && !MISSILE_HULL_SKILL_IDS.has(skillId)) return undefined;
+    if (modifier.groupID !== undefined && !TURRET_GROUPS.has(modifier.groupID)) return undefined;
+    return "turretOptimal";
+  }
+  if (base === "turretDamage") {
+    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return undefined;
+    return base;
+  }
+  if (base === "turretTracking" || base === "turretFalloff") return base;
+  if (base === "missileDamage" || base === "missileFlightTime" || base === "missileExplosionRadius" || base === "missileExplosionVelocity") return base;
+  return undefined;
 }
 
 function sizeTierFromPropulsionName(name: string): "small" | "medium" | "large" | "capital" {
@@ -486,6 +536,7 @@ interface TurretStats {
   readonly turretSkill?: string;
   readonly specializationSkill?: string;
   readonly requiredSkillIds: readonly TypeId[];
+  readonly groupID: number;
   readonly metaLevel: number;
   readonly metaGroupID: number;
 }
@@ -1385,6 +1436,7 @@ async function main() {
           turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
           specializationSkill: specializationSkillFromRequired(types, requiredSkills, type.typeID),
           requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID),
+          groupID: type.groupID,
           metaLevel: type.metaLevel ?? 0,
           metaGroupID: type.metaGroupID ?? 1,
         };
@@ -1591,7 +1643,7 @@ async function main() {
     Object.entries(combatDrones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
   );
 
-  const skillMagnitudes = buildSkillMagnitudes(attributeNames, typedogmas);
+  const skillBonuses = buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects);
 
   const date = new Date().toISOString().split("T")[0];
   const header =
@@ -1689,6 +1741,7 @@ export interface TurretStats {
   readonly turretSkill?: string;
   readonly specializationSkill?: string;
   readonly requiredSkillIds: readonly TypeId[];
+  readonly groupID: number;
   readonly metaLevel: number;
   readonly metaGroupID: number;
   readonly id: TypeId;
@@ -1706,15 +1759,15 @@ export interface HullBonus {
   readonly moduleGroupId?: number;
 }
 
-export type SkillBonusType = "turretDamage" | "turretRoF";
+export type SkillBonusType = "turretDamage" | "turretRoF" | "turretTracking" | "turretOptimal" | "turretFalloff" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity";
 
 export interface SkillBonus {
   readonly skillId: TypeId;
   readonly bonusType: SkillBonusType;
   readonly magnitudePerLevel: number;
-  readonly weaponGroup?: TurretWeaponGroup;
-  readonly turretSkill?: string;
-  readonly specializationSkill?: string;
+  readonly requiredSkillId?: TypeId;
+  readonly moduleGroupId?: number;
+  readonly appliesTo: "module" | "charge";
 }
 
 export interface ChargeStats {
@@ -1937,7 +1990,7 @@ export const OMNIDIRECTIONAL_TRACKING_ENHANCERS: Readonly<Record<string, Omnidir
     ``,
     `export const HULL_BONUSES: Readonly<Record<ShipId, readonly HullBonus[]>> = ${stringifyHullBonuses(hullBonuses)};`,
     ``,
-    `export const SKILL_BONUSES: readonly SkillBonus[] = ${stringifySkillBonuses(skillMagnitudes)};`,
+    `export const SKILL_BONUSES: readonly SkillBonus[] = ${stringifySkillBonuses(skillBonuses)};`,
     ``,
     `export const DRONES: Readonly<Record<string, { readonly id: TypeId; readonly name: string }>> = ${stringifyWithTypeIds(sortedDrones)};`,
     ``,
@@ -1946,7 +1999,7 @@ export const OMNIDIRECTIONAL_TRACKING_ENHANCERS: Readonly<Record<string, Omnidir
   ];
 
   addInScopeItemNames(itemNames, types, groups, IN_SCOPE_CATEGORY_IDS);
-  addSkillNames(itemNames, types);
+  addSkillNames(itemNames, types, skillBonuses);
 
   const dbTableNames = collectDbTableNames(
     fittingModules,
@@ -1969,6 +2022,7 @@ export const OMNIDIRECTIONAL_TRACKING_ENHANCERS: Readonly<Record<string, Omnidir
     omnidirectionalTrackingEnhancers,
     drones,
     combatDrones,
+    skillBonuses,
   );
   const filteredItemNames = filterItemNames(itemNames, idToType, groups, dbTableNames);
 
@@ -2032,10 +2086,12 @@ function addInScopeItemNames(
   }
 }
 
-function relevantSkillIds(): readonly string[] {
+function relevantSkillIds(skillBonuses: readonly RawSkillBonus[]): readonly string[] {
   const ids = new Set<string>();
-  for (const rule of SKILL_BONUS_RULES) ids.add(String(rule.skillId));
-  ids.add(WARHEAD_UPGRADES_SKILL_ID);
+  for (const bonus of skillBonuses) {
+    ids.add(String(bonus.skillId));
+    if (bonus.requiredSkillId !== undefined) ids.add(String(bonus.requiredSkillId));
+  }
   for (const id of DRONE_SKILL_IDS) ids.add(id);
   return [...ids];
 }
@@ -2050,8 +2106,8 @@ const SKILL_NAME_FALLBACKS: Readonly<Record<string, LocalizedName>> = {
   "23594": { en: "Sentry Drone Interfacing", zh: "岗哨无人机操控理论", ja: "セントリードローンインターフェイス" },
 };
 
-function addSkillNames(itemNames: Record<string, LocalizedName>, types: Readonly<Record<string, SdeType>>): void {
-  for (const id of relevantSkillIds()) {
+function addSkillNames(itemNames: Record<string, LocalizedName>, types: Readonly<Record<string, SdeType>>, skillBonuses: readonly RawSkillBonus[]): void {
+  for (const id of relevantSkillIds(skillBonuses)) {
     if (id in itemNames) continue;
     const type = types[id];
     if (type) { addItemName(itemNames, id, type); continue; }
@@ -2081,6 +2137,7 @@ function collectDbTableNames(
   omnidirectionalTrackingEnhancers: Record<string, Row<OmnidirectionalTrackingEnhancerStats>>,
   drones: Record<string, DroneEntry>,
   combatDrones: Record<string, Row<DroneStats>>,
+  skillBonuses: readonly RawSkillBonus[],
 ): Set<string> {
   return new Set([
     ...Object.keys(fittingModules),
@@ -2103,7 +2160,7 @@ function collectDbTableNames(
     ...Object.keys(omnidirectionalTrackingEnhancers),
     ...Object.keys(drones),
     ...Object.keys(combatDrones),
-    ...relevantSkillIds(),
+    ...relevantSkillIds(skillBonuses),
   ]);
 }
 

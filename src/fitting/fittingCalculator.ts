@@ -93,7 +93,6 @@ export class FittingCalculatorImpl implements FittingCalculator {
     if (fitting.turretGroups.length === 0) return [];
 
     const skillLevel = conditions.skillLevel;
-    const skillRoFMultiplier = computeSkillRoFMultiplier(this.db.skillBonuses, skillLevel);
 
     const result: ImportedTurret[] = [];
     for (const group of fitting.turretGroups) {
@@ -101,6 +100,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       if (!turret) continue;
       const weaponGroup = turretWeaponGroupFromSkill(turret.turretSkill);
       const chargeId = group.chargeId;
+      const skillRoFMultiplier = computeSkillRoFMultiplier(this.db.skillBonuses, turret, skillLevel);
 
       const hullTrackingPercents: number[] = [];
       const hullOptimalPercents: number[] = [];
@@ -129,7 +129,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const hullDamageMultiplier = hullDamagePercents.reduce((acc, p) => acc * (1 + p / 100), 1);
       const hullRoFMultiplier = hullRoFPercents.reduce((acc, p) => acc * (1 + p / 100), 1);
 
-      const skillEntries = computeSkillDamageEntries(this.db.skillBonuses, turret.turretSkill, weaponGroup, turret.specializationSkill, skillLevel);
+      const skillEntries = computeSkillDamageEntries(this.db.skillBonuses, turret, skillLevel);
       const activeSkillEntries = skillEntries.filter((e) => e.multiplier !== 1);
       const skillDamageMultiplier = activeSkillEntries.reduce((acc, e) => acc * e.multiplier, 1);
 
@@ -561,22 +561,25 @@ interface SkillDamageEntry {
   readonly multiplier: number;
 }
 
-function computeSkillDamageEntries(skillBonuses: readonly SkillBonus[], turretSkill: string | undefined, weaponGroup: TurretWeaponGroup | undefined, specializationSkill: string | undefined, skillLevel: number): readonly SkillDamageEntry[] {
+function computeSkillDamageEntries(skillBonuses: readonly SkillBonus[], turret: TurretStats, skillLevel: number): readonly SkillDamageEntry[] {
   const entries: SkillDamageEntry[] = [];
   for (const bonus of skillBonuses) {
     if (bonus.bonusType !== "turretDamage") continue;
-    if (bonus.weaponGroup && bonus.weaponGroup !== weaponGroup) continue;
-    if (bonus.turretSkill && bonus.turretSkill !== turretSkill) continue;
-    if (bonus.specializationSkill && bonus.specializationSkill !== specializationSkill) continue;
+    if (bonus.appliesTo !== "module") continue;
+    if (bonus.requiredSkillId !== undefined && !turret.requiredSkillIds.includes(bonus.requiredSkillId)) continue;
+    if (bonus.moduleGroupId !== undefined && bonus.moduleGroupId !== turret.groupID) continue;
     entries.push({ skillId: bonus.skillId, multiplier: 1 + (bonus.magnitudePerLevel * skillLevel) / 100 });
   }
   return entries;
 }
 
-function computeSkillRoFMultiplier(skillBonuses: readonly SkillBonus[], skillLevel: number): number {
+function computeSkillRoFMultiplier(skillBonuses: readonly SkillBonus[], turret: TurretStats, skillLevel: number): number {
   let multiplier = 1;
   for (const bonus of skillBonuses) {
     if (bonus.bonusType !== "turretRoF") continue;
+    if (bonus.appliesTo !== "module") continue;
+    if (bonus.requiredSkillId !== undefined && !turret.requiredSkillIds.includes(bonus.requiredSkillId)) continue;
+    if (bonus.moduleGroupId !== undefined && bonus.moduleGroupId !== turret.groupID) continue;
     multiplier *= 1 + (bonus.magnitudePerLevel * skillLevel) / 100;
   }
   return multiplier;
