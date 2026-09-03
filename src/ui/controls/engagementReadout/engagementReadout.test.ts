@@ -1,4 +1,4 @@
-import { Vec2, ZERO_DAMAGE, type AttackAssessment, type DamageAssessment, type DroneSpec, type EngagementView, type MissileSpec, type ShipState, type TurretSpec } from "../../../sim";
+import { IDLE_LOCK, Vec2, ZERO_DAMAGE, type AttackAssessment, type DamageAssessment, type DroneSpec, type EngagementView, type LockState, type MissileSpec, type ShipState, type TurretSpec } from "../../../sim";
 import { EngagementReadoutImpl, type EngagementReadout, type ReadoutEls } from "./engagementReadout";
 
 function fakeSideEls(): ReadoutEls["shipA"] {
@@ -28,6 +28,7 @@ function fakeSideEls(): ReadoutEls["shipA"] {
     resNominalDpsLabel: make(), resAppliedDpsLabel: make(),
     resTimeToImpactLabel: make(),
     resSigFactorLabel: make(), resVelocityFactorLabel: make(),
+    resLockState: make(), resLockStateLabel: make(),
     resTurretCards: make(), resMissileCards: make(),
   };
 }
@@ -77,7 +78,7 @@ const DUMMY_TURRET: TurretSpec = { kind: "turret", tracking: 0, sigResolution: 4
 const DUMMY_MISSILE: MissileSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 2, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 3, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
 const DUMMY_DRONE: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
 
-function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipADamage?: DamageAssessment }) {
+function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipADamage?: DamageAssessment; shipALock?: LockState }) {
   const ship = fakeShipState();
   const frame = {
     time: 0, shipA: ship, shipB: ship,
@@ -99,7 +100,8 @@ function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: num
     damage: { nominalDps: 0, appliedDps: 0, application: 0, volley: 0, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
     turret: { hit: shipBHit, expectedMultiplier: 0 },
   };
-  return { frame, attacks: { shipA: shipAAttack, shipB: shipBAttack }, effectiveWeapons: { shipA: DUMMY_TURRET, shipB: DUMMY_TURRET } } as unknown as EngagementView;
+  const shipALock = overrides.shipALock ?? IDLE_LOCK;
+  return { frame, attacks: { shipA: shipAAttack, shipB: shipBAttack }, effectiveWeapons: { shipA: DUMMY_TURRET, shipB: DUMMY_TURRET }, locks: { shipA: shipALock, shipB: IDLE_LOCK } } as unknown as EngagementView;
 }
 
 function makeMissileView(overrides: { distance?: number; shipADamage?: DamageAssessment; shipAMissile?: { application: number; signatureTerm: number; velocityTerm: number; inRange: boolean; timeToImpact: number } }) {
@@ -118,7 +120,7 @@ function makeMissileView(overrides: { distance?: number; shipADamage?: DamageAss
     damage: shipADamage,
     missile: shipAMissile,
   };
-  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_MISSILE, shipB: undefined } } as unknown as EngagementView;
+  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_MISSILE, shipB: undefined }, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK } } as unknown as EngagementView;
 }
 
 function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipADamage?: DamageAssessment }) {
@@ -137,7 +139,7 @@ function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: numb
     damage: shipADamage,
     drone: { hit: shipAHit, expectedMultiplier: 0.8, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true },
   };
-  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_DRONE, shipB: undefined } } as unknown as EngagementView;
+  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_DRONE, shipB: undefined }, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK } } as unknown as EngagementView;
 }
 
 function makeNoWeaponView(distance: number = 1000): EngagementView {
@@ -151,6 +153,7 @@ function makeNoWeaponView(distance: number = 1000): EngagementView {
     },
     attacks: { shipA: undefined, shipB: undefined },
     effectiveWeapons: { shipA: undefined, shipB: undefined },
+    locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK },
   } as unknown as EngagementView;
 }
 
@@ -321,5 +324,29 @@ describe("EngagementReadout", () => {
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeDroneView({ distance: 1000, shipADamage: { nominalDps: 25, appliedDps: 0, application: 0, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE } }), T);
     expect(els.shipA.resAppliedDpsApplication.classList.contains("is-danger")).toBe(true);
+  });
+
+  test("locked lock state shows lockHint.locked text and is-optimal class", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeTurretView({ distance: 1000, shipALock: { ...IDLE_LOCK, status: "locked", lockTime: 5, inRange: true } }), T);
+    expect(els.shipA.resLockState.textContent).toBe("lockHint.locked");
+    expect(els.shipA.resLockState.classList.contains("is-optimal")).toBe(true);
+  });
+
+  test("locking lock state shows progress percentage and is-caution class", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeTurretView({ distance: 1000, shipALock: { ...IDLE_LOCK, status: "locking", progress: 0.6, lockTime: 5, inRange: true } }), T);
+    expect(els.shipA.resLockState.textContent).toBe("60%");
+    expect(els.shipA.resLockState.classList.contains("is-caution")).toBe(true);
+  });
+
+  test("lockTime of zero shows dash and is-dim class", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeTurretView({ distance: 1000 }), T);
+    expect(els.shipA.resLockState.textContent).toBe("-");
+    expect(els.shipA.resLockState.classList.contains("is-dim")).toBe(true);
   });
 });

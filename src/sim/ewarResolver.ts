@@ -2,6 +2,7 @@ import type { TypeId } from "../gamedata/ids";
 import type { StackingPenalty } from "./stackingPenalty";
 import type {
   AppliedEwarEffect,
+  DampenerBreakdown,
   DisruptionBreakdown,
   EwarEffectFamily,
   EwarProjection,
@@ -26,6 +27,7 @@ export interface EwarResolver {
   appliedEffects(projection: EwarProjection | undefined, distance: number): readonly AppliedEwarEffect[];
   speedBreakdown(projection: EwarProjection | undefined, distance: number): SpeedBreakdown;
   disruptionBreakdown(projection: EwarProjection | undefined, distance: number): DisruptionBreakdown;
+  dampenerBreakdown(projection: EwarProjection | undefined, distance: number): DampenerBreakdown;
   dampenedSensorSpec(spec: SensorSpec, projection: EwarProjection | undefined, distance: number): SensorSpec;
   dampenedSensorSpecIgnoringRange(spec: SensorSpec, projection: EwarProjection | undefined): SensorSpec;
 }
@@ -182,6 +184,10 @@ export class EwarResolverImpl implements EwarResolver {
     return this.disruptorModifiers(projection, distance, false);
   }
 
+  dampenerBreakdown(projection: EwarProjection | undefined, distance: number): DampenerBreakdown {
+    return this.dampenerAttributions(projection, distance, false);
+  }
+
   dampenedSensorSpec(spec: SensorSpec, projection: EwarProjection | undefined, distance: number): SensorSpec {
     const modifiers = this.dampenerModifiers(projection, distance, false);
     return this.applyDampenerModifiers(spec, modifiers);
@@ -294,6 +300,32 @@ export class EwarResolverImpl implements EwarResolver {
     if (falloff === 0) return 0;
     const ratio = (distance - optimal) / falloff;
     return 0.5 ** (ratio * ratio);
+  }
+
+  private dampenerAttributions(
+    projection: EwarProjection | undefined,
+    distance: number,
+    ignoreRange: boolean,
+  ): DampenerBreakdown {
+    if (!projection) return { scanResolution: [], maxTargetRange: [] };
+    const scanResolution: StatEffectAttribution[] = [];
+    const maxTargetRange: StatEffectAttribution[] = [];
+    for (let i = 0; i < projection.loadout.dampeners.length; i++) {
+      const spec = projection.loadout.dampeners[i];
+      const activation = projection.activation?.dampeners[i];
+      if (activation && !activation.active) continue;
+      const overloadBonus = activation?.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
+      const scanResPercent = spec.scanResolutionBonusPercent * overloadBonus;
+      const rangePercent = spec.maxTargetRangeBonusPercent * overloadBonus;
+      const effectiveness = ignoreRange ? 1 : this.falloffEffectiveness(distance, spec.optimal, spec.falloff);
+      if (effectiveness <= 0) continue;
+      const script = activation?.script ?? spec.defaultScript;
+      const scriptedScanRes = scanResPercent * (script?.scanResolutionMultiplier ?? 1);
+      const scriptedRange = rangePercent * (script?.maxTargetRangeMultiplier ?? 1);
+      if (scriptedScanRes !== 0) scanResolution.push({ moduleId: spec.moduleId, scriptId: script?.moduleId, multiplier: 1 + (scriptedScanRes / 100) * effectiveness });
+      if (scriptedRange !== 0) maxTargetRange.push({ moduleId: spec.moduleId, scriptId: script?.moduleId, multiplier: 1 + (scriptedRange / 100) * effectiveness });
+    }
+    return { scanResolution, maxTargetRange };
   }
 
   private dampenerModifiers(

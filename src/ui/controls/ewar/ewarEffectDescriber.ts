@@ -1,5 +1,5 @@
 import type { EwarResolver } from "../../../sim";
-import type { DisruptionScriptSpec, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TurretSpec, TrackingDisruptorSpec } from "../../../sim";
+import type { DisruptionScriptSpec, EwarProjection, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TurretSpec, TrackingDisruptorSpec } from "../../../sim";
 import { ZERO_DAMAGE } from "../../../sim";
 import type { I18n } from "../../i18n";
 
@@ -13,7 +13,9 @@ export interface EwarEffectDescriber {
   scramblerDescription(projection: EwarProjection, distance: number): string;
   scramblerHint(projection: EwarProjection): string;
   painterHint(projection: EwarProjection): string;
+  dampenerHint(projection: EwarProjection): string;
   painterModuleEffect(spec: TargetPainterSpec): string;
+  dampenerModuleEffect(spec: SensorDampenerSpec, script: SensorDampenerScriptSpec | undefined): string;
   webModuleEffect(spec: StasisWebSpec): string;
   grapplerModuleEffect(spec: StasisGrapplerSpec): string;
   disruptorModuleEffect(spec: TrackingDisruptorSpec, script: DisruptionScriptSpec | undefined): string;
@@ -24,6 +26,7 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   private readonly resolver: EwarResolver;
   private readonly i18n: I18n;
   private readonly unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+  private readonly unitSensor: SensorSpec = { scanResolution: 1, maxTargetingRange: 1, maxLockedTargets: 1 };
 
   constructor(deps: { ewarResolver: EwarResolver; i18n: I18n }) {
     this.resolver = deps.ewarResolver;
@@ -175,6 +178,27 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
     return this.sigDescription(1 + spec.signatureRadiusBonusPercent / 100);
   }
 
+  dampenerHint(projection: EwarProjection): string {
+    const sensor = this.resolver.dampenedSensorSpecIgnoringRange(this.unitSensor, projection);
+    const reach = this.dampenerReach(projection);
+    return `${this.dampenerDescription(sensor)} · ${this.formatRange(reach)}`;
+  }
+
+  dampenerModuleEffect(spec: SensorDampenerSpec, script: SensorDampenerScriptSpec | undefined): string {
+    const scanRes = 1 + spec.scanResolutionBonusPercent / 100 * (script?.scanResolutionMultiplier ?? 1);
+    const maxRange = 1 + spec.maxTargetRangeBonusPercent / 100 * (script?.maxTargetRangeMultiplier ?? 1);
+    return this.dampenerDescription({ scanResolution: scanRes, maxTargetingRange: maxRange, maxLockedTargets: 1 });
+  }
+
+  private dampenerDescription(sensor: SensorSpec): string {
+    const scanRes = Math.round((1 - sensor.scanResolution) * 100);
+    const range = Math.round((1 - sensor.maxTargetingRange) * 100);
+    if (scanRes === 0 && range === 0) return this.i18n.t("ewar.hover.outOfRange");
+    const scanResLabel = this.i18n.t("ewar.hover.scanResolution");
+    const rangeLabel = this.i18n.t("ewar.hover.targetingRange");
+    return `${scanResLabel} -${scanRes}% · ${rangeLabel} -${range}%`;
+  }
+
   private sigDescription(multiplier: number): string {
     if (multiplier === 1) return this.i18n.t("ewar.hover.outOfRange");
     const percent = Math.round((multiplier - 1) * 100);
@@ -188,6 +212,17 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
       if (activation && !activation.active) continue;
       const spec = projection.loadout.painters[i];
       reach = Math.max(reach, spec.maxRange + spec.falloff);
+    }
+    return reach;
+  }
+
+  private dampenerReach(projection: EwarProjection): number {
+    let reach = 0;
+    for (let i = 0; i < projection.loadout.dampeners.length; i++) {
+      const activation = projection.activation?.dampeners[i];
+      if (activation && !activation.active) continue;
+      const spec = projection.loadout.dampeners[i];
+      reach = Math.max(reach, spec.optimal + spec.falloff);
     }
     return reach;
   }

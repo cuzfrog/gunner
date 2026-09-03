@@ -9,7 +9,7 @@ import type {
   Ships,
   StatConditions,
 } from "../ships";
-import { type BoostLoadout, type EwarLoadout, type MissileBoosterLoadout, type StackingPenalty } from "../sim";
+import { type BoostLoadout, type EwarLoadout, type MissileBoosterLoadout, type SensorBoostLoadout, type SensorSpec, type StackingPenalty } from "../sim";
 import { parseEft, type BankKind, type EftDocument, type EftLine, type QuantityItem } from "./eft";
 
 import type { ItemNameCatalog, ItemNameResolver } from "../gamedata/itemNames";
@@ -66,6 +66,8 @@ export interface ImportedFitting {
   readonly ewar: EwarLoadout;
   readonly boosts: BoostLoadout;
   readonly missileBoosts: MissileBoosterLoadout;
+  readonly sensorSpec: SensorSpec;
+  readonly sensorBoosts: SensorBoostLoadout;
   readonly hullBonuses: readonly HullBonus[];
   readonly defense: DefenseSpec;
 }
@@ -182,6 +184,8 @@ export class FittingImportImpl implements FittingImport {
     const ewar = this.calculator.resolveEwar(fittingState);
     const boosts = this.calculator.resolveBoosts(fittingState);
     const missileBoosts = this.calculator.resolveMissileBoosts(fittingState);
+    const sensorSpec = this.calculator.resolveSensorSpec(fittingState, conditions);
+    const sensorBoosts = this.calculator.resolveSensorBoosts(fittingState);
     const defense = this.defenseCalculator.resolve(fittingState, conditions);
 
     return {
@@ -198,6 +202,8 @@ export class FittingImportImpl implements FittingImport {
       ewar,
       boosts,
       missileBoosts,
+      sensorSpec,
+      sensorBoosts,
       hullBonuses,
       defense,
     };

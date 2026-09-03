@@ -10,6 +10,7 @@ import type {
   Ships,
   SkillLevel,
   StatConditions,
+  TargetingSkills,
 } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection } from "../../../appstate";
@@ -62,6 +63,10 @@ export interface ISkillOverloadSection {
   setDefenseSkills(skills: DefenseSkills): void;
   resetDefenseSkills(): void;
   renderDefenseSkills(): void;
+  currentTargetingSkills(): TargetingSkills | undefined;
+  setTargetingSkills(skills: TargetingSkills): void;
+  resetTargetingSkills(): void;
+  renderTargetingSkills(): void;
 }
 
 export interface IPropulsionSection {

@@ -155,6 +155,7 @@ export class SessionCodecImpl implements SessionCodec {
       shipASig: shipA.sig ?? 1,
       shipASkillLevel: shipA.skillLevel,
       shipADefenseSkills: shipA.defenseSkills,
+      shipATargetingSkills: shipA.targetingSkills,
       shipAOverload: shipA.overload,
       shipAWeaponOverload: shipA.weaponOverload,
       shipADamageEnabled: this.defenseController.damageEnabled("shipA"),
@@ -172,6 +173,7 @@ export class SessionCodecImpl implements SessionCodec {
       shipBInertia: shipB.inertia,
       shipBSkillLevel: shipB.skillLevel,
       shipBDefenseSkills: shipB.defenseSkills,
+      shipBTargetingSkills: shipB.targetingSkills,
       shipBOverload: shipB.overload,
       shipBWeaponOverload: shipB.weaponOverload,
       shipBDamageEnabled: this.defenseController.damageEnabled("shipB"),
@@ -259,6 +261,12 @@ export class SessionCodecImpl implements SessionCodec {
     this.missileBoosterController.restore(side, loadout, activation);
   }
 
+  private restoreSensorData(side: Side, fitting: string | undefined): void {
+    const panel = side === "shipA" ? this.shipASide : this.shipBSide;
+    const imported = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions()) : undefined;
+    panel.setSensorData(imported?.sensorSpec, imported?.sensorBoosts);
+  }
+
   private restoreLauncher(side: Side, fitting: string | undefined, ammoId: TypeId | undefined): void {
     const panel = side === "shipA" ? this.shipASide : this.shipBSide;
     this.launcherControllers[side].restore(fitting, panel.skillConditions(), ammoId);
@@ -313,6 +321,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.restoreBooster("shipB", settings.shipB.fitting, settings.shipB.boosterActivation);
     this.restoreMissileBooster("shipA", settings.shipA.fitting, settings.shipA.missileBoosterActivation);
     this.restoreMissileBooster("shipB", settings.shipB.fitting, settings.shipB.missileBoosterActivation);
+    this.restoreSensorData("shipA", settings.shipA.fitting);
+    this.restoreSensorData("shipB", settings.shipB.fitting);
     this.restoreDefense("shipA", settings.shipA.fitting, settings.shipA.damageEnabled, settings.shipA.repMode ?? "auto", settings.shipA.repairerActivation ?? [], settings.shipA.rahActivation);
     this.restoreDefense("shipB", settings.shipB.fitting, settings.shipB.damageEnabled, settings.shipB.repMode ?? "auto", settings.shipB.repairerActivation ?? [], settings.shipB.rahActivation);
   }
@@ -371,6 +381,7 @@ function sidePanelStateOf(combatant: CombatantSettings): SidePanelState {
     aggressivity: combatant.aggressivity,
     skillLevel: combatant.skillLevel,
     defenseSkills: combatant.defenseSkills,
+    targetingSkills: combatant.targetingSkills,
     overload: combatant.overload,
     weaponOverload: combatant.weaponOverload,
     damageEnabled: combatant.damageEnabled,

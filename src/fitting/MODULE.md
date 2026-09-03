@@ -32,7 +32,14 @@ no-new-exports:
   - presetFittings.test.ts
   - presetFittings.ts
   - turretStats.ts
+  - fittingState.ts
+  - defenseCalculator.test.ts
+  - defenseCalculator.ts
+  - index.ts
+  - fittingCalculator.ts
+  - damageBreakdown.ts
 ---
+
 
 # fitting
 

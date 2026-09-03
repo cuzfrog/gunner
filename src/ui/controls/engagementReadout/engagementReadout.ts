@@ -1,4 +1,4 @@
-import type { AttackAssessment, EngagementView, HitChanceBreakdown } from "../../../sim";
+import type { AttackAssessment, EngagementView, HitChanceBreakdown, LockState } from "../../../sim";
 import { setText } from "../controlsDom";
 import { formatDistance, formatWithCommas, hitChanceClass } from "../controlsFormat";
 
@@ -13,12 +13,14 @@ interface SideHitEls {
 
 interface SideDpsEls {
   readonly resNominalDps: HTMLElement;
+  readonly resLockState: HTMLElement;
   readonly resAppliedDps: HTMLElement;
   readonly resAppliedDpsApplication: HTMLElement;
   readonly resTimeToImpact: HTMLElement;
   readonly resSigFactor: HTMLElement;
   readonly resVelocityFactor: HTMLElement;
   readonly resNominalDpsLabel: HTMLElement;
+  readonly resLockStateLabel: HTMLElement;
   readonly resAppliedDpsLabel: HTMLElement;
   readonly resTimeToImpactLabel: HTMLElement;
   readonly resSigFactorLabel: HTMLElement;
@@ -45,14 +47,15 @@ export class EngagementReadoutImpl implements EngagementReadout {
   }
 
   update(view: EngagementView, t: (key: string) => string): void {
-    const { frame, attacks } = view;
+    const { frame, attacks, locks } = view;
     setText(this.els.resDistance, formatDistance(frame.distance, t));
-    this.updateSide(this.els.shipA, attacks.shipA, t);
-    this.updateSide(this.els.shipB, attacks.shipB, t);
+    this.updateSide(this.els.shipA, attacks.shipA, locks.shipA, t);
+    this.updateSide(this.els.shipB, attacks.shipB, locks.shipB, t);
   }
 
-  private updateSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment | undefined, t: (key: string) => string): void {
+  private updateSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment | undefined, lock: LockState | undefined, t: (key: string) => string): void {
     this.clearColorClasses(els);
+    this.updateLockState(els, lock, t);
     const hitChance = attack?.turret?.hit ?? attack?.drone?.hit;
     if (hitChance) {
       this.updateHitChanceSide(els, attack!, hitChance, t);
@@ -63,6 +66,26 @@ export class EngagementReadoutImpl implements EngagementReadout {
     }
   }
 
+  private updateLockState(els: SideHitEls & SideDpsEls, lock: LockState | undefined, t: (key: string) => string): void {
+    setText(els.resLockStateLabel, t("result.lockState"));
+    if (lock === undefined || lock.lockTime === 0) {
+      setText(els.resLockState, "-");
+      els.resLockState.classList.add("is-dim");
+      return;
+    }
+    els.resLockState.classList.remove("is-dim");
+    if (lock.status === "locked") {
+      setText(els.resLockState, t("lockHint.locked"));
+      els.resLockState.classList.add("is-optimal");
+    } else if (lock.status === "locking") {
+      setText(els.resLockState, `${Math.round(lock.progress * 100)}%`);
+      els.resLockState.classList.add("is-caution");
+    } else {
+      setText(els.resLockState, t("lockHint.idle"));
+      els.resLockState.classList.add("is-dim");
+    }
+  }
+
   private clearColorClasses(els: SideHitEls & SideDpsEls): void {
     els.resHit.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resTrackPen.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
@@ -70,6 +93,7 @@ export class EngagementReadoutImpl implements EngagementReadout {
     els.resAppliedDps.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resAppliedDpsApplication.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resNominalDps.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
+    els.resLockState.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resSigFactor.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resVelocityFactor.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resTimeToImpact.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");

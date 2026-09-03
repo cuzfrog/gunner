@@ -38,8 +38,8 @@ import type { DpsHintProvider } from "./dpsHint";
 import type { DpsHintRenderer } from "./dpsHint";
 import type { AmmoHintProvider } from "./ammoHint";
 import type { AmmoHintRenderer } from "./ammoHint";
-import type { AppliedDpsHintProvider } from "./appliedDpsHint";
-import type { AppliedDpsHintRenderer } from "./appliedDpsHint";
+import type { AppliedDpsHintProvider, AppliedDpsHintRenderer } from "./appliedDpsHint";
+import type { LockStateHintProvider, LockStateHintRenderer } from "./lockStateHint";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -127,4 +127,6 @@ export interface ControlsCradle {
   readonly viewStore: ViewStore;
   readonly appliedDpsHintRenderer: AppliedDpsHintRenderer;
   readonly appliedDpsHintProvider: AppliedDpsHintProvider;
+  readonly lockStateHintRenderer: LockStateHintRenderer;
+  readonly lockStateHintProvider: LockStateHintProvider;
 }

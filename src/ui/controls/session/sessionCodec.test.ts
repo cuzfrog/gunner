@@ -147,6 +147,7 @@ function mockSidePanel(side: "shipA" | "shipB", captured: Partial<SidePanelState
     capture: vi.fn(() => full),
     restore: vi.fn(),
     skillConditions: vi.fn(() => ({ skillLevel: 5, overloaded: true })),
+    setSensorData: vi.fn(),
     sections: {
       stats: { updateAlignTime: vi.fn() },
       skill: { setSkillLevel: vi.fn(), setOverloadActive: vi.fn(), setOverloadDisabled: vi.fn() },

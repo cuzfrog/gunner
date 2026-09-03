@@ -39,6 +39,7 @@ export type {
   RahSpec,
   RepairerSpec,
   DampenerActivation,
+  DampenerBreakdown,
   DisruptionBreakdown,
   DisruptionScriptSpec,
   DisruptorActivation,

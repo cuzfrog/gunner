@@ -505,6 +505,11 @@ export interface DisruptionBreakdown {
   readonly falloff: readonly StatEffectAttribution[];
 }
 
+export interface DampenerBreakdown {
+  readonly scanResolution: readonly StatEffectAttribution[];
+  readonly maxTargetRange: readonly StatEffectAttribution[];
+}
+
 export interface BoosterActivation {
   readonly active: boolean;
   readonly overloaded: boolean;

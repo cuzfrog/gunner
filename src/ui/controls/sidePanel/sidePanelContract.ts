@@ -1,6 +1,6 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
-import type { DefenseSkills, ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
-import type { AutopilotMode, SimValueParser } from "../../../sim";
+import type { DefenseSkills, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../../../ships";
+import type { AutopilotMode, SensorBoostLoadout, SensorSpec, SimValueParser } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting } from "../../../appstate";
@@ -50,6 +50,7 @@ export interface SidePanel {
   setLauncherProfile(profile: ShipProfile | undefined): void;
   clearDrone(): void;
   restoreDrone(): void;
+  setSensorData(spec: SensorSpec | undefined, boosts: SensorBoostLoadout | undefined): void;
   renderFittingPopupIfOpen(): void;
   closeFittingPopupIfOpen(): void;
   hideFittingPreview(): void;
@@ -68,6 +69,7 @@ export interface SidePanelState {
   readonly aggressivity: number;
   readonly skillLevel: SkillLevel | undefined;
   readonly defenseSkills?: DefenseSkills;
+  readonly targetingSkills?: TargetingSkills;
   readonly overload: boolean;
   readonly weaponOverload: boolean;
   readonly damageEnabled?: boolean;
@@ -77,6 +79,8 @@ export interface SidePanelState {
   readonly overrides: Partial<ProfileParamOverrides>;
   readonly fittedHull: FittedHullSummary | undefined;
   readonly sig?: number;
+  readonly sensorSpec?: SensorSpec;
+  readonly sensorBoosts?: SensorBoostLoadout;
 }
 
 export interface FittingPopupControl {

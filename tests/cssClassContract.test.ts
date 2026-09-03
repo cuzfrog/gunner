@@ -63,6 +63,8 @@ const APPROVED_PREFIXES = [
   "skill",
   "defense-skill",
   "defense-skills",
+  "targeting-skill",
+  "targeting-skills",
   "ammo",
   "launcher",
   "drone",

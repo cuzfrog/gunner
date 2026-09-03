@@ -60,6 +60,8 @@ export class SimConfigSourceImpl implements SimConfigSource {
       ewar: this.ewarController.projection(side),
       boosts: this.boosterController.projection(side),
       missileBoosts: this.missileBoosterController.projection(side),
+      sensorSpec: state.sensorSpec,
+      sensorBoosts: state.sensorBoosts ? { loadout: state.sensorBoosts } : undefined,
     };
   }
 }

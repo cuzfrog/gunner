@@ -1,5 +1,5 @@
 import type { ShipId, TypeId } from "../../../gamedata/ids";
-import type { DefenseLayer, DisruptionBreakdown, EwarResolver, SpeedBreakdown, StatEffectAttribution } from "../../../sim";
+import type { DampenerBreakdown, DefenseLayer, DisruptionBreakdown, EwarResolver, SpeedBreakdown, StatEffectAttribution } from "../../../sim";
 import type { ImageCatalog } from "../../icons";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
@@ -80,7 +80,8 @@ export class PortraitsControllerImpl implements PortraitsController {
     const projection = this.ewarController.projection(enemySide);
     const speedBreakdown = this.ewarResolver.speedBreakdown(projection, this.distance);
     const disruptionBreakdown = this.ewarResolver.disruptionBreakdown(projection, this.distance);
-    const portraitEffects = buildPortraitEffects(speedBreakdown, disruptionBreakdown, this.i18n);
+    const dampenerBreakdown = this.ewarResolver.dampenerBreakdown(projection, this.distance);
+    const portraitEffects = buildPortraitEffects(speedBreakdown, disruptionBreakdown, dampenerBreakdown, this.i18n);
     const defenseEffects = this.defenseController.cyclingEffects(side);
     const allEffects = [...portraitEffects, ...defenseEffects];
     const hpPercentages = this.defenseController.hpPercentages(side);
@@ -115,7 +116,7 @@ function buildDiffKey(id: ShipId, effects: readonly PortraitEffect[]): string {
   return `${id}|${effects.map((e) => `${e.moduleId}:${e.hint}`).join(",")}`;
 }
 
-function buildPortraitEffects(speed: SpeedBreakdown, disruption: DisruptionBreakdown, i18n: I18n): PortraitEffect[] {
+function buildPortraitEffects(speed: SpeedBreakdown, disruption: DisruptionBreakdown, dampener: DampenerBreakdown, i18n: I18n): PortraitEffect[] {
   const effects: PortraitEffect[] = [];
   for (const effect of speed.effects) {
     if (effect.family === "scrambler") {
@@ -136,6 +137,15 @@ function buildPortraitEffects(speed: SpeedBreakdown, disruption: DisruptionBreak
     if (channels.falloff < 1) parts.push(`${i18n.t("ewar.hover.falloff")} -${Math.round((1 - channels.falloff) * 100)}%`);
     if (parts.length > 0) effects.push({ moduleId, hint: parts.join(" · ") });
   }
+  const dampenerMap = new Map<TypeId, { scanResolution: number; maxTargetRange: number }>();
+  for (const entry of dampener.scanResolution) accumulateDampener(dampenerMap, entry, "scanResolution");
+  for (const entry of dampener.maxTargetRange) accumulateDampener(dampenerMap, entry, "maxTargetRange");
+  for (const [moduleId, channels] of dampenerMap) {
+    const parts: string[] = [];
+    if (channels.scanResolution < 1) parts.push(`${i18n.t("ewar.hover.scanResolution")} -${Math.round((1 - channels.scanResolution) * 100)}%`);
+    if (channels.maxTargetRange < 1) parts.push(`${i18n.t("ewar.hover.targetingRange")} -${Math.round((1 - channels.maxTargetRange) * 100)}%`);
+    if (parts.length > 0) effects.push({ moduleId, hint: parts.join(" · ") });
+  }
   return effects;
 }
 
@@ -143,6 +153,15 @@ function accumulateDisruption(map: Map<TypeId, { tracking: number; optimal: numb
   let existing = map.get(entry.moduleId);
   if (!existing) {
     existing = { tracking: 1, optimal: 1, falloff: 1 };
+    map.set(entry.moduleId, existing);
+  }
+  existing[channel] = entry.multiplier;
+}
+
+function accumulateDampener(map: Map<TypeId, { scanResolution: number; maxTargetRange: number }>, entry: StatEffectAttribution, channel: "scanResolution" | "maxTargetRange"): void {
+  let existing = map.get(entry.moduleId);
+  if (!existing) {
+    existing = { scanResolution: 1, maxTargetRange: 1 };
     map.set(entry.moduleId, existing);
   }
   existing[channel] = entry.multiplier;

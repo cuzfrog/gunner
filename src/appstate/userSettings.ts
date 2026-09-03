@@ -1,5 +1,5 @@
 import type { AutopilotMode, SigResolutionClass, WeaponKind } from "../sim";
-import type { DefenseSkills, FittedHull, PropulsionId, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
+import type { DefenseSkills, FittedHull, PropulsionId, PropulsionKind, PropulsionStats, SkillLevel, TargetingSkills } from "../ships";
 import type { ShipId, TypeId } from "../gamedata/ids";
 import type { DroneGroup } from "../fitting";
 import type { Language } from "./language";
@@ -22,6 +22,7 @@ export interface StoredEwarActivation {
   readonly disruptors?: readonly { readonly active: boolean; readonly overloaded: boolean; readonly script: StoredDisruptionScript }[];
   readonly scramblers?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
   readonly painters?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
+  readonly dampeners?: readonly { readonly active: boolean; readonly overloaded: boolean; readonly script: StoredDisruptionScript }[];
 }
 
 export interface StoredMissileBoosterActivation {
@@ -100,6 +101,7 @@ export interface UserSettings {
   shipAInertia: number;
   shipASkillLevel?: SkillLevel;
   shipADefenseSkills?: DefenseSkills;
+  shipATargetingSkills?: TargetingSkills;
   shipAOverload?: boolean;
   shipAWeaponOverload?: boolean;
   shipADamageEnabled?: boolean;
@@ -113,6 +115,7 @@ export interface UserSettings {
   shipBSig: number;
   shipBSkillLevel?: SkillLevel;
   shipBDefenseSkills?: DefenseSkills;
+  shipBTargetingSkills?: TargetingSkills;
   shipBOverload?: boolean;
   shipBWeaponOverload?: boolean;
   shipBDamageEnabled?: boolean;

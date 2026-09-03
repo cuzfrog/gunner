@@ -74,6 +74,7 @@ const noEwarResolver: EwarResolver = {
   disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
   dampenedSensorSpec: (spec) => spec,
   dampenedSensorSpecIgnoringRange: (spec) => spec,
+  dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
 };
 
 const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };

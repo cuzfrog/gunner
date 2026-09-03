@@ -86,6 +86,7 @@ function fakeEwarResolver(): EwarResolver {
     disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
     dampenedSensorSpec: (spec) => spec,
     dampenedSensorSpecIgnoringRange: (spec) => spec,
+    dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
   };
 }
 

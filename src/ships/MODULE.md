@@ -11,8 +11,11 @@ no-new-exports:
   - ships.test.ts
   - tiers.test.ts
   - tiers.ts
-
+  - types.ts
+  - ships.ts
+  - index.ts
 ---
+
 
 # ships
 

@@ -1,5 +1,5 @@
 import type { AutopilotMode, SigResolutionClass, WeaponKind } from "../sim";
-import type { DefenseSkills, SkillLevel } from "../ships";
+import type { DefenseSkills, SkillLevel, TargetingSkills } from "../ships";
 import type { ShipId, TypeId } from "../gamedata/ids";
 import type { DroneGroup } from "../fitting";
 import {
@@ -25,6 +25,7 @@ export interface CombatantSettings {
   readonly aggressivity: number;
   readonly skillLevel?: SkillLevel;
   readonly defenseSkills?: DefenseSkills;
+  readonly targetingSkills?: TargetingSkills;
   readonly overload: boolean;
   readonly weaponOverload: boolean;
   readonly damageEnabled: boolean;

@@ -1,6 +1,6 @@
 import { createContainer, InjectionMode } from "awilix";
 import { registerGameDataModule } from "../../../gamedata";
-import { registerShipsModule, type DefenseSkills, type ShipsCradle, defaultDefenseSkills } from "../../../ships";
+import { registerShipsModule, type DefenseSkills, type ShipsCradle, defaultDefenseSkills, defaultTargetingSkills } from "../../../ships";
 import { RIFTER, buildSidePanel, getFake, mockShips } from "../testSupport";
 
 function realShips() {
@@ -128,7 +128,7 @@ describe("SidePanel", () => {
     const { document, panel } = buildSidePanel("shipA");
     getFake(document, "ship-a-skills").value = "4";
     getFake(document, "ship-a-overload").checked = true;
-    expect(panel.skillConditions()).toEqual({ skillLevel: 4, overloaded: true, weaponOverloaded: false, defenseSkills: defaultDefenseSkills(4) });
+    expect(panel.skillConditions()).toEqual({ skillLevel: 4, overloaded: true, weaponOverloaded: false, defenseSkills: defaultDefenseSkills(4), targetingSkills: defaultTargetingSkills(4) });
   });
 
   test("onHullChange delegates to the hull section", () => {

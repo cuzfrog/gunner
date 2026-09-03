@@ -1,4 +1,4 @@
-import type { DefenseSkills, FittedHull, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
+import type { DefenseSkills, FittedHull, PropulsionKind, PropulsionStats, SkillLevel, TargetingSkills } from "../ships";
 import { toTypeId } from "../gamedata/ids";
 import type { DroneGroup } from "../fitting";
 import type { Language } from "./language";
@@ -23,6 +23,12 @@ export function isOptionalEwarActivation(value: unknown): boolean {
   }
   if (s.scramblers !== undefined && (!Array.isArray(s.scramblers) || !s.scramblers.every(isStoredScramblerActivation))) return false;
   if (s.painters !== undefined && (!Array.isArray(s.painters) || !s.painters.every(isStoredWebActivation))) return false;
+  if (s.dampeners !== undefined) {
+    if (!Array.isArray(s.dampeners)) return false;
+    for (const item of s.dampeners) {
+      if (!isStoredDisruptorActivation(item)) return false;
+    }
+  }
   return true;
 }
 
@@ -134,6 +140,19 @@ export function isDefenseSkills(value: unknown): value is DefenseSkills {
 
 export function isOptionalDefenseSkills(value: unknown): value is DefenseSkills | undefined {
   return value === undefined || isDefenseSkills(value);
+}
+
+export function isTargetingSkills(value: unknown): value is TargetingSkills {
+  if (!isRecord(value)) return false;
+  const keys: readonly (keyof TargetingSkills)[] = ["longRangeTargeting", "signatureAnalysis", "targetManagement", "advancedTargetManagement", "sensorLinking", "signalSuppression", "frequencyModulation"];
+  for (const key of keys) {
+    if (!isSkillLevel(value[key])) return false;
+  }
+  return true;
+}
+
+export function isOptionalTargetingSkills(value: unknown): value is TargetingSkills | undefined {
+  return value === undefined || isTargetingSkills(value);
 }
 
 export function isOptionalBoolean(value: unknown): value is boolean | undefined {

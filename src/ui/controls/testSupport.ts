@@ -199,6 +199,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
       disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
       dampenedSensorSpec: vi.fn((spec) => spec),
       dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
+      dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
     })),
     hitChance: asValue(vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance })),
     ships: asValue(vi.mocked<Ships>({ ...mockShips(), ...options.ships })),

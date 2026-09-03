@@ -1,4 +1,4 @@
-import { type DefenseSkills, type SkillLevel, type StatConditions, defaultDefenseSkills } from "../../../ships";
+import { type DefenseSkills, type SkillLevel, type StatConditions, type TargetingSkills, defaultDefenseSkills, defaultTargetingSkills } from "../../../ships";
 import type { I18n } from "../../i18n";
 import { isHtmlButtonElement } from "../controlsDom";
 import { skillLevelFromString, skillOptionLabel } from "../controlsFormat";
@@ -19,6 +19,7 @@ export interface SkillOverloadSectionEls {
   readonly turretWeaponOverloadButton: HTMLButtonElement;
   readonly launcherWeaponOverloadButton: HTMLButtonElement;
   readonly defenseSkills: HTMLElement;
+  readonly targetingSkills: HTMLElement;
 }
 
 export class SkillOverloadSection implements ISkillOverloadSection {
@@ -30,6 +31,8 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   private readonly skillChoice: ChoiceGroupImpl;
   private readonly defenseSkillChoices: ReadonlyMap<DefenseSkillKey, ChoiceGroupImpl>;
   private defenseSkillLevels: DefenseSkills | undefined;
+  private readonly targetingSkillChoices: ReadonlyMap<TargetingSkillKey, ChoiceGroupImpl>;
+  private targetingSkillLevels: TargetingSkills | undefined;
   private weaponOverloaded = false;
   readonly popup: Popup;
 
@@ -44,6 +47,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
       shape: { buttonClass: "btn" },
     });
     this.defenseSkillChoices = createDefenseSkillChoices(els.defenseSkills, (key, level) => this.onDefenseSkillChange(key, level));
+    this.targetingSkillChoices = createTargetingSkillChoices(els.targetingSkills, (key, level) => this.onTargetingSkillChange(key, level));
     this.popup = this.createSkillPopup();
     this.els.skills.addEventListener("input", () => {
       this.onSkillOrOverloadChange(true);
@@ -63,6 +67,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
       overloaded: this.els.overload.checked,
       weaponOverloaded: this.weaponOverloaded,
       defenseSkills: this.defenseSkillLevels ?? defaultDefenseSkills(skillLevel),
+      targetingSkills: this.targetingSkillLevels ?? defaultTargetingSkills(skillLevel),
     };
   }
 
@@ -219,6 +224,51 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     this.onSkillOrOverloadChange(false);
   }
 
+  currentTargetingSkills(): TargetingSkills | undefined {
+    return this.targetingSkillLevels;
+  }
+
+  setTargetingSkills(skills: TargetingSkills): void {
+    this.targetingSkillLevels = skills;
+    for (const [key, choice] of this.targetingSkillChoices) {
+      const level = skills[key];
+      choice.set(String(level));
+    }
+  }
+
+  resetTargetingSkills(): void {
+    this.targetingSkillLevels = undefined;
+    const level = this.currentSkillLevel() ?? 5;
+    const defaults = defaultTargetingSkills(level);
+    for (const [key, choice] of this.targetingSkillChoices) {
+      choice.set(String(defaults[key]));
+    }
+  }
+
+  renderTargetingSkills(): void {
+    const container = this.els.targetingSkills;
+    container.setAttribute("aria-label", this.i18n.t("label.targetingSkills"));
+    for (const { key, labelKey } of TARGETING_SKILL_KEYS) {
+      const label = container.querySelector(`.targeting-skill-label[data-skill-key="${key}"]`);
+      if (label) label.textContent = this.i18n.t(labelKey);
+      const choice = this.targetingSkillChoices.get(key);
+      if (!choice) continue;
+      const level = this.targetingSkillLevels?.[key] ?? defaultTargetingSkills(this.currentSkillLevel() ?? 5)[key];
+      const options: ChoiceGroupOption[] = [];
+      for (let lv = 0; lv <= 5; lv++) {
+        const skill = skillLevelFromString(String(lv));
+        options.push({ value: String(lv), label: String(lv), hint: skillOptionLabel(this.i18n, skill) });
+      }
+      choice.render(options, String(level));
+    }
+  }
+
+  private onTargetingSkillChange(key: TargetingSkillKey, level: SkillLevel): void {
+    const current = this.targetingSkillLevels ?? defaultTargetingSkills(skillLevelFromString(this.els.skills.value));
+    this.targetingSkillLevels = { ...current, [key]: level };
+    this.onSkillOrOverloadChange(false);
+  }
+
   private createSkillPopup(): Popup {
     const id = sideId(this.panel.side);
     return {
@@ -264,6 +314,42 @@ function createDefenseSkillChoices(container: HTMLElement, onChange: (key: Defen
     row.appendChild(label);
     const options = document.createElement("div");
     options.className = "defense-skill-options";
+    row.appendChild(options);
+    container.appendChild(row);
+    const choice = new ChoiceGroupImpl({ group: options, shape: { buttonClass: "btn" } });
+    options.addEventListener("input", () => {
+      const activeValue = Array.from(options.children).find((b) => b.getAttribute("aria-pressed") === "true")?.getAttribute("data-value") ?? "";
+      onChange(key, skillLevelFromString(activeValue));
+    });
+    choices.set(key, choice);
+  }
+  return choices;
+}
+
+type TargetingSkillKey = keyof TargetingSkills;
+
+const TARGETING_SKILL_KEYS: readonly { readonly key: TargetingSkillKey; readonly labelKey: string }[] = [
+  { key: "longRangeTargeting", labelKey: "skill.longRangeTargeting" },
+  { key: "signatureAnalysis", labelKey: "skill.signatureAnalysis" },
+  { key: "targetManagement", labelKey: "skill.targetManagement" },
+  { key: "advancedTargetManagement", labelKey: "skill.advancedTargetManagement" },
+  { key: "sensorLinking", labelKey: "skill.sensorLinking" },
+  { key: "signalSuppression", labelKey: "skill.signalSuppression" },
+  { key: "frequencyModulation", labelKey: "skill.frequencyModulation" },
+];
+
+function createTargetingSkillChoices(container: HTMLElement, onChange: (key: TargetingSkillKey, level: SkillLevel) => void): ReadonlyMap<TargetingSkillKey, ChoiceGroupImpl> {
+  const choices = new Map<TargetingSkillKey, ChoiceGroupImpl>();
+  for (const { key } of TARGETING_SKILL_KEYS) {
+    const row = document.createElement("div");
+    row.className = "targeting-skill-row";
+    row.dataset.skillKey = key;
+    const label = document.createElement("span");
+    label.className = "targeting-skill-label";
+    label.dataset.skillKey = key;
+    row.appendChild(label);
+    const options = document.createElement("div");
+    options.className = "targeting-skill-options";
     row.appendChild(options);
     container.appendChild(row);
     const choice = new ChoiceGroupImpl({ group: options, shape: { buttonClass: "btn" } });

@@ -107,6 +107,7 @@ export class FakeSidePanel {
   overrides: Record<string, unknown> = {};
   lastCommittedHull?: ShipId;
   skillConditions = vi.fn(() => ({ skillLevel: 5 as const, overloaded: true, weaponOverloaded: false }));
+  setSensorData = vi.fn();
   pastePopup = fakePopup();
   getPastePopup = () => this.pastePopup;
   sections = {

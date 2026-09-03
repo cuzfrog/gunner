@@ -1,4 +1,4 @@
-import { EMPTY_DEFENSE_SPEC, registerSimModule, type SimCradle, type SimValueParser } from "../sim";
+import { EMPTY_DEFENSE_SPEC, EMPTY_SENSOR_BOOST_LOADOUT, registerSimModule, type SimCradle, type SimValueParser } from "../sim";
 import { createContainer, InjectionMode } from "awilix";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
 import { toShipId, toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
@@ -294,6 +294,8 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
   defense: EMPTY_DEFENSE_SPEC,
+  sensorSpec: { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4 },
+  sensorBoosts: EMPTY_SENSOR_BOOST_LOADOUT,
 };
 export function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();

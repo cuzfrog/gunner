@@ -1,11 +1,11 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
-import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type SensorDampenerScriptSpec, type StasisGrapplerSpec, type TargetPainterSpec, type WarpScramblerSpec } from "../../../sim";
+import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type SensorDampenerScriptSpec, type SensorDampenerSpec, type StasisGrapplerSpec, type TargetPainterSpec, type WarpScramblerSpec } from "../../../sim";
 import type { StoredDisruptionScript, StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
-import { scriptStatSuffix } from "../controlsFormat";
+import { formatMultiplier, scriptStatSuffix } from "../controlsFormat";
 import { html } from "../markup";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
@@ -38,9 +38,10 @@ export class EwarControllerImpl implements EwarController {
   private readonly states = new Map<Side, EwarState>();
   private readonly popups: Record<Side, Popup>;
   private readonly scriptPopups: Record<Side, Popup>;
-  private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
+  private readonly scriptGears = new Map<Side, { kind: "disruptor" | "dampener"; index: number; gear: HTMLButtonElement }>();
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
   private readonly disruptorNameSpans = new Map<Side, HTMLSpanElement[]>();
+  private readonly dampenerNameSpans = new Map<Side, HTMLSpanElement[]>();
   private readonly scriptOptionList: SelectableListImpl;
   private readonly gearAction: IconActionImpl;
   private readonly overloadAction: IconActionImpl;
@@ -126,6 +127,11 @@ export class EwarControllerImpl implements EwarController {
       })),
       ...(storedScramblers !== undefined ? { scramblers: storedScramblers } : {}),
       painters: state.activation.painters.map((p) => ({ active: p.active, overloaded: p.overloaded })),
+      dampeners: state.activation.dampeners.map((d) => ({
+        active: d.active,
+        overloaded: d.overloaded,
+        script: d.script?.moduleId ?? "none",
+      })),
     };
   }
 
@@ -187,6 +193,7 @@ export class EwarControllerImpl implements EwarController {
     this.scriptPopups[side].close();
     this.scriptGears.delete(side);
     this.disruptorNameSpans.delete(side);
+    this.dampenerNameSpans.delete(side);
     section.innerHTML = "";
     if (!state || this.isEmpty(state.loadout)) {
       trigger.disabled = true;
@@ -215,12 +222,15 @@ export class EwarControllerImpl implements EwarController {
     if (state.loadout.painters.length > 0) {
       this.renderSection(section, "label.ewar.painter", (container) => this.renderPainters(side, state, container));
     }
+    if (state.loadout.dampeners.length > 0) {
+      this.renderSection(section, "label.ewar.dampener", (container) => this.renderDampeners(side, state, container));
+    }
     this.popups[side].close();
   }
 
   private renderSection(
     parent: HTMLElement,
-    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler" | "label.ewar.painter",
+    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler" | "label.ewar.painter" | "label.ewar.dampener",
     renderRows: (container: HTMLElement) => void,
   ): void {
     const rowContainer = html`<div></div>` as unknown as HTMLDivElement;
@@ -257,6 +267,10 @@ export class EwarControllerImpl implements EwarController {
     const painterActive = state.activation.painters.filter((p) => p.active).length;
     const painterTitle = state.loadout.painters.length > 0 ? this.ewarEffectDescriber.painterHint(projection) : "";
     if (state.loadout.painters.length > 0) this.appendSummaryItem(summary, state.loadout.painters[0].moduleId, painterActive, state.loadout.painters.length, painterTitle);
+    const dampenerTotal = state.loadout.dampeners.length;
+    const dampenerActive = state.activation.dampeners.filter((d) => d.active).length;
+    const dampenerTitle = dampenerTotal > 0 ? this.ewarEffectDescriber.dampenerHint(projection) : "";
+    if (dampenerTotal > 0) this.appendSummaryItem(summary, state.loadout.dampeners[0].moduleId, dampenerActive, dampenerTotal, dampenerTitle);
   }
 
   private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, hint: string): void {
@@ -268,7 +282,7 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private isEmpty(loadout: EwarLoadout): boolean {
-    return loadout.webs.length === 0 && loadout.grapplers.length === 0 && loadout.disruptors.length === 0 && loadout.scramblers.length === 0 && loadout.painters.length === 0;
+    return loadout.webs.length === 0 && loadout.grapplers.length === 0 && loadout.disruptors.length === 0 && loadout.scramblers.length === 0 && loadout.painters.length === 0 && loadout.dampeners.length === 0;
   }
 
   private clampActivation(loadout: EwarLoadout, saved?: StoredEwarActivation): MutableEwarActivation {
@@ -316,7 +330,21 @@ export class EwarControllerImpl implements EwarController {
         const overloaded = typeof savedPainter === "boolean" ? false : savedPainter?.overloaded ?? false;
         return { active, overloaded };
       }),
-      dampeners: [],
+      dampeners: loadout.dampeners.map((dampener, i) => {
+        const savedDampener = saved?.dampeners?.[i];
+        const savedScript = savedDampener?.script;
+        let script: SensorDampenerScriptSpec | undefined;
+        if (savedScript === undefined) {
+          script = dampener.defaultScript;
+        } else if (savedScript === "none") {
+          script = undefined;
+        } else {
+          const byId = typeIdFromString(savedScript);
+          script = byId !== undefined ? loadout.dampenerScripts.find((s) => s.moduleId === byId) : undefined;
+          if (script === undefined) script = dampener.defaultScript;
+        }
+        return { active: savedDampener?.active ?? true, overloaded: savedDampener?.overloaded ?? false, script };
+      }),
     };
   }
 
@@ -389,6 +417,23 @@ export class EwarControllerImpl implements EwarController {
     }
   }
 
+  private renderDampeners(side: Side, state: EwarState, section: HTMLElement): void {
+    const nameSpans: HTMLSpanElement[] = [];
+    for (let i = 0; i < state.loadout.dampeners.length; i++) {
+      const dampener: SensorDampenerSpec = state.loadout.dampeners[i];
+      const activation = state.activation.dampeners[i];
+      const { button, nameSpan } = this.createModuleButton(activation.active, dampener, this.ewarEffectDescriber.dampenerModuleEffect(dampener, activation.script));
+      nameSpans.push(nameSpan);
+      const onToggle = () => this.toggleDampenerOverload(side, i, overloadButton);
+      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, dampener, onToggle);
+      button.addEventListener("click", () => this.toggleDampener(side, i, button, row));
+      const gear = this.createDampenerScriptGear(side, i, activation.script, activation.active);
+      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton, gear]}</div>` as unknown as HTMLDivElement;
+      section.appendChild(row);
+    }
+    this.dampenerNameSpans.set(side, nameSpans);
+  }
+
   private moduleDisplayName(spec: { readonly moduleId: TypeId }): string {
     return this.fittingImport.itemNameForId(spec.moduleId, this.i18n.current());
   }
@@ -404,7 +449,16 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private createScriptGear(side: Side, index: number, script: DisruptionScriptSpec | undefined, active: boolean): HTMLButtonElement {
-    const gear = this.gearAction.create(() => this.openScriptPopup(side, index, gear));
+    const gear = this.gearAction.create(() => this.openScriptPopup(side, "disruptor", index, gear));
+    gear.setAttribute("data-index", String(index));
+    gear.setAttribute("aria-controls", `${sideId(side)}-ewar-script-popup`);
+    this.updateGearHint(gear, script);
+    if (!active) gear.setAttribute("disabled", "");
+    return gear;
+  }
+
+  private createDampenerScriptGear(side: Side, index: number, script: SensorDampenerScriptSpec | undefined, active: boolean): HTMLButtonElement {
+    const gear = this.gearAction.create(() => this.openScriptPopup(side, "dampener", index, gear));
     gear.setAttribute("data-index", String(index));
     gear.setAttribute("aria-controls", `${sideId(side)}-ewar-script-popup`);
     this.updateGearHint(gear, script);
@@ -429,18 +483,26 @@ export class EwarControllerImpl implements EwarController {
     return button;
   }
 
-  private openScriptPopup(side: Side, index: number, gear: HTMLButtonElement): void {
-    this.scriptGears.set(side, { index, gear });
-    this.renderScriptOptions(side, index);
+  private openScriptPopup(side: Side, kind: "disruptor" | "dampener", index: number, gear: HTMLButtonElement): void {
+    this.scriptGears.set(side, { kind, index, gear });
+    this.renderScriptOptions(side, kind, index);
     gear.setAttribute("aria-expanded", "true");
     this.scriptPopups[side].open();
   }
 
-  private renderScriptOptions(side: Side, index: number): void {
+  private renderScriptOptions(side: Side, kind: "disruptor" | "dampener", index: number): void {
     const popup = this.scriptPopupEls.get(side);
     const state = this.states.get(side);
     if (!popup || !state) return;
     popup.innerHTML = "";
+    if (kind === "disruptor") {
+      this.renderDisruptorScriptOptions(side, state, index, popup);
+    } else {
+      this.renderDampenerScriptOptions(side, state, index, popup);
+    }
+  }
+
+  private renderDisruptorScriptOptions(side: Side, state: EwarState, index: number, popup: HTMLElement): void {
     const current = state.activation.disruptors[index].script;
     const disruptor = state.loadout.disruptors[index];
     const labelId = `${sideId(side)}-ewar-script-label`;
@@ -454,7 +516,7 @@ export class EwarControllerImpl implements EwarController {
       hint: this.i18n.t("ewar.script.none.hint"),
       selected: current === undefined,
     });
-    noneButton.addEventListener("click", () => this.onScriptSelected(side, index, "none"));
+    noneButton.addEventListener("click", () => this.onScriptSelected(side, "disruptor", index, "none"));
     popup.appendChild(noneButton);
 
     for (const script of state.loadout.scripts) {
@@ -465,50 +527,97 @@ export class EwarControllerImpl implements EwarController {
         iconUrl: this.imageCatalog.itemIconUrl(script.moduleId),
         selected: this.isSameScript(current, script),
       });
-      button.addEventListener("click", () => this.onScriptSelected(side, index, script.moduleId));
+      button.addEventListener("click", () => this.onScriptSelected(side, "disruptor", index, script.moduleId));
       popup.appendChild(button);
     }
   }
 
-  private onScriptSelected(side: Side, index: number, value: string): void {
+  private renderDampenerScriptOptions(side: Side, state: EwarState, index: number, popup: HTMLElement): void {
+    const current = state.activation.dampeners[index].script;
+    const dampener = state.loadout.dampeners[index];
+    const labelId = `${sideId(side)}-ewar-script-label`;
+    const label = html`<div id="${labelId}" class="ewar-script-popup-label">${this.moduleDisplayName(dampener)}</div>`;
+    popup.setAttribute("aria-labelledby", labelId);
+    popup.appendChild(label);
+
+    const noneButton = this.scriptOptionList.createButton({
+      value: "none",
+      label: this.i18n.t("ewar.script.none"),
+      hint: this.i18n.t("ewar.script.none.hint"),
+      selected: current === undefined,
+    });
+    noneButton.addEventListener("click", () => this.onScriptSelected(side, "dampener", index, "none"));
+    popup.appendChild(noneButton);
+
+    for (const script of state.loadout.dampenerScripts) {
+      const button = this.scriptOptionList.createButton({
+        value: script.moduleId,
+        label: this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()),
+        hint: `scan res x${formatMultiplier(script.scanResolutionMultiplier)} · target range x${formatMultiplier(script.maxTargetRangeMultiplier)}`,
+        iconUrl: this.imageCatalog.itemIconUrl(script.moduleId),
+        selected: this.isSameScript(current, script),
+      });
+      button.addEventListener("click", () => this.onScriptSelected(side, "dampener", index, script.moduleId));
+      popup.appendChild(button);
+    }
+  }
+
+  private onScriptSelected(side: Side, kind: "disruptor" | "dampener", index: number, value: string): void {
     const state = this.states.get(side);
     if (!state) return;
     if (value === "none") {
-      this.onScriptInput(side, index, undefined);
+      this.onScriptInput(side, kind, index, undefined);
       this.scriptPopups[side].close();
       this.scriptPopups[side].focusTrigger();
       return;
     }
     const byId = typeIdFromString(value);
-    const script = byId !== undefined ? state.loadout.scripts.find((s) => s.moduleId === byId) : undefined;
-    if (script === undefined) return;
-    this.onScriptInput(side, index, script);
+    if (byId === undefined) return;
+    if (kind === "disruptor") {
+      const script = state.loadout.scripts.find((s) => s.moduleId === byId);
+      if (script === undefined) return;
+      this.onScriptInput(side, kind, index, script);
+    } else {
+      const script = state.loadout.dampenerScripts.find((s) => s.moduleId === byId);
+      if (script === undefined) return;
+      this.onScriptInput(side, kind, index, script);
+    }
     this.scriptPopups[side].close();
     this.scriptPopups[side].focusTrigger();
   }
 
-  private onScriptInput(side: Side, index: number, script: DisruptionScriptSpec | undefined): void {
+  private onScriptInput(side: Side, kind: "disruptor" | "dampener", index: number, script: DisruptionScriptSpec | SensorDampenerScriptSpec | undefined): void {
     const state = this.states.get(side);
     if (!state) return;
-    state.activation.disruptors[index].script = script;
-    const gear = this.findGearFor(side, index);
-    if (gear) this.updateGearHint(gear, script);
-    const nameSpan = this.disruptorNameSpans.get(side)?.[index];
-    if (nameSpan) nameSpan.setAttribute("data-hint", this.ewarEffectDescriber.disruptorModuleEffect(state.loadout.disruptors[index], script));
+    if (kind === "disruptor") {
+      const disruptorScript = script as DisruptionScriptSpec | undefined;
+      state.activation.disruptors[index].script = disruptorScript;
+      const gear = this.findGearFor(side, kind, index);
+      if (gear) this.updateGearHint(gear, disruptorScript);
+      const nameSpan = this.disruptorNameSpans.get(side)?.[index];
+      if (nameSpan) nameSpan.setAttribute("data-hint", this.ewarEffectDescriber.disruptorModuleEffect(state.loadout.disruptors[index], disruptorScript));
+    } else {
+      const dampenerScript = script as SensorDampenerScriptSpec | undefined;
+      state.activation.dampeners[index].script = dampenerScript;
+      const gear = this.findGearFor(side, kind, index);
+      if (gear) this.updateGearHint(gear, dampenerScript);
+      const nameSpan = this.dampenerNameSpans.get(side)?.[index];
+      if (nameSpan) nameSpan.setAttribute("data-hint", this.ewarEffectDescriber.dampenerModuleEffect(state.loadout.dampeners[index], dampenerScript));
+    }
     this.events.emitConfigInvalidated();
   }
 
-  private isSameScript(a: DisruptionScriptSpec | undefined, b: DisruptionScriptSpec | undefined): boolean {
+  private isSameScript(a: { readonly moduleId: TypeId } | undefined, b: { readonly moduleId: TypeId } | undefined): boolean {
     if (a === undefined || b === undefined) return a === b;
     return a.moduleId === b.moduleId;
   }
 
-  private findGearFor(side: Side, index: number): HTMLButtonElement | undefined {
+  private findGearFor(side: Side, kind: "disruptor" | "dampener", index: number): HTMLButtonElement | undefined {
     const gearState = this.scriptGears.get(side);
-    return gearState?.index === index ? gearState.gear : undefined;
+    return gearState?.kind === kind && gearState?.index === index ? gearState.gear : undefined;
   }
 
-  private updateGearHint(gear: HTMLButtonElement, script: DisruptionScriptSpec | undefined): void {
+  private updateGearHint(gear: HTMLButtonElement, script: { readonly moduleId: TypeId } | undefined): void {
     const hint = script ? this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()) : this.i18n.t("ewar.script.none");
     gear.setAttribute("data-hint", hint);
     gear.setAttribute("aria-label", hint);
@@ -643,6 +752,33 @@ export class EwarControllerImpl implements EwarController {
     if (!state) return;
     const overloaded = !state.activation.painters[index].overloaded;
     state.activation.painters[index].overloaded = overloaded;
+    button.setAttribute("aria-pressed", String(overloaded));
+
+    this.updateSummary(side);
+    this.events.emitConfigInvalidated();
+  }
+
+  private toggleDampener(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const active = !state.activation.dampeners[index].active;
+    state.activation.dampeners[index].active = active;
+    button.setAttribute("aria-pressed", String(active));
+    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
+    for (const child of row.children) {
+      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
+        child.disabled = !active;
+      }
+    }
+    this.updateSummary(side);
+    this.events.emitConfigInvalidated();
+  }
+
+  private toggleDampenerOverload(side: Side, index: number, button: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const overloaded = !state.activation.dampeners[index].overloaded;
+    state.activation.dampeners[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
 
     this.updateSummary(side);

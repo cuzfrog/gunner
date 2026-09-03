@@ -120,6 +120,7 @@ function makeEvaluator(): {
     disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
     dampenedSensorSpec: vi.fn((spec) => spec),
     dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
+    dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
   });
   const turretBoosterResolver = vi.mocked<TurretBoosterResolver>({ boostedTurret: vi.fn(() => boostedTurret) });
   const missileBoosterResolver = vi.mocked<MissileBoosterResolver>({ boostedMissile: vi.fn((m) => m) });

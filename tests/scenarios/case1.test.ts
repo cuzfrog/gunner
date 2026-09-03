@@ -5,7 +5,7 @@ import { PredictiveAutopilot } from "../../src/sim/predictiveAutopilot";
 import { SimulationImpl } from "../../src/sim/simulation";
 import type { ShipConfig, SimConfig } from "../../src/sim/types";
 
-const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false, appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }), disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }), dampenedSensorSpec: (spec, projection, distance) => spec, dampenedSensorSpecIgnoringRange: (spec, projection) => spec };
+const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false, appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }), disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }), dampenedSensorSpec: (spec, projection, distance) => spec, dampenedSensorSpecIgnoringRange: (spec, projection) => spec, dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }) };
 
 describe("case1: Harbinger keepAtRange 10km vs Thrasher orbit 14km", () => {
   test("predictive steering reduces mean angular velocity versus the reactive baseline", () => {

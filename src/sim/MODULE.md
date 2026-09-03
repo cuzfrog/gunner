@@ -54,7 +54,14 @@ no-new-exports:
   - weaponClock.ts
   - weaponClock.test.ts
   - module.ts
+  - defenseSimulator.test.ts
+  - defenseSimulator.ts
+  - types.ts
+  - defenseAssessment.test.ts
+  - types.test.ts
+  - index.ts
 ---
+
 
 
 

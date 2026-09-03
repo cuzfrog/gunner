@@ -37,6 +37,7 @@ import {
   isFiniteNumber,
   isOptionalFittingText,
   isOptionalMissileBoosterActivations,
+  isOptionalTargetingSkills,
   isOptionalNonEmptyString,
   isOptionalNonNegative,
   isOptionalPositive,
@@ -220,6 +221,7 @@ export class SettingsParser {
       isOptionalNonNegative(s[`${p}Aggressivity`]) &&
       isOptionalSkillLevel(s[`${p}SkillLevel`]) &&
       isOptionalDefenseSkills(s[`${p}DefenseSkills`]) &&
+      isOptionalTargetingSkills(s[`${p}TargetingSkills`]) &&
       isOptionalBoolean(s[`${p}Overload`]) &&
       isOptionalBoolean(s[`${p}WeaponOverload`]) &&
       isOptionalBoolean(s[`${p}DamageEnabled`]) &&
@@ -491,6 +493,7 @@ function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSetti
   const p = side;
   if (combatant.skillLevel !== undefined) wire[`${p}SkillLevel` as const] = combatant.skillLevel;
   if (combatant.defenseSkills !== undefined) wire[`${p}DefenseSkills` as const] = combatant.defenseSkills;
+  if (combatant.targetingSkills !== undefined) wire[`${p}TargetingSkills` as const] = combatant.targetingSkills;
   wire[`${p}Overload` as const] = combatant.overload;
   wire[`${p}WeaponOverload` as const] = combatant.weaponOverload;
   wire[`${p}DamageEnabled` as const] = combatant.damageEnabled;
@@ -524,6 +527,7 @@ function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"
     aggressivity: sideValue(side, settings.shipAAggressivity, settings.shipBAggressivity) ?? 1,
     skillLevel: sideValue(side, settings.shipASkillLevel, settings.shipBSkillLevel),
     defenseSkills: sideValue(side, settings.shipADefenseSkills, settings.shipBDefenseSkills),
+    targetingSkills: sideValue(side, settings.shipATargetingSkills, settings.shipBTargetingSkills),
     overload: sideValue(side, settings.shipAOverload, settings.shipBOverload) ?? true,
     weaponOverload: sideValue(side, settings.shipAWeaponOverload, settings.shipBWeaponOverload) ?? false,
     damageEnabled: sideValue(side, settings.shipADamageEnabled, settings.shipBDamageEnabled) ?? true,

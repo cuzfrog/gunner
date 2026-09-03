@@ -1,6 +1,6 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import { EMPTY_EWAR_LOADOUT } from "../../../sim";
-import type { DisruptionScriptSpec, EwarLoadout, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
+import type { DisruptionScriptSpec, EwarLoadout, SensorDampenerScriptSpec, SensorDampenerSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";
@@ -34,6 +34,21 @@ const DISRUPTOR2: TrackingDisruptorSpec = {
 const SCRAMBLER: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 };
 const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: toTypeId("41040"), optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
 const PAINTER: TargetPainterSpec = { moduleName: "Target Painter II", moduleId: toTypeId("12275"), maxRange: 36000, falloff: 90000, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 20 };
+const SCAN_RES_SCRIPT: SensorDampenerScriptSpec & { readonly moduleId: TypeId } = {
+  name: "Scan Resolution Dampening Script", moduleId: toTypeId("42532"), scanResolutionMultiplier: 2, maxTargetRangeMultiplier: 0,
+};
+const TARGET_RANGE_SCRIPT: SensorDampenerScriptSpec & { readonly moduleId: TypeId } = {
+  name: "Targeting Range Dampening Script", moduleId: toTypeId("42533"), scanResolutionMultiplier: 0, maxTargetRangeMultiplier: 2,
+};
+const DAMPENER_SCRIPTS: readonly (SensorDampenerScriptSpec & { readonly moduleId: TypeId })[] = [SCAN_RES_SCRIPT, TARGET_RANGE_SCRIPT];
+const DAMPENER: SensorDampenerSpec = {
+  moduleName: "Sensor Dampener I", moduleId: toTypeId("2119"), optimal: 10000, falloff: 30000,
+  scanResolutionBonusPercent: -20, maxTargetRangeBonusPercent: -20, defaultScript: undefined, overloadStrengthBonusPercent: 20,
+};
+const DAMPENER2: SensorDampenerSpec = {
+  moduleName: "Sensor Dampener II", moduleId: toTypeId("2120"), optimal: 12000, falloff: 35000,
+  scanResolutionBonusPercent: -25, maxTargetRangeBonusPercent: -25, defaultScript: SCAN_RES_SCRIPT, overloadStrengthBonusPercent: 20,
+};
 
 class FakePopupGroup implements PopupGroup {
   private readonly popups: Popup[] = [];
@@ -117,8 +132,12 @@ function buildEwarController(
     "448": "Warp Scrambler II",
     "41040": "Heavy Stasis Grappler I",
     "12275": "Target Painter II",
+    "2119": "Sensor Dampener I",
+    "2120": "Sensor Dampener II",
     "29005": "Optimal Range Disruption Script",
     "29007": "Tracking Speed Disruption Script",
+    "42532": "Scan Resolution Dampening Script",
+    "42533": "Targeting Range Dampening Script",
   };
   const fittingImport = vi.mocked(mockFittingImport());
   fittingImport.itemNameForId = vi.fn((id: TypeId, lang: string) => {
@@ -135,7 +154,9 @@ function buildEwarController(
     scramblerDescription: vi.fn(() => "scrambler-title"),
     scramblerHint: vi.fn(() => "scrambler-hint"),
     painterHint: vi.fn(() => "painter-hint"),
+    dampenerHint: vi.fn(() => "dampener-hint"),
     painterModuleEffect: vi.fn(() => "painter-effect"),
+    dampenerModuleEffect: vi.fn(() => "dampener-effect"),
     webModuleEffect: vi.fn(() => "web-effect"),
     grapplerModuleEffect: vi.fn(() => "grappler-effect"),
     disruptorModuleEffect: vi.fn(() => "disruptor-effect"),
@@ -162,6 +183,10 @@ function grapplerSection(document: Document, side: "shipA" | "shipB"): FakeEleme
 
 function disruptorSection(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
   return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.disruptor");
+}
+
+function dampenerSection(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
+  return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.dampener");
 }
 
 function scramblerSection(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
@@ -441,6 +466,7 @@ describe("EwarController", () => {
         { active: true, overloaded: false, script: TRACKING_SCRIPT.moduleId },
       ],
       painters: [],
+      dampeners: [],
     });
 
     controller.restore("shipB", loadout, captured);
@@ -478,6 +504,7 @@ describe("EwarController", () => {
       grapplers: [],
       disruptors: [{ active: false, overloaded: true, script: TRACKING_SCRIPT.moduleId }],
       painters: [],
+      dampeners: [],
     });
   });
 
@@ -523,6 +550,7 @@ describe("EwarController", () => {
         { active: false, overloaded: false, script: "none" },
       ],
       painters: [],
+      dampeners: [],
     });
   });
 
@@ -572,6 +600,7 @@ describe("EwarController", () => {
       grapplers: [],
       disruptors: [{ active: true, overloaded: false, script: TRACKING_SCRIPT.moduleId }],
       painters: [],
+      dampeners: [],
     });
   });
 
@@ -717,6 +746,7 @@ describe("EwarController", () => {
       grapplers: [],
       disruptors: [{ active: true, overloaded: true, script: OPTIMAL_SCRIPT.moduleId }],
       painters: [],
+      dampeners: [],
     });
   });
 
@@ -903,5 +933,174 @@ describe("EwarController", () => {
     expect(painterSummary).toBeDefined();
     expect(painterSummary!.children[1].textContent).toBe("2/2");
     expect(ewarEffectDescriber.painterHint).toHaveBeenCalled();
+  });
+
+  test("dampener section renders rows with toggle, overload, and script gear buttons", () => {
+    const { controller, document, ewarEffectDescriber } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [], dampeners: [DAMPENER2], scripts: [], dampenerScripts: DAMPENER_SCRIPTS, };
+    controller.setLoadout("shipA", loadout);
+
+    const section = dampenerSection(document, "shipA")!;
+    expect(section).toBeDefined();
+    expect(section.children[0].textContent).toBe("label.ewar.dampener");
+    expect(section.children.length).toBe(2);
+    const row = section.children[1];
+    expect(row.className).toBe("ewar-row");
+    const button = row.children[0];
+    expect(button.getAttribute("aria-pressed")).toBe("true");
+    expect(button.children[1].textContent).toBe(DAMPENER2.moduleName);
+    expect(button.children[1].getAttribute("data-hint")).toBe("dampener-effect");
+    expect(ewarEffectDescriber.dampenerModuleEffect).toHaveBeenCalledWith(DAMPENER2, SCAN_RES_SCRIPT);
+    const gear = gearFor(row);
+    expect(gear.getAttribute("data-hint")).toBe("Scan Resolution Dampening Script");
+    expect(gear.disabled).toBe(false);
+    const overload = overloadFor(row);
+    expect(overload.getAttribute("aria-pressed")).toBe("false");
+  });
+
+  test("dampener toggle deactivates the row and disables overload and gear", () => {
+    const { controller, document } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [], dampeners: [DAMPENER], scripts: [], dampenerScripts: DAMPENER_SCRIPTS, };
+    controller.setLoadout("shipA", loadout);
+
+    const popup = getFake(document, "ship-a-ewar-popup");
+    popup.hidden = false;
+    const section = dampenerSection(document, "shipA")!;
+    const row = section.children[1];
+    const button = row.children[0];
+    const gear = gearFor(row);
+    const overload = overloadFor(row);
+    expect(row.className).toBe("ewar-row");
+    button.trigger("click");
+    expect(row.className).toBe("ewar-row ewar-row-inactive");
+    expect(button.getAttribute("aria-pressed")).toBe("false");
+    expect(gear.disabled).toBe(true);
+    expect(overload.disabled).toBe(true);
+    button.trigger("click");
+    expect(row.className).toBe("ewar-row");
+    expect(gear.disabled).toBe(false);
+    expect(overload.disabled).toBe(false);
+  });
+
+  test("dampener overload toggle flips aria-pressed and capture output", () => {
+    const { controller, document } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [], dampeners: [DAMPENER], scripts: [], dampenerScripts: DAMPENER_SCRIPTS, };
+    controller.setLoadout("shipA", loadout);
+
+    const popup = getFake(document, "ship-a-ewar-popup");
+    popup.hidden = false;
+    const row = dampenerSection(document, "shipA")!.children[1];
+    const overload = overloadFor(row);
+    expect(overload.getAttribute("aria-pressed")).toBe("false");
+    overload.trigger("click");
+    expect(overload.getAttribute("aria-pressed")).toBe("true");
+    expect(controller.capture("shipA")?.dampeners).toEqual([{ active: true, overloaded: true, script: "none" }]);
+  });
+
+  test("dampener script choice persists per row and survives capture/restore round-trip", () => {
+    const { controller, document } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [], dampeners: [DAMPENER, DAMPENER2], scripts: [], dampenerScripts: DAMPENER_SCRIPTS, };
+    controller.setLoadout("shipB", loadout);
+
+    const popup = getFake(document, "ship-b-ewar-popup");
+    popup.hidden = false;
+
+    const section = dampenerSection(document, "shipB")!;
+    const firstRow = section.children[1];
+    const firstGear = gearFor(firstRow);
+    firstGear.trigger("click");
+    const firstScriptPopup = scriptPopupFor(document, "shipB");
+    expect(firstScriptPopup.hidden).toBe(false);
+    scriptOptionFor(firstScriptPopup, String(TARGET_RANGE_SCRIPT.moduleId))!.trigger("click");
+    expect(controller.capture("shipB")?.dampeners?.[0]?.script).toBe(TARGET_RANGE_SCRIPT.moduleId);
+    expect(firstGear.getAttribute("data-hint")).toBe("Targeting Range Dampening Script");
+
+    const secondRow = section.children[2];
+    const secondGear = gearFor(secondRow);
+    secondGear.trigger("click");
+    const secondScriptPopup = scriptPopupFor(document, "shipB");
+    scriptOptionFor(secondScriptPopup, String(SCAN_RES_SCRIPT.moduleId))!.trigger("click");
+    expect(controller.capture("shipB")?.dampeners?.[1]?.script).toBe(SCAN_RES_SCRIPT.moduleId);
+
+    const captured = controller.capture("shipB");
+    expect(captured).toEqual({
+      webs: [],
+      grapplers: [],
+      disruptors: [],
+      painters: [],
+      dampeners: [
+        { active: true, overloaded: false, script: TARGET_RANGE_SCRIPT.moduleId },
+        { active: true, overloaded: false, script: SCAN_RES_SCRIPT.moduleId },
+      ],
+    });
+
+    controller.restore("shipB", loadout, captured);
+    const restored = controller.capture("shipB");
+    expect(restored).toEqual(captured);
+
+    const restoredSection = dampenerSection(document, "shipB")!;
+    expect(gearFor(restoredSection.children[1]).getAttribute("data-hint")).toBe("Targeting Range Dampening Script");
+    expect(gearFor(restoredSection.children[2]).getAttribute("data-hint")).toBe("Scan Resolution Dampening Script");
+  });
+
+  test("dampener capture and restore round-trips activation with default script", () => {
+    const { controller } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [], dampeners: [DAMPENER2], scripts: [], dampenerScripts: DAMPENER_SCRIPTS, };
+    controller.setLoadout("shipA", loadout);
+    const captured = controller.capture("shipA");
+    expect(captured?.dampeners).toEqual([{ active: true, overloaded: false, script: SCAN_RES_SCRIPT.moduleId }]);
+
+    controller.restore("shipA", loadout, { webs: [], grapplers: [], disruptors: [], painters: [], dampeners: [{ active: false, overloaded: true, script: "none" }] });
+    const restored = controller.capture("shipA");
+    expect(restored?.dampeners).toEqual([{ active: false, overloaded: true, script: "none" }]);
+  });
+
+  test("dampener summary shows active count and hint", () => {
+    const { controller, document, ewarEffectDescriber } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [], dampeners: [DAMPENER, DAMPENER2], scripts: [], dampenerScripts: DAMPENER_SCRIPTS, };
+    controller.setLoadout("shipA", loadout);
+
+    const summary = getFake(document, "ship-a-ewar-summary");
+    const dampenerSummary = summary.children.find((c) => c.children[0]?.src === "icons/2119.png");
+    expect(dampenerSummary).toBeDefined();
+    expect(dampenerSummary!.children[1].textContent).toBe("2/2");
+    expect(dampenerSummary!.getAttribute("data-hint")).toBe("dampener-hint");
+    expect(ewarEffectDescriber.dampenerHint).toHaveBeenCalled();
+  });
+
+  test("dampener projection carries per-module overload and script", () => {
+    const { controller, document } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [], dampeners: [DAMPENER2], scripts: [], dampenerScripts: DAMPENER_SCRIPTS, };
+    controller.setLoadout("shipA", loadout);
+    expect(controller.projection("shipA")).toEqual({
+      loadout,
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [{ active: true, overloaded: false, script: SCAN_RES_SCRIPT }] },
+    });
+
+    const popup = getFake(document, "ship-a-ewar-popup");
+    popup.hidden = false;
+    const row = dampenerSection(document, "shipA")!.children[1];
+    const overload = overloadFor(row);
+    overload.trigger("click");
+    expect(controller.projection("shipA")!.activation!.dampeners[0]!.overloaded).toBe(true);
+  });
+
+  test("selecting a dampener script updates the module button hint by calling dampenerModuleEffect with the selected script", () => {
+    const { controller, document, ewarEffectDescriber } = buildEwarController();
+    controller.setLoadout("shipA", { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [], dampeners: [DAMPENER2], scripts: [], dampenerScripts: DAMPENER_SCRIPTS, });
+    ewarEffectDescriber.dampenerModuleEffect.mockReturnValue("dampener-with-scan");
+    const popup = getFake(document, "ship-a-ewar-popup");
+    popup.hidden = false;
+    const section = dampenerSection(document, "shipA")!;
+    const row = section.children[1];
+    const button = row.children[0];
+    const gear = gearFor(row);
+    expect(button.children[1].getAttribute("data-hint")).toBe("dampener-effect");
+    gear.trigger("click");
+    const scriptPopup = scriptPopupFor(document, "shipA");
+    ewarEffectDescriber.dampenerModuleEffect.mockReturnValue("dampener-with-target");
+    scriptOptionFor(scriptPopup, String(TARGET_RANGE_SCRIPT.moduleId))!.trigger("click");
+    expect(button.children[1].getAttribute("data-hint")).toBe("dampener-with-target");
+    expect(ewarEffectDescriber.dampenerModuleEffect).toHaveBeenCalledWith(DAMPENER2, TARGET_RANGE_SCRIPT);
   });
 });

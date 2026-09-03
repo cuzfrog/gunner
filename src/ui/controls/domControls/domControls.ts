@@ -156,6 +156,8 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     this.shipBSide.sections.skill.renderSkillOptions();
     this.shipASide.sections.skill.renderDefenseSkills();
     this.shipBSide.sections.skill.renderDefenseSkills();
+    this.shipASide.sections.skill.renderTargetingSkills();
+    this.shipBSide.sections.skill.renderTargetingSkills();
     this.els.play.addEventListener("click", () => this.onPlayPause());
     this.els.reset.addEventListener("click", () => this.onReset());
     this.els.simSpeed.addEventListener("change", () => this.onSpeedChange(this.preferencesController.getSpeed()));

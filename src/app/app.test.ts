@@ -98,6 +98,7 @@ const ewarResolver = vi.mocked<Required<EwarResolver>>({
   disruptionBreakdown: vi.fn(),
   dampenedSensorSpec: vi.fn((spec) => spec),
   dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
+  dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
 });
 
 const emptySpeedBreakdown: SpeedBreakdown = { effects: [], propulsionSuppressed: false };

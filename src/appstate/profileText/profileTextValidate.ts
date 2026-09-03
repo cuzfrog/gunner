@@ -14,6 +14,7 @@ import {
   isOptionalFittedHullSummary,
   isPositive,
   isSkillLevel,
+  isTargetingSkills,
 } from "../validators";
 import type { ChargeCatalog, DroneGroup } from "../../fitting";
 import { toTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
@@ -43,6 +44,14 @@ export function parseScalarValue(
     try {
       const parsed: unknown = JSON.parse(value);
       return isDefenseSkills(parsed) ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  if (field === "shipATargetingSkills" || field === "shipBTargetingSkills") {
+    try {
+      const parsed: unknown = JSON.parse(value);
+      return isTargetingSkills(parsed) ? parsed : undefined;
     } catch {
       return undefined;
     }
@@ -175,6 +184,7 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
     shipASig: raw.shipASig,
     shipASkillLevel: raw.shipASkillLevel,
     shipADefenseSkills: raw.shipADefenseSkills,
+    shipATargetingSkills: raw.shipATargetingSkills,
     shipAOverload: raw.shipAOverload,
     shipAWeaponOverload: raw.shipAWeaponOverload,
     shipADamageEnabled: raw.shipADamageEnabled,
@@ -196,6 +206,7 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
     shipBDroneGroups: raw.shipBDroneGroups,
     shipBSkillLevel: raw.shipBSkillLevel,
     shipBDefenseSkills: raw.shipBDefenseSkills,
+    shipBTargetingSkills: raw.shipBTargetingSkills,
     shipBOverload: raw.shipBOverload,
     shipBWeaponOverload: raw.shipBWeaponOverload,
     shipBDamageEnabled: raw.shipBDamageEnabled,

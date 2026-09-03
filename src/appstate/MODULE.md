@@ -20,7 +20,13 @@ no-new-exports:
   - savedFittings.test.ts
   - settingsStore.ts
   - settingsCompat.ts
+  - combatantSettings.ts
+  - validators.ts
+  - userSettings.ts
+  - settingsParser.ts
+  - index.ts
 ---
+
 
 
 

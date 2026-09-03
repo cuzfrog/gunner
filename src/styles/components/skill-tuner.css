@@ -91,4 +91,49 @@
   border-color: var(--accent-teal);
   color: var(--accent-teal);
 }
+
+.targeting-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.targeting-skill-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.targeting-skill-label {
+  flex: 0 0 auto;
+  width: 154px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.targeting-skill-options {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 2px;
+}
+
+.targeting-skill-options > .btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 2px 0;
+  font-size: 11px;
+}
+
+.targeting-skill-options [aria-pressed="true"] {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
 }

@@ -89,6 +89,8 @@ const controlsCradleKeys = {
   viewStore: "viewStore",
   appliedDpsHintRenderer: "appliedDpsHintRenderer",
   appliedDpsHintProvider: "appliedDpsHintProvider",
+  lockStateHintRenderer: "lockStateHintRenderer",
+  lockStateHintProvider: "lockStateHintProvider",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 
 describe("registerControlsModule", () => {
