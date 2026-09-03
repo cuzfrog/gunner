@@ -494,18 +494,14 @@ describe("CanvasRenderer", () => {
       expect(shipALockArcs.length).toBeGreaterThan(0);
     });
 
-    test("draws target symbol instead of arc when status is locked", () => {
+    test("draws full lock arc when status is locked", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       renderer.setLockStates({ shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true }, shipB: { status: "locked", progress: 1, remaining: 0, lockTime: 0, inRange: true } });
       renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, undefined);
-      const ctx = canvas.getContext("2d") as unknown as { arcs: number[][]; moveTos: number[][]; lineTos: number[][] };
-      expect(ctx.arcs.filter((a) => Math.abs(a[2] - LOCK_RADIUS) < 0.5)).toHaveLength(0);
-      const targetRadius = 3;
-      const targetArcs = ctx.arcs.filter((a) => Math.abs(a[2] - targetRadius) < 0.5);
-      expect(targetArcs.length).toBeGreaterThan(0);
-      expect(ctx.moveTos.length).toBeGreaterThanOrEqual(4);
-      expect(ctx.lineTos.length).toBeGreaterThanOrEqual(4);
+      const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
+      const shipALockArcs = ctx.arcs.filter((a) => Math.abs(a[2] - LOCK_RADIUS) < 0.5);
+      expect(shipALockArcs.length).toBeGreaterThan(0);
     });
 
     test("skips lock arc for backward-compatible locked state with zero lockTime", () => {

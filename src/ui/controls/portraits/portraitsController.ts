@@ -1,10 +1,11 @@
 import type { ShipId, TypeId } from "../../../gamedata/ids";
-import type { DampenerBreakdown, DefenseLayer, DisruptionBreakdown, EwarResolver, SpeedBreakdown, StatEffectAttribution } from "../../../sim";
+import type { DampenerBreakdown, DefenseLayer, DisruptionBreakdown, EwarResolver, LockState, SpeedBreakdown, StatEffectAttribution } from "../../../sim";
 import type { ImageCatalog } from "../../icons";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import type { EwarController } from "../ewar";
 import type { DefenseController } from "../defense";
+import type { ViewStore } from "../controlsContract";
 import type { Side } from "../side";
 import type { CombatantProfiles, PortraitsEls, PortraitsController } from "./portraitsControllerContract";
 import { html } from "../markup";
@@ -30,6 +31,7 @@ export class PortraitsControllerImpl implements PortraitsController {
   private readonly combatantProfiles: CombatantProfiles;
   private readonly events: UiEvents;
   private readonly i18n: I18n;
+  private readonly viewStore: ViewStore;
   private distance = 0;
   private readonly shipAState: SideState = { lastKey: "", lastId: "" };
   private readonly shipBState: SideState = { lastKey: "", lastId: "" };
@@ -43,6 +45,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     combatantProfiles: CombatantProfiles;
     events: UiEvents;
     i18n: I18n;
+    viewStore: ViewStore;
   }) {
     this.els = deps.els;
     this.imageCatalog = deps.imageCatalog;
@@ -52,6 +55,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     this.combatantProfiles = deps.combatantProfiles;
     this.events = deps.events;
     this.i18n = deps.i18n;
+    this.viewStore = deps.viewStore;
     this.events.onDistanceChanged((d) => { this.distance = d; });
     this.update();
   }
@@ -67,11 +71,13 @@ export class PortraitsControllerImpl implements PortraitsController {
     const image = side === "shipA" ? this.els.shipAImage : this.els.shipBImage;
     const effects = side === "shipA" ? this.els.shipAEffects : this.els.shipBEffects;
     const hpBars = side === "shipA" ? this.els.shipAHpBars : this.els.shipBHpBars;
+    const lockBadge = side === "shipA" ? this.els.shipALockBadge : this.els.shipBLockBadge;
     const profile = this.combatantProfiles.profile(side);
     if (profile === undefined) {
       root.hidden = true;
       effects.hidden = true;
       hpBars.hidden = true;
+      lockBadge.hidden = true;
       state.lastKey = "";
       state.lastId = "";
       return;
@@ -87,7 +93,10 @@ export class PortraitsControllerImpl implements PortraitsController {
     const hpPercentages = this.defenseController.hpPercentages(side);
     updateHpBars(hpBars, hpPercentages);
     hpBars.hidden = hpPercentages === undefined;
-    const key = buildDiffKey(profile.id, allEffects);
+    const lock = this.viewStore.currentView()?.locks[side];
+    const lockBadgeVisible = lock !== undefined && lock.status === "locked" && lock.lockTime > 0;
+    if (lockBadge.hidden !== !lockBadgeVisible) lockBadge.hidden = !lockBadgeVisible;
+    const key = buildDiffKey(profile.id, allEffects, lockBadgeVisible);
     if (state.lastKey === key) return;
     state.lastKey = key;
     if (root.hidden) root.hidden = false;
@@ -112,8 +121,8 @@ function sideStateFor(side: Side, shipAState: SideState, shipBState: SideState):
   return side === "shipA" ? shipAState : shipBState;
 }
 
-function buildDiffKey(id: ShipId, effects: readonly PortraitEffect[]): string {
-  return `${id}|${effects.map((e) => `${e.moduleId}:${e.hint}`).join(",")}`;
+function buildDiffKey(id: ShipId, effects: readonly PortraitEffect[], lockBadge: boolean): string {
+  return `${id}|${effects.map((e) => `${e.moduleId}:${e.hint}`).join(",")}|${lockBadge}`;
 }
 
 function buildPortraitEffects(speed: SpeedBreakdown, disruption: DisruptionBreakdown, dampener: DampenerBreakdown, i18n: I18n): PortraitEffect[] {

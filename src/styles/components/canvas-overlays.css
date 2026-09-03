@@ -39,6 +39,11 @@
 .combatant-portrait-ship-a { left: var(--canvas-overlay-inset); }
 .combatant-portrait-ship-b { right: var(--canvas-overlay-inset); }
 
+.portrait-image-wrap {
+  position: relative;
+  display: inline-block;
+}
+
 .portrait-image {
   width: 55px;
   height: 55px;
@@ -47,6 +52,43 @@
   border: 1px solid var(--border-dim);
   border-radius: 2px;
 }
+
+.portrait-lock-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--text-primary);
+  border-radius: 50%;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.portrait-lock-badge::before,
+.portrait-lock-badge::after {
+  content: "";
+  position: absolute;
+  background: var(--text-primary);
+}
+
+.portrait-lock-badge::before {
+  top: 50%;
+  left: -3px;
+  right: -3px;
+  height: 1.5px;
+  transform: translateY(-50%);
+}
+
+.portrait-lock-badge::after {
+  left: 50%;
+  top: -3px;
+  bottom: -3px;
+  width: 1.5px;
+  transform: translateX(-50%);
+}
+
+.portrait-lock-badge[hidden] { display: none; }
 
 .portrait-image-ship-a { border-color: var(--accent-teal); }
 .portrait-image-ship-b { border-color: var(--accent-orange); }

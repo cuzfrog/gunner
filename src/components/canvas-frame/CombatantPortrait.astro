@@ -9,7 +9,10 @@ const imageClass = `portrait-image portrait-image-${side}`;
 ---
 
 <div id={id} class={portraitClass} hidden>
-  <img class={imageClass} alt="">
+  <div class="portrait-image-wrap">
+    <img class={imageClass} alt="">
+    <div class={`portrait-lock-badge portrait-lock-badge-${side}`} hidden></div>
+  </div>
   <div class={`portrait-hp-bars portrait-hp-bars-${side}`}>
     <div class="portrait-hp-bar portrait-hp-bar-shield"><span class="portrait-hp-fill"></span></div>
     <div class="portrait-hp-bar portrait-hp-bar-armor"><span class="portrait-hp-fill"></span></div>

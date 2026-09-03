@@ -1,8 +1,9 @@
 import { fakeDocument, getFake, FakeElement } from "../../testing";
 import { UiEventsImpl } from "../../events";
-import type { EwarProjection, EwarResolver, SpeedBreakdown, DisruptionBreakdown } from "../../../sim";
+import type { EngagementView, EwarProjection, EwarResolver, LockState, SpeedBreakdown, DisruptionBreakdown } from "../../../sim";
 import type { EwarController } from "../ewar";
 import type { DefenseController } from "../defense";
+import type { ViewStore } from "../controlsContract";
 import type { ImageCatalog } from "../../icons";
 import type { ShipProfile } from "../../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId } from "../../../gamedata/ids";
@@ -62,6 +63,10 @@ function createFakePortraitEls(document: Document): PortraitsEls {
   const shipAImage = document.createElement("img");
   shipAImage.className = "portrait-image";
   shipARoot.appendChild(shipAImage);
+  const shipALockBadge = document.createElement("div");
+  shipALockBadge.className = "portrait-lock-badge";
+  shipALockBadge.hidden = true;
+  shipARoot.appendChild(shipALockBadge);
   const shipAHpBars = document.createElement("div");
   shipAHpBars.className = "portrait-hp-bars";
   for (const layer of ["shield", "armor", "hull"]) {
@@ -80,6 +85,10 @@ function createFakePortraitEls(document: Document): PortraitsEls {
   const shipBImage = document.createElement("img");
   shipBImage.className = "portrait-image";
   shipBRoot.appendChild(shipBImage);
+  const shipBLockBadge = document.createElement("div");
+  shipBLockBadge.className = "portrait-lock-badge";
+  shipBLockBadge.hidden = true;
+  shipBRoot.appendChild(shipBLockBadge);
   const shipBHpBars = document.createElement("div");
   shipBHpBars.className = "portrait-hp-bars";
   for (const layer of ["shield", "armor", "hull"]) {
@@ -103,6 +112,8 @@ function createFakePortraitEls(document: Document): PortraitsEls {
     shipBEffects,
     shipAHpBars,
     shipBHpBars,
+    shipALockBadge,
+    shipBLockBadge,
   };
 }
 
@@ -168,6 +179,7 @@ function buildController() {
     cyclingEffects: vi.fn(() => []),
     hpPercentages: vi.fn(() => undefined),
   });
+  const viewStore = vi.mocked<ViewStore>({ currentView: vi.fn(() => undefined) });
   const controller = new PortraitsControllerImpl({
     els,
     imageCatalog,
@@ -177,8 +189,9 @@ function buildController() {
     combatantProfiles,
     events,
     i18n,
+    viewStore,
   });
-  return { controller, els, profiles, projections, ewarController, ewarResolver, defenseController, imageCatalog, events, createElementSpy, i18n };
+  return { controller, els, profiles, projections, ewarController, ewarResolver, defenseController, imageCatalog, events, createElementSpy, i18n, viewStore };
 }
 
 describe("PortraitsController", () => {
@@ -585,6 +598,62 @@ describe("PortraitsController", () => {
       const after = hpFillWidth(els, "shipA", 0);
       expect(after).toContain("0.1000");
       expect(after).not.toBe(before);
+    });
+  });
+
+  describe("lock badge", () => {
+    const LOCKED: LockState = { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true };
+    const LOCKING: LockState = { status: "locking", progress: 0.5, remaining: 5, lockTime: 10, inRange: true };
+    const IDLE: LockState = { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: false };
+
+    function makeView(locks: { shipA: LockState; shipB: LockState }): EngagementView {
+      return { locks, frame: {} as unknown as EngagementView["frame"], attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: {} as unknown, shipB: {} as unknown } } as unknown as EngagementView;
+    }
+
+    test("hidden when no view is available", () => {
+      const { controller, els, profiles } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      controller.update();
+      expect(els.shipALockBadge.hidden).toBe(true);
+    });
+
+    test("hidden when lock status is idle", () => {
+      const { controller, els, profiles, viewStore } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      viewStore.currentView.mockReturnValue(makeView({ shipA: IDLE, shipB: IDLE }));
+      controller.update();
+      expect(els.shipALockBadge.hidden).toBe(true);
+    });
+
+    test("hidden when lock status is locking", () => {
+      const { controller, els, profiles, viewStore } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      viewStore.currentView.mockReturnValue(makeView({ shipA: LOCKING, shipB: IDLE }));
+      controller.update();
+      expect(els.shipALockBadge.hidden).toBe(true);
+    });
+
+    test("visible when lock status is locked with non-zero lockTime", () => {
+      const { controller, els, profiles, viewStore } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      viewStore.currentView.mockReturnValue(makeView({ shipA: LOCKED, shipB: IDLE }));
+      controller.update();
+      expect(els.shipALockBadge.hidden).toBe(false);
+    });
+
+    test("hidden when locked but lockTime is zero (backward-compatible)", () => {
+      const { controller, els, profiles, viewStore } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      viewStore.currentView.mockReturnValue(makeView({ shipA: { ...LOCKED, lockTime: 0 }, shipB: IDLE }));
+      controller.update();
+      expect(els.shipALockBadge.hidden).toBe(true);
+    });
+
+    test("hidden when profile is undefined even if locked", () => {
+      const { controller, els, viewStore } = buildController();
+      viewStore.currentView.mockReturnValue(makeView({ shipA: LOCKED, shipB: IDLE }));
+      controller.update();
+      expect(els.shipALockBadge.hidden).toBe(true);
     });
   });
 });

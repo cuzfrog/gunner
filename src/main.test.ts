@@ -175,6 +175,11 @@ function fakeDocument(): Document {
           img.tagName = "IMG";
           img.className = "portrait-image";
           el.appendChild(img);
+          const lockBadge = new FakeElement();
+          lockBadge.tagName = "DIV";
+          lockBadge.className = "portrait-lock-badge";
+          lockBadge.hidden = true;
+          el.appendChild(lockBadge);
           const hpBars = new FakeElement();
           hpBars.tagName = "DIV";
           hpBars.className = "portrait-hp-bars";

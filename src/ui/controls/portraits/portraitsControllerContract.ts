@@ -14,6 +14,8 @@ export interface PortraitsEls {
   readonly shipBEffects: HTMLElement;
   readonly shipAHpBars: HTMLElement;
   readonly shipBHpBars: HTMLElement;
+  readonly shipALockBadge: HTMLElement;
+  readonly shipBLockBadge: HTMLElement;
 }
 
 export interface PortraitsController {

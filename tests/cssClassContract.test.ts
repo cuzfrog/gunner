@@ -10,6 +10,8 @@ const ALLOWED_UNDEFINED = new Set<string>([
   "portrait-hp-bar-shield",
   "portrait-hp-bar-armor",
   "portrait-hp-bar-hull",
+  "portrait-lock-badge-ship-a",
+  "portrait-lock-badge-ship-b",
 ]);
 
 // CSS classes not referenced by the literal scan (built dynamically or stale rules pending removal).

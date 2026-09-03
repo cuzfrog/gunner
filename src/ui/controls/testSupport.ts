@@ -82,6 +82,11 @@ function addPortraitChildren(document: Document): void {
     image.tagName = "IMG";
     image.className = "portrait-image";
     root.appendChild(image);
+    const lockBadge = new FakeElement();
+    lockBadge.tagName = "DIV";
+    lockBadge.className = "portrait-lock-badge";
+    lockBadge.hidden = true;
+    root.appendChild(lockBadge);
     const hpBars = new FakeElement();
     hpBars.tagName = "DIV";
     hpBars.className = "portrait-hp-bars";

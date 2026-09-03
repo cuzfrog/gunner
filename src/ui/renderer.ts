@@ -476,10 +476,10 @@ export class CanvasRenderer implements Renderer {
     if (lock.status === "locked" && lock.lockTime === 0) return;
     const p = this.worldToScreen(ship.position);
     const radius = SHIP_ICON_SIZE + 6;
-    if (lock.status === "locked") {
-      this.drawLockTarget(p, COLORS.lockComplete);
-    } else if (lock.status === "locking") {
+    if (lock.status === "locking") {
       this.drawLockArc(p, radius, lock.progress, COLORS.lockProgress);
+    } else if (lock.status === "locked") {
+      this.drawLockArc(p, radius, 1, COLORS.lockComplete);
     } else {
       this.drawLockArc(p, radius, 1, COLORS.lockIdle);
     }
@@ -492,32 +492,6 @@ export class CanvasRenderer implements Renderer {
     this.ctx.beginPath();
     this.ctx.arc(center.x, center.y, radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
     this.ctx.stroke();
-  }
-
-  private drawLockTarget(center: { x: number; y: number }, color: string): void {
-    const cx = center.x + SHIP_ICON_SIZE - 1;
-    const cy = center.y - SHIP_ICON_SIZE * 0.75 + 1;
-    const r = 3;
-    this.ctx.strokeStyle = color;
-    this.ctx.lineWidth = 1.5;
-    this.ctx.setLineDash([]);
-    this.ctx.beginPath();
-    this.ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    this.ctx.stroke();
-    this.ctx.beginPath();
-    this.ctx.moveTo(cx - r - 1, cy);
-    this.ctx.lineTo(cx - r + 0.5, cy);
-    this.ctx.moveTo(cx + r - 0.5, cy);
-    this.ctx.lineTo(cx + r + 1, cy);
-    this.ctx.moveTo(cx, cy - r - 1);
-    this.ctx.lineTo(cx, cy - r + 0.5);
-    this.ctx.moveTo(cx, cy + r - 0.5);
-    this.ctx.lineTo(cx, cy + r + 1);
-    this.ctx.stroke();
-    this.ctx.fillStyle = color;
-    this.ctx.beginPath();
-    this.ctx.arc(cx, cy, 1, 0, Math.PI * 2);
-    this.ctx.fill();
   }
 
   private drawSpeedLabel(ship: ShipState, color: string, dy: number): void {
