@@ -143,6 +143,9 @@ export interface DamageAssessment {
 
 export interface DamageEvent {
   readonly target: Side;
+  readonly source: Side;
+  readonly weaponIndex: number;
+  readonly kind: WeaponKind;
   readonly rawByType: DamageVector; // post-hit-quality, pre-resist
 }
 

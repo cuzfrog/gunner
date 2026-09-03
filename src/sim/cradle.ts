@@ -18,6 +18,7 @@ import type {
   StackingPenalty,
   TurretBoosterResolver,
   TurretDamage,
+  WeaponClock,
 } from "./index";
 import type { SimConfig } from "./types";
 
@@ -43,5 +44,6 @@ export interface SimCradle {
   readonly defenseAssessor: DefenseAssessor;
   readonly defenseSimulator: DefenseSimulator;
   readonly rngFactory: RngFactory;
+  readonly weaponClock: WeaponClock;
   readonly simConfig: SimConfig;
 }

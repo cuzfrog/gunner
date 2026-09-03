@@ -47,6 +47,8 @@ no-new-exports:
   - rng.test.ts
   - hitRoll.ts
   - hitRoll.test.ts
+  - weaponClock.ts
+  - weaponClock.test.ts
   - module.ts
 ---
 

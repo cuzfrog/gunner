@@ -6,10 +6,10 @@ import { ZERO_DAMAGE } from "./types";
 function events(shipA: DamageVector, shipB: DamageVector): readonly DamageEvent[] {
   const result: DamageEvent[] = [];
   if (shipA.em > 0 || shipA.thermal > 0 || shipA.kinetic > 0 || shipA.explosive > 0) {
-    result.push({ target: "shipA", rawByType: shipA });
+    result.push({ target: "shipA", source: "shipB", weaponIndex: 0, kind: "turret", rawByType: shipA });
   }
   if (shipB.em > 0 || shipB.thermal > 0 || shipB.kinetic > 0 || shipB.explosive > 0) {
-    result.push({ target: "shipB", rawByType: shipB });
+    result.push({ target: "shipB", source: "shipA", weaponIndex: 0, kind: "turret", rawByType: shipB });
   }
   return result;
 }
@@ -530,8 +530,8 @@ describe("DefenseSimulatorImpl", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, shieldRechargeTime: 0 })));
     sim.step(1, [
-      { target: "shipA", rawByType: { em: 50, thermal: 0, kinetic: 0, explosive: 0 } },
-      { target: "shipA", rawByType: { em: 50, thermal: 0, kinetic: 0, explosive: 0 } },
+      { target: "shipA", source: "shipB", weaponIndex: 0, kind: "turret", rawByType: { em: 50, thermal: 0, kinetic: 0, explosive: 0 } },
+      { target: "shipA", source: "shipB", weaponIndex: 0, kind: "turret", rawByType: { em: 50, thermal: 0, kinetic: 0, explosive: 0 } },
     ]);
     expect(sim.view().pools.shipA.shield).toBe(900);
   });

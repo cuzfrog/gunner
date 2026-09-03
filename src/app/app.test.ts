@@ -24,6 +24,7 @@ import {
   type SimSnapshot,
   type SpeedBreakdown,
   type TurretSpec,
+  type WeaponClock,
 } from "../sim";
 import { toTypeId } from "../gamedata/ids";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
@@ -55,7 +56,7 @@ const controls = vi.mocked<Controls>({
 });
 const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
 const droneSimulator = vi.mocked<DroneSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), states: vi.fn(() => []) });
-const missileSimulator = vi.mocked<MissileSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })) });
+const missileSimulator = vi.mocked<MissileSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(() => []), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })) });
 const emptyDefenseView: DefenseView = {
   pools: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
   poolPercentages: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
@@ -69,6 +70,7 @@ const emptyDefenseView: DefenseView = {
 };
 const defenseSimulator = vi.mocked<DefenseSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(() => emptyDefenseView), setDamageEnabled: vi.fn(), setRepairMode: vi.fn(), setRepairerActivation: vi.fn(), setRahActivation: vi.fn() });
 const missileBoosterResolver = vi.mocked<MissileBoosterResolver>({ boostedMissile: vi.fn((m) => m) });
+const weaponClock = vi.mocked<WeaponClock>({ reset: vi.fn(), step: vi.fn(() => []) });
 const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn() });
 const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setDroneRangeVisibility: vi.fn(), setDroneControlRangeVisibility: vi.fn(), setManualZoom: vi.fn() });
 const loop = vi.mocked<Loop>({
@@ -169,7 +171,7 @@ describe("AppImpl", () => {
     controls.hasWeapon.mockReturnValue(true);
     ewarResolver.speedBreakdown.mockReturnValue(emptySpeedBreakdown);
     ewarResolver.disruptionBreakdown.mockReturnValue(emptyDisruptionBreakdown);
-    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, renderer, loop });
+    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, weaponClock, renderer, loop });
   });
 
   function callbacks(): ControlsCallbacks {
@@ -213,7 +215,7 @@ describe("AppImpl", () => {
     };
     simulation.snapshot.mockReturnValue(boostedSnapshot);
     engagementFrameComposer.compose.mockReturnValue(view);
-    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, renderer, loop });
+    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, weaponClock, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, { shipA: { kind: "turret", optimal: 6000, falloff: 4000 }, shipB: { kind: "turret", optimal: 6000, falloff: 4000 } }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, emptyDefenseView);
     expect(controls.update).toHaveBeenCalledWith(view, {
@@ -225,7 +227,7 @@ describe("AppImpl", () => {
   test("falls back to the view's effective weapon when the composer returns no assessment", () => {
     const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT } };
     engagementFrameComposer.compose.mockReturnValue(view);
-    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, renderer, loop });
+    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, weaponClock, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, emptyDefenseView);
     expect(controls.update).toHaveBeenCalledWith(view, {
@@ -361,7 +363,7 @@ describe("AppImpl", () => {
     engagementFrameComposer.compose.mockReturnValue(droneView);
     controls.getWeapon.mockReturnValue(drone);
     controls.getWeapons.mockReturnValue([drone]);
-    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, renderer, loop });
+    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, weaponClock, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "drone", optimal: 1000, falloff: 500 }, shipB: { kind: "drone", optimal: 1000, falloff: 500 } }, [], { shipA: [{ positions: [new Vec2(0, 0)], optimal: 1000, falloff: 500, controlRange: 60000 }], shipB: [{ positions: [new Vec2(0, 0)], optimal: 1000, falloff: 500, controlRange: 60000 }] }, { shipA: [], shipB: [] }, emptyDefenseView);
     expect(controls.update).toHaveBeenCalledWith(droneView, {

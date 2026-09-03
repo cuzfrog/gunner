@@ -17,6 +17,7 @@ export type { DroneSimulator, DroneSimConfig } from "./droneSimulator";
 export type { MissileSimulator } from "./missileSimulator";
 export type { Rng, RngFactory } from "./rng";
 export type { TurretDamage } from "./turretDamage";
+export type { WeaponClock } from "./weaponClock";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
   AppliedEwarEffect,

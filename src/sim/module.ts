@@ -19,6 +19,7 @@ import { SimulationImpl } from "./simulation";
 import { StackingPenaltyImpl } from "./stackingPenalty";
 import { SimValueParserImpl } from "./simValueParser";
 import { TurretDamageImpl } from "./turretDamage";
+import { WeaponClockImpl } from "./weaponClock";
 import type { SimCradle } from "./cradle";
 
 export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T>): void {
@@ -44,5 +45,6 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     defenseAssessor: asClass(DefenseAssessorImpl).singleton(),
     defenseSimulator: asClass(DefenseSimulatorImpl).singleton(),
     rngFactory: asClass(Mulberry32RngFactory).singleton(),
+    weaponClock: asClass(WeaponClockImpl).singleton(),
   });
 }

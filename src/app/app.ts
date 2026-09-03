@@ -1,5 +1,5 @@
-import { Vec2, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "../sim";
-import type { DamageEvent, DefenseSimConfig, DefenseSimulator, DefenseView, DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, MissileAttackFacts, MissileBoosterResolver, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, ShipState, Side, Simulation, WeaponSpec } from "../sim";
+import { Vec2 } from "../sim";
+import type { DamageEvent, DefenseSimConfig, DefenseSimulator, DefenseView, DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, MissileAttackFacts, MissileBoosterResolver, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, ShipState, Side, Simulation, WeaponClock, WeaponSpec } from "../sim";
 import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, MissileRenderCollection, Renderer, WeaponRange, WeaponRanges } from "../ui";
 
 export interface App {
@@ -16,6 +16,7 @@ export class AppImpl implements App {
   private readonly engagementFrameComposer: EngagementFrameComposer;
   private readonly ewarResolver: EwarResolver;
   private readonly missileBoosterResolver: MissileBoosterResolver;
+  private readonly weaponClock: WeaponClock;
   private readonly renderer: Renderer;
   private readonly loop: Loop;
 
@@ -28,6 +29,7 @@ export class AppImpl implements App {
     engagementFrameComposer: EngagementFrameComposer;
     ewarResolver: EwarResolver;
     missileBoosterResolver: MissileBoosterResolver;
+    weaponClock: WeaponClock;
     renderer: Renderer;
     loop: Loop;
   }) {
@@ -39,6 +41,7 @@ export class AppImpl implements App {
     this.engagementFrameComposer = deps.engagementFrameComposer;
     this.ewarResolver = deps.ewarResolver;
     this.missileBoosterResolver = deps.missileBoosterResolver;
+    this.weaponClock = deps.weaponClock;
     this.renderer = deps.renderer;
     this.loop = deps.loop;
   }
@@ -51,6 +54,7 @@ export class AppImpl implements App {
         this.simulation.reset(this.controls.getConfig());
         this.droneSimulator.reset(this.droneSimConfig());
         this.missileSimulator.reset(this.missileSimConfig());
+        this.weaponClock.reset();
         this.defenseSimulator.reset(this.defenseSimConfig());
         this.loop.reset();
         this.renderFrame();
@@ -75,6 +79,7 @@ export class AppImpl implements App {
     });
     this.droneSimulator.reset(this.droneSimConfig());
     this.missileSimulator.reset(this.missileSimConfig());
+    this.weaponClock.reset();
     this.defenseSimulator.reset(this.defenseSimConfig());
     this.renderFrame();
   }
@@ -85,8 +90,9 @@ export class AppImpl implements App {
     const input = this.engagementInput(snapshot);
     const view = this.engagementFrameComposer.compose(snapshot, input);
     this.droneSimulator.step(dt, view.frame);
-    this.missileSimulator.step(dt, view.frame, this.missileLaunchSpecs(view));
-    const events = this.defenseEvents(view, dt);
+    const missileEvents = this.missileSimulator.step(dt, view.frame, this.missileLaunchSpecs(view));
+    const weaponEvents = this.weaponClock.step(dt, view);
+    const events: DamageEvent[] = [...missileEvents, ...weaponEvents];
     this.defenseSimulator.step(dt, events);
     const defenseView = this.defenseSimulator.view();
     if (defenseView.dead.shipA || defenseView.dead.shipB) {
@@ -119,19 +125,6 @@ export class AppImpl implements App {
       repairerActivation: { shipA: this.controls.getRepairerActivation("shipA"), shipB: this.controls.getRepairerActivation("shipB") },
       rahActivation: { shipA: this.controls.getRahActivation("shipA"), shipB: this.controls.getRahActivation("shipB") },
     };
-  }
-
-  private defenseEvents(view: EngagementView, dt: number): readonly DamageEvent[] {
-    const events: DamageEvent[] = [];
-    const shipAIncoming = view.attacks.shipB?.damage.appliedByType ?? ZERO_DAMAGE;
-    const shipBIncoming = view.attacks.shipA?.damage.appliedByType ?? ZERO_DAMAGE;
-    if (damageVectorSum(shipAIncoming) > 0) {
-      events.push({ target: "shipA", rawByType: damageVectorScale(shipAIncoming, dt) });
-    }
-    if (damageVectorSum(shipBIncoming) > 0) {
-      events.push({ target: "shipB", rawByType: damageVectorScale(shipBIncoming, dt) });
-    }
-    return events;
   }
 
   private engagementInput(snapshot: ReturnType<Simulation["snapshot"]>): EngagementInput {
