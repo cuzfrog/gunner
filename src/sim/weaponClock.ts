@@ -58,11 +58,8 @@ export class WeaponClockImpl implements WeaponClock {
 
   private clearCooldowns(source: Side, attacks: readonly WeaponAttack[]): void {
     const clock = this.sides[source];
-    const signature = weaponSignature(attacks);
-    if (signature !== clock.weaponSignature) {
-      clock.cooldowns.clear();
-      clock.weaponSignature = signature;
-    }
+    clock.cooldowns.clear();
+    clock.weaponSignature = weaponSignature(attacks);
   }
 
   private stepSide(source: Side, dt: number, attacks: readonly WeaponAttack[], target: Side): readonly DamageEvent[] {

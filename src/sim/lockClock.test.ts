@@ -101,4 +101,49 @@ describe("LockClockImpl", () => {
     const laterRemaining = clock.states().shipA.remaining;
     expect(laterRemaining).toBeLessThan(initialRemaining);
   });
+
+  test("re-locking after break restarts from zero progress", () => {
+    const clock = new LockClockImpl();
+    clock.step(0.1, stepInput(10000));
+    clock.step(1.0, stepInput(10000));
+    expect(clock.states().shipA.progress).toBeGreaterThan(0);
+    clock.step(0.1, stepInput(80000));
+    expect(clock.states().shipA.status).toBe("idle");
+    expect(clock.states().shipA.progress).toBe(0);
+    clock.step(0.1, stepInput(10000));
+    expect(clock.states().shipA.status).toBe("locking");
+    expect(clock.states().shipA.progress).toBe(0);
+  });
+
+  test("locked ship that leaves and re-enters range must re-lock from scratch", () => {
+    const clock = new LockClockImpl();
+    clock.step(0.1, stepInput(10000));
+    const time = clock.states().shipA.lockTime;
+    clock.step(time, stepInput(10000));
+    expect(clock.states().shipA.status).toBe("locked");
+    clock.step(0.1, stepInput(80000));
+    expect(clock.states().shipA.status).toBe("idle");
+    clock.step(0.1, stepInput(10000));
+    expect(clock.states().shipA.status).toBe("locking");
+    expect(clock.states().shipA.progress).toBe(0);
+  });
+
+  test("dt overshoot clamps to locked", () => {
+    const clock = new LockClockImpl();
+    clock.step(0.01, stepInput(10000));
+    const time = clock.states().shipA.lockTime;
+    const states = clock.step(time * 3, stepInput(10000));
+    expect(states.shipA.status).toBe("locked");
+    expect(states.shipA.progress).toBe(1);
+  });
+
+  test("zero scan resolution freezes progress in locking state", () => {
+    const clock = new LockClockImpl();
+    clock.step(0.1, stepInput(10000));
+    const zeroScanResSensor: SensorSpec = { scanResolution: 0, maxTargetingRange: 50000, maxLockedTargets: 4 };
+    const states = clock.step(1.0, stepInput(10000, zeroScanResSensor, zeroScanResSensor));
+    expect(states.shipA.status).toBe("locking");
+    expect(states.shipA.progress).toBe(0);
+    expect(states.shipA.lockTime).toBe(Infinity);
+  });
 });

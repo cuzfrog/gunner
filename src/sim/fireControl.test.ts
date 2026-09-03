@@ -293,4 +293,26 @@ describe("EngagementEvaluatorImpl", () => {
     expect(result.shipA!.effectiveWeapon).not.toEqual(turret);
     expect(result.shipA?.turret?.hit).toEqual(hit);
   });
+
+  test("locked=false zeros appliedDps while preserving nominalDps", () => {
+    const { evaluator } = makeEvaluator();
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40, locked: false } });
+    expect(result.shipA?.damage.nominalDps).toBe(turretDamageResult.nominalDps);
+    expect(result.shipA?.damage.appliedDps).toBe(0);
+    expect(result.shipA?.damage.application).toBe(0);
+    expect(damageVectorSum(result.shipA!.damage.appliedByType)).toBe(0);
+    expect(damageVectorSum(result.shipA!.damage.appliedVolleyByType)).toBe(0);
+  });
+
+  test("locked=true preserves appliedDps", () => {
+    const { evaluator } = makeEvaluator();
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40, locked: true } });
+    expect(result.shipA?.damage.appliedDps).toBe(turretDamageResult.appliedDps);
+  });
+
+  test("locked omitted preserves appliedDps (backward compatible)", () => {
+    const { evaluator } = makeEvaluator();
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40 } });
+    expect(result.shipA?.damage.appliedDps).toBe(turretDamageResult.appliedDps);
+  });
 });

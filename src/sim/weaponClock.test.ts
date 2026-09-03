@@ -165,4 +165,26 @@ describe("WeaponClockImpl", () => {
     const eventsAfter = clock.step(1, viewB);
     expect(eventsAfter).toHaveLength(0);
   });
+
+  test("unlocked side produces no events", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const attack = turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 });
+    const view: EngagementView = { ...makeView([attack]), locks: { shipA: { status: "locking", progress: 0.5, remaining: 5, lockTime: 10, inRange: true }, shipB: LOCKED_STATE } };
+    const events = clock.step(10, view);
+    expect(events).toHaveLength(0);
+  });
+
+  test("re-lock after break waits full cycle (no burst fire)", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const attack = turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 });
+    const lockedView = makeView([attack]);
+    const unlockingView: EngagementView = { ...makeView([attack]), locks: { shipA: { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: false }, shipB: LOCKED_STATE } };
+    clock.step(4, lockedView);
+    clock.step(1, lockedView);
+    clock.step(3, unlockingView);
+    const eventsAfterRelock = clock.step(1, lockedView);
+    expect(eventsAfterRelock).toHaveLength(0);
+    const eventsAfterFullCycle = clock.step(4, lockedView);
+    expect(eventsAfterFullCycle).toHaveLength(1);
+  });
 });

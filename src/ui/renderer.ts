@@ -1,4 +1,4 @@
-import { Vec2, type DefenseView, type EngagementFrame, type ShipState, type SimSnapshot } from "../sim";
+import { Vec2, type DefenseView, type EngagementFrame, type LockState, type ShipState, type Side, type SimSnapshot } from "../sim";
 import type { WeaponRangeVisibility } from "../appstate";
 import type { I18n } from "./i18n";
 import { PALETTE, withAlpha } from "./palette";
@@ -59,6 +59,7 @@ export interface Renderer {
   setDroneRangeVisibility(visibility: WeaponRangeVisibility): void;
   setDroneControlRangeVisibility(visibility: WeaponRangeVisibility): void;
   setManualZoom(autoZoom: boolean, factor: number): void;
+  setLockStates(states: Record<Side, LockState> | undefined): void;
   draw(snapshot: SimSnapshot, frame: EngagementFrame, ranges: WeaponRanges, overlays: readonly RangeOverlay[], droneInfo: DroneRenderInfo, missileInfo: MissileRenderCollection | undefined, defenseView: DefenseView | undefined): void;
 }
 
@@ -78,6 +79,10 @@ const COLORS = {
   overlayGrappler: PALETTE.overlayGrappler,
   overlayScrambler: PALETTE.overlayScrambler,
   overlayDisruptor: PALETTE.overlayDisruptor,
+  lockIdle: withAlpha(PALETTE.textSecondary, 0.4),
+  lockProgress: PALETTE.warnYellow,
+  lockComplete: PALETTE.optimalGreen,
+  targetingRange: withAlpha(PALETTE.accentTeal, 0.3),
 } as const;
 
 const OVERLAY_COLORS: { readonly [K in RangeOverlayKind]: string } = {
@@ -117,6 +122,7 @@ export class CanvasRenderer implements Renderer {
   private droneControlRangeVisibility: WeaponRangeVisibility = "none";
   private autoZoom = true;
   private zoomFactor = 1;
+  private lockStates: Record<Side, LockState> | undefined;
 
   constructor({ canvas, i18n }: { canvas: HTMLCanvasElement; i18n: I18n }) {
     this.canvas = canvas;
@@ -148,6 +154,10 @@ export class CanvasRenderer implements Renderer {
     if (Number.isFinite(factor)) this.zoomFactor = Math.max(0.25, Math.min(4, factor));
   }
 
+  setLockStates(states: Record<Side, LockState> | undefined): void {
+    this.lockStates = states;
+  }
+
   draw(snapshot: SimSnapshot, frame: EngagementFrame, ranges: WeaponRanges, overlays: readonly RangeOverlay[], droneInfo: DroneRenderInfo, missileInfo: MissileRenderCollection | undefined, defenseView: DefenseView | undefined): void {
     this.syncBufferSize();
     this.updateCamera(snapshot, ranges);
@@ -165,6 +175,7 @@ export class CanvasRenderer implements Renderer {
     this.drawDroneRangeRings(droneInfo);
     this.drawShip(snapshot.shipA, COLORS.shipA);
     this.drawShip(snapshot.shipB, COLORS.shipB);
+    this.drawLockIndicators(snapshot);
     this.drawDrones(droneInfo);
     if (missileInfo) this.drawMissiles(missileInfo);
     this.drawSpeedLabel(snapshot.shipA, COLORS.shipA, -20);
@@ -453,6 +464,34 @@ export class CanvasRenderer implements Renderer {
     this.ctx.fill();
 
     this.ctx.restore();
+  }
+
+  private drawLockIndicators(snapshot: SimSnapshot): void {
+    if (!this.lockStates) return;
+    this.drawLockForShip(snapshot.shipA, this.lockStates.shipA, COLORS.shipA);
+    this.drawLockForShip(snapshot.shipB, this.lockStates.shipB, COLORS.shipB);
+  }
+
+  private drawLockForShip(ship: ShipState, lock: LockState, color: string): void {
+    if (lock.status === "locked" && lock.lockTime === 0) return;
+    const p = this.worldToScreen(ship.position);
+    const radius = SHIP_ICON_SIZE + 6;
+    if (lock.status === "locking") {
+      this.drawLockArc(p, radius, lock.progress, COLORS.lockProgress);
+    } else if (lock.status === "locked") {
+      this.drawLockArc(p, radius, 1, COLORS.lockComplete);
+    } else {
+      this.drawLockArc(p, radius, 1, COLORS.lockIdle);
+    }
+  }
+
+  private drawLockArc(center: { x: number; y: number }, radius: number, progress: number, color: string): void {
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 2;
+    this.ctx.setLineDash([]);
+    this.ctx.beginPath();
+    this.ctx.arc(center.x, center.y, radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+    this.ctx.stroke();
   }
 
   private drawSpeedLabel(ship: ShipState, color: string, dy: number): void {

@@ -64,6 +64,7 @@ export class AppImpl implements App {
         this.lockClock.reset();
         this.defenseSimulator.reset(this.defenseSimConfig());
         this.loop.reset();
+        this.initializeLocks();
         this.renderFrame();
       },
       onConfigChange: () => {
@@ -89,6 +90,7 @@ export class AppImpl implements App {
     this.weaponClock.reset();
     this.lockClock.reset();
     this.defenseSimulator.reset(this.defenseSimConfig());
+    this.initializeLocks();
     this.renderFrame();
   }
 
@@ -100,8 +102,8 @@ export class AppImpl implements App {
       distance,
       sensorA: this.effectiveSensorSpec(snapshot.shipA, snapshot.shipB, distance),
       sensorB: this.effectiveSensorSpec(snapshot.shipB, snapshot.shipA, distance),
-      sigA: this.controls.getSig("shipA"),
-      sigB: this.controls.getSig("shipB"),
+      sigA: this.paintedSig(snapshot.shipB, snapshot.shipA, distance),
+      sigB: this.paintedSig(snapshot.shipA, snapshot.shipB, distance),
     });
     const input = this.engagementInput(snapshot, locks);
     const view = this.engagementFrameComposer.compose(snapshot, input);
@@ -161,6 +163,23 @@ export class AppImpl implements App {
     return this.ewarResolver.dampenedSensorSpec(boosted, opponent.ewar, distance);
   }
 
+  private paintedSig(ship: ShipState, opponent: ShipState, distance: number): number {
+    const baseSig = opponent.sig ?? 1;
+    return baseSig * this.ewarResolver.sigMultiplier(ship.ewar, distance);
+  }
+
+  private initializeLocks(): void {
+    const snapshot = this.simulation.snapshot();
+    const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
+    this.lockClock.step(0, {
+      distance,
+      sensorA: this.effectiveSensorSpec(snapshot.shipA, snapshot.shipB, distance),
+      sensorB: this.effectiveSensorSpec(snapshot.shipB, snapshot.shipA, distance),
+      sigA: this.paintedSig(snapshot.shipB, snapshot.shipA, distance),
+      sigB: this.paintedSig(snapshot.shipA, snapshot.shipB, distance),
+    });
+  }
+
   private missileFactsFor(side: Side): readonly MissileAttackFacts[] {
     const weapons = this.controls.getWeapons(side);
     const facts: MissileAttackFacts[] = [];
@@ -209,6 +228,7 @@ export class AppImpl implements App {
     this.renderer.setDroneRangeVisibility(this.controls.getDroneRangeVisibility());
     this.renderer.setDroneControlRangeVisibility(this.controls.getDroneControlRangeVisibility());
     this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
+    this.renderer.setLockStates(view.locks);
     this.renderer.draw(snapshot, view.frame, this.rendererWeaponRanges(view), this.controls.getOverlays(), this.droneRenderInfo(), this.missileRenderInfo(), this.defenseSimulator.view());
     this.controls.update(view, effectiveReadouts, this.defenseSimulator.view());
   }
