@@ -1,4 +1,4 @@
-import type { FittingDbData } from "./fittingDb";
+import type { FittingDbData, SkillBonus } from "./fittingDb";
 import type { ItemNameCatalog, ItemNameLoader, ItemNameResolver } from "./itemNames";
 import type { ModuleSlotCatalog } from "./moduleSlots";
 import type { NameI18nCatalog } from "./nameI18n";
@@ -14,4 +14,5 @@ export interface GameDataCradle {
   readonly itemNameLoader: ItemNameLoader;
   readonly itemNameResolver: ItemNameResolver;
   readonly presetFitTexts: PresetFitTexts;
+  readonly skillBonuses: readonly SkillBonus[];
 }

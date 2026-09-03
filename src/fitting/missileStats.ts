@@ -1,5 +1,5 @@
-import type { HullBonus, LauncherStats, MissileStats } from "../gamedata/fittingDb";
-import { toTypeId, type TypeId } from "../gamedata/ids";
+import type { HullBonus, LauncherStats, MissileStats, SkillBonus } from "../gamedata/fittingDb";
+import { type TypeId } from "../gamedata/ids";
 import { type DamageVector, type StackingPenalty, damageVectorFromPartial, damageVectorScale } from "../sim";
 import type { SkillLevel } from "../ships";
 import { missileDamageByType } from "./damageBreakdown";
@@ -13,7 +13,7 @@ export interface MissileSkillOutput {
   readonly maxVelocity: number;
   readonly flightTime: number;
   readonly skillDamageMultiplier: number;
-  readonly skillDamageId: TypeId;
+  readonly skillDamageIds: readonly TypeId[];
   readonly hullDamageMultiplier: number;
 }
 
@@ -21,44 +21,35 @@ export interface MissileSkillModel {
   compute(launcher: LauncherStats, missile: MissileStats, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): MissileSkillOutput;
 }
 
-const MLO_ROF_BONUS = 0.02;
-const RAPID_LAUNCH_ROF_BONUS = 0.03;
-const WARHEAD_DAMAGE_BONUS = 0.02;
-const WARHEAD_UPGRADES_ID = toTypeId("20315");
-const MISSILE_BOMBARDMENT_FLIGHT_BONUS = 0.10;
-const MISSILE_PROJECTION_VELOCITY_BONUS = 0.10;
-const GUIDED_PRECISION_RADIUS_BONUS = 0.05;
-const TARGET_NAV_VELOCITY_BONUS = 0.10;
-
 interface MissileSkillModelDeps {
   readonly stackingPenalty: StackingPenalty;
+  readonly skillBonuses: readonly SkillBonus[];
 }
 
 export class MissileSkillModelImpl implements MissileSkillModel {
   private readonly stacking: StackingPenalty;
+  private readonly skillBonuses: readonly SkillBonus[];
 
-  constructor({ stackingPenalty }: MissileSkillModelDeps) {
+  constructor({ stackingPenalty, skillBonuses }: MissileSkillModelDeps) {
     this.stacking = stackingPenalty;
+    this.skillBonuses = skillBonuses;
   }
 
   compute(launcher: LauncherStats, missile: MissileStats, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): MissileSkillOutput {
-    const skillRofMultiplier = (1 - MLO_ROF_BONUS * skillLevel) * (1 - RAPID_LAUNCH_ROF_BONUS * skillLevel);
-    const skillDamageMultiplier = 1 + WARHEAD_DAMAGE_BONUS * skillLevel;
-    const skillExplosionRadiusMultiplier = 1 - GUIDED_PRECISION_RADIUS_BONUS * skillLevel;
-    const skillExplosionVelocityMultiplier = 1 + TARGET_NAV_VELOCITY_BONUS * skillLevel;
-    const skillMaxVelocityMultiplier = 1 + MISSILE_PROJECTION_VELOCITY_BONUS * skillLevel;
-    const skillFlightTimeMultiplier = 1 + MISSILE_BOMBARDMENT_FLIGHT_BONUS * skillLevel;
+    const matchingSkillBonuses = this.skillBonuses.filter((b) => skillBonusMatches(b, launcher, missile));
+    const skillDamageMultiplier = multiplySkillBonuses(matchingSkillBonuses, "missileDamage", skillLevel);
+    const skillRofMultiplier = multiplySkillBonuses(matchingSkillBonuses, "missileRoF", skillLevel);
+    const skillVelocityMultiplier = multiplySkillBonuses(matchingSkillBonuses, "missileVelocity", skillLevel);
+    const skillFlightTimeMultiplier = multiplySkillBonuses(matchingSkillBonuses, "missileFlightTime", skillLevel);
+    const skillExplosionRadiusMultiplier = multiplySkillBonuses(matchingSkillBonuses, "missileExplosionRadius", skillLevel);
+    const skillExplosionVelocityMultiplier = multiplySkillBonuses(matchingSkillBonuses, "missileExplosionVelocity", skillLevel);
+    const skillDamageIds = matchingSkillBonuses.filter((b) => b.bonusType === "missileDamage" && b.magnitudePerLevel !== 0).map((b) => b.skillId);
 
-    const matchingBonuses = hullBonuses.filter((b) => hullBonusMatchesLauncher(b, launcher, missile));
-    const damagePercent = matchingBonuses.filter((b) => b.attribute === "missileDamage").map((b) => b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1) / 100);
-    const rofPercent = matchingBonuses.filter((b) => b.attribute === "missileRoF").map((b) => b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1) / 100);
-    const velocityPercent = matchingBonuses.filter((b) => b.attribute === "missileVelocity").map((b) => b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1) / 100);
-    const flightTimePercent = matchingBonuses.filter((b) => b.attribute === "missileFlightTime").map((b) => b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1) / 100);
-
-    const hullDamageMultiplier = damagePercent.length > 0 ? this.stacking.apply(damagePercent.map((p) => 1 + p)) : 1;
-    const hullRofMultiplier = rofPercent.length > 0 ? this.stacking.apply(rofPercent.map((p) => 1 + p)) : 1;
-    const hullVelocityMultiplier = velocityPercent.length > 0 ? this.stacking.apply(velocityPercent.map((p) => 1 + p)) : 1;
-    const hullFlightTimeMultiplier = flightTimePercent.length > 0 ? this.stacking.apply(flightTimePercent.map((p) => 1 + p)) : 1;
+    const matchingHullBonuses = hullBonuses.filter((b) => hullBonusMatchesLauncher(b, launcher, missile));
+    const hullDamageMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileDamage", skillLevel);
+    const hullRofMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileRoF", skillLevel);
+    const hullVelocityMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileVelocity", skillLevel);
+    const hullFlightTimeMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileFlightTime", skillLevel);
 
     const damageMultiplier = skillDamageMultiplier * hullDamageMultiplier;
     return {
@@ -67,13 +58,37 @@ export class MissileSkillModelImpl implements MissileSkillModel {
       explosionRadius: missile.explosionRadius * skillExplosionRadiusMultiplier,
       explosionVelocity: missile.explosionVelocity * skillExplosionVelocityMultiplier,
       damageReductionFactor: missile.damageReductionFactor,
-      maxVelocity: missile.maxVelocity * skillMaxVelocityMultiplier * hullVelocityMultiplier,
+      maxVelocity: missile.maxVelocity * skillVelocityMultiplier * hullVelocityMultiplier,
       flightTime: missile.flightTime * skillFlightTimeMultiplier * hullFlightTimeMultiplier,
       skillDamageMultiplier,
-      skillDamageId: WARHEAD_UPGRADES_ID,
+      skillDamageIds,
       hullDamageMultiplier,
     };
   }
+}
+
+function skillBonusMatches(bonus: SkillBonus, launcher: LauncherStats, missile: MissileStats): boolean {
+  if (bonus.appliesTo === "module") {
+    if (bonus.requiredSkillId !== undefined && !launcher.requiredSkillIds.includes(bonus.requiredSkillId)) return false;
+    if (bonus.moduleGroupId !== undefined && bonus.moduleGroupId !== launcher.launcherGroup) return false;
+  } else {
+    if (bonus.requiredSkillId !== undefined && !missile.requiredSkillIds.includes(bonus.requiredSkillId)) return false;
+  }
+  return true;
+}
+
+function multiplySkillBonuses(bonuses: readonly SkillBonus[], bonusType: SkillBonus["bonusType"], skillLevel: SkillLevel): number {
+  let multiplier = 1;
+  for (const bonus of bonuses) {
+    if (bonus.bonusType !== bonusType) continue;
+    multiplier *= 1 + (bonus.magnitudePerLevel * skillLevel) / 100;
+  }
+  return multiplier;
+}
+
+function hullStackingMultiplier(stacking: StackingPenalty, bonuses: readonly HullBonus[], attribute: HullBonus["attribute"], skillLevel: SkillLevel): number {
+  const percents = bonuses.filter((b) => b.attribute === attribute).map((b) => b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1) / 100);
+  return percents.length > 0 ? stacking.apply(percents.map((p) => 1 + p)) : 1;
 }
 
 function hullBonusMatchesLauncher(bonus: HullBonus, launcher: LauncherStats, missile: MissileStats): boolean {

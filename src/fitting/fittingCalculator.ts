@@ -231,7 +231,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
 
     const output = this.missileSkillModel.compute(launcherStats, missileStats, fitting.hullBonuses, conditions.skillLevel);
     const launcherOverloadCycle = conditions.weaponOverloaded ? WEAPON_OVERLOAD_ROF_MULTIPLIER : 1;
-    const missileFactors = buildMissileDamageFactors(output.skillDamageMultiplier, output.skillDamageId, output.hullDamageMultiplier, fitting.profile.name, bcsDamageBonus, bcsDamageModifiers);
+    const missileFactors = buildMissileDamageFactors(output.skillDamageMultiplier, output.skillDamageIds, output.hullDamageMultiplier, fitting.profile.name, bcsDamageBonus, bcsDamageModifiers);
     return {
       moduleId: bestGroup.moduleId,
       name: launcherStats.name,
@@ -629,10 +629,10 @@ function deduplicateSkillIds(ids: readonly TypeId[]): readonly TypeId[] {
   return result;
 }
 
-function buildMissileDamageFactors(skillDamageMultiplier: number, skillId: TypeId, hullDamageMultiplier: number, hullName: string, moduleDamageBonus: number, moduleModifiers: readonly { moduleId: TypeId; multiplier: number }[]): readonly DamageFactor[] {
+function buildMissileDamageFactors(skillDamageMultiplier: number, skillIds: readonly TypeId[], hullDamageMultiplier: number, hullName: string, moduleDamageBonus: number, moduleModifiers: readonly { moduleId: TypeId; multiplier: number }[]): readonly DamageFactor[] {
   const factors: DamageFactor[] = [{ kind: "base", multiplier: 1 }];
   if (moduleDamageBonus !== 1) factors.push({ kind: "module", multiplier: moduleDamageBonus, moduleIds: moduleModifiers.map((m) => m.moduleId) });
-  if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillIds: [skillId] });
+  if (skillDamageMultiplier !== 1 && skillIds.length > 0) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillIds: skillIds });
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
   return factors;
 }

@@ -340,7 +340,7 @@ const hullBonusDb: FittingDb = {
 const gunFamilies = new GunFamiliesImpl({ fittingDb: db });
 
 const chargeCatalog = new ChargeCatalogImpl({ fittingDb: db, gunFamilies });
-const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty });
+const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonuses: db.skillBonuses });
 const missileCatalog = new MissileCatalogImpl({ fittingDb: db, missileSkillModel });
 const droneSkillModel = new DroneSkillModelImpl();
 const droneCatalog = new DroneCatalogImpl({ fittingDb: db });
@@ -388,7 +388,7 @@ const fullFittingDb: FittingDb = {
 };
 const fullGunFamilies = new GunFamiliesImpl({ fittingDb: fullFittingDb });
 const fullChargeCatalog = new ChargeCatalogImpl({ fittingDb: fullFittingDb, gunFamilies: fullGunFamilies });
-const fullMissileSkillModel = new MissileSkillModelImpl({ stackingPenalty });
+const fullMissileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonuses: fullFittingDb.skillBonuses });
 const fullMissileCatalog = new MissileCatalogImpl({ fittingDb: fullFittingDb, missileSkillModel: fullMissileSkillModel });
 const fullDroneSkillModel = new DroneSkillModelImpl();
 const fullDroneCatalog = new DroneCatalogImpl({ fittingDb: fullFittingDb });
@@ -1431,7 +1431,7 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
     );
     expect(result!.launcher).toBeDefined();
     const baseDamage = 95;
-    const skillDamageMultiplier = 1 + 0.02 * 4;
+    const skillDamageMultiplier = (1 + 0.05 * 4) * (1 + 0.02 * 4);
     const hullDamagePercent = 5 * 4;
     const hullDamageMultiplier = stackingPenalty.apply([1 + hullDamagePercent / 100]);
     expect(damageVectorSum(result!.launcher!.damagePerMissile)).toBeCloseTo(baseDamage * skillDamageMultiplier * hullDamageMultiplier, 4);

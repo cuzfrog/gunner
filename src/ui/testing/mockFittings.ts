@@ -104,6 +104,7 @@ const MOCK_REPRESENTATIVES: Record<GunFamily, Record<SigResolutionClass, TypeId>
   beamLaser: { S: toTypeId("454"), M: toTypeId("459"), L: toTypeId("464"), XL: toTypeId("20446") },
   blaster: { S: toTypeId("564"), M: toTypeId("568"), L: toTypeId("573"), XL: toTypeId("20450") },
   railgun: { S: toTypeId("565"), M: toTypeId("570"), L: toTypeId("574"), XL: toTypeId("20448") },
+  disintegrator: { S: toTypeId("47912"), M: toTypeId("47915"), L: toTypeId("47918"), XL: toTypeId("52998") },
 };
 
 export function mockGunFamilies(): GunFamilies {

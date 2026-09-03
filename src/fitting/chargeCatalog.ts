@@ -56,7 +56,7 @@ export interface ChargeOption {
   readonly damageByType: Readonly<Partial<Record<DamageType, number>>>;
 }
 
-export type ChargeFamily = "projectile" | "hybrid" | "laser";
+export type ChargeFamily = "projectile" | "hybrid" | "laser" | "precursor";
 
 export interface ChargeCatalog {
   usualForChargeSize(chargeSize: number): TypeId;
@@ -219,6 +219,7 @@ const TURRET_CHARGE_FAMILIES: Readonly<Record<GunFamily, ChargeFamily>> = {
   blaster: "hybrid",
   pulseLaser: "laser",
   beamLaser: "laser",
+  disintegrator: "precursor",
 } as const;
 
 const CHARGE_FAMILY_BY_BASE: Readonly<Record<string, ChargeFamily>> = {
