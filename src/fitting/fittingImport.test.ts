@@ -285,8 +285,8 @@ const db: FittingDb = {
     "Gyrostabilizer II": row("Gyrostabilizer II", "Gyrostabilizer II", { turretDamageMultiplier: 1.15, turretSpeedMultiplier: 0.89, turretWeaponGroup: "Projectile Weapon" }),
   },
   turrets: {
-    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", requiredSkillIds: [], metaLevel: 5, metaGroupID: 2 }),
-    "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, damageMultiplier: 3, cycleTime: 5, turretSkill: "Small Projectile Turret", requiredSkillIds: [], metaLevel: 5, metaGroupID: 2 }),
+    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", requiredSkillIds: [toTypeId("3300"), toTypeId("3306"), toTypeId("12214")], metaLevel: 5, metaGroupID: 2 }),
+    "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, damageMultiplier: 3, cycleTime: 5, turretSkill: "Small Projectile Turret", requiredSkillIds: [toTypeId("3300"), toTypeId("3302"), toTypeId("11079")], metaLevel: 5, metaGroupID: 2 }),
   },
   charges: {
     "Conflagration M": row("Conflagration M", "Conflagration M", { trackingMultiplier: 0.7, rangeMultiplier: 0.5 }),
@@ -320,18 +320,18 @@ const hullBonusDb: FittingDb = {
   ...db,
   hullBonuses: {
     [bonusProfile.id]: [
-      { attribute: "maxVelocity", magnitude: 5, skill: "Minmatar Cruiser" },
-      { attribute: "agility", magnitude: -4, skill: "Minmatar Cruiser" },
-      { attribute: "turretTracking", magnitude: 10, skill: "Minmatar Cruiser", turretSkill: "Small Projectile Turret" },
-      { attribute: "turretFalloff", magnitude: 10 },
-      { attribute: "turretOptimal", magnitude: 25, turretSkill: "Medium Projectile Turret" },
+      { attribute: "maxVelocity", magnitude: 5, scalesWithHullSkill: true },
+      { attribute: "agility", magnitude: -4, scalesWithHullSkill: true },
+      { attribute: "turretTracking", magnitude: 10, scalesWithHullSkill: true, moduleSkillId: toTypeId("3302") },
+      { attribute: "turretFalloff", magnitude: 10, scalesWithHullSkill: false },
+      { attribute: "turretOptimal", magnitude: 25, scalesWithHullSkill: false, moduleSkillId: toTypeId("3305") },
     ],
     [roleBonusProfile.id]: [
-      { attribute: "maxVelocity", magnitude: 50 },
-      { attribute: "agility", magnitude: -5 },
+      { attribute: "maxVelocity", magnitude: 50, scalesWithHullSkill: false },
+      { attribute: "agility", magnitude: -5, scalesWithHullSkill: false },
     ],
     [profile.id]: [
-      { attribute: "turretDamage", magnitude: 10, skill: "Amarr Battlecruiser", turretSkill: "Medium Energy Turret" },
+      { attribute: "turretDamage", magnitude: 10, scalesWithHullSkill: true, moduleSkillId: toTypeId("3306") },
     ],
   },
   skillBonuses: [],
@@ -925,7 +925,7 @@ Heat Sink II`,
       ...db,
       hullBonuses: {
         [profile.id]: [
-          { attribute: "turretRoF", magnitude: -5, skill: "Amarr Battlecruiser", turretSkill: "Medium Energy Turret" },
+          { attribute: "turretRoF", magnitude: -5, scalesWithHullSkill: true, moduleSkillId: toTypeId("3306") },
         ],
       },
       skillBonuses: [],

@@ -222,7 +222,7 @@ function hullBonusMultiplier(hullBonuses: readonly HullBonus[], attribute: strin
   let multiplier = 1;
   for (const bonus of hullBonuses) {
     if (bonus.attribute !== attribute) continue;
-    const percent = bonus.magnitude * (bonus.skill ? skillLevel : 1);
+    const percent = bonus.magnitude * (bonus.scalesWithHullSkill ? skillLevel : 1);
     multiplier *= 1 + percent / 100;
   }
   return multiplier;

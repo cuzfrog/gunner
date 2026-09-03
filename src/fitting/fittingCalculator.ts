@@ -109,7 +109,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const hullRoFPercents: number[] = [];
 
       for (const bonus of fitting.hullBonuses) {
-        if (bonus.turretSkill && turret.turretSkill !== bonus.turretSkill) continue;
+        if (bonus.moduleSkillId && !turret.requiredSkillIds.includes(bonus.moduleSkillId)) continue;
         const percent = hullBonusPercent(bonus, skillLevel);
         if (bonus.attribute === "turretTracking") hullTrackingPercents.push(percent);
         if (bonus.attribute === "turretOptimal") hullOptimalPercents.push(percent);
@@ -583,7 +583,7 @@ function computeSkillRoFMultiplier(skillBonuses: readonly SkillBonus[], skillLev
 }
 
 function hullBonusPercent(bonus: HullBonus, skillLevel: number): number {
-  return bonus.magnitude * (bonus.skill ? skillLevel : 1);
+  return bonus.magnitude * (bonus.scalesWithHullSkill ? skillLevel : 1);
 }
 
 const WEAPON_OVERLOAD_DAMAGE_MULTIPLIER = 1.15;

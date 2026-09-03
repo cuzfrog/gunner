@@ -83,7 +83,7 @@ describe("MissileSkillModelImpl", () => {
 
   test("hull missile damage bonus is applied via stacking penalty", () => {
     const bonuses: readonly HullBonus[] = [
-      { attribute: "missileDamage", magnitude: 5, skill: "Caldari Frigate", launcherGroup: 509 },
+      { attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, moduleGroupId: 509 },
     ];
     stacking.apply.mockReturnValue(1.25);
     const result = model().compute(launcher(16, 509), missile(), bonuses, 5);
@@ -92,7 +92,7 @@ describe("MissileSkillModelImpl", () => {
 
   test("hull missile damage bonus only applies when launcherGroup matches", () => {
     const bonuses: readonly HullBonus[] = [
-      { attribute: "missileDamage", magnitude: 5, skill: "Caldari Frigate", launcherGroup: 510 },
+      { attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, moduleGroupId: 510 },
     ];
     const result = model().compute(launcher(16, 509), missile(), bonuses, 5);
     expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * (1 + 0.02 * 5), 6);
@@ -100,7 +100,7 @@ describe("MissileSkillModelImpl", () => {
 
   test("hull missile damage bonus applies when launcherGroup is absent (universal)", () => {
     const bonuses: readonly HullBonus[] = [
-      { attribute: "missileDamage", magnitude: 5, skill: "Caldari Cruiser" },
+      { attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true },
     ];
     stacking.apply.mockReturnValue(1.25);
     const result = model().compute(launcher(12, 510), missile({ launcherGroup: 510 }), bonuses, 5);
@@ -109,7 +109,7 @@ describe("MissileSkillModelImpl", () => {
 
   test("hull missile ROF bonus is applied as a multiplier to cycle time", () => {
     const bonuses: readonly HullBonus[] = [
-      { attribute: "missileRoF", magnitude: -5, skill: "Minmatar Frigate", launcherGroup: 509 },
+      { attribute: "missileRoF", magnitude: -5, scalesWithHullSkill: true, moduleGroupId: 509 },
     ];
     stacking.apply.mockReturnValue(0.75);
     const result = model().compute(launcher(16, 509), missile(), bonuses, 5);
@@ -119,7 +119,7 @@ describe("MissileSkillModelImpl", () => {
 
   test("hull missile ROF bonus only applies when launcherGroup matches", () => {
     const bonuses: readonly HullBonus[] = [
-      { attribute: "missileRoF", magnitude: -5, skill: "Minmatar Frigate", launcherGroup: 510 },
+      { attribute: "missileRoF", magnitude: -5, scalesWithHullSkill: true, moduleGroupId: 510 },
     ];
     const result = model().compute(launcher(16, 509), missile(), bonuses, 5);
     const skillRof = (1 - 0.02 * 5) * (1 - 0.03 * 5);

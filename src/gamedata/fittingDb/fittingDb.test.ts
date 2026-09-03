@@ -93,11 +93,11 @@ describe("fittingDb", () => {
 
   test("includes hull bonuses for turret, velocity and agility attributes", () => {
     expect(HULL_BONUSES["16242" as ShipId]).toEqual([
-      { attribute: "turretOptimal", magnitude: 50, turretSkill: "Small Projectile Turret" },
-      { attribute: "turretDamage", magnitude: 5, skill: "Minmatar Destroyer", turretSkill: "Small Projectile Turret" },
-      { attribute: "turretTracking", magnitude: 10, skill: "Minmatar Destroyer", turretSkill: "Small Projectile Turret" },
+      { attribute: "turretOptimal", magnitude: 50, scalesWithHullSkill: false, moduleSkillId: toTypeId("3302") },
+      { attribute: "turretDamage", magnitude: 5, scalesWithHullSkill: true, moduleSkillId: toTypeId("3302") },
+      { attribute: "turretTracking", magnitude: 10, scalesWithHullSkill: true, moduleSkillId: toTypeId("3302") },
     ]);
-    expect(HULL_BONUSES["23917" as ShipId]).toEqual([{ attribute: "agility", magnitude: -5, skill: "Advanced Spaceship Command" }]);
+    expect(HULL_BONUSES["23917" as ShipId]).toContainEqual({ attribute: "agility", magnitude: -5, scalesWithHullSkill: true });
   });
 
   test("includes charge multipliers", () => {
@@ -365,27 +365,22 @@ describe("fittingDb", () => {
   });
 
   test("includes Kestrel missile damage hull bonus for light missiles", () => {
-    expect(HULL_BONUSES["602" as ShipId]).toEqual([
-      { attribute: "missileDamage", magnitude: 5, skill: "Caldari Frigate", launcherGroup: 509 },
-    ]);
+    expect(HULL_BONUSES["602" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3320") });
+    expect(HULL_BONUSES["602" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3321") });
   });
 
   test("includes Raven missile ROF hull bonuses for cruise, torpedo, and rapid heavy launchers", () => {
-    expect(HULL_BONUSES["638" as ShipId]).toEqual([
-      { attribute: "missileRoF", magnitude: -5, skill: "Caldari Battleship", launcherGroup: 506 },
-      { attribute: "missileRoF", magnitude: -5, skill: "Caldari Battleship", launcherGroup: 508 },
-      { attribute: "missileRoF", magnitude: -5, skill: "Caldari Battleship", launcherGroup: 1245 },
-      { attribute: "plateHpPercent", magnitude: 50 },
-      { attribute: "extenderHpPercent", magnitude: 100 },
-    ]);
+    expect(HULL_BONUSES["638" as ShipId]).toContainEqual({ attribute: "missileRoF", magnitude: -5, scalesWithHullSkill: true, moduleGroupId: 506 });
+    expect(HULL_BONUSES["638" as ShipId]).toContainEqual({ attribute: "missileRoF", magnitude: -5, scalesWithHullSkill: true, moduleGroupId: 508 });
+    expect(HULL_BONUSES["638" as ShipId]).toContainEqual({ attribute: "missileRoF", magnitude: -5, scalesWithHullSkill: true, moduleGroupId: 1245 });
+    expect(HULL_BONUSES["638" as ShipId]).toContainEqual({ attribute: "plateHpPercent", magnitude: 50, scalesWithHullSkill: false, moduleGroupId: 329 });
+    expect(HULL_BONUSES["638" as ShipId]).toContainEqual({ attribute: "extenderHpPercent", magnitude: 100, scalesWithHullSkill: false, moduleGroupId: 38 });
   });
 
   test("includes Drake missile damage hull bonuses for heavy and heavy assault missiles", () => {
-    expect(HULL_BONUSES["24698" as ShipId]).toEqual([
-      { attribute: "shieldResist", magnitude: -4, skill: "Caldari Battlecruiser" },
-      { attribute: "missileDamage", magnitude: 10, skill: "Caldari Battlecruiser", launcherGroup: 771 },
-      { attribute: "missileDamage", magnitude: 10, skill: "Caldari Battlecruiser", launcherGroup: 510 },
-    ]);
+    expect(HULL_BONUSES["24698" as ShipId]).toContainEqual({ attribute: "shieldResist", magnitude: -4, scalesWithHullSkill: true });
+    expect(HULL_BONUSES["24698" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 10, scalesWithHullSkill: true, chargeSkillId: toTypeId("25719") });
+    expect(HULL_BONUSES["24698" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 10, scalesWithHullSkill: true, chargeSkillId: toTypeId("3324") });
   });
 
   test("includes Heat Sink II with damage and speed multipliers for energy weapons", () => {
@@ -416,8 +411,8 @@ describe("fittingDb", () => {
     expect(HULL_BONUSES["24696" as ShipId]).toContainEqual({
       attribute: "turretDamage",
       magnitude: 10,
-      skill: "Amarr Battlecruiser",
-      turretSkill: "Medium Energy Turret",
+      scalesWithHullSkill: true,
+      moduleSkillId: toTypeId("3306"),
     });
   });
 
@@ -425,15 +420,40 @@ describe("fittingDb", () => {
     expect(HULL_BONUSES["24692" as ShipId]).toContainEqual({
       attribute: "armorResist",
       magnitude: -4,
-      skill: "Amarr Battleship",
+      scalesWithHullSkill: true,
     });
     expect(HULL_BONUSES["24692" as ShipId]).toContainEqual({
       attribute: "plateHpPercent",
       magnitude: 50,
+      scalesWithHullSkill: false,
+      moduleGroupId: 329,
     });
     expect(HULL_BONUSES["24692" as ShipId]).toContainEqual({
       attribute: "extenderHpPercent",
       magnitude: 100,
+      scalesWithHullSkill: false,
+      moduleGroupId: 38,
+    });
+  });
+
+  test("includes Garmur missile damage, velocity, and flight time hull bonuses", () => {
+    expect(HULL_BONUSES["33816" as ShipId]).toContainEqual({
+      attribute: "missileDamage",
+      magnitude: 25,
+      scalesWithHullSkill: true,
+      chargeSkillId: toTypeId("3319"),
+    });
+    expect(HULL_BONUSES["33816" as ShipId]).toContainEqual({
+      attribute: "missileVelocity",
+      magnitude: 200,
+      scalesWithHullSkill: false,
+      chargeSkillId: toTypeId("3319"),
+    });
+    expect(HULL_BONUSES["33816" as ShipId]).toContainEqual({
+      attribute: "missileFlightTime",
+      magnitude: -50,
+      scalesWithHullSkill: false,
+      chargeSkillId: toTypeId("3319"),
     });
   });
 

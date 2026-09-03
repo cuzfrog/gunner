@@ -258,7 +258,7 @@ describe("DefenseCalculatorImpl", () => {
   });
 
   test("shieldHpPercent hull bonus uses general skill level, not shieldManagement", () => {
-    const shieldHpBonus: readonly HullBonus[] = [{ attribute: "shieldHpPercent", magnitude: 5, skill: "Caldari Battleship" }];
+    const shieldHpBonus: readonly HullBonus[] = [{ attribute: "shieldHpPercent", magnitude: 5, scalesWithHullSkill: true }];
     const state = factory.create(rokhProfile, shieldHpBonus, [], [], [] as readonly CargoEntry[]);
     const withManagement0 = calculator.resolve(state, { skillLevel: 4, overloaded: false, weaponOverloaded: false, defenseSkills: { ...defaultDefenseSkills(4), shieldManagement: 0 } });
     const withManagement5 = calculator.resolve(state, { skillLevel: 4, overloaded: false, weaponOverloaded: false, defenseSkills: { ...defaultDefenseSkills(4), shieldManagement: 5 } });

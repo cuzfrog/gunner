@@ -49,12 +49,16 @@ export class MissileSkillModelImpl implements MissileSkillModel {
     const skillMaxVelocityMultiplier = 1 + MISSILE_PROJECTION_VELOCITY_BONUS * skillLevel;
     const skillFlightTimeMultiplier = 1 + MISSILE_BOMBARDMENT_FLIGHT_BONUS * skillLevel;
 
-    const matchingBonuses = hullBonuses.filter((b) => b.launcherGroup === undefined || b.launcherGroup === launcher.launcherGroup);
-    const damagePercent = matchingBonuses.filter((b) => b.attribute === "missileDamage").map((b) => b.magnitude * (b.skill ? skillLevel : 1) / 100);
-    const rofPercent = matchingBonuses.filter((b) => b.attribute === "missileRoF").map((b) => b.magnitude * (b.skill ? skillLevel : 1) / 100);
+    const matchingBonuses = hullBonuses.filter((b) => hullBonusMatchesLauncher(b, launcher, missile));
+    const damagePercent = matchingBonuses.filter((b) => b.attribute === "missileDamage").map((b) => b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1) / 100);
+    const rofPercent = matchingBonuses.filter((b) => b.attribute === "missileRoF").map((b) => b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1) / 100);
+    const velocityPercent = matchingBonuses.filter((b) => b.attribute === "missileVelocity").map((b) => b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1) / 100);
+    const flightTimePercent = matchingBonuses.filter((b) => b.attribute === "missileFlightTime").map((b) => b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1) / 100);
 
     const hullDamageMultiplier = damagePercent.length > 0 ? this.stacking.apply(damagePercent.map((p) => 1 + p)) : 1;
     const hullRofMultiplier = rofPercent.length > 0 ? this.stacking.apply(rofPercent.map((p) => 1 + p)) : 1;
+    const hullVelocityMultiplier = velocityPercent.length > 0 ? this.stacking.apply(velocityPercent.map((p) => 1 + p)) : 1;
+    const hullFlightTimeMultiplier = flightTimePercent.length > 0 ? this.stacking.apply(flightTimePercent.map((p) => 1 + p)) : 1;
 
     const damageMultiplier = skillDamageMultiplier * hullDamageMultiplier;
     return {
@@ -63,11 +67,18 @@ export class MissileSkillModelImpl implements MissileSkillModel {
       explosionRadius: missile.explosionRadius * skillExplosionRadiusMultiplier,
       explosionVelocity: missile.explosionVelocity * skillExplosionVelocityMultiplier,
       damageReductionFactor: missile.damageReductionFactor,
-      maxVelocity: missile.maxVelocity * skillMaxVelocityMultiplier,
-      flightTime: missile.flightTime * skillFlightTimeMultiplier,
+      maxVelocity: missile.maxVelocity * skillMaxVelocityMultiplier * hullVelocityMultiplier,
+      flightTime: missile.flightTime * skillFlightTimeMultiplier * hullFlightTimeMultiplier,
       skillDamageMultiplier,
       skillDamageId: WARHEAD_UPGRADES_ID,
       hullDamageMultiplier,
     };
   }
+}
+
+function hullBonusMatchesLauncher(bonus: HullBonus, launcher: LauncherStats, missile: MissileStats): boolean {
+  if (bonus.moduleGroupId !== undefined && bonus.moduleGroupId !== launcher.launcherGroup) return false;
+  if (bonus.moduleSkillId !== undefined && !launcher.requiredSkillIds.includes(bonus.moduleSkillId)) return false;
+  if (bonus.chargeSkillId !== undefined && !missile.requiredSkillIds.includes(bonus.chargeSkillId)) return false;
+  return true;
 }

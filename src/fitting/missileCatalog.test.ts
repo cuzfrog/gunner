@@ -133,7 +133,7 @@ describe("MissileCatalogImpl", () => {
 
   test("withCharge applies hull bonuses", () => {
     const bonuses: readonly HullBonus[] = [
-      { attribute: "missileDamage", magnitude: 5, skill: "Caldari Frigate", launcherGroup: 509 },
+      { attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, moduleGroupId: 509 },
     ];
     stacking.apply.mockReturnValue(1.25);
     const base = importedLauncher();
