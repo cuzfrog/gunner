@@ -1,4 +1,4 @@
-import { type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS } from "./types";
+import { type DamageEvent, type DamageResists, type DamageType, type DefenseLayer, type DefenseSpec, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS } from "./types";
 
 export type RepairMode = "auto" | "manual";
 
@@ -61,7 +61,7 @@ export interface DefenseSimConfig {
 export interface DefenseSimulator {
   reset(config: DefenseSimConfig): void;
   update(config: DefenseSimConfig): void;
-  step(dt: number, incoming: Record<Side, DamageVector>): void;
+  step(dt: number, events: readonly DamageEvent[]): void;
   view(): DefenseView;
   setDamageEnabled(side: Side, enabled: boolean): void;
   setRepairMode(side: Side, mode: RepairMode): void;
@@ -117,9 +117,13 @@ interface SidePools {
 export class DefenseSimulatorImpl implements DefenseSimulator {
   private sides: Record<Side, SidePools> = { shipA: emptyPools(), shipB: emptyPools() };
   private time: number;
+  private eventBuffer: DamageEvent[];
+  private nextTickBoundary: number;
 
   constructor() {
     this.time = 0;
+    this.eventBuffer = [];
+    this.nextTickBoundary = 1;
   }
 
   reset(config: DefenseSimConfig): void {
@@ -128,6 +132,8 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
       shipB: poolsFromSpec(config.shipB, config.damageEnabled.shipB, config.repairMode.shipB, config.repairerActivation.shipB, config.rahActivation.shipB),
     };
     this.time = 0;
+    this.eventBuffer = [];
+    this.nextTickBoundary = 1;
   }
 
   update(config: DefenseSimConfig): void {
@@ -137,10 +143,14 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     };
   }
 
-  step(dt: number, incoming: Record<Side, DamageVector>): void {
+  step(dt: number, events: readonly DamageEvent[]): void {
     this.time += dt;
-    this.stepSide("shipA", dt, incoming.shipA);
-    this.stepSide("shipB", dt, incoming.shipB);
+    for (const event of events) {
+      this.eventBuffer.push(event);
+    }
+    const released = this.collectReleasedEvents();
+    this.stepSide("shipA", dt, released.shipA);
+    this.stepSide("shipB", dt, released.shipB);
   }
 
   view(): DefenseView {
@@ -198,7 +208,23 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     rah.overloaded = overloaded;
   }
 
-  private stepSide(side: Side, dt: number, incoming: DamageVector): void {
+  private collectReleasedEvents(): Record<Side, readonly DamageEvent[]> {
+    const shipAEvents: DamageEvent[] = [];
+    const shipBEvents: DamageEvent[] = [];
+    if (this.time >= this.nextTickBoundary) {
+      for (const event of this.eventBuffer) {
+        if (event.target === "shipA") shipAEvents.push(event);
+        else shipBEvents.push(event);
+      }
+      this.eventBuffer = [];
+      while (this.time >= this.nextTickBoundary) {
+        this.nextTickBoundary += 1;
+      }
+    }
+    return { shipA: shipAEvents, shipB: shipBEvents };
+  }
+
+  private stepSide(side: Side, dt: number, events: readonly DamageEvent[]): void {
     const pools = this.sides[side];
     if (pools.dead) return;
     if (!pools.damageEnabled) {
@@ -209,7 +235,7 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     }
     updateRahResists(pools);
     applyShieldRegen(pools, dt);
-    const armorDamageByType = applyDamage(pools, incoming, dt);
+    const armorDamageByType = applyEvents(pools, events);
     stepRepairers(pools, dt);
     stepRah(pools, dt, armorDamageByType);
     if (pools.hullMax > 0 && pools.hull <= 0) {
@@ -395,12 +421,14 @@ function shieldRegenRate(pools: SidePools): number {
   return (10 * pools.shieldMax / pools.shieldRechargeTime) * sqrtRatio * (1 - sqrtRatio);
 }
 
-function applyDamage(pools: SidePools, incoming: DamageVector, dt: number): MutableDamageVector {
+function applyEvents(pools: SidePools, events: readonly DamageEvent[]): MutableDamageVector {
   const armorDamageByType: MutableDamageVector = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
-  for (const type of DAMAGE_TYPES) {
-    const rawDamage = incoming[type] * dt;
-    if (rawDamage <= 0) continue;
-    armorDamageByType[type] = applyDamageType(pools, type, rawDamage);
+  for (const event of events) {
+    for (const type of DAMAGE_TYPES) {
+      const rawDamage = event.rawByType[type];
+      if (rawDamage <= 0) continue;
+      armorDamageByType[type] += applyDamageType(pools, type, rawDamage);
+    }
   }
   return armorDamageByType;
 }
