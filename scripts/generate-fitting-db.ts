@@ -83,7 +83,6 @@ interface SdeTypeDogma {
 type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity" | "turretDamage" | "turretRoF" | "droneDamage" | "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
 type SkillBonusType = "turretDamage" | "turretRoF" | "turretTracking" | "turretOptimal" | "turretFalloff" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity";
 
-// DELETED: BONUS_EFFECTS map is being replaced by data-driven derivation from modifierInfo.
 // The NON_SCALING_EFFECT_IDS set below preserves the only information that cannot be derived
 // from the SDE: whether a given effect's magnitude scales with the hull skill level or is a
 // flat role/rookie/AT/Pirate/NavyDestroyer bonus.

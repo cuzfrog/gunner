@@ -100,7 +100,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       if (!turret) continue;
       const weaponGroup = turretWeaponGroupFromSkill(turret.turretSkill);
       const chargeId = group.chargeId;
-      const skillRoFMultiplier = computeSkillRoFMultiplier(this.db.skillBonuses, turret, skillLevel);
+      const skillRoFMultiplier = computeSkillMultiplier(this.db.skillBonuses, turret, "turretRoF", skillLevel);
 
       const hullTrackingPercents: number[] = [];
       const hullOptimalPercents: number[] = [];
@@ -571,18 +571,6 @@ function computeSkillDamageEntries(skillBonuses: readonly SkillBonus[], turret: 
     entries.push({ skillId: bonus.skillId, multiplier: 1 + (bonus.magnitudePerLevel * skillLevel) / 100 });
   }
   return entries;
-}
-
-function computeSkillRoFMultiplier(skillBonuses: readonly SkillBonus[], turret: TurretStats, skillLevel: number): number {
-  let multiplier = 1;
-  for (const bonus of skillBonuses) {
-    if (bonus.bonusType !== "turretRoF") continue;
-    if (bonus.appliesTo !== "module") continue;
-    if (bonus.requiredSkillId !== undefined && !turret.requiredSkillIds.includes(bonus.requiredSkillId)) continue;
-    if (bonus.moduleGroupId !== undefined && bonus.moduleGroupId !== turret.groupID) continue;
-    multiplier *= 1 + (bonus.magnitudePerLevel * skillLevel) / 100;
-  }
-  return multiplier;
 }
 
 function computeSkillMultiplier(skillBonuses: readonly SkillBonus[], turret: TurretStats, bonusType: SkillBonus["bonusType"], skillLevel: number): number {
