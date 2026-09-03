@@ -296,4 +296,40 @@ describe("DefenseCalculatorImpl", () => {
       expect(spec.shieldUniformity).toBeCloseTo(Math.max(0, 0.25 - 0.05 * level), 5);
     }
   });
+
+  test("Reinforced Bulkheads II increases hull HP above base", () => {
+    const base = resolve([]);
+    const withBulkhead = resolve([moduleEntry("Reinforced Bulkheads II")]);
+    expect(withBulkhead.layers.hull.hp).toBeGreaterThan(base.layers.hull.hp);
+  });
+
+  test("two Reinforced Bulkheads II are stacking-penalized", () => {
+    const one = resolve([moduleEntry("Reinforced Bulkheads II")]);
+    const two = resolve([moduleEntry("Reinforced Bulkheads II"), moduleEntry("Reinforced Bulkheads II")]);
+    expect(two.layers.hull.hp).toBeGreaterThan(one.layers.hull.hp);
+    const naiveTwo = one.layers.hull.hp * 1.4;
+    expect(two.layers.hull.hp).toBeLessThan(naiveTwo);
+  });
+
+  test("single Reinforced Bulkheads II applies full bonus without stacking penalty", () => {
+    const base = resolve([]);
+    const withBulkhead = resolve([moduleEntry("Reinforced Bulkheads II")]);
+    const mechanicsMultiplier = 1 + 0.05 * 5;
+    const expected = profile.hullHp * mechanicsMultiplier * 1.4;
+    expect(withBulkhead.layers.hull.hp).toBe(expected);
+    expect(withBulkhead.layers.hull.hp).toBeGreaterThan(base.layers.hull.hp);
+  });
+
+  test("Nanofiber Internal Structure II also provides hull HP bonus", () => {
+    const base = resolve([]);
+    const withNanofiber = resolve([moduleEntry("Nanofiber Internal Structure II")]);
+    expect(withNanofiber.layers.hull.hp).toBeGreaterThan(base.layers.hull.hp);
+  });
+
+  test("Damage Control II hull resists stack with bulkhead HP bonus", () => {
+    const withBoth = resolve([moduleEntry("Reinforced Bulkheads II"), moduleEntry("Damage Control II")]);
+    const withDcOnly = resolve([moduleEntry("Damage Control II")]);
+    expect(withBoth.layers.hull.hp).toBeGreaterThan(withDcOnly.layers.hull.hp);
+    expect(withBoth.layers.hull.resists.em).toBeCloseTo(withDcOnly.layers.hull.resists.em, 5);
+  });
 });

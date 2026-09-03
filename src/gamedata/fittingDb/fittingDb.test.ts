@@ -25,6 +25,13 @@ describe("fittingDb", () => {
     expect(moduleByName("Reinforced Bulkheads II")).toMatchObject({ agilityMultiplier: 1.05 });
   });
 
+  test("bulkheads provide hull HP defense stats", () => {
+    const defense = moduleByName("Reinforced Bulkheads II")?.defense;
+    expect(defense).toBeDefined();
+    expect(defense!.kind).toBe("hullBulkhead");
+    expect(defense!.hullHpPercent).toBe(40);
+  });
+
   test("includes small afterburner and microwarpdrive with exact SDE values", () => {
     const ab = moduleByName("1MN Afterburner I")?.propulsion;
     expect(ab).toBeDefined();

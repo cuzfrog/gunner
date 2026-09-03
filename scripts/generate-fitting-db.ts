@@ -240,6 +240,7 @@ const DEFENSE_EFFECTS = {
   shieldExtender: 21,
   armorPlate: 1959,
   shieldRecharge: 50,
+  structureHpMultiply: 60,
 } as const;
 
 // Maps module dogma effectIDs to the weapon group they modify. These are damage/RoF
@@ -831,7 +832,7 @@ interface DefenseAncillary {
 
 interface DefenseModuleStats {
   readonly kind: "damageControl" | "rah" | "repairer" | "boostAmplifier"
-    | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule";
+    | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule" | "hullBulkhead";
   readonly layer?: "shield" | "armor" | "hull";
   readonly active?: boolean;
   readonly resistBonus?: DamageResists;
@@ -851,6 +852,7 @@ interface DefenseModuleStats {
   readonly multiplier?: number;
   readonly shieldHpAdd?: number;
   readonly armorHpAdd?: number;
+  readonly hullHpPercent?: number;
   readonly sigRadiusPenalty?: number;
   readonly rechargeMultiplier?: number;
 }
@@ -875,6 +877,7 @@ function buildDefenseStats(values: Map<string, number>, effects: Set<number>, gr
   if (effects.has(DEFENSE_EFFECTS.shieldExtender)) return buildShieldExtenderStats(values);
   if (effects.has(DEFENSE_EFFECTS.armorPlate)) return buildArmorPlateStats(values);
   if (effects.has(DEFENSE_EFFECTS.shieldRecharge)) return buildRechargeModuleStats(values);
+  if (effects.has(DEFENSE_EFFECTS.structureHpMultiply)) return buildHullBulkheadStats(values);
   return undefined;
 }
 
@@ -1016,6 +1019,12 @@ function buildArmorPlateStats(values: Map<string, number>): DefenseModuleStats |
   const armorHpBonusAdd = optionalNumber(values.get("armorHPBonusAdd"));
   if (armorHpBonusAdd === undefined) return undefined;
   return { kind: "armorPlate", armorHpAdd: armorHpBonusAdd };
+}
+
+function buildHullBulkheadStats(values: Map<string, number>): DefenseModuleStats | undefined {
+  const hullHpBonusPercent = optionalNumber(values.get("hp"));
+  if (hullHpBonusPercent === undefined) return undefined;
+  return { kind: "hullBulkhead", hullHpPercent: hullHpBonusPercent };
 }
 
 function buildRechargeModuleStats(values: Map<string, number>): DefenseModuleStats | undefined {
@@ -1820,7 +1829,7 @@ export interface DefenseAncillary {
 }
 
 export interface DefenseModuleStats {
-  readonly kind: "damageControl" | "rah" | "repairer" | "boostAmplifier" | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule";
+  readonly kind: "damageControl" | "rah" | "repairer" | "boostAmplifier" | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule" | "hullBulkhead";
   readonly layer?: DefenseLayer;
   readonly active?: boolean;
   readonly resistBonus?: DamageResists;
@@ -1840,6 +1849,7 @@ export interface DefenseModuleStats {
   readonly multiplier?: number;
   readonly shieldHpAdd?: number;
   readonly armorHpAdd?: number;
+  readonly hullHpPercent?: number;
   readonly sigRadiusPenalty?: number;
   readonly rechargeMultiplier?: number;
 }
