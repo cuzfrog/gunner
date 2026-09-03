@@ -48,18 +48,18 @@ export function collectLauncherEls(document: Document, side: Side): LauncherEls 
 
 const SCOURGE_LIGHT: MissileStats = {
   damage: 83, damageType: "kinetic", explosionRadius: 50, explosionVelocity: 170,
-  damageReductionFactor: 0.5, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384,
+  damageReductionFactor: 0.5, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384, requiredSkillIds: [],
   id: "206" as TypeId, name: "Scourge Light Missile",
 };
 
 const NOVA_LIGHT: MissileStats = {
   damage: 83, damageType: "explosive", explosionRadius: 50, explosionVelocity: 170,
-  damageReductionFactor: 0.5, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384,
+  damageReductionFactor: 0.5, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384, requiredSkillIds: [],
   id: "202" as TypeId, name: "Nova Light Missile",
 };
 
 const LIGHT_MISSILE_LAUNCHER: LauncherStats = {
-  rateOfFire: 16, launcherGroup: 509, chargeGroups: [384, 394], metaLevel: 0, metaGroupID: 1,
+  rateOfFire: 16, launcherGroup: 509, chargeGroups: [384, 394], requiredSkillIds: [], metaLevel: 0, metaGroupID: 1,
   id: "499" as TypeId, name: "Light Missile Launcher I",
 };
 

@@ -1,4 +1,5 @@
 import type { ShipId, TypeId } from "../ids";
+import { toTypeId } from "../ids";
 import { CHARGES, COMBAT_DRONES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, SCRIPTS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
 
 function moduleByName(name: string): FittingModuleStats | undefined {
@@ -261,6 +262,15 @@ describe("fittingDb", () => {
       launcherGroup: 509,
     });
     expect(rowByName(LAUNCHERS, "Light Missile Launcher II")?.chargeGroups).toContain(653);
+  });
+
+  test("includes required skill IDs on launchers, missiles, and turrets", () => {
+    expect(rowByName(LAUNCHERS, "Light Missile Launcher II")?.requiredSkillIds).toContain(toTypeId("3319"));
+    expect(rowByName(LAUNCHERS, "Light Missile Launcher II")?.requiredSkillIds).toContain(toTypeId("20210"));
+    expect(rowByName(MISSILES, "Caldari Navy Mjolnir Light Missile")?.requiredSkillIds).toContain(toTypeId("3319"));
+    expect(rowByName(MISSILES, "Caldari Navy Mjolnir Light Missile")?.requiredSkillIds).toContain(toTypeId("3321"));
+    expect(rowByName(TURRETS, "Heavy Pulse Laser II")?.requiredSkillIds).toContain(toTypeId("3300"));
+    expect(rowByName(TURRETS, "Heavy Pulse Laser II")?.requiredSkillIds).toContain(toTypeId("3306"));
   });
 
   test("includes torpedo launchers with group 508 and chargeGroup3 for standard torpedoes", () => {

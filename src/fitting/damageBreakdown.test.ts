@@ -7,7 +7,7 @@ function charge(overrides: Partial<ChargeStats> = {}): ChargeStats {
 }
 
 function missile(overrides: Partial<MissileStats> = {}): MissileStats {
-  return { damage: 100, damageType: "kinetic", explosionRadius: 50, explosionVelocity: 170, damageReductionFactor: 2.0, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384, id: toTypeId("2"), name: "Test Missile", ...overrides };
+  return { damage: 100, damageType: "kinetic", explosionRadius: 50, explosionVelocity: 170, damageReductionFactor: 2.0, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384, requiredSkillIds: [], id: toTypeId("2"), name: "Test Missile", ...overrides };
 }
 
 describe("chargeDamageByType", () => {

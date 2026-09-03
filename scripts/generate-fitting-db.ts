@@ -54,8 +54,19 @@ interface SdeDogmaAttribute {
   name: string;
 }
 
+interface SdeDogmaEffectModifier {
+  readonly domain: string;
+  readonly func: string;
+  readonly modifiedAttributeID: number;
+  readonly modifyingAttributeID: number;
+  readonly operation: number;
+  readonly skillTypeID?: number;
+}
+
 interface SdeDogmaEffect {
   effectID: number;
+  effectName?: string;
+  modifierInfo?: readonly SdeDogmaEffectModifier[];
 }
 
 interface SdeGroup {
@@ -69,6 +80,11 @@ interface SdeTypeDogma {
 }
 
 type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "turretDamage" | "turretRoF" | "droneDamage" | "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
+
+// Extended attribute categories for data-driven skill bonuses (Phase 3) and
+// data-driven hull bonuses (Phase 2). Phase 1 declares these so COMBAT_ATTRIBUTE_MAP
+// can reference them; they are not yet emitted in the generated HullBonusAttribute type.
+type SkillBonusAttribute = "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity";
 
 interface HullBonusRule {
   readonly attribute: BonusAttribute;
@@ -535,6 +551,28 @@ const MISSILE_ROF_EFFECT = 889;
 
 const TURRET_GROUPS = new Set([53, 55, 74]);
 
+// Maps SDE dogma attribute IDs to internal combat bonus categories. Used by Phase 2
+// (hull bonuses) and Phase 3 (skill bonuses) to derive bonuses from modifierInfo.
+// Attribute 51 (speed) and 37 (maxVelocity) are context-dependent: the caller
+// disambiguates based on the modifier's filter (turret skill vs missile skill,
+// ship vs missile). Attribute 54 (maxRange) is filtered to exclude warp scramblers.
+const COMBAT_ATTRIBUTE_MAP: Readonly<Record<number, BonusAttribute | SkillBonusAttribute>> = {
+  114: "missileDamage", // emDamage
+  116: "missileDamage", // explosiveDamage
+  117: "missileDamage", // kineticDamage
+  118: "missileDamage", // thermalDamage
+  64: "turretDamage", // damageMultiplier
+  51: "turretRoF", // speed (cycle time) — disambiguated to missileRoF at runtime
+  160: "turretTracking", // trackingSpeed
+  204: "turretTracking", // trackingSpeedMultiplier
+  54: "turretOptimal", // maxRange — filtered to exclude warp scramblers
+  158: "turretFalloff", // falloff
+  37: "maxVelocity", // maxVelocity — disambiguated to missileVelocity at runtime
+  281: "missileFlightTime", // explosionDelay
+  654: "missileExplosionRadius", // aoeCloudSize
+  653: "missileExplosionVelocity", // aoeVelocity
+};
+
 const CHARGE_GROUPS = new Set([
   83, 85, 86,
   372, 373, 374, 375, 376, 377,
@@ -657,7 +695,9 @@ const SKILL_BONUS_RULES: readonly SkillBonusRule[] = [
 ];
 
 function stringifyWithTypeIds<T>(value: T): string {
-  return JSON.stringify(value).replace(/"id":"(\d+)"/g, '"id":"$1" as TypeId');
+  return JSON.stringify(value)
+    .replace(/"id":"(\d+)"/g, '"id":"$1" as TypeId')
+    .replace(/"requiredSkillIds":\[(.*?)\]/g, (match, inner) => `"requiredSkillIds":[${inner.replace(/"(\d+)"/g, '"$1" as TypeId')}]`);
 }
 
 function stringifyHullBonuses(value: Record<ShipId, readonly HullBonus[]>): string {
@@ -812,6 +852,7 @@ interface TurretStats {
   readonly cycleTime: number;
   readonly turretSkill?: string;
   readonly specializationSkill?: string;
+  readonly requiredSkillIds: readonly TypeId[];
   readonly metaLevel: number;
   readonly metaGroupID: number;
 }
@@ -830,6 +871,7 @@ interface LauncherStats {
   readonly rateOfFire: number;
   readonly launcherGroup: number;
   readonly chargeGroups: readonly number[];
+  readonly requiredSkillIds: readonly TypeId[];
   readonly metaLevel: number;
   readonly metaGroupID: number;
 }
@@ -844,6 +886,7 @@ interface MissileStats {
   readonly flightTime: number;
   readonly launcherGroup: number;
   readonly chargeGroup: number;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 interface TurretScriptStats {
@@ -1474,7 +1517,13 @@ function specializationSkillFromRequired(
   return undefined;
 }
 
-export function buildLauncherStats(values: Map<string, number>, groupID: number, type: SdeType): LauncherStats | undefined {
+function buildRequiredSkillIds(requiredSkills: Record<string, Record<string, number>>, typeID: number): readonly TypeId[] {
+  const skills = requiredSkills[String(typeID)];
+  if (!skills) return [];
+  return Object.keys(skills).map((id) => id as TypeId);
+}
+
+export function buildLauncherStats(values: Map<string, number>, groupID: number, type: SdeType, requiredSkillIds: readonly TypeId[]): LauncherStats | undefined {
   const speed = values.get("speed");
   if (speed === undefined || speed <= 0) return undefined;
   const chargeGroups: number[] = [];
@@ -1483,10 +1532,10 @@ export function buildLauncherStats(values: Map<string, number>, groupID: number,
     if (group !== undefined && group > 0) chargeGroups.push(group);
   }
   if (chargeGroups.length === 0) return undefined;
-  return { rateOfFire: speed / 1000, launcherGroup: groupID, chargeGroups, metaLevel: type.metaLevel ?? 0, metaGroupID: type.metaGroupID ?? 1 };
+  return { rateOfFire: speed / 1000, launcherGroup: groupID, chargeGroups, requiredSkillIds, metaLevel: type.metaLevel ?? 0, metaGroupID: type.metaGroupID ?? 1 };
 }
 
-export function buildMissileStats(values: Map<string, number>, groupID: number): MissileStats | undefined {
+export function buildMissileStats(values: Map<string, number>, groupID: number, requiredSkillIds: readonly TypeId[]): MissileStats | undefined {
   const emDamage = values.get("emDamage") ?? 0;
   const thermalDamage = values.get("thermalDamage") ?? 0;
   const kineticDamage = values.get("kineticDamage") ?? 0;
@@ -1512,6 +1561,7 @@ export function buildMissileStats(values: Map<string, number>, groupID: number):
     flightTime: flightTime / 1000,
     launcherGroup,
     chargeGroup: groupID,
+    requiredSkillIds,
   };
 }
 
@@ -1592,6 +1642,7 @@ async function main() {
   const types = await loadMerged<SdeType>("types.");
   const typedogmas = await loadMerged<SdeTypeDogma>("typedogma.");
   const attributes = await loadMerged<SdeDogmaAttribute>("dogmaattributes.");
+  const dogmaEffects = await loadMerged<SdeDogmaEffect>("dogmaeffects.");
   const groups = await loadMerged<SdeGroup>("groups.");
   const requiredSkills = await loadMerged<Record<string, number>>("requiredskillsfortypes.");
   const attributeNames = buildAttributeNameMap(attributes);
@@ -1654,6 +1705,7 @@ async function main() {
           cycleTime: speed / 1000,
           turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
           specializationSkill: specializationSkillFromRequired(types, requiredSkills, type.typeID),
+          requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID),
           metaLevel: type.metaLevel ?? 0,
           metaGroupID: type.metaGroupID ?? 1,
         };
@@ -1680,7 +1732,7 @@ async function main() {
     }
 
     if (LAUNCHER_GROUPS.has(type.groupID)) {
-      const stats = buildLauncherStats(values, type.groupID, type);
+      const stats = buildLauncherStats(values, type.groupID, type, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         launchers[id] = { ...stats, id, name: enName };
         addItemName(itemNames, id, type);
@@ -1689,7 +1741,7 @@ async function main() {
     }
 
     if (MISSILE_CHARGE_GROUPS.has(type.groupID)) {
-      const stats = buildMissileStats(values, type.groupID);
+      const stats = buildMissileStats(values, type.groupID, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         missiles[id] = { ...stats, id, name: enName };
         addItemName(itemNames, id, type);
@@ -1957,6 +2009,7 @@ export interface TurretStats {
   readonly cycleTime: number;
   readonly turretSkill?: string;
   readonly specializationSkill?: string;
+  readonly requiredSkillIds: readonly TypeId[];
   readonly metaLevel: number;
   readonly metaGroupID: number;
   readonly id: TypeId;
@@ -2000,6 +2053,7 @@ export interface LauncherStats {
   readonly rateOfFire: number;
   readonly launcherGroup: number;
   readonly chargeGroups: readonly number[];
+  readonly requiredSkillIds: readonly TypeId[];
   readonly metaLevel: number;
   readonly metaGroupID: number;
   readonly id: TypeId;
@@ -2016,6 +2070,7 @@ export interface MissileStats {
   readonly flightTime: number;
   readonly launcherGroup: number;
   readonly chargeGroup: number;
+  readonly requiredSkillIds: readonly TypeId[];
   readonly id: TypeId;
   readonly name: string;
 }

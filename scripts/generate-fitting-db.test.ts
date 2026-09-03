@@ -1,6 +1,7 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { toTypeId } from "../src/gamedata/ids";
 import { buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats } from "./generate-fitting-db";
 
 function values(entries: Record<string, number>): Map<string, number> {
@@ -263,25 +264,27 @@ describe("_buildModuleStats", () => {
 });
 
 describe("buildLauncherStats", () => {
+  const skillIds = [toTypeId("3319"), toTypeId("3321")];
+
   test("returns undefined when speed attribute is missing", () => {
-    expect(buildLauncherStats(values({ chargeGroup1: 384 }), 509, sdeType())).toBeUndefined();
+    expect(buildLauncherStats(values({ chargeGroup1: 384 }), 509, sdeType(), skillIds)).toBeUndefined();
   });
 
   test("returns undefined when speed is non-positive", () => {
-    expect(buildLauncherStats(values({ speed: 0, chargeGroup1: 384 }), 509, sdeType())).toBeUndefined();
-    expect(buildLauncherStats(values({ speed: -100, chargeGroup1: 384 }), 509, sdeType())).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: 0, chargeGroup1: 384 }), 509, sdeType(), skillIds)).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: -100, chargeGroup1: 384 }), 509, sdeType(), skillIds)).toBeUndefined();
   });
 
   test("returns undefined when no charge groups are present", () => {
-    expect(buildLauncherStats(values({ speed: 13600 }), 509, sdeType())).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: 13600 }), 509, sdeType(), skillIds)).toBeUndefined();
   });
 
   test("converts cycle time from milliseconds to seconds and preserves launcher group with charge groups", () => {
-    // Arbalest Compact Light Missile Launcher: speed=13600ms, group 509, chargeGroup1=384, chargeGroup2=394
-    expect(buildLauncherStats(values({ speed: 13600, chargeGroup1: 384, chargeGroup2: 394 }), 509, sdeType())).toEqual({
+    expect(buildLauncherStats(values({ speed: 13600, chargeGroup1: 384, chargeGroup2: 394 }), 509, sdeType(), skillIds)).toEqual({
       rateOfFire: 13.6,
       launcherGroup: 509,
       chargeGroups: [384, 394],
+      requiredSkillIds: skillIds,
       metaLevel: 0,
       metaGroupID: 1,
     });
@@ -290,26 +293,28 @@ describe("buildLauncherStats", () => {
   test("collects charge groups from chargeGroup1 through chargeGroup5", () => {
     expect(buildLauncherStats(values({
       speed: 18000, chargeGroup1: 657, chargeGroup3: 89,
-    }), 508, sdeType())).toEqual({
+    }), 508, sdeType(), skillIds)).toEqual({
       rateOfFire: 18,
       launcherGroup: 508,
       chargeGroups: [657, 89],
+      requiredSkillIds: skillIds,
       metaLevel: 0,
       metaGroupID: 1,
     });
   });
 
   test("preserves torpedo launcher group (508) with chargeGroup3", () => {
-    const stats = buildLauncherStats(values({ speed: 18000, chargeGroup3: 89 }), 508, sdeType());
+    const stats = buildLauncherStats(values({ speed: 18000, chargeGroup3: 89 }), 508, sdeType(), skillIds);
     expect(stats?.launcherGroup).toBe(508);
     expect(stats?.chargeGroups).toEqual([89]);
   });
 
   test("preserves metaLevel and metaGroupID from SDE type", () => {
-    expect(buildLauncherStats(values({ speed: 12800, chargeGroup1: 384 }), 509, sdeType(5, 2))).toEqual({
+    expect(buildLauncherStats(values({ speed: 12800, chargeGroup1: 384 }), 509, sdeType(5, 2), skillIds)).toEqual({
       rateOfFire: 12.8,
       launcherGroup: 509,
       chargeGroups: [384],
+      requiredSkillIds: skillIds,
       metaLevel: 5,
       metaGroupID: 2,
     });
@@ -317,24 +322,25 @@ describe("buildLauncherStats", () => {
 });
 
 describe("buildMissileStats", () => {
+  const skillIds = [toTypeId("3319"), toTypeId("3321")];
+
   test("returns undefined when all damage attributes are zero or missing", () => {
     expect(buildMissileStats(values({
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3000, explosionDelay: 5000, launcherGroup: 509,
-    }), 384)).toBeUndefined();
+    }), 384, skillIds)).toBeUndefined();
   });
 
   test("returns undefined when application attributes are missing", () => {
-    expect(buildMissileStats(values({ kineticDamage: 100 }), 384)).toBeUndefined();
+    expect(buildMissileStats(values({ kineticDamage: 100 }), 384, skillIds)).toBeUndefined();
   });
 
   test("builds a kinetic light missile from SDE attributes", () => {
-    // Mjolnir Light Missile is EM, but we test with kinetic here
     expect(buildMissileStats(values({
       emDamage: 0, thermalDamage: 0, kineticDamage: 113, explosiveDamage: 0,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384)).toEqual({
+    }), 384, skillIds)).toEqual({
       damage: 113,
       damageType: "kinetic",
       explosionRadius: 50,
@@ -344,6 +350,7 @@ describe("buildMissileStats", () => {
       flightTime: 5,
       launcherGroup: 509,
       chargeGroup: 384,
+      requiredSkillIds: skillIds,
     });
   });
 
@@ -352,7 +359,7 @@ describe("buildMissileStats", () => {
       emDamage: 113, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 0,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384);
+    }), 384, skillIds);
     expect(stats?.damageType).toBe("em");
     expect(stats?.damage).toBe(113);
   });
@@ -362,7 +369,7 @@ describe("buildMissileStats", () => {
       emDamage: 0, thermalDamage: 113, kineticDamage: 0, explosiveDamage: 0,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384);
+    }), 384, skillIds);
     expect(stats?.damageType).toBe("thermal");
   });
 
@@ -371,7 +378,7 @@ describe("buildMissileStats", () => {
       emDamage: 0, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 113,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384);
+    }), 384, skillIds);
     expect(stats?.damageType).toBe("explosive");
   });
 
@@ -380,7 +387,7 @@ describe("buildMissileStats", () => {
       emDamage: 0, thermalDamage: 0, kineticDamage: 100, explosiveDamage: 0,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 10000, launcherGroup: 509,
-    }), 384);
+    }), 384, skillIds);
     expect(stats?.flightTime).toBe(10);
   });
 
@@ -389,7 +396,7 @@ describe("buildMissileStats", () => {
       emDamage: 30, thermalDamage: 30, kineticDamage: 30, explosiveDamage: 30,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384);
+    }), 384, skillIds);
     expect(stats?.damage).toBe(120);
   });
 });
