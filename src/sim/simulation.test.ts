@@ -19,7 +19,9 @@ const scram: EwarProjection = {
     disruptors: [],
     scramblers: [{ moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 }],
     painters: [],
+    dampeners: [],
     scripts: [],
+    dampenerScripts: [],
   },
   activation: {
     webs: [],
@@ -27,6 +29,7 @@ const scram: EwarProjection = {
     disruptors: [],
     scramblers: [{ active: true, overloaded: false }],
     painters: [],
+    dampeners: [],
   },
 };
 
@@ -179,9 +182,11 @@ describe("SimulationImpl", () => {
         disruptors: [],
         scramblers: [],
         painters: [],
+        dampeners: [],
         scripts: [],
+        dampenerScripts: [],
       },
-      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [] },
+      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [] },
     };
     const config = { ...simConfig("orbit"), shipA: { ...shipConfig("shipA", "midships"), ewar: shipAWeb } };
     const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver: resolver, simConfig: config });
@@ -256,9 +261,11 @@ describe("SimulationImpl", () => {
         disruptors: [],
         scramblers: [],
         painters: [],
+        dampeners: [],
         scripts: [],
+        dampenerScripts: [],
       },
-      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [] },
+      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [] },
     };
     const resolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });
     const shipASteering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };

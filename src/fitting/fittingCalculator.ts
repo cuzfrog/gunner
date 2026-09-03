@@ -1,8 +1,8 @@
 import type { TypeId } from "../gamedata/ids";
-import type { FittingDb, FittingModuleStats, HullBonus, LauncherStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, TurretWeaponGroup, WarpScramblerStats, DisruptionScriptStats } from "../gamedata/fittingDb";
-import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
-import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec } from "../sim";
-import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, ZERO_DAMAGE, damageVectorFromPartial, damageVectorScale } from "../sim";
+import type { FittingDb, FittingModuleStats, HullBonus, LauncherStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, SensorBoosterStats, SensorDampenerStats, SensorBoosterScriptStats, SensorDampenerScriptStats, SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, TurretWeaponGroup, WarpScramblerStats, DisruptionScriptStats } from "../gamedata/fittingDb";
+import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../ships";
+import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec } from "../sim";
+import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, ZERO_DAMAGE, damageVectorFromPartial, damageVectorScale } from "../sim";
 import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher } from "./chargeCatalog";
 import type { GunFamily, GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
@@ -33,6 +33,8 @@ export interface FittingCalculator {
   resolveEwar(fitting: FittingState): EwarLoadout;
   resolveBoosts(fitting: FittingState): BoostLoadout;
   resolveMissileBoosts(fitting: FittingState): MissileBoosterLoadout;
+  resolveSensorBoosts(fitting: FittingState): SensorBoostLoadout;
+  resolveSensorSpec(fitting: FittingState, conditions: StatConditions): SensorSpec;
   resolveDrones(fitting: FittingState, conditions: StatConditions): readonly ImportedDrone[];
   resolveCargoCharges(fitting: FittingState): readonly { id: TypeId; quantity: number }[];
 }
@@ -307,11 +309,14 @@ export class FittingCalculatorImpl implements FittingCalculator {
   resolveEwar(fitting: FittingState): EwarLoadout {
     const scripts = disruptionScriptSpecsFrom(this.db.disruptionScripts);
     const scriptByName = new Map(scripts.map((s) => [s.name, s]));
+    const dampenerScripts = sensorDampenerScriptSpecsFrom(this.db.sensorDampenerScripts);
+    const dampenerScriptByName = new Map(dampenerScripts.map((s) => [s.name, s]));
     const webs: StasisWebSpec[] = [];
     const grapplers: StasisGrapplerSpec[] = [];
     const disruptors: TrackingDisruptorSpec[] = [];
     const scramblers: WarpScramblerSpec[] = [];
     const painters: TargetPainterSpec[] = [];
+    const dampeners: SensorDampenerSpec[] = [];
 
     for (const mod of fitting.ewarModules) {
       const webStats = this.db.stasisWebs[mod.moduleId];
@@ -339,11 +344,18 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const painterStats = this.db.targetPainters[mod.moduleId];
       if (painterStats) {
         painters.push(painterSpecFrom(painterStats));
+        continue;
+      }
+      const dampenerStats = this.db.sensorDampeners[mod.moduleId];
+      if (dampenerStats) {
+        const scriptName = mod.chargeId ? this.itemNameCatalog.nameForId(mod.chargeId, "en") : undefined;
+        const defaultScript = scriptName ? dampenerScriptByName.get(scriptName) : undefined;
+        dampeners.push(sensorDampenerSpecFrom(dampenerStats, defaultScript));
       }
     }
 
-    if (webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && painters.length === 0) return { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] };
-    return { webs, grapplers, disruptors, scramblers, painters, scripts };
+    if (webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && painters.length === 0 && dampeners.length === 0) return { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts };
+    return { webs, grapplers, disruptors, scramblers, painters, dampeners, scripts, dampenerScripts };
   }
 
   resolveBoosts(fitting: FittingState): BoostLoadout {
@@ -384,6 +396,63 @@ export class FittingCalculatorImpl implements FittingCalculator {
 
     if (computers.length === 0 && enhancers.length === 0) return EMPTY_MISSILE_BOOSTER_LOADOUT;
     return { computers, enhancers, scripts };
+  }
+
+  resolveSensorBoosts(fitting: FittingState): SensorBoostLoadout {
+    const boosterScripts = sensorBoosterScriptSpecsFrom(this.db.sensorBoosterScripts);
+    const boosterScriptByName = new Map(boosterScripts.map((s) => [s.name, s]));
+    const boosters: SensorBoosterSpec[] = [];
+    const amplifiers: SignalAmplifierSpec[] = [];
+
+    for (const mod of fitting.sensorBoosterModules) {
+      const boosterStats = this.db.sensorBoosters[mod.moduleId];
+      if (boosterStats) {
+        const scriptName = mod.chargeId ? this.itemNameCatalog.nameForId(mod.chargeId, "en") : undefined;
+        const defaultScript = scriptName ? boosterScriptByName.get(scriptName) : undefined;
+        boosters.push(sensorBoosterSpecFrom(boosterStats, defaultScript));
+      }
+    }
+
+    for (const mod of fitting.sensorAmplifierModules) {
+      const amplifierStats = this.db.signalAmplifiers[mod.moduleId];
+      if (amplifierStats) {
+        amplifiers.push(signalAmplifierSpecFrom(amplifierStats));
+      }
+    }
+
+    if (boosters.length === 0 && amplifiers.length === 0) return EMPTY_SENSOR_BOOST_LOADOUT;
+    return { boosters, amplifiers, boosterScripts };
+  }
+
+  resolveSensorSpec(fitting: FittingState, conditions: StatConditions): SensorSpec {
+    const targeting = conditions.targetingSkills;
+    const longRangeLevel = targeting?.longRangeTargeting ?? 0;
+    const signatureAnalysisLevel = targeting?.signatureAnalysis ?? 0;
+    const targetManagementLevel = targeting?.targetManagement ?? 0;
+    const advancedTargetManagementLevel = targeting?.advancedTargetManagement ?? 0;
+
+    const signatureAnalysisMultiplier = 1 + 0.05 * signatureAnalysisLevel;
+    const longRangeMultiplier = 1 + 0.05 * longRangeLevel;
+
+    const scanResolution = fitting.profile.scanResolution * signatureAnalysisMultiplier;
+    const maxTargetingRange = fitting.profile.maxTargetingRange * longRangeMultiplier;
+    let maxLockedTargets = fitting.profile.maxLockedTargets + targetManagementLevel + advancedTargetManagementLevel;
+
+    const scanResPercents: number[] = [];
+    const rangePercents: number[] = [];
+    for (const mod of fitting.sensorAmplifierModules) {
+      const amplifierStats = this.db.signalAmplifiers[mod.moduleId];
+      if (amplifierStats) {
+        scanResPercents.push(amplifierStats.scanResolutionBonusPercent);
+        rangePercents.push(amplifierStats.maxTargetRangeBonusPercent);
+        maxLockedTargets += amplifierStats.maxLockedTargetsBonus;
+      }
+    }
+
+    const scanResMultiplier = this.stacking.apply(scanResPercents.map((p) => 1 + p / 100));
+    const rangeMultiplier = this.stacking.apply(rangePercents.map((p) => 1 + p / 100));
+
+    return { scanResolution: Math.round(scanResolution * scanResMultiplier), maxTargetingRange: Math.round(maxTargetingRange * rangeMultiplier), maxLockedTargets };
   }
 
   resolveDrones(fitting: FittingState, conditions: StatConditions): readonly ImportedDrone[] {
@@ -500,6 +569,34 @@ function disruptionScriptSpecsFrom(scripts: Readonly<Record<string, DisruptionSc
 
 function painterSpecFrom(stats: TargetPainterStats): TargetPainterSpec {
   return { moduleName: stats.name, moduleId: stats.id, maxRange: stats.maxRange, falloff: stats.falloff, signatureRadiusBonusPercent: stats.signatureRadiusBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent };
+}
+
+function sensorDampenerSpecFrom(stats: SensorDampenerStats, defaultScript: SensorDampenerScriptSpec | undefined): SensorDampenerSpec {
+  return { moduleName: stats.name, moduleId: stats.id, optimal: stats.optimal, falloff: stats.falloff, scanResolutionBonusPercent: stats.scanResolutionBonusPercent, maxTargetRangeBonusPercent: stats.maxTargetRangeBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent, defaultScript };
+}
+
+function sensorDampenerScriptSpecsFrom(scripts: Readonly<Record<string, SensorDampenerScriptStats>>): SensorDampenerScriptSpec[] {
+  const result: SensorDampenerScriptSpec[] = [];
+  for (const stats of Object.values(scripts)) {
+    result.push({ name: stats.name, moduleId: stats.id, scanResolutionMultiplier: stats.scanResolutionMultiplier, maxTargetRangeMultiplier: stats.maxTargetRangeMultiplier });
+  }
+  return result;
+}
+
+function sensorBoosterScriptSpecsFrom(scripts: Readonly<Record<string, SensorBoosterScriptStats>>): SensorBoosterScriptSpec[] {
+  const result: SensorBoosterScriptSpec[] = [];
+  for (const stats of Object.values(scripts)) {
+    result.push({ name: stats.name, moduleId: stats.id, scanResolutionMultiplier: stats.scanResolutionMultiplier, maxTargetRangeMultiplier: stats.maxTargetRangeMultiplier });
+  }
+  return result;
+}
+
+function sensorBoosterSpecFrom(stats: SensorBoosterStats, defaultScript: SensorBoosterScriptSpec | undefined): SensorBoosterSpec {
+  return { moduleName: stats.name, moduleId: stats.id, scanResolutionBonusPercent: stats.scanResolutionBonusPercent, maxTargetRangeBonusPercent: stats.maxTargetRangeBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent, defaultScript };
+}
+
+function signalAmplifierSpecFrom(stats: SignalAmplifierStats): SignalAmplifierSpec {
+  return { moduleName: stats.name, moduleId: stats.id, scanResolutionBonusPercent: stats.scanResolutionBonusPercent, maxTargetRangeBonusPercent: stats.maxTargetRangeBonusPercent, maxLockedTargetsBonus: stats.maxLockedTargetsBonus };
 }
 
 function missileScriptSpecsFrom(scripts: Readonly<Record<string, MissileScriptStats>>): MissileScriptSpec[] {

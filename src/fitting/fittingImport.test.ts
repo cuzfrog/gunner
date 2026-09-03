@@ -26,6 +26,11 @@ import {
   OMNIDIRECTIONAL_TRACKING_ENHANCERS,
   OMNIDIRECTIONAL_TRACKING_LINKS,
   SCRIPTS,
+  SENSOR_BOOSTER_SCRIPTS,
+  SENSOR_BOOSTERS,
+  SENSOR_DAMPENER_SCRIPTS,
+  SENSOR_DAMPENERS,
+  SIGNAL_AMPLIFIERS,
   SKILL_BONUSES,
   STASIS_GRAPPLERS,
   STASIS_WEBS,
@@ -106,6 +111,9 @@ const profile: ShipProfile = {
   inertiaModifier: 0.45,
   baseSpeed: 165,
   sigRadius: 270,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -127,6 +135,9 @@ const frigateProfile: ShipProfile = {
   inertiaModifier: 3.2,
   baseSpeed: 365,
   sigRadius: 35,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -148,6 +159,9 @@ const bonusProfile: ShipProfile = {
   inertiaModifier: 0.5,
   baseSpeed: 205,
   sigRadius: 130,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -169,6 +183,9 @@ const roleBonusProfile: ShipProfile = {
   inertiaModifier: 0.51,
   baseSpeed: 195,
   sigRadius: 135,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -190,6 +207,9 @@ const abaddonProfile: ShipProfile = {
   inertiaModifier: 0.14,
   baseSpeed: 89,
   sigRadius: 470,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -211,6 +231,9 @@ const kestrelProfile: ShipProfile = {
   inertiaModifier: 3.1,
   baseSpeed: 325,
   sigRadius: 38,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -318,6 +341,11 @@ const db: FittingDb = {
   combatDrones: {},
   omnidirectionalTrackingLinks: {},
   omnidirectionalTrackingEnhancers: {},
+  sensorDampeners: {},
+  sensorBoosters: {},
+  signalAmplifiers: {},
+  sensorBoosterScripts: {},
+  sensorDampenerScripts: {},
 };
 
 const hullBonusDb: FittingDb = {
@@ -393,6 +421,11 @@ const fullFittingDb: FittingDb = {
   combatDrones: COMBAT_DRONES,
   omnidirectionalTrackingLinks: OMNIDIRECTIONAL_TRACKING_LINKS,
   omnidirectionalTrackingEnhancers: OMNIDIRECTIONAL_TRACKING_ENHANCERS,
+  sensorDampeners: SENSOR_DAMPENERS,
+  sensorBoosters: SENSOR_BOOSTERS,
+  signalAmplifiers: SIGNAL_AMPLIFIERS,
+  sensorBoosterScripts: SENSOR_BOOSTER_SCRIPTS,
+  sensorDampenerScripts: SENSOR_DAMPENER_SCRIPTS,
 };
 const fullGunFamilies = new GunFamiliesImpl({ fittingDb: fullFittingDb });
 const fullChargeCatalog = new ChargeCatalogImpl({ fittingDb: fullFittingDb, gunFamilies: fullGunFamilies });
@@ -1593,7 +1626,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, hullBonuses: {}, skillBonuses: [], drones: DRONES, combatDrones: COMBAT_DRONES };
+  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, skillBonuses: [], drones: DRONES, combatDrones: COMBAT_DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {

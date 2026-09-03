@@ -1,5 +1,5 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
-import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type StasisGrapplerSpec, type TargetPainterSpec, type WarpScramblerSpec } from "../../../sim";
+import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type SensorDampenerScriptSpec, type StasisGrapplerSpec, type TargetPainterSpec, type WarpScramblerSpec } from "../../../sim";
 import type { StoredDisruptionScript, StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
@@ -19,6 +19,7 @@ interface MutableEwarActivation {
   disruptors: { active: boolean; overloaded: boolean; script: DisruptionScriptSpec | undefined }[];
   scramblers: { active: boolean; overloaded: boolean }[];
   painters: { active: boolean; overloaded: boolean }[];
+  dampeners: { active: boolean; overloaded: boolean; script: SensorDampenerScriptSpec | undefined }[];
 }
 
 interface EwarState {
@@ -315,6 +316,7 @@ export class EwarControllerImpl implements EwarController {
         const overloaded = typeof savedPainter === "boolean" ? false : savedPainter?.overloaded ?? false;
         return { active, overloaded };
       }),
+      dampeners: [],
     };
   }
 

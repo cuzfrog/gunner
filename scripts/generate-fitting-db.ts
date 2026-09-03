@@ -160,6 +160,11 @@ const TARGET_PAINTER_GROUP = 379;
 const MISSILE_GUIDANCE_COMPUTER_GROUP = 1396;
 const MISSILE_GUIDANCE_ENHANCER_GROUP = 1395;
 const MISSILE_SCRIPT_GROUP = 1400;
+const SENSOR_DAMPENER_GROUP = 208;
+const SENSOR_BOOSTER_GROUP = 212;
+const SIGNAL_AMPLIFIER_GROUP = 210;
+const SENSOR_BOOSTER_SCRIPT_GROUP = 910;
+const SENSOR_DAMPENER_SCRIPT_GROUP = 911;
 const MISSILE_DAMAGE_EFFECT = 763;
 const MISSILE_ROF_EFFECT = 889;
 
@@ -516,6 +521,9 @@ interface FittingModuleStats {
   readonly trackingDisruptor?: TrackingDisruptorStats;
   readonly warpScrambler?: WarpScramblerStats;
   readonly targetPainter?: TargetPainterStats;
+  readonly sensorDampener?: SensorDampenerStats;
+  readonly sensorBooster?: SensorBoosterStats;
+  readonly signalAmplifier?: SignalAmplifierStats;
   readonly missileDamageMultiplier?: number;
   readonly missileCycleTimeMultiplier?: number;
   readonly droneDamageBonus?: number;
@@ -655,6 +663,36 @@ interface OmnidirectionalTrackingEnhancerStats {
   readonly trackingBonusPercent: number;
   readonly optimalBonusPercent: number;
   readonly falloffBonusPercent: number;
+}
+
+interface SensorDampenerStats {
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly scanResolutionBonusPercent: number;
+  readonly maxTargetRangeBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+}
+
+interface SensorBoosterStats {
+  readonly scanResolutionBonusPercent: number;
+  readonly maxTargetRangeBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+}
+
+interface SignalAmplifierStats {
+  readonly scanResolutionBonusPercent: number;
+  readonly maxTargetRangeBonusPercent: number;
+  readonly maxLockedTargetsBonus: number;
+}
+
+interface SensorBoosterScriptStats {
+  readonly scanResolutionMultiplier: number;
+  readonly maxTargetRangeMultiplier: number;
+}
+
+interface SensorDampenerScriptStats {
+  readonly scanResolutionMultiplier: number;
+  readonly maxTargetRangeMultiplier: number;
 }
 
 type DroneSizeClass = "light" | "medium" | "heavy" | "sentry";
@@ -1142,6 +1180,61 @@ export function buildDisruptionScriptStats(values: Map<string, number>): Disrupt
   };
 }
 
+export function buildSensorDampenerStats(values: Map<string, number>): SensorDampenerStats | undefined {
+  const scanResolutionBonus = values.get("scanResolutionBonus");
+  const maxTargetRangeBonus = values.get("maxTargetRangeBonus");
+  if (scanResolutionBonus === undefined && maxTargetRangeBonus === undefined) return undefined;
+  return {
+    optimal: values.get("maxRange") ?? 0,
+    falloff: values.get("falloffEffectiveness") ?? 0,
+    scanResolutionBonusPercent: scanResolutionBonus ?? 0,
+    maxTargetRangeBonusPercent: maxTargetRangeBonus ?? 0,
+    overloadStrengthBonusPercent: values.get("overloadSensorModuleStrengthBonus") ?? 0,
+  };
+}
+
+export function buildSensorBoosterStats(values: Map<string, number>): SensorBoosterStats | undefined {
+  const scanResolutionBonus = values.get("scanResolutionBonus");
+  const maxTargetRangeBonus = values.get("maxTargetRangeBonus");
+  if (scanResolutionBonus === undefined && maxTargetRangeBonus === undefined) return undefined;
+  return {
+    scanResolutionBonusPercent: scanResolutionBonus ?? 0,
+    maxTargetRangeBonusPercent: maxTargetRangeBonus ?? 0,
+    overloadStrengthBonusPercent: values.get("overloadSensorModuleStrengthBonus") ?? 0,
+  };
+}
+
+export function buildSignalAmplifierStats(values: Map<string, number>): SignalAmplifierStats | undefined {
+  const scanResolutionBonus = values.get("scanResolutionBonus");
+  const maxTargetRangeBonus = values.get("maxTargetRangeBonus");
+  if (scanResolutionBonus === undefined && maxTargetRangeBonus === undefined) return undefined;
+  return {
+    scanResolutionBonusPercent: scanResolutionBonus ?? 0,
+    maxTargetRangeBonusPercent: maxTargetRangeBonus ?? 0,
+    maxLockedTargetsBonus: values.get("maxLockedTargetsBonus") ?? 0,
+  };
+}
+
+export function buildSensorBoosterScriptStats(values: Map<string, number>): SensorBoosterScriptStats | undefined {
+  const scanResolutionBonusBonus = values.get("scanResolutionBonusBonus");
+  const maxTargetRangeBonusBonus = values.get("maxTargetRangeBonusBonus");
+  if (scanResolutionBonusBonus === undefined && maxTargetRangeBonusBonus === undefined) return undefined;
+  return {
+    scanResolutionMultiplier: 1 + (scanResolutionBonusBonus ?? 0) / 100,
+    maxTargetRangeMultiplier: 1 + (maxTargetRangeBonusBonus ?? 0) / 100,
+  };
+}
+
+export function buildSensorDampenerScriptStats(values: Map<string, number>): SensorDampenerScriptStats | undefined {
+  const scanResolutionBonusBonus = values.get("scanResolutionBonusBonus");
+  const maxTargetRangeBonusBonus = values.get("maxTargetRangeBonusBonus");
+  if (scanResolutionBonusBonus === undefined && maxTargetRangeBonusBonus === undefined) return undefined;
+  return {
+    scanResolutionMultiplier: 1 + (scanResolutionBonusBonus ?? 0) / 100,
+    maxTargetRangeMultiplier: 1 + (maxTargetRangeBonusBonus ?? 0) / 100,
+  };
+}
+
 function buildHullBonuses(
   attributeNames: Map<number, string>,
   attributeValues: Map<number, number>,
@@ -1394,6 +1487,11 @@ async function main() {
   const missileScripts: Record<string, Row<MissileScriptStats>> = {};
   const omnidirectionalTrackingLinks: Record<string, Row<OmnidirectionalTrackingLinkStats>> = {};
   const omnidirectionalTrackingEnhancers: Record<string, Row<OmnidirectionalTrackingEnhancerStats>> = {};
+  const sensorDampeners: Record<string, Row<SensorDampenerStats>> = {};
+  const sensorBoosters: Record<string, Row<SensorBoosterStats>> = {};
+  const signalAmplifiers: Record<string, Row<SignalAmplifierStats>> = {};
+  const sensorBoosterScripts: Record<string, Row<SensorBoosterScriptStats>> = {};
+  const sensorDampenerScripts: Record<string, Row<SensorDampenerScriptStats>> = {};
   const hullBonuses: Record<ShipId, readonly HullBonus[]> = {};
   const drones: Record<string, DroneEntry> = {};
   const combatDrones: Record<string, Row<DroneStats>> = {};
@@ -1619,6 +1717,54 @@ async function main() {
       continue;
     }
 
+    if (type.groupID === SENSOR_DAMPENER_GROUP) {
+      const stats = buildSensorDampenerStats(values);
+      if (stats) {
+        sensorDampeners[id] = { ...stats, id, name: enName };
+        fittingModules[id] = { sensorDampener: stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
+    if (type.groupID === SENSOR_BOOSTER_GROUP) {
+      const stats = buildSensorBoosterStats(values);
+      if (stats) {
+        sensorBoosters[id] = { ...stats, id, name: enName };
+        fittingModules[id] = { sensorBooster: stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
+    if (type.groupID === SIGNAL_AMPLIFIER_GROUP) {
+      const stats = buildSignalAmplifierStats(values);
+      if (stats) {
+        signalAmplifiers[id] = { ...stats, id, name: enName };
+        fittingModules[id] = { signalAmplifier: stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
+    if (type.groupID === SENSOR_BOOSTER_SCRIPT_GROUP) {
+      const stats = buildSensorBoosterScriptStats(values);
+      if (stats) {
+        sensorBoosterScripts[id] = { ...stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
+    if (type.groupID === SENSOR_DAMPENER_SCRIPT_GROUP) {
+      const stats = buildSensorDampenerScriptStats(values);
+      if (stats) {
+        sensorDampenerScripts[id] = { ...stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
     if (MODULE_GROUPS.has(type.groupID)) {
       const effects = buildEffectSet(typeDogma);
       if (type.groupID === 46) {
@@ -1719,6 +1865,9 @@ export interface FittingModuleStats {
   readonly trackingDisruptor?: Omit<TrackingDisruptorStats, "id" | "name">;
   readonly warpScrambler?: Omit<WarpScramblerStats, "id" | "name">;
   readonly targetPainter?: Omit<TargetPainterStats, "id" | "name">;
+  readonly sensorDampener?: Omit<SensorDampenerStats, "id" | "name">;
+  readonly sensorBooster?: Omit<SensorBoosterStats, "id" | "name">;
+  readonly signalAmplifier?: Omit<SignalAmplifierStats, "id" | "name">;
   readonly missileDamageMultiplier?: number;
   readonly missileCycleTimeMultiplier?: number;
   readonly droneDamageBonus?: number;
@@ -1918,6 +2067,46 @@ export interface OmnidirectionalTrackingEnhancerStats {
   readonly name: string;
 }
 
+export interface SensorDampenerStats {
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly scanResolutionBonusPercent: number;
+  readonly maxTargetRangeBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export interface SensorBoosterStats {
+  readonly scanResolutionBonusPercent: number;
+  readonly maxTargetRangeBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export interface SignalAmplifierStats {
+  readonly scanResolutionBonusPercent: number;
+  readonly maxTargetRangeBonusPercent: number;
+  readonly maxLockedTargetsBonus: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export interface SensorBoosterScriptStats {
+  readonly scanResolutionMultiplier: number;
+  readonly maxTargetRangeMultiplier: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export interface SensorDampenerScriptStats {
+  readonly scanResolutionMultiplier: number;
+  readonly maxTargetRangeMultiplier: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
 export type DroneSizeClass = "light" | "medium" | "heavy" | "sentry";
 
 export interface DroneStats {
@@ -1971,6 +2160,16 @@ export const OMNIDIRECTIONAL_TRACKING_LINKS: Readonly<Record<string, Omnidirecti
 
 export const OMNIDIRECTIONAL_TRACKING_ENHANCERS: Readonly<Record<string, OmnidirectionalTrackingEnhancerStats>> = ${stringifyWithTypeIds(omnidirectionalTrackingEnhancers)};
 
+export const SENSOR_DAMPENERS: Readonly<Record<string, SensorDampenerStats>> = ${stringifyWithTypeIds(sensorDampeners)};
+
+export const SENSOR_BOOSTERS: Readonly<Record<string, SensorBoosterStats>> = ${stringifyWithTypeIds(sensorBoosters)};
+
+export const SIGNAL_AMPLIFIERS: Readonly<Record<string, SignalAmplifierStats>> = ${stringifyWithTypeIds(signalAmplifiers)};
+
+export const SENSOR_BOOSTER_SCRIPTS: Readonly<Record<string, SensorBoosterScriptStats>> = ${stringifyWithTypeIds(sensorBoosterScripts)};
+
+export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScriptStats>> = ${stringifyWithTypeIds(sensorDampenerScripts)};
+
 `;
 
   const lines: string[] = [
@@ -2019,6 +2218,11 @@ export const OMNIDIRECTIONAL_TRACKING_ENHANCERS: Readonly<Record<string, Omnidir
     missileScripts,
     omnidirectionalTrackingLinks,
     omnidirectionalTrackingEnhancers,
+    sensorDampeners,
+    sensorBoosters,
+    signalAmplifiers,
+    sensorBoosterScripts,
+    sensorDampenerScripts,
     drones,
     combatDrones,
     skillBonuses,
@@ -2047,6 +2251,11 @@ export const OMNIDIRECTIONAL_TRACKING_ENHANCERS: Readonly<Record<string, Omnidir
     `${Object.keys(missileScripts).length} missile scripts`,
     `${Object.keys(omnidirectionalTrackingLinks).length} omnidirectional tracking links`,
     `${Object.keys(omnidirectionalTrackingEnhancers).length} omnidirectional tracking enhancers`,
+    `${Object.keys(sensorDampeners).length} sensor dampeners`,
+    `${Object.keys(sensorBoosters).length} sensor boosters`,
+    `${Object.keys(signalAmplifiers).length} signal amplifiers`,
+    `${Object.keys(sensorBoosterScripts).length} sensor booster scripts`,
+    `${Object.keys(sensorDampenerScripts).length} sensor dampener scripts`,
     `${Object.keys(hullBonuses).length} hull bonus sets`,
     `${Object.keys(sortedDrones).length} drones`,
     `${Object.keys(sortedCombatDrones).length} combat drones`,
@@ -2134,6 +2343,11 @@ function collectDbTableNames(
   missileScripts: Record<string, MissileScriptStats>,
   omnidirectionalTrackingLinks: Record<string, Row<OmnidirectionalTrackingLinkStats>>,
   omnidirectionalTrackingEnhancers: Record<string, Row<OmnidirectionalTrackingEnhancerStats>>,
+  sensorDampeners: Record<string, Row<SensorDampenerStats>>,
+  sensorBoosters: Record<string, Row<SensorBoosterStats>>,
+  signalAmplifiers: Record<string, Row<SignalAmplifierStats>>,
+  sensorBoosterScripts: Record<string, Row<SensorBoosterScriptStats>>,
+  sensorDampenerScripts: Record<string, Row<SensorDampenerScriptStats>>,
   drones: Record<string, DroneEntry>,
   combatDrones: Record<string, Row<DroneStats>>,
   skillBonuses: readonly RawSkillBonus[],
@@ -2157,6 +2371,11 @@ function collectDbTableNames(
     ...Object.keys(missileScripts),
     ...Object.keys(omnidirectionalTrackingLinks),
     ...Object.keys(omnidirectionalTrackingEnhancers),
+    ...Object.keys(sensorDampeners),
+    ...Object.keys(sensorBoosters),
+    ...Object.keys(signalAmplifiers),
+    ...Object.keys(sensorBoosterScripts),
+    ...Object.keys(sensorDampenerScripts),
     ...Object.keys(drones),
     ...Object.keys(combatDrones),
     ...relevantSkillIds(skillBonuses),

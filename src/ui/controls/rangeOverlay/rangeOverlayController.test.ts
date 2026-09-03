@@ -75,29 +75,29 @@ function buildController(now: () => number = () => 0): {
 
 function projectionWithWeb(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [WEB], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
-    activation: { webs: [{ active, overloaded }], grapplers: [], disruptors: [], scramblers: []  , painters: [] },
+    loadout: { webs: [WEB], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
+    activation: { webs: [{ active, overloaded }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [] },
   };
 }
 
 function projectionWithGrappler(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], scripts: [] },
-    activation: { webs: [], grapplers: [{ active, overloaded }], disruptors: [], scramblers: []  , painters: [] },
+    loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
+    activation: { webs: [], grapplers: [{ active, overloaded }], disruptors: [], scramblers: []  , painters: [], dampeners: [] },
   };
 }
 
 function projectionWithScrambler(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], scripts: [] },
-    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active, overloaded  }], painters: [] },
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
+    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active, overloaded  }], painters: [], dampeners: [] },
   };
 }
 
 function projectionWithDisruptor(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [DISRUPTOR], scramblers: [], painters: [], scripts: [] },
-    activation: { webs: [], grapplers: [], disruptors: [{ active, overloaded, script: undefined }], scramblers: []  , painters: [] },
+    loadout: { webs: [], grapplers: [], disruptors: [DISRUPTOR], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
+    activation: { webs: [], grapplers: [], disruptors: [{ active, overloaded, script: undefined }], scramblers: []  , painters: [], dampeners: [] },
   };
 }
 

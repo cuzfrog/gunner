@@ -124,6 +124,9 @@ export const RIFTER: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 365,
   sigRadius: 36,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -166,6 +169,8 @@ const EMPTY_FITTING_STATE: FittingState = {
   boosterModules: [], missileBoosterModules: [], droneBoosterModules: [], droneGroups: [],
   drones: [],
   cargo: [],
+  sensorBoosterModules: [],
+  sensorAmplifierModules: [],
 };
 
 const RIFTER_FITTING_STATE: FittingState = {
@@ -182,7 +187,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   turret: TURRET,
   drones: [],
   cargoCharges: [],
-  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
   defense: EMPTY_DEFENSE_SPEC,

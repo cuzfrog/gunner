@@ -40,7 +40,7 @@ const i18n = vi.mocked<I18n>({
 });
 
 const describer = new EwarEffectDescriberImpl({ ewarResolver: resolver, i18n });
-const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] } };
+const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], } };
 const distance = 5000;
 
 beforeEach(() => {
@@ -132,9 +132,10 @@ describe("EwarEffectDescriber", () => {
     const webProjection = {
       loadout: {
         webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }],
-        grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [],
+        grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [],
+        dampenerScripts: [],
       },
-      activation: { webs: [{ active: true, overloaded: true }], grapplers: [], disruptors: [], scramblers: []  , painters: [] },
+      activation: { webs: [{ active: true, overloaded: true }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [] },
     } as EwarProjection;
     resolver.speedMultiplierIgnoringRange.mockReturnValue(0.4);
     expect(describer.webHint(webProjection)).toBe("Reduce speed by 60% · range 13.0 km");
@@ -145,9 +146,10 @@ describe("EwarEffectDescriber", () => {
       loadout: {
         webs: [], grapplers: [],
         disruptors: [{ moduleName: "Tracking Disruptor II", moduleId: toTypeId("2109"), optimal: 48000, falloff: 24000, disruption: 0.1719, defaultScript: undefined, overloadStrengthBonusPercent: 20 }],
-        scramblers: [], painters: [], scripts: [],
+        scramblers: [], painters: [], dampeners: [], scripts: [],
+        dampenerScripts: [],
       },
-      activation: { webs: [], grapplers: [], disruptors: [{ active: true, overloaded: true, script: undefined }], scramblers: []  , painters: [] },
+      activation: { webs: [], grapplers: [], disruptors: [{ active: true, overloaded: true, script: undefined }], scramblers: []  , painters: [], dampeners: [] },
     } as EwarProjection;
     resolver.disruptedTurretIgnoringRange.mockReturnValue({ ...unitTurret, tracking: 0.7, optimal: 0.55, falloff: 0.55 });
     expect(describer.disruptorHint(disruptorProjection)).toBe("Tracking -30% · Optimal -45% · Falloff -45% · range 72.0 km");
@@ -158,9 +160,10 @@ describe("EwarEffectDescriber", () => {
       loadout: {
         webs: [], grapplers: [], disruptors: [],
         scramblers: [{ moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 }],
-        painters: [], scripts: [],
+        painters: [], dampeners: [], scripts: [],
+        dampenerScripts: [],
       },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active: true, overloaded: true }], painters: [] },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active: true, overloaded: true }], painters: [], dampeners: [] },
     } as EwarProjection;
     resolver.propulsionSuppressedIgnoringRange.mockReturnValue(true);
     expect(describer.scramblerHint(scramblerProjection)).toBe("Disables MWD · range 10.8 km");
@@ -200,8 +203,8 @@ describe("EwarEffectDescriber", () => {
     const speedFactor = 0.6;
     const webSpec: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor, overloadRangeBonusPercent: 30 };
     const webProj = {
-      loadout: { webs: [webSpec], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
-      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [] },
+      loadout: { webs: [webSpec], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
+      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [] },
     } as EwarProjection;
     resolver.speedMultiplierIgnoringRange.mockReturnValue(1 - speedFactor);
     const hintEffect = describer.webHint(webProj).split(" · ")[0];
@@ -211,8 +214,8 @@ describe("EwarEffectDescriber", () => {
   test("painterHint reports signature bonus and range", () => {
     const painterSpec: TargetPainterSpec = { moduleName: "Target Painter II", moduleId: toTypeId("12275"), maxRange: 36000, falloff: 90000, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 20 };
     const painterProj = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [painterSpec], scripts: [] },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [{ active: true, overloaded: false }] },
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [painterSpec], dampeners: [], scripts: [], dampenerScripts: [], },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [{ active: true, overloaded: false }], dampeners: [] },
     } as EwarProjection;
     resolver.sigMultiplierIgnoringRange.mockReturnValue(1.3);
     expect(describer.painterHint(painterProj)).toBe("Signature radius +30% · range 126.0 km");
@@ -220,7 +223,7 @@ describe("EwarEffectDescriber", () => {
 
   test("painterHint reports out of range when no active painter", () => {
     const painterProj = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
     } as EwarProjection;
     resolver.sigMultiplierIgnoringRange.mockReturnValue(1);
     expect(describer.painterHint(painterProj)).toBe("No effect at this range · range 0 m");

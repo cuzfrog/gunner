@@ -17,6 +17,9 @@ function makeProfile(): ShipProfile {
     inertiaModifier: 3,
     baseSpeed: 300,
     sigRadius: 35,
+    scanResolution: 200,
+    maxTargetingRange: 30000,
+    maxLockedTargets: 4,
     droneBandwidth: 75,
     droneCapacity: 75,
     maxActiveDrones: 5,
@@ -70,9 +73,11 @@ function mockCalculator(): FittingCalculator {
     resolveLauncher: vi.fn(() => undefined),
     resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
     resolvePropulsion: vi.fn(() => undefined),
-    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], painters: [], scramblers: [], scripts: [] })),
+    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], painters: [], scramblers: [], dampeners: [], scripts: [], dampenerScripts: [], })),
     resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
     resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })),
+    resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [] })),
+    resolveSensorSpec: vi.fn(() => ({ scanResolution: 0, maxTargetingRange: 0, maxLockedTargets: 0 })),
     resolveDrones: vi.fn((fitting: FittingState, _conditions: StatConditions): readonly ImportedDrone[] => {
       return fitting.droneGroups.map((g) => makeImportedDrone(String(g.typeId), g.count));
     }),

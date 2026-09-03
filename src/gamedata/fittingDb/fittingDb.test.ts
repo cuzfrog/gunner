@@ -1,6 +1,6 @@
 import type { ShipId, TypeId } from "../ids";
 import { toTypeId } from "../ids";
-import { CHARGES, COMBAT_DRONES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, SCRIPTS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
+import { CHARGES, COMBAT_DRONES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, SCRIPTS, SENSOR_BOOSTERS, SENSOR_BOOSTER_SCRIPTS, SENSOR_DAMPENERS, SENSOR_DAMPENER_SCRIPTS, SIGNAL_AMPLIFIERS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
 
 function moduleByName(name: string): FittingModuleStats | undefined {
   return Object.values(FITTING_MODULES).find((m) => m.name === name);
@@ -668,6 +668,64 @@ describe("fittingDb", () => {
     expect(moduleByName("Ballistic Control System II")).toMatchObject({
       missileDamageMultiplier: 1.1,
       missileCycleTimeMultiplier: 0.895,
+    });
+  });
+
+  test("includes sensor dampeners with scan resolution and targeting range penalties", () => {
+    const dampener = rowByName(SENSOR_DAMPENERS, "Remote Sensor Dampener II");
+    expect(dampener).toMatchObject({
+      optimal: 30000,
+      falloff: 60000,
+      scanResolutionBonusPercent: -15.3,
+      maxTargetRangeBonusPercent: -15.3,
+      overloadStrengthBonusPercent: 20,
+    });
+    expect(moduleByName("Remote Sensor Dampener II")?.sensorDampener).toMatchObject(baseStats(dampener!));
+  });
+
+  test("includes sensor boosters with scan resolution and targeting range bonuses", () => {
+    const booster = rowByName(SENSOR_BOOSTERS, "Sensor Booster II");
+    expect(booster).toMatchObject({
+      scanResolutionBonusPercent: 30,
+      maxTargetRangeBonusPercent: 30,
+      overloadStrengthBonusPercent: 15,
+    });
+    expect(moduleByName("Sensor Booster II")?.sensorBooster).toMatchObject(baseStats(booster!));
+  });
+
+  test("includes signal amplifiers with passive sensor bonuses and max locked targets", () => {
+    const amplifier = rowByName(SIGNAL_AMPLIFIERS, "Signal Amplifier II");
+    expect(amplifier).toMatchObject({
+      scanResolutionBonusPercent: 15,
+      maxTargetRangeBonusPercent: 30,
+      maxLockedTargetsBonus: 2,
+    });
+    expect(moduleByName("Signal Amplifier II")?.signalAmplifier).toMatchObject(baseStats(amplifier!));
+  });
+
+  test("includes sensor booster scripts with scan resolution and targeting range multipliers", () => {
+    const scanResScript = rowByName(SENSOR_BOOSTER_SCRIPTS, "Scan Resolution Script");
+    expect(scanResScript).toMatchObject({
+      scanResolutionMultiplier: 2,
+      maxTargetRangeMultiplier: 0,
+    });
+    const rangeScript = rowByName(SENSOR_BOOSTER_SCRIPTS, "Targeting Range Script");
+    expect(rangeScript).toMatchObject({
+      scanResolutionMultiplier: 0,
+      maxTargetRangeMultiplier: 2,
+    });
+  });
+
+  test("includes sensor dampener scripts with scan resolution and targeting range multipliers", () => {
+    const scanResScript = rowByName(SENSOR_DAMPENER_SCRIPTS, "Scan Resolution Dampening Script");
+    expect(scanResScript).toMatchObject({
+      scanResolutionMultiplier: 2,
+      maxTargetRangeMultiplier: 0,
+    });
+    const rangeScript = rowByName(SENSOR_DAMPENER_SCRIPTS, "Targeting Range Dampening Script");
+    expect(rangeScript).toMatchObject({
+      scanResolutionMultiplier: 0,
+      maxTargetRangeMultiplier: 2,
     });
   });
 });

@@ -24,6 +24,9 @@ export interface ShipProfile {
   readonly inertiaModifier: number;
   readonly baseSpeed: number;
   readonly sigRadius: number;
+  readonly scanResolution: number; // mm
+  readonly maxTargetingRange: number; // m
+  readonly maxLockedTargets: number;
   readonly droneBandwidth: number;
   readonly droneCapacity: number;
   readonly maxActiveDrones: number;
@@ -56,11 +59,22 @@ export interface DefenseSkills {
   readonly thermodynamics: SkillLevel;
 }
 
+export interface TargetingSkills {
+  readonly longRangeTargeting: SkillLevel;
+  readonly signatureAnalysis: SkillLevel;
+  readonly targetManagement: SkillLevel;
+  readonly advancedTargetManagement: SkillLevel;
+  readonly sensorLinking: SkillLevel;
+  readonly signalSuppression: SkillLevel;
+  readonly frequencyModulation: SkillLevel;
+}
+
 export interface StatConditions {
   readonly skillLevel: SkillLevel;
   readonly overloaded: boolean;
   readonly weaponOverloaded: boolean;
   readonly defenseSkills?: DefenseSkills;
+  readonly targetingSkills?: TargetingSkills;
 }
 
 export function defaultDefenseSkills(level: SkillLevel): DefenseSkills {
@@ -80,6 +94,18 @@ export function defaultDefenseSkills(level: SkillLevel): DefenseSkills {
     armorResistancePhasing: level,
     tacticalShieldManipulation: level,
     thermodynamics: level,
+  };
+}
+
+export function defaultTargetingSkills(level: SkillLevel): TargetingSkills {
+  return {
+    longRangeTargeting: level,
+    signatureAnalysis: level,
+    targetManagement: level,
+    advancedTargetManagement: level,
+    sensorLinking: level,
+    signalSuppression: level,
+    frequencyModulation: level,
   };
 }
 

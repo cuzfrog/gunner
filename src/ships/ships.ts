@@ -19,9 +19,9 @@ export type { ShipNameLanguage } from "../gamedata/i18n";
 export type { ShipStats } from "./effectiveStats";
 export type {
   DefenseSkills, FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel,
-  StatConditions,
+  StatConditions, TargetingSkills,
 } from "./types";
-export { defaultDefenseSkills } from "./types";
+export { defaultDefenseSkills, defaultTargetingSkills } from "./types";
 
 export interface HullView {
   readonly name: string;

@@ -50,5 +50,7 @@ function syntheticFittingState(context: DroneLoadoutContext, groups: readonly Dr
     droneGroups: groups,
     drones: [],
     cargo: [],
+    sensorBoosterModules: [],
+    sensorAmplifierModules: [],
   };
 }

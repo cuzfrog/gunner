@@ -61,6 +61,12 @@ function parseNumber(input: string): number {
   return value;
 }
 
+function parseDistance(input: string): number {
+  const value = parseNumber(input);
+  if (input.toLowerCase().includes("km")) return value * 1000;
+  return value;
+}
+
 function hasObject(value: unknown, key: string): Record<string, unknown> {
   if (!value || typeof value !== "object") throw new Error(`Entry is not an object`);
   const record = value as Record<string, unknown>;
@@ -72,6 +78,12 @@ function hasObject(value: unknown, key: string): Record<string, unknown> {
 function hasString(value: Record<string, unknown>, key: string, context: string): string {
   const field = value[key];
   if (typeof field !== "string") throw new Error(`${context}: missing or invalid ${key}`);
+  return field;
+}
+
+function hasNumber(value: Record<string, unknown>, key: string, context: string): number {
+  const field = value[key];
+  if (typeof field !== "number") throw new Error(`${context}: missing or invalid ${key}`);
   return field;
 }
 
@@ -281,6 +293,9 @@ function parseProfile(
     inertiaModifier: parseNumber(hasString(navigation, "inertiaModifier", name)),
     baseSpeed: parseNumber(hasString(navigation, "maxVelocity", name)),
     sigRadius: parseNumber(hasString(targeting, "sigRadius", name)),
+    scanResolution: parseNumber(hasString(targeting, "scanResolution", name)),
+    maxTargetingRange: parseDistance(hasString(targeting, "maxTargetingRange", name)),
+    maxLockedTargets: hasNumber(targeting, "maxLockedTargets", name),
     droneBandwidth: droneLimits.bandwidth,
     droneCapacity: droneLimits.capacity,
     maxActiveDrones: droneLimits.maxActive,
@@ -312,6 +327,9 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push(`    inertiaModifier: ${p.inertiaModifier},`);
     lines.push(`    baseSpeed: ${p.baseSpeed},`);
     lines.push(`    sigRadius: ${p.sigRadius},`);
+    lines.push(`    scanResolution: ${p.scanResolution},`);
+    lines.push(`    maxTargetingRange: ${p.maxTargetingRange},`);
+    lines.push(`    maxLockedTargets: ${p.maxLockedTargets},`);
     lines.push(`    droneBandwidth: ${p.droneBandwidth},`);
     lines.push(`    droneCapacity: ${p.droneCapacity},`);
     lines.push(`    maxActiveDrones: ${p.maxActiveDrones},`);

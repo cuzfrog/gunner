@@ -36,6 +36,7 @@ export type {
   DefenseSpec,
   RahSpec,
   RepairerSpec,
+  DampenerActivation,
   DisruptionBreakdown,
   DisruptionScriptSpec,
   DisruptorActivation,
@@ -67,10 +68,19 @@ export type {
   OrbitDirection,
   PainterActivation,
   ScramblerActivation,
+  SensorBoosterActivation,
+  SensorBoosterScriptSpec,
+  SensorBoosterSpec,
+  SensorBoostLoadout,
+  SensorBoostProjection,
+  SensorDampenerScriptSpec,
+  SensorDampenerSpec,
+  SensorSpec,
   ShipConfig,
   ShipState,
   Side,
   SigResolutionClass,
+  SignalAmplifierSpec,
   SimConfig,
   SimSnapshot,
   SpeedBreakdown,
@@ -91,7 +101,7 @@ export type {
   WeaponKind,
   WeaponSpec,
 } from "./types";
-export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, DAMAGE_TYPES, EMPTY_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, SIG_RESOLUTIONS, ZERO_DAMAGE, ZERO_RESISTS, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum } from "./types";
+export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, DAMAGE_TYPES, EMPTY_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, SIG_RESOLUTIONS, ZERO_DAMAGE, ZERO_RESISTS, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum } from "./types";
 export type { SimValueParser } from "./simValueParser";
 export { Vec2 } from "./vec2";
 export type { SimCradle } from "./cradle";

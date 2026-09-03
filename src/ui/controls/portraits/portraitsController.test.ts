@@ -19,6 +19,9 @@ const SHIP_A_PROFILE: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 300,
   sigRadius: 36,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -39,6 +42,9 @@ const SHIP_B_PROFILE: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 300,
   sigRadius: 36,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -356,12 +362,14 @@ describe("PortraitsController", () => {
     projections.shipB = {
       loadout: {
         webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
-        grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [],
+        grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [],
+        dampenerScripts: [],
       },
       activation: {
         webs: [{ active: true, overloaded: false }],
         grapplers: [], disruptors: [], scramblers: [],
       painters: [],
+      dampeners: [],
       },
     };
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("527") ? "images/icons/1234@1x.png" : undefined));

@@ -63,6 +63,8 @@ export interface ShipState extends ShipConfig {
   ewar?: EwarProjection;
   boosts?: TurretBoostProjection;
   missileBoosts?: MissileBoosterProjection;
+  sensorBoosts?: SensorBoostProjection;
+  sensorSpec?: SensorSpec;
 }
 
 export interface SimConfig {
@@ -282,6 +284,73 @@ export interface TargetPainterSpec {
   readonly overloadStrengthBonusPercent: number;
 }
 
+export interface SensorDampenerScriptSpec {
+  readonly name: string;
+  readonly moduleId: TypeId;
+  readonly scanResolutionMultiplier: number;
+  readonly maxTargetRangeMultiplier: number;
+}
+
+export interface SensorDampenerSpec {
+  readonly moduleName: string;
+  readonly moduleId: TypeId;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly scanResolutionBonusPercent: number;
+  readonly maxTargetRangeBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+  readonly defaultScript: SensorDampenerScriptSpec | undefined;
+}
+
+export interface SensorBoosterScriptSpec {
+  readonly name: string;
+  readonly moduleId: TypeId;
+  readonly scanResolutionMultiplier: number;
+  readonly maxTargetRangeMultiplier: number;
+}
+
+export interface SensorBoosterSpec {
+  readonly moduleName: string;
+  readonly moduleId: TypeId;
+  readonly scanResolutionBonusPercent: number;
+  readonly maxTargetRangeBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+  readonly defaultScript: SensorBoosterScriptSpec | undefined;
+}
+
+export interface SignalAmplifierSpec {
+  readonly moduleName: string;
+  readonly moduleId: TypeId;
+  readonly scanResolutionBonusPercent: number;
+  readonly maxTargetRangeBonusPercent: number;
+  readonly maxLockedTargetsBonus: number;
+}
+
+export interface SensorBoostLoadout {
+  readonly boosters: readonly SensorBoosterSpec[];
+  readonly amplifiers: readonly SignalAmplifierSpec[];
+  readonly boosterScripts: readonly SensorBoosterScriptSpec[];
+}
+
+export const EMPTY_SENSOR_BOOST_LOADOUT: SensorBoostLoadout = { boosters: [], amplifiers: [], boosterScripts: [] };
+
+export interface SensorBoosterActivation {
+  readonly active: boolean;
+  readonly overloaded: boolean;
+  readonly script: SensorBoosterScriptSpec | undefined;
+}
+
+export interface SensorBoostProjection {
+  readonly loadout: SensorBoostLoadout;
+  readonly activation?: readonly SensorBoosterActivation[];
+}
+
+export interface SensorSpec {
+  readonly scanResolution: number;
+  readonly maxTargetingRange: number;
+  readonly maxLockedTargets: number;
+}
+
 export interface TrackingBoosterSpec {
   readonly moduleName: string;
   readonly moduleId: TypeId;
@@ -341,10 +410,12 @@ export interface EwarLoadout {
   readonly disruptors: readonly TrackingDisruptorSpec[];
   readonly scramblers: readonly WarpScramblerSpec[];
   readonly painters: readonly TargetPainterSpec[];
+  readonly dampeners: readonly SensorDampenerSpec[];
   readonly scripts: readonly DisruptionScriptSpec[];
+  readonly dampenerScripts: readonly SensorDampenerScriptSpec[];
 }
 
-export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] };
+export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [] };
 
 export interface WebActivation {
   readonly active: boolean;
@@ -372,12 +443,19 @@ export interface PainterActivation {
   readonly overloaded: boolean;
 }
 
+export interface DampenerActivation {
+  readonly active: boolean;
+  readonly overloaded: boolean;
+  readonly script: SensorDampenerScriptSpec | undefined;
+}
+
 export interface EwarActivation {
   readonly webs: readonly WebActivation[];
   readonly grapplers: readonly GrapplerActivation[];
   readonly disruptors: readonly DisruptorActivation[];
   readonly scramblers: readonly ScramblerActivation[];
   readonly painters: readonly PainterActivation[];
+  readonly dampeners: readonly DampenerActivation[];
 }
 
 export interface EwarProjection {
@@ -385,7 +463,7 @@ export interface EwarProjection {
   readonly activation?: EwarActivation;
 }
 
-export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor";
+export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener";
 
 export interface AppliedEwarEffect {
   readonly family: EwarEffectFamily;
@@ -449,6 +527,8 @@ export interface CombatantConfig extends ShipConfig {
   readonly ewar?: EwarProjection;
   readonly boosts?: TurretBoostProjection;
   readonly missileBoosts?: MissileBoosterProjection;
+  readonly sensorBoosts?: SensorBoostProjection;
+  readonly sensorSpec?: SensorSpec;
 }
 
 export interface DefenseLayerSpec {

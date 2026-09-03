@@ -104,7 +104,7 @@ describe("_parseProfile", () => {
       hullType: "Standard Frigates",
       navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
       structure: { mass: "1,067,000 kg" },
-      targeting: { sigRadius: "35 m" },
+      targeting: { sigRadius: "35 m", scanResolution: "200 mm", maxTargetingRange: "30 km", maxLockedTargets: 4 },
       drones: { droneCapacity: "25 m³", droneBandwidth: "25 Mbit/sec" },
     };
     const profile = _parseProfile(raw, 0, shipNameToType, emptyTypedogmas, emptyAttributeNames);
@@ -127,7 +127,7 @@ describe("_parseProfile", () => {
       hullType: "Standard Frigates",
       navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
       structure: { mass: "1,067,000 kg" },
-      targeting: { sigRadius: "35 m" },
+      targeting: { sigRadius: "35 m", scanResolution: "200 mm", maxTargetingRange: "30 km", maxLockedTargets: 4 },
     };
     const profile = _parseProfile(raw, 0, shipNameToType, emptyTypedogmas, emptyAttributeNames);
     expect(profile.droneBandwidth).toBe(0);
@@ -158,7 +158,7 @@ describe("_parseProfile", () => {
       hullType: "Standard Frigates",
       navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
       structure: { mass: "1,067,000 kg" },
-      targeting: { sigRadius: "35 m" },
+      targeting: { sigRadius: "35 m", scanResolution: "200 mm", maxTargetingRange: "30 km", maxLockedTargets: 4 },
     };
     const profile = _parseProfile(raw, 0, shipNameToType, typedogmas, attributeNames);
     expect(profile.shieldHp).toBe(375);
@@ -177,7 +177,7 @@ describe("_parseProfile", () => {
       hullType: "Standard Frigates",
       navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
       structure: { mass: "1,067,000 kg" },
-      targeting: { sigRadius: "35 m" },
+      targeting: { sigRadius: "35 m", scanResolution: "200 mm", maxTargetingRange: "30 km", maxLockedTargets: 4 },
     };
     const profile = _parseProfile(raw, 0, shipNameToType, emptyTypedogmas, emptyAttributeNames);
     expect(profile.shieldHp).toBe(0);

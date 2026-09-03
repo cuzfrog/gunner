@@ -15,6 +15,11 @@ import {
   type MissileStats,
   type OmnidirectionalTrackingEnhancerStats,
   type OmnidirectionalTrackingLinkStats,
+  type SensorBoosterScriptStats,
+  type SensorBoosterStats,
+  type SensorDampenerScriptStats,
+  type SensorDampenerStats,
+  type SignalAmplifierStats,
   type SkillBonus,
   type SkillBonusType,
   type StasisGrapplerStats,
@@ -40,6 +45,11 @@ import {
   OMNIDIRECTIONAL_TRACKING_ENHANCERS,
   OMNIDIRECTIONAL_TRACKING_LINKS,
   SCRIPTS,
+  SENSOR_BOOSTER_SCRIPTS,
+  SENSOR_BOOSTERS,
+  SENSOR_DAMPENER_SCRIPTS,
+  SENSOR_DAMPENERS,
+  SIGNAL_AMPLIFIERS,
   SKILL_BONUSES,
   STASIS_GRAPPLERS,
   STASIS_WEBS,
@@ -66,6 +76,11 @@ export type {
   MissileStats,
   OmnidirectionalTrackingEnhancerStats,
   OmnidirectionalTrackingLinkStats,
+  SensorBoosterScriptStats,
+  SensorBoosterStats,
+  SensorDampenerScriptStats,
+  SensorDampenerStats,
+  SignalAmplifierStats,
   SkillBonus,
   SkillBonusType,
   StasisGrapplerStats,
@@ -101,6 +116,11 @@ export interface FittingDbData {
   readonly missileScripts: Readonly<Record<string, Row<MissileScriptStats>>>;
   readonly omnidirectionalTrackingLinks: Readonly<Record<string, Row<OmnidirectionalTrackingLinkStats>>>;
   readonly omnidirectionalTrackingEnhancers: Readonly<Record<string, Row<OmnidirectionalTrackingEnhancerStats>>>;
+  readonly sensorDampeners: Readonly<Record<string, Row<SensorDampenerStats>>>;
+  readonly sensorBoosters: Readonly<Record<string, Row<SensorBoosterStats>>>;
+  readonly signalAmplifiers: Readonly<Record<string, Row<SignalAmplifierStats>>>;
+  readonly sensorBoosterScripts: Readonly<Record<string, Row<SensorBoosterScriptStats>>>;
+  readonly sensorDampenerScripts: Readonly<Record<string, Row<SensorDampenerScriptStats>>>;
   readonly hullBonuses: Readonly<Record<ShipId, readonly HullBonus[]>>;
   readonly skillBonuses: readonly SkillBonus[];
   readonly drones: Readonly<Record<string, DroneEntry>>;
@@ -128,6 +148,11 @@ export const FITTING_DB: FittingDbData = {
   missileScripts: MISSILE_SCRIPTS,
   omnidirectionalTrackingLinks: OMNIDIRECTIONAL_TRACKING_LINKS,
   omnidirectionalTrackingEnhancers: OMNIDIRECTIONAL_TRACKING_ENHANCERS,
+  sensorDampeners: SENSOR_DAMPENERS,
+  sensorBoosters: SENSOR_BOOSTERS,
+  signalAmplifiers: SIGNAL_AMPLIFIERS,
+  sensorBoosterScripts: SENSOR_BOOSTER_SCRIPTS,
+  sensorDampenerScripts: SENSOR_DAMPENER_SCRIPTS,
   hullBonuses: HULL_BONUSES,
   skillBonuses: SKILL_BONUSES,
   drones: DRONES,
