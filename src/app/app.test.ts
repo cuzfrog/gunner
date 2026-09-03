@@ -132,7 +132,7 @@ function baseView(): EngagementView {
   const assessment: AttackAssessment = {
     boostedWeapon: turret,
     effectiveWeapon: turret,
-    damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, appliedByType: ZERO_DAMAGE },
+    damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
     turret: { hit, expectedMultiplier: 1 },
   };
   return { frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT } };
@@ -201,7 +201,7 @@ describe("AppImpl", () => {
     const assessment: AttackAssessment = {
       boostedWeapon: boostedTurret,
       effectiveWeapon: effectiveTurret,
-      damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, appliedByType: ZERO_DAMAGE },
+      damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
       turret: { hit, expectedMultiplier: 1 },
     };
     const view: EngagementView = {
@@ -348,7 +348,7 @@ describe("AppImpl", () => {
     };
     const droneAssessment: AttackAssessment = {
       boostedWeapon: drone, effectiveWeapon: drone,
-      damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE },
+      damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
       drone: { hit, expectedMultiplier: 1, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true },
     };
     const droneView: EngagementView = {

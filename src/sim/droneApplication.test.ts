@@ -229,4 +229,19 @@ describe("DroneApplicationImpl", () => {
     expect(result.appliedByType).toEqual(expected);
     expect(damageVectorSum(result.appliedByType)).toBeCloseTo(result.appliedDps, 10);
   });
+
+  test("appliedVolleyByType carries per-type per-cycle volley scaled by expectedMultiplier", () => {
+    const drone = lightDrone({ damagePerShot: { em: 15, thermal: 0, kinetic: 25, explosive: 10 } });
+    const result = application.compute(frame(5000, 0), drone, 40);
+    const expected = damageVectorScale(drone.damagePerShot, drone.droneCount * result.expectedMultiplier);
+    expect(result.appliedVolleyByType).toEqual(expected);
+    expect(damageVectorSum(result.appliedVolleyByType)).toBeCloseTo(result.volley * result.expectedMultiplier, 10);
+  });
+
+  test("appliedVolleyByType is zero when out of range", () => {
+    const drone = sentryDrone({ optimal: 1000, falloff: 500 });
+    const result = application.compute(frame(5000, 0), drone, 400);
+    expect(result.inRange).toBe(false);
+    expect(result.appliedVolleyByType).toEqual(ZERO_DAMAGE);
+  });
 });

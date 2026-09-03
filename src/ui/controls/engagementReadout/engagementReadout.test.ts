@@ -88,7 +88,7 @@ function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: num
   };
   const shipAHit = overrides.shipAHit ?? { chance: 0, trackingTerm: 0, rangeTerm: 0 };
   const shipBHit = overrides.shipBHit ?? { chance: 0, trackingTerm: 0, rangeTerm: 0 };
-  const shipADamage = overrides.shipADamage ?? { nominalDps: 2.4, appliedDps: 2.0, application: 0.83, volley: 12, appliedByType: ZERO_DAMAGE };
+  const shipADamage = overrides.shipADamage ?? { nominalDps: 2.4, appliedDps: 2.0, application: 0.83, volley: 12, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
   const shipAAttack: AttackAssessment = {
     boostedWeapon: DUMMY_TURRET, effectiveWeapon: DUMMY_TURRET,
     damage: shipADamage,
@@ -96,7 +96,7 @@ function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: num
   };
   const shipBAttack: AttackAssessment = {
     boostedWeapon: DUMMY_TURRET, effectiveWeapon: DUMMY_TURRET,
-    damage: { nominalDps: 0, appliedDps: 0, application: 0, volley: 0, appliedByType: ZERO_DAMAGE },
+    damage: { nominalDps: 0, appliedDps: 0, application: 0, volley: 0, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
     turret: { hit: shipBHit, expectedMultiplier: 0 },
   };
   return { frame, attacks: { shipA: shipAAttack, shipB: shipBAttack }, effectiveWeapons: { shipA: DUMMY_TURRET, shipB: DUMMY_TURRET } } as unknown as EngagementView;
@@ -111,7 +111,7 @@ function makeMissileView(overrides: { distance?: number; shipADamage?: DamageAss
     relVelocity: new Vec2(0, 0), radialVelocity: 0,
     transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
   };
-  const shipADamage = overrides.shipADamage ?? { nominalDps: 40, appliedDps: 32, application: 0.8, volley: 200, appliedByType: ZERO_DAMAGE };
+  const shipADamage = overrides.shipADamage ?? { nominalDps: 40, appliedDps: 32, application: 0.8, volley: 200, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
   const shipAMissile = overrides.shipAMissile ?? { application: 0.8, signatureTerm: 1, velocityTerm: 0.8, inRange: true, timeToImpact: 2.5 };
   const shipAAttack: AttackAssessment = {
     boostedWeapon: DUMMY_MISSILE, effectiveWeapon: DUMMY_MISSILE,
@@ -131,7 +131,7 @@ function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: numb
     transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
   };
   const shipAHit = overrides.shipAHit ?? { chance: 0.5, trackingTerm: 1, rangeTerm: 0 };
-  const shipADamage = overrides.shipADamage ?? { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE };
+  const shipADamage = overrides.shipADamage ?? { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
   const shipAAttack: AttackAssessment = {
     boostedWeapon: DUMMY_DRONE, effectiveWeapon: DUMMY_DRONE,
     damage: shipADamage,
@@ -208,7 +208,7 @@ describe("EngagementReadout", () => {
   test("turret side shows DPS and application percentage in separate grid cells", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
-    readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 50, appliedDps: 40, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE } }), T);
+    readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 50, appliedDps: 40, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE } }), T);
     expect(els.shipA.resTurretCards.hidden).toBe(false);
     expect(els.shipA.resMissileCards.hidden).toBe(true);
     expect(els.shipA.resNominalDps.textContent).toBe("50.0");
@@ -220,14 +220,14 @@ describe("EngagementReadout", () => {
   test("turret side with zero applied DPS shows is-danger", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
-    readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 50, appliedDps: 0, application: 0, volley: 100, appliedByType: ZERO_DAMAGE } }), T);
+    readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 50, appliedDps: 0, application: 0, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE } }), T);
     expect(els.shipA.resAppliedDpsApplication.classList.contains("is-danger")).toBe(true);
   });
 
   test("turret side with application > 1 (wrecking hits) shows is-optimal", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
-    readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 100, appliedDps: 101.5, application: 1.015, volley: 100, appliedByType: ZERO_DAMAGE } }), T);
+    readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 100, appliedDps: 101.5, application: 1.015, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE } }), T);
     expect(els.shipA.resAppliedDps.textContent).toBe("101.5");
     expect(els.shipA.resAppliedDpsApplication.textContent).toBe("(101.5%)");
     expect(els.shipA.resAppliedDpsApplication.classList.contains("is-optimal")).toBe(true);
@@ -258,7 +258,7 @@ describe("EngagementReadout", () => {
   test("missile side with zero applied DPS shows is-danger", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
-    readout.update(makeMissileView({ distance: 5000, shipADamage: { nominalDps: 40, appliedDps: 0, application: 0, volley: 200, appliedByType: ZERO_DAMAGE }, shipAMissile: { application: 0, signatureTerm: 0, velocityTerm: 0, inRange: false, timeToImpact: 2.5 } }), T);
+    readout.update(makeMissileView({ distance: 5000, shipADamage: { nominalDps: 40, appliedDps: 0, application: 0, volley: 200, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE }, shipAMissile: { application: 0, signatureTerm: 0, velocityTerm: 0, inRange: false, timeToImpact: 2.5 } }), T);
     expect(els.shipA.resAppliedDpsApplication.classList.contains("is-danger")).toBe(true);
   });
 
@@ -319,7 +319,7 @@ describe("EngagementReadout", () => {
   test("drone side with zero applied DPS shows is-danger", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
-    readout.update(makeDroneView({ distance: 1000, shipADamage: { nominalDps: 25, appliedDps: 0, application: 0, volley: 100, appliedByType: ZERO_DAMAGE } }), T);
+    readout.update(makeDroneView({ distance: 1000, shipADamage: { nominalDps: 25, appliedDps: 0, application: 0, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE } }), T);
     expect(els.shipA.resAppliedDpsApplication.classList.contains("is-danger")).toBe(true);
   });
 });

@@ -14,8 +14,8 @@ const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.5, sigResoluti
 const shipBEffectiveTurret: TurretSpec = { kind: "turret", tracking: 0.3, sigResolution: 125, optimal: 8500, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const hit = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
 const shipBHit = { chance: 0.7, trackingTerm: 0.2, rangeTerm: 0.3 };
-const shipADamage = { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, appliedByType: ZERO_DAMAGE };
-const shipBDamage = { nominalDps: 20, appliedDps: 14, application: 0.7, volley: 100, appliedByType: ZERO_DAMAGE };
+const shipADamage = { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+const shipBDamage = { nominalDps: 20, appliedDps: 14, application: 0.7, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
 
 const shipA: ShipState = {
   id: "shipA",
@@ -127,7 +127,7 @@ describe("EngagementFrameComposerImpl", () => {
   test("multiple weapons on one side sum DPS while keeping primary weapon details", () => {
     const { engagementEvaluator, composer } = makeComposer();
     const secondTurret: TurretSpec = { kind: "turret", tracking: 0.2, sigResolution: 125, optimal: 7000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 50, explosive: 0 }, cycleTime: 4, turretCount: 2 };
-    const secondDamage = { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE };
+    const secondDamage = { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
     const secondAssessment: AttackAssessment = {
       boostedWeapon: secondTurret,
       effectiveWeapon: secondTurret,
@@ -159,8 +159,8 @@ describe("EngagementFrameComposerImpl", () => {
     const { engagementEvaluator, composer } = makeComposer();
     const firstByType = { em: 12, thermal: 8, kinetic: 0, explosive: 4 };
     const secondByType = { em: 3, thermal: 0, kinetic: 20, explosive: 7 };
-    const firstDamage = { nominalDps: 24, appliedDps: 24, application: 1, volley: 100, appliedByType: firstByType };
-    const secondDamage = { nominalDps: 30, appliedDps: 30, application: 1, volley: 100, appliedByType: secondByType };
+    const firstDamage = { nominalDps: 24, appliedDps: 24, application: 1, volley: 100, appliedByType: firstByType, appliedVolleyByType: firstByType };
+    const secondDamage = { nominalDps: 30, appliedDps: 30, application: 1, volley: 100, appliedByType: secondByType, appliedVolleyByType: secondByType };
     const firstAssessment: AttackAssessment = { boostedWeapon: boostedTurret, effectiveWeapon: effectiveTurret, damage: firstDamage, turret: { hit, expectedMultiplier: 1 } };
     const secondAssessment: AttackAssessment = { boostedWeapon: boostedTurret, effectiveWeapon: effectiveTurret, damage: secondDamage, turret: { hit, expectedMultiplier: 1 } };
     engagementEvaluator.evaluate.mockImplementation((_frame, attacks) => {
@@ -172,6 +172,7 @@ describe("EngagementFrameComposerImpl", () => {
     const view = composer.compose(snapshot, multiInput);
     expect(view.attacks.shipA).toBeDefined();
     expect(view.attacks.shipA!.damage.appliedByType).toEqual(damageVectorAdd(firstByType, secondByType));
+    expect(view.attacks.shipA!.damage.appliedVolleyByType).toEqual(damageVectorAdd(firstByType, secondByType));
   });
 
   test("defenses are forwarded with correct appliedByType routing and overload flag", () => {
@@ -179,8 +180,8 @@ describe("EngagementFrameComposerImpl", () => {
     const shipAAttackByType = { em: 100, thermal: 0, kinetic: 0, explosive: 0 };
     const shipBAttackByType = { em: 0, thermal: 100, kinetic: 0, explosive: 0 };
     engagementEvaluator.evaluate.mockReturnValue({
-      shipA: { ...shipAAssessment, damage: { ...shipADamage, appliedByType: shipAAttackByType } },
-      shipB: { ...shipBAssessment, damage: { ...shipBDamage, appliedByType: shipBAttackByType } },
+      shipA: { ...shipAAssessment, damage: { ...shipADamage, appliedByType: shipAAttackByType, appliedVolleyByType: shipAAttackByType } },
+      shipB: { ...shipBAssessment, damage: { ...shipBDamage, appliedByType: shipBAttackByType, appliedVolleyByType: shipBAttackByType } },
     });
     const shipADefense: DefenseSpec = {
       layers: {
@@ -191,6 +192,7 @@ describe("EngagementFrameComposerImpl", () => {
       shieldRechargeTime: 100,
       repairers: [{ layer: "shield", amount: 100, cycleTime: 5, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1.15, cycleTimeMultiplier: 0.85 } }],
       signaturePenalty: 0,
+      shieldUniformity: 0.25,
     };
     const shipBDefense: DefenseSpec = {
       layers: {
@@ -201,6 +203,7 @@ describe("EngagementFrameComposerImpl", () => {
       shieldRechargeTime: 100,
       repairers: [],
       signaturePenalty: 0,
+      shieldUniformity: 0.25,
     };
     const defenseInput = { weapons: { shipA: [shipATurret] as const, shipB: [shipBTurret] as const }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] } as const, missileFacts: { shipA: [], shipB: [] } as const, defenses: { shipA: shipADefense, shipB: shipBDefense } as const, overloaded: { shipA: true, shipB: false } as const };
     const view = composer.compose(snapshot, defenseInput);

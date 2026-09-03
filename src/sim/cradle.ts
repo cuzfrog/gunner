@@ -12,6 +12,7 @@ import type {
   MissileApplication,
   MissileBoosterResolver,
   MissileSimulator,
+  RngFactory,
   SimValueParser,
   Simulation,
   StackingPenalty,
@@ -41,5 +42,6 @@ export interface SimCradle {
   readonly engagementFrameComposer: EngagementFrameComposer;
   readonly defenseAssessor: DefenseAssessor;
   readonly defenseSimulator: DefenseSimulator;
+  readonly rngFactory: RngFactory;
   readonly simConfig: SimConfig;
 }

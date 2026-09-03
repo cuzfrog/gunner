@@ -83,4 +83,19 @@ describe("TurretDamageImpl", () => {
     expect(result.appliedByType).toEqual(expected);
     expect(damageVectorSum(result.appliedByType)).toBeCloseTo(result.appliedDps, 10);
   });
+
+  test("appliedVolleyByType carries per-type per-cycle volley scaled by expectedMultiplier", () => {
+    const multiTypeTurret: TurretSpec = { ...turret, damagePerShot: { em: 10, thermal: 20, kinetic: 30, explosive: 40 } };
+    const hit: HitChanceBreakdown = { chance: 0.5, trackingTerm: 1, rangeTerm: 0 };
+    const result = damage.compute(hit, multiTypeTurret);
+    const expected = damageVectorScale(multiTypeTurret.damagePerShot, multiTypeTurret.turretCount * result.expectedMultiplier);
+    expect(result.appliedVolleyByType).toEqual(expected);
+    expect(damageVectorSum(result.appliedVolleyByType)).toBeCloseTo(result.volley * result.expectedMultiplier, 10);
+  });
+
+  test("appliedVolleyByType equals appliedByType * cycleTime", () => {
+    const hit: HitChanceBreakdown = { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.2 };
+    const result = damage.compute(hit, turret);
+    expect(result.appliedVolleyByType.kinetic).toBeCloseTo(result.appliedByType.kinetic * turret.cycleTime, 10);
+  });
 });

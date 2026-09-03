@@ -43,6 +43,10 @@ no-new-exports:
   - engagementFrameComposer.ts
   - defenseAssessment.ts
   - fireControl.ts
+  - rng.ts
+  - rng.test.ts
+  - hitRoll.ts
+  - hitRoll.test.ts
   - module.ts
 ---
 

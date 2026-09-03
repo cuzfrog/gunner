@@ -9,13 +9,13 @@ const drone: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, opt
 
 const turretAssessment: AttackAssessment = {
   boostedWeapon: turret, effectiveWeapon: turret,
-  damage: { nominalDps: 80, appliedDps: 64, application: 0.8, volley: 400, appliedByType: ZERO_DAMAGE },
+  damage: { nominalDps: 80, appliedDps: 64, application: 0.8, volley: 400, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
   turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8 },
 };
 
 const droneAssessment: AttackAssessment = {
   boostedWeapon: drone, effectiveWeapon: drone,
-  damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE },
+  damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
   drone: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true },
 };
 

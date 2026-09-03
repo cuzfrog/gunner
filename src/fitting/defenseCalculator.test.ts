@@ -1,6 +1,6 @@
 import { type FactionId, type HullTypeId, type ShipId } from "../gamedata/ids";
 import { FITTING_DB, type HullBonus } from "../gamedata/fittingDb";
-import { type DefenseSkills, type ShipProfile, defaultDefenseSkills } from "../ships";
+import { type DefenseSkills, type ShipProfile, type SkillLevel, defaultDefenseSkills } from "../ships";
 import type { StackingPenalty } from "../sim";
 import { FittingStateFactory, type CargoEntry, type FittingModuleEntry } from "./fittingState";
 import { DefenseCalculatorImpl } from "./defenseCalculator";
@@ -266,5 +266,28 @@ describe("DefenseCalculatorImpl", () => {
     expect(withManagement0.layers.shield.hp).toBeCloseTo(rokhProfile.shieldHp * hullBonusMultiplier, 0);
     const managementRatio = withManagement5.layers.shield.hp / withManagement0.layers.shield.hp;
     expect(managementRatio).toBeCloseTo(1 + 0.05 * 5, 5);
+  });
+
+  test("shieldUniformity is 0.25 at TSM 0", () => {
+    const skills: DefenseSkills = { ...defaultDefenseSkills(5), tacticalShieldManipulation: 0 };
+    const state = factory.create(profile, hullBonuses, [], [], [] as readonly CargoEntry[]);
+    const spec = calculator.resolve(state, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skills });
+    expect(spec.shieldUniformity).toBeCloseTo(0.25, 5);
+  });
+
+  test("shieldUniformity is 0 at TSM 5", () => {
+    const skills: DefenseSkills = { ...defaultDefenseSkills(5), tacticalShieldManipulation: 5 };
+    const state = factory.create(profile, hullBonuses, [], [], [] as readonly CargoEntry[]);
+    const spec = calculator.resolve(state, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skills });
+    expect(spec.shieldUniformity).toBe(0);
+  });
+
+  test("shieldUniformity decreases by 0.05 per TSM level", () => {
+    const state = factory.create(profile, hullBonuses, [], [], [] as readonly CargoEntry[]);
+    for (let level = 0; level <= 5; level++) {
+      const skills: DefenseSkills = { ...defaultDefenseSkills(5), tacticalShieldManipulation: level as SkillLevel };
+      const spec = calculator.resolve(state, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skills });
+      expect(spec.shieldUniformity).toBeCloseTo(Math.max(0, 0.25 - 0.05 * level), 5);
+    }
   });
 });

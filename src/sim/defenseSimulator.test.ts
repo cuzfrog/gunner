@@ -24,6 +24,7 @@ function spec(opts: {
     repairers: opts.repairers ?? [],
     signaturePenalty: 0,
     rah: opts.rah,
+    shieldUniformity: 0.25,
   };
 }
 

@@ -13,6 +13,7 @@ import { TurretBoosterResolverImpl } from "./turretBoosterResolver";
 import { HitChanceImpl } from "./hitChance";
 import { KinematicsImpl } from "./kinematics";
 import { MissileApplicationImpl } from "./missileApplication";
+import { Mulberry32RngFactory } from "./rng";
 import { PredictiveAutopilot } from "./predictiveAutopilot";
 import { SimulationImpl } from "./simulation";
 import { StackingPenaltyImpl } from "./stackingPenalty";
@@ -42,5 +43,6 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     engagementFrameComposer: asClass(EngagementFrameComposerImpl).singleton(),
     defenseAssessor: asClass(DefenseAssessorImpl).singleton(),
     defenseSimulator: asClass(DefenseSimulatorImpl).singleton(),
+    rngFactory: asClass(Mulberry32RngFactory).singleton(),
   });
 }

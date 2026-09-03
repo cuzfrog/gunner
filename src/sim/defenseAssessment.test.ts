@@ -16,6 +16,7 @@ function makeSpec(opts: { shieldHp?: number; armorHp?: number; hullHp?: number; 
       ? [{ layer: "shield" as const, amount: opts.repairShield, cycleTime: opts.repairCycle, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: opts.overloadAmount ?? 1, cycleTimeMultiplier: opts.overloadCycle ?? 1 } }]
       : [],
     signaturePenalty: 0,
+    shieldUniformity: 0.25,
   };
 }
 

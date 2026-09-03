@@ -105,6 +105,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
       const application = facts.predicted.application;
       const appliedDps = nominalDps * application;
       const appliedByType = damageVectorScale(boosted.damagePerMissile, (boosted.launcherCount * application) / Math.max(boosted.cycleTime, 0));
+      const appliedVolleyByType = damageVectorScale(boosted.damagePerMissile, boosted.launcherCount * application);
       const breakdown: MissileDamageBreakdown = {
         application,
         signatureTerm: facts.predicted.signatureTerm,
@@ -112,7 +113,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
         inRange: facts.interceptable,
         timeToImpact: facts.nearestTimeToImpact,
       };
-      const damage = { nominalDps, appliedDps, application, volley, appliedByType };
+      const damage = { nominalDps, appliedDps, application, volley, appliedByType, appliedVolleyByType };
       return { boostedWeapon: boosted, effectiveWeapon: boosted, damage, missile: breakdown };
     }
     const result = this.missileApplication.compute(boosted, opponent.velocity.len(), opponentSigRadius);
@@ -123,7 +124,10 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     const appliedByType = inRange
       ? damageVectorScale(boosted.damagePerMissile, (boosted.launcherCount * result.application) / Math.max(boosted.cycleTime, 0))
       : ZERO_DAMAGE;
-    const damage = { nominalDps, appliedDps, application: inRange ? result.application : 0, volley, appliedByType };
+    const appliedVolleyByType = inRange
+      ? damageVectorScale(boosted.damagePerMissile, boosted.launcherCount * result.application)
+      : ZERO_DAMAGE;
+    const damage = { nominalDps, appliedDps, application: inRange ? result.application : 0, volley, appliedByType, appliedVolleyByType };
     return { boostedWeapon: boosted, effectiveWeapon: boosted, damage, missile: breakdown };
   }
 

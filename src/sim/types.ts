@@ -137,7 +137,13 @@ export interface DamageAssessment {
   readonly appliedDps: number;
   readonly application: number; // 0..1, applied/nominal
   readonly volley: number; // per cycle, all launchers/turrets
-  readonly appliedByType: DamageVector;
+  readonly appliedByType: DamageVector; // DPS per type
+  readonly appliedVolleyByType: DamageVector; // per-cycle volley per type, post-application
+}
+
+export interface DamageEvent {
+  readonly target: Side;
+  readonly rawByType: DamageVector; // post-hit-quality, pre-resist
 }
 
 export interface TurretDamageBreakdown {
@@ -473,6 +479,7 @@ export interface DefenseSpec {
   readonly repairers: readonly RepairerSpec[];
   readonly signaturePenalty: number;
   readonly rah?: RahSpec;
+  readonly shieldUniformity: number; // 0..0.25, bleed-through threshold from TSM skill
 }
 
 export const ZERO_RESISTS: DamageResists = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
@@ -486,4 +493,5 @@ export const EMPTY_DEFENSE_SPEC: DefenseSpec = {
   shieldRechargeTime: 0,
   repairers: [],
   signaturePenalty: 0,
+  shieldUniformity: 0.25,
 };

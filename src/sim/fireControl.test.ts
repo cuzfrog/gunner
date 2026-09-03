@@ -7,13 +7,13 @@ import type { MissileApplication } from "./missileApplication";
 import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import type { TurretDamage } from "./turretDamage";
-import { type DamageAssessment, type DroneDamageBreakdown, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE } from "./types";
+import { type DamageAssessment, type DroneDamageBreakdown, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.05, sigResolution: 40, optimal: 4000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const hit: HitChanceBreakdown = { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 };
-const turretDamageResult: DamageAssessment = { nominalDps: 20, appliedDps: 16, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE };
+const turretDamageResult: DamageAssessment = { nominalDps: 20, appliedDps: 16, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
 
 const shipA: ShipState = {
   id: "shipA",
@@ -94,6 +94,7 @@ const droneBreakdownResult: DroneDamageBreakdown & DamageAssessment = {
   application: 1.0,
   volley: 192,
   appliedByType: ZERO_DAMAGE,
+  appliedVolleyByType: ZERO_DAMAGE,
 };
 
 function makeEvaluator(): {
@@ -223,6 +224,29 @@ describe("EngagementEvaluatorImpl", () => {
     expect(result.shipA?.damage.application).toBe(0);
     expect(result.shipA?.damage.nominalDps).toBeCloseTo(40, 10);
     expect(result.shipA?.missile?.inRange).toBe(false);
+  });
+
+  test("missile appliedVolleyByType carries per-cycle volley scaled by application", () => {
+    const { evaluator } = makeEvaluator();
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40 } });
+    const expected = damageVectorScale(missile.damagePerMissile, missile.launcherCount * 0.8);
+    expect(result.shipA?.damage.appliedVolleyByType).toEqual(expected);
+    expect(damageVectorSum(result.shipA!.damage.appliedVolleyByType)).toBeCloseTo(result.shipA!.damage.volley * 0.8, 10);
+  });
+
+  test("missile appliedVolleyByType is zero when out of range", () => {
+    const { evaluator } = makeEvaluator();
+    const shortRangeMissile: MissileSpec = { ...missile, flightRange: 5000, maxVelocity: 1000, flightTime: 5 };
+    const result = evaluator.evaluate(frame, { shipA: { weapon: shortRangeMissile, opponentSigRadius: 40 } });
+    expect(result.shipA?.damage.appliedVolleyByType).toEqual(ZERO_DAMAGE);
+  });
+
+  test("missile appliedVolleyByType uses facts application when facts provided", () => {
+    const { evaluator } = makeEvaluator();
+    const facts = { inFlightCount: 2, nearestTimeToImpact: 1.5, predicted: { application: 0.5, signatureTerm: 1, velocityTerm: 0.6 }, interceptable: true };
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: facts } });
+    const expected = damageVectorScale(missile.damagePerMissile, missile.launcherCount * 0.5);
+    expect(result.shipA?.damage.appliedVolleyByType).toEqual(expected);
   });
 
   test("uses missile facts for applied DPS when facts are provided", () => {

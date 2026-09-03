@@ -39,6 +39,7 @@ export class DefenseCalculatorImpl implements DefenseCalculator {
     const repairers = resolveRepairers(modules, skills, this.stacking);
     const signaturePenalty = resolveSignaturePenalty(modules);
     const rah = resolveRahSpec(modules, skills, armorResists);
+    const shieldUniformity = resolveShieldUniformity(skills);
 
     return {
       layers: {
@@ -50,6 +51,7 @@ export class DefenseCalculatorImpl implements DefenseCalculator {
       repairers,
       signaturePenalty,
       rah,
+      shieldUniformity,
     };
   }
 }
@@ -265,6 +267,10 @@ function resolveSignaturePenalty(modules: readonly DefenseModuleEntry[]): number
   return penalty;
 }
 
+function resolveShieldUniformity(skills: DefenseSkills): number {
+  return Math.max(0, SHIELD_UNIFORMITY_BASE - SHIELD_UNIFORMITY_PER_LEVEL * skills.tacticalShieldManipulation);
+}
+
 function clampResist(resist: number): number {
   if (resist < 0) return 0;
   if (resist > 1) return 1;
@@ -281,3 +287,5 @@ const HULL_UPGRADES_BONUS = 0.05;
 const MECHANICS_BONUS = 0.05;
 const COMPENSATION_BONUS = 0.05;
 const ARMOR_RESISTANCE_PHASING_BONUS = 0.1;
+const SHIELD_UNIFORMITY_BASE = 0.25;
+const SHIELD_UNIFORMITY_PER_LEVEL = 0.05;
