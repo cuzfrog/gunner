@@ -19,6 +19,7 @@ function spec(opts: {
   armorHp?: number;
   hullHp?: number;
   shieldRechargeTime?: number;
+  shieldUniformity?: number;
   shieldResists?: Partial<Record<keyof DamageVector, number>>;
   armorResists?: Partial<Record<keyof DamageVector, number>>;
   hullResists?: Partial<Record<keyof DamageVector, number>>;
@@ -35,7 +36,7 @@ function spec(opts: {
     repairers: opts.repairers ?? [],
     signaturePenalty: 0,
     rah: opts.rah,
-    shieldUniformity: 0.25,
+    shieldUniformity: opts.shieldUniformity ?? 0.25,
   };
 }
 
@@ -599,6 +600,89 @@ describe("DefenseSimulatorImpl", () => {
     expect(sim.view().pools.shipA.shield).toBe(9900);
     sim.step(0.5, events(EM_DAMAGE, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(9800);
+  });
+
+  test("shield bleed-through: no bleed when shield above uniformity threshold", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(900);
+    expect(sim.view().pools.shipA.armor).toBe(1000);
+  });
+
+  test("shield bleed-through: bleed occurs when shield below uniformity threshold", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
+    sim.step(1, events({ em: 800, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(200);
+    expect(sim.view().pools.shipA.armor).toBe(1000);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const view = sim.view();
+    expect(view.pools.shipA.shield).toBeLessThan(200);
+    expect(view.pools.shipA.armor).toBeLessThan(1000);
+  });
+
+  test("shield bleed-through: full bleed at zero shield", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 100, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
+    sim.step(1, events({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(0);
+    expect(sim.view().pools.shipA.armor).toBe(1000);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(0);
+    expect(sim.view().pools.shipA.armor).toBe(900);
+  });
+
+  test("shield bleed-through: no bleed when uniformity is zero (TSM V)", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 100, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldUniformity: 0 })));
+    sim.step(1, events({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(0);
+    expect(sim.view().pools.shipA.armor).toBe(1000);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(0);
+    expect(sim.view().pools.shipA.armor).toBe(900);
+  });
+
+  test("shield bleed-through: bleed damage respects armor resist", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 100, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0.5 }, shieldUniformity: 0.25 })));
+    sim.step(1, events({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(0);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.armor).toBe(950);
+  });
+
+  test("shield bleed-through: no bleed at exact threshold boundary", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
+    sim.step(1, events({ em: 750, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(250);
+    expect(sim.view().pools.shipA.armor).toBe(1000);
+  });
+
+  test("shield bleed-through: linear midpoint at half threshold", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
+    sim.step(1, events({ em: 750, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(250);
+    sim.step(1, events({ em: 125, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(125);
+    expect(sim.view().pools.shipA.armor).toBe(1000);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const view = sim.view();
+    expect(view.pools.shipA.shield).toBe(75);
+    expect(view.pools.shipA.armor).toBe(950);
+  });
+
+  test("shield bleed-through: combined bleed and shield overflow in one hit", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
+    sim.step(1, events({ em: 750, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(250);
+    sim.step(1, events({ em: 1000, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(0);
+    expect(sim.view().pools.shipA.armor).toBeLessThan(1000);
   });
 });
 

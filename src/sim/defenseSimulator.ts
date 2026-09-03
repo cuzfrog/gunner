@@ -102,6 +102,7 @@ interface SidePools {
   armorMax: number;
   hullMax: number;
   shieldRechargeTime: number;
+  shieldUniformity: number;
   baseArmorResists: DamageResists;
   resists: Readonly<Record<DefenseLayer, Readonly<Record<DamageType, number>>>>;
   dead: boolean;
@@ -251,6 +252,7 @@ function emptyPools(): SidePools {
     shield: 0, armor: 0, hull: 0,
     shieldMax: 0, armorMax: 0, hullMax: 0,
     shieldRechargeTime: 0,
+    shieldUniformity: 0,
     baseArmorResists: ZERO_RESISTS,
     resists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS },
     dead: false, deadAt: undefined, damageEnabled: true,
@@ -274,6 +276,7 @@ function poolsFromSpec(spec: DefenseSpec, damageEnabled: boolean, repairMode: Re
     armorMax: spec.layers.armor.hp,
     hullMax: spec.layers.hull.hp,
     shieldRechargeTime: spec.shieldRechargeTime,
+    shieldUniformity: spec.shieldUniformity,
     baseArmorResists,
     resists: { shield: spec.layers.shield.resists, armor: liveArmorResists, hull: spec.layers.hull.resists },
     dead: false, deadAt: undefined, damageEnabled,
@@ -302,6 +305,7 @@ function mergePools(prev: SidePools, spec: DefenseSpec, damageEnabled: boolean, 
     armorMax,
     hullMax,
     shieldRechargeTime: spec.shieldRechargeTime,
+    shieldUniformity: spec.shieldUniformity,
     baseArmorResists,
     resists: { shield: spec.layers.shield.resists, armor: liveArmorResists, hull: spec.layers.hull.resists },
     dead: prev.dead,
@@ -435,11 +439,15 @@ function applyEvents(pools: SidePools, events: readonly DamageEvent[]): MutableD
 
 function applyDamageType(pools: SidePools, type: DamageType, rawDamage: number): number {
   const shieldDamage = rawDamage * (1 - pools.resists.shield[type]);
-  const shieldAbsorbed = Math.min(pools.shield, shieldDamage);
+  const bleedFraction = shieldBleedFraction(pools);
+  const bleedDamage = shieldDamage * bleedFraction;
+  const absorbedByShield = shieldDamage - bleedDamage;
+  const shieldAbsorbed = Math.min(pools.shield, absorbedByShield);
   pools.shield -= shieldAbsorbed;
-  const shieldOverflow = shieldDamage - shieldAbsorbed;
-  if (shieldOverflow <= 0) return 0;
-  const armorDamage = shieldOverflow * (1 - pools.resists.armor[type]);
+  const shieldOverflow = absorbedByShield - shieldAbsorbed;
+  const armorIncoming = bleedDamage + shieldOverflow;
+  if (armorIncoming <= 0) return 0;
+  const armorDamage = armorIncoming * (1 - pools.resists.armor[type]);
   const armorAbsorbed = Math.min(pools.armor, armorDamage);
   pools.armor -= armorAbsorbed;
   const armorOverflow = armorDamage - armorAbsorbed;
@@ -447,6 +455,13 @@ function applyDamageType(pools: SidePools, type: DamageType, rawDamage: number):
   const hullDamage = armorOverflow * (1 - pools.resists.hull[type]);
   pools.hull -= hullDamage;
   return armorDamage;
+}
+
+function shieldBleedFraction(pools: SidePools): number {
+  if (pools.shieldUniformity <= 0 || pools.shieldMax <= 0) return 0;
+  const threshold = pools.shieldUniformity * pools.shieldMax;
+  if (pools.shield >= threshold) return 0;
+  return 1 - pools.shield / threshold;
 }
 
 function stepRepairers(pools: SidePools, dt: number): void {
