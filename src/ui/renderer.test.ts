@@ -494,14 +494,13 @@ describe("CanvasRenderer", () => {
       expect(shipALockArcs.length).toBeGreaterThan(0);
     });
 
-    test("draws full lock arc when status is locked", () => {
+    test("draws no lock arc when status is locked", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       renderer.setLockStates({ shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true }, shipB: { status: "locked", progress: 1, remaining: 0, lockTime: 0, inRange: true } });
       renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, undefined);
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
-      const shipALockArcs = ctx.arcs.filter((a) => Math.abs(a[2] - LOCK_RADIUS) < 0.5);
-      expect(shipALockArcs.length).toBeGreaterThan(0);
+      expect(ctx.arcs.filter((a) => Math.abs(a[2] - LOCK_RADIUS) < 0.5)).toHaveLength(0);
     });
 
     test("skips lock arc for backward-compatible locked state with zero lockTime", () => {

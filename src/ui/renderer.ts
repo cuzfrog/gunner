@@ -81,7 +81,6 @@ const COLORS = {
   overlayDisruptor: PALETTE.overlayDisruptor,
   lockIdle: withAlpha(PALETTE.textPrimary, 0.4),
   lockProgress: PALETTE.textPrimary,
-  lockComplete: PALETTE.textPrimary,
   targetingRange: withAlpha(PALETTE.accentTeal, 0.3),
 } as const;
 
@@ -473,13 +472,11 @@ export class CanvasRenderer implements Renderer {
   }
 
   private drawLockForShip(ship: ShipState, lock: LockState, color: string): void {
-    if (lock.status === "locked" && lock.lockTime === 0) return;
+    if (lock.status === "locked") return;
     const p = this.worldToScreen(ship.position);
     const radius = SHIP_ICON_SIZE + 6;
     if (lock.status === "locking") {
       this.drawLockArc(p, radius, lock.progress, COLORS.lockProgress);
-    } else if (lock.status === "locked") {
-      this.drawLockArc(p, radius, 1, COLORS.lockComplete);
     } else {
       this.drawLockArc(p, radius, 1, COLORS.lockIdle);
     }
