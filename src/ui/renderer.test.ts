@@ -501,7 +501,7 @@ describe("CanvasRenderer", () => {
       renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, undefined);
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][]; moveTos: number[][]; lineTos: number[][] };
       expect(ctx.arcs.filter((a) => Math.abs(a[2] - LOCK_RADIUS) < 0.5)).toHaveLength(0);
-      const targetRadius = 5;
+      const targetRadius = 3;
       const targetArcs = ctx.arcs.filter((a) => Math.abs(a[2] - targetRadius) < 0.5);
       expect(targetArcs.length).toBeGreaterThan(0);
       expect(ctx.moveTos.length).toBeGreaterThanOrEqual(4);

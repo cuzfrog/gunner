@@ -495,10 +495,9 @@ export class CanvasRenderer implements Renderer {
   }
 
   private drawLockTarget(center: { x: number; y: number }, color: string): void {
-    const offset = SHIP_ICON_SIZE + 10;
-    const cx = center.x + offset;
-    const cy = center.y - offset;
-    const r = 5;
+    const cx = center.x + SHIP_ICON_SIZE - 1;
+    const cy = center.y - SHIP_ICON_SIZE * 0.75 + 1;
+    const r = 3;
     this.ctx.strokeStyle = color;
     this.ctx.lineWidth = 1.5;
     this.ctx.setLineDash([]);
@@ -506,18 +505,18 @@ export class CanvasRenderer implements Renderer {
     this.ctx.arc(cx, cy, r, 0, Math.PI * 2);
     this.ctx.stroke();
     this.ctx.beginPath();
-    this.ctx.moveTo(cx - r - 2, cy);
-    this.ctx.lineTo(cx - r + 1, cy);
-    this.ctx.moveTo(cx + r - 1, cy);
-    this.ctx.lineTo(cx + r + 2, cy);
-    this.ctx.moveTo(cx, cy - r - 2);
-    this.ctx.lineTo(cx, cy - r + 1);
-    this.ctx.moveTo(cx, cy + r - 1);
-    this.ctx.lineTo(cx, cy + r + 2);
+    this.ctx.moveTo(cx - r - 1, cy);
+    this.ctx.lineTo(cx - r + 0.5, cy);
+    this.ctx.moveTo(cx + r - 0.5, cy);
+    this.ctx.lineTo(cx + r + 1, cy);
+    this.ctx.moveTo(cx, cy - r - 1);
+    this.ctx.lineTo(cx, cy - r + 0.5);
+    this.ctx.moveTo(cx, cy + r - 0.5);
+    this.ctx.lineTo(cx, cy + r + 1);
     this.ctx.stroke();
     this.ctx.fillStyle = color;
     this.ctx.beginPath();
-    this.ctx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+    this.ctx.arc(cx, cy, 1, 0, Math.PI * 2);
     this.ctx.fill();
   }
 
