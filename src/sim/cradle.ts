@@ -13,6 +13,7 @@ import type {
   MissileBoosterResolver,
   MissileSimulator,
   RngFactory,
+  SensorBoosterResolver,
   SimValueParser,
   Simulation,
   StackingPenalty,
@@ -28,6 +29,7 @@ export interface SimCradle {
   readonly ewarResolver: EwarResolver;
   readonly turretBoosterResolver: TurretBoosterResolver;
   readonly missileBoosterResolver: MissileBoosterResolver;
+  readonly sensorBoosterResolver: SensorBoosterResolver;
   readonly kinematics: Kinematics;
   readonly hitChance: HitChance;
   readonly missileApplication: MissileApplication;

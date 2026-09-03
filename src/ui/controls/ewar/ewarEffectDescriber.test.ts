@@ -17,6 +17,8 @@ const resolver = vi.mocked<EwarResolver>({
   appliedEffects: vi.fn(),
   speedBreakdown: vi.fn(() => ({ effects: [], propulsionSuppressed: false })),
   disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
+  dampenedSensorSpec: vi.fn((spec) => spec),
+  dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
 });
 
 const LABELS: Record<string, string> = {

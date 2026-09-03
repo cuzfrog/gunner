@@ -118,6 +118,8 @@ function makeEvaluator(): {
     propulsionSuppressedIgnoringRange: vi.fn(() => false),
     speedBreakdown: vi.fn(() => ({ effects: [], propulsionSuppressed: false })),
     disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
+    dampenedSensorSpec: vi.fn((spec) => spec),
+    dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
   });
   const turretBoosterResolver = vi.mocked<TurretBoosterResolver>({ boostedTurret: vi.fn(() => boostedTurret) });
   const missileBoosterResolver = vi.mocked<MissileBoosterResolver>({ boostedMissile: vi.fn((m) => m) });

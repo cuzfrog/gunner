@@ -5,6 +5,8 @@ import type {
   DisruptionBreakdown,
   EwarEffectFamily,
   EwarProjection,
+  SensorDampenerSpec,
+  SensorSpec,
   SpeedBreakdown,
   SpeedEffectAttribution,
   StatEffectAttribution,
@@ -24,6 +26,8 @@ export interface EwarResolver {
   appliedEffects(projection: EwarProjection | undefined, distance: number): readonly AppliedEwarEffect[];
   speedBreakdown(projection: EwarProjection | undefined, distance: number): SpeedBreakdown;
   disruptionBreakdown(projection: EwarProjection | undefined, distance: number): DisruptionBreakdown;
+  dampenedSensorSpec(spec: SensorSpec, projection: EwarProjection | undefined, distance: number): SensorSpec;
+  dampenedSensorSpecIgnoringRange(spec: SensorSpec, projection: EwarProjection | undefined): SensorSpec;
 }
 
 const MIN_APPLIED_EFFECTIVENESS = 0.01;
@@ -124,10 +128,18 @@ export class EwarResolverImpl implements EwarResolver {
       if (representatives.disruptor !== undefined) continue;
       if (this.falloffEffectiveness(distance, spec.optimal, spec.falloff) >= MIN_APPLIED_EFFECTIVENESS) representatives.disruptor = spec.moduleId;
     }
+    for (let i = 0; i < projection.loadout.dampeners.length; i++) {
+      const spec = projection.loadout.dampeners[i];
+      const activation = projection.activation?.dampeners[i];
+      if (activation && !activation.active) continue;
+      if (representatives.dampener !== undefined) continue;
+      if (this.falloffEffectiveness(distance, spec.optimal, spec.falloff) >= MIN_APPLIED_EFFECTIVENESS) representatives.dampener = spec.moduleId;
+    }
     if (representatives.web !== undefined) effects.push({ family: "web", moduleId: representatives.web });
     if (representatives.grappler !== undefined) effects.push({ family: "grappler", moduleId: representatives.grappler });
     if (representatives.scrambler !== undefined) effects.push({ family: "scrambler", moduleId: representatives.scrambler });
     if (representatives.disruptor !== undefined) effects.push({ family: "disruptor", moduleId: representatives.disruptor });
+    if (representatives.dampener !== undefined) effects.push({ family: "dampener", moduleId: representatives.dampener });
     return effects;
   }
 
@@ -168,6 +180,16 @@ export class EwarResolverImpl implements EwarResolver {
 
   disruptionBreakdown(projection: EwarProjection | undefined, distance: number): DisruptionBreakdown {
     return this.disruptorModifiers(projection, distance, false);
+  }
+
+  dampenedSensorSpec(spec: SensorSpec, projection: EwarProjection | undefined, distance: number): SensorSpec {
+    const modifiers = this.dampenerModifiers(projection, distance, false);
+    return this.applyDampenerModifiers(spec, modifiers);
+  }
+
+  dampenedSensorSpecIgnoringRange(spec: SensorSpec, projection: EwarProjection | undefined): SensorSpec {
+    const modifiers = this.dampenerModifiers(projection, 0, true);
+    return this.applyDampenerModifiers(spec, modifiers);
   }
 
   private representativeSpeedEffect(candidates: readonly SpeedEffectAttribution[]): SpeedEffectAttribution | undefined {
@@ -272,5 +294,42 @@ export class EwarResolverImpl implements EwarResolver {
     if (falloff === 0) return 0;
     const ratio = (distance - optimal) / falloff;
     return 0.5 ** (ratio * ratio);
+  }
+
+  private dampenerModifiers(
+    projection: EwarProjection | undefined,
+    distance: number,
+    ignoreRange: boolean,
+  ): { scanResMultipliers: readonly number[]; rangeMultipliers: readonly number[] } {
+    if (!projection) return { scanResMultipliers: [], rangeMultipliers: [] };
+    const scanResMultipliers: number[] = [];
+    const rangeMultipliers: number[] = [];
+
+    for (let i = 0; i < projection.loadout.dampeners.length; i++) {
+      const spec = projection.loadout.dampeners[i];
+      const activation = projection.activation?.dampeners[i];
+      if (activation && !activation.active) continue;
+
+      const overloadBonus = activation?.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
+      const scanResPercent = spec.scanResolutionBonusPercent * overloadBonus;
+      const rangePercent = spec.maxTargetRangeBonusPercent * overloadBonus;
+      const effectiveness = ignoreRange ? 1 : this.falloffEffectiveness(distance, spec.optimal, spec.falloff);
+      if (effectiveness <= 0) continue;
+
+      const script = activation?.script ?? spec.defaultScript;
+      const scriptedScanRes = scanResPercent * (script?.scanResolutionMultiplier ?? 1);
+      const scriptedRange = rangePercent * (script?.maxTargetRangeMultiplier ?? 1);
+
+      if (scriptedScanRes !== 0) scanResMultipliers.push(1 + (scriptedScanRes / 100) * effectiveness);
+      if (scriptedRange !== 0) rangeMultipliers.push(1 + (scriptedRange / 100) * effectiveness);
+    }
+
+    return { scanResMultipliers, rangeMultipliers };
+  }
+
+  private applyDampenerModifiers(spec: SensorSpec, modifiers: { scanResMultipliers: readonly number[]; rangeMultipliers: readonly number[] }): SensorSpec {
+    const scanResolution = Math.round(spec.scanResolution * this.stacking.apply(modifiers.scanResMultipliers));
+    const maxTargetingRange = Math.round(spec.maxTargetingRange * this.stacking.apply(modifiers.rangeMultipliers));
+    return { scanResolution, maxTargetingRange, maxLockedTargets: spec.maxLockedTargets };
   }
 }

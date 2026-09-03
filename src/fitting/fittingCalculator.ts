@@ -434,25 +434,11 @@ export class FittingCalculatorImpl implements FittingCalculator {
     const signatureAnalysisMultiplier = 1 + 0.05 * signatureAnalysisLevel;
     const longRangeMultiplier = 1 + 0.05 * longRangeLevel;
 
-    const scanResolution = fitting.profile.scanResolution * signatureAnalysisMultiplier;
-    const maxTargetingRange = fitting.profile.maxTargetingRange * longRangeMultiplier;
-    let maxLockedTargets = fitting.profile.maxLockedTargets + targetManagementLevel + advancedTargetManagementLevel;
+    const scanResolution = Math.round(fitting.profile.scanResolution * signatureAnalysisMultiplier);
+    const maxTargetingRange = Math.round(fitting.profile.maxTargetingRange * longRangeMultiplier);
+    const maxLockedTargets = fitting.profile.maxLockedTargets + targetManagementLevel + advancedTargetManagementLevel;
 
-    const scanResPercents: number[] = [];
-    const rangePercents: number[] = [];
-    for (const mod of fitting.sensorAmplifierModules) {
-      const amplifierStats = this.db.signalAmplifiers[mod.moduleId];
-      if (amplifierStats) {
-        scanResPercents.push(amplifierStats.scanResolutionBonusPercent);
-        rangePercents.push(amplifierStats.maxTargetRangeBonusPercent);
-        maxLockedTargets += amplifierStats.maxLockedTargetsBonus;
-      }
-    }
-
-    const scanResMultiplier = this.stacking.apply(scanResPercents.map((p) => 1 + p / 100));
-    const rangeMultiplier = this.stacking.apply(rangePercents.map((p) => 1 + p / 100));
-
-    return { scanResolution: Math.round(scanResolution * scanResMultiplier), maxTargetingRange: Math.round(maxTargetingRange * rangeMultiplier), maxLockedTargets };
+    return { scanResolution, maxTargetingRange, maxLockedTargets };
   }
 
   resolveDrones(fitting: FittingState, conditions: StatConditions): readonly ImportedDrone[] {

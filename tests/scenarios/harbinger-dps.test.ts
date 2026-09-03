@@ -72,6 +72,8 @@ const noEwarResolver: EwarResolver = {
   propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false,
   appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
   disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+  dampenedSensorSpec: (spec) => spec,
+  dampenedSensorSpecIgnoringRange: (spec) => spec,
 };
 
 function makeComposer() {

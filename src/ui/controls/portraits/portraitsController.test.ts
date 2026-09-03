@@ -131,6 +131,8 @@ function buildController() {
     appliedEffects: vi.fn(() => []),
     speedBreakdown: vi.fn((): SpeedBreakdown => ({ effects: [], propulsionSuppressed: false })),
     disruptionBreakdown: vi.fn((): DisruptionBreakdown => ({ tracking: [], optimal: [], falloff: [] })),
+    dampenedSensorSpec: vi.fn((spec) => spec),
+    dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
   });
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((_shipId) => "images/ships/Rifter.webp"),

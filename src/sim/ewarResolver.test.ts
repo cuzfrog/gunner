@@ -4,10 +4,14 @@ import { toTypeId } from "../gamedata/ids";
 import {
   EMPTY_EWAR_LOADOUT,
   type AppliedEwarEffect,
+  type DampenerActivation,
   type DisruptionBreakdown,
   type DisruptionScriptSpec,
   type EwarProjection,
   type PainterActivation,
+  type SensorDampenerScriptSpec,
+  type SensorDampenerSpec,
+  type SensorSpec,
   type SpeedBreakdown,
   type StasisGrapplerSpec,
   type StasisWebSpec,
@@ -818,6 +822,133 @@ describe("EwarResolverImpl", () => {
     test("sigMultiplierIgnoringRange ignores falloff", () => {
       const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
       expect(resolver.sigMultiplierIgnoringRange(projection)).toBeCloseTo(1.30, 10);
+    });
+  });
+
+  describe("sensor dampeners", () => {
+    const DAMP_II_ID = toTypeId("1969");
+    const SCAN_RES_DAMP_SCRIPT_ID = toTypeId("29013");
+    const RANGE_DAMP_SCRIPT_ID = toTypeId("29015");
+
+    const SCAN_RES_DAMP_SCRIPT: SensorDampenerScriptSpec = {
+      name: "Scan Resolution Dampening Script", moduleId: SCAN_RES_DAMP_SCRIPT_ID, scanResolutionMultiplier: 2, maxTargetRangeMultiplier: 0,
+    };
+    const RANGE_DAMP_SCRIPT: SensorDampenerScriptSpec = {
+      name: "Targeting Range Dampening Script", moduleId: RANGE_DAMP_SCRIPT_ID, scanResolutionMultiplier: 0, maxTargetRangeMultiplier: 2,
+    };
+
+    const DAMP_II: SensorDampenerSpec = {
+      moduleName: "Remote Sensor Dampener II",
+      moduleId: DAMP_II_ID,
+      optimal: 30000,
+      falloff: 60000,
+      scanResolutionBonusPercent: -15.3,
+      maxTargetRangeBonusPercent: -15.3,
+      overloadStrengthBonusPercent: 20,
+      defaultScript: undefined,
+    };
+    const DAMP_NO_FALLOFF: SensorDampenerSpec = { ...DAMP_II, falloff: 0 };
+
+    const baseSensorSpec: SensorSpec = { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4 };
+
+    function dampenerProjection(
+      dampeners: readonly SensorDampenerSpec[],
+      activations: readonly DampenerActivation[],
+    ): EwarProjection {
+      return {
+        loadout: { ...EMPTY_EWAR_LOADOUT, dampeners, dampenerScripts: [] },
+        activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: activations },
+      };
+    }
+
+    test("dampener at optimal applies full scan res and range reduction", () => {
+      const projection = dampenerProjection([DAMP_II], [{ active: true, overloaded: false, script: undefined }]);
+      const result = resolver.dampenedSensorSpec(baseSensorSpec, projection, 10000);
+      expect(result.scanResolution).toBe(Math.round(200 * (1 + (-15.3) / 100)));
+      expect(result.maxTargetingRange).toBe(Math.round(30000 * (1 + (-15.3) / 100)));
+      expect(result.maxLockedTargets).toBe(4);
+    });
+
+    test("dampener out of range (no falloff) applies no reduction", () => {
+      const projection = dampenerProjection([DAMP_NO_FALLOFF], [{ active: true, overloaded: false, script: undefined }]);
+      const result = resolver.dampenedSensorSpec(baseSensorSpec, projection, 40000);
+      expect(result).toEqual(baseSensorSpec);
+    });
+
+    test("dampener in falloff applies partial reduction", () => {
+      const projection = dampenerProjection([DAMP_II], [{ active: true, overloaded: false, script: undefined }]);
+      const distance = 60000;
+      const effectiveness = 0.5 ** (((distance - 30000) / 60000) ** 2);
+      const result = resolver.dampenedSensorSpec(baseSensorSpec, projection, distance);
+      const expectedScanRes = Math.round(200 * (1 + (-15.3 / 100) * effectiveness));
+      const expectedRange = Math.round(30000 * (1 + (-15.3 / 100) * effectiveness));
+      expect(result.scanResolution).toBe(expectedScanRes);
+      expect(result.maxTargetingRange).toBe(expectedRange);
+    });
+
+    test("inactive dampener applies no reduction", () => {
+      const projection = dampenerProjection([DAMP_II], [{ active: false, overloaded: false, script: undefined }]);
+      const result = resolver.dampenedSensorSpec(baseSensorSpec, projection, 10000);
+      expect(result).toEqual(baseSensorSpec);
+    });
+
+    test("overloaded dampener applies overload strength bonus", () => {
+      const projection = dampenerProjection([DAMP_II], [{ active: true, overloaded: true, script: undefined }]);
+      const result = resolver.dampenedSensorSpec(baseSensorSpec, projection, 10000);
+      const expectedPercent = -15.3 * 1.2;
+      expect(result.scanResolution).toBe(Math.round(200 * (1 + expectedPercent / 100)));
+      expect(result.maxTargetingRange).toBe(Math.round(30000 * (1 + expectedPercent / 100)));
+    });
+
+    test("scan resolution script doubles scan res reduction, zeros range reduction", () => {
+      const damp = { ...DAMP_II, defaultScript: SCAN_RES_DAMP_SCRIPT };
+      const projection = dampenerProjection([damp], [{ active: true, overloaded: false, script: SCAN_RES_DAMP_SCRIPT }]);
+      const result = resolver.dampenedSensorSpec(baseSensorSpec, projection, 10000);
+      expect(result.scanResolution).toBe(Math.round(200 * (1 + (-15.3 * 2) / 100)));
+      expect(result.maxTargetingRange).toBe(30000);
+    });
+
+    test("targeting range script doubles range reduction, zeros scan res reduction", () => {
+      const damp = { ...DAMP_II, defaultScript: RANGE_DAMP_SCRIPT };
+      const projection = dampenerProjection([damp], [{ active: true, overloaded: false, script: RANGE_DAMP_SCRIPT }]);
+      const result = resolver.dampenedSensorSpec(baseSensorSpec, projection, 10000);
+      expect(result.scanResolution).toBe(200);
+      expect(result.maxTargetingRange).toBe(Math.round(30000 * (1 + (-15.3 * 2) / 100)));
+    });
+
+    test("multiple dampeners apply stacking penalties", () => {
+      const projection = dampenerProjection([DAMP_II, DAMP_II], [{ active: true, overloaded: false, script: undefined }, { active: true, overloaded: false, script: undefined }]);
+      const result = resolver.dampenedSensorSpec(baseSensorSpec, projection, 10000);
+      const multipliers = [1 + (-15.3) / 100, 1 + (-15.3) / 100];
+      const expectedScanRes = Math.round(200 * stacking.apply(multipliers));
+      expect(result.scanResolution).toBe(expectedScanRes);
+    });
+
+    test("dampenedSensorSpecIgnoringRange ignores falloff", () => {
+      const projection = dampenerProjection([DAMP_II], [{ active: true, overloaded: false, script: undefined }]);
+      const result = resolver.dampenedSensorSpecIgnoringRange(baseSensorSpec, projection);
+      expect(result.scanResolution).toBe(Math.round(200 * (1 + (-15.3) / 100)));
+      expect(result.maxTargetingRange).toBe(Math.round(30000 * (1 + (-15.3) / 100)));
+    });
+
+    test("falls back to dampener defaultScript when activation has no script", () => {
+      const damp = { ...DAMP_II, defaultScript: SCAN_RES_DAMP_SCRIPT };
+      const projection = dampenerProjection([damp], [{ active: true, overloaded: false, script: undefined }]);
+      const result = resolver.dampenedSensorSpec(baseSensorSpec, projection, 10000);
+      expect(result.scanResolution).toBe(Math.round(200 * (1 + (-15.3 * 2) / 100)));
+      expect(result.maxTargetingRange).toBe(30000);
+    });
+
+    test("appliedEffects includes dampener when in range", () => {
+      const projection = dampenerProjection([DAMP_II], [{ active: true, overloaded: false, script: undefined }]);
+      const effects = resolver.appliedEffects(projection, 10000);
+      expect(effects).toContainEqual({ family: "dampener", moduleId: DAMP_II_ID });
+    });
+
+    test("appliedEffects excludes dampener when out of range", () => {
+      const projection = dampenerProjection([DAMP_NO_FALLOFF], [{ active: true, overloaded: false, script: undefined }]);
+      const effects = resolver.appliedEffects(projection, 40000);
+      expect(effects.find((e) => e.family === "dampener")).toBeUndefined();
     });
   });
 });

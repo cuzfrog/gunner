@@ -9,6 +9,7 @@ import { EwarResolverImpl } from "./ewarResolver";
 import { EngagementEvaluatorImpl } from "./fireControl";
 import { EngagementFrameComposerImpl } from "./engagementFrameComposer";
 import { MissileBoosterResolverImpl } from "./missileBoosterResolver";
+import { SensorBoosterResolverImpl } from "./sensorBoosterResolver";
 import { TurretBoosterResolverImpl } from "./turretBoosterResolver";
 import { HitChanceImpl } from "./hitChance";
 import { KinematicsImpl } from "./kinematics";
@@ -29,6 +30,7 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     ewarResolver: asClass(EwarResolverImpl).singleton(),
     turretBoosterResolver: asClass(TurretBoosterResolverImpl).singleton(),
     missileBoosterResolver: asClass(MissileBoosterResolverImpl).singleton(),
+    sensorBoosterResolver: asClass(SensorBoosterResolverImpl).singleton(),
     kinematics: asClass(KinematicsImpl).singleton(),
     hitChance: asClass(HitChanceImpl).singleton(),
     missileApplication: asClass(MissileApplicationImpl).singleton(),

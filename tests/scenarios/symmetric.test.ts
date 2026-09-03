@@ -83,6 +83,8 @@ function fakeEwarResolver(): EwarResolver {
     appliedEffects: () => [],
     speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
     disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+    dampenedSensorSpec: (spec) => spec,
+    dampenedSensorSpecIgnoringRange: (spec) => spec,
   };
 }
 
