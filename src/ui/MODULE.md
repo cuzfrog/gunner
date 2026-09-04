@@ -4,8 +4,6 @@ no-new-exports:
   - module.ts
   - palette.ts
   - palette.test.ts
-  - panelConfigurationMemory.test.ts
-  - panelConfigurationMemory.ts
   - renderer.test.ts
   - timer.ts
   - timer.test.ts
