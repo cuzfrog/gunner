@@ -285,7 +285,7 @@ describe("classifyDefenseEffects - repairers (action effects)", () => {
 });
 
 describe("classifyDefenseEffects - resist edge cases", () => {
-  test("shield+armor resist (no hull) returns undefined (not a recognized single-layer or damage-control pattern)", () => {
+  test("shield+armor resist (no hull) classifies as damageControl (multi-layer resist)", () => {
     const e = effect(8000, {
       category: 4,
       modifiers: [
@@ -294,16 +294,16 @@ describe("classifyDefenseEffects - resist edge cases", () => {
       ],
     });
     const result = classifyDefenseEffects([e], undefined);
-    expect(firstIntent(result)).toBeUndefined();
+    expect(firstIntent(result)).toEqual({ tag: "damageControl" });
   });
 
-  test("hpFlat with operation POST_PERCENT_DIV on shield returns undefined (not a recognized HP pattern)", () => {
+  test("armor HP with operation POST_PERCENT_DIV classifies as hpPercent/armor", () => {
     const e = effect(8001, {
       category: 4,
-      modifiers: [mod({ modifiedAttributeID: 263, modifyingAttributeID: 72, operation: 4 })],
+      modifiers: [mod({ modifiedAttributeID: 265, modifyingAttributeID: 148, operation: 4 })],
     });
     const result = classifyDefenseEffects([e], undefined);
-    expect(firstIntent(result)).toBeUndefined();
+    expect(firstIntent(result)).toEqual({ tag: "hpPercent", layer: "armor" });
   });
 });
 

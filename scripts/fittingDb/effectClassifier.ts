@@ -110,17 +110,13 @@ function classifyResistModifiers(modifiers: readonly SdeDogmaEffectModifier[], e
   }
   if (layers.size === 0) return undefined;
 
-  if (layers.has("shield") && layers.has("armor") && layers.has("hull")) {
+  if (layers.size >= 2) {
     return { tag: "damageControl" };
   }
 
-  if (layers.size === 1) {
-    const layer = [...layers][0];
-    const active = effectCategory === EFFECT_CATEGORY_ACTIVE;
-    return { tag: "resist", layer, active };
-  }
-
-  return undefined;
+  const layer = [...layers][0];
+  const active = effectCategory === EFFECT_CATEGORY_ACTIVE;
+  return { tag: "resist", layer, active };
 }
 
 function classifyHpModifiers(modifiers: readonly SdeDogmaEffectModifier[]): DefenseIntent | undefined {
@@ -134,8 +130,9 @@ function classifyHpModifiers(modifiers: readonly SdeDogmaEffectModifier[]): Defe
     if (m.operation === OPERATION_POST_PERCENT) {
       return { tag: "hpPercent", layer };
     }
-    if (m.operation === OPERATION_POST_PERCENT_DIV && layer === "hull") {
-      return { tag: "hullBulkheadMultiplier" };
+    if (m.operation === OPERATION_POST_PERCENT_DIV) {
+      if (layer === "hull") return { tag: "hullBulkheadMultiplier" };
+      return { tag: "hpPercent", layer };
     }
   }
   return undefined;

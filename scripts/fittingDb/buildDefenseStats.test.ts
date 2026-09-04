@@ -231,6 +231,41 @@ describe("buildDefenseStatsFromIntents - HP modules", () => {
     });
   });
 
+  test("Layered Coating (effect 63, armorHPMultiplier) builds hpPercent/armor from multiplier", () => {
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "63": makeEffect(63, { category: 4, modifiers: [mod({ modifiedAttributeID: 265, modifyingAttributeID: 148, operation: 4 })] }),
+    };
+    const ctx = makeCtx({
+      values: values({ armorHPMultiplier: 1.09 }),
+      effects: new Set([63]),
+      dogmaEffects,
+    });
+    expect(buildDefenseStatsFromIntents(ctx)).toEqual({
+      kind: "hpPercent",
+      layer: "armor",
+      hpPercent: 9,
+    });
+  });
+
+  test("Layered Energized Membrane with armorHPMultiplier and resist bonus builds defense", () => {
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "63": makeEffect(63, { category: 4, modifiers: [mod({ modifiedAttributeID: 265, modifyingAttributeID: 148, operation: 4 })] }),
+      "2041": makeEffect(2041, { category: 4, modifiers: [
+        mod({ modifiedAttributeID: 267, modifyingAttributeID: 984, operation: 6 }),
+        mod({ modifiedAttributeID: 268, modifyingAttributeID: 985, operation: 6 }),
+        mod({ modifiedAttributeID: 269, modifyingAttributeID: 986, operation: 6 }),
+        mod({ modifiedAttributeID: 270, modifyingAttributeID: 987, operation: 6 }),
+      ] }),
+    };
+    const ctx = makeCtx({
+      values: values({ armorHPMultiplier: 1.09, emDamageResistanceBonus: -15, explosiveDamageResistanceBonus: -15, kineticDamageResistanceBonus: -15, thermalDamageResistanceBonus: -15 }),
+      effects: new Set([63, 2041]),
+      dogmaEffects,
+    });
+    const result = buildDefenseStatsFromIntents(ctx);
+    expect(result).toBeDefined();
+  });
+
   test("hull bulkhead percent (effect 392) builds hullBulkhead", () => {
     const dogmaEffects: Record<string, SdeDogmaEffect> = {
       "392": makeEffect(392, { category: 0, modifiers: [mod({ modifiedAttributeID: 9, modifyingAttributeID: 327, operation: 6 })] }),

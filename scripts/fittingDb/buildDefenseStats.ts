@@ -252,11 +252,16 @@ function buildHpFlatStats(layer: "shield" | "armor", values: Map<string, number>
 function buildHpPercentStats(layer: DefenseLayer, values: Map<string, number>): DefenseModuleStats | undefined {
   const attrName = layer === "shield" ? "shieldCapacityBonus" : layer === "armor" ? "armorHpBonus" : "hullHpBonus";
   const percent = optionalNumber(values.get(attrName));
-  if (percent === undefined) return undefined;
-  if (layer === "hull") {
-    return { kind: "hullBulkhead", hullHpPercent: percent };
+  if (percent !== undefined) {
+    if (layer === "hull") return { kind: "hullBulkhead", hullHpPercent: percent };
+    return { kind: "hpPercent", layer, hpPercent: percent };
   }
-  return { kind: "hpPercent", layer, hpPercent: percent };
+  const multiplierName = layer === "shield" ? "shieldCapacityMultiplier" : layer === "armor" ? "armorHPMultiplier" : "structureHPMultiplier";
+  const multiplier = optionalNumber(values.get(multiplierName));
+  if (multiplier === undefined) return undefined;
+  const convertedPercent = round6((multiplier - 1) * 100);
+  if (layer === "hull") return { kind: "hullBulkhead", hullHpPercent: convertedPercent };
+  return { kind: "hpPercent", layer, hpPercent: convertedPercent };
 }
 
 function buildHullBulkheadStatsFromMultiplier(values: Map<string, number>): DefenseModuleStats | undefined {
