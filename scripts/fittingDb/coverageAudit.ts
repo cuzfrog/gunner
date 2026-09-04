@@ -1,14 +1,16 @@
 import type { SdeDogmaEffect, SdeType, SdeTypeDogma } from "./dogmaTypes";
-import { classifyDefenseEffects, type DefenseIntent } from "./effectClassifier";
+import { FUNC_ITEM_MODIFIER, FUNC_LOCATION_REQUIRED_SKILL } from "./dogmaTypes";
+import { classifyDefenseEffects } from "./effectClassifier";
 import {
   ARMOR_DAMAGE_AMOUNT,
   ARMOR_HP,
+  DURATION,
+  RESISTANCE_SHIFT_AMOUNT,
   SHIELD_BONUS,
   SHIELD_CAPACITY,
   SHIELD_RECHARGE_RATE,
   STRUCTURE_DAMAGE_AMOUNT,
   STRUCTURE_HP,
-  RESISTANCE_SHIFT_AMOUNT,
   SHIELD_RESONANCE_ATTRS,
   ARMOR_RESONANCE_ATTRS,
   HULL_RESONANCE_ATTRS,
@@ -17,7 +19,7 @@ import {
 export type AuditFailureCategory =
   | "signatureWithoutStats"
   | "unclassifiedCombatModifier"
-  | "generatedStatsMissingFields";
+  | "defenseAttrWithoutIntent";
 
 export interface AuditFailure {
   readonly typeId: number;
@@ -26,18 +28,27 @@ export interface AuditFailure {
   readonly detail: string;
 }
 
-const DEFENSE_RELEVANT_ATTRS = new Set<number>([
+const DEFENSE_TARGET_ATTRS = new Set<number>([
   SHIELD_CAPACITY,
   ARMOR_HP,
   STRUCTURE_HP,
   SHIELD_RECHARGE_RATE,
+  ...SHIELD_RESONANCE_ATTRS,
+  ...ARMOR_RESONANCE_ATTRS,
+  ...HULL_RESONANCE_ATTRS,
+]);
+
+const AMPLIFIER_TARGET_ATTRS = new Set<number>([
+  SHIELD_BONUS,
+  ARMOR_DAMAGE_AMOUNT,
+  DURATION,
+]);
+
+const ACTION_DEFENSE_ATTRS = new Set<number>([
   SHIELD_BONUS,
   ARMOR_DAMAGE_AMOUNT,
   STRUCTURE_DAMAGE_AMOUNT,
   RESISTANCE_SHIFT_AMOUNT,
-  ...SHIELD_RESONANCE_ATTRS,
-  ...ARMOR_RESONANCE_ATTRS,
-  ...HULL_RESONANCE_ATTRS,
 ]);
 
 const DEFENSE_INTENT_TAGS = new Set<string>([
@@ -95,17 +106,41 @@ export function auditCoverage(ctx: AuditContext): readonly AuditFailure[] {
       const mods = effect.modifierInfo;
       if (!mods || mods.length === 0) continue;
       for (const m of mods) {
-        if (m.func === "ItemModifier" && DEFENSE_RELEVANT_ATTRS.has(m.modifiedAttributeID)) {
+        if (m.func === FUNC_ITEM_MODIFIER && DEFENSE_TARGET_ATTRS.has(m.modifiedAttributeID)) {
           const singleResult = classifyDefenseEffects([effect], typeDogma);
           if (singleResult.intents.length === 0) {
             failures.push({
               typeId,
               typeName: type["typeName_en-us"],
               category: "unclassifiedCombatModifier",
-              detail: `Effect ${effect.effectID} modifies defense-relevant attribute ${m.modifiedAttributeID} (op ${m.operation}) but was not classified`,
+              detail: `Effect ${effect.effectID} ItemModifier modifies defense-relevant attribute ${m.modifiedAttributeID} (op ${m.operation}) but was not classified`,
             });
           }
         }
+        if (m.func === FUNC_LOCATION_REQUIRED_SKILL && AMPLIFIER_TARGET_ATTRS.has(m.modifiedAttributeID)) {
+          const singleResult = classifyDefenseEffects([effect], typeDogma);
+          if (singleResult.intents.length === 0) {
+            failures.push({
+              typeId,
+              typeName: type["typeName_en-us"],
+              category: "unclassifiedCombatModifier",
+              detail: `Effect ${effect.effectID} LocationRequiredSkillModifier modifies amplifier attribute ${m.modifiedAttributeID} (op ${m.operation}, skill ${m.skillTypeID}) but was not classified`,
+            });
+          }
+        }
+      }
+    }
+
+    const actionAttrPresent = typeDogma.dogmaAttributes.some((a) => ACTION_DEFENSE_ATTRS.has(a.attributeID));
+    if (actionAttrPresent) {
+      const hasActionIntent = result.intents.some((c) => c.intent.tag === "repairer" || c.intent.tag === "rah");
+      if (!hasActionIntent) {
+        failures.push({
+          typeId,
+          typeName: type["typeName_en-us"],
+          category: "defenseAttrWithoutIntent",
+          detail: `Module has defense action attributes (shieldBonus/armorDamageAmount/structureDamageAmount/resistanceShiftAmount) but no repairer or rah intent was classified`,
+        });
       }
     }
   }

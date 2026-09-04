@@ -62,4 +62,3 @@ export const EFFECT_CATEGORY_ACTIVE = 1;
 export const EFFECT_CATEGORY_REMOTE = 2;
 export const EFFECT_CATEGORY_ONLINE = 4;
 export const EFFECT_CATEGORY_OVERLOAD = 5;
-export const EFFECT_CATEGORY_RIG = 7;

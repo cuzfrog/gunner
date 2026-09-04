@@ -268,6 +268,43 @@ describe("classifyDefenseEffects - repairers (action effects)", () => {
     const result = classifyDefenseEffects([e], td);
     expect(firstIntent(result)).toEqual({ tag: "rah" });
   });
+
+  test("remote shield transporter (effect 6186, category 2, shieldBonus attr) classifies as shield repairer", () => {
+    const e = effect(6186, { category: 2, name: "shipModuleRemoteShieldBooster" });
+    const td = typeDogma([{ attributeID: 68, value: 100 }]);
+    const result = classifyDefenseEffects([e], td);
+    expect(firstIntent(result)).toEqual({ tag: "repairer", layer: "shield", ancillary: false });
+  });
+
+  test("remote armor repairer (category 2, armorDamageAmount attr) classifies as armor repairer", () => {
+    const e = effect(7000, { category: 2, name: "shipModuleRemoteArmorRepairer" });
+    const td = typeDogma([{ attributeID: 84, value: 100 }]);
+    const result = classifyDefenseEffects([e], td);
+    expect(firstIntent(result)).toEqual({ tag: "repairer", layer: "armor", ancillary: false });
+  });
+});
+
+describe("classifyDefenseEffects - resist edge cases", () => {
+  test("shield+armor resist (no hull) returns undefined (not a recognized single-layer or damage-control pattern)", () => {
+    const e = effect(8000, {
+      category: 4,
+      modifiers: [
+        mod({ modifiedAttributeID: 271, modifyingAttributeID: 984 }),
+        mod({ modifiedAttributeID: 267, modifyingAttributeID: 984 }),
+      ],
+    });
+    const result = classifyDefenseEffects([e], undefined);
+    expect(firstIntent(result)).toBeUndefined();
+  });
+
+  test("hpFlat with operation POST_PERCENT_DIV on shield returns undefined (not a recognized HP pattern)", () => {
+    const e = effect(8001, {
+      category: 4,
+      modifiers: [mod({ modifiedAttributeID: 263, modifyingAttributeID: 72, operation: 4 })],
+    });
+    const result = classifyDefenseEffects([e], undefined);
+    expect(firstIntent(result)).toBeUndefined();
+  });
 });
 
 describe("classifyDefenseEffects - amplifiers", () => {
@@ -336,5 +373,48 @@ describe("classifyDefenseEffects - unclassified effects", () => {
     expect(result.intents).toHaveLength(2);
     expect(result.intents[0]?.intent.tag).toBe("resist");
     expect(result.intents[1]?.intent.tag).toBe("hpFlat");
+  });
+
+  test("armor plate mass effect 1959 does NOT classify as defense (it modifies mass, not HP)", () => {
+    const e = effect(1959, {
+      category: 4,
+      modifiers: [mod({ modifiedAttributeID: 4, modifyingAttributeID: 796, operation: 2 })],
+    });
+    const result = classifyDefenseEffects([e], undefined);
+    expect(result.intents).toHaveLength(0);
+    expect(result.unclassified).toHaveLength(1);
+  });
+
+  test("unclassified effects populate the unclassified array with a reason", () => {
+    const e = effect(9999, {
+      category: 0,
+      modifiers: [mod({ modifiedAttributeID: 1234, modifyingAttributeID: 5678 })],
+    });
+    const result = classifyDefenseEffects([e], undefined);
+    expect(result.unclassified).toHaveLength(1);
+    expect(result.unclassified[0]?.effectId).toBe(9999);
+    expect(result.unclassified[0]?.reason).toContain("no matching intent");
+  });
+
+  test("non-repair LocationRequiredSkillModifier on DURATION does not classify as repairAmplifier", () => {
+    const e = effect(8888, {
+      category: 0,
+      modifiers: [
+        mod({ func: "LocationRequiredSkillModifier", modifiedAttributeID: 73, modifyingAttributeID: 999, skillTypeID: 3300 }),
+      ],
+    });
+    const result = classifyDefenseEffects([e], undefined);
+    expect(result.intents).toHaveLength(0);
+  });
+
+  test("non-repair LocationRequiredSkillModifier on SHIELD_BONUS does not classify as boostAmplifier", () => {
+    const e = effect(8889, {
+      category: 0,
+      modifiers: [
+        mod({ func: "LocationRequiredSkillModifier", modifiedAttributeID: 68, modifyingAttributeID: 999, skillTypeID: 3300 }),
+      ],
+    });
+    const result = classifyDefenseEffects([e], undefined);
+    expect(result.intents).toHaveLength(0);
   });
 });

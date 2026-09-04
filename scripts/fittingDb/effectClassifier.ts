@@ -1,16 +1,6 @@
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./dogmaTypes";
-import { FUNC_ITEM_MODIFIER, FUNC_LOCATION_REQUIRED_SKILL, OPERATION_ADD, OPERATION_POST_PERCENT, OPERATION_POST_PERCENT_DIV } from "./dogmaTypes";
-import {
-  ARMOR_DAMAGE_AMOUNT,
-  DURATION,
-  RESISTANCE_SHIFT_AMOUNT,
-  SHIELD_BONUS,
-  SHIELD_RECHARGE_RATE,
-  STRUCTURE_DAMAGE_AMOUNT,
-  DefenseLayer,
-  hpLayerForAttr,
-  resistLayerForAttr,
-} from "./combatAttributes";
+import { EFFECT_CATEGORY_ACTIVE, EFFECT_CATEGORY_REMOTE, FUNC_ITEM_MODIFIER, FUNC_LOCATION_REQUIRED_SKILL, OPERATION_ADD, OPERATION_POST_PERCENT, OPERATION_POST_PERCENT_DIV } from "./dogmaTypes";
+import { ARMOR_DAMAGE_AMOUNT, DURATION, RESISTANCE_SHIFT_AMOUNT, REPAIR_SKILL_IDS, SHIELD_BONUS, SHIELD_RECHARGE_RATE, STRUCTURE_DAMAGE_AMOUNT, DefenseLayer, hpLayerForAttr, resistLayerForAttr } from "./combatAttributes";
 
 export type DefenseIntent =
   | { readonly tag: "resist"; readonly layer: DefenseLayer; readonly active: boolean }
@@ -25,14 +15,21 @@ export type DefenseIntent =
   | { readonly tag: "boostAmplifier" }
   | { readonly tag: "repairAmplifier"; readonly sub: "amount" | "cycleTime" };
 
+export type CombatIntent = DefenseIntent;
+
 export interface ClassifiedEffect {
   readonly effectId: number;
-  readonly intent: DefenseIntent;
+  readonly intent: CombatIntent;
+}
+
+export interface UnclassifiedEffect {
+  readonly effectId: number;
+  readonly reason: string;
 }
 
 export interface ClassifierResult {
   readonly intents: readonly ClassifiedEffect[];
-  readonly unclassified: readonly { readonly effectId: number; readonly reason: string }[];
+  readonly unclassified: readonly UnclassifiedEffect[];
 }
 
 export function classifyDefenseEffects(
@@ -40,14 +37,20 @@ export function classifyDefenseEffects(
   typeDogma: SdeTypeDogma | undefined,
 ): ClassifierResult {
   const classified: ClassifiedEffect[] = [];
-  const unclassified: { effectId: number; reason: string }[] = [];
+  const unclassified: UnclassifiedEffect[] = [];
   for (const effect of effects) {
     const intent = classifySingleEffect(effect, typeDogma);
     if (intent !== undefined) {
       classified.push({ effectId: effect.effectID, intent });
+    } else {
+      unclassified.push({ effectId: effect.effectID, reason: describeUnclassified(effect) });
     }
   }
   return { intents: classified, unclassified };
+}
+
+export function classifyCombatEffect(effect: SdeDogmaEffect, typeDogma: SdeTypeDogma | undefined): CombatIntent | undefined {
+  return classifySingleEffect(effect, typeDogma);
 }
 
 function classifySingleEffect(effect: SdeDogmaEffect, typeDogma: SdeTypeDogma | undefined): DefenseIntent | undefined {
@@ -95,13 +98,8 @@ function classifyResistModifiers(modifiers: readonly SdeDogmaEffectModifier[], e
 
   if (layers.size === 1) {
     const layer = [...layers][0];
-    const active = effectCategory === 1;
+    const active = effectCategory === EFFECT_CATEGORY_ACTIVE;
     return { tag: "resist", layer, active };
-  }
-
-  if (layers.has("armor") && layers.has("hull") && !layers.has("shield")) {
-    const active = effectCategory === 1;
-    return { tag: "resist", layer: "armor", active };
   }
 
   return undefined;
@@ -113,7 +111,7 @@ function classifyHpModifiers(modifiers: readonly SdeDogmaEffectModifier[]): Defe
     if (!layer) continue;
     if (m.operation === OPERATION_ADD) {
       if (layer === "hull") return undefined;
-      return { tag: "hpFlat", layer: layer as "shield" | "armor" };
+      return { tag: "hpFlat", layer };
     }
     if (m.operation === OPERATION_POST_PERCENT) {
       return { tag: "hpPercent", layer };
@@ -136,6 +134,7 @@ function classifyRechargeModifiers(modifiers: readonly SdeDogmaEffectModifier[])
 
 function classifyAmplifierModifiers(modifiers: readonly SdeDogmaEffectModifier[]): DefenseIntent | undefined {
   for (const m of modifiers) {
+    if (m.skillTypeID === undefined || !REPAIR_SKILL_IDS.has(m.skillTypeID)) continue;
     if (m.modifiedAttributeID === SHIELD_BONUS && m.operation === OPERATION_POST_PERCENT) {
       return { tag: "boostAmplifier" };
     }
@@ -158,15 +157,15 @@ function classifyActionEffect(effect: SdeDogmaEffect, typeDogma: SdeTypeDogma | 
     return { tag: "rah" };
   }
 
-  if (attrIds.has(SHIELD_BONUS) && (effect.effectCategory === 1 || effect.effectCategory === 2)) {
+  if (attrIds.has(SHIELD_BONUS) && (effect.effectCategory === EFFECT_CATEGORY_ACTIVE || effect.effectCategory === EFFECT_CATEGORY_REMOTE)) {
     const ancillary = isAncillaryEffect(effect);
     return { tag: "repairer", layer: "shield", ancillary };
   }
-  if (attrIds.has(ARMOR_DAMAGE_AMOUNT) && effect.effectCategory === 1) {
+  if (attrIds.has(ARMOR_DAMAGE_AMOUNT) && (effect.effectCategory === EFFECT_CATEGORY_ACTIVE || effect.effectCategory === EFFECT_CATEGORY_REMOTE)) {
     const ancillary = isAncillaryEffect(effect);
     return { tag: "repairer", layer: "armor", ancillary };
   }
-  if (attrIds.has(STRUCTURE_DAMAGE_AMOUNT) && effect.effectCategory === 1) {
+  if (attrIds.has(STRUCTURE_DAMAGE_AMOUNT) && effect.effectCategory === EFFECT_CATEGORY_ACTIVE) {
     return { tag: "repairer", layer: "hull", ancillary: false };
   }
 
@@ -175,4 +174,13 @@ function classifyActionEffect(effect: SdeDogmaEffect, typeDogma: SdeTypeDogma | 
 
 function isAncillaryEffect(effect: SdeDogmaEffect): boolean {
   return effect.effectName?.toLowerCase().includes("fueled") ?? false;
+}
+
+function describeUnclassified(effect: SdeDogmaEffect): string {
+  const mods = effect.modifierInfo;
+  if (!mods || mods.length === 0) {
+    return `action effect category ${effect.effectCategory} with no matching defense attributes`;
+  }
+  const modDescs = mods.map((m) => `${m.func}(attr ${m.modifiedAttributeID}<-${m.modifyingAttributeID} op ${m.operation})`);
+  return `no matching intent for modifiers: ${modDescs.join(", ")}`;
 }

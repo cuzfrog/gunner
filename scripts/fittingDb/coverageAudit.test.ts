@@ -1,5 +1,5 @@
 import { auditCoverage, type AuditContext } from "./coverageAudit";
-import type { SdeDogmaEffect, SdeType, SdeTypeDogma } from "./dogmaTypes";
+import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeType, SdeTypeDogma } from "./dogmaTypes";
 
 function makeType(typeId: number, groupId: number, name = "Test Module"): SdeType {
   return { typeID: typeId, "typeName_en-us": name, groupID: groupId, published: 1 };
@@ -12,12 +12,12 @@ function makeTypeDogma(attrs: readonly { attributeID: number; value: number }[] 
   };
 }
 
-function makeEffect(eid: number, opts: { category?: number; modifiers?: readonly object[]; name?: string } = {}): SdeDogmaEffect {
+function makeEffect(eid: number, opts: { category?: number; modifiers?: readonly SdeDogmaEffectModifier[]; name?: string } = {}): SdeDogmaEffect {
   return {
     effectID: eid,
     effectName: opts.name,
     effectCategory: opts.category ?? 0,
-    modifierInfo: opts.modifiers as any,
+    modifierInfo: opts.modifiers,
   };
 }
 
@@ -26,7 +26,7 @@ function makeContext(overrides: Partial<AuditContext> = {}): AuditContext {
     types: {},
     typedogmas: {},
     dogmaEffects: {},
-    moduleGroupIds: new Set([60, 773]),
+    moduleGroupIds: new Set([40, 60, 773]),
     generatedModules: new Map(),
     ...overrides,
   };
@@ -106,6 +106,53 @@ describe("auditCoverage - unclassifiedCombatModifier", () => {
     const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Unknown Defense Module", hasDefense: true }]]) });
     const failures = auditCoverage(ctx);
     expect(failures.some((f) => f.category === "unclassifiedCombatModifier")).toBe(true);
+  });
+
+  test("fails when a LocationRequiredSkillModifier modifies an amplifier attribute but classifier does not recognize it", () => {
+    const typeId = 2002;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, 773, "Unknown Amplifier Rig") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([{ attributeID: 806, value: 15 }], [7777]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "7777": makeEffect(7777, {
+        category: 0,
+        modifiers: [{ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 84, modifyingAttributeID: 806, operation: 99, skillTypeID: 3393 }],
+      }),
+    };
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Unknown Amplifier Rig", hasDefense: true }]]) });
+    const failures = auditCoverage(ctx);
+    expect(failures.some((f) => f.category === "unclassifiedCombatModifier")).toBe(true);
+  });
+});
+
+describe("auditCoverage - defenseAttrWithoutIntent", () => {
+  test("fails when a module has shieldBonus attribute but no repairer intent (no matching action effect)", () => {
+    const typeId = 5001;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, 40, "Mystery Shield Booster") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([{ attributeID: 68, value: 200 }], [9999]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "9999": makeEffect(9999, { category: 0, name: "unknownEffect" }),
+    };
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Mystery Shield Booster", hasDefense: true }]]) });
+    const failures = auditCoverage(ctx);
+    expect(failures.some((f) => f.category === "defenseAttrWithoutIntent")).toBe(true);
+  });
+
+  test("does not fail when a module has shieldBonus attribute and a repairer intent", () => {
+    const typeId = 5002;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, 40, "Shield Booster") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([{ attributeID: 68, value: 200 }], [4]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "4": makeEffect(4, { category: 1, name: "shieldBoosting" }),
+    };
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Shield Booster", hasDefense: true }]]) });
+    const failures = auditCoverage(ctx);
+    expect(failures.some((f) => f.category === "defenseAttrWithoutIntent")).toBe(false);
   });
 });
 
