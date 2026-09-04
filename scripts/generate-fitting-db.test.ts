@@ -36,6 +36,19 @@ function callBuildDefenseStats(vals: Map<string, number>, effects: readonly SdeD
   return _buildDefenseStats(vals, effectIds, groupId, typeDogma, dogmaEffectsMap(effects));
 }
 
+function groupMod(modifiedAttr: number, modifyingAttr: number, operation: number, groupId: number): SdeDogmaEffectModifier {
+  return { domain: "shipID", func: "LocationGroupModifier", modifiedAttributeID: modifiedAttr, modifyingAttributeID: modifyingAttr, operation, groupID: groupId };
+}
+
+function combatEffect(eid: number, category: number, modifiers: readonly SdeDogmaEffectModifier[], name?: string): SdeDogmaEffect {
+  return { effectID: eid, effectName: name, effectCategory: category, modifierInfo: modifiers };
+}
+
+function callBuildModuleStats(vals: Map<string, number>, effects: readonly SdeDogmaEffect[], typeDogma?: SdeTypeDogma): ReturnType<typeof _buildModuleStats> {
+  const effectIds = new Set(effects.map((e) => e.effectID));
+  return _buildModuleStats(vals, effectIds, typeDogma, dogmaEffectsMap(effects));
+}
+
 function sdeType(metaLevel = 0, metaGroupID = 1, volume?: number): { typeID: number; "typeName_en-us": string; groupID: number; published: number; metaLevel: number; metaGroupID: number; volume?: number } {
   return { typeID: 0, "typeName_en-us": "", groupID: 0, published: 1, metaLevel, metaGroupID, volume };
 }
@@ -220,24 +233,22 @@ describe("buildDisruptionScriptStats", () => {
 });
 
 describe("_buildModuleStats", () => {
-  function effects(...ids: number[]): Set<number> {
-    return new Set(ids);
-  }
-
   test("returns undefined when no stats are present", () => {
-    expect(_buildModuleStats(values({}), effects())).toBeUndefined();
+    expect(callBuildModuleStats(values({}), [])).toBeUndefined();
   });
 
   test("extracts mass and agility stats without damage effects", () => {
-    expect(_buildModuleStats(values({ massAddition: 500000, agilityMultiplier: -10 }), effects())).toEqual({
+    expect(callBuildModuleStats(values({ massAddition: 500000, agilityMultiplier: -10 }), [])).toEqual({
       massAddition: 500000,
       agilityMultiplier: 0.9,
     });
   });
 
   test("extracts Heat Sink damage and speed multipliers with energy weapon effect", () => {
-    // Heat Sink II: effect 91 (energyWeaponDamageMultiply), effect 95 (energyWeaponSpeedMultiply)
-    const stats = _buildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), effects(91, 95));
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), [
+      combatEffect(91, 4, [groupMod(64, 204, 4, 53)]),
+      combatEffect(95, 4, [groupMod(51, 204, 4, 53)]),
+    ]);
     expect(stats).toEqual({
       turretDamageMultiplier: 1.1,
       turretSpeedMultiplier: 0.895,
@@ -246,8 +257,10 @@ describe("_buildModuleStats", () => {
   });
 
   test("extracts Gyrostabilizer damage and speed with projectile weapon effect", () => {
-    // Gyrostabilizer II: effect 92 (projectileWeaponDamageMultiply), effect 89 (projectileWeaponSpeedMultiply)
-    const stats = _buildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.89 }), effects(92, 89));
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.89 }), [
+      combatEffect(92, 4, [groupMod(64, 204, 4, 55)]),
+      combatEffect(89, 4, [groupMod(51, 204, 4, 55)]),
+    ]);
     expect(stats).toEqual({
       turretDamageMultiplier: 1.15,
       turretSpeedMultiplier: 0.89,
@@ -256,8 +269,10 @@ describe("_buildModuleStats", () => {
   });
 
   test("extracts Magnetic Field Stabilizer with hybrid weapon effect", () => {
-    // Magnetic Field Stabilizer II: effect 93 (hybridWeaponDamageMultiply), effect 96 (hybridWeaponSpeedMultiply)
-    const stats = _buildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.905 }), effects(93, 96));
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.905 }), [
+      combatEffect(93, 4, [groupMod(64, 204, 4, 74)]),
+      combatEffect(96, 4, [groupMod(51, 204, 4, 74)]),
+    ]);
     expect(stats).toEqual({
       turretDamageMultiplier: 1.15,
       turretSpeedMultiplier: 0.905,
@@ -266,12 +281,15 @@ describe("_buildModuleStats", () => {
   });
 
   test("does not extract damage stats when no damage effect is present", () => {
-    const stats = _buildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), effects());
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), []);
     expect(stats).toBeUndefined();
   });
 
   test("preserves damage stats alongside tracking stats", () => {
-    const stats = _buildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895, trackingSpeedBonus: 10 }), effects(91, 95));
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895, trackingSpeedBonus: 10 }), [
+      combatEffect(91, 4, [groupMod(64, 204, 4, 53)]),
+      combatEffect(95, 4, [groupMod(51, 204, 4, 53)]),
+    ]);
     expect(stats).toEqual({
       turretDamageMultiplier: 1.1,
       turretSpeedMultiplier: 0.895,
@@ -280,13 +298,22 @@ describe("_buildModuleStats", () => {
     });
   });
 
-  test("extracts rig damage effects for projectile weapon", () => {
-    // Projectile rig: effect 2798 (projectileWeaponDamageMultiplyPassive), effect 2799 (projectileWeaponSpeedMultiplyPassive)
-    const stats = _buildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.93 }), effects(2798, 2799));
+  test("extracts projectile rig damage effect (passive)", () => {
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.15 }), [
+      combatEffect(2798, 0, [groupMod(64, 204, 4, 55)]),
+    ]);
     expect(stats).toEqual({
       turretDamageMultiplier: 1.15,
-      turretSpeedMultiplier: 0.93,
       turretWeaponGroup: "Projectile Weapon",
+    });
+  });
+
+  test("extracts missile rig speed effect (passive) as missile not turret", () => {
+    const stats = callBuildModuleStats(values({ speedMultiplier: 0.93 }), [
+      combatEffect(2799, 0, [skillMod(51, 204, 4, 3319)]),
+    ]);
+    expect(stats).toEqual({
+      missileCycleTimeMultiplier: 0.93,
     });
   });
 });
@@ -613,12 +640,11 @@ describe("_buildMissileScriptStats", () => {
 });
 
 describe("Ballistic Control System in _buildModuleStats", () => {
-  function effects(...ids: number[]): Set<number> {
-    return new Set(ids);
-  }
-
   test("extracts BCS damage and cycle time multipliers with missile damage effects", () => {
-    const stats = _buildModuleStats(values({ missileDamageMultiplierBonus: 1.1, speedMultiplier: 0.895 }), effects(763, 889));
+    const stats = callBuildModuleStats(values({ missileDamageMultiplierBonus: 1.1, speedMultiplier: 0.895 }), [
+      combatEffect(763, 4, [itemMod(212, 212, 0)]),
+      combatEffect(889, 4, [skillMod(51, 204, 4, 3319)]),
+    ]);
     expect(stats).toEqual({
       missileDamageMultiplier: 1.1,
       missileCycleTimeMultiplier: 0.895,
@@ -626,23 +652,19 @@ describe("Ballistic Control System in _buildModuleStats", () => {
   });
 
   test("does not extract missile damage stats when no missile effect is present", () => {
-    const stats = _buildModuleStats(values({ missileDamageMultiplierBonus: 1.1, speedMultiplier: 0.895 }), effects());
+    const stats = callBuildModuleStats(values({ missileDamageMultiplierBonus: 1.1, speedMultiplier: 0.895 }), []);
     expect(stats).toBeUndefined();
   });
 });
 
 describe("Drone Link Augmentor in _buildModuleStats", () => {
-  function effects(...ids: number[]): Set<number> {
-    return new Set(ids);
-  }
-
   test("extracts drone control range bonus from droneRangeBonus attribute", () => {
-    const stats = _buildModuleStats(values({ droneRangeBonus: 20000 }), effects());
+    const stats = callBuildModuleStats(values({ droneRangeBonus: 20000 }), []);
     expect(stats).toEqual({ droneControlRangeBonus: 20000 });
   });
 
   test("does not extract drone control range when attribute is absent", () => {
-    const stats = _buildModuleStats(values({}), effects());
+    const stats = callBuildModuleStats(values({}), []);
     expect(stats).toBeUndefined();
   });
 });

@@ -191,3 +191,107 @@ describe("auditCoverage - edge cases", () => {
     expect(failures).toHaveLength(0);
   });
 });
+
+describe("auditCoverage - turret/missile combat modifiers", () => {
+  test("does not fail when turret LocationGroupModifier is classified", () => {
+    const typeId = 6001;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, 311, "Gyrostabilizer II") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([{ attributeID: 64, value: 25 }], [92]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "92": makeEffect(92, {
+        category: 4,
+        modifiers: [{ domain: "shipID", func: "LocationGroupModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 4, groupID: 55 }],
+      }),
+    };
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, moduleGroupIds: new Set([311]) });
+    const failures = auditCoverage(ctx);
+    expect(failures).toHaveLength(0);
+  });
+
+  test("fails when turret LocationGroupModifier is not classified", () => {
+    const typeId = 6002;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, 311, "Mystery Turret Mod") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([{ attributeID: 64, value: 25 }], [8888]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "8888": makeEffect(8888, {
+        category: 4,
+        modifiers: [{ domain: "shipID", func: "LocationGroupModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 99, groupID: 55 }],
+      }),
+    };
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, moduleGroupIds: new Set([311]) });
+    const failures = auditCoverage(ctx);
+    expect(failures.some((f) => f.category === "unclassifiedCombatModifier")).toBe(true);
+  });
+
+  test("does not fail when missile ItemModifier is classified", () => {
+    const typeId = 6003;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, 311, "BCS II") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([{ attributeID: 212, value: 50 }], [763]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "763": makeEffect(763, {
+        category: 4,
+        modifiers: [{ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 212, modifyingAttributeID: 212, operation: 0 }],
+      }),
+    };
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, moduleGroupIds: new Set([311]) });
+    const failures = auditCoverage(ctx);
+    expect(failures).toHaveLength(0);
+  });
+
+  test("fails when missile ItemModifier on missileDamageMultiplier is not classified", () => {
+    const typeId = 6004;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, 311, "Mystery Missile Mod") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([{ attributeID: 212, value: 50 }], [7777]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "7777": makeEffect(7777, {
+        category: 4,
+        modifiers: [{ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 212, modifyingAttributeID: 212, operation: 99 }],
+      }),
+    };
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, moduleGroupIds: new Set([311]) });
+    const failures = auditCoverage(ctx);
+    expect(failures.some((f) => f.category === "unclassifiedCombatModifier")).toBe(true);
+  });
+
+  test("does not fail when missile LocationRequiredSkillModifier speed is classified", () => {
+    const typeId = 6005;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, 311, "BCS II") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([{ attributeID: 51, value: 90 }], [889]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "889": makeEffect(889, {
+        category: 4,
+        modifiers: [{ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 51, modifyingAttributeID: 204, operation: 4, skillTypeID: 3319 }],
+      }),
+    };
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, moduleGroupIds: new Set([311]) });
+    const failures = auditCoverage(ctx);
+    expect(failures).toHaveLength(0);
+  });
+
+  test("fails when missile LocationRequiredSkillModifier speed is not classified", () => {
+    const typeId = 6006;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, 311, "Mystery Missile RoF Mod") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([{ attributeID: 51, value: 90 }], [6666]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "6666": makeEffect(6666, {
+        category: 4,
+        modifiers: [{ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 51, modifyingAttributeID: 204, operation: 99, skillTypeID: 3319 }],
+      }),
+    };
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, moduleGroupIds: new Set([311]) });
+    const failures = auditCoverage(ctx);
+    expect(failures.some((f) => f.category === "unclassifiedCombatModifier")).toBe(true);
+  });
+});

@@ -1,6 +1,6 @@
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./dogmaTypes";
-import { EFFECT_CATEGORY_ACTIVE, EFFECT_CATEGORY_REMOTE, FUNC_ITEM_MODIFIER, FUNC_LOCATION_REQUIRED_SKILL, OPERATION_ADD, OPERATION_POST_PERCENT, OPERATION_POST_PERCENT_DIV } from "./dogmaTypes";
-import { ARMOR_DAMAGE_AMOUNT, DURATION, RESISTANCE_SHIFT_AMOUNT, REPAIR_SKILL_IDS, SHIELD_BONUS, SHIELD_RECHARGE_RATE, STRUCTURE_DAMAGE_AMOUNT, DefenseLayer, hpLayerForAttr, resistLayerForAttr } from "./combatAttributes";
+import { EFFECT_CATEGORY_ACTIVE, EFFECT_CATEGORY_REMOTE, FUNC_ITEM_MODIFIER, FUNC_LOCATION_GROUP, FUNC_LOCATION_REQUIRED_SKILL, OPERATION_ADD, OPERATION_POST_PERCENT, OPERATION_POST_PERCENT_DIV, OPERATION_PRE_ASSIGN } from "./dogmaTypes";
+import { ARMOR_DAMAGE_AMOUNT, DURATION, RESISTANCE_SHIFT_AMOUNT, REPAIR_SKILL_IDS, SHIELD_BONUS, SHIELD_RECHARGE_RATE, STRUCTURE_DAMAGE_AMOUNT, TURRET_DAMAGE_MULTIPLIER, TURRET_SPEED, MISSILE_DAMAGE_MULTIPLIER, MISSILE_LAUNCHER_OPERATION_SKILL, TURRET_WEAPON_GROUP_IDS, DefenseLayer, TurretWeaponGroupName, hpLayerForAttr, resistLayerForAttr, turretWeaponGroupForGroupId } from "./combatAttributes";
 
 export type DefenseIntent =
   | { readonly tag: "resist"; readonly layer: DefenseLayer; readonly active: boolean }
@@ -15,11 +15,19 @@ export type DefenseIntent =
   | { readonly tag: "boostAmplifier" }
   | { readonly tag: "repairAmplifier"; readonly sub: "amount" | "cycleTime" };
 
-export type CombatIntent = DefenseIntent;
+export type TurretIntent =
+  | { readonly tag: "turretDamage"; readonly weaponGroup: TurretWeaponGroupName }
+  | { readonly tag: "turretSpeed"; readonly weaponGroup: TurretWeaponGroupName };
 
-export interface ClassifiedEffect {
+export type MissileIntent =
+  | { readonly tag: "missileDamage" }
+  | { readonly tag: "missileSpeed" };
+
+export type CombatIntent = DefenseIntent | TurretIntent | MissileIntent;
+
+export interface ClassifiedDefenseEffect {
   readonly effectId: number;
-  readonly intent: CombatIntent;
+  readonly intent: DefenseIntent;
 }
 
 export interface UnclassifiedEffect {
@@ -28,7 +36,7 @@ export interface UnclassifiedEffect {
 }
 
 export interface ClassifierResult {
-  readonly intents: readonly ClassifiedEffect[];
+  readonly intents: readonly ClassifiedDefenseEffect[];
   readonly unclassified: readonly UnclassifiedEffect[];
 }
 
@@ -36,7 +44,7 @@ export function classifyDefenseEffects(
   effects: readonly SdeDogmaEffect[],
   typeDogma: SdeTypeDogma | undefined,
 ): ClassifierResult {
-  const classified: ClassifiedEffect[] = [];
+  const classified: ClassifiedDefenseEffect[] = [];
   const unclassified: UnclassifiedEffect[] = [];
   for (const effect of effects) {
     const intent = classifySingleEffect(effect, typeDogma);
@@ -50,7 +58,17 @@ export function classifyDefenseEffects(
 }
 
 export function classifyCombatEffect(effect: SdeDogmaEffect, typeDogma: SdeTypeDogma | undefined): CombatIntent | undefined {
-  return classifySingleEffect(effect, typeDogma);
+  const modifiers = effect.modifierInfo;
+  if (modifiers && modifiers.length > 0) {
+    const defenseIntent = classifyModifierEffect(effect, modifiers);
+    if (defenseIntent) return defenseIntent;
+    const turretIntent = classifyTurretModifiers(modifiers);
+    if (turretIntent) return turretIntent;
+    const missileIntent = classifyMissileModifiers(modifiers);
+    if (missileIntent) return missileIntent;
+    return undefined;
+  }
+  return classifyActionEffect(effect, typeDogma);
 }
 
 function classifySingleEffect(effect: SdeDogmaEffect, typeDogma: SdeTypeDogma | undefined): DefenseIntent | undefined {
@@ -174,6 +192,31 @@ function classifyActionEffect(effect: SdeDogmaEffect, typeDogma: SdeTypeDogma | 
 
 function isAncillaryEffect(effect: SdeDogmaEffect): boolean {
   return effect.effectName?.toLowerCase().includes("fueled") ?? false;
+}
+
+function classifyTurretModifiers(modifiers: readonly SdeDogmaEffectModifier[]): TurretIntent | undefined {
+  for (const m of modifiers) {
+    if (m.func !== FUNC_LOCATION_GROUP) continue;
+    if (m.groupID === undefined || !TURRET_WEAPON_GROUP_IDS.has(m.groupID)) continue;
+    if (m.operation !== OPERATION_POST_PERCENT_DIV) continue;
+    const weaponGroup = turretWeaponGroupForGroupId(m.groupID);
+    if (!weaponGroup) continue;
+    if (m.modifiedAttributeID === TURRET_DAMAGE_MULTIPLIER) return { tag: "turretDamage", weaponGroup };
+    if (m.modifiedAttributeID === TURRET_SPEED) return { tag: "turretSpeed", weaponGroup };
+  }
+  return undefined;
+}
+
+function classifyMissileModifiers(modifiers: readonly SdeDogmaEffectModifier[]): MissileIntent | undefined {
+  for (const m of modifiers) {
+    if (m.func === FUNC_ITEM_MODIFIER && m.modifiedAttributeID === MISSILE_DAMAGE_MULTIPLIER && m.operation === OPERATION_PRE_ASSIGN) {
+      return { tag: "missileDamage" };
+    }
+    if (m.func === FUNC_LOCATION_REQUIRED_SKILL && m.modifiedAttributeID === TURRET_SPEED && m.operation === OPERATION_POST_PERCENT_DIV && m.skillTypeID === MISSILE_LAUNCHER_OPERATION_SKILL) {
+      return { tag: "missileSpeed" };
+    }
+  }
+  return undefined;
 }
 
 function describeUnclassified(effect: SdeDogmaEffect): string {

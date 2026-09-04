@@ -6,6 +6,8 @@ import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 import type { ShipNameLanguage } from "../src/ships";
 import type { DamageResists } from "../src/sim";
 import { buildDefenseStatsFromIntents, type DefenseModuleStats } from "./fittingDb/buildDefenseStats";
+import { buildCombatModuleStats } from "./fittingDb/buildModuleStats";
+import { auditCoverage, type AuditModuleEntry } from "./fittingDb/coverageAudit";
 import type { SdeDogmaAttribute, SdeDogmaEffect, SdeDogmaEffectModifier, SdeGroup, SdeTypeDogma } from "./fittingDb/dogmaTypes";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
@@ -136,8 +138,6 @@ const SENSOR_BOOSTER_GROUP = 212;
 const SIGNAL_AMPLIFIER_GROUP = 210;
 const SENSOR_BOOSTER_SCRIPT_GROUP = 910;
 const SENSOR_DAMPENER_SCRIPT_GROUP = 911;
-const MISSILE_DAMAGE_EFFECT = 763;
-const MISSILE_ROF_EFFECT = 889;
 
 const TURRET_GROUPS = new Set([53, 55, 74, 1986]);
 
@@ -193,24 +193,6 @@ const DRONE_CONTROL_RANGE_MODULE_GROUP = 647;
 const RIG_SIG_DRAWBACK_EFFECT = 2716;
 const RIG_AGILITY_DRAWBACK_EFFECT = 2717;
 const SHIP_CATEGORY_ID = 6;
-
-// Maps module dogma effectIDs to the weapon group they modify. These are damage/RoF
-// multiplier effects from Heat Sinks, Gyrostabilizers, Magnetic Field Stabilizers, and
-// their rig/booster variants. The module's damageMultiplier and speedMultiplier attributes
-// are applied to turret modules of the matching weapon group with stacking penalties.
-const DAMAGE_MODULE_EFFECTS: Readonly<Record<number, TurretWeaponGroup>> = {
-  89: "Projectile Weapon",
-  91: "Energy Weapon",
-  92: "Projectile Weapon",
-  93: "Hybrid Weapon",
-  95: "Energy Weapon",
-  96: "Hybrid Weapon",
-  2798: "Projectile Weapon",
-  2799: "Projectile Weapon",
-  2802: "Hybrid Weapon",
-  2803: "Energy Weapon",
-  2804: "Hybrid Weapon",
-};
 
 // Skill typeIDs that provide turret damage or rate-of-fire bonuses. The bonus attribute
 // on the skill item is a percentage per level; it is applied as an unpenalized boost.
@@ -693,7 +675,7 @@ function buildPropulsionStats(values: Map<string, number>, type: SdeType): Fitti
   };
 }
 
-function buildModuleStats(values: Map<string, number>, effects: Set<number>): FittingModuleStats | undefined {
+function buildModuleStats(values: Map<string, number>, effects: Set<number>, typeDogma: SdeTypeDogma | undefined, dogmaEffects: Readonly<Record<string, SdeDogmaEffect>>): FittingModuleStats | undefined {
   const stats: { -readonly [K in keyof FittingModuleStats]?: FittingModuleStats[K] } = {};
 
   const massAddition = optionalNumber(values.get("massAddition"));
@@ -734,22 +716,13 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
     stats.agilityDrawbackPercent = drawback;
   }
 
-  const damageGroup = resolveDamageModuleGroup(effects);
-  if (damageGroup !== undefined) {
-    const damageMultiplier = optionalNumber(values.get("damageMultiplier"));
-    const speedMultiplier = optionalNumber(values.get("speedMultiplier"));
-    if ((damageMultiplier !== undefined && damageMultiplier !== 0) || (speedMultiplier !== undefined && speedMultiplier !== 0)) {
-      stats.turretWeaponGroup = damageGroup;
-      if (damageMultiplier !== undefined && damageMultiplier !== 0) stats.turretDamageMultiplier = damageMultiplier;
-      if (speedMultiplier !== undefined && speedMultiplier !== 0) stats.turretSpeedMultiplier = speedMultiplier;
-    }
-  }
-
-  if (effects.has(MISSILE_DAMAGE_EFFECT) || effects.has(MISSILE_ROF_EFFECT)) {
-    const missileDamageMultiplier = optionalNumber(values.get("missileDamageMultiplierBonus"));
-    const missileCycleTimeMultiplier = optionalNumber(values.get("speedMultiplier"));
-    if (missileDamageMultiplier !== undefined) stats.missileDamageMultiplier = missileDamageMultiplier;
-    if (missileCycleTimeMultiplier !== undefined) stats.missileCycleTimeMultiplier = missileCycleTimeMultiplier;
+  const combatStats = buildCombatModuleStats({ values, effects, dogmaEffects, typeDogma });
+  if (combatStats) {
+    if (combatStats.turretWeaponGroup !== undefined) stats.turretWeaponGroup = combatStats.turretWeaponGroup;
+    if (combatStats.turretDamageMultiplier !== undefined) stats.turretDamageMultiplier = combatStats.turretDamageMultiplier;
+    if (combatStats.turretSpeedMultiplier !== undefined) stats.turretSpeedMultiplier = combatStats.turretSpeedMultiplier;
+    if (combatStats.missileDamageMultiplier !== undefined) stats.missileDamageMultiplier = combatStats.missileDamageMultiplier;
+    if (combatStats.missileCycleTimeMultiplier !== undefined) stats.missileCycleTimeMultiplier = combatStats.missileCycleTimeMultiplier;
   }
 
   const droneDamageBonus = optionalNumber(values.get("droneDamageBonus"));
@@ -760,14 +733,6 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
 
   if (Object.keys(stats).length === 0) return undefined;
   return { ...stats };
-}
-
-function resolveDamageModuleGroup(effects: Set<number>): TurretWeaponGroup | undefined {
-  for (const effectId of effects) {
-    const group = DAMAGE_MODULE_EFFECTS[effectId];
-    if (group !== undefined) return group;
-  }
-  return undefined;
 }
 
 function buildDefenseStats(
@@ -1479,7 +1444,7 @@ async function main() {
         fittingModules[id] = { ...buildPropulsionStats(values, type), id, name: enName };
         addItemName(itemNames, id, type);
       } else {
-        const stats = buildModuleStats(values, effects);
+        const stats = buildModuleStats(values, effects, typeDogma, dogmaEffects);
         const defense = buildDefenseStats(values, effects, type.groupID, typeDogma, dogmaEffects);
         if (stats || defense) {
           fittingModules[id] = { ...stats, defense, id, name: enName };
@@ -1940,6 +1905,22 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     skillBonuses,
   );
   const filteredItemNames = filterItemNames(itemNames, idToType, groups, dbTableNames);
+
+  const auditEntries = new Map<number, AuditModuleEntry>();
+  for (const [idStr, mod] of Object.entries(fittingModules)) {
+    auditEntries.set(Number(idStr), { typeId: Number(idStr), typeName: mod.name, hasDefense: mod.defense !== undefined });
+  }
+  const auditFailures = auditCoverage({
+    types,
+    typedogmas,
+    dogmaEffects,
+    moduleGroupIds: MODULE_GROUPS,
+    generatedModules: auditEntries,
+  });
+  if (auditFailures.length > 0) {
+    const details = auditFailures.map((f) => `[${f.category}] type ${f.typeId} (${f.typeName}): ${f.detail}`).join("\n");
+    throw new Error(`Coverage audit failed with ${auditFailures.length} failure(s):\n${details}`);
+  }
 
   await mkdir(dirname(OUT_FILE), { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));

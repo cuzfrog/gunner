@@ -1,4 +1,4 @@
-import { classifyDefenseEffects, type DefenseIntent } from "./effectClassifier";
+import { classifyDefenseEffects, classifyCombatEffect, type DefenseIntent, type CombatIntent } from "./effectClassifier";
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./dogmaTypes";
 
 function mod(overrides: Partial<SdeDogmaEffectModifier> = {}): SdeDogmaEffectModifier {
@@ -416,5 +416,191 @@ describe("classifyDefenseEffects - unclassified effects", () => {
     });
     const result = classifyDefenseEffects([e], undefined);
     expect(result.intents).toHaveLength(0);
+  });
+});
+
+describe("classifyCombatEffect - turret damage/speed effects", () => {
+  test("energy weapon damage multiply (effect 91) classifies as turretDamage/Energy", () => {
+    const e = effect(91, {
+      category: 4,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 4, groupID: 53 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretDamage", weaponGroup: "Energy Weapon" });
+  });
+
+  test("projectile weapon damage multiply (effect 92) classifies as turretDamage/Projectile", () => {
+    const e = effect(92, {
+      category: 4,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 4, groupID: 55 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretDamage", weaponGroup: "Projectile Weapon" });
+  });
+
+  test("hybrid weapon damage multiply (effect 93) classifies as turretDamage/Hybrid", () => {
+    const e = effect(93, {
+      category: 4,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 4, groupID: 74 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretDamage", weaponGroup: "Hybrid Weapon" });
+  });
+
+  test("energy weapon speed multiply (effect 95) classifies as turretSpeed/Energy", () => {
+    const e = effect(95, {
+      category: 4,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 51, modifyingAttributeID: 204, operation: 4, groupID: 53 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretSpeed", weaponGroup: "Energy Weapon" });
+  });
+
+  test("projectile weapon speed multiply (effect 89) classifies as turretSpeed/Projectile", () => {
+    const e = effect(89, {
+      category: 4,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 51, modifyingAttributeID: 204, operation: 4, groupID: 55 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretSpeed", weaponGroup: "Projectile Weapon" });
+  });
+
+  test("hybrid weapon speed multiply (effect 96) classifies as turretSpeed/Hybrid", () => {
+    const e = effect(96, {
+      category: 4,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 51, modifyingAttributeID: 204, operation: 4, groupID: 74 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretSpeed", weaponGroup: "Hybrid Weapon" });
+  });
+
+  test("passive rig damage multiply (effect 2798) classifies as turretDamage/Projectile", () => {
+    const e = effect(2798, {
+      category: 0,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 4, groupID: 55 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretDamage", weaponGroup: "Projectile Weapon" });
+  });
+
+  test("passive hybrid rig damage (effect 2802) classifies as turretDamage/Hybrid", () => {
+    const e = effect(2802, {
+      category: 0,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 4, groupID: 74 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretDamage", weaponGroup: "Hybrid Weapon" });
+  });
+
+  test("passive energy rig damage (effect 2803) classifies as turretDamage/Energy", () => {
+    const e = effect(2803, {
+      category: 0,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 4, groupID: 53 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretDamage", weaponGroup: "Energy Weapon" });
+  });
+
+  test("passive hybrid rig speed (effect 2804) classifies as turretSpeed/Hybrid", () => {
+    const e = effect(2804, {
+      category: 0,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 51, modifyingAttributeID: 204, operation: 4, groupID: 74 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretSpeed", weaponGroup: "Hybrid Weapon" });
+  });
+
+  test("passive projectile burst aerator (effect 2797) classifies as turretSpeed/Projectile", () => {
+    const e = effect(2797, {
+      category: 0,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 51, modifyingAttributeID: 204, operation: 4, groupID: 55 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretSpeed", weaponGroup: "Projectile Weapon" });
+  });
+
+  test("passive energy burst aerator (effect 2801) classifies as turretSpeed/Energy", () => {
+    const e = effect(2801, {
+      category: 0,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 51, modifyingAttributeID: 204, operation: 4, groupID: 53 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretSpeed", weaponGroup: "Energy Weapon" });
+  });
+
+  test("warhead calefaction catalyst (effect 2851) classifies as missileDamage", () => {
+    const e = effect(2851, {
+      category: 0,
+      modifiers: [mod({ func: "ItemModifier", modifiedAttributeID: 212, modifyingAttributeID: 212, operation: 0 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "missileDamage" });
+  });
+
+  test("LocationGroupModifier with non-turret group does not classify as turret intent", () => {
+    const e = effect(9999, {
+      category: 0,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 4, groupID: 999 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toBeUndefined();
+  });
+
+  test("LocationGroupModifier with non-damage/speed attribute does not classify as turret intent", () => {
+    const e = effect(9998, {
+      category: 0,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 999, modifyingAttributeID: 204, operation: 4, groupID: 53 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toBeUndefined();
+  });
+});
+
+describe("classifyCombatEffect - missile damage/speed effects", () => {
+  test("missile damage bonus (effect 763) classifies as missileDamage", () => {
+    const e = effect(763, {
+      category: 4,
+      modifiers: [mod({ func: "ItemModifier", modifiedAttributeID: 212, modifyingAttributeID: 212, operation: 0 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "missileDamage" });
+  });
+
+  test("missile launcher speed multiplier (effect 889) classifies as missileSpeed", () => {
+    const e = effect(889, {
+      category: 4,
+      modifiers: [mod({ func: "LocationRequiredSkillModifier", modifiedAttributeID: 51, modifyingAttributeID: 204, operation: 4, skillTypeID: 3319 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "missileSpeed" });
+  });
+
+  test("passive missile launcher speed (effect 2799) classifies as missileSpeed", () => {
+    const e = effect(2799, {
+      category: 0,
+      modifiers: [mod({ func: "LocationRequiredSkillModifier", modifiedAttributeID: 51, modifyingAttributeID: 204, operation: 4, skillTypeID: 3319 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "missileSpeed" });
+  });
+
+  test("LocationRequiredSkillModifier with non-missile skill does not classify as missileSpeed", () => {
+    const e = effect(9997, {
+      category: 0,
+      modifiers: [mod({ func: "LocationRequiredSkillModifier", modifiedAttributeID: 51, modifyingAttributeID: 204, operation: 4, skillTypeID: 3300 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toBeUndefined();
+  });
+
+  test("ItemModifier with non-missile-damage attribute does not classify as missileDamage", () => {
+    const e = effect(9996, {
+      category: 4,
+      modifiers: [mod({ func: "ItemModifier", modifiedAttributeID: 999, modifyingAttributeID: 999, operation: 0 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toBeUndefined();
+  });
+});
+
+describe("classifyCombatEffect - defense effects still classify via combat path", () => {
+  test("passive shield resist effect classifies as resist via classifyCombatEffect", () => {
+    const e = effect(2052, {
+      category: 4,
+      modifiers: [mod({ modifiedAttributeID: 271, modifyingAttributeID: 984 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "resist", layer: "shield", active: false });
+  });
+
+  test("damage control effect classifies as damageControl via classifyCombatEffect", () => {
+    const e = effect(2302, {
+      category: 4,
+      modifiers: [
+        mod({ modifiedAttributeID: 267, modifyingAttributeID: 267, operation: 0 }),
+        mod({ modifiedAttributeID: 271, modifyingAttributeID: 271, operation: 0 }),
+        mod({ modifiedAttributeID: 113, modifyingAttributeID: 974, operation: 0 }),
+      ],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "damageControl" });
   });
 });

@@ -1,6 +1,6 @@
 import type { SdeDogmaEffect, SdeType, SdeTypeDogma } from "./dogmaTypes";
-import { FUNC_ITEM_MODIFIER, FUNC_LOCATION_REQUIRED_SKILL } from "./dogmaTypes";
-import { classifyDefenseEffects } from "./effectClassifier";
+import { FUNC_ITEM_MODIFIER, FUNC_LOCATION_GROUP, FUNC_LOCATION_REQUIRED_SKILL } from "./dogmaTypes";
+import { classifyDefenseEffects, classifyCombatEffect } from "./effectClassifier";
 import {
   ARMOR_DAMAGE_AMOUNT,
   ARMOR_HP,
@@ -14,6 +14,11 @@ import {
   SHIELD_RESONANCE_ATTRS,
   ARMOR_RESONANCE_ATTRS,
   HULL_RESONANCE_ATTRS,
+  TURRET_DAMAGE_MULTIPLIER,
+  TURRET_SPEED,
+  MISSILE_DAMAGE_MULTIPLIER,
+  MISSILE_LAUNCHER_OPERATION_SKILL,
+  TURRET_WEAPON_GROUP_IDS,
 } from "./combatAttributes";
 
 export type AuditFailureCategory =
@@ -50,6 +55,9 @@ const ACTION_DEFENSE_ATTRS = new Set<number>([
   STRUCTURE_DAMAGE_AMOUNT,
   RESISTANCE_SHIFT_AMOUNT,
 ]);
+
+const TURRET_COMBAT_ATTRS = new Set<number>([TURRET_DAMAGE_MULTIPLIER, TURRET_SPEED]);
+const MISSILE_COMBAT_ATTRS = new Set<number>([MISSILE_DAMAGE_MULTIPLIER, TURRET_SPEED]);
 
 const DEFENSE_INTENT_TAGS = new Set<string>([
   "resist",
@@ -125,6 +133,39 @@ export function auditCoverage(ctx: AuditContext): readonly AuditFailure[] {
               typeName: type["typeName_en-us"],
               category: "unclassifiedCombatModifier",
               detail: `Effect ${effect.effectID} LocationRequiredSkillModifier modifies amplifier attribute ${m.modifiedAttributeID} (op ${m.operation}, skill ${m.skillTypeID}) but was not classified`,
+            });
+          }
+        }
+        if (m.func === FUNC_LOCATION_GROUP && m.groupID !== undefined && TURRET_WEAPON_GROUP_IDS.has(m.groupID) && TURRET_COMBAT_ATTRS.has(m.modifiedAttributeID)) {
+          const combatIntent = classifyCombatEffect(effect, typeDogma);
+          if (!combatIntent) {
+            failures.push({
+              typeId,
+              typeName: type["typeName_en-us"],
+              category: "unclassifiedCombatModifier",
+              detail: `Effect ${effect.effectID} LocationGroupModifier modifies turret attribute ${m.modifiedAttributeID} (op ${m.operation}, group ${m.groupID}) but was not classified`,
+            });
+          }
+        }
+        if (m.func === FUNC_ITEM_MODIFIER && MISSILE_COMBAT_ATTRS.has(m.modifiedAttributeID)) {
+          const combatIntent = classifyCombatEffect(effect, typeDogma);
+          if (!combatIntent) {
+            failures.push({
+              typeId,
+              typeName: type["typeName_en-us"],
+              category: "unclassifiedCombatModifier",
+              detail: `Effect ${effect.effectID} ItemModifier modifies missile attribute ${m.modifiedAttributeID} (op ${m.operation}) but was not classified`,
+            });
+          }
+        }
+        if (m.func === FUNC_LOCATION_REQUIRED_SKILL && m.modifiedAttributeID === TURRET_SPEED && m.skillTypeID === MISSILE_LAUNCHER_OPERATION_SKILL) {
+          const combatIntent = classifyCombatEffect(effect, typeDogma);
+          if (!combatIntent) {
+            failures.push({
+              typeId,
+              typeName: type["typeName_en-us"],
+              category: "unclassifiedCombatModifier",
+              detail: `Effect ${effect.effectID} LocationRequiredSkillModifier modifies missile speed attribute ${m.modifiedAttributeID} (op ${m.operation}, skill ${m.skillTypeID}) but was not classified`,
             });
           }
         }
