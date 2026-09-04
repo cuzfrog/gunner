@@ -478,10 +478,10 @@ describe("FittingImportImpl", () => {
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(1.05, 6);
   });
 
-  test("shield extender signature radius is handled by defense calculator, not resolveHull", () => {
+  test("shield extender signature radius is included in fitted hull add and attributed by defense calculator", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Shieldy]\nMedium Shield Extender II`, conditions);
-    expect(result!.fitted.sigRadiusAdd).toBe(0);
+    expect(result!.fitted.sigRadiusAdd).toBe(7);
     expect(result!.fitted.sigMultiplier).toBe(1);
     expect(result!.defense!.signaturePenalty).toBe(7);
   });
@@ -659,7 +659,7 @@ describe("FittingImportImpl", () => {
       conditions,
     );
     expect(result!.fitted.mass).toBe(profile.mass + 3_750_000);
-    expect(result!.fitted.sigRadiusAdd).toBe(0);
+    expect(result!.fitted.sigRadiusAdd).toBe(7);
     expect(result!.defense!.signaturePenalty).toBe(7);
   });
 

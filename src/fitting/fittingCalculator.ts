@@ -267,8 +267,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       if (stats.speedBonusPercent) speedPercents.push(stats.speedBonusPercent / 100);
       if (stats.agilityMultiplier) agilityMultipliers.push(stats.agilityMultiplier);
       if (stats.agilityDrawbackPercent) agilityMultipliers.push(1 + stats.agilityDrawbackPercent / 100);
-      const extenderSigInDefense = stats.defense?.kind === "shieldExtender" && stats.defense.sigRadiusPenalty !== undefined;
-      if (stats.sigRadiusAdd && !extenderSigInDefense) sigRadiusAdd += stats.sigRadiusAdd;
+      if (stats.sigRadiusAdd) sigRadiusAdd += stats.sigRadiusAdd;
       if (stats.sigBonusPercent) sigPercents.push(stats.sigBonusPercent / 100);
       if (stats.sigDrawbackPercent) sigPercents.push(stats.sigDrawbackPercent / 100);
     }
