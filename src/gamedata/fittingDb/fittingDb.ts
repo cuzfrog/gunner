@@ -1,4 +1,4 @@
-// Generated from EVE Online SDE via Pyfa staticdata (2026-09-03). Do not edit by hand.
+// Generated from EVE Online SDE via Pyfa staticdata (2026-09-04). Do not edit by hand.
 /* eslint-disable */
 
 import type { ShipId, TypeId } from "../ids";

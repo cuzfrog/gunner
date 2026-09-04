@@ -303,12 +303,11 @@ describe("DefenseCalculatorImpl", () => {
     expect(withBulkhead.layers.hull.hp).toBeGreaterThan(base.layers.hull.hp);
   });
 
-  test("two Reinforced Bulkheads II are stacking-penalized", () => {
-    const one = resolve([moduleEntry("Reinforced Bulkheads II")]);
+  test("two Reinforced Bulkheads II multiply without stacking penalty", () => {
     const two = resolve([moduleEntry("Reinforced Bulkheads II"), moduleEntry("Reinforced Bulkheads II")]);
-    expect(two.layers.hull.hp).toBeGreaterThan(one.layers.hull.hp);
-    const naiveTwo = one.layers.hull.hp * 1.25;
-    expect(two.layers.hull.hp).toBeLessThan(naiveTwo);
+    const mechanicsMultiplier = 1 + 0.05 * 5;
+    const expected = profile.hullHp * mechanicsMultiplier * 1.25 * 1.25;
+    expect(two.layers.hull.hp).toBe(Math.round(expected));
   });
 
   test("single Reinforced Bulkheads II applies full bonus without stacking penalty", () => {

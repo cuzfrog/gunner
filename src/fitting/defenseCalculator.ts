@@ -29,7 +29,7 @@ export class DefenseCalculatorImpl implements DefenseCalculator {
 
     const shieldHp = resolveShieldHp(profile, modules, fitting.hullBonuses, skills, conditions.skillLevel);
     const armorHp = resolveArmorHp(profile, modules, fitting.hullBonuses, skills, conditions.skillLevel);
-    const hullHp = resolveHullHp(profile, modules, fitting.hullBonuses, skills, conditions.skillLevel, this.stacking);
+    const hullHp = resolveHullHp(profile, modules, fitting.hullBonuses, skills, conditions.skillLevel);
     const shieldRechargeTime = resolveShieldRecharge(profile, modules, skills, this.stacking);
 
     const shieldResists = resolveLayerResists("shield", profile.shieldResists, modules, fitting.hullBonuses, skills, conditions.skillLevel, conditions.overloaded, this.stacking);
@@ -103,16 +103,15 @@ function resolveArmorHp(profile: ShipProfile, modules: readonly DefenseModuleEnt
   return roundHp(hp * hullUpgradesMultiplier);
 }
 
-function resolveHullHp(profile: ShipProfile, modules: readonly DefenseModuleEntry[], hullBonuses: readonly HullBonus[], skills: DefenseSkills, skillLevel: SkillLevel, stacking: StackingPenalty): number {
+function resolveHullHp(profile: ShipProfile, modules: readonly DefenseModuleEntry[], hullBonuses: readonly HullBonus[], skills: DefenseSkills, skillLevel: SkillLevel): number {
   const mechanicsMultiplier = 1 + MECHANICS_BONUS * skills.mechanics;
   const shipHullBonusMultiplier = hullBonusMultiplier(hullBonuses, "hullHpPercent", skillLevel);
-  const bulkheadMultipliers: number[] = [];
+  let moduleBulkheadMultiplier = 1;
   for (const mod of modules) {
     if (mod.stats.kind === "hullBulkhead" && mod.stats.hullHpPercent !== undefined) {
-      bulkheadMultipliers.push(1 + mod.stats.hullHpPercent / 100);
+      moduleBulkheadMultiplier *= 1 + mod.stats.hullHpPercent / 100;
     }
   }
-  const moduleBulkheadMultiplier = bulkheadMultipliers.length > 0 ? stacking.apply(bulkheadMultipliers) : 1;
   return roundHp(profile.hullHp * mechanicsMultiplier * shipHullBonusMultiplier * moduleBulkheadMultiplier);
 }
 
