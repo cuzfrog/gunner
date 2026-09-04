@@ -227,7 +227,9 @@ const SHIP_CATEGORY_ID = 6;
 const DEFENSE_EFFECTS = {
   damageControl: 2302,
   armorResonancePassive: 2041,
+  armorResonancePassiveRig: 2792,
   shieldResonancePassive: 2052,
+  shieldResonancePassiveRig: 2795,
   shieldHardener: 5230,
   armorHardener: 5231,
   shieldBoost: 4,
@@ -872,7 +874,7 @@ function buildDefenseStats(values: Map<string, number>, effects: Set<number>, gr
   if (effects.has(DEFENSE_EFFECTS.shieldHardener) || effects.has(DEFENSE_EFFECTS.armorHardener)) {
     return buildActiveHardenerStats(values, effects);
   }
-  if (effects.has(DEFENSE_EFFECTS.armorResonancePassive) || effects.has(DEFENSE_EFFECTS.shieldResonancePassive)) {
+  if (effects.has(DEFENSE_EFFECTS.armorResonancePassive) || effects.has(DEFENSE_EFFECTS.shieldResonancePassive) || effects.has(DEFENSE_EFFECTS.armorResonancePassiveRig) || effects.has(DEFENSE_EFFECTS.shieldResonancePassiveRig)) {
     return buildPassiveResistStats(values, effects);
   }
   if (effects.has(DEFENSE_EFFECTS.shieldExtender)) return buildShieldExtenderStats(values);
@@ -1004,7 +1006,7 @@ function buildActiveHardenerStats(values: Map<string, number>, effects: Set<numb
 }
 
 function buildPassiveResistStats(values: Map<string, number>, effects: Set<number>): DefenseModuleStats | undefined {
-  const layer = effects.has(DEFENSE_EFFECTS.shieldResonancePassive) ? "shield" : "armor";
+  const layer = (effects.has(DEFENSE_EFFECTS.shieldResonancePassive) || effects.has(DEFENSE_EFFECTS.shieldResonancePassiveRig)) ? "shield" : "armor";
   const resistBonus = extractResistBonus(values);
   if (!resistBonus) return undefined;
   return { kind: "resistModule", layer, active: false, resistBonus };

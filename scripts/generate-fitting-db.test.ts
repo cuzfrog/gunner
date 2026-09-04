@@ -769,6 +769,28 @@ describe("_buildDefenseStats", () => {
     });
   });
 
+  test("Small EM Shield Reinforcer I rig extracts passive shield resist bonus via rig effect", () => {
+    expect(_buildDefenseStats(values({
+      emDamageResistanceBonus: -30,
+    }), new Set([2795]), 0)).toEqual({
+      kind: "resistModule",
+      layer: "shield",
+      active: false,
+      resistBonus: { em: 0.3, thermal: 0, kinetic: 0, explosive: 0 },
+    });
+  });
+
+  test("Small EM Armor Reinforcer I rig extracts passive armor resist bonus via rig effect", () => {
+    expect(_buildDefenseStats(values({
+      emDamageResistanceBonus: -30,
+    }), new Set([2792]), 0)).toEqual({
+      kind: "resistModule",
+      layer: "armor",
+      active: false,
+      resistBonus: { em: 0.3, thermal: 0, kinetic: 0, explosive: 0 },
+    });
+  });
+
   test("Large Shield Booster II extracts shield repair amount with overload multipliers", () => {
     expect(_buildDefenseStats(values({
       shieldBonus: 276, duration: 4000, capacitorNeed: 160, heatDamage: 1.3, overloadShieldBonus: 10, overloadSelfDurationBonus: -15,
