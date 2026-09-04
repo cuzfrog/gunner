@@ -102,6 +102,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
 
   private assessMissile(frame: EngagementFrame, ship: ShipState, opponent: ShipState, missile: MissileSpec, opponentSigRadius: number, facts?: MissileAttackFacts): AttackAssessment {
     const boosted = this.missileBoosters.boostedMissile(missile, ship.missileBoosts);
+    const baseVolleyByType = damageVectorScale(boosted.damagePerMissile, boosted.launcherCount);
     const missileDamage = damageVectorSum(boosted.damagePerMissile);
     const nominalDps = boosted.cycleTime > 0 ? (missileDamage * boosted.launcherCount) / boosted.cycleTime : 0;
     const volley = missileDamage * boosted.launcherCount;
@@ -117,7 +118,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
         inRange: facts.interceptable,
         timeToImpact: facts.nearestTimeToImpact,
       };
-      const damage = { nominalDps, appliedDps, application, volley, appliedByType, appliedVolleyByType };
+      const damage = { nominalDps, appliedDps, application, volley, baseVolleyByType, appliedByType, appliedVolleyByType };
       return { boostedWeapon: boosted, effectiveWeapon: boosted, damage, missile: breakdown };
     }
     const result = this.missileApplication.compute(boosted, opponent.velocity.len(), opponentSigRadius);
@@ -131,7 +132,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     const appliedVolleyByType = inRange
       ? damageVectorScale(boosted.damagePerMissile, boosted.launcherCount * result.application)
       : ZERO_DAMAGE;
-    const damage = { nominalDps, appliedDps, application: inRange ? result.application : 0, volley, appliedByType, appliedVolleyByType };
+    const damage = { nominalDps, appliedDps, application: inRange ? result.application : 0, volley, baseVolleyByType, appliedByType, appliedVolleyByType };
     return { boostedWeapon: boosted, effectiveWeapon: boosted, damage, missile: breakdown };
   }
 
@@ -142,7 +143,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
 }
 
 function zeroAppliedDps(assessment: AttackAssessment): AttackAssessment {
-  const { nominalDps } = assessment.damage;
-  const zeroed: DamageAssessment = { nominalDps, appliedDps: 0, application: 0, volley: assessment.damage.volley, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+  const { nominalDps, volley, baseVolleyByType } = assessment.damage;
+  const zeroed: DamageAssessment = { nominalDps, appliedDps: 0, application: 0, volley, baseVolleyByType, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
   return { ...assessment, damage: zeroed };
 }

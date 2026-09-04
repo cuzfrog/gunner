@@ -13,7 +13,7 @@ const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, o
 const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.05, sigResolution: 40, optimal: 4000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const hit: HitChanceBreakdown = { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 };
-const turretDamageResult: DamageAssessment = { nominalDps: 20, appliedDps: 16, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+const turretDamageResult: DamageAssessment = { nominalDps: 20, appliedDps: 16, application: 0.8, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
 
 const shipA: ShipState = {
   id: "shipA",
@@ -93,6 +93,7 @@ const droneBreakdownResult: DroneDamageBreakdown & DamageAssessment = {
   appliedDps: 48,
   application: 1.0,
   volley: 192,
+  baseVolleyByType: ZERO_DAMAGE,
   appliedByType: ZERO_DAMAGE,
   appliedVolleyByType: ZERO_DAMAGE,
 };

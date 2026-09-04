@@ -9,7 +9,7 @@ const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, 
 function makeAttack(appliedByType: { em: number; thermal: number; kinetic: number; explosive: number }, appliedDps: number): AttackAssessment {
   return {
     boostedWeapon: turret, effectiveWeapon: turret,
-    damage: { nominalDps: 100, appliedDps, application: 0.8, volley: 400, appliedByType, appliedVolleyByType: ZERO_DAMAGE },
+    damage: { nominalDps: 100, appliedDps, application: 0.8, volley: 400, baseVolleyByType: ZERO_DAMAGE, appliedByType, appliedVolleyByType: ZERO_DAMAGE },
     turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8 },
   };
 }

@@ -139,6 +139,7 @@ export interface DamageAssessment {
   readonly appliedDps: number;
   readonly application: number; // 0..1, applied/nominal
   readonly volley: number; // per cycle, all launchers/turrets
+  readonly baseVolleyByType: DamageVector; // per-cycle volley per type, pre-application, count-scaled
   readonly appliedByType: DamageVector; // DPS per type
   readonly appliedVolleyByType: DamageVector; // per-cycle volley per type, post-application
 }
@@ -189,6 +190,7 @@ export interface MissileLaunchSpec {
   readonly weaponIndex: number;
   readonly boosted: MissileSpec;
   readonly paintedTargetSig: number;
+  readonly baseVolleyByType: DamageVector; // per-cycle volley per type, pre-application, count-scaled
 }
 
 export interface MissileSimConfig {

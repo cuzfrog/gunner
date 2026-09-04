@@ -23,6 +23,7 @@ export class DroneApplicationImpl implements DroneApplication {
     const hit = this.hitChance.compute(effective.frame, drone, opponentSigRadius);
     const expectedMultiplier = computeExpectedMultiplier(hit.chance);
     const shotDamage = damageVectorSum(drone.damagePerShot);
+    const baseVolleyByType = damageVectorScale(drone.damagePerShot, drone.droneCount);
     const nominalDps = drone.cycleTime > 0 ? (shotDamage * drone.droneCount) / drone.cycleTime : 0;
     const appliedDps = effective.inRange ? nominalDps * expectedMultiplier : 0;
     const volley = shotDamage * drone.droneCount;
@@ -35,7 +36,7 @@ export class DroneApplicationImpl implements DroneApplication {
     return {
       hit, expectedMultiplier, inRange: effective.inRange, inWeaponRange: effective.inWeaponRange,
       mode: effective.mode, distanceToTarget: effective.distanceToTarget, inControlRange: effective.inControlRange,
-      nominalDps, appliedDps, application: effective.inRange ? expectedMultiplier : 0, volley, appliedByType, appliedVolleyByType,
+      nominalDps, appliedDps, application: effective.inRange ? expectedMultiplier : 0, volley, baseVolleyByType, appliedByType, appliedVolleyByType,
     };
   }
 }

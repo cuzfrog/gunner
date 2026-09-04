@@ -36,7 +36,7 @@ function makeAssessment(expectedMultiplier: number, appliedVolleyByType: { em: n
   return {
     boostedWeapon: turret,
     effectiveWeapon: turret,
-    damage: { nominalDps: 20, appliedDps: 20 * expectedMultiplier, application: expectedMultiplier, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType },
+    damage: { nominalDps: 20, appliedDps: 20 * expectedMultiplier, application: expectedMultiplier, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType },
     turret: { hit, expectedMultiplier },
   };
 }

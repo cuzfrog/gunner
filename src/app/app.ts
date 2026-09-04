@@ -1,4 +1,4 @@
-import { Vec2 } from "../sim";
+import { Vec2, damageVectorScale } from "../sim";
 import type { DamageEvent, DefenseSimConfig, DefenseSimulator, DefenseView, DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, LockClock, LockState, MissileAttackFacts, MissileBoosterResolver, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, SensorBoosterResolver, SensorSpec, ShipState, Side, Simulation, WeaponClock, WeaponSpec } from "../sim";
 import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, MissileRenderCollection, Renderer, WeaponRange, WeaponRanges } from "../ui";
 
@@ -210,7 +210,8 @@ export class AppImpl implements App {
     for (const weapon of weapons) {
       if (weapon.kind !== "missile") continue;
       const boosted = this.missileBoosterResolver.boostedMissile(weapon, shipState.missileBoosts);
-      specs.push({ weaponIndex: missileIndex, boosted, paintedTargetSig: paintedSig });
+      const baseVolleyByType = damageVectorScale(boosted.damagePerMissile, boosted.launcherCount);
+      specs.push({ weaponIndex: missileIndex, boosted, paintedTargetSig: paintedSig, baseVolleyByType });
       missileIndex++;
     }
     return specs;

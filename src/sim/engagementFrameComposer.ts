@@ -102,7 +102,7 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
     if (weaponAttacks.length === 0) return { combined: undefined, weaponAttacks: [] };
     if (weaponAttacks.length === 1) return { combined: weaponAttacks[0].assessment, weaponAttacks };
     const primary = weaponAttacks[0].assessment;
-    const initialDamage: DamageAssessment = { nominalDps: 0, appliedDps: 0, application: 0, volley: 0, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+    const initialDamage: DamageAssessment = { nominalDps: 0, appliedDps: 0, application: 0, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
     const totalDamage = weaponAttacks.reduce<DamageAssessment>(sumDamage, initialDamage);
     return { combined: { ...primary, damage: totalDamage }, weaponAttacks };
   }
@@ -125,6 +125,7 @@ function sumDamage(acc: DamageAssessment, weaponAttack: WeaponAttack): DamageAss
     appliedDps,
     application: nominalDps > 0 ? appliedDps / nominalDps : 0,
     volley: acc.volley + weaponAttack.assessment.damage.volley,
+    baseVolleyByType: damageVectorAdd(acc.baseVolleyByType, weaponAttack.assessment.damage.baseVolleyByType),
     appliedByType: damageVectorAdd(acc.appliedByType, weaponAttack.assessment.damage.appliedByType),
     appliedVolleyByType: damageVectorAdd(acc.appliedVolleyByType, weaponAttack.assessment.damage.appliedVolleyByType),
   };

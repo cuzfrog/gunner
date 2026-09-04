@@ -18,6 +18,7 @@ export type { DroneApplication } from "./droneApplication";
 export type { DroneSimulator, DroneSimConfig } from "./droneSimulator";
 export type { MissileSimulator } from "./missileSimulator";
 export type { Rng, RngFactory } from "./rng";
+export type { WeaponDamageAssessor } from "./weaponDamageAssessor";
 export type { TurretDamage } from "./turretDamage";
 export type { WeaponClock } from "./weaponClock";
 export type { StackingPenalty } from "./stackingPenalty";

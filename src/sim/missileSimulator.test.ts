@@ -51,7 +51,7 @@ function frame(shipAPos: Vec2, shipBPos: Vec2, shipAVel: Vec2 = new Vec2(0, 0), 
 }
 
 function launchSpec(weaponIndex: number, boosted: MissileSpec, paintedTargetSig: number): MissileLaunchSpec {
-  return { weaponIndex, boosted, paintedTargetSig };
+  return { weaponIndex, boosted, paintedTargetSig, baseVolleyByType: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } };
 }
 
 describe("MissileSimulatorImpl", () => {

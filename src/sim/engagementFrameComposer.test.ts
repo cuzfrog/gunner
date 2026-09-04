@@ -14,8 +14,8 @@ const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.5, sigResoluti
 const shipBEffectiveTurret: TurretSpec = { kind: "turret", tracking: 0.3, sigResolution: 125, optimal: 8500, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const hit = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
 const shipBHit = { chance: 0.7, trackingTerm: 0.2, rangeTerm: 0.3 };
-const shipADamage = { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
-const shipBDamage = { nominalDps: 20, appliedDps: 14, application: 0.7, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+const shipADamage = { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+const shipBDamage = { nominalDps: 20, appliedDps: 14, application: 0.7, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
 const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };
 
 const shipA: ShipState = {
@@ -128,7 +128,7 @@ describe("EngagementFrameComposerImpl", () => {
   test("multiple weapons on one side sum DPS while keeping primary weapon details", () => {
     const { engagementEvaluator, composer } = makeComposer();
     const secondTurret: TurretSpec = { kind: "turret", tracking: 0.2, sigResolution: 125, optimal: 7000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 50, explosive: 0 }, cycleTime: 4, turretCount: 2 };
-    const secondDamage = { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+    const secondDamage = { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
     const secondAssessment: AttackAssessment = {
       boostedWeapon: secondTurret,
       effectiveWeapon: secondTurret,
@@ -160,8 +160,8 @@ describe("EngagementFrameComposerImpl", () => {
     const { engagementEvaluator, composer } = makeComposer();
     const firstByType = { em: 12, thermal: 8, kinetic: 0, explosive: 4 };
     const secondByType = { em: 3, thermal: 0, kinetic: 20, explosive: 7 };
-    const firstDamage = { nominalDps: 24, appliedDps: 24, application: 1, volley: 100, appliedByType: firstByType, appliedVolleyByType: firstByType };
-    const secondDamage = { nominalDps: 30, appliedDps: 30, application: 1, volley: 100, appliedByType: secondByType, appliedVolleyByType: secondByType };
+    const firstDamage = { nominalDps: 24, appliedDps: 24, application: 1, volley: 100, baseVolleyByType: firstByType, appliedByType: firstByType, appliedVolleyByType: firstByType };
+    const secondDamage = { nominalDps: 30, appliedDps: 30, application: 1, volley: 100, baseVolleyByType: secondByType, appliedByType: secondByType, appliedVolleyByType: secondByType };
     const firstAssessment: AttackAssessment = { boostedWeapon: boostedTurret, effectiveWeapon: effectiveTurret, damage: firstDamage, turret: { hit, expectedMultiplier: 1 } };
     const secondAssessment: AttackAssessment = { boostedWeapon: boostedTurret, effectiveWeapon: effectiveTurret, damage: secondDamage, turret: { hit, expectedMultiplier: 1 } };
     engagementEvaluator.evaluate.mockImplementation((_frame, attacks) => {
@@ -181,8 +181,8 @@ describe("EngagementFrameComposerImpl", () => {
     const shipAAttackByType = { em: 100, thermal: 0, kinetic: 0, explosive: 0 };
     const shipBAttackByType = { em: 0, thermal: 100, kinetic: 0, explosive: 0 };
     engagementEvaluator.evaluate.mockReturnValue({
-      shipA: { ...shipAAssessment, damage: { ...shipADamage, appliedByType: shipAAttackByType, appliedVolleyByType: shipAAttackByType } },
-      shipB: { ...shipBAssessment, damage: { ...shipBDamage, appliedByType: shipBAttackByType, appliedVolleyByType: shipBAttackByType } },
+      shipA: { ...shipAAssessment, damage: { ...shipADamage, baseVolleyByType: shipAAttackByType, appliedByType: shipAAttackByType, appliedVolleyByType: shipAAttackByType } },
+      shipB: { ...shipBAssessment, damage: { ...shipBDamage, baseVolleyByType: shipBAttackByType, appliedByType: shipBAttackByType, appliedVolleyByType: shipBAttackByType } },
     });
     const shipADefense: DefenseSpec = {
       layers: {

@@ -21,6 +21,7 @@ import type {
   TurretBoosterResolver,
   TurretDamage,
   WeaponClock,
+  WeaponDamageAssessor,
 } from "./index";
 import type { SimConfig } from "./types";
 
@@ -37,6 +38,7 @@ export interface SimCradle {
   readonly droneApplication: DroneApplication;
   readonly droneSimulator: DroneSimulator;
   readonly missileSimulator: MissileSimulator;
+  readonly weaponDamageAssessor: WeaponDamageAssessor;
   readonly turretDamage: TurretDamage;
   readonly reactiveSteering: Autopilot;
   readonly shipBSteering: Autopilot;

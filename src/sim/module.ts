@@ -22,6 +22,7 @@ import { StackingPenaltyImpl } from "./stackingPenalty";
 import { SimValueParserImpl } from "./simValueParser";
 import { TurretDamageImpl } from "./turretDamage";
 import { WeaponClockImpl } from "./weaponClock";
+import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
 import type { SimCradle } from "./cradle";
 
 export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T>): void {
@@ -38,6 +39,7 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     droneApplication: asClass(DroneApplicationImpl).singleton(),
     droneSimulator: asClass(DroneSimulatorImpl).singleton(),
     missileSimulator: asClass(MissileSimulatorImpl).singleton(),
+    weaponDamageAssessor: asClass(WeaponDamageAssessorImpl).singleton(),
     turretDamage: asClass(TurretDamageImpl).singleton(),
     reactiveSteering: asClass(ReactiveAutopilot).singleton(),
     shipBSteering: asClass(PredictiveAutopilot).singleton(),

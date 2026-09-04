@@ -10,11 +10,12 @@ export class TurretDamageImpl implements TurretDamage {
   compute(hit: HitChanceBreakdown, turret: TurretSpec): TurretDamageBreakdown & DamageAssessment {
     const expectedMultiplier = computeExpectedMultiplier(hit.chance);
     const shotDamage = damageVectorSum(turret.damagePerShot);
+    const baseVolleyByType = damageVectorScale(turret.damagePerShot, turret.turretCount);
     const nominalDps = turret.cycleTime > 0 ? (shotDamage * turret.turretCount) / turret.cycleTime : 0;
     const appliedDps = nominalDps * expectedMultiplier;
     const volley = shotDamage * turret.turretCount;
     const appliedByType = damageVectorScale(turret.damagePerShot, (turret.turretCount * expectedMultiplier) / Math.max(turret.cycleTime, 0));
     const appliedVolleyByType = damageVectorScale(turret.damagePerShot, turret.turretCount * expectedMultiplier);
-    return { hit, expectedMultiplier, nominalDps, appliedDps, application: expectedMultiplier, volley, appliedByType, appliedVolleyByType };
+    return { hit, expectedMultiplier, nominalDps, appliedDps, application: expectedMultiplier, volley, baseVolleyByType, appliedByType, appliedVolleyByType };
   }
 }
