@@ -15,6 +15,7 @@ import type { PanelTurretLink } from "./turretLink";
 import type { PanelLauncherLink } from "./launcherLink";
 import type { PanelDroneLink } from "./droneLink";
 import type { SidePanelElements } from "./elements";
+import type { DimensionedSelection, SelectionSession, PropulsionDimension } from "../../selectionSession";
 
 export interface SidePanel {
   readonly side: Side;
@@ -122,4 +123,6 @@ export interface SidePanelDeps {
   launcherLink: PanelLauncherLink;
   droneLink: PanelDroneLink;
   simValueParser: SimValueParser;
+  propulsionSelection: DimensionedSelection<PropulsionDimension>;
+  selectionSession: SelectionSession;
 }

@@ -75,7 +75,7 @@ export class SidePanelImpl implements SidePanel {
   private fittingPreview?: FittingPreviewControl;
 
   constructor(deps: SidePanelDeps) {
-    const { side, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events, overrides, turretLink, launcherLink, droneLink, simValueParser } = deps;
+    const { side, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events, overrides, turretLink, launcherLink, droneLink, simValueParser, propulsionSelection, selectionSession } = deps;
     this.side = side;
     this.popupGroup = popupGroup;
     this.els = els;
@@ -92,7 +92,7 @@ export class SidePanelImpl implements SidePanel {
     const nav = new NavSection({ panel: this, els, simValueParser });
     const stats = new StatsSection({ panel: this, els, ships, i18n });
     const skill = new SkillOverloadSection({ panel: this, els, i18n, popupGroup });
-    const propulsion = new PropulsionSection({ panel: this, els, ships, fittingImport, imageCatalog, i18n, popupGroup });
+    const propulsion = new PropulsionSection({ panel: this, els, ships, fittingImport, imageCatalog, i18n, popupGroup, propulsionSelection, selectionSession });
     const paste = new PasteImportSection({ panel: this, els, i18n, timer });
     this.sections = { hull, nav, stats, skill, propulsion, paste };
     this.els.speed.addEventListener("input", () => this.onShipInput("speed"));

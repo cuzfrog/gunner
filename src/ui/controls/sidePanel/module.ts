@@ -9,6 +9,7 @@ import { createPanelTurretLink } from "./turretLink";
 import { createPanelLauncherLink } from "./launcherLink";
 import { createPanelDroneLink } from "./droneLink";
 import { WeaponSystemSwitchImpl } from "./weaponSystemSwitch";
+import { createPropulsionSelection } from "../../selectionSession";
 
 export function registerSidePanelModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
@@ -37,6 +38,7 @@ function createWeaponSystemSwitch(side: Side, deps: ControlsCradle): WeaponSyste
 }
 
 function sideDeps<T extends ControlsCradle>(proxy: T, side: Side): SidePanelDeps {
+  const selectionSession = proxy.selectionSessionBySide[side];
   return {
     side,
     popupGroup: proxy.popupGroup,
@@ -52,5 +54,7 @@ function sideDeps<T extends ControlsCradle>(proxy: T, side: Side): SidePanelDeps
     launcherLink: createPanelLauncherLink(side, proxy.launcherControllers, proxy.popupGroup),
     droneLink: createPanelDroneLink(side, proxy.droneControllers, proxy.popupGroup),
     simValueParser: proxy.simValueParser,
+    propulsionSelection: createPropulsionSelection(selectionSession),
+    selectionSession,
   };
 }

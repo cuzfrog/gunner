@@ -1,6 +1,6 @@
 import type { FittingImport } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
-import type { FittedHull, PropulsionId, PropulsionModule, ShipProfile, Ships } from "../../../ships";
+import type { FittedHull, PropulsionId, PropulsionKind, PropulsionModule, ShipProfile, Ships } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { PROPULSION_NONE, type FittedHullSummary, type PropulsionSelection } from "../../../appstate";
@@ -11,6 +11,7 @@ import type { SidePanel } from "./sidePanelContract";
 import { html } from "../markup";
 import type { IPropulsionSection } from "./sidePanelSections";
 import { PropulsionVariantSection, type PropulsionVariantSectionEls } from "./propulsionVariantSection";
+import type { DimensionedSelection, SelectionSession, PropulsionDimension } from "../../selectionSession";
 
 export interface PropulsionSectionEls extends PropulsionVariantSectionEls {
   readonly propulsion: HTMLSelectElement;
@@ -27,10 +28,12 @@ export class PropulsionSection implements IPropulsionSection {
   private readonly popupGroup: PopupGroup;
   private readonly variants: PropulsionVariantSection;
   private readonly propulsionChoice: ChoiceGroupImpl;
+  private readonly propulsionSelection: DimensionedSelection<PropulsionDimension>;
+  private readonly selectionSession: SelectionSession;
 
   constructor({
-    panel, els, ships, fittingImport, imageCatalog, i18n, popupGroup,
-  }: { panel: SidePanel; els: PropulsionSectionEls; ships: Ships; fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n; popupGroup: PopupGroup }) {
+    panel, els, ships, fittingImport, imageCatalog, i18n, popupGroup, propulsionSelection, selectionSession,
+  }: { panel: SidePanel; els: PropulsionSectionEls; ships: Ships; fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n; popupGroup: PopupGroup; propulsionSelection: DimensionedSelection<PropulsionDimension>; selectionSession: SelectionSession }) {
     this.panel = panel;
     this.els = els;
     this.ships = ships;
@@ -38,6 +41,8 @@ export class PropulsionSection implements IPropulsionSection {
     this.imageCatalog = imageCatalog;
     this.i18n = i18n;
     this.popupGroup = popupGroup;
+    this.propulsionSelection = propulsionSelection;
+    this.selectionSession = selectionSession;
     this.propulsionChoice = new ChoiceGroupImpl({
       group: els.propulsionOptions,
       select: els.propulsion,
@@ -126,7 +131,7 @@ export class PropulsionSection implements IPropulsionSection {
     if (propulsionId) {
       const module = this.ships.fittingOption(profile, propulsionId);
       if (module) {
-        const variant = this.resolvePropulsionVariant(module, fitted);
+        const variant = this.resolvePropulsionVariantWithMemory(module, fitted);
         const propulsionModuleId = variant?.id;
         const propulsionName = variant?.name ?? module.label;
         const propulsion = (propulsionModuleId ? this.fittingImport.propulsionStatsById(propulsionModuleId) : undefined) ?? module;
@@ -139,6 +144,9 @@ export class PropulsionSection implements IPropulsionSection {
           propulsionKind: module.kind,
           propulsion,
         };
+        if (propulsionModuleId) {
+          this.propulsionSelection.noteApplied({ kind: module.kind, module }, { moduleId: propulsionModuleId });
+        }
       }
     } else if (fitted) {
       updated = { ...fitted, propulsionId: undefined, propulsionKind: undefined, propulsion: undefined };
@@ -150,6 +158,16 @@ export class PropulsionSection implements IPropulsionSection {
     this.panel.sections.skill.setOverloadDisabled();
     this.variants.updateUI();
     this.panel.host.persistConfigChange();
+  }
+
+  notePropulsionVariant(kind: PropulsionKind, moduleId: TypeId): void {
+    const profile = this.panel.profile;
+    if (!profile) return;
+    const propulsionId = this.currentPropulsionId();
+    if (!propulsionId) return;
+    const module = this.ships.fittingOption(profile, propulsionId);
+    if (!module || module.kind !== kind) return;
+    this.propulsionSelection.noteApplied({ kind, module }, { moduleId });
   }
 
   setPropulsionActive(propulsionId: string): void {
@@ -173,6 +191,22 @@ export class PropulsionSection implements IPropulsionSection {
       const byName = variants.find((variant) => variant.name === fitted.propulsionName);
       if (byName) return byName;
     }
+    return this.defaultPropulsionVariant(module);
+  }
+
+  private resolvePropulsionVariantWithMemory(module: PropulsionModule, fitted: FittedHullSummary | undefined): { readonly id: TypeId; readonly name: string } | undefined {
+    const variants = this.fittingImport.propulsionVariantNames(module);
+    if (fitted?.propulsionModuleId !== undefined) {
+      const preserved = variants.find((variant) => variant.id === fitted.propulsionModuleId);
+      if (preserved) return preserved;
+    }
+    if (fitted?.propulsionName !== undefined) {
+      const byName = variants.find((variant) => variant.name === fitted.propulsionName);
+      if (byName) return byName;
+    }
+    const remembered = this.propulsionSelection.selectionFor({ kind: module.kind, module });
+    const memoryVariant = variants.find((variant) => variant.id === remembered.moduleId);
+    if (memoryVariant) return memoryVariant;
     return this.defaultPropulsionVariant(module);
   }
 

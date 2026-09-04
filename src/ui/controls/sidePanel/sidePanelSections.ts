@@ -4,6 +4,7 @@ import type {
   DefenseSkills,
   FittedHull,
   PropulsionId,
+  PropulsionKind,
   PropulsionModule,
   PropulsionStats,
   ShipProfile,
@@ -78,6 +79,7 @@ export interface IPropulsionSection {
   onPropulsionChange(): void;
   setPropulsionActive(propulsionId: string): void;
   resolvePropulsionVariant(module: PropulsionModule, fitted: FittedHullSummary | undefined): { readonly id: TypeId; readonly name: string } | undefined;
+  notePropulsionVariant(kind: PropulsionKind, moduleId: TypeId): void;
   defaultPropulsionName(module: PropulsionModule): string;
   nakedFitted(profile: ShipProfile): FittedHull;
 }

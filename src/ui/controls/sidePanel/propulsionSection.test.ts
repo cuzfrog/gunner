@@ -9,6 +9,7 @@ import type { Popup, PopupGroup } from "../popup";
 import { PropulsionSection, type PropulsionSectionEls } from "./propulsionSection";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
+import { createSelectionSession, createPropulsionSelection } from "../../selectionSession";
 
 const AB_1MN = "ab-1mn" as const;
 const MWD_5MN = "mwd-5mn" as const;
@@ -170,9 +171,11 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
     onPointerDown: vi.fn(),
     onKeyDown: vi.fn(),
   });
-  const section = new PropulsionSection({ panel, els, ships, fittingImport, imageCatalog, i18n, popupGroup });
+  const selectionSession = createSelectionSession();
+  const propulsionSelection = createPropulsionSelection(selectionSession);
+  const section = new PropulsionSection({ panel, els, ships, fittingImport, imageCatalog, i18n, popupGroup, propulsionSelection, selectionSession });
   (panel.sections as unknown as { propulsion: typeof section }).propulsion = section;
-  return { document, panel, section, host, imageCatalog, popupGroup };
+  return { document, panel, section, host, imageCatalog, popupGroup, selectionSession };
 }
 
 describe("PropulsionSection", () => {
@@ -340,6 +343,57 @@ describe("PropulsionSection", () => {
     expect(panel.fittedHull?.propulsionId).toBe(MWD_5MN);
     expect(panel.fittedHull?.propulsionModuleId).toBe(MWD_DEFAULT_ID);
     expect(panel.fittedHull?.propulsionName).toBe("5MN Microwarpdrive I");
+  });
+
+  test("AB -> MWD -> AB restores the previously selected AB variant from memory", () => {
+    const { document, panel, section, selectionSession } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    // User selects AB Variant II
+    panel.fittedHull = { ...panel.fittedHull!, propulsionModuleId: AB_VARIANT_II_ID, propulsionName: "1MN Afterburner II" };
+    section.notePropulsionVariant(AB_MODULE.kind, AB_VARIANT_II_ID);
+    // Switch to MWD
+    getFake(document, "ship-a-propulsion").value = MWD_5MN;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.propulsionModuleId).toBe(MWD_DEFAULT_ID);
+    // Switch back to AB
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.propulsionId).toBe(AB_1MN);
+    expect(panel.fittedHull?.propulsionModuleId).toBe(AB_VARIANT_II_ID);
+    expect(panel.fittedHull?.propulsionName).toBe("1MN Afterburner II");
+    expect(selectionSession.recall("propulsion:afterburner")?.moduleId).toBe(AB_VARIANT_II_ID);
+  });
+
+  test("selecting MWD variant then AB then MWD restores the MWD variant from memory", () => {
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    // Start with MWD
+    getFake(document, "ship-a-propulsion").value = MWD_5MN;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.propulsionModuleId).toBe(MWD_DEFAULT_ID);
+    // Switch to AB
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.propulsionModuleId).toBe(AB_DEFAULT_ID);
+    // Switch back to MWD — should restore MWD_DEFAULT_ID from memory
+    getFake(document, "ship-a-propulsion").value = MWD_5MN;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.propulsionId).toBe(MWD_5MN);
+    expect(panel.fittedHull?.propulsionModuleId).toBe(MWD_DEFAULT_ID);
+  });
+
+  test("clearing session resets propulsion memory", () => {
+    const { document, panel, section, selectionSession } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    panel.fittedHull = { ...panel.fittedHull!, propulsionModuleId: AB_VARIANT_II_ID, propulsionName: "1MN Afterburner II" };
+    section.notePropulsionVariant(AB_MODULE.kind, AB_VARIANT_II_ID);
+    expect(selectionSession.recall("propulsion:afterburner")?.moduleId).toBe(AB_VARIANT_II_ID);
+    selectionSession.clear();
+    expect(selectionSession.recall("propulsion:afterburner")).toBeUndefined();
   });
 
   test("resolvePropulsionVariant falls back to default when fitted has no variant", () => {

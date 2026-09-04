@@ -37,6 +37,7 @@ import { registerControlsModule } from "./module";
 import type { Popup, PopupGroup } from "./popup";
 import type { Side } from "./side";
 import { registerSidePanelModule, type SidePanel, type SidePanelHost } from "./sidePanel";
+import { registerSelectionSessionModule } from "../selectionSession";
 import type { TurretController, TurretOverrides } from "./turret";
 import type { LauncherController } from "./launcher";
 import type { DroneController } from "./drone";
@@ -418,6 +419,7 @@ export function buildSidePanel(
     dpsHintRenderer: asValue({ render: vi.fn() }),
     dpsHintProvider: asValue({ render: vi.fn() }),
   });
+  registerSelectionSessionModule(cradle);
   registerSidePanelModule(cradle);
 
   const panel = side === "shipA" ? cradle.cradle.shipASide : cradle.cradle.shipBSide;
