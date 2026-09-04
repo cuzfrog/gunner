@@ -1,0 +1,168 @@
+import { type FakeElement, fakeDocument } from "../../testing";
+import { ZERO_DAMAGE, ZERO_RESISTS, EMPTY_DEFENSE_ASSESSMENT, type AttackAssessment, type DefenseAssessment, type EngagementView, type TurretSpec } from "../../../sim";
+import type { ViewStore } from "../controlsContract";
+import type { ActualDpsHintModel, ActualDpsHintRenderer } from "./actualDpsHintRenderer";
+import { type ActualDpsHintProviderDeps, ActualDpsHintProviderImpl } from "./actualDpsHintProvider";
+
+const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
+
+function makeAttack(appliedByType: { em: number; thermal: number; kinetic: number; explosive: number }, appliedDps: number): AttackAssessment {
+  return {
+    boostedWeapon: turret, effectiveWeapon: turret,
+    damage: { nominalDps: 100, appliedDps, application: 0.8, volley: 400, appliedByType, appliedVolleyByType: ZERO_DAMAGE },
+    turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8 },
+  };
+}
+
+function makeDefense(actualIncomingDps: number, actualIncomingByType: { em: number; thermal: number; kinetic: number; explosive: number }, effectiveResists: { em: number; thermal: number; kinetic: number; explosive: number }): DefenseAssessment {
+  return { ...EMPTY_DEFENSE_ASSESSMENT, actualIncomingDps, actualIncomingByType, effectiveResists };
+}
+
+function makeView(shipAAttack: AttackAssessment | undefined, shipBDefense: DefenseAssessment): EngagementView {
+  return {
+    frame: { time: 0, shipA: {} as never, shipB: {} as never, relPosition: {} as never, distance: 5000, relVelocity: {} as never, radialVelocity: 0, transversalVelocity: {} as never, transversalSpeed: 0, angularVelocity: 0 },
+    attacks: { shipA: shipAAttack, shipB: undefined },
+    weaponAttacks: { shipA: [], shipB: [] },
+    effectiveWeapons: { shipA: turret, shipB: undefined },
+    defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: shipBDefense },
+    locks: { shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true }, shipB: { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: false } },
+  } as unknown as EngagementView;
+}
+
+function makeViewStore(view: EngagementView | undefined): ViewStore {
+  return { currentView: vi.fn(() => view) } as unknown as ViewStore;
+}
+
+function makeMockRenderer(): { renderer: ActualDpsHintRenderer; renderMock: ReturnType<typeof vi.fn> } {
+  const renderMock = vi.fn();
+  const renderer = { render: renderMock } as unknown as ActualDpsHintRenderer;
+  return { renderer, renderMock };
+}
+
+function makeDeps(overrides: Partial<ActualDpsHintProviderDeps> = {}): ActualDpsHintProviderDeps & { renderMock: ReturnType<typeof vi.fn> } {
+  const { renderer, renderMock } = makeMockRenderer();
+  const attack = makeAttack({ em: 100, thermal: 50, kinetic: 0, explosive: 0 }, 150);
+  const defense = makeDefense(110, { em: 50, thermal: 40, kinetic: 0, explosive: 0 }, { em: 0.5, thermal: 0.2, kinetic: 0, explosive: 0 });
+  return {
+    viewStore: makeViewStore(makeView(attack, defense)),
+    actualDpsHintRenderer: renderer,
+    ...overrides,
+    renderMock,
+  };
+}
+
+function makeAnchor(side?: string): HTMLElement {
+  const anchor = globalThis.document.createElement("span");
+  if (side) anchor.dataset.side = side;
+  return anchor;
+}
+
+describe("ActualDpsHintProviderImpl", () => {
+  let originalDocument: Document | undefined;
+  let originalElement: typeof Element | undefined;
+
+  beforeEach(() => {
+    originalDocument = globalThis.document;
+    originalElement = globalThis.Element;
+    globalThis.document = fakeDocument();
+  });
+
+  afterEach(() => {
+    if (originalDocument === undefined) {
+      delete (globalThis as Record<string, unknown>).document;
+    } else {
+      globalThis.document = originalDocument;
+    }
+    if (originalElement === undefined) {
+      delete (globalThis as Record<string, unknown>).Element;
+    } else {
+      globalThis.Element = originalElement;
+    }
+  });
+
+  test("renders nothing when anchor has no data-side", () => {
+    const deps = makeDeps();
+    const provider = new ActualDpsHintProviderImpl(deps);
+    const anchor = makeAnchor();
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(deps.renderMock).not.toHaveBeenCalled();
+  });
+
+  test("renders nothing when view store has no current view", () => {
+    const deps = makeDeps({ viewStore: makeViewStore(undefined) });
+    const provider = new ActualDpsHintProviderImpl(deps);
+    const anchor = makeAnchor("a");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(deps.renderMock).not.toHaveBeenCalled();
+  });
+
+  test("renders nothing when side has no attack", () => {
+    const defense = makeDefense(0, ZERO_DAMAGE, ZERO_RESISTS);
+    const deps = makeDeps({ viewStore: makeViewStore(makeView(undefined, defense)) });
+    const provider = new ActualDpsHintProviderImpl(deps);
+    const anchor = makeAnchor("a");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(deps.renderMock).not.toHaveBeenCalled();
+  });
+
+  test("builds model with per-type rows from attacker appliedByType and opponent defense", () => {
+    const deps = makeDeps();
+    const provider = new ActualDpsHintProviderImpl(deps);
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(deps.renderMock).toHaveBeenCalledTimes(1);
+    const model = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
+    expect(model.types).toHaveLength(2);
+    expect(model.types[0].type).toBe("em");
+    expect(model.types[0].appliedDps).toBe(100);
+    expect(model.types[0].resist).toBe(0.5);
+    expect(model.types[0].actualDps).toBe(50);
+    expect(model.types[1].type).toBe("thermal");
+    expect(model.types[1].appliedDps).toBe(50);
+    expect(model.types[1].resist).toBe(0.2);
+    expect(model.types[1].actualDps).toBe(40);
+    expect(model.totalAppliedDps).toBe(150);
+    expect(model.totalActualDps).toBe(110);
+  });
+
+  test("skips damage types with zero applied DPS", () => {
+    const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
+    const defense = makeDefense(50, { em: 50, thermal: 0, kinetic: 0, explosive: 0 }, { em: 0.5, thermal: 0, kinetic: 0, explosive: 0 });
+    const deps = makeDeps({ viewStore: makeViewStore(makeView(attack, defense)) });
+    const provider = new ActualDpsHintProviderImpl(deps);
+    const anchor = makeAnchor("a");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    const model = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
+    expect(model.types).toHaveLength(1);
+    expect(model.types[0].type).toBe("em");
+  });
+
+  test("uses shipB defense for shipA side and shipA defense for shipB side", () => {
+    const shipAAttack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
+    const shipADefense = makeDefense(30, { em: 30, thermal: 0, kinetic: 0, explosive: 0 }, { em: 0.7, thermal: 0, kinetic: 0, explosive: 0 });
+    const shipBDefense = makeDefense(70, { em: 70, thermal: 0, kinetic: 0, explosive: 0 }, { em: 0.3, thermal: 0, kinetic: 0, explosive: 0 });
+    const view: EngagementView = {
+      frame: { time: 0, shipA: {} as never, shipB: {} as never, relPosition: {} as never, distance: 5000, relVelocity: {} as never, radialVelocity: 0, transversalVelocity: {} as never, transversalSpeed: 0, angularVelocity: 0 },
+      attacks: { shipA: shipAAttack, shipB: shipAAttack },
+      weaponAttacks: { shipA: [], shipB: [] },
+      effectiveWeapons: { shipA: turret, shipB: turret },
+      defenses: { shipA: shipADefense, shipB: shipBDefense },
+      locks: { shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true }, shipB: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true } },
+    } as unknown as EngagementView;
+    const deps = makeDeps({ viewStore: makeViewStore(view) });
+    const provider = new ActualDpsHintProviderImpl(deps);
+    const container = globalThis.document.createElement("div");
+    provider.render(makeAnchor("shipA"), container);
+    const modelA = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
+    expect(modelA.totalActualDps).toBe(70);
+    deps.renderMock.mockClear();
+    provider.render(makeAnchor("shipB"), container);
+    const modelB = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
+    expect(modelB.totalActualDps).toBe(30);
+  });
+});

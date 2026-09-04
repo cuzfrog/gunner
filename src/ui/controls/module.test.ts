@@ -89,6 +89,8 @@ const controlsCradleKeys = {
   viewStore: "viewStore",
   appliedDpsHintRenderer: "appliedDpsHintRenderer",
   appliedDpsHintProvider: "appliedDpsHintProvider",
+  actualDpsHintRenderer: "actualDpsHintRenderer",
+  actualDpsHintProvider: "actualDpsHintProvider",
   lockStateHintRenderer: "lockStateHintRenderer",
   lockStateHintProvider: "lockStateHintProvider",
 } as const satisfies { [K in keyof ControlsCradle]: K };
