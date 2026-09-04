@@ -29,8 +29,7 @@
 }
 
 .result-hero-grid {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
   gap: 4px;
   align-items: baseline;
 }
@@ -39,7 +38,6 @@
   font-size: 15px;
   line-height: 19px;
   font-family: "Chakra Petch", sans-serif;
-  text-align: right;
   min-width: 5ch;
 }
 

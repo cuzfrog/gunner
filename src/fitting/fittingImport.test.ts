@@ -272,8 +272,8 @@ const ships = vi.mocked<Ships>({
 
 const db: FittingDb = {
   modules: {
-    "1600mm Steel Plates II": row("1600mm Steel Plates II", "1600mm Steel Plates II", { massAddition: 3_750_000 }),
-    "Reinforced Bulkheads II": row("Reinforced Bulkheads II", "Reinforced Bulkheads II", { agilityMultiplier: 1.05 }),
+    "1600mm Steel Plates II": row("1600mm Steel Plates II", "1600mm Steel Plates II", { massAddition: 3_750_000, defense: { kind: "armorPlate", armorHpAdd: 4800 } }),
+    "Reinforced Bulkheads II": row("Reinforced Bulkheads II", "Reinforced Bulkheads II", { agilityMultiplier: 1.05, defense: { kind: "hullBulkhead", hullHpPercent: 25 } }),
     "5MN Microwarpdrive I": row("5MN Microwarpdrive I", "5MN Microwarpdrive I", {
       propulsion: {
         kind: "microwarpdrive",
@@ -295,8 +295,8 @@ const db: FittingDb = {
       },
     }),
     "Inertial Stabilizers II": row("Inertial Stabilizers II", "Inertial Stabilizers II", { agilityMultiplier: 0.8, sigBonusPercent: 11 }),
-    "Nanofiber Internal Structure II": row("Nanofiber Internal Structure II", "Nanofiber Internal Structure II", { speedBonusPercent: 9.5, agilityMultiplier: 0.8425 }),
-    "Medium Shield Extender II": row("Medium Shield Extender II", "Medium Shield Extender II", { sigRadiusAdd: 7 }),
+    "Nanofiber Internal Structure II": row("Nanofiber Internal Structure II", "Nanofiber Internal Structure II", { speedBonusPercent: 9.5, agilityMultiplier: 0.8425, defense: { kind: "hullBulkhead", hullHpPercent: -20 } }),
+    "Medium Shield Extender II": row("Medium Shield Extender II", "Medium Shield Extender II", { sigRadiusAdd: 7, defense: { kind: "shieldExtender", shieldHpAdd: 1100, sigRadiusPenalty: 7 } }),
     "Medium Higgs Anchor I": row("Medium Higgs Anchor I", "Medium Higgs Anchor I", { massBonusPercentage: 100, agilityMultiplier: 0.45, speedBonusPercent: -75 }),
     "Overdrive Injector System II": row("Overdrive Injector System II", "Overdrive Injector System II", { speedBonusPercent: 12.5 }),
     "Medium Trimark Armor Pump II": row("Medium Trimark Armor Pump II", "Medium Trimark Armor Pump II", { agilityDrawbackPercent: 10 }),
@@ -478,11 +478,12 @@ describe("FittingImportImpl", () => {
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(1.05, 6);
   });
 
-  test("adds shield extender signature radius", () => {
+  test("shield extender signature radius is handled by defense calculator, not resolveHull", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Shieldy]\nMedium Shield Extender II`, conditions);
-    expect(result!.fitted.sigRadiusAdd).toBe(7);
+    expect(result!.fitted.sigRadiusAdd).toBe(0);
     expect(result!.fitted.sigMultiplier).toBe(1);
+    expect(result!.defense!.signaturePenalty).toBe(7);
   });
 
   test("applies stacking penalty to two agility modules", () => {
@@ -552,6 +553,32 @@ describe("FittingImportImpl", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Kiter]\nOverdrive Injector System II`, conditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.125, 6);
+  });
+
+  test("nanofiber in defenseModules applies speed and agility bonuses", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(`[Harbinger, Nano]\nNanofiber Internal Structure II`, conditions);
+    expect(result!.fitted.speedMultiplier).toBeCloseTo(1.095, 6);
+    expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.8425, 6);
+  });
+
+  test("armor plate in defenseModules applies mass addition", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(`[Harbinger, Armor]\n1600mm Steel Plates II`, conditions);
+    expect(result!.fitted.mass).toBe(profile.mass + 3_750_000);
+  });
+
+  test("bulkhead in defenseModules applies agility multiplier", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(`[Harbinger, Bulk]\nReinforced Bulkheads II`, conditions);
+    expect(result!.fitted.inertiaMultiplier).toBeCloseTo(1.05, 6);
+  });
+
+  test("nanofiber and overdrive speed bonuses stack", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(`[Harbinger, Fast]\nOverdrive Injector System II\nNanofiber Internal Structure II`, conditions);
+    const expected = stackingPenalty.apply([1.125, 1.095]);
+    expect(result!.fitted.speedMultiplier).toBeCloseTo(expected, 6);
   });
 
   test("applies mass percentage bonuses with stacking penalty", () => {
@@ -632,7 +659,8 @@ describe("FittingImportImpl", () => {
       conditions,
     );
     expect(result!.fitted.mass).toBe(profile.mass + 3_750_000);
-    expect(result!.fitted.sigRadiusAdd).toBe(7);
+    expect(result!.fitted.sigRadiusAdd).toBe(0);
+    expect(result!.defense!.signaturePenalty).toBe(7);
   });
 
   test("resolves the first turret and charge", () => {

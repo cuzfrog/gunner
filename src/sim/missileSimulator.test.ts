@@ -407,4 +407,26 @@ describe("MissileSimulatorImpl", () => {
     }
     expect(totalEvents).toBe(0);
   });
+
+  test("impact uses real target velocity, not clamped to maxSpeed", () => {
+    const application = new MissileApplicationImpl();
+    const computeSpy = vi.spyOn(application, "compute");
+    const sim = new MissileSimulatorImpl({ missileApplication: application });
+    sim.reset({ shipA: [lightMissile], shipB: [] });
+    const targetPos = new Vec2(100, 0);
+    const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
+    sim.step(0.1, frame(new Vec2(0, 0), targetPos), launches);
+    const overshootVelocity = new Vec2(0, 1000);
+    const lowMaxSpeed = 100;
+    for (let i = 0; i < 100; i++) {
+      const events = sim.step(0.1, frame(new Vec2(0, 0), targetPos, new Vec2(0, 0), overshootVelocity, 0, lowMaxSpeed), { shipA: [], shipB: [] });
+      if (events.length > 0) {
+        const impactCall = computeSpy.mock.calls.find((c) => c[1] === overshootVelocity.len());
+        expect(impactCall).toBeDefined();
+        expect(impactCall![1]).toBeCloseTo(1000, 6);
+        expect(impactCall![1]).toBeGreaterThan(lowMaxSpeed);
+        break;
+      }
+    }
+  });
 });

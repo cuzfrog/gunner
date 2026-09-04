@@ -101,7 +101,7 @@ export class MissileSimulatorImpl implements MissileSimulator {
     const state = this.sides[side];
     this.updateTargetKinematics(state, targetVel, targetMaxSpeed, dt);
     this.handleLaunches(state, shipPos, launches, dt);
-    return this.advanceEntities(side, state, dt, targetPos, targetVel, targetMaxSpeed);
+    return this.advanceEntities(side, state, dt, targetPos, targetVel);
   }
 
   private updateTargetKinematics(state: SideState, targetVel: Vec2, targetMaxSpeed: number, dt: number): void {
@@ -125,7 +125,7 @@ export class MissileSimulatorImpl implements MissileSimulator {
     }
   }
 
-  private advanceEntities(source: Side, state: SideState, dt: number, targetPos: Vec2, targetVel: Vec2, targetMaxSpeed: number): readonly DamageEvent[] {
+  private advanceEntities(source: Side, state: SideState, dt: number, targetPos: Vec2, targetVel: Vec2): readonly DamageEvent[] {
     const survivors: MissileBody[] = [];
     const events: DamageEvent[] = [];
     const target = source === "shipA" ? "shipB" : "shipA";
@@ -136,7 +136,7 @@ export class MissileSimulatorImpl implements MissileSimulator {
       const toTarget = targetPos.sub(missile.position);
       const dist = toTarget.len();
       if (dist <= missile.paintedSig) {
-        const event = this.impactEvent(source, target, missile, targetVel, targetMaxSpeed);
+        const event = this.impactEvent(source, target, missile, targetVel);
         if (event) events.push(event);
         continue;
       }
@@ -144,7 +144,7 @@ export class MissileSimulatorImpl implements MissileSimulator {
       missile.velocity = accelerateToward(missile.velocity, desired, dt);
       const step = missile.velocity.scale(dt);
       if (step.len() >= dist) {
-        const event = this.impactEvent(source, target, missile, targetVel, targetMaxSpeed);
+        const event = this.impactEvent(source, target, missile, targetVel);
         if (event) events.push(event);
         continue;
       }
@@ -156,9 +156,8 @@ export class MissileSimulatorImpl implements MissileSimulator {
     return events;
   }
 
-  private impactEvent(source: Side, target: Side, missile: MissileBody, targetVel: Vec2, targetMaxSpeed: number): DamageEvent | undefined {
-    const targetSpeed = Math.min(targetVel.len(), targetMaxSpeed);
-    const result = this.application.compute(missile.spec, targetSpeed, missile.paintedSig);
+  private impactEvent(source: Side, target: Side, missile: MissileBody, targetVel: Vec2): DamageEvent | undefined {
+    const result = this.application.compute(missile.spec, targetVel.len(), missile.paintedSig);
     if (result.application <= 0) return undefined;
     const rawByType = damageVectorScale(missile.spec.damagePerMissile, result.application);
     if (damageVectorSum(rawByType) <= 0) return undefined;
