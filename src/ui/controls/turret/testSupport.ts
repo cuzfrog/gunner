@@ -194,7 +194,6 @@ export function buildTurret(
     fittingCalculator,
     fittingOverrides,
     turretSelection,
-    selectionSession,
   });
   return {
     document,

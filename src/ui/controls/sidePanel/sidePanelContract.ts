@@ -51,6 +51,7 @@ export interface SidePanel {
   setLauncherProfile(profile: ShipProfile | undefined): void;
   clearDrone(): void;
   restoreDrone(): void;
+  clearSelectionSession(): void;
   setSensorData(spec: SensorSpec | undefined, boosts: SensorBoostLoadout | undefined): void;
   renderFittingPopupIfOpen(): void;
   closeFittingPopupIfOpen(): void;

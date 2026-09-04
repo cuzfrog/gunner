@@ -148,10 +148,11 @@ function mockSidePanel(side: "shipA" | "shipB", captured: Partial<SidePanelState
     restore: vi.fn(),
     skillConditions: vi.fn(() => ({ skillLevel: 5, overloaded: true })),
     setSensorData: vi.fn(),
+    clearSelectionSession: vi.fn(),
     sections: {
       stats: { updateAlignTime: vi.fn() },
       skill: { setSkillLevel: vi.fn(), setOverloadActive: vi.fn(), setOverloadDisabled: vi.fn() },
-      propulsion: { renderPropulsionOptions: vi.fn() },
+      propulsion: { renderPropulsionOptions: vi.fn(), seedPropulsionMemory: vi.fn() },
       hull: { refreshHullInputs: vi.fn(), updateHullHint: vi.fn() },
     },
   } as unknown as SidePanel;

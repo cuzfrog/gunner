@@ -36,7 +36,6 @@ function createLauncherController(side: Side, deps: ControlsCradle): LauncherCon
     fittingCalculator: deps.fittingCalculator,
     fittingOverrides: deps.fittingOverridesBySide[side],
     launcherSelection: createLauncherSelection(session, deps.launcherClasses),
-    selectionSession: session,
   });
 }
 

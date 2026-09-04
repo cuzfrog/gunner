@@ -72,6 +72,5 @@ function createTurretController(side: Side, deps: TurretControllerFactoryDeps): 
     fittingCalculator: deps.fittingCalculator,
     fittingOverrides: deps.fittingOverridesBySide[side],
     turretSelection: createTurretSelection(session, deps.gunFamilies),
-    selectionSession: session,
   });
 }

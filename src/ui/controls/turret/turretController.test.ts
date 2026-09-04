@@ -81,7 +81,7 @@ describe("TurretController", () => {
   });
 
   test("clear resets turret, cargo and expand state", () => {
-    const { document, controller, chargeCatalog, selectionSession } = buildTurret({
+    const { document, controller, chargeCatalog } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER_WITH_CARGO) },
       chargeCatalog: { chargesForTurret: vi.fn(() => CHARGE_OPTIONS) },
     });
@@ -93,7 +93,6 @@ describe("TurretController", () => {
     expect(controller.ammo()).toBe("Hail S");
     expect(getFake(document, "ship-a-ammo-trigger").disabled).toBe(true);
     expect(getFake(document, "ship-a-ammo-all-section").hidden).toBe(true);
-    expect(selectionSession.recall("turret:autocannon:S")).toBeUndefined();
   });
 
   test("expand toggle reveals and hides the all charges section", () => {

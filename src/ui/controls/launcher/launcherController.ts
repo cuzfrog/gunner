@@ -9,7 +9,7 @@ import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../sh
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
-import type { DimensionedSelection, SelectionSession } from "../../selectionSession";
+import type { DimensionedSelection } from "../../selectionSession";
 import { setText } from "../controlsDom";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
 import type { Popup } from "../popup";
@@ -37,7 +37,6 @@ export class LauncherControllerImpl implements LauncherController {
   private readonly calculator: FittingCalculator;
   private readonly fittingOverrides: FittingOverridesStore;
   private readonly launcherSelection: DimensionedSelection<LauncherClass>;
-  private readonly selectionSession: SelectionSession;
   private readonly ammoPopupValue: Popup;
   private readonly attributesPopupValue: Popup;
   private selectedLauncher?: ImportedLauncher;
@@ -70,7 +69,6 @@ export class LauncherControllerImpl implements LauncherController {
     this.calculator = deps.fittingCalculator;
     this.fittingOverrides = deps.fittingOverrides;
     this.launcherSelection = deps.launcherSelection;
-    this.selectionSession = deps.selectionSession;
     this.ammoList = new SelectableListImpl({
       itemClass: "launcher-ammo-item selectable-item",
       nameClass: "launcher-ammo-name",
@@ -128,7 +126,6 @@ export class LauncherControllerImpl implements LauncherController {
     this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
     this.fittingState = imported.fittingState;
     this.fittingOverrides.clear();
-    this.selectionSession.clear();
     this.selectedLauncher = imported.launcher;
     this.currentAmmoId = imported.launcher?.chargeId;
     if (imported.launcher) {
@@ -147,7 +144,6 @@ export class LauncherControllerImpl implements LauncherController {
         this.fittingState = imported.fittingState;
         this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
         this.fittingOverrides.clear();
-        this.selectionSession.clear();
         this.selectedLauncher = imported.launcher;
         this.currentAmmoId = imported.launcher.chargeId;
         this.originalLauncherModuleId = imported.launcher.moduleId;
@@ -184,7 +180,6 @@ export class LauncherControllerImpl implements LauncherController {
     this.conditions = undefined;
     this.originalLauncherModuleId = undefined;
     this.fittingOverrides.clear();
-    this.selectionSession.clear();
     this.render();
   }
 

@@ -285,6 +285,8 @@ export class SessionCodecImpl implements SessionCodec {
 
   private applyShipState(settings: SessionSettings): void {
     this.els.initialDistance.value = String(settings.initialDistance);
+    this.shipASide.clearSelectionSession();
+    this.shipBSide.clearSelectionSession();
     this.shipASide.restore(sidePanelStateOf(settings.shipA));
     this.shipBSide.restore(sidePanelStateOf(settings.shipB));
     this.turretOverridesBySide.shipA.set(settings.shipA.overrides);

@@ -166,7 +166,7 @@ describe("LauncherController class switch", () => {
     expect(selectionSession.recall("launcher:rocket")?.ammoId).toBe(userRocketAmmoId);
 
     controller.clear();
-    expect(selectionSession.recall("launcher:rocket")).toBeUndefined();
+    selectionSession.clear();
     controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(selectionSession.recall("launcher:rocket")?.ammoId).toBe(SCOURGE_ROCKET_ID);
   });

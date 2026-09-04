@@ -129,6 +129,7 @@ export class HullSection implements IHullSection {
     this.panel.fittedHull = undefined;
     this.panel.fittingText = undefined;
     this.panel.clearOverrides();
+    this.panel.clearSelectionSession();
     this.panel.clearTurret();
     this.panel.clearLauncher();
     this.panel.clearDrone();
@@ -160,12 +161,14 @@ export class HullSection implements IHullSection {
   applyImportedFitting(summary: FittedHullSummary): void {
     this.panel.fittedHull = summary;
     this.panel.sections.propulsion.renderPropulsionOptions(summary.propulsionId ?? PROPULSION_NONE);
+    this.panel.sections.propulsion.seedPropulsionMemory();
     this.panel.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
   }
 
   restoreFittingSummary(summary: FittedHullSummary): void {
     this.panel.fittedHull = summary;
     this.panel.sections.propulsion.renderPropulsionOptions();
+    this.panel.sections.propulsion.seedPropulsionMemory();
     this.panel.sections.paste.clearImportHint();
     this.updateHullHint(this.panel.sections.stats.currentFittedPropulsionModule(summary));
   }

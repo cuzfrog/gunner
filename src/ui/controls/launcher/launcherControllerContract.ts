@@ -5,7 +5,7 @@ import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../sh
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
-import type { DimensionedSelection, SelectionSession } from "../../selectionSession";
+import type { DimensionedSelection } from "../../selectionSession";
 import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
@@ -25,7 +25,6 @@ export interface LauncherControllerDeps {
   readonly fittingCalculator: FittingCalculator;
   readonly fittingOverrides: FittingOverridesStore;
   readonly launcherSelection: DimensionedSelection<LauncherClass>;
-  readonly selectionSession: SelectionSession;
 }
 
 export interface LauncherEls {

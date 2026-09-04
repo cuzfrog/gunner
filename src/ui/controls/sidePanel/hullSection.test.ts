@@ -83,6 +83,7 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
       setPropulsionActive: vi.fn(),
       resolvePropulsionVariant: vi.fn(),
       notePropulsionVariant: vi.fn(),
+      seedPropulsionMemory: vi.fn(),
       defaultPropulsionName: vi.fn(),
       nakedFitted: vi.fn(),
       popup: {} as unknown as Popup,
@@ -128,6 +129,7 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
     setLauncherProfile: vi.fn(),
     clearDrone: vi.fn(),
     restoreDrone: vi.fn(),
+    clearSelectionSession: vi.fn(),
   } as unknown as SidePanel);
 
   const section = new HullSection({ panel, els, ships, i18n });

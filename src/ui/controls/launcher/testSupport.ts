@@ -199,7 +199,6 @@ export function buildLauncher(
     fittingCalculator,
     fittingOverrides,
     launcherSelection,
-    selectionSession,
   });
   return { document, controller, missileCatalog, launcherClasses, ships, imageCatalog, fittingImport, fittingDb, i18n, events, popupGroup, fittingOverrides, selectionSession, fittingCalculator };
 }

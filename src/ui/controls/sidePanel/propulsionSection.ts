@@ -11,7 +11,7 @@ import type { SidePanel } from "./sidePanelContract";
 import { html } from "../markup";
 import type { IPropulsionSection } from "./sidePanelSections";
 import { PropulsionVariantSection, type PropulsionVariantSectionEls } from "./propulsionVariantSection";
-import type { DimensionedSelection, SelectionSession, PropulsionDimension } from "../../selectionSession";
+import type { DimensionedSelection, PropulsionDimension } from "../../selectionSession";
 
 export interface PropulsionSectionEls extends PropulsionVariantSectionEls {
   readonly propulsion: HTMLSelectElement;
@@ -29,11 +29,10 @@ export class PropulsionSection implements IPropulsionSection {
   private readonly variants: PropulsionVariantSection;
   private readonly propulsionChoice: ChoiceGroupImpl;
   private readonly propulsionSelection: DimensionedSelection<PropulsionDimension>;
-  private readonly selectionSession: SelectionSession;
 
   constructor({
-    panel, els, ships, fittingImport, imageCatalog, i18n, popupGroup, propulsionSelection, selectionSession,
-  }: { panel: SidePanel; els: PropulsionSectionEls; ships: Ships; fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n; popupGroup: PopupGroup; propulsionSelection: DimensionedSelection<PropulsionDimension>; selectionSession: SelectionSession }) {
+    panel, els, ships, fittingImport, imageCatalog, i18n, popupGroup, propulsionSelection,
+  }: { panel: SidePanel; els: PropulsionSectionEls; ships: Ships; fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n; popupGroup: PopupGroup; propulsionSelection: DimensionedSelection<PropulsionDimension> }) {
     this.panel = panel;
     this.els = els;
     this.ships = ships;
@@ -42,7 +41,6 @@ export class PropulsionSection implements IPropulsionSection {
     this.i18n = i18n;
     this.popupGroup = popupGroup;
     this.propulsionSelection = propulsionSelection;
-    this.selectionSession = selectionSession;
     this.propulsionChoice = new ChoiceGroupImpl({
       group: els.propulsionOptions,
       select: els.propulsion,
@@ -168,6 +166,17 @@ export class PropulsionSection implements IPropulsionSection {
     const module = this.ships.fittingOption(profile, propulsionId);
     if (!module || module.kind !== kind) return;
     this.propulsionSelection.noteApplied({ kind, module }, { moduleId });
+  }
+
+  seedPropulsionMemory(): void {
+    const fitted = this.panel.fittedHull;
+    if (!fitted?.propulsionModuleId || !fitted.propulsionKind) return;
+    const module = this.currentPropulsionModule();
+    if (!module || module.kind !== fitted.propulsionKind) return;
+    const variants = this.fittingImport.propulsionVariantNames(module);
+    const valid = variants.some((variant) => variant.id === fitted.propulsionModuleId);
+    if (!valid) return;
+    this.propulsionSelection.noteApplied({ kind: module.kind, module }, { moduleId: fitted.propulsionModuleId });
   }
 
   setPropulsionActive(propulsionId: string): void {

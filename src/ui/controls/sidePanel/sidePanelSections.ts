@@ -80,6 +80,7 @@ export interface IPropulsionSection {
   setPropulsionActive(propulsionId: string): void;
   resolvePropulsionVariant(module: PropulsionModule, fitted: FittedHullSummary | undefined): { readonly id: TypeId; readonly name: string } | undefined;
   notePropulsionVariant(kind: PropulsionKind, moduleId: TypeId): void;
+  seedPropulsionMemory(): void;
   defaultPropulsionName(module: PropulsionModule): string;
   nakedFitted(profile: ShipProfile): FittedHull;
 }

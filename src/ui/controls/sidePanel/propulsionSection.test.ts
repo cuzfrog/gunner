@@ -157,6 +157,7 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
     restoreLauncher: vi.fn(),
     clearDrone: vi.fn(),
     restoreDrone: vi.fn(),
+    clearSelectionSession: vi.fn(),
   } as unknown as SidePanel);
 
   const i18n = mockI18n();
@@ -173,7 +174,7 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
   });
   const selectionSession = createSelectionSession();
   const propulsionSelection = createPropulsionSelection(selectionSession);
-  const section = new PropulsionSection({ panel, els, ships, fittingImport, imageCatalog, i18n, popupGroup, propulsionSelection, selectionSession });
+  const section = new PropulsionSection({ panel, els, ships, fittingImport, imageCatalog, i18n, popupGroup, propulsionSelection });
   (panel.sections as unknown as { propulsion: typeof section }).propulsion = section;
   return { document, panel, section, host, imageCatalog, popupGroup, selectionSession };
 }
@@ -393,6 +394,41 @@ describe("PropulsionSection", () => {
     section.notePropulsionVariant(AB_MODULE.kind, AB_VARIANT_II_ID);
     expect(selectionSession.recall("propulsion:afterburner")?.moduleId).toBe(AB_VARIANT_II_ID);
     selectionSession.clear();
+    expect(selectionSession.recall("propulsion:afterburner")).toBeUndefined();
+  });
+
+  test("seedPropulsionMemory seeds from the fitted hull summary", () => {
+    const { document, panel, section, selectionSession } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    selectionSession.clear();
+    expect(selectionSession.recall("propulsion:afterburner")).toBeUndefined();
+    panel.fittedHull = { ...panel.fittedHull!, propulsionModuleId: AB_VARIANT_II_ID, propulsionName: "1MN Afterburner II", propulsionKind: "afterburner" };
+    section.seedPropulsionMemory();
+    expect(selectionSession.recall("propulsion:afterburner")?.moduleId).toBe(AB_VARIANT_II_ID);
+  });
+
+  test("seedPropulsionMemory does not seed when variant is invalid for current module", () => {
+    const { document, panel, section, selectionSession } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    getFake(document, "ship-a-propulsion").value = MWD_5MN;
+    section.onPropulsionChange();
+    selectionSession.clear();
+    panel.fittedHull = { ...panel.fittedHull!, propulsionModuleId: AB_VARIANT_II_ID, propulsionName: "1MN Afterburner II", propulsionKind: "afterburner" };
+    section.seedPropulsionMemory();
+    expect(selectionSession.recall("propulsion:microwarpdrive")).toBeUndefined();
+    expect(selectionSession.recall("propulsion:afterburner")).toBeUndefined();
+  });
+
+  test("seedPropulsionMemory does not seed when fitted has no propulsion module", () => {
+    const { document, panel, section, selectionSession } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    selectionSession.clear();
+    panel.fittedHull = { ...panel.fittedHull!, propulsionModuleId: undefined, propulsionName: undefined, propulsionKind: undefined };
+    section.seedPropulsionMemory();
     expect(selectionSession.recall("propulsion:afterburner")).toBeUndefined();
   });
 

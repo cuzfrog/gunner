@@ -1,15 +1,11 @@
 import { asClass, asFunction, type AwilixContainer } from "awilix";
 import type { ControlsCradle } from "../controls";
 import type { GunFamilies, LauncherClass, LauncherClasses } from "../../fitting";
-import { SelectionSessionImpl } from "./selectionSession";
-import type { SelectionSession } from "./selectionSession";
-import { DimensionedSelectionImpl } from "./dimensionedSelection";
-import { TurretDimensionKeyerImpl } from "./turretDimensionKeyer";
+import { SelectionSessionImpl, type SelectionSession } from "./selectionSession";
+import { DimensionedSelectionImpl, type DimensionedSelection } from "./dimensionedSelection";
+import { TurretDimensionKeyerImpl, type TurretDimension } from "./turretDimensionKeyer";
 import { LauncherDimensionKeyerImpl } from "./launcherDimensionKeyer";
-import { PropulsionDimensionKeyerImpl } from "./propulsionDimensionKeyer";
-import type { DimensionedSelection } from "./dimensionedSelection";
-import type { TurretDimension } from "./turretDimensionKeyer";
-import type { PropulsionDimension } from "./propulsionDimensionKeyer";
+import { PropulsionDimensionKeyerImpl, type PropulsionDimension } from "./propulsionDimensionKeyer";
 
 export function registerSelectionSessionModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({

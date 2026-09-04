@@ -13,7 +13,7 @@ import type { UiEvents } from "../../events";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
 import type { TrackingInput } from "../trackingInput";
-import type { DimensionedSelection, SelectionSession, TurretDimension } from "../../selectionSession";
+import type { DimensionedSelection, TurretDimension } from "../../selectionSession";
 
 export interface TurretControllerDeps {
   readonly side: Side;
@@ -33,7 +33,6 @@ export interface TurretControllerDeps {
   readonly fittingCalculator: FittingCalculator;
   readonly fittingOverrides: FittingOverridesStore;
   readonly turretSelection: DimensionedSelection<TurretDimension>;
-  readonly selectionSession: SelectionSession;
 }
 
 export interface TurretController {

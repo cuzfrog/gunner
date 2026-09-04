@@ -8,7 +8,7 @@ import type { TrackingInput } from "../trackingInput";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
-import type { DimensionedSelection, SelectionSession, TurretDimension } from "../../selectionSession";
+import type { DimensionedSelection, TurretDimension } from "../../selectionSession";
 import { isHtmlButtonElement, num } from "../controlsDom";
 import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
@@ -63,7 +63,6 @@ export class TurretControllerImpl implements TurretController {
   private readonly calculator: FittingCalculator;
   private readonly fittingOverrides: FittingOverridesStore;
   private readonly turretSelection: DimensionedSelection<TurretDimension>;
-  private readonly selectionSession: SelectionSession;
   private selectedTurret?: ImportedTurret;
   private importedTurrets: readonly ImportedTurret[] = [];
   private allowedSigResClasses: readonly SigResolutionClass[] = SIG_RESOLUTIONS_ORDER;
@@ -92,7 +91,6 @@ export class TurretControllerImpl implements TurretController {
     this.calculator = deps.fittingCalculator;
     this.fittingOverrides = deps.fittingOverrides;
     this.turretSelection = deps.turretSelection;
-    this.selectionSession = deps.selectionSession;
     this.currentAmmoId = this.chargeCatalog.usualForChargeSize(1);
     this.popupValue = this.createAmmoPopup();
     this.els.ammoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
@@ -154,7 +152,6 @@ export class TurretControllerImpl implements TurretController {
     this.conditions = conditions;
     this.fittingState = imported.fittingState;
     this.fittingOverrides.clear();
-    this.selectionSession.clear();
     const { turret, turrets, cargoCharges, ammo } = this.resolver.resolveFromImported(imported);
     this.cargoCharges = cargoCharges;
     this.selectedTurret = turret;
@@ -199,7 +196,6 @@ export class TurretControllerImpl implements TurretController {
       this.conditions = settings.conditions;
       this.fittingState = imported?.fittingState;
       this.fittingOverrides.clear();
-      this.selectionSession.clear();
       const { turret, turrets, cargoCharges, ammo: resolvedAmmo } = this.resolver.resolveFromFitting(
         settings.fitting,
         settings.conditions,
@@ -251,7 +247,6 @@ export class TurretControllerImpl implements TurretController {
     this.conditions = undefined;
     this.originalTurretModuleId = undefined;
     this.fittingOverrides.clear();
-    this.selectionSession.clear();
     this.currentAmmoId = this.chargeCatalog.usualForChargeSize(1);
     this.allExpanded = false;
     this.render();
