@@ -75,11 +75,29 @@ export function buildDefenseStatsFromIntents(ctx: BuildDefenseStatsContext): Def
 }
 
 function buildStatsFromIntents(intents: readonly { intent: DefenseIntent }[], ctx: BuildDefenseStatsContext): DefenseModuleStats | undefined {
+  let base: DefenseModuleStats | undefined;
   for (const { intent } of intents) {
     const stats = buildStatsForIntent(intent, ctx);
-    if (stats) return stats;
+    if (!stats) continue;
+    if (!base) {
+      base = stats;
+      continue;
+    }
+    base = mergeDefenseStats(base, stats);
   }
-  return undefined;
+  return base;
+}
+
+function mergeDefenseStats(base: DefenseModuleStats, secondary: DefenseModuleStats): DefenseModuleStats {
+  return {
+    ...base,
+    ...(base.resistBonus === undefined && secondary.resistBonus !== undefined ? { resistBonus: secondary.resistBonus } : {}),
+    ...(base.hpPercent === undefined && secondary.hpPercent !== undefined ? { hpPercent: secondary.hpPercent } : {}),
+    ...(base.hullHpPercent === undefined && secondary.hullHpPercent !== undefined ? { hullHpPercent: secondary.hullHpPercent } : {}),
+    ...(base.shieldHpAdd === undefined && secondary.shieldHpAdd !== undefined ? { shieldHpAdd: secondary.shieldHpAdd } : {}),
+    ...(base.armorHpAdd === undefined && secondary.armorHpAdd !== undefined ? { armorHpAdd: secondary.armorHpAdd } : {}),
+    ...(base.sigRadiusPenalty === undefined && secondary.sigRadiusPenalty !== undefined ? { sigRadiusPenalty: secondary.sigRadiusPenalty } : {}),
+  };
 }
 
 function buildStatsForIntent(intent: DefenseIntent, ctx: BuildDefenseStatsContext): DefenseModuleStats | undefined {
@@ -258,7 +276,7 @@ function buildHpPercentStats(layer: DefenseLayer, values: Map<string, number>): 
   }
   const multiplierName = layer === "shield" ? "shieldCapacityMultiplier" : layer === "armor" ? "armorHPMultiplier" : "structureHPMultiplier";
   const multiplier = optionalNumber(values.get(multiplierName));
-  if (multiplier === undefined) return undefined;
+  if (multiplier === undefined || multiplier === 1) return undefined;
   const convertedPercent = round6((multiplier - 1) * 100);
   if (layer === "hull") return { kind: "hullBulkhead", hullHpPercent: convertedPercent };
   return { kind: "hpPercent", layer, hpPercent: convertedPercent };

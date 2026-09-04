@@ -247,7 +247,7 @@ describe("buildDefenseStatsFromIntents - HP modules", () => {
     });
   });
 
-  test("Layered Energized Membrane with armorHPMultiplier and resist bonus builds defense", () => {
+  test("Layered Energized Membrane with armorHPMultiplier and resist bonus builds both", () => {
     const dogmaEffects: Record<string, SdeDogmaEffect> = {
       "63": makeEffect(63, { category: 4, modifiers: [mod({ modifiedAttributeID: 265, modifyingAttributeID: 148, operation: 4 })] }),
       "2041": makeEffect(2041, { category: 4, modifiers: [
@@ -264,6 +264,10 @@ describe("buildDefenseStatsFromIntents - HP modules", () => {
     });
     const result = buildDefenseStatsFromIntents(ctx);
     expect(result).toBeDefined();
+    expect(result?.kind).toBe("hpPercent");
+    expect(result?.layer).toBe("armor");
+    expect(result?.hpPercent).toBe(9);
+    expect(result?.resistBonus).toEqual({ em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 });
   });
 
   test("hull bulkhead percent (effect 392) builds hullBulkhead", () => {
