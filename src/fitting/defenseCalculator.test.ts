@@ -307,7 +307,7 @@ describe("DefenseCalculatorImpl", () => {
     const one = resolve([moduleEntry("Reinforced Bulkheads II")]);
     const two = resolve([moduleEntry("Reinforced Bulkheads II"), moduleEntry("Reinforced Bulkheads II")]);
     expect(two.layers.hull.hp).toBeGreaterThan(one.layers.hull.hp);
-    const naiveTwo = one.layers.hull.hp * 1.4;
+    const naiveTwo = one.layers.hull.hp * 1.25;
     expect(two.layers.hull.hp).toBeLessThan(naiveTwo);
   });
 
@@ -315,15 +315,21 @@ describe("DefenseCalculatorImpl", () => {
     const base = resolve([]);
     const withBulkhead = resolve([moduleEntry("Reinforced Bulkheads II")]);
     const mechanicsMultiplier = 1 + 0.05 * 5;
-    const expected = profile.hullHp * mechanicsMultiplier * 1.4;
-    expect(withBulkhead.layers.hull.hp).toBe(expected);
+    const expected = profile.hullHp * mechanicsMultiplier * 1.25;
+    expect(withBulkhead.layers.hull.hp).toBe(Math.round(expected));
     expect(withBulkhead.layers.hull.hp).toBeGreaterThan(base.layers.hull.hp);
   });
 
-  test("Nanofiber Internal Structure II also provides hull HP bonus", () => {
+  test("Nanofiber Internal Structure II reduces hull HP", () => {
     const base = resolve([]);
     const withNanofiber = resolve([moduleEntry("Nanofiber Internal Structure II")]);
-    expect(withNanofiber.layers.hull.hp).toBeGreaterThan(base.layers.hull.hp);
+    expect(withNanofiber.layers.hull.hp).toBeLessThan(base.layers.hull.hp);
+  });
+
+  test("Medium Transverse Bulkhead II rig increases hull HP", () => {
+    const base = resolve([]);
+    const withRig = resolve([moduleEntry("Medium Transverse Bulkhead II")]);
+    expect(withRig.layers.hull.hp).toBeGreaterThan(base.layers.hull.hp);
   });
 
   test("Damage Control II hull resists stack with bulkhead HP bonus", () => {

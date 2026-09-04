@@ -29,7 +29,14 @@ describe("fittingDb", () => {
     const defense = moduleByName("Reinforced Bulkheads II")?.defense;
     expect(defense).toBeDefined();
     expect(defense!.kind).toBe("hullBulkhead");
-    expect(defense!.hullHpPercent).toBe(40);
+    expect(defense!.hullHpPercent).toBe(25);
+  });
+
+  test("transverse bulkhead rigs provide hull HP defense stats", () => {
+    const defense = moduleByName("Medium Transverse Bulkhead II")?.defense;
+    expect(defense).toBeDefined();
+    expect(defense!.kind).toBe("hullBulkhead");
+    expect(defense!.hullHpPercent).toBe(25);
   });
 
   test("includes small afterburner and microwarpdrive with exact SDE values", () => {

@@ -241,6 +241,7 @@ const DEFENSE_EFFECTS = {
   armorPlate: 1959,
   shieldRecharge: 50,
   structureHpMultiply: 60,
+  hullHpBonus: 392,
 } as const;
 
 // Maps module dogma effectIDs to the weapon group they modify. These are damage/RoF
@@ -877,7 +878,8 @@ function buildDefenseStats(values: Map<string, number>, effects: Set<number>, gr
   if (effects.has(DEFENSE_EFFECTS.shieldExtender)) return buildShieldExtenderStats(values);
   if (effects.has(DEFENSE_EFFECTS.armorPlate)) return buildArmorPlateStats(values);
   if (effects.has(DEFENSE_EFFECTS.shieldRecharge)) return buildRechargeModuleStats(values);
-  if (effects.has(DEFENSE_EFFECTS.structureHpMultiply)) return buildHullBulkheadStats(values);
+  if (effects.has(DEFENSE_EFFECTS.structureHpMultiply)) return buildHullBulkheadStatsFromMultiplier(values);
+  if (effects.has(DEFENSE_EFFECTS.hullHpBonus)) return buildHullBulkheadStatsFromPercent(values);
   return undefined;
 }
 
@@ -1021,8 +1023,14 @@ function buildArmorPlateStats(values: Map<string, number>): DefenseModuleStats |
   return { kind: "armorPlate", armorHpAdd: armorHpBonusAdd };
 }
 
-function buildHullBulkheadStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const hullHpBonusPercent = optionalNumber(values.get("hp"));
+function buildHullBulkheadStatsFromMultiplier(values: Map<string, number>): DefenseModuleStats | undefined {
+  const multiplier = optionalNumber(values.get("structureHPMultiplier"));
+  if (multiplier === undefined) return undefined;
+  return { kind: "hullBulkhead", hullHpPercent: round6((multiplier - 1) * 100) };
+}
+
+function buildHullBulkheadStatsFromPercent(values: Map<string, number>): DefenseModuleStats | undefined {
+  const hullHpBonusPercent = optionalNumber(values.get("hullHpBonus"));
   if (hullHpBonusPercent === undefined) return undefined;
   return { kind: "hullBulkhead", hullHpPercent: hullHpBonusPercent };
 }
