@@ -1,9 +1,10 @@
 import type { EwarResolver } from "./ewarResolver";
+import { computeExpectedMultiplier } from "./expectedHitMultiplier";
 import type { HitChance } from "./hitChance";
 import type { MissileApplication } from "./missileApplication";
 import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
-import type { TurretDamage } from "./turretDamage";
+import type { WeaponDamageAssessor } from "./weaponDamageAssessor";
 import type { DroneApplication } from "./droneApplication";
 import type {
   DamageAssessment,
@@ -11,7 +12,6 @@ import type {
   DroneRuntimeState,
   DroneSpec,
   EngagementFrame,
-  HitChanceBreakdown,
   MissileAttackFacts,
   MissileDamageBreakdown,
   MissileSpec,
@@ -21,7 +21,7 @@ import type {
   TurretSpec,
   WeaponSpec,
 } from "./types";
-import { ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
+import { ZERO_DAMAGE } from "./types";
 
 export interface AttackState {
   readonly weapon: WeaponSpec;
@@ -49,16 +49,16 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   private readonly ewarResolver: EwarResolver;
   private readonly boosters: TurretBoosterResolver;
   private readonly missileBoosters: MissileBoosterResolver;
-  private readonly turretDamage: TurretDamage;
+  private readonly weaponDamageAssessor: WeaponDamageAssessor;
   private readonly missileApplication: MissileApplication;
   private readonly droneApplication: DroneApplication;
 
-  constructor({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, turretDamage, missileApplication, droneApplication }: {
+  constructor({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, missileApplication, droneApplication }: {
     hitChance: HitChance;
     ewarResolver: EwarResolver;
     turretBoosterResolver: TurretBoosterResolver;
     missileBoosterResolver: MissileBoosterResolver;
-    turretDamage: TurretDamage;
+    weaponDamageAssessor: WeaponDamageAssessor;
     missileApplication: MissileApplication;
     droneApplication: DroneApplication;
   }) {
@@ -66,7 +66,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     this.ewarResolver = ewarResolver;
     this.boosters = turretBoosterResolver;
     this.missileBoosters = missileBoosterResolver;
-    this.turretDamage = turretDamage;
+    this.weaponDamageAssessor = weaponDamageAssessor;
     this.missileApplication = missileApplication;
     this.droneApplication = droneApplication;
   }
@@ -96,21 +96,15 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     const boosted = this.boosters.boostedTurret(turret, ship.boosts);
     const effectiveTurret = this.ewarResolver.disruptedTurret(boosted, opponent.ewar, frame.distance);
     const hit = this.hitChance.compute(frame, effectiveTurret, opponentSigRadius);
-    const damage = this.turretDamage.compute(hit, effectiveTurret);
+    const expectedMultiplier = computeExpectedMultiplier(hit.chance);
+    const damage = this.weaponDamageAssessor.assess(effectiveTurret, expectedMultiplier, true);
     return { boostedWeapon: boosted, effectiveWeapon: effectiveTurret, damage, turret: { hit, expectedMultiplier: damage.application } };
   }
 
   private assessMissile(frame: EngagementFrame, ship: ShipState, opponent: ShipState, missile: MissileSpec, opponentSigRadius: number, facts?: MissileAttackFacts): AttackAssessment {
     const boosted = this.missileBoosters.boostedMissile(missile, ship.missileBoosts);
-    const baseVolleyByType = damageVectorScale(boosted.damagePerMissile, boosted.launcherCount);
-    const missileDamage = damageVectorSum(boosted.damagePerMissile);
-    const nominalDps = boosted.cycleTime > 0 ? (missileDamage * boosted.launcherCount) / boosted.cycleTime : 0;
-    const volley = missileDamage * boosted.launcherCount;
     if (facts) {
       const application = facts.predicted.application;
-      const appliedDps = nominalDps * application;
-      const appliedByType = damageVectorScale(boosted.damagePerMissile, (boosted.launcherCount * application) / Math.max(boosted.cycleTime, 0));
-      const appliedVolleyByType = damageVectorScale(boosted.damagePerMissile, boosted.launcherCount * application);
       const breakdown: MissileDamageBreakdown = {
         application,
         signatureTerm: facts.predicted.signatureTerm,
@@ -118,21 +112,14 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
         inRange: facts.interceptable,
         timeToImpact: facts.nearestTimeToImpact,
       };
-      const damage = { nominalDps, appliedDps, application, volley, baseVolleyByType, appliedByType, appliedVolleyByType };
+      const damage = this.weaponDamageAssessor.assess(boosted, application, facts.interceptable);
       return { boostedWeapon: boosted, effectiveWeapon: boosted, damage, missile: breakdown };
     }
     const result = this.missileApplication.compute(boosted, opponent.velocity.len(), opponentSigRadius);
     const inRange = frame.distance <= boosted.flightRange;
     const timeToImpact = boosted.maxVelocity > 0 ? frame.distance / boosted.maxVelocity : 0;
     const breakdown: MissileDamageBreakdown = { ...result, inRange, timeToImpact };
-    const appliedDps = inRange ? nominalDps * result.application : 0;
-    const appliedByType = inRange
-      ? damageVectorScale(boosted.damagePerMissile, (boosted.launcherCount * result.application) / Math.max(boosted.cycleTime, 0))
-      : ZERO_DAMAGE;
-    const appliedVolleyByType = inRange
-      ? damageVectorScale(boosted.damagePerMissile, boosted.launcherCount * result.application)
-      : ZERO_DAMAGE;
-    const damage = { nominalDps, appliedDps, application: inRange ? result.application : 0, volley, baseVolleyByType, appliedByType, appliedVolleyByType };
+    const damage = this.weaponDamageAssessor.assess(boosted, result.application, inRange);
     return { boostedWeapon: boosted, effectiveWeapon: boosted, damage, missile: breakdown };
   }
 

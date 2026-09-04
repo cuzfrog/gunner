@@ -19,7 +19,6 @@ import type {
   Simulation,
   StackingPenalty,
   TurretBoosterResolver,
-  TurretDamage,
   WeaponClock,
   WeaponDamageAssessor,
 } from "./index";
@@ -39,7 +38,6 @@ export interface SimCradle {
   readonly droneSimulator: DroneSimulator;
   readonly missileSimulator: MissileSimulator;
   readonly weaponDamageAssessor: WeaponDamageAssessor;
-  readonly turretDamage: TurretDamage;
   readonly reactiveSteering: Autopilot;
   readonly shipBSteering: Autopilot;
   readonly shipASteering: Autopilot;

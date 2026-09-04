@@ -22,7 +22,7 @@ import { KinematicsImpl } from "../../src/sim/kinematics";
 import { MissileApplicationImpl } from "../../src/sim/missileApplication";
 import { MissileBoosterResolverImpl } from "../../src/sim/missileBoosterResolver";
 import { DroneApplicationImpl } from "../../src/sim/droneApplication";
-import { TurretDamageImpl } from "../../src/sim/turretDamage";
+import { WeaponDamageAssessorImpl } from "../../src/sim/weaponDamageAssessor";
 import { Vec2 } from "../../src/sim/vec2";
 import { SIG_RESOLUTIONS, damageVectorSum, type ShipState, type SimSnapshot, type TurretSpec, type MissileSpec } from "../../src/sim/types";
 import type { EwarResolver } from "../../src/sim/ewarResolver";
@@ -82,10 +82,10 @@ const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, loc
 function makeComposer() {
   const hitChance = new HitChanceImpl();
   const kinematics = new KinematicsImpl();
-  const turretDamage = new TurretDamageImpl();
+  const weaponDamageAssessor = new WeaponDamageAssessorImpl();
   const missileApplication = new MissileApplicationImpl();
-  const droneApplication = new DroneApplicationImpl({ hitChance });
-  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver: noEwarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: stacking }), turretDamage, missileApplication, droneApplication });
+  const droneApplication = new DroneApplicationImpl({ hitChance, weaponDamageAssessor });
+  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver: noEwarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: stacking }), weaponDamageAssessor, missileApplication, droneApplication });
   return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor: new DefenseAssessorImpl() });
 }
 

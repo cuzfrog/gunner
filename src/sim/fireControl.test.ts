@@ -1,4 +1,5 @@
 import { Vec2 } from "./vec2";
+import { computeExpectedMultiplier } from "./expectedHitMultiplier";
 import { EngagementEvaluatorImpl } from "./fireControl";
 import type { DroneApplication } from "./droneApplication";
 import type { EwarResolver } from "./ewarResolver";
@@ -6,14 +7,15 @@ import type { HitChance } from "./hitChance";
 import type { MissileApplication } from "./missileApplication";
 import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
-import type { TurretDamage } from "./turretDamage";
+import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
 import { type DamageAssessment, type DroneDamageBreakdown, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.05, sigResolution: 40, optimal: 4000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const hit: HitChanceBreakdown = { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 };
-const turretDamageResult: DamageAssessment = { nominalDps: 20, appliedDps: 16, application: 0.8, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+const expectedMultiplier = computeExpectedMultiplier(0.8);
+const turretDamageResult: DamageAssessment = { nominalDps: 20, appliedDps: 20 * expectedMultiplier, application: expectedMultiplier, volley: 100, baseVolleyByType: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, appliedByType: { em: 0, thermal: 0, kinetic: 20 * expectedMultiplier, explosive: 0 }, appliedVolleyByType: { em: 0, thermal: 0, kinetic: 100 * expectedMultiplier, explosive: 0 } };
 
 const shipA: ShipState = {
   id: "shipA",
@@ -103,7 +105,6 @@ function makeEvaluator(): {
   ewarResolver: EwarResolver;
   turretBoosterResolver: TurretBoosterResolver;
   missileBoosterResolver: MissileBoosterResolver;
-  turretDamage: TurretDamage;
   missileApplication: MissileApplication;
   droneApplication: DroneApplication;
   evaluator: EngagementEvaluatorImpl;
@@ -125,11 +126,11 @@ function makeEvaluator(): {
   });
   const turretBoosterResolver = vi.mocked<TurretBoosterResolver>({ boostedTurret: vi.fn(() => boostedTurret) });
   const missileBoosterResolver = vi.mocked<MissileBoosterResolver>({ boostedMissile: vi.fn((m) => m) });
-  const turretDamage = vi.mocked<TurretDamage>({ compute: vi.fn(() => ({ hit, expectedMultiplier: 0.8, ...turretDamageResult })) });
+  const weaponDamageAssessor = new WeaponDamageAssessorImpl();
   const missileApplication = vi.mocked<MissileApplication>({ compute: vi.fn(() => missileApplicationResult) });
   const droneApplication = vi.mocked<DroneApplication>({ compute: vi.fn(() => droneBreakdownResult) });
-  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, turretDamage, missileApplication, droneApplication });
-  return { hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, turretDamage, missileApplication, droneApplication, evaluator };
+  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, missileApplication, droneApplication });
+  return { hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, missileApplication, droneApplication, evaluator };
 }
 
 describe("EngagementEvaluatorImpl", () => {
@@ -140,8 +141,8 @@ describe("EngagementEvaluatorImpl", () => {
     expect(result.shipA?.effectiveWeapon).toEqual(effectiveTurret);
     expect(result.shipA?.turret?.hit).toEqual(hit);
     expect(result.shipA?.damage.nominalDps).toBe(turretDamageResult.nominalDps);
-    expect(result.shipA?.damage.appliedDps).toBe(turretDamageResult.appliedDps);
-    expect(result.shipA?.damage.application).toBe(turretDamageResult.application);
+    expect(result.shipA?.damage.appliedDps).toBeCloseTo(turretDamageResult.appliedDps, 10);
+    expect(result.shipA?.damage.application).toBeCloseTo(turretDamageResult.application, 10);
     expect(result.shipA?.damage.volley).toBe(turretDamageResult.volley);
     expect(result.shipB).toBeUndefined();
     expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boostedTurret, shipB.ewar, 6000);
@@ -309,12 +310,12 @@ describe("EngagementEvaluatorImpl", () => {
   test("locked=true preserves appliedDps", () => {
     const { evaluator } = makeEvaluator();
     const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40, locked: true } });
-    expect(result.shipA?.damage.appliedDps).toBe(turretDamageResult.appliedDps);
+    expect(result.shipA?.damage.appliedDps).toBeCloseTo(turretDamageResult.appliedDps, 10);
   });
 
   test("locked omitted preserves appliedDps (backward compatible)", () => {
     const { evaluator } = makeEvaluator();
     const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40 } });
-    expect(result.shipA?.damage.appliedDps).toBe(turretDamageResult.appliedDps);
+    expect(result.shipA?.damage.appliedDps).toBeCloseTo(turretDamageResult.appliedDps, 10);
   });
 });

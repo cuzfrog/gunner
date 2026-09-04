@@ -1,5 +1,6 @@
 import { DroneApplicationImpl } from "./droneApplication";
 import { HitChanceImpl } from "./hitChance";
+import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
 import { Vec2 } from "./vec2";
 import { type DroneRuntimeState, type DroneSpec, type EngagementFrame, type ShipState, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
@@ -19,7 +20,8 @@ function sentryDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
 }
 
 const hitChance = new HitChanceImpl();
-const application = new DroneApplicationImpl({ hitChance });
+const weaponDamageAssessor = new WeaponDamageAssessorImpl();
+const application = new DroneApplicationImpl({ hitChance, weaponDamageAssessor });
 
 describe("DroneApplicationImpl", () => {
   test("engaging drone at orbit slot uses orbit speed for angular velocity", () => {
