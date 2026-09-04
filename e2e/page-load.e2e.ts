@@ -37,8 +37,9 @@ test.describe("page load", () => {
     await expect(page.locator("#res-applied-dps-a")).toHaveText("-");
     await expect(page.locator("#res-actual-dps-a")).toHaveText("-");
     await expect(page.locator("#res-nominal-dps-a")).toHaveText("-");
-    await expect(page.locator("#res-turret-cards-a")).toBeVisible();
-    await expect(page.locator("#res-missile-cards-a")).toBeHidden();
+    await expect(page.locator("#res-side-a")).toHaveClass(/is-turret/);
+    await expect(page.locator("#res-hit-a")).toBeVisible();
+    await expect(page.locator("#res-sig-factor-a")).toBeHidden();
     await expect(page.locator("#res-hit-a")).toHaveText("-");
   });
 

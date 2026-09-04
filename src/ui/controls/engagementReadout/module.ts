@@ -39,8 +39,7 @@ function collectReadoutEls(els: ControlsElements): ReadoutEls {
       resTimeToImpactLabel: els.resTimeToImpactLabelA,
       resSigFactorLabel: els.resSigFactorLabelA,
       resVelocityFactorLabel: els.resVelocityFactorLabelA,
-      resTurretCards: els.resTurretCardsA,
-      resMissileCards: els.resMissileCardsA,
+      resSide: els.resSideA,
     },
     shipB: {
       resTrackPen: els.resTrackPenB,
@@ -64,8 +63,7 @@ function collectReadoutEls(els: ControlsElements): ReadoutEls {
       resTimeToImpactLabel: els.resTimeToImpactLabelB,
       resSigFactorLabel: els.resSigFactorLabelB,
       resVelocityFactorLabel: els.resVelocityFactorLabelB,
-      resTurretCards: els.resTurretCardsB,
-      resMissileCards: els.resMissileCardsB,
+      resSide: els.resSideB,
     },
   };
 }

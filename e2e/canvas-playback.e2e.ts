@@ -166,10 +166,12 @@ test.describe("canvas settings and playback", () => {
   test("missile result cards show when launcher active", async ({ cleanPage: page }) => {
     await importViaPaste(page, "ship-a", loadFittingText(FITTING_CERBERUS));
     await importViaPaste(page, "ship-b", loadFittingText(FITTING_THRASHER));
-    await expect(page.locator("#res-missile-cards-a")).toBeVisible();
-    await expect(page.locator("#res-turret-cards-a")).toBeHidden();
-    await expect(page.locator("#res-turret-cards-b")).toBeVisible();
-    await expect(page.locator("#res-missile-cards-b")).toBeHidden();
+    await expect(page.locator("#res-side-a")).toHaveClass(/is-missile/);
+    await expect(page.locator("#res-sig-factor-a")).toBeVisible();
+    await expect(page.locator("#res-hit-a")).toBeHidden();
+    await expect(page.locator("#res-side-b")).toHaveClass(/is-turret/);
+    await expect(page.locator("#res-hit-b")).toBeVisible();
+    await expect(page.locator("#res-sig-factor-b")).toBeHidden();
   });
 
   test("portraits appear when hull selected", async ({ cleanPage: page }) => {

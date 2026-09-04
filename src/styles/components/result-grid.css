@@ -21,7 +21,7 @@
 .result-side-a { border-left: 2px solid var(--accent-teal); }
 .result-side-b { border-left: 2px solid var(--accent-orange); }
 
-.result-side-hero {
+.result-hero {
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
@@ -49,21 +49,8 @@
   min-width: 8ch;
 }
 
-.result-side-support {
-  display: flex;
-  gap: 9px;
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.result-side-weapon {
-  display: flex;
-  gap: 9px;
-  flex: 1 1 auto;
-  min-width: 330px;
-}
-
-.result-side-weapon[hidden] { display: none; }
+.result-side.is-turret .result-metric-missile { display: none; }
+.result-side.is-missile .result-metric-turret { display: none; }
 
 .result-range {
   display: flex;

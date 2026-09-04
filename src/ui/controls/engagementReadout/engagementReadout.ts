@@ -27,8 +27,7 @@ interface SideDpsEls {
   readonly resTimeToImpactLabel: HTMLElement;
   readonly resSigFactorLabel: HTMLElement;
   readonly resVelocityFactorLabel: HTMLElement;
-  readonly resTurretCards: HTMLElement;
-  readonly resMissileCards: HTMLElement;
+  readonly resSide: HTMLElement;
 }
 
 export interface ReadoutEls {
@@ -103,8 +102,7 @@ export class EngagementReadoutImpl implements EngagementReadout {
   }
 
   private updateHitChanceSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment, opponentDefense: DefenseAssessment, hit: HitChanceBreakdown, t: (key: string) => string): void {
-    els.resTurretCards.hidden = false;
-    els.resMissileCards.hidden = true;
+    setWeaponMode(els, "turret");
     setText(els.resHitLabel, t("result.hitChance"));
     setText(els.resTrackPenLabel, t("result.trackingPenalty"));
     setText(els.resRangePenLabel, t("result.rangePenalty"));
@@ -120,8 +118,7 @@ export class EngagementReadoutImpl implements EngagementReadout {
   }
 
   private updateMissileSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment, opponentDefense: DefenseAssessment, t: (key: string) => string): void {
-    els.resTurretCards.hidden = true;
-    els.resMissileCards.hidden = false;
+    setWeaponMode(els, "missile");
     const missile = attack.missile!;
     setText(els.resTimeToImpactLabel, t("result.timeToImpact"));
     setText(els.resSigFactorLabel, t("result.signatureFactor"));
@@ -137,8 +134,7 @@ export class EngagementReadoutImpl implements EngagementReadout {
   }
 
   private updateNoWeaponSide(els: SideHitEls & SideDpsEls): void {
-    els.resTurretCards.hidden = false;
-    els.resMissileCards.hidden = true;
+    setWeaponMode(els, "turret");
     setText(els.resHit, "-");
     setText(els.resTrackPen, "-");
     setText(els.resRangePen, "-");
@@ -160,6 +156,13 @@ export class EngagementReadoutImpl implements EngagementReadout {
     els.resVelocityFactor.classList.add("is-dim");
     els.resTimeToImpact.classList.add("is-dim");
   }
+}
+
+type WeaponMode = "turret" | "missile";
+
+function setWeaponMode(els: SideDpsEls, mode: WeaponMode): void {
+  els.resSide.classList.remove("is-turret", "is-missile");
+  els.resSide.classList.add(`is-${mode}`);
 }
 
 function writeDpsFields(els: SideDpsEls, attack: AttackAssessment, opponentDefense: DefenseAssessment, t: (key: string) => string): void {

@@ -29,7 +29,7 @@ function fakeSideEls(): ReadoutEls["shipA"] {
     resTimeToImpactLabel: make(),
     resSigFactorLabel: make(), resVelocityFactorLabel: make(),
     resLockState: make(), resLockStateLabel: make(),
-    resTurretCards: make(), resMissileCards: make(),
+    resSide: make(),
   };
 }
 
@@ -220,8 +220,8 @@ describe("EngagementReadout", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 50, appliedDps: 40, application: 0.8, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE }, shipBActualDps: 30 }), T);
-    expect(els.shipA.resTurretCards.hidden).toBe(false);
-    expect(els.shipA.resMissileCards.hidden).toBe(true);
+    expect(els.shipA.resSide.classList.contains("is-turret")).toBe(true);
+    expect(els.shipA.resSide.classList.contains("is-missile")).toBe(false);
     expect(els.shipA.resNominalDps.textContent).toBe("50.0");
     expect(els.shipA.resAppliedDps.textContent).toBe("40.0");
     expect(els.shipA.resAppliedDpsApplication.textContent).toBe("(80.0%)");
@@ -249,8 +249,8 @@ describe("EngagementReadout", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeMissileView({ distance: 5000 }), T);
-    expect(els.shipA.resTurretCards.hidden).toBe(true);
-    expect(els.shipA.resMissileCards.hidden).toBe(false);
+    expect(els.shipA.resSide.classList.contains("is-missile")).toBe(true);
+    expect(els.shipA.resSide.classList.contains("is-turret")).toBe(false);
     expect(els.shipA.resNominalDps.textContent).toBe("40.0");
     expect(els.shipA.resAppliedDps.textContent).toBe("32.0");
     expect(els.shipA.resAppliedDpsApplication.textContent).toBe("(80.0%)");
@@ -278,8 +278,8 @@ describe("EngagementReadout", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeNoWeaponView(1000), T);
-    expect(els.shipA.resTurretCards.hidden).toBe(false);
-    expect(els.shipA.resMissileCards.hidden).toBe(true);
+    expect(els.shipA.resSide.classList.contains("is-turret")).toBe(true);
+    expect(els.shipA.resSide.classList.contains("is-missile")).toBe(false);
     expect(els.shipA.resNominalDps.textContent).toBe("-");
     expect(els.shipA.resAppliedDps.textContent).toBe("-");
     expect(els.shipA.resAppliedDpsApplication.textContent).toBe("-");
@@ -320,8 +320,8 @@ describe("EngagementReadout", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeDroneView({ distance: 1000 }), T);
-    expect(els.shipA.resTurretCards.hidden).toBe(false);
-    expect(els.shipA.resMissileCards.hidden).toBe(true);
+    expect(els.shipA.resSide.classList.contains("is-turret")).toBe(true);
+    expect(els.shipA.resSide.classList.contains("is-missile")).toBe(false);
     expect(els.shipA.resHit.textContent).toBe("50.0%");
     expect(els.shipA.resTrackPen.textContent).toBe("50.0%");
     expect(els.shipA.resRangePen.textContent).toBe("100.0%");

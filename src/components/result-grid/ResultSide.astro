@@ -26,36 +26,30 @@ const MISSILE_METRICS = [
 ] as const;
 ---
 
-<div class={`result-side result-side-${s}`}>
-  <div class="result-side-hero">
+<div class={`result-side result-side-${s} is-turret`} id={`res-side-${s}`}>
+  <div class="result-hero">
     <span class="result-card-label" id={`res-applied-dps-label-${s}`} data-i18n="result.appliedDps">Applied DPS</span>
     <div class="result-hero-grid">
       <span class="result-card-value result-hero-value mono" id={`res-applied-dps-${s}`} data-hint-content="appliedDps" data-side={s}>-</span>
       <span class="result-card-value result-hero-application mono" id={`res-applied-dps-application-${s}`}>-</span>
     </div>
   </div>
-  <div class="result-side-support">
-    {SUPPORT_METRICS.map((m) => (
-      <div class="result-metric">
-        <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
-        <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`} data-hint-content={m.hint} data-side={m.side}>{m.value}</span>
-      </div>
-    ))}
-  </div>
-  <div class="result-side-weapon" id={`res-turret-cards-${s}`}>
-    {TURRET_METRICS.map((m) => (
-      <div class="result-metric">
-        <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
-        <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`}>{m.value}</span>
-      </div>
-    ))}
-  </div>
-  <div class="result-side-weapon" id={`res-missile-cards-${s}`} hidden>
-    {MISSILE_METRICS.map((m) => (
-      <div class="result-metric">
-        <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
-        <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`}>{m.value}</span>
-      </div>
-    ))}
-  </div>
+  {SUPPORT_METRICS.map((m) => (
+    <div class="result-metric">
+      <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
+      <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`} data-hint-content={m.hint} data-side={m.side}>{m.value}</span>
+    </div>
+  ))}
+  {TURRET_METRICS.map((m) => (
+    <div class="result-metric result-metric-turret">
+      <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
+      <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`}>{m.value}</span>
+    </div>
+  ))}
+  {MISSILE_METRICS.map((m) => (
+    <div class="result-metric result-metric-missile">
+      <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
+      <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`}>{m.value}</span>
+    </div>
+  ))}
 </div>
