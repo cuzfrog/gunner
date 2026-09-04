@@ -2,6 +2,7 @@ import { Vec2 } from "./vec2";
 import { MissileSimulatorImpl } from "./missileSimulator";
 import { MissileApplicationImpl } from "./missileApplication";
 import type { EngagementFrame, MissileLaunchSpec, MissileSpec, ShipState } from "./types";
+import { damageVectorScale } from "./types";
 
 const lightMissile: MissileSpec = {
   kind: "missile",
@@ -51,7 +52,7 @@ function frame(shipAPos: Vec2, shipBPos: Vec2, shipAVel: Vec2 = new Vec2(0, 0), 
 }
 
 function launchSpec(weaponIndex: number, boosted: MissileSpec, paintedTargetSig: number): MissileLaunchSpec {
-  return { weaponIndex, boosted, paintedTargetSig, baseVolleyByType: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } };
+  return { weaponIndex, boosted, paintedTargetSig, baseVolleyByType: damageVectorScale(boosted.damagePerMissile, boosted.launcherCount) };
 }
 
 describe("MissileSimulatorImpl", () => {
@@ -367,6 +368,33 @@ describe("MissileSimulatorImpl", () => {
     expect(events[0].kind).toBe("missile");
     expect(events[0].weaponIndex).toBe(0);
     expect(events[0].rawByType.kinetic).toBeGreaterThan(0);
+  });
+
+  test("impact damage scales by launcherCount via baseVolleyByType", () => {
+    const multiLauncher: MissileSpec = { ...lightMissile, launcherCount: 3 };
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [multiLauncher], shipB: [] });
+    const launches = { shipA: [launchSpec(0, multiLauncher, 40)], shipB: [] };
+    const targetPos = new Vec2(100, 0);
+    sim.step(0.1, frame(new Vec2(0, 0), targetPos), launches);
+    let events: readonly { target: string; source: string; kind: string; weaponIndex: number; rawByType: { em: number; thermal: number; kinetic: number; explosive: number } }[] = [];
+    for (let i = 0; i < 100; i++) {
+      events = sim.step(0.1, frame(new Vec2(0, 0), targetPos), { shipA: [], shipB: [] });
+      if (events.length > 0) break;
+    }
+    expect(events.length).toBeGreaterThanOrEqual(1);
+    const singleLauncher: MissileSpec = { ...lightMissile, launcherCount: 1 };
+    const simSingle = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    simSingle.reset({ shipA: [singleLauncher], shipB: [] });
+    const singleLaunches = { shipA: [launchSpec(0, singleLauncher, 40)], shipB: [] };
+    simSingle.step(0.1, frame(new Vec2(0, 0), targetPos), singleLaunches);
+    let singleEvents: typeof events = [];
+    for (let i = 0; i < 100; i++) {
+      singleEvents = simSingle.step(0.1, frame(new Vec2(0, 0), targetPos), { shipA: [], shipB: [] });
+      if (singleEvents.length > 0) break;
+    }
+    expect(singleEvents.length).toBeGreaterThanOrEqual(1);
+    expect(events[0].rawByType.kinetic).toBeCloseTo(singleEvents[0].rawByType.kinetic * 3, 6);
   });
 
   test("step returns no events when no missiles are in flight", () => {

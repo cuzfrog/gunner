@@ -1,5 +1,5 @@
-import { Vec2, damageVectorScale } from "../sim";
-import type { DamageEvent, DefenseSimConfig, DefenseSimulator, DefenseView, DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, LockClock, LockState, MissileAttackFacts, MissileBoosterResolver, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, SensorBoosterResolver, SensorSpec, ShipState, Side, Simulation, WeaponClock, WeaponSpec } from "../sim";
+import { Vec2 } from "../sim";
+import type { DamageEvent, DefenseSimConfig, DefenseSimulator, DefenseView, DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, LockClock, LockState, MissileAttackFacts, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, SensorBoosterResolver, SensorSpec, ShipState, Side, Simulation, WeaponClock, WeaponSpec } from "../sim";
 import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, MissileRenderCollection, Renderer, WeaponRange, WeaponRanges } from "../ui";
 
 export interface App {
@@ -15,7 +15,6 @@ export class AppImpl implements App {
   private readonly defenseSimulator: DefenseSimulator;
   private readonly engagementFrameComposer: EngagementFrameComposer;
   private readonly ewarResolver: EwarResolver;
-  private readonly missileBoosterResolver: MissileBoosterResolver;
   private readonly sensorBoosterResolver: SensorBoosterResolver;
   private readonly weaponClock: WeaponClock;
   private readonly lockClock: LockClock;
@@ -30,7 +29,6 @@ export class AppImpl implements App {
     defenseSimulator: DefenseSimulator;
     engagementFrameComposer: EngagementFrameComposer;
     ewarResolver: EwarResolver;
-    missileBoosterResolver: MissileBoosterResolver;
     sensorBoosterResolver: SensorBoosterResolver;
     weaponClock: WeaponClock;
     lockClock: LockClock;
@@ -44,7 +42,6 @@ export class AppImpl implements App {
     this.defenseSimulator = deps.defenseSimulator;
     this.engagementFrameComposer = deps.engagementFrameComposer;
     this.ewarResolver = deps.ewarResolver;
-    this.missileBoosterResolver = deps.missileBoosterResolver;
     this.sensorBoosterResolver = deps.sensorBoosterResolver;
     this.weaponClock = deps.weaponClock;
     this.lockClock = deps.lockClock;
@@ -201,16 +198,15 @@ export class AppImpl implements App {
   }
 
   private buildLaunchSpecs(side: Side, view: EngagementView): readonly MissileLaunchSpec[] {
-    const weapons = this.controls.getWeapons(side);
     const shipState = side === "shipA" ? view.frame.shipA : view.frame.shipB;
     const opponentSig = side === "shipA" ? this.controls.getSig("shipB") : this.controls.getSig("shipA");
     const paintedSig = opponentSig * this.ewarResolver.sigMultiplier(shipState.ewar, view.frame.distance);
     const specs: MissileLaunchSpec[] = [];
     let missileIndex = 0;
-    for (const weapon of weapons) {
-      if (weapon.kind !== "missile") continue;
-      const boosted = this.missileBoosterResolver.boostedMissile(weapon, shipState.missileBoosts);
-      const baseVolleyByType = damageVectorScale(boosted.damagePerMissile, boosted.launcherCount);
+    for (const attack of view.weaponAttacks[side]) {
+      const boosted = attack.assessment.boostedWeapon;
+      if (boosted.kind !== "missile") continue;
+      const baseVolleyByType = attack.assessment.damage.baseVolleyByType;
       specs.push({ weaponIndex: missileIndex, boosted, paintedTargetSig: paintedSig, baseVolleyByType });
       missileIndex++;
     }
