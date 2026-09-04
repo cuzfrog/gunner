@@ -9,7 +9,7 @@ import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../sh
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
-import type { PanelConfigurationMemory } from "../../panelConfigurationMemory";
+import type { DimensionedSelection, SelectionSession } from "../../selectionSession";
 import { setText } from "../controlsDom";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
 import type { Popup } from "../popup";
@@ -36,7 +36,8 @@ export class LauncherControllerImpl implements LauncherController {
   private readonly popupGroup: PopupGroup;
   private readonly calculator: FittingCalculator;
   private readonly fittingOverrides: FittingOverridesStore;
-  private readonly panelMemory: PanelConfigurationMemory;
+  private readonly launcherSelection: DimensionedSelection<LauncherClass>;
+  private readonly selectionSession: SelectionSession;
   private readonly ammoPopupValue: Popup;
   private readonly attributesPopupValue: Popup;
   private selectedLauncher?: ImportedLauncher;
@@ -68,7 +69,8 @@ export class LauncherControllerImpl implements LauncherController {
     this.popupGroup = deps.popupGroup;
     this.calculator = deps.fittingCalculator;
     this.fittingOverrides = deps.fittingOverrides;
-    this.panelMemory = deps.panelMemory;
+    this.launcherSelection = deps.launcherSelection;
+    this.selectionSession = deps.selectionSession;
     this.ammoList = new SelectableListImpl({
       itemClass: "launcher-ammo-item selectable-item",
       nameClass: "launcher-ammo-name",
@@ -126,12 +128,12 @@ export class LauncherControllerImpl implements LauncherController {
     this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
     this.fittingState = imported.fittingState;
     this.fittingOverrides.clear();
-    this.panelMemory.clear();
+    this.selectionSession.clear();
     this.selectedLauncher = imported.launcher;
     this.currentAmmoId = imported.launcher?.chargeId;
     if (imported.launcher) {
       this.originalLauncherModuleId = imported.launcher.moduleId;
-      this.panelMemory.rememberLauncher(this.launcherClasses.classOf(imported.launcher.moduleId), { moduleId: imported.launcher.moduleId, ammoId: imported.launcher.chargeId });
+      this.launcherSelection.noteApplied(this.launcherClasses.classOf(imported.launcher.moduleId), { moduleId: imported.launcher.moduleId, ammoId: imported.launcher.chargeId });
     }
     this.render();
   }
@@ -145,7 +147,7 @@ export class LauncherControllerImpl implements LauncherController {
         this.fittingState = imported.fittingState;
         this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
         this.fittingOverrides.clear();
-        this.panelMemory.clear();
+        this.selectionSession.clear();
         this.selectedLauncher = imported.launcher;
         this.currentAmmoId = imported.launcher.chargeId;
         this.originalLauncherModuleId = imported.launcher.moduleId;
@@ -155,7 +157,7 @@ export class LauncherControllerImpl implements LauncherController {
           this.selectedLauncher = this.calculator.resolveLauncher(patched, conditions)!;
           this.currentAmmoId = this.selectedLauncher.chargeId;
         }
-        this.panelMemory.rememberLauncher(this.launcherClasses.classOf(this.selectedLauncher.moduleId), { moduleId: this.selectedLauncher.moduleId, ammoId: this.currentAmmoId });
+        this.launcherSelection.noteApplied(this.launcherClasses.classOf(this.selectedLauncher.moduleId), { moduleId: this.selectedLauncher.moduleId, ammoId: this.currentAmmoId });
       } else {
         this.selectedLauncher = undefined;
         this.currentAmmoId = undefined;
@@ -182,7 +184,7 @@ export class LauncherControllerImpl implements LauncherController {
     this.conditions = undefined;
     this.originalLauncherModuleId = undefined;
     this.fittingOverrides.clear();
-    this.panelMemory.clear();
+    this.selectionSession.clear();
     this.render();
   }
 
@@ -271,10 +273,10 @@ export class LauncherControllerImpl implements LauncherController {
     if (!launcher || !this.originalLauncherModuleId) return;
     const currentClass = this.launcherClasses.classOf(launcher.moduleId);
     if (currentClass === target) return;
-    const remembered = this.panelMemory.recallLauncher(target);
-    const targetModuleId = remembered?.moduleId ?? this.launcherClasses.representativeOf(target);
+    const remembered = this.launcherSelection.selectionFor(target);
+    const targetModuleId = remembered.moduleId;
     const targetLauncherStats = this.fittingDb.launchers[targetModuleId];
-    const targetAmmoId = remembered?.ammoId ?? (targetLauncherStats ? this.missileCatalog.usualForLauncher(targetLauncherStats) : undefined);
+    const targetAmmoId = remembered.ammoId ?? (targetLauncherStats ? this.missileCatalog.usualForLauncher(targetLauncherStats) : undefined);
     this.fittingOverrides.clearLauncher();
     this.fittingOverrides.setLauncherModule(this.originalLauncherModuleId, targetModuleId);
     if (targetAmmoId) this.fittingOverrides.setLauncherCharge(targetModuleId, targetAmmoId);
@@ -372,7 +374,7 @@ export class LauncherControllerImpl implements LauncherController {
 
   private rememberCurrentLauncherSelection(): void {
     if (!this.selectedLauncher || this.currentAmmoId === undefined) return;
-    this.panelMemory.rememberLauncher(
+    this.launcherSelection.noteApplied(
       this.launcherClasses.classOf(this.selectedLauncher.moduleId),
       { moduleId: this.selectedLauncher.moduleId, ammoId: this.currentAmmoId },
     );

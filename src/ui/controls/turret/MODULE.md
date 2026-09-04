@@ -22,4 +22,4 @@ no-new-exports:
 
 Turret input, state resolution, ammo rendering, and signature-resolution UI.
 
-The public surface is `TurretController`. The module owns its DOM collection through a private `collectTurretEls`. `TurretController` depends on `FittingCalculator`, `FittingOverridesStore`, and `PanelConfigurationMemory` from the `fitting` and `ui` modules to recompute the fitted turret when the user switches weapon-size class, variant, or ammunition. User selections are written as fitting overrides against the original module; the calculator resolves the final turret projection from the patched `FittingState`.
+The public surface is `TurretController`. The module owns its DOM collection through a private `collectTurretEls`. `TurretController` depends on `FittingCalculator`, `FittingOverridesStore`, and `DimensionedSelection<TurretDimension>` from the `fitting` and `selectionSession` modules to recompute the fitted turret when the user switches weapon-size class, variant, or ammunition. User selections are written as fitting overrides against the original module; the calculator resolves the final turret projection from the patched `FittingState`.

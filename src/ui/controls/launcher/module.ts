@@ -4,6 +4,7 @@ import type { createControlsEls } from "../elements";
 import type { Side } from "../side";
 import { LauncherControllerImpl } from "./launcherController";
 import type { LauncherController, LauncherEls } from "./launcherControllerContract";
+import { createLauncherSelection } from "../../selectionSession";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -19,6 +20,7 @@ export function registerLauncherModule<T extends ControlsCradle>(cradle: AwilixC
 }
 
 function createLauncherController(side: Side, deps: ControlsCradle): LauncherControllerImpl {
+  const session = deps.selectionSessionBySide[side];
   return new LauncherControllerImpl({
     side,
     els: collectLauncherEls(deps.els, side),
@@ -33,7 +35,8 @@ function createLauncherController(side: Side, deps: ControlsCradle): LauncherCon
     popupGroup: deps.popupGroup,
     fittingCalculator: deps.fittingCalculator,
     fittingOverrides: deps.fittingOverridesBySide[side],
-    panelMemory: deps.panelMemoryBySide[side],
+    launcherSelection: createLauncherSelection(session, deps.launcherClasses),
+    selectionSession: session,
   });
 }
 

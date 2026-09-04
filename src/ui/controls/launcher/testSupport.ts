@@ -6,7 +6,7 @@ import type { ShipId, TypeId } from "../../../gamedata/ids";
 import type { Ships, SkillLevel } from "../../../ships";
 import { UiEventsImpl } from "../../events";
 import type { I18n, Language } from "../../i18n";
-import { PanelConfigurationMemoryImpl } from "../../panelConfigurationMemory";
+import { createSelectionSession, createLauncherSelection } from "../../selectionSession";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
 import { fakeDocument } from "../testSupport";
@@ -168,7 +168,8 @@ export function buildLauncher(
   });
   const launchersByModuleId: Readonly<Record<string, ImportedLauncher>> = options.launchersByModuleId ?? {};
   const fittingOverrides = new FittingOverridesStoreImpl();
-  const panelMemory = new PanelConfigurationMemoryImpl();
+  const selectionSession = createSelectionSession();
+  const launcherSelection = createLauncherSelection(selectionSession, launcherClasses);
   const fittingCalculator = vi.mocked<FittingCalculator>({
     resolveTurrets: vi.fn(() => []),
     resolveLauncher: vi.fn((state) => {
@@ -197,7 +198,8 @@ export function buildLauncher(
     popupGroup,
     fittingCalculator,
     fittingOverrides,
-    panelMemory,
+    launcherSelection,
+    selectionSession,
   });
-  return { document, controller, missileCatalog, launcherClasses, ships, imageCatalog, fittingImport, fittingDb, i18n, events, popupGroup, fittingOverrides, panelMemory, fittingCalculator };
+  return { document, controller, missileCatalog, launcherClasses, ships, imageCatalog, fittingImport, fittingDb, i18n, events, popupGroup, fittingOverrides, selectionSession, fittingCalculator };
 }

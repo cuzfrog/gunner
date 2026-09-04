@@ -21,6 +21,7 @@ import { registerShareModule } from "./share";
 import type { Side } from "./side";
 import { registerSidePanelModule } from "./sidePanel";
 import { registerTurretModule } from "./turret";
+import { registerSelectionSessionModule } from "../selectionSession";
 import { registerEwarModule } from "./ewar";
 import { registerDefenseModule } from "./defense";
 import { registerBoosterModule } from "./booster";
@@ -42,6 +43,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
     els: asFunction(createControlsEls).singleton(),
   });
   registerHintsModule(cradle);
+  registerSelectionSessionModule(cradle);
   registerTurretModule(cradle);
   registerLauncherModule(cradle);
   registerDroneModule(cradle);

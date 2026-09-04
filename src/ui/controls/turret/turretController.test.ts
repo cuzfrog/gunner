@@ -81,7 +81,7 @@ describe("TurretController", () => {
   });
 
   test("clear resets turret, cargo and expand state", () => {
-    const { document, controller, chargeCatalog } = buildTurret({
+    const { document, controller, chargeCatalog, selectionSession } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER_WITH_CARGO) },
       chargeCatalog: { chargesForTurret: vi.fn(() => CHARGE_OPTIONS) },
     });
@@ -93,6 +93,7 @@ describe("TurretController", () => {
     expect(controller.ammo()).toBe("Hail S");
     expect(getFake(document, "ship-a-ammo-trigger").disabled).toBe(true);
     expect(getFake(document, "ship-a-ammo-all-section").hidden).toBe(true);
+    expect(selectionSession.recall("turret:autocannon:S")).toBeUndefined();
   });
 
   test("expand toggle reveals and hides the all charges section", () => {
@@ -513,7 +514,7 @@ describe("TurretController", () => {
   });
 
   test("variant selection remembers the module per sig-res class and restores it on sig-res round-trip", () => {
-    const { document, controller, gunFamilies, panelMemory } = buildTurret({
+    const { document, controller, gunFamilies, selectionSession } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
     });
     vi.mocked(gunFamilies.variantsForFamily).mockReturnValue([
@@ -530,7 +531,7 @@ describe("TurretController", () => {
     buttonFor(document, "M").trigger("click");
     expect(controller.turret()?.moduleId).toBe("491" as TypeId);
     expect(controller.turret()?.sigResolutionClass).toBe("M");
-    expect(panelMemory.recallTurret("autocannon", "M")?.moduleId).toBe("491" as TypeId);
+    expect(selectionSession.recall("turret:autocannon:M")?.moduleId).toBe("491" as TypeId);
     buttonFor(document, "S").trigger("click");
     expect(controller.turret()?.moduleId).toBe("21076" as TypeId);
     expect(controller.turret()?.sigResolutionClass).toBe("S");
