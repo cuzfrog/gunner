@@ -1,6 +1,7 @@
 ---
 no-new-exports:
   - defenseController.ts
+  - defenseController.test.ts
   - defenseControllerContract.ts
   - module.ts
   - index.ts

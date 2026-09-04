@@ -26,7 +26,7 @@ export interface DefenseController {
   updateSummaries(): void;
   render(): void;
   signaturePenalty(side: Side): number;
-  updateEffectiveSig(side: Side, baseSig: number): void;
+  updateEffectiveSig(side: Side, sig: number): void;
   damageEnabled(side: Side): boolean;
   setDamageEnabled(side: Side, enabled: boolean): void;
   repairMode(side: Side): StoredRepairMode;
