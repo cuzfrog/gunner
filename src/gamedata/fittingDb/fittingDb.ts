@@ -29,7 +29,7 @@ export interface DefenseAncillary {
 }
 
 export interface DefenseModuleStats {
-  readonly kind: "damageControl" | "rah" | "repairer" | "boostAmplifier" | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule" | "hullBulkhead";
+  readonly kind: "damageControl" | "rah" | "repairer" | "boostAmplifier" | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule" | "hullBulkhead" | "hpPercent" | "rechargeAmplifier" | "repairAmplifier";
   readonly layer?: DefenseLayer;
   readonly active?: boolean;
   readonly resistBonus?: DamageResists;
@@ -50,8 +50,11 @@ export interface DefenseModuleStats {
   readonly shieldHpAdd?: number;
   readonly armorHpAdd?: number;
   readonly hullHpPercent?: number;
+  readonly hpPercent?: number;
   readonly sigRadiusPenalty?: number;
   readonly rechargeMultiplier?: number;
+  readonly repairAmountMultiplier?: number;
+  readonly repairCycleTimeMultiplier?: number;
 }
 
 export interface FittingModuleStats {

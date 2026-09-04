@@ -5,6 +5,7 @@ import type { ShipId, TypeId } from "../src/gamedata/ids";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 import type { ShipNameLanguage } from "../src/ships";
 import type { DamageResists } from "../src/sim";
+import { buildDefenseStatsFromIntents } from "./fittingDb/buildDefenseStats";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const OUT_FILE = join(import.meta.dir, "..", "src", "gamedata", "fittingDb", "fittingDb.ts");
@@ -222,29 +223,6 @@ const DRONE_CONTROL_RANGE_MODULE_GROUP = 647;
 const RIG_SIG_DRAWBACK_EFFECT = 2716;
 const RIG_AGILITY_DRAWBACK_EFFECT = 2717;
 const SHIP_CATEGORY_ID = 6;
-
-// Defense module effect IDs (from RESEARCH.md pyfa effect anchors)
-const DEFENSE_EFFECTS = {
-  damageControl: 2302,
-  armorResonancePassive: 2041,
-  armorResonancePassiveRig: 2792,
-  shieldResonancePassive: 2052,
-  shieldResonancePassiveRig: 2795,
-  shieldHardener: 5230,
-  armorHardener: 5231,
-  shieldBoost: 4,
-  armorRepair: 27,
-  structureRepair: 26,
-  fueledShieldBoost: 4936,
-  fueledArmorRepair: 5275,
-  shieldBoostAmplifier: 1720,
-  rah: 4928,
-  shieldExtender: 21,
-  armorPlate: 1959,
-  shieldRecharge: 50,
-  structureHpMultiply: 60,
-  hullHpBonus: 392,
-} as const;
 
 // Maps module dogma effectIDs to the weapon group they modify. These are damage/RoF
 // multiplier effects from Heat Sinks, Gyrostabilizers, Magnetic Field Stabilizers, and
@@ -835,7 +813,8 @@ interface DefenseAncillary {
 
 interface DefenseModuleStats {
   readonly kind: "damageControl" | "rah" | "repairer" | "boostAmplifier"
-    | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule" | "hullBulkhead";
+    | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule" | "hullBulkhead"
+    | "hpPercent" | "rechargeAmplifier" | "repairAmplifier";
   readonly layer?: "shield" | "armor" | "hull";
   readonly active?: boolean;
   readonly resistBonus?: DamageResists;
@@ -856,235 +835,21 @@ interface DefenseModuleStats {
   readonly shieldHpAdd?: number;
   readonly armorHpAdd?: number;
   readonly hullHpPercent?: number;
+  readonly hpPercent?: number;
   readonly sigRadiusPenalty?: number;
   readonly rechargeMultiplier?: number;
+  readonly repairAmountMultiplier?: number;
+  readonly repairCycleTimeMultiplier?: number;
 }
 
-function buildDefenseStats(values: Map<string, number>, effects: Set<number>, groupId: number): DefenseModuleStats | undefined {
-  if (effects.has(DEFENSE_EFFECTS.damageControl)) return buildDamageControlStats(values);
-  if (effects.has(DEFENSE_EFFECTS.rah)) return buildRahStats(values);
-  if (effects.has(DEFENSE_EFFECTS.shieldBoost) || effects.has(DEFENSE_EFFECTS.fueledShieldBoost)) {
-    return buildShieldBoosterStats(values, effects);
-  }
-  if (effects.has(DEFENSE_EFFECTS.armorRepair) || effects.has(DEFENSE_EFFECTS.fueledArmorRepair)) {
-    return buildArmorRepairerStats(values, effects, groupId);
-  }
-  if (effects.has(DEFENSE_EFFECTS.structureRepair)) return buildHullRepairerStats(values);
-  if (effects.has(DEFENSE_EFFECTS.shieldBoostAmplifier)) return buildShieldBoostAmplifierStats(values);
-  if (effects.has(DEFENSE_EFFECTS.shieldHardener) || effects.has(DEFENSE_EFFECTS.armorHardener)) {
-    return buildActiveHardenerStats(values, effects);
-  }
-  if (effects.has(DEFENSE_EFFECTS.armorResonancePassive) || effects.has(DEFENSE_EFFECTS.shieldResonancePassive) || effects.has(DEFENSE_EFFECTS.armorResonancePassiveRig) || effects.has(DEFENSE_EFFECTS.shieldResonancePassiveRig)) {
-    return buildPassiveResistStats(values, effects);
-  }
-  if (effects.has(DEFENSE_EFFECTS.shieldExtender)) return buildShieldExtenderStats(values);
-  if (effects.has(DEFENSE_EFFECTS.armorPlate)) return buildArmorPlateStats(values);
-  if (effects.has(DEFENSE_EFFECTS.shieldRecharge)) return buildRechargeModuleStats(values);
-  if (effects.has(DEFENSE_EFFECTS.structureHpMultiply)) return buildHullBulkheadStatsFromMultiplier(values);
-  if (effects.has(DEFENSE_EFFECTS.hullHpBonus)) return buildHullBulkheadStatsFromPercent(values);
-  return undefined;
-}
-
-function buildDamageControlStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const shieldResists = extractDcResonances(values, "shield");
-  const armorResists = extractDcResonances(values, "armor");
-  const hullResists = extractDcResonances(values, "hull");
-  if (!shieldResists && !armorResists && !hullResists) return undefined;
-  return {
-    kind: "damageControl",
-    shieldResists: shieldResists ?? undefined,
-    armorResists: armorResists ?? undefined,
-    hullResists: hullResists ?? undefined,
-  };
-}
-
-function buildRahStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const armorResonances = extractDcResonances(values, "armor");
-  const resistanceShiftAmount = optionalNumber(values.get("resistanceShiftAmount"));
-  const duration = optionalNumber(values.get("duration"));
-  const capacitorNeed = optionalNumber(values.get("capacitorNeed"));
-  const overloadDurationBonus = optionalNumber(values.get("overloadSelfDurationBonus"));
-  if (!armorResonances) return undefined;
-  return {
-    kind: "rah",
-    baseArmorResists: armorResonances,
-    resistanceShiftAmount: resistanceShiftAmount ?? 6,
-    cycleTime: duration !== undefined ? duration / 1000 : undefined,
-    capacitorNeed,
-    overloadCycleTimeMultiplier: overloadDurationBonus !== undefined ? 1 + overloadDurationBonus / 100 : undefined,
-  };
-}
-
-function buildShieldBoosterStats(values: Map<string, number>, effects: Set<number>): DefenseModuleStats | undefined {
-  const shieldBonus = optionalNumber(values.get("shieldBonus"));
-  const duration = optionalNumber(values.get("duration"));
-  if (shieldBonus === undefined || duration === undefined) return undefined;
-  const capacitorNeed = optionalNumber(values.get("capacitorNeed"));
-  const heatDamage = optionalNumber(values.get("heatDamage"));
-  const overloadShieldBonus = optionalNumber(values.get("overloadShieldBonus"));
-  const overloadDurationBonus = optionalNumber(values.get("overloadSelfDurationBonus"));
-  const isAncillary = effects.has(DEFENSE_EFFECTS.fueledShieldBoost);
-  const reloadTime = optionalNumber(values.get("reloadTime"));
-  const ancillary = isAncillary ? { chargeMultiplier: 1, shots: 0, reloadTime: (reloadTime ?? 0) / 1000 } : undefined;
-  return {
-    kind: "repairer",
-    layer: "shield",
-    amount: shieldBonus,
-    cycleTime: duration / 1000,
-    capacitorNeed,
-    heatDamage,
-    overload: buildRepairerOverload(overloadShieldBonus, overloadDurationBonus),
-    ancillary,
-  };
-}
-
-function buildArmorRepairerStats(values: Map<string, number>, effects: Set<number>, groupId: number): DefenseModuleStats | undefined {
-  const armorDamageAmount = optionalNumber(values.get("armorDamageAmount"));
-  const duration = optionalNumber(values.get("duration"));
-  if (armorDamageAmount === undefined || duration === undefined) return undefined;
-  const capacitorNeed = optionalNumber(values.get("capacitorNeed"));
-  const heatDamage = optionalNumber(values.get("heatDamage"));
-  const overloadAmountBonus = optionalNumber(values.get("overloadArmorDamageAmount"));
-  const overloadDurationBonus = optionalNumber(values.get("overloadSelfDurationBonus"));
-  const isAncillary = groupId === 1199 || effects.has(DEFENSE_EFFECTS.fueledArmorRepair);
-  const chargedArmorDamageMultiplier = optionalNumber(values.get("chargedArmorDamageMultiplier"));
-  const reloadTime = optionalNumber(values.get("reloadTime"));
-  const ancillary = buildAncillary(isAncillary, chargedArmorDamageMultiplier ?? 1, reloadTime);
-  return {
-    kind: "repairer",
-    layer: "armor",
-    amount: armorDamageAmount,
-    cycleTime: duration / 1000,
-    capacitorNeed,
-    heatDamage,
-    overload: buildRepairerOverload(overloadAmountBonus, overloadDurationBonus),
-    ancillary,
-  };
-}
-
-function buildHullRepairerStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const structureDamageAmount = optionalNumber(values.get("structureDamageAmount"));
-  const duration = optionalNumber(values.get("duration"));
-  if (structureDamageAmount === undefined || duration === undefined) return undefined;
-  const capacitorNeed = optionalNumber(values.get("capacitorNeed"));
-  const heatDamage = optionalNumber(values.get("heatDamage"));
-  return {
-    kind: "repairer",
-    layer: "hull",
-    amount: structureDamageAmount,
-    cycleTime: duration / 1000,
-    capacitorNeed,
-    heatDamage,
-    overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 },
-  };
-}
-
-function buildShieldBoostAmplifierStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const shieldBoostMultiplier = optionalNumber(values.get("shieldBoostMultiplier"));
-  if (shieldBoostMultiplier === undefined) return undefined;
-  return { kind: "boostAmplifier", multiplier: round6(1 + shieldBoostMultiplier / 100) };
-}
-
-function buildActiveHardenerStats(values: Map<string, number>, effects: Set<number>): DefenseModuleStats | undefined {
-  const layer = effects.has(DEFENSE_EFFECTS.shieldHardener) ? "shield" : "armor";
-  const resistBonus = extractResistBonus(values);
-  if (!resistBonus) return undefined;
-  const duration = optionalNumber(values.get("duration"));
-  const capacitorNeed = optionalNumber(values.get("capacitorNeed"));
-  const heatDamage = optionalNumber(values.get("heatDamage"));
-  const overloadHardeningBonus = optionalNumber(values.get("overloadHardeningBonus"));
-  return {
-    kind: "resistModule",
-    layer,
-    active: true,
-    resistBonus,
-    overloadBonusMultiplier: overloadHardeningBonus !== undefined ? 1 + overloadHardeningBonus / 100 : undefined,
-    cycleTime: duration !== undefined ? duration / 1000 : undefined,
-    capacitorNeed,
-    heatDamage,
-  };
-}
-
-function buildPassiveResistStats(values: Map<string, number>, effects: Set<number>): DefenseModuleStats | undefined {
-  const layer = (effects.has(DEFENSE_EFFECTS.shieldResonancePassive) || effects.has(DEFENSE_EFFECTS.shieldResonancePassiveRig)) ? "shield" : "armor";
-  const resistBonus = extractResistBonus(values);
-  if (!resistBonus) return undefined;
-  return { kind: "resistModule", layer, active: false, resistBonus };
-}
-
-function buildShieldExtenderStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const capacityBonus = optionalNumber(values.get("capacityBonus"));
-  if (capacityBonus === undefined) return undefined;
-  const sigRadiusAdd = optionalNumber(values.get("signatureRadiusAdd"));
-  return { kind: "shieldExtender", shieldHpAdd: capacityBonus, sigRadiusPenalty: sigRadiusAdd };
-}
-
-function buildArmorPlateStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const armorHpBonusAdd = optionalNumber(values.get("armorHPBonusAdd"));
-  if (armorHpBonusAdd === undefined) return undefined;
-  return { kind: "armorPlate", armorHpAdd: armorHpBonusAdd };
-}
-
-function buildHullBulkheadStatsFromMultiplier(values: Map<string, number>): DefenseModuleStats | undefined {
-  const multiplier = optionalNumber(values.get("structureHPMultiplier"));
-  if (multiplier === undefined) return undefined;
-  return { kind: "hullBulkhead", hullHpPercent: round6((multiplier - 1) * 100) };
-}
-
-function buildHullBulkheadStatsFromPercent(values: Map<string, number>): DefenseModuleStats | undefined {
-  const hullHpBonusPercent = optionalNumber(values.get("hullHpBonus"));
-  if (hullHpBonusPercent === undefined) return undefined;
-  return { kind: "hullBulkhead", hullHpPercent: hullHpBonusPercent };
-}
-
-function buildRechargeModuleStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const rechargeBonus = optionalNumber(values.get("rechargeratebonus")) ?? optionalNumber(values.get("shieldRechargeRateMultiplier"));
-  if (rechargeBonus === undefined) return undefined;
-  return { kind: "rechargeModule", rechargeMultiplier: 1 + rechargeBonus / 100 };
-}
-
-function buildRepairerOverload(amountBonus: number | undefined, durationBonus: number | undefined): DefenseRepairerOverload {
-  return {
-    amountMultiplier: amountBonus !== undefined ? 1 + amountBonus / 100 : 1,
-    cycleTimeMultiplier: durationBonus !== undefined ? 1 + durationBonus / 100 : 1,
-  };
-}
-
-function buildAncillary(isAncillary: boolean, chargeMultiplier: number, reloadTime: number | undefined): DefenseAncillary | undefined {
-  if (!isAncillary) return undefined;
-  return { chargeMultiplier, shots: 0, reloadTime: (reloadTime ?? 0) / 1000 };
-}
-
-function extractResistBonus(values: Map<string, number>): DamageResists | undefined {
-  const em = optionalNumber(values.get("emDamageResistanceBonus"));
-  const thermal = optionalNumber(values.get("thermalDamageResistanceBonus"));
-  const kinetic = optionalNumber(values.get("kineticDamageResistanceBonus"));
-  const explosive = optionalNumber(values.get("explosiveDamageResistanceBonus"));
-  if (em === undefined && thermal === undefined && kinetic === undefined && explosive === undefined) return undefined;
-  return {
-    em: round6(Math.abs(em ?? 0) / 100),
-    thermal: round6(Math.abs(thermal ?? 0) / 100),
-    kinetic: round6(Math.abs(kinetic ?? 0) / 100),
-    explosive: round6(Math.abs(explosive ?? 0) / 100),
-  };
-}
-
-function extractDcResonances(values: Map<string, number>, prefix: string): DamageResists | undefined {
-  const emAttr = prefix === "hull" ? "hullEmDamageResonance" : `${prefix}EmDamageResonance`;
-  const thermalAttr = prefix === "hull" ? "hullThermalDamageResonance" : `${prefix}ThermalDamageResonance`;
-  const kineticAttr = prefix === "hull" ? "hullKineticDamageResonance" : `${prefix}KineticDamageResonance`;
-  const explosiveAttr = prefix === "hull" ? "hullExplosiveDamageResonance" : `${prefix}ExplosiveDamageResonance`;
-  const em = optionalNumber(values.get(emAttr));
-  const thermal = optionalNumber(values.get(thermalAttr));
-  const kinetic = optionalNumber(values.get(kineticAttr));
-  const explosive = optionalNumber(values.get(explosiveAttr));
-  if (em === undefined && thermal === undefined && kinetic === undefined && explosive === undefined) return undefined;
-  return {
-    em: round6(1 - (em ?? 1)),
-    thermal: round6(1 - (thermal ?? 1)),
-    kinetic: round6(1 - (kinetic ?? 1)),
-    explosive: round6(1 - (explosive ?? 1)),
-  };
+function buildDefenseStats(
+  values: Map<string, number>,
+  effects: Set<number>,
+  groupId: number,
+  typeDogma: SdeTypeDogma | undefined,
+  dogmaEffects: Readonly<Record<string, SdeDogmaEffect>>,
+): DefenseModuleStats | undefined {
+  return buildDefenseStatsFromIntents({ values, effects, groupId, typeDogma, dogmaEffects });
 }
 
 function round6(value: number): number {
@@ -1791,7 +1556,7 @@ async function main() {
         addItemName(itemNames, id, type);
       } else {
         const stats = buildModuleStats(values, effects);
-        const defense = buildDefenseStats(values, effects, type.groupID);
+        const defense = buildDefenseStats(values, effects, type.groupID, typeDogma, dogmaEffects);
         if (stats || defense) {
           fittingModules[id] = { ...stats, defense, id, name: enName };
           addItemName(itemNames, id, type);
@@ -1839,7 +1604,7 @@ export interface DefenseAncillary {
 }
 
 export interface DefenseModuleStats {
-  readonly kind: "damageControl" | "rah" | "repairer" | "boostAmplifier" | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule" | "hullBulkhead";
+  readonly kind: "damageControl" | "rah" | "repairer" | "boostAmplifier" | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule" | "hullBulkhead" | "hpPercent" | "rechargeAmplifier" | "repairAmplifier";
   readonly layer?: DefenseLayer;
   readonly active?: boolean;
   readonly resistBonus?: DamageResists;
@@ -1860,8 +1625,11 @@ export interface DefenseModuleStats {
   readonly shieldHpAdd?: number;
   readonly armorHpAdd?: number;
   readonly hullHpPercent?: number;
+  readonly hpPercent?: number;
   readonly sigRadiusPenalty?: number;
   readonly rechargeMultiplier?: number;
+  readonly repairAmountMultiplier?: number;
+  readonly repairCycleTimeMultiplier?: number;
 }
 
 export interface FittingModuleStats {

@@ -74,12 +74,17 @@ function collectDefenseModules(db: FittingDb, fitting: FittingState): readonly D
 function resolveShieldHp(profile: ShipProfile, modules: readonly DefenseModuleEntry[], hullBonuses: readonly HullBonus[], skills: DefenseSkills, skillLevel: SkillLevel): number {
   const shieldHpPercentMultiplier = hullBonusMultiplier(hullBonuses, "shieldHpPercent", skillLevel);
   let hp = profile.shieldHp * shieldHpPercentMultiplier;
+  let hpPercentMultiplier = 1;
   const extenderAdds: number[] = [];
   for (const mod of modules) {
     if (mod.stats.kind === "shieldExtender" && mod.stats.shieldHpAdd !== undefined) {
       extenderAdds.push(mod.stats.shieldHpAdd);
     }
+    if (mod.stats.kind === "hpPercent" && mod.stats.layer === "shield" && mod.stats.hpPercent !== undefined) {
+      hpPercentMultiplier *= 1 + mod.stats.hpPercent / 100;
+    }
   }
+  hp *= hpPercentMultiplier;
   const extenderTotal = extenderAdds.reduce((sum, add) => sum + add, 0);
   const extenderBonusMultiplier = hullBonusMultiplier(hullBonuses, "extenderHpPercent", skillLevel);
   hp += extenderTotal * extenderBonusMultiplier;
@@ -90,12 +95,17 @@ function resolveShieldHp(profile: ShipProfile, modules: readonly DefenseModuleEn
 function resolveArmorHp(profile: ShipProfile, modules: readonly DefenseModuleEntry[], hullBonuses: readonly HullBonus[], skills: DefenseSkills, skillLevel: SkillLevel): number {
   const armorHpPercentMultiplier = hullBonusMultiplier(hullBonuses, "armorHpPercent", skillLevel);
   let hp = profile.armorHp * armorHpPercentMultiplier;
+  let hpPercentMultiplier = 1;
   const plateAdds: number[] = [];
   for (const mod of modules) {
     if (mod.stats.kind === "armorPlate" && mod.stats.armorHpAdd !== undefined) {
       plateAdds.push(mod.stats.armorHpAdd);
     }
+    if (mod.stats.kind === "hpPercent" && mod.stats.layer === "armor" && mod.stats.hpPercent !== undefined) {
+      hpPercentMultiplier *= 1 + mod.stats.hpPercent / 100;
+    }
   }
+  hp *= hpPercentMultiplier;
   const plateTotal = plateAdds.reduce((sum, add) => sum + add, 0);
   const plateBonusMultiplier = hullBonusMultiplier(hullBonuses, "plateHpPercent", skillLevel);
   hp += plateTotal * plateBonusMultiplier;
@@ -119,6 +129,9 @@ function resolveShieldRecharge(profile: ShipProfile, modules: readonly DefenseMo
   const rechargeMultipliers: number[] = [];
   for (const mod of modules) {
     if (mod.stats.kind === "rechargeModule" && mod.stats.rechargeMultiplier !== undefined) {
+      rechargeMultipliers.push(mod.stats.rechargeMultiplier);
+    }
+    if (mod.stats.kind === "rechargeAmplifier" && mod.stats.rechargeMultiplier !== undefined) {
       rechargeMultipliers.push(mod.stats.rechargeMultiplier);
     }
   }
@@ -190,16 +203,27 @@ function resolveResistForType(
 function resolveRepairers(modules: readonly DefenseModuleEntry[], skills: DefenseSkills, stacking: StackingPenalty): readonly RepairerSpec[] {
   const repairers: RepairerSpec[] = [];
   const boostAmplifierMultiplier = resolveBoostAmplifierMultiplier(modules, stacking);
+  const repairAmountMultipliers: number[] = [];
+  const repairCycleTimeMultipliers: number[] = [];
+  for (const mod of modules) {
+    if (mod.stats.kind === "repairAmplifier") {
+      if (mod.stats.repairAmountMultiplier !== undefined) repairAmountMultipliers.push(mod.stats.repairAmountMultiplier);
+      if (mod.stats.repairCycleTimeMultiplier !== undefined) repairCycleTimeMultipliers.push(mod.stats.repairCycleTimeMultiplier);
+    }
+  }
+  const repairAmountMultiplier = repairAmountMultipliers.length > 0 ? stacking.apply(repairAmountMultipliers) : 1;
+  const repairCycleTimeMultiplier = repairCycleTimeMultipliers.length > 0 ? stacking.apply(repairCycleTimeMultipliers) : 1;
   for (const mod of modules) {
     const stats = mod.stats;
     if (stats.kind !== "repairer") continue;
     if (stats.amount === undefined || stats.cycleTime === undefined) continue;
     const layer = stats.layer ?? "shield";
-    const amount = layer === "shield" ? stats.amount * boostAmplifierMultiplier : stats.amount;
+    const baseAmount = layer === "shield" ? stats.amount * boostAmplifierMultiplier : stats.amount;
+    const amount = baseAmount * repairAmountMultiplier;
     repairers.push({
       layer,
       amount,
-      cycleTime: stats.cycleTime,
+      cycleTime: stats.cycleTime * repairCycleTimeMultiplier,
       capacitorNeed: stats.capacitorNeed ?? 0,
       heatDamage: stats.heatDamage ?? 0,
       overload: stats.overload ?? { amountMultiplier: 1, cycleTimeMultiplier: 1 },
