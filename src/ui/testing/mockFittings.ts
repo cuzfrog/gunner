@@ -4,6 +4,7 @@ import type { FittingDb, LauncherStats, TurretStats } from "../../gamedata/fitti
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
 import type { HitChance, SigResolutionClass } from "../../sim";
+import { EMPTY_DEFENSE_SPEC, EMPTY_SENSOR_BOOST_LOADOUT, ZERO_DAMAGE } from "../../sim";
 import type { Language } from "../i18n";
 import type { ClipboardProvider, SavedFittings, SessionSettings, SettingsParser, SettingsStore } from "../../appstate";
 import type { DisplayPreferences, ProfileSettings, UserSettings } from "../../appstate";
@@ -103,6 +104,7 @@ const MOCK_REPRESENTATIVES: Record<GunFamily, Record<SigResolutionClass, TypeId>
   beamLaser: { S: toTypeId("454"), M: toTypeId("459"), L: toTypeId("464"), XL: toTypeId("20446") },
   blaster: { S: toTypeId("564"), M: toTypeId("568"), L: toTypeId("573"), XL: toTypeId("20450") },
   railgun: { S: toTypeId("565"), M: toTypeId("570"), L: toTypeId("574"), XL: toTypeId("20448") },
+  disintegrator: { S: toTypeId("47912"), M: toTypeId("47915"), L: toTypeId("47918"), XL: toTypeId("52998") },
 };
 
 export function mockGunFamilies(): GunFamilies {
@@ -122,9 +124,19 @@ export const RIFTER: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 365,
   sigRadius: 36,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 export const FITTED: FittedHull = { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
@@ -139,7 +151,7 @@ export const TURRET: ImportedTurret = {
   base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
   moduleId: "486" as TypeId,
   damageMultiplier: 3,
-  damagePerShot: 12,
+  damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 },
   cycleTime: 5,
   turretCount: 1,
   damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
@@ -149,6 +161,7 @@ const EMPTY_FITTING_STATE: FittingState = {
   profile: RIFTER,
   hullBonuses: [],
   supportModules: [],
+  defenseModules: [],
   turretGroups: [],
   launcherGroups: [],
   propulsionModule: undefined,
@@ -156,6 +169,8 @@ const EMPTY_FITTING_STATE: FittingState = {
   boosterModules: [], missileBoosterModules: [], droneBoosterModules: [], droneGroups: [],
   drones: [],
   cargo: [],
+  sensorBoosterModules: [],
+  sensorAmplifierModules: [],
 };
 
 const RIFTER_FITTING_STATE: FittingState = {
@@ -172,9 +187,12 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   turret: TURRET,
   drones: [],
   cargoCharges: [],
-  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
+  defense: EMPTY_DEFENSE_SPEC,
+  sensorSpec: { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4 },
+  sensorBoosts: EMPTY_SENSOR_BOOST_LOADOUT,
 };
 export const IMPORTED_RIFTER_WITH_CARGO: ImportedFitting = { ...IMPORTED_RIFTER, cargoCharges: [{ id: "21898" as TypeId, quantity: 2000 }] };
 
@@ -187,9 +205,9 @@ export function mockParser(): SettingsParser {
   return {
     parseUserSettings: vi.fn(() => null),
     decodeUrlSettings: vi.fn(() => null),
-    fromWire: vi.fn((wire: UserSettings): SessionSettings => ({ version: wire.version, display: { language: wire.language, shipATrackingUnit: wire.shipATrackingUnit, shipBTrackingUnit: wire.shipBTrackingUnit, weaponRangeVisibility: wire.weaponRangeVisibility, droneRangeVisibility: wire.droneRangeVisibility ?? "none", droneControlRangeVisibility: wire.droneControlRangeVisibility ?? "none", simSpeed: wire.simSpeed, gridBrightness: wire.gridBrightness ?? 0.5, autoZoom: wire.autoZoom ?? true, zoomFactor: wire.zoomFactor ?? 1 }, shipA: { speed: wire.shipASpeed, mode: wire.shipAMode, range: wire.shipARange, mass: wire.shipAMass, inertia: wire.shipAInertia, aggressivity: wire.shipAAggressivity ?? 1, skillLevel: wire.shipASkillLevel, overload: wire.shipAOverload ?? true, weaponOverload: wire.shipAWeaponOverload ?? false, hull: wire.shipAHullId, propulsion: wire.shipAPropulsion, fitting: wire.shipAFitting, overrides: wire.shipAOverrides ?? {}, fittedHull: wire.shipAFittedHull, ewarActivation: wire.shipAEwarActivation, boosterActivation: wire.shipABoosterActivation, missileBoosterActivation: wire.shipAMissileBoosterActivation, sig: wire.shipASig, tracking: wire.shipATracking ?? 0, sigRes: wire.shipASigRes ?? "S", optimal: wire.shipAOptimal ?? 0, falloff: wire.shipAFalloff ?? 0, ammo: wire.shipAAmmo, weaponKind: wire.shipAWeaponKind, missileAmmo: wire.shipAMissileAmmo }, shipB: { speed: wire.shipBSpeed, mode: wire.shipBMode, range: wire.shipBRange, mass: wire.shipBMass, inertia: wire.shipBInertia, aggressivity: wire.shipBAggressivity ?? 1, skillLevel: wire.shipBSkillLevel, overload: wire.shipBOverload ?? true, weaponOverload: wire.shipBWeaponOverload ?? false, hull: wire.shipBHullId, propulsion: wire.shipBPropulsion, fitting: wire.shipBFitting, overrides: wire.shipBOverrides ?? {}, fittedHull: wire.shipBFittedHull, ewarActivation: wire.shipBEwarActivation, boosterActivation: wire.shipBBoosterActivation, missileBoosterActivation: wire.shipBMissileBoosterActivation, sig: wire.shipBSig, tracking: wire.shipBTracking ?? 0, sigRes: wire.shipBSigRes ?? "S", optimal: wire.shipBOptimal ?? 0, falloff: wire.shipBFalloff ?? 0, ammo: wire.shipBAmmo, weaponKind: wire.shipBWeaponKind, missileAmmo: wire.shipBMissileAmmo }, initialDistance: wire.initialDistance })),
+    fromWire: vi.fn((wire: UserSettings): SessionSettings => ({ version: wire.version, display: { language: wire.language, shipATrackingUnit: wire.shipATrackingUnit, shipBTrackingUnit: wire.shipBTrackingUnit, weaponRangeVisibility: wire.weaponRangeVisibility, droneRangeVisibility: wire.droneRangeVisibility ?? "none", droneControlRangeVisibility: wire.droneControlRangeVisibility ?? "none", simSpeed: wire.simSpeed, gridBrightness: wire.gridBrightness ?? 0.5, autoZoom: wire.autoZoom ?? true, zoomFactor: wire.zoomFactor ?? 1 }, shipA: { speed: wire.shipASpeed, mode: wire.shipAMode, range: wire.shipARange, mass: wire.shipAMass, inertia: wire.shipAInertia, aggressivity: wire.shipAAggressivity ?? 1, skillLevel: wire.shipASkillLevel, overload: wire.shipAOverload ?? true, weaponOverload: wire.shipAWeaponOverload ?? false, damageEnabled: wire.shipADamageEnabled ?? true, hull: wire.shipAHullId, propulsion: wire.shipAPropulsion, fitting: wire.shipAFitting, overrides: wire.shipAOverrides ?? {}, fittedHull: wire.shipAFittedHull, ewarActivation: wire.shipAEwarActivation, boosterActivation: wire.shipABoosterActivation, missileBoosterActivation: wire.shipAMissileBoosterActivation, repMode: wire.shipARepMode, repairerActivation: wire.shipARepairerActivation, rahActivation: wire.shipARahActivation, sig: wire.shipASig, tracking: wire.shipATracking ?? 0, sigRes: wire.shipASigRes ?? "S", optimal: wire.shipAOptimal ?? 0, falloff: wire.shipAFalloff ?? 0, ammo: wire.shipAAmmo, weaponKind: wire.shipAWeaponKind, missileAmmo: wire.shipAMissileAmmo }, shipB: { speed: wire.shipBSpeed, mode: wire.shipBMode, range: wire.shipBRange, mass: wire.shipBMass, inertia: wire.shipBInertia, aggressivity: wire.shipBAggressivity ?? 1, skillLevel: wire.shipBSkillLevel, overload: wire.shipBOverload ?? true, weaponOverload: wire.shipBWeaponOverload ?? false, damageEnabled: wire.shipBDamageEnabled ?? true, hull: wire.shipBHullId, propulsion: wire.shipBPropulsion, fitting: wire.shipBFitting, overrides: wire.shipBOverrides ?? {}, fittedHull: wire.shipBFittedHull, ewarActivation: wire.shipBEwarActivation, boosterActivation: wire.shipBBoosterActivation, missileBoosterActivation: wire.shipBMissileBoosterActivation, repMode: wire.shipBRepMode, repairerActivation: wire.shipBRepairerActivation, rahActivation: wire.shipBRahActivation, sig: wire.shipBSig, tracking: wire.shipBTracking ?? 0, sigRes: wire.shipBSigRes ?? "S", optimal: wire.shipBOptimal ?? 0, falloff: wire.shipBFalloff ?? 0, ammo: wire.shipBAmmo, weaponKind: wire.shipBWeaponKind, missileAmmo: wire.shipBMissileAmmo }, initialDistance: wire.initialDistance })),
     toWire: vi.fn(),
-    fromProfile: vi.fn((profile: ProfileSettings, display: DisplayPreferences): SessionSettings => ({ version: profile.version, display, shipA: { speed: profile.shipASpeed, mode: profile.shipAMode, range: profile.shipARange, mass: profile.shipAMass, inertia: profile.shipAInertia, aggressivity: profile.shipAAggressivity ?? 1, skillLevel: profile.shipASkillLevel, overload: profile.shipAOverload ?? true, weaponOverload: profile.shipAWeaponOverload ?? false, hull: profile.shipAHullId, propulsion: profile.shipAPropulsion, fitting: profile.shipAFitting, overrides: profile.shipAOverrides ?? {}, fittedHull: profile.shipAFittedHull, ewarActivation: undefined, boosterActivation: undefined, missileBoosterActivation: undefined, sig: profile.shipASig, tracking: profile.shipATracking ?? 0, sigRes: profile.shipASigRes ?? "S", optimal: profile.shipAOptimal ?? 0, falloff: profile.shipAFalloff ?? 0, ammo: profile.shipAAmmo ?? ("12608" as TypeId), weaponKind: profile.shipAWeaponKind, missileAmmo: profile.shipAMissileAmmo }, shipB: { speed: profile.shipBSpeed, mode: profile.shipBMode, range: profile.shipBRange, mass: profile.shipBMass, inertia: profile.shipBInertia, aggressivity: profile.shipBAggressivity ?? 1, skillLevel: profile.shipBSkillLevel, overload: profile.shipBOverload ?? true, weaponOverload: profile.shipBWeaponOverload ?? false, hull: profile.shipBHullId, propulsion: profile.shipBPropulsion, fitting: profile.shipBFitting, overrides: profile.shipBOverrides ?? {}, fittedHull: profile.shipBFittedHull, ewarActivation: undefined, boosterActivation: undefined, missileBoosterActivation: undefined, sig: profile.shipBSig, tracking: profile.shipBTracking ?? 0, sigRes: profile.shipBSigRes ?? "S", optimal: profile.shipBOptimal ?? 0, falloff: profile.shipBFalloff ?? 0, ammo: profile.shipBAmmo ?? ("12608" as TypeId), weaponKind: profile.shipBWeaponKind, missileAmmo: profile.shipBMissileAmmo }, initialDistance: profile.initialDistance })),
+    fromProfile: vi.fn((profile: ProfileSettings, display: DisplayPreferences): SessionSettings => ({ version: profile.version, display, shipA: { speed: profile.shipASpeed, mode: profile.shipAMode, range: profile.shipARange, mass: profile.shipAMass, inertia: profile.shipAInertia, aggressivity: profile.shipAAggressivity ?? 1, skillLevel: profile.shipASkillLevel, overload: profile.shipAOverload ?? true, weaponOverload: profile.shipAWeaponOverload ?? false, damageEnabled: profile.shipADamageEnabled ?? true, hull: profile.shipAHullId, propulsion: profile.shipAPropulsion, fitting: profile.shipAFitting, overrides: profile.shipAOverrides ?? {}, fittedHull: profile.shipAFittedHull, ewarActivation: undefined, boosterActivation: undefined, missileBoosterActivation: undefined, repMode: profile.shipARepMode, repairerActivation: profile.shipARepairerActivation, rahActivation: profile.shipARahActivation, sig: profile.shipASig, tracking: profile.shipATracking ?? 0, sigRes: profile.shipASigRes ?? "S", optimal: profile.shipAOptimal ?? 0, falloff: profile.shipAFalloff ?? 0, ammo: profile.shipAAmmo ?? ("12608" as TypeId), weaponKind: profile.shipAWeaponKind, missileAmmo: profile.shipAMissileAmmo }, shipB: { speed: profile.shipBSpeed, mode: profile.shipBMode, range: profile.shipBRange, mass: profile.shipBMass, inertia: profile.shipBInertia, aggressivity: profile.shipBAggressivity ?? 1, skillLevel: profile.shipBSkillLevel, overload: profile.shipBOverload ?? true, weaponOverload: profile.shipBWeaponOverload ?? false, damageEnabled: profile.shipBDamageEnabled ?? true, hull: profile.shipBHullId, propulsion: profile.shipBPropulsion, fitting: profile.shipBFitting, overrides: profile.shipBOverrides ?? {}, fittedHull: profile.shipBFittedHull, ewarActivation: undefined, boosterActivation: undefined, missileBoosterActivation: undefined, repMode: profile.shipBRepMode, repairerActivation: profile.shipBRepairerActivation, rahActivation: profile.shipBRahActivation, sig: profile.shipBSig, tracking: profile.shipBTracking ?? 0, sigRes: profile.shipBSigRes ?? "S", optimal: profile.shipBOptimal ?? 0, falloff: profile.shipBFalloff ?? 0, ammo: profile.shipBAmmo ?? ("12608" as TypeId), weaponKind: profile.shipBWeaponKind, missileAmmo: profile.shipBMissileAmmo }, initialDistance: profile.initialDistance })),
     parseProfiles: vi.fn(() => ({})),
     profileFromUnknown: vi.fn(() => null),
     serialize: vi.fn(() => ""),

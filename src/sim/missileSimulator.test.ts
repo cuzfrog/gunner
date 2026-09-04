@@ -5,7 +5,7 @@ import type { EngagementFrame, MissileLaunchSpec, MissileSpec, ShipState } from 
 
 const lightMissile: MissileSpec = {
   kind: "missile",
-  damagePerMissile: 83,
+  damagePerMissile: { em: 0, thermal: 0, kinetic: 83, explosive: 0 },
   cycleTime: 4,
   launcherCount: 1,
   explosionRadius: 40,
@@ -18,7 +18,7 @@ const lightMissile: MissileSpec = {
 
 const heavyMissile: MissileSpec = {
   kind: "missile",
-  damagePerMissile: 149,
+  damagePerMissile: { em: 0, thermal: 0, kinetic: 149, explosive: 0 },
   cycleTime: 8,
   launcherCount: 2,
   explosionRadius: 140,
@@ -348,5 +348,85 @@ describe("MissileSimulatorImpl", () => {
     }
     const facts = sim.facts("shipA", 0);
     expect(facts.interceptable).toBe(true);
+  });
+
+  test("step returns impact event when missile reaches target", () => {
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [lightMissile], shipB: [] });
+    const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
+    const targetPos = new Vec2(100, 0);
+    sim.step(0.1, frame(new Vec2(0, 0), targetPos), launches);
+    let events: readonly { target: string; source: string; kind: string; weaponIndex: number; rawByType: { em: number; thermal: number; kinetic: number; explosive: number } }[] = [];
+    for (let i = 0; i < 100; i++) {
+      events = sim.step(0.1, frame(new Vec2(0, 0), targetPos), { shipA: [], shipB: [] });
+      if (events.length > 0) break;
+    }
+    expect(events.length).toBeGreaterThanOrEqual(1);
+    expect(events[0].target).toBe("shipB");
+    expect(events[0].source).toBe("shipA");
+    expect(events[0].kind).toBe("missile");
+    expect(events[0].weaponIndex).toBe(0);
+    expect(events[0].rawByType.kinetic).toBeGreaterThan(0);
+  });
+
+  test("step returns no events when no missiles are in flight", () => {
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [lightMissile], shipB: [] });
+    const events = sim.step(0.1, frame(new Vec2(0, 0), new Vec2(1000, 0)), { shipA: [], shipB: [] });
+    expect(events).toHaveLength(0);
+  });
+
+  test("step returns events from both sides", () => {
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [lightMissile], shipB: [lightMissile] });
+    const launches = {
+      shipA: [launchSpec(0, lightMissile, 40)],
+      shipB: [launchSpec(0, lightMissile, 40)],
+    };
+    const shipAPos = new Vec2(0, 0);
+    const shipBPos = new Vec2(100, 0);
+    sim.step(0.1, frame(shipAPos, shipBPos), launches);
+    let totalEvents = 0;
+    for (let i = 0; i < 100; i++) {
+      const events = sim.step(0.1, frame(shipAPos, shipBPos), { shipA: [], shipB: [] });
+      totalEvents += events.length;
+    }
+    expect(totalEvents).toBeGreaterThanOrEqual(2);
+  });
+
+  test("expired missile produces no impact event", () => {
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [lightMissile], shipB: [] });
+    const farTarget = new Vec2(100000, 0);
+    const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
+    sim.step(0.1, frame(new Vec2(0, 0), farTarget), launches);
+    let totalEvents = 0;
+    for (let i = 0; i < 100; i++) {
+      const events = sim.step(0.1, frame(new Vec2(0, 0), farTarget), { shipA: [], shipB: [] });
+      totalEvents += events.length;
+    }
+    expect(totalEvents).toBe(0);
+  });
+
+  test("impact uses real target velocity, not clamped to maxSpeed", () => {
+    const application = new MissileApplicationImpl();
+    const computeSpy = vi.spyOn(application, "compute");
+    const sim = new MissileSimulatorImpl({ missileApplication: application });
+    sim.reset({ shipA: [lightMissile], shipB: [] });
+    const targetPos = new Vec2(100, 0);
+    const launches = { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] };
+    sim.step(0.1, frame(new Vec2(0, 0), targetPos), launches);
+    const overshootVelocity = new Vec2(0, 1000);
+    const lowMaxSpeed = 100;
+    for (let i = 0; i < 100; i++) {
+      const events = sim.step(0.1, frame(new Vec2(0, 0), targetPos, new Vec2(0, 0), overshootVelocity, 0, lowMaxSpeed), { shipA: [], shipB: [] });
+      if (events.length > 0) {
+        const impactCall = computeSpy.mock.calls.find((c) => c[1] === overshootVelocity.len());
+        expect(impactCall).toBeDefined();
+        expect(impactCall![1]).toBeCloseTo(1000, 6);
+        expect(impactCall![1]).toBeGreaterThan(lowMaxSpeed);
+        break;
+      }
+    }
   });
 });

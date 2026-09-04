@@ -3,19 +3,19 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
 }
 
 .control-bar-playback {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   margin-right: auto;
 }
 
 .control-bar-playback > .btn {
-  padding: 8px 14px;
-  min-height: 32px;
+  padding: 9px 15px;
+  min-height: 35px;
 }
 
 .control-bar-field .form-slider-value {
@@ -30,8 +30,8 @@
 }
 
 .control-bar-initial-distance .input-with-unit {
-  width: 96px;
-  min-width: 64px;
+  width: 106px;
+  min-width: 70px;
 }
 
 .control-bar-speed {
@@ -42,30 +42,30 @@
   display: flex;
   align-items: center;
   min-width: 0;
-  gap: 6px;
+  gap: 7px;
 }
 
 .control-bar-field > .input-field {
-  min-width: 82px;
-  padding: 8px 24px 8px 8px;
+  min-width: 90px;
+  padding: 9px 26px 9px 9px;
   text-align: left;
   text-align-last: left;
 }
 
 .control-bar-field > .form-slider {
-  width: 96px;
-  min-width: 64px;
+  width: 106px;
+  min-width: 70px;
 }
 
 .control-bar-canvas-settings-popup {
-  bottom: 48px;
-  left: 12px;
+  bottom: 53px;
+  left: 13px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-width: 200px;
-  max-width: calc(100% - 24px);
-  padding: 8px;
+  gap: 9px;
+  min-width: 220px;
+  max-width: calc(100% - 26px);
+  padding: 9px;
 }
 
 .zoom-auto-option {
@@ -73,7 +73,7 @@
   align-items: center;
   gap: 4px;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   white-space: nowrap;
 }

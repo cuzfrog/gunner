@@ -4,6 +4,7 @@ import type { ImportedFitting, ImportedLauncher } from "../../../fitting";
 import type { HullBonus } from "../../../gamedata/fittingDb";
 import type { TypeId } from "../../../gamedata/ids";
 import type { MissileSpec } from "../../../sim";
+import { damageVectorSum } from "../../../sim";
 import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -216,7 +217,7 @@ export class LauncherControllerImpl implements LauncherController {
     }
     this.ammoChip.render(launcher.chargeName, this.imageCatalog.itemIconUrl(launcher.chargeId));
     const t = (key: string): string => this.i18n.t(key);
-    setText(this.els.volleyDamage, formatWithCommas(launcher.damagePerMissile * launcher.count, 1));
+    setText(this.els.volleyDamage, formatWithCommas(damageVectorSum(launcher.damagePerMissile) * launcher.count, 1));
     setText(this.els.rateOfFire, `${formatNumber(launcher.cycleTime, 2)} s`);
     setText(this.els.explosionRadius, formatDistance(launcher.explosionRadius, t));
     setText(this.els.explosionVelocity, `${formatWithCommas(launcher.explosionVelocity, 0)} m/s`);

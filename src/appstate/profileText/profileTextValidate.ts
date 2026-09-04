@@ -8,11 +8,13 @@ import {
 } from "../userSettings";
 import type { SimValueParser } from "../../sim";
 import {
+  isDefenseSkills,
   isNonNegative,
   isOptionalBoosterActivations,
   isOptionalFittedHullSummary,
   isPositive,
   isSkillLevel,
+  isTargetingSkills,
 } from "../validators";
 import type { ChargeCatalog, DroneGroup } from "../../fitting";
 import { toTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
@@ -32,11 +34,27 @@ export function parseScalarValue(
   if (value === "") return undefined;
 
   if (field === "version") return value === String(USER_SETTINGS_VERSION) ? USER_SETTINGS_VERSION : undefined;
-  if (field === "shipAOverload" || field === "shipBOverload") return value === "true" ? true : value === "false" ? false : undefined;
+  if (field === "shipAOverload" || field === "shipBOverload" || field === "shipAWeaponOverload" || field === "shipBWeaponOverload" || field === "shipADamageEnabled" || field === "shipBDamageEnabled") return value === "true" ? true : value === "false" ? false : undefined;
   if (field === "shipAMode" || field === "shipBMode") return simValueParser.parseAutopilotMode(value);
   if (field === "shipASkillLevel" || field === "shipBSkillLevel") {
     const num = Number(value);
     return isSkillLevel(num) ? num : undefined;
+  }
+  if (field === "shipADefenseSkills" || field === "shipBDefenseSkills") {
+    try {
+      const parsed: unknown = JSON.parse(value);
+      return isDefenseSkills(parsed) ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  if (field === "shipATargetingSkills" || field === "shipBTargetingSkills") {
+    try {
+      const parsed: unknown = JSON.parse(value);
+      return isTargetingSkills(parsed) ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
   }
   if (field === "shipASigRes" || field === "shipBSigRes") {
     return simValueParser.parseSigResolutionClass(value);
@@ -165,7 +183,11 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
   const fields: Record<string, unknown> = {
     shipASig: raw.shipASig,
     shipASkillLevel: raw.shipASkillLevel,
+    shipADefenseSkills: raw.shipADefenseSkills,
+    shipATargetingSkills: raw.shipATargetingSkills,
     shipAOverload: raw.shipAOverload,
+    shipAWeaponOverload: raw.shipAWeaponOverload,
+    shipADamageEnabled: raw.shipADamageEnabled,
     shipAHullId: raw.shipAHullId,
     shipAPropulsion: raw.shipAPropulsion,
     shipAFitting: raw.shipAFitting,
@@ -183,7 +205,11 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
     shipBMissileAmmo: raw.shipBMissileAmmo,
     shipBDroneGroups: raw.shipBDroneGroups,
     shipBSkillLevel: raw.shipBSkillLevel,
+    shipBDefenseSkills: raw.shipBDefenseSkills,
+    shipBTargetingSkills: raw.shipBTargetingSkills,
     shipBOverload: raw.shipBOverload,
+    shipBWeaponOverload: raw.shipBWeaponOverload,
+    shipBDamageEnabled: raw.shipBDamageEnabled,
     shipBHullId: raw.shipBHullId,
     shipBPropulsion: raw.shipBPropulsion,
     shipBFitting: raw.shipBFitting,

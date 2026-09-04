@@ -1,5 +1,6 @@
 import { asClass, type AwilixContainer } from "awilix";
 import { ChargeCatalogImpl } from "./chargeCatalog";
+import { DefenseCalculatorImpl } from "./defenseCalculator";
 import { DroneCatalogImpl } from "./droneCatalog";
 import { DroneLoadoutResolverImpl } from "./droneLoadoutResolver";
 import { DroneLoadoutValidatorImpl } from "./droneLoadoutValidator";
@@ -16,6 +17,7 @@ import type { FittingCradle } from "./cradle";
 export function registerFittingModule<T extends FittingCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     chargeCatalog: asClass(ChargeCatalogImpl).singleton(),
+    defenseCalculator: asClass(DefenseCalculatorImpl).singleton(),
     droneCatalog: asClass(DroneCatalogImpl).singleton(),
     droneLoadoutResolver: asClass(DroneLoadoutResolverImpl).singleton(),
     droneLoadoutValidator: asClass(DroneLoadoutValidatorImpl).singleton(),

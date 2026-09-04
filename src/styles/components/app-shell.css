@@ -1,8 +1,8 @@
 @layer components {
 .app-container {
-  max-width: 1400px;
+  max-width: 1540px;
   margin: 0 auto;
-  padding: 12px;
+  padding: 13px;
 }
 
 .app-header {
@@ -20,7 +20,7 @@
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 4px 10px;
+  gap: 4px 11px;
 }
 
 .app-version-text {
@@ -56,6 +56,7 @@
 
 .app-lang-toggle > .btn {
   font-size: 12px;
+  min-height: 24px;
   white-space: nowrap;
 }
 
@@ -78,8 +79,8 @@
 
 .app-main {
   display: grid;
-  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(280px, 320px);
-  gap: 14px;
+  grid-template-columns: minmax(308px, 352px) minmax(0, 1fr) minmax(308px, 352px);
+  gap: 15px;
 }
 
 }

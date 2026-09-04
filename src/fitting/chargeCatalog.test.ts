@@ -82,7 +82,7 @@ function turret(overrides: Partial<ImportedTurret> = {}): ImportedTurret {
     base: { tracking: 0.315, optimal: 600, falloff: 3000 },
     moduleId: turretIdForName("150mm Railgun I"),
     damageMultiplier: 3,
-    damagePerShot: 12,
+    damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 },
     cycleTime: 5,
     turretCount: 1,
     damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,

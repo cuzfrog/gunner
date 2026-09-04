@@ -23,6 +23,7 @@ function baseShipAState(): SidePanelState {
     overrides: {},
     fittedHull: undefined,
     sig: undefined,
+    defenseSkills: undefined,
   };
 }
 
@@ -43,13 +44,14 @@ function baseShipBState(): SidePanelState {
     overrides: {},
     fittedHull: undefined,
     sig: 40,
+    defenseSkills: undefined,
   };
 }
 
 function ewarProjection(): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
-    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [] },
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
+    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [] },
   };
 }
 

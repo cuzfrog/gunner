@@ -25,9 +25,19 @@ const RIFTER: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 365,
   sigRadius: 36,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const THRASHER: ShipProfile = {
@@ -39,9 +49,19 @@ const THRASHER: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 250,
   sigRadius: 120,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 function fakeStorage(): StorageProvider {

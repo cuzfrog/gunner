@@ -2,7 +2,7 @@ import { FITTING_DB, type FittingDb, type TurretStats } from "../gamedata/fittin
 import { toTypeId, type TypeId } from "../gamedata/ids";
 import type { SigResolutionClass } from "../sim";
 
-export type GunFamily = "pulseLaser" | "beamLaser" | "railgun" | "blaster" | "autocannon" | "artillery";
+export type GunFamily = "pulseLaser" | "beamLaser" | "railgun" | "blaster" | "autocannon" | "artillery" | "disintegrator";
 
 export interface GunFamilies {
   familyOf(moduleId: TypeId): GunFamily;
@@ -42,6 +42,7 @@ function gunFamilyOf(moduleName: string): GunFamily {
 
   const normalized = normalize(moduleName);
 
+  if (hasDisintegratorHint(normalized)) return "disintegrator";
   if (hasArtilleryHint(normalized)) return "artillery";
   if (hasAutocannonHint(normalized)) return "autocannon";
   if (hasRailgunHint(normalized)) return "railgun";
@@ -86,6 +87,12 @@ const GUN_FAMILY_REPRESENTATIVES: Readonly<Record<GunFamily, Readonly<Record<Sig
     M: toTypeId("493"),
     L: toTypeId("498"),
     XL: toTypeId("20454"),
+  },
+  disintegrator: {
+    S: toTypeId("47912"),
+    M: toTypeId("47915"),
+    L: toTypeId("47918"),
+    XL: toTypeId("52998"),
   },
 } as const;
 
@@ -193,6 +200,10 @@ function hasBlasterHint(normalized: string): boolean {
     normalized.includes("phase cannon") ||
     normalized.includes("particle cannon")
   );
+}
+
+function hasDisintegratorHint(normalized: string): boolean {
+  return normalized.includes("disintegrator");
 }
 
 function disambiguateEnergy(normalized: string, originalName: string): GunFamily {

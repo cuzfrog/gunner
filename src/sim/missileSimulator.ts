@@ -1,6 +1,7 @@
 import { Vec2 } from "./vec2";
 import type { MissileApplication } from "./missileApplication";
 import type {
+  DamageEvent,
   EngagementFrame,
   MissileApplicationResult,
   MissileAttackFacts,
@@ -10,11 +11,12 @@ import type {
   MissileSpec,
   Side,
 } from "./types";
+import { ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 export interface MissileSimulator {
   reset(config: MissileSimConfig): void;
   update(config: MissileSimConfig): void;
-  step(dt: number, frame: EngagementFrame, launches: Record<Side, readonly MissileLaunchSpec[]>): void;
+  step(dt: number, frame: EngagementFrame, launches: Record<Side, readonly MissileLaunchSpec[]>): readonly DamageEvent[];
   states(side: Side): readonly MissileRuntimeState[];
   facts(side: Side, weaponIndex: number): MissileAttackFacts;
 }
@@ -69,13 +71,14 @@ export class MissileSimulatorImpl implements MissileSimulator {
     // Weapon specs are pushed per-step via launches; no state needs to change on config update.
   }
 
-  step(dt: number, frame: EngagementFrame, launches: Record<Side, readonly MissileLaunchSpec[]>): void {
+  step(dt: number, frame: EngagementFrame, launches: Record<Side, readonly MissileLaunchSpec[]>): readonly DamageEvent[] {
     this.time += dt;
     this.lastFrameShipA = frame.shipA.position;
     this.lastFrameShipB = frame.shipB.position;
     this.lastFrameDistance = frame.distance;
-    this.stepSide("shipA", dt, frame.shipA.position, frame.shipB.position, frame.shipB.velocity, frame.shipB.maxSpeed, launches.shipA);
-    this.stepSide("shipB", dt, frame.shipB.position, frame.shipA.position, frame.shipA.velocity, frame.shipA.maxSpeed, launches.shipB);
+    const shipAEvents = this.stepSide("shipA", dt, frame.shipA.position, frame.shipB.position, frame.shipB.velocity, frame.shipB.maxSpeed, launches.shipA);
+    const shipBEvents = this.stepSide("shipB", dt, frame.shipB.position, frame.shipA.position, frame.shipA.velocity, frame.shipA.maxSpeed, launches.shipB);
+    return [...shipAEvents, ...shipBEvents];
   }
 
   states(side: Side): readonly MissileRuntimeState[] {
@@ -94,11 +97,11 @@ export class MissileSimulatorImpl implements MissileSimulator {
     return { inFlightCount: inFlight.length, nearestTimeToImpact, predicted, interceptable };
   }
 
-  private stepSide(side: Side, dt: number, shipPos: Vec2, targetPos: Vec2, targetVel: Vec2, targetMaxSpeed: number, launches: readonly MissileLaunchSpec[]): void {
+  private stepSide(side: Side, dt: number, shipPos: Vec2, targetPos: Vec2, targetVel: Vec2, targetMaxSpeed: number, launches: readonly MissileLaunchSpec[]): readonly DamageEvent[] {
     const state = this.sides[side];
     this.updateTargetKinematics(state, targetVel, targetMaxSpeed, dt);
     this.handleLaunches(state, shipPos, launches, dt);
-    this.advanceEntities(state, dt, targetPos);
+    return this.advanceEntities(side, state, dt, targetPos, targetVel);
   }
 
   private updateTargetKinematics(state: SideState, targetVel: Vec2, targetMaxSpeed: number, dt: number): void {
@@ -122,24 +125,43 @@ export class MissileSimulatorImpl implements MissileSimulator {
     }
   }
 
-  private advanceEntities(state: SideState, dt: number, targetPos: Vec2): void {
+  private advanceEntities(source: Side, state: SideState, dt: number, targetPos: Vec2, targetVel: Vec2): readonly DamageEvent[] {
     const survivors: MissileBody[] = [];
+    const events: DamageEvent[] = [];
+    const target = source === "shipA" ? "shipB" : "shipA";
     for (const missile of state.entities) {
       missile.fuel -= dt;
       if (missile.fuel <= 0) continue;
       if (missile.position.dist(missile.launchPos) >= missile.spec.flightRange) continue;
       const toTarget = targetPos.sub(missile.position);
       const dist = toTarget.len();
-      if (dist <= missile.paintedSig) continue;
+      if (dist <= missile.paintedSig) {
+        const event = this.impactEvent(source, target, missile, targetVel);
+        if (event) events.push(event);
+        continue;
+      }
       const desired = toTarget.norm().scale(missile.spec.maxVelocity);
       missile.velocity = accelerateToward(missile.velocity, desired, dt);
       const step = missile.velocity.scale(dt);
-      if (step.len() >= dist) continue;
+      if (step.len() >= dist) {
+        const event = this.impactEvent(source, target, missile, targetVel);
+        if (event) events.push(event);
+        continue;
+      }
       missile.position = missile.position.add(step);
       pushTrail(missile.trail, missile.position);
       survivors.push(missile);
     }
     state.entities = survivors;
+    return events;
+  }
+
+  private impactEvent(source: Side, target: Side, missile: MissileBody, targetVel: Vec2): DamageEvent | undefined {
+    const result = this.application.compute(missile.spec, targetVel.len(), missile.paintedSig);
+    if (result.application <= 0) return undefined;
+    const rawByType = damageVectorScale(missile.spec.damagePerMissile, result.application);
+    if (damageVectorSum(rawByType) <= 0) return undefined;
+    return { target, source, weaponIndex: missile.weaponIndex, kind: "missile", rawByType };
   }
 
   private predictApplication(state: SideState, spec: MissileSpec, weaponIndex: number, eta: number, interceptable: boolean): MissileApplicationResult {

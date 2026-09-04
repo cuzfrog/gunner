@@ -175,6 +175,25 @@ function fakeDocument(): Document {
           img.tagName = "IMG";
           img.className = "portrait-image";
           el.appendChild(img);
+          const lockBadge = new FakeElement();
+          lockBadge.tagName = "DIV";
+          lockBadge.className = "portrait-lock-badge";
+          lockBadge.hidden = true;
+          el.appendChild(lockBadge);
+          const hpBars = new FakeElement();
+          hpBars.tagName = "DIV";
+          hpBars.className = "portrait-hp-bars";
+          for (const layer of ["shield", "armor", "hull"]) {
+            const bar = new FakeElement();
+            bar.tagName = "DIV";
+            bar.className = `portrait-hp-bar portrait-hp-bar-${layer}`;
+            const fill = new FakeElement();
+            fill.tagName = "SPAN";
+            fill.className = "portrait-hp-fill";
+            bar.appendChild(fill);
+            hpBars.appendChild(bar);
+          }
+          el.appendChild(hpBars);
           const effects = new FakeElement();
           effects.tagName = "DIV";
           effects.className = "portrait-effects";

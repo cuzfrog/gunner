@@ -1,5 +1,6 @@
 import type { ShipId, TypeId } from "../ids";
-import { CHARGES, COMBAT_DRONES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, SCRIPTS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
+import { toTypeId } from "../ids";
+import { CHARGES, COMBAT_DRONES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, SCRIPTS, SENSOR_BOOSTERS, SENSOR_BOOSTER_SCRIPTS, SENSOR_DAMPENERS, SENSOR_DAMPENER_SCRIPTS, SIGNAL_AMPLIFIERS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
 
 function moduleByName(name: string): FittingModuleStats | undefined {
   return Object.values(FITTING_MODULES).find((m) => m.name === name);
@@ -22,6 +23,20 @@ describe("fittingDb", () => {
 
   test("bulkheads add agility penalty but no mass", () => {
     expect(moduleByName("Reinforced Bulkheads II")).toMatchObject({ agilityMultiplier: 1.05 });
+  });
+
+  test("bulkheads provide hull HP defense stats", () => {
+    const defense = moduleByName("Reinforced Bulkheads II")?.defense;
+    expect(defense).toBeDefined();
+    expect(defense!.kind).toBe("hullBulkhead");
+    expect(defense!.hullHpPercent).toBe(25);
+  });
+
+  test("transverse bulkhead rigs provide hull HP defense stats", () => {
+    const defense = moduleByName("Medium Transverse Bulkhead II")?.defense;
+    expect(defense).toBeDefined();
+    expect(defense!.kind).toBe("hullBulkhead");
+    expect(defense!.hullHpPercent).toBe(25);
   });
 
   test("includes small afterburner and microwarpdrive with exact SDE values", () => {
@@ -92,11 +107,11 @@ describe("fittingDb", () => {
 
   test("includes hull bonuses for turret, velocity and agility attributes", () => {
     expect(HULL_BONUSES["16242" as ShipId]).toEqual([
-      { attribute: "turretOptimal", magnitude: 50, turretSkill: "Small Projectile Turret" },
-      { attribute: "turretDamage", magnitude: 5, skill: "Minmatar Destroyer", turretSkill: "Small Projectile Turret" },
-      { attribute: "turretTracking", magnitude: 10, skill: "Minmatar Destroyer", turretSkill: "Small Projectile Turret" },
+      { attribute: "turretOptimal", magnitude: 50, scalesWithHullSkill: false, moduleSkillId: toTypeId("3302") },
+      { attribute: "turretDamage", magnitude: 5, scalesWithHullSkill: true, moduleSkillId: toTypeId("3302") },
+      { attribute: "turretTracking", magnitude: 10, scalesWithHullSkill: true, moduleSkillId: toTypeId("3302") },
     ]);
-    expect(HULL_BONUSES["23917" as ShipId]).toEqual([{ attribute: "agility", magnitude: -5, skill: "Advanced Spaceship Command" }]);
+    expect(HULL_BONUSES["23917" as ShipId]).toContainEqual({ attribute: "agility", magnitude: -5, scalesWithHullSkill: true });
   });
 
   test("includes charge multipliers", () => {
@@ -263,6 +278,15 @@ describe("fittingDb", () => {
     expect(rowByName(LAUNCHERS, "Light Missile Launcher II")?.chargeGroups).toContain(653);
   });
 
+  test("includes required skill IDs on launchers, missiles, and turrets", () => {
+    expect(rowByName(LAUNCHERS, "Light Missile Launcher II")?.requiredSkillIds).toContain(toTypeId("3319"));
+    expect(rowByName(LAUNCHERS, "Light Missile Launcher II")?.requiredSkillIds).toContain(toTypeId("20210"));
+    expect(rowByName(MISSILES, "Caldari Navy Mjolnir Light Missile")?.requiredSkillIds).toContain(toTypeId("3319"));
+    expect(rowByName(MISSILES, "Caldari Navy Mjolnir Light Missile")?.requiredSkillIds).toContain(toTypeId("3321"));
+    expect(rowByName(TURRETS, "Heavy Pulse Laser II")?.requiredSkillIds).toContain(toTypeId("3300"));
+    expect(rowByName(TURRETS, "Heavy Pulse Laser II")?.requiredSkillIds).toContain(toTypeId("3306"));
+  });
+
   test("includes torpedo launchers with group 508 and chargeGroup3 for standard torpedoes", () => {
     expect(rowByName(LAUNCHERS, "Torpedo Launcher I")).toMatchObject({
       rateOfFire: 18,
@@ -355,24 +379,22 @@ describe("fittingDb", () => {
   });
 
   test("includes Kestrel missile damage hull bonus for light missiles", () => {
-    expect(HULL_BONUSES["602" as ShipId]).toEqual([
-      { attribute: "missileDamage", magnitude: 5, skill: "Caldari Frigate", launcherGroup: 509 },
-    ]);
+    expect(HULL_BONUSES["602" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3320") });
+    expect(HULL_BONUSES["602" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3321") });
   });
 
   test("includes Raven missile ROF hull bonuses for cruise, torpedo, and rapid heavy launchers", () => {
-    expect(HULL_BONUSES["638" as ShipId]).toEqual([
-      { attribute: "missileRoF", magnitude: -5, skill: "Caldari Battleship", launcherGroup: 506 },
-      { attribute: "missileRoF", magnitude: -5, skill: "Caldari Battleship", launcherGroup: 508 },
-      { attribute: "missileRoF", magnitude: -5, skill: "Caldari Battleship", launcherGroup: 1245 },
-    ]);
+    expect(HULL_BONUSES["638" as ShipId]).toContainEqual({ attribute: "missileRoF", magnitude: -5, scalesWithHullSkill: true, moduleGroupId: 506 });
+    expect(HULL_BONUSES["638" as ShipId]).toContainEqual({ attribute: "missileRoF", magnitude: -5, scalesWithHullSkill: true, moduleGroupId: 508 });
+    expect(HULL_BONUSES["638" as ShipId]).toContainEqual({ attribute: "missileRoF", magnitude: -5, scalesWithHullSkill: true, moduleGroupId: 1245 });
+    expect(HULL_BONUSES["638" as ShipId]).toContainEqual({ attribute: "plateHpPercent", magnitude: 50, scalesWithHullSkill: false, moduleGroupId: 329 });
+    expect(HULL_BONUSES["638" as ShipId]).toContainEqual({ attribute: "extenderHpPercent", magnitude: 100, scalesWithHullSkill: false, moduleGroupId: 38 });
   });
 
   test("includes Drake missile damage hull bonuses for heavy and heavy assault missiles", () => {
-    expect(HULL_BONUSES["24698" as ShipId]).toEqual([
-      { attribute: "missileDamage", magnitude: 10, skill: "Caldari Battlecruiser", launcherGroup: 771 },
-      { attribute: "missileDamage", magnitude: 10, skill: "Caldari Battlecruiser", launcherGroup: 510 },
-    ]);
+    expect(HULL_BONUSES["24698" as ShipId]).toContainEqual({ attribute: "shieldResist", magnitude: -4, scalesWithHullSkill: true });
+    expect(HULL_BONUSES["24698" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 10, scalesWithHullSkill: true, chargeSkillId: toTypeId("25719") });
+    expect(HULL_BONUSES["24698" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 10, scalesWithHullSkill: true, chargeSkillId: toTypeId("3324") });
   });
 
   test("includes Heat Sink II with damage and speed multipliers for energy weapons", () => {
@@ -403,8 +425,49 @@ describe("fittingDb", () => {
     expect(HULL_BONUSES["24696" as ShipId]).toContainEqual({
       attribute: "turretDamage",
       magnitude: 10,
-      skill: "Amarr Battlecruiser",
-      turretSkill: "Medium Energy Turret",
+      scalesWithHullSkill: true,
+      moduleSkillId: toTypeId("3306"),
+    });
+  });
+
+  test("includes Abaddon defensive hull bonuses for armor resist and plate/extender HP", () => {
+    expect(HULL_BONUSES["24692" as ShipId]).toContainEqual({
+      attribute: "armorResist",
+      magnitude: -4,
+      scalesWithHullSkill: true,
+    });
+    expect(HULL_BONUSES["24692" as ShipId]).toContainEqual({
+      attribute: "plateHpPercent",
+      magnitude: 50,
+      scalesWithHullSkill: false,
+      moduleGroupId: 329,
+    });
+    expect(HULL_BONUSES["24692" as ShipId]).toContainEqual({
+      attribute: "extenderHpPercent",
+      magnitude: 100,
+      scalesWithHullSkill: false,
+      moduleGroupId: 38,
+    });
+  });
+
+  test("includes Garmur missile damage, velocity, and flight time hull bonuses", () => {
+    expect(HULL_BONUSES["33816" as ShipId]).toContainEqual({
+      attribute: "missileDamage",
+      magnitude: 25,
+      scalesWithHullSkill: true,
+      chargeSkillId: toTypeId("3319"),
+    });
+    expect(HULL_BONUSES["33816" as ShipId]).toContainEqual({
+      attribute: "missileVelocity",
+      magnitude: 200,
+      scalesWithHullSkill: false,
+      chargeSkillId: toTypeId("3319"),
+    });
+    expect(HULL_BONUSES["33816" as ShipId]).toContainEqual({
+      attribute: "missileFlightTime",
+      magnitude: -50,
+      scalesWithHullSkill: false,
+      chargeSkillId: toTypeId("3319"),
     });
   });
 
@@ -423,9 +486,9 @@ describe("fittingDb", () => {
   });
 
   test("includes Surgical Strike damage bonus for all weapon groups", () => {
-    const energy = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.weaponGroup === "Energy Weapon");
-    const projectile = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.weaponGroup === "Projectile Weapon");
-    const hybrid = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.weaponGroup === "Hybrid Weapon");
+    const energy = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.moduleGroupId === 53);
+    const projectile = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.moduleGroupId === 55);
+    const hybrid = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.moduleGroupId === 74);
     expect(energy).toBeDefined();
     expect(energy!.bonusType).toBe("turretDamage");
     expect(energy!.magnitudePerLevel).toBe(3);
@@ -434,60 +497,130 @@ describe("fittingDb", () => {
   });
 
   test("includes Medium Energy Turret damage bonus", () => {
-    const mediumEnergy = SKILL_BONUSES.find((b) => b.turretSkill === "Medium Energy Turret");
+    const mediumEnergy = SKILL_BONUSES.find((b) => b.requiredSkillId === toTypeId("3306"));
     expect(mediumEnergy).toBeDefined();
     expect(mediumEnergy!.bonusType).toBe("turretDamage");
     expect(mediumEnergy!.magnitudePerLevel).toBe(5);
   });
 
   test("includes Large Hybrid Turret damage bonus", () => {
-    const largeHybrid = SKILL_BONUSES.find((b) => b.turretSkill === "Large Hybrid Turret");
+    const largeHybrid = SKILL_BONUSES.find((b) => b.requiredSkillId === toTypeId("3307"));
     expect(largeHybrid).toBeDefined();
     expect(largeHybrid!.bonusType).toBe("turretDamage");
     expect(largeHybrid!.magnitudePerLevel).toBe(5);
   });
 
   test("includes Capital Energy Turret damage bonus", () => {
-    const capitalEnergy = SKILL_BONUSES.find((b) => b.turretSkill === "Capital Energy Turret");
+    const capitalEnergy = SKILL_BONUSES.find((b) => b.requiredSkillId === toTypeId("20327"));
     expect(capitalEnergy).toBeDefined();
     expect(capitalEnergy!.bonusType).toBe("turretDamage");
     expect(capitalEnergy!.magnitudePerLevel).toBe(5);
   });
 
   test("includes all 12 turret size skills", () => {
-    const turretSkills = SKILL_BONUSES.filter((b) => b.turretSkill !== undefined).map((b) => b.turretSkill);
-    expect(turretSkills).toEqual(expect.arrayContaining([
-      "Small Energy Turret", "Small Hybrid Turret", "Small Projectile Turret",
-      "Medium Energy Turret", "Medium Hybrid Turret", "Medium Projectile Turret",
-      "Large Energy Turret", "Large Hybrid Turret", "Large Projectile Turret",
-      "Capital Energy Turret", "Capital Hybrid Turret", "Capital Projectile Turret",
-    ]));
+    const turretSizeSkillIds = new Set(["3301", "3302", "3303", "3304", "3305", "3306", "3307", "3308", "3309", "20327", "21666", "21667"].map((s) => toTypeId(s)));
+    const turretSkills = SKILL_BONUSES.filter((b) => b.requiredSkillId !== undefined && turretSizeSkillIds.has(b.requiredSkillId)).map((b) => b.requiredSkillId);
+    expect(turretSkills).toEqual(expect.arrayContaining([...turretSizeSkillIds]));
   });
 
   test("includes Medium Pulse Laser Specialization damage bonus", () => {
-    const medPulseSpec = SKILL_BONUSES.find((b) => b.specializationSkill === "Medium Pulse Laser Specialization");
+    const medPulseSpec = SKILL_BONUSES.find((b) => b.requiredSkillId === toTypeId("12214"));
     expect(medPulseSpec).toBeDefined();
     expect(medPulseSpec!.bonusType).toBe("turretDamage");
     expect(medPulseSpec!.magnitudePerLevel).toBe(2);
   });
 
   test("includes all 24 turret specialization skills", () => {
-    const specSkills = SKILL_BONUSES.filter((b) => b.specializationSkill !== undefined).map((b) => b.specializationSkill);
+    const specSkillIds = new Set(["11082", "11083", "11084", "12201", "12202", "12203", "12204", "12205", "12206", "12207", "12208", "12209", "12210", "12211", "12212", "12213", "12214", "12215", "41403", "41404", "41405", "41406", "41407", "41408"].map((s) => toTypeId(s)));
+    const specSkills = SKILL_BONUSES.filter((b) => b.requiredSkillId !== undefined && specSkillIds.has(b.requiredSkillId)).map((b) => b.requiredSkillId);
     expect(specSkills.length).toBe(24);
-    expect(specSkills).toEqual(expect.arrayContaining([
-      "Small Beam Laser Specialization", "Small Pulse Laser Specialization",
-      "Medium Beam Laser Specialization", "Medium Pulse Laser Specialization",
-      "Large Beam Laser Specialization", "Large Pulse Laser Specialization",
-      "Capital Beam Laser Specialization", "Capital Pulse Laser Specialization",
-      "Small Railgun Specialization", "Small Blaster Specialization",
-      "Medium Railgun Specialization", "Medium Blaster Specialization",
-      "Large Railgun Specialization", "Large Blaster Specialization",
-      "Capital Railgun Specialization", "Capital Blaster Specialization",
-      "Small Autocannon Specialization", "Small Artillery Specialization",
-      "Medium Autocannon Specialization", "Medium Artillery Specialization",
-      "Large Autocannon Specialization", "Large Artillery Specialization",
-      "Capital Autocannon Specialization", "Capital Artillery Specialization",
-    ]));
+    expect(specSkills).toEqual(expect.arrayContaining([...specSkillIds]));
+  });
+
+  test("includes Light Missiles damage bonus", () => {
+    const lightMissiles = SKILL_BONUSES.find((b) => b.skillId === toTypeId("3321") && b.bonusType === "missileDamage");
+    expect(lightMissiles).toBeDefined();
+    expect(lightMissiles!.magnitudePerLevel).toBe(5);
+    expect(lightMissiles!.appliesTo).toBe("charge");
+    expect(lightMissiles!.requiredSkillId).toBe(toTypeId("3321"));
+  });
+
+  test("includes Warhead Upgrades damage bonus", () => {
+    const warhead = SKILL_BONUSES.find((b) => b.skillId === toTypeId("20315") && b.bonusType === "missileDamage");
+    expect(warhead).toBeDefined();
+    expect(warhead!.magnitudePerLevel).toBe(2);
+    expect(warhead!.appliesTo).toBe("charge");
+    expect(warhead!.requiredSkillId).toBe(toTypeId("3319"));
+  });
+
+  test("includes Missile Launcher Operation ROF bonus", () => {
+    const mlo = SKILL_BONUSES.find((b) => b.skillId === toTypeId("3319") && b.bonusType === "missileRoF");
+    expect(mlo).toBeDefined();
+    expect(mlo!.magnitudePerLevel).toBe(-2);
+    expect(mlo!.appliesTo).toBe("module");
+  });
+
+  test("includes Rapid Launch ROF bonus", () => {
+    const rapidLaunch = SKILL_BONUSES.find((b) => b.skillId === toTypeId("21071") && b.bonusType === "missileRoF");
+    expect(rapidLaunch).toBeDefined();
+    expect(rapidLaunch!.magnitudePerLevel).toBe(-3);
+    expect(rapidLaunch!.appliesTo).toBe("module");
+  });
+
+  test("includes Light Missile Specialization ROF bonus", () => {
+    const lightSpec = SKILL_BONUSES.find((b) => b.skillId === toTypeId("20210") && b.bonusType === "missileRoF");
+    expect(lightSpec).toBeDefined();
+    expect(lightSpec!.magnitudePerLevel).toBe(-2);
+    expect(lightSpec!.appliesTo).toBe("module");
+  });
+
+  test("includes Missile Bombardment flight time bonus", () => {
+    const bombardment = SKILL_BONUSES.find((b) => b.skillId === toTypeId("12441") && b.bonusType === "missileFlightTime");
+    expect(bombardment).toBeDefined();
+    expect(bombardment!.magnitudePerLevel).toBe(10);
+    expect(bombardment!.appliesTo).toBe("charge");
+  });
+
+  test("includes Missile Projection velocity bonus", () => {
+    const projection = SKILL_BONUSES.find((b) => b.skillId === toTypeId("12442") && b.bonusType === "missileVelocity");
+    expect(projection).toBeDefined();
+    expect(projection!.magnitudePerLevel).toBe(10);
+    expect(projection!.appliesTo).toBe("charge");
+  });
+
+  test("includes Guided Precision explosion radius bonus", () => {
+    const precision = SKILL_BONUSES.find((b) => b.skillId === toTypeId("20312") && b.bonusType === "missileExplosionRadius");
+    expect(precision).toBeDefined();
+    expect(precision!.magnitudePerLevel).toBe(-5);
+    expect(precision!.appliesTo).toBe("charge");
+  });
+
+  test("includes Target Navigation Prediction explosion velocity bonus", () => {
+    const targetNav = SKILL_BONUSES.find((b) => b.skillId === toTypeId("20314") && b.bonusType === "missileExplosionVelocity");
+    expect(targetNav).toBeDefined();
+    expect(targetNav!.magnitudePerLevel).toBe(10);
+    expect(targetNav!.appliesTo).toBe("charge");
+  });
+
+  test("includes Motion Prediction tracking bonus", () => {
+    const motionPred = SKILL_BONUSES.find((b) => b.skillId === toTypeId("3312") && b.bonusType === "turretTracking");
+    expect(motionPred).toBeDefined();
+    expect(motionPred!.magnitudePerLevel).toBe(5);
+    expect(motionPred!.appliesTo).toBe("module");
+  });
+
+  test("includes Sharpshooter optimal range bonus", () => {
+    const sharpshooter = SKILL_BONUSES.find((b) => b.skillId === toTypeId("3311") && b.bonusType === "turretOptimal");
+    expect(sharpshooter).toBeDefined();
+    expect(sharpshooter!.magnitudePerLevel).toBe(5);
+    expect(sharpshooter!.appliesTo).toBe("module");
+  });
+
+  test("includes Trajectory Analysis falloff bonus", () => {
+    const trajectory = SKILL_BONUSES.find((b) => b.skillId === toTypeId("3317") && b.bonusType === "turretFalloff");
+    expect(trajectory).toBeDefined();
+    expect(trajectory!.magnitudePerLevel).toBe(5);
+    expect(trajectory!.appliesTo).toBe("module");
   });
 
   test("Heavy Pulse Laser II has Medium Pulse Laser Specialization", () => {
@@ -549,6 +682,64 @@ describe("fittingDb", () => {
     expect(moduleByName("Ballistic Control System II")).toMatchObject({
       missileDamageMultiplier: 1.1,
       missileCycleTimeMultiplier: 0.895,
+    });
+  });
+
+  test("includes sensor dampeners with scan resolution and targeting range penalties", () => {
+    const dampener = rowByName(SENSOR_DAMPENERS, "Remote Sensor Dampener II");
+    expect(dampener).toMatchObject({
+      optimal: 30000,
+      falloff: 60000,
+      scanResolutionBonusPercent: -15.3,
+      maxTargetRangeBonusPercent: -15.3,
+      overloadStrengthBonusPercent: 20,
+    });
+    expect(moduleByName("Remote Sensor Dampener II")?.sensorDampener).toMatchObject(baseStats(dampener!));
+  });
+
+  test("includes sensor boosters with scan resolution and targeting range bonuses", () => {
+    const booster = rowByName(SENSOR_BOOSTERS, "Sensor Booster II");
+    expect(booster).toMatchObject({
+      scanResolutionBonusPercent: 30,
+      maxTargetRangeBonusPercent: 30,
+      overloadStrengthBonusPercent: 15,
+    });
+    expect(moduleByName("Sensor Booster II")?.sensorBooster).toMatchObject(baseStats(booster!));
+  });
+
+  test("includes signal amplifiers with passive sensor bonuses and max locked targets", () => {
+    const amplifier = rowByName(SIGNAL_AMPLIFIERS, "Signal Amplifier II");
+    expect(amplifier).toMatchObject({
+      scanResolutionBonusPercent: 15,
+      maxTargetRangeBonusPercent: 30,
+      maxLockedTargetsBonus: 2,
+    });
+    expect(moduleByName("Signal Amplifier II")?.signalAmplifier).toMatchObject(baseStats(amplifier!));
+  });
+
+  test("includes sensor booster scripts with scan resolution and targeting range multipliers", () => {
+    const scanResScript = rowByName(SENSOR_BOOSTER_SCRIPTS, "Scan Resolution Script");
+    expect(scanResScript).toMatchObject({
+      scanResolutionMultiplier: 2,
+      maxTargetRangeMultiplier: 0,
+    });
+    const rangeScript = rowByName(SENSOR_BOOSTER_SCRIPTS, "Targeting Range Script");
+    expect(rangeScript).toMatchObject({
+      scanResolutionMultiplier: 0,
+      maxTargetRangeMultiplier: 2,
+    });
+  });
+
+  test("includes sensor dampener scripts with scan resolution and targeting range multipliers", () => {
+    const scanResScript = rowByName(SENSOR_DAMPENER_SCRIPTS, "Scan Resolution Dampening Script");
+    expect(scanResScript).toMatchObject({
+      scanResolutionMultiplier: 2,
+      maxTargetRangeMultiplier: 0,
+    });
+    const rangeScript = rowByName(SENSOR_DAMPENER_SCRIPTS, "Targeting Range Dampening Script");
+    expect(rangeScript).toMatchObject({
+      scanResolutionMultiplier: 0,
+      maxTargetRangeMultiplier: 2,
     });
   });
 });

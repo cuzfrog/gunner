@@ -2,7 +2,7 @@
 .canvas-frame {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
   position: relative;
 }
 
@@ -22,14 +22,14 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 6px;
+  gap: 7px;
   z-index: var(--z-canvas-overlay);
   pointer-events: auto;
 }
 
 .combatant-portrait {
   position: absolute;
-  bottom: 88px;
+  bottom: 97px;
   display: flex;
   flex-direction: column;
   z-index: var(--z-canvas-overlay);
@@ -39,21 +39,88 @@
 .combatant-portrait-ship-a { left: var(--canvas-overlay-inset); }
 .combatant-portrait-ship-b { right: var(--canvas-overlay-inset); }
 
+.portrait-image-wrap {
+  position: relative;
+  display: inline-block;
+}
+
 .portrait-image {
-  width: 50px;
-  height: 50px;
+  width: 55px;
+  height: 55px;
   object-fit: contain;
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
 }
 
+.portrait-lock-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--text-primary);
+  border-radius: 50%;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.portrait-lock-badge::before,
+.portrait-lock-badge::after {
+  content: "";
+  position: absolute;
+  background: var(--text-primary);
+}
+
+.portrait-lock-badge::before {
+  top: 50%;
+  left: -3px;
+  right: -3px;
+  height: 1.5px;
+  transform: translateY(-50%);
+}
+
+.portrait-lock-badge::after {
+  left: 50%;
+  top: -3px;
+  bottom: -3px;
+  width: 1.5px;
+  transform: translateX(-50%);
+}
+
+.portrait-lock-badge[hidden] { display: none; }
+
 .portrait-image-ship-a { border-color: var(--accent-teal); }
 .portrait-image-ship-b { border-color: var(--accent-orange); }
 
+.portrait-hp-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 55px;
+  margin-top: 2px;
+}
+
+.portrait-hp-bar {
+  position: relative;
+  height: 3px;
+  background: var(--text-primary);
+  opacity: 0.7;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.portrait-hp-fill {
+  display: block;
+  height: 100%;
+  margin-left: auto;
+  background: var(--danger-red);
+  opacity: 0.8;
+}
+
 .portrait-effects {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 7px);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -63,8 +130,8 @@
 .portrait-effects[hidden] { display: none; }
 
 .portrait-effect-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   background: var(--bg-panel);
   border-radius: 2px;
   pointer-events: auto;
@@ -75,18 +142,18 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 8px;
+  padding: 3px 9px;
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
   color: var(--text-secondary);
   font-family: "Chakra Petch", sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
-  min-height: 22px;
+  min-height: 24px;
 }
 
 .range-overlay-chip[aria-pressed="true"] {

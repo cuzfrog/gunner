@@ -111,17 +111,21 @@ const GLOBAL_ELEMENT_DEFINITIONS = {
   resTrackPenLabelB: { id: "res-track-pen-label-b", tag: "SPAN" as const, defaultValue: undefined },
   resRangePenLabelB: { id: "res-range-pen-label-b", tag: "SPAN" as const, defaultValue: undefined },
   resNominalDpsA: { id: "res-nominal-dps-a", tag: "SPAN" as const, defaultValue: undefined },
+  resLockStateA: { id: "res-lock-state-a", tag: "SPAN" as const, defaultValue: undefined },
   resAppliedDpsA: { id: "res-applied-dps-a", tag: "SPAN" as const, defaultValue: undefined },
   resAppliedDpsApplicationA: { id: "res-applied-dps-application-a", tag: "SPAN" as const, defaultValue: undefined },
   resTimeToImpactA: { id: "res-time-to-impact-a", tag: "SPAN" as const, defaultValue: undefined },
   resNominalDpsB: { id: "res-nominal-dps-b", tag: "SPAN" as const, defaultValue: undefined },
+  resLockStateB: { id: "res-lock-state-b", tag: "SPAN" as const, defaultValue: undefined },
   resAppliedDpsB: { id: "res-applied-dps-b", tag: "SPAN" as const, defaultValue: undefined },
   resAppliedDpsApplicationB: { id: "res-applied-dps-application-b", tag: "SPAN" as const, defaultValue: undefined },
   resTimeToImpactB: { id: "res-time-to-impact-b", tag: "SPAN" as const, defaultValue: undefined },
   resNominalDpsLabelA: { id: "res-nominal-dps-label-a", tag: "SPAN" as const, defaultValue: undefined },
+  resLockStateLabelA: { id: "res-lock-state-label-a", tag: "SPAN" as const, defaultValue: undefined },
   resAppliedDpsLabelA: { id: "res-applied-dps-label-a", tag: "SPAN" as const, defaultValue: undefined },
   resTimeToImpactLabelA: { id: "res-time-to-impact-label-a", tag: "SPAN" as const, defaultValue: undefined },
   resNominalDpsLabelB: { id: "res-nominal-dps-label-b", tag: "SPAN" as const, defaultValue: undefined },
+  resLockStateLabelB: { id: "res-lock-state-label-b", tag: "SPAN" as const, defaultValue: undefined },
   resAppliedDpsLabelB: { id: "res-applied-dps-label-b", tag: "SPAN" as const, defaultValue: undefined },
   resTimeToImpactLabelB: { id: "res-time-to-impact-label-b", tag: "SPAN" as const, defaultValue: undefined },
   resTurretCardsA: { id: "res-turret-cards-a", tag: "DIV" as const, defaultValue: undefined },
@@ -163,6 +167,7 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   effectiveOptimal: { tag: "SPAN" as const, baseId: "optimal", defaultValue: undefined },
   effectiveFalloff: { tag: "SPAN" as const, baseId: "falloff", defaultValue: undefined },
   effectiveSpeed: { tag: "SPAN" as const, baseId: "speed", defaultValue: undefined },
+  effectiveSig: { tag: "SPAN" as const, baseId: "sig", defaultValue: undefined },
   ammoField: { tag: "DIV" as const, baseId: "ammo-field", defaultValue: undefined },
   ammoTrigger: { tag: "BUTTON" as const, baseId: "ammo-trigger", defaultValue: undefined },
   ammoSummary: { tag: "SPAN" as const, baseId: "ammo-summary", defaultValue: undefined },
@@ -198,6 +203,8 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   skillTrigger: { tag: "BUTTON" as const, baseId: "skill-trigger", defaultValue: undefined },
   skillPopup: { tag: "DIV" as const, baseId: "skill-popup", defaultValue: undefined },
   skillField: { tag: "DIV" as const, baseId: "skill-field", defaultValue: undefined },
+  defenseSkills: { tag: "DIV" as const, baseId: "defense-skills", defaultValue: undefined },
+  targetingSkills: { tag: "DIV" as const, baseId: "targeting-skills", defaultValue: undefined },
   overload: { tag: "INPUT" as const, baseId: "overload", defaultValue: undefined },
   overloadButton: { tag: "BUTTON" as const, baseId: "overload-button", defaultValue: undefined },
   ewarField: { tag: "DIV" as const, baseId: "ewar-field", defaultValue: undefined },
@@ -206,6 +213,12 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   ewarSection: { tag: "DIV" as const, baseId: "ewar-section", defaultValue: undefined },
   ewarSummaryRow: { tag: "SPAN" as const, baseId: "ewar-summary-row", defaultValue: undefined },
   ewarSummary: { tag: "SPAN" as const, baseId: "ewar-summary", defaultValue: undefined },
+  defenseField: { tag: "DIV" as const, baseId: "defense-field", defaultValue: undefined },
+  defenseTrigger: { tag: "BUTTON" as const, baseId: "defense-trigger", defaultValue: undefined },
+  defensePopup: { tag: "DIV" as const, baseId: "defense-popup", defaultValue: undefined },
+  defenseSection: { tag: "DIV" as const, baseId: "defense-section", defaultValue: undefined },
+  defenseSummaryRow: { tag: "SPAN" as const, baseId: "defense-summary-row", defaultValue: undefined },
+  defenseSummary: { tag: "SPAN" as const, baseId: "defense-summary", defaultValue: undefined },
   boosterSection: { tag: "DIV" as const, baseId: "booster-section", defaultValue: undefined },
   boosterSummary: { tag: "SPAN" as const, baseId: "booster-summary", defaultValue: undefined },
   missileBoosterSection: { tag: "DIV" as const, baseId: "missile-booster-section", defaultValue: undefined },
@@ -312,7 +325,7 @@ export function globalElementId<K extends keyof GlobalElementDefinitionMap>(key:
 export function combatantElementId<K extends keyof CombatantElementDefinitionMap>(key: K, side: Side): string {
   const sideConfig = sideConfigFor(side);
   const def = COMBATANT_ELEMENT_DEFINITIONS[key];
-  if (key === "effectiveTracking" || key === "effectiveOptimal" || key === "effectiveFalloff" || key === "effectiveSpeed") {
+  if (key === "effectiveTracking" || key === "effectiveOptimal" || key === "effectiveFalloff" || key === "effectiveSpeed" || key === "effectiveSig") {
     return `effective-${sideConfig.idPrefix}-${def.baseId}`;
   }
   return `${sideConfig.idPrefix}-${def.baseId}`;

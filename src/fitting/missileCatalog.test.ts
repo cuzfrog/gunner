@@ -1,19 +1,23 @@
 import { MissileCatalogImpl } from "./missileCatalog";
 import { MissileSkillModelImpl } from "./missileStats";
-import type { FittingDb, HullBonus, LauncherStats, MissileStats } from "../gamedata/fittingDb";
-import type { StackingPenalty } from "../sim";
+import { FITTING_DB, type FittingDb, type HullBonus, type LauncherStats, type MissileStats } from "../gamedata/fittingDb";
+import { type StackingPenalty, damageVectorSum } from "../sim";
 import type { SkillLevel } from "../ships";
 import { toTypeId, type TypeId } from "../gamedata/ids";
 import type { ImportedLauncher } from "./chargeCatalog";
 import { EMPTY_DAMAGE_BREAKDOWN } from "./damageBreakdown";
 
-const LIGHT_MISSILE_LAUNCHER: LauncherStats = { rateOfFire: 16, launcherGroup: 509, chargeGroups: [384, 394], metaLevel: 0, metaGroupID: 1, id: toTypeId("499"), name: "Light Missile Launcher I" };
-const ROCKET_LAUNCHER: LauncherStats = { rateOfFire: 4, launcherGroup: 507, chargeGroups: [387], metaLevel: 0, metaGroupID: 1, id: toTypeId("510"), name: "Rocket Launcher I" };
+const MLO_ID = toTypeId("3319");
+const LIGHT_MISSILES_ID = toTypeId("3321");
+const ROCKETS_ID = toTypeId("3320");
 
-const SCOURGE_LIGHT: MissileStats = { damage: 83, damageType: "kinetic", explosionRadius: 50, explosionVelocity: 202, damageReductionFactor: 2.0, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384, id: toTypeId("258"), name: "Scourge Light Missile" };
-const INFERNO_LIGHT: MissileStats = { damage: 83, damageType: "thermal", explosionRadius: 50, explosionVelocity: 202, damageReductionFactor: 2.0, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384, id: toTypeId("257"), name: "Inferno Light Missile" };
-const SCOURGE_FURY_LIGHT: MissileStats = { damage: 145, damageType: "kinetic", explosionRadius: 75, explosionVelocity: 151, damageReductionFactor: 2.6, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 394, id: toTypeId("261"), name: "Scourge Fury Light Missile" };
-const SCOURGE_ROCKET: MissileStats = { damage: 45, damageType: "kinetic", explosionRadius: 20, explosionVelocity: 225, damageReductionFactor: 1.5, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, id: toTypeId("301"), name: "Scourge Rocket" };
+const LIGHT_MISSILE_LAUNCHER: LauncherStats = { rateOfFire: 16, launcherGroup: 509, chargeGroups: [384, 394], requiredSkillIds: [MLO_ID], metaLevel: 0, metaGroupID: 1, id: toTypeId("499"), name: "Light Missile Launcher I" };
+const ROCKET_LAUNCHER: LauncherStats = { rateOfFire: 4, launcherGroup: 507, chargeGroups: [387], requiredSkillIds: [MLO_ID], metaLevel: 0, metaGroupID: 1, id: toTypeId("510"), name: "Rocket Launcher I" };
+
+const SCOURGE_LIGHT: MissileStats = { damage: 83, damageType: "kinetic", explosionRadius: 50, explosionVelocity: 202, damageReductionFactor: 2.0, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384, requiredSkillIds: [MLO_ID, LIGHT_MISSILES_ID], id: toTypeId("258"), name: "Scourge Light Missile" };
+const INFERNO_LIGHT: MissileStats = { damage: 83, damageType: "thermal", explosionRadius: 50, explosionVelocity: 202, damageReductionFactor: 2.0, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384, requiredSkillIds: [MLO_ID, LIGHT_MISSILES_ID], id: toTypeId("257"), name: "Inferno Light Missile" };
+const SCOURGE_FURY_LIGHT: MissileStats = { damage: 145, damageType: "kinetic", explosionRadius: 75, explosionVelocity: 151, damageReductionFactor: 2.6, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 394, requiredSkillIds: [MLO_ID, LIGHT_MISSILES_ID], id: toTypeId("261"), name: "Scourge Fury Light Missile" };
+const SCOURGE_ROCKET: MissileStats = { damage: 45, damageType: "kinetic", explosionRadius: 20, explosionVelocity: 225, damageReductionFactor: 1.5, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, requiredSkillIds: [MLO_ID, ROCKETS_ID], id: toTypeId("301"), name: "Scourge Rocket" };
 
 const missiles: Readonly<Record<string, MissileStats>> = {
   [String(SCOURGE_LIGHT.id)]: SCOURGE_LIGHT,
@@ -28,7 +32,7 @@ const launchers: Readonly<Record<string, LauncherStats>> = {
 };
 
 const stacking = vi.mocked<StackingPenalty>({ apply: vi.fn((m: readonly number[]) => m.reduce((p, x) => p * x, 1)) });
-const skillModel = new MissileSkillModelImpl({ stackingPenalty: stacking });
+const skillModel = new MissileSkillModelImpl({ stackingPenalty: stacking, skillBonuses: FITTING_DB.skillBonuses });
 const testDb: Pick<FittingDb, "missiles" | "launchers"> = { missiles, launchers };
 
 function catalog(): MissileCatalogImpl {
@@ -47,7 +51,7 @@ function importedLauncher(overrides: Partial<ImportedLauncher> = {}): ImportedLa
     count: 1,
     chargeId: SCOURGE_LIGHT.id,
     chargeName: SCOURGE_LIGHT.name,
-    damagePerMissile: 83,
+    damagePerMissile: { em: 0, thermal: 0, kinetic: 83, explosive: 0 },
     cycleTime: 16,
     explosionRadius: 50,
     explosionVelocity: 202,
@@ -70,7 +74,7 @@ describe("MissileCatalogImpl", () => {
   });
 
   test("missilesForLauncher returns empty for a launcher with no matching missiles", () => {
-    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], metaLevel: 0, metaGroupID: 1, id: toTypeId("999"), name: "Empty" };
+    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], requiredSkillIds: [], metaLevel: 0, metaGroupID: 1, id: toTypeId("999"), name: "Empty" };
     expect(catalog().missilesForLauncher(emptyLauncher)).toEqual([]);
   });
 
@@ -81,7 +85,7 @@ describe("MissileCatalogImpl", () => {
   });
 
   test("usualForLauncher returns undefined when no missiles match", () => {
-    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], metaLevel: 0, metaGroupID: 1, id: toTypeId("999"), name: "Empty" };
+    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], requiredSkillIds: [], metaLevel: 0, metaGroupID: 1, id: toTypeId("999"), name: "Empty" };
     expect(catalog().usualForLauncher(emptyLauncher)).toBeUndefined();
   });
 
@@ -90,7 +94,8 @@ describe("MissileCatalogImpl", () => {
     const result = catalog().withCharge(base, SCOURGE_FURY_LIGHT.id, [], 5);
     expect(result.chargeId).toBe(SCOURGE_FURY_LIGHT.id);
     expect(result.chargeName).toBe(SCOURGE_FURY_LIGHT.name);
-    expect(result.damagePerMissile).toBeCloseTo(145 * (1 + 0.02 * 5), 6);
+    const skillDamageMultiplier = (1 + 0.05 * 5) * (1 + 0.02 * 5);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(145 * skillDamageMultiplier, 6);
     expect(result.explosionRadius).toBeCloseTo(75 * (1 - 0.05 * 5), 6);
     expect(result.damageReductionFactor).toBe(2.6);
   });
@@ -133,12 +138,13 @@ describe("MissileCatalogImpl", () => {
 
   test("withCharge applies hull bonuses", () => {
     const bonuses: readonly HullBonus[] = [
-      { attribute: "missileDamage", magnitude: 5, skill: "Caldari Frigate", launcherGroup: 509 },
+      { attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, moduleGroupId: 509 },
     ];
     stacking.apply.mockReturnValue(1.25);
     const base = importedLauncher();
     const result = catalog().withCharge(base, SCOURGE_LIGHT.id, bonuses, 5);
-    expect(result.damagePerMissile).toBeCloseTo(83 * (1 + 0.02 * 5) * 1.25, 6);
+    const skillDamageMultiplier = (1 + 0.05 * 5) * (1 + 0.02 * 5);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * skillDamageMultiplier * 1.25, 6);
   });
 
   test("equivalentInGroups finds a stem-matching missile in the target charge groups", () => {
@@ -147,7 +153,7 @@ describe("MissileCatalogImpl", () => {
   });
 
   test("equivalentInGroups returns undefined when no stem match exists in the target groups", () => {
-    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], metaLevel: 0, metaGroupID: 1, id: toTypeId("999"), name: "Empty" };
+    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], requiredSkillIds: [], metaLevel: 0, metaGroupID: 1, id: toTypeId("999"), name: "Empty" };
     expect(catalog().equivalentInGroups(SCOURGE_ROCKET.id, emptyLauncher.chargeGroups)).toBeUndefined();
   });
 
@@ -156,7 +162,7 @@ describe("MissileCatalogImpl", () => {
   });
 
   test("equivalentInGroups preserves the damage type across size classes", () => {
-    const infernoRocket: MissileStats = { damage: 45, damageType: "thermal", explosionRadius: 20, explosionVelocity: 225, damageReductionFactor: 1.5, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, id: toTypeId("302"), name: "Inferno Rocket" };
+    const infernoRocket: MissileStats = { damage: 45, damageType: "thermal", explosionRadius: 20, explosionVelocity: 225, damageReductionFactor: 1.5, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, requiredSkillIds: [], id: toTypeId("302"), name: "Inferno Rocket" };
     const dbWithInferno: Pick<FittingDb, "missiles" | "launchers"> = {
       missiles: { ...missiles, [String(infernoRocket.id)]: infernoRocket },
       launchers,
@@ -167,7 +173,7 @@ describe("MissileCatalogImpl", () => {
   });
 
   test("equivalentInGroups maps Rage rocket to Fury light missile via variant alias", () => {
-    const scourgeRageRocket: MissileStats = { damage: 60, damageType: "kinetic", explosionRadius: 20, explosionVelocity: 180, damageReductionFactor: 1.8, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, id: toTypeId("310"), name: "Scourge Rage Rocket" };
+    const scourgeRageRocket: MissileStats = { damage: 60, damageType: "kinetic", explosionRadius: 20, explosionVelocity: 180, damageReductionFactor: 1.8, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, requiredSkillIds: [], id: toTypeId("310"), name: "Scourge Rage Rocket" };
     const dbWithRage: Pick<FittingDb, "missiles" | "launchers"> = {
       missiles: { ...missiles, [String(scourgeRageRocket.id)]: scourgeRageRocket },
       launchers,
@@ -178,8 +184,8 @@ describe("MissileCatalogImpl", () => {
   });
 
   test("equivalentInGroups maps Javelin rocket to Precision light missile via variant alias", () => {
-    const scourgeJavelinRocket: MissileStats = { damage: 30, damageType: "kinetic", explosionRadius: 15, explosionVelocity: 300, damageReductionFactor: 1.2, maxVelocity: 9000, flightTime: 4, launcherGroup: 507, chargeGroup: 387, id: toTypeId("311"), name: "Scourge Javelin Rocket" };
-    const scourgePrecisionLight: MissileStats = { damage: 100, damageType: "kinetic", explosionRadius: 35, explosionVelocity: 250, damageReductionFactor: 1.8, maxVelocity: 5000, flightTime: 7, launcherGroup: 509, chargeGroup: 394, id: toTypeId("262"), name: "Scourge Precision Light Missile" };
+    const scourgeJavelinRocket: MissileStats = { damage: 30, damageType: "kinetic", explosionRadius: 15, explosionVelocity: 300, damageReductionFactor: 1.2, maxVelocity: 9000, flightTime: 4, launcherGroup: 507, chargeGroup: 387, requiredSkillIds: [], id: toTypeId("311"), name: "Scourge Javelin Rocket" };
+    const scourgePrecisionLight: MissileStats = { damage: 100, damageType: "kinetic", explosionRadius: 35, explosionVelocity: 250, damageReductionFactor: 1.8, maxVelocity: 5000, flightTime: 7, launcherGroup: 509, chargeGroup: 394, requiredSkillIds: [], id: toTypeId("262"), name: "Scourge Precision Light Missile" };
     const dbWithJavelin: Pick<FittingDb, "missiles" | "launchers"> = {
       missiles: { ...missiles, [String(scourgeJavelinRocket.id)]: scourgeJavelinRocket, [String(scourgePrecisionLight.id)]: scourgePrecisionLight },
       launchers,
@@ -190,7 +196,7 @@ describe("MissileCatalogImpl", () => {
   });
 
   test("equivalentInGroups maps Fury light missile back to Rage rocket via variant alias", () => {
-    const scourgeRageRocket: MissileStats = { damage: 60, damageType: "kinetic", explosionRadius: 20, explosionVelocity: 180, damageReductionFactor: 1.8, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, id: toTypeId("310"), name: "Scourge Rage Rocket" };
+    const scourgeRageRocket: MissileStats = { damage: 60, damageType: "kinetic", explosionRadius: 20, explosionVelocity: 180, damageReductionFactor: 1.8, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, requiredSkillIds: [], id: toTypeId("310"), name: "Scourge Rage Rocket" };
     const dbWithRage: Pick<FittingDb, "missiles" | "launchers"> = {
       missiles: { ...missiles, [String(scourgeRageRocket.id)]: scourgeRageRocket },
       launchers,
@@ -201,7 +207,7 @@ describe("MissileCatalogImpl", () => {
   });
 
   test("equivalentInGroups falls back to base stem when variant is unavailable in target groups", () => {
-    const scourgeRageRocket: MissileStats = { damage: 60, damageType: "kinetic", explosionRadius: 20, explosionVelocity: 180, damageReductionFactor: 1.8, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, id: toTypeId("310"), name: "Scourge Rage Rocket" };
+    const scourgeRageRocket: MissileStats = { damage: 60, damageType: "kinetic", explosionRadius: 20, explosionVelocity: 180, damageReductionFactor: 1.8, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, requiredSkillIds: [], id: toTypeId("310"), name: "Scourge Rage Rocket" };
     const dbWithRage: Pick<FittingDb, "missiles" | "launchers"> = {
       missiles: { ...missiles, [String(scourgeRageRocket.id)]: scourgeRageRocket },
       launchers,

@@ -1,4 +1,5 @@
 import type { FactionId, HullTypeId, ShipId, TypeId } from "../gamedata/ids";
+import type { DamageResists } from "../sim";
 
 export type HullTier = "small" | "medium" | "large" | "capital";
 
@@ -23,17 +24,89 @@ export interface ShipProfile {
   readonly inertiaModifier: number;
   readonly baseSpeed: number;
   readonly sigRadius: number;
+  readonly scanResolution: number; // mm
+  readonly maxTargetingRange: number; // m
+  readonly maxLockedTargets: number;
   readonly droneBandwidth: number;
   readonly droneCapacity: number;
   readonly maxActiveDrones: number;
+  readonly shieldHp: number;
+  readonly shieldRechargeTime: number; // seconds
+  readonly armorHp: number;
+  readonly hullHp: number;
+  readonly shieldResists: DamageResists;
+  readonly armorResists: DamageResists;
+  readonly hullResists: DamageResists;
 }
 
 export type SkillLevel = 0 | 1 | 2 | 3 | 4 | 5;
+
+export interface DefenseSkills {
+  readonly shieldManagement: SkillLevel;
+  readonly shieldOperation: SkillLevel;
+  readonly hullUpgrades: SkillLevel;
+  readonly mechanics: SkillLevel;
+  readonly shieldCompensationEm: SkillLevel;
+  readonly shieldCompensationThermal: SkillLevel;
+  readonly shieldCompensationKinetic: SkillLevel;
+  readonly shieldCompensationExplosive: SkillLevel;
+  readonly armorCompensationEm: SkillLevel;
+  readonly armorCompensationThermal: SkillLevel;
+  readonly armorCompensationKinetic: SkillLevel;
+  readonly armorCompensationExplosive: SkillLevel;
+  readonly armorResistancePhasing: SkillLevel;
+  readonly tacticalShieldManipulation: SkillLevel;
+  readonly thermodynamics: SkillLevel;
+}
+
+export interface TargetingSkills {
+  readonly longRangeTargeting: SkillLevel;
+  readonly signatureAnalysis: SkillLevel;
+  readonly targetManagement: SkillLevel;
+  readonly advancedTargetManagement: SkillLevel;
+  readonly sensorLinking: SkillLevel;
+  readonly signalSuppression: SkillLevel;
+  readonly frequencyModulation: SkillLevel;
+}
 
 export interface StatConditions {
   readonly skillLevel: SkillLevel;
   readonly overloaded: boolean;
   readonly weaponOverloaded: boolean;
+  readonly defenseSkills?: DefenseSkills;
+  readonly targetingSkills?: TargetingSkills;
+}
+
+export function defaultDefenseSkills(level: SkillLevel): DefenseSkills {
+  return {
+    shieldManagement: level,
+    shieldOperation: level,
+    hullUpgrades: level,
+    mechanics: level,
+    shieldCompensationEm: level,
+    shieldCompensationThermal: level,
+    shieldCompensationKinetic: level,
+    shieldCompensationExplosive: level,
+    armorCompensationEm: level,
+    armorCompensationThermal: level,
+    armorCompensationKinetic: level,
+    armorCompensationExplosive: level,
+    armorResistancePhasing: level,
+    tacticalShieldManipulation: level,
+    thermodynamics: level,
+  };
+}
+
+export function defaultTargetingSkills(level: SkillLevel): TargetingSkills {
+  return {
+    longRangeTargeting: level,
+    signatureAnalysis: level,
+    targetManagement: level,
+    advancedTargetManagement: level,
+    sensorLinking: level,
+    signalSuppression: level,
+    frequencyModulation: level,
+  };
 }
 
 export interface PropulsionStats {

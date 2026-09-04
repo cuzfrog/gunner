@@ -10,7 +10,7 @@ import type { CombatantConfig, EwarProjection, ShipConfig, SimConfig } from "./t
 
 const shipASteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 const shipBSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
-const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false, appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }), disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }) };
+const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false, appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }), disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }), dampenedSensorSpec: (spec, projection, distance) => spec, dampenedSensorSpecIgnoringRange: (spec, projection) => spec, dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }) };
 
 const scram: EwarProjection = {
   loadout: {
@@ -19,7 +19,9 @@ const scram: EwarProjection = {
     disruptors: [],
     scramblers: [{ moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 }],
     painters: [],
+    dampeners: [],
     scripts: [],
+    dampenerScripts: [],
   },
   activation: {
     webs: [],
@@ -27,6 +29,7 @@ const scram: EwarProjection = {
     disruptors: [],
     scramblers: [{ active: true, overloaded: false }],
     painters: [],
+    dampeners: [],
   },
 };
 
@@ -151,6 +154,9 @@ describe("SimulationImpl", () => {
       appliedEffects: () => [],
       speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
       disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+      dampenedSensorSpec: (spec) => spec,
+      dampenedSensorSpecIgnoringRange: (spec) => spec,
+      dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config = simConfig("orbit");
@@ -170,6 +176,9 @@ describe("SimulationImpl", () => {
       appliedEffects: () => [],
       speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
       disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+      dampenedSensorSpec: (spec) => spec,
+      dampenedSensorSpecIgnoringRange: (spec) => spec,
+      dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const shipAWeb: EwarProjection = {
@@ -179,9 +188,11 @@ describe("SimulationImpl", () => {
         disruptors: [],
         scramblers: [],
         painters: [],
+        dampeners: [],
         scripts: [],
+        dampenerScripts: [],
       },
-      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [] },
+      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [] },
     };
     const config = { ...simConfig("orbit"), shipA: { ...shipConfig("shipA", "midships"), ewar: shipAWeb } };
     const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver: resolver, simConfig: config });
@@ -200,6 +211,9 @@ describe("SimulationImpl", () => {
       appliedEffects: () => [],
       speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
       disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+      dampenedSensorSpec: (spec) => spec,
+      dampenedSensorSpecIgnoringRange: (spec) => spec,
+      dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const config = {
@@ -222,6 +236,9 @@ describe("SimulationImpl", () => {
       appliedEffects: () => [],
       speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
       disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+      dampenedSensorSpec: (spec) => spec,
+      dampenedSensorSpecIgnoringRange: (spec) => spec,
+      dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const config = { ...simConfig("orbit"), initialDistance: 5001 };
@@ -256,9 +273,11 @@ describe("SimulationImpl", () => {
         disruptors: [],
         scramblers: [],
         painters: [],
+        dampeners: [],
         scripts: [],
+        dampenerScripts: [],
       },
-      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [] },
+      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [] },
     };
     const resolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });
     const shipASteering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
@@ -338,6 +357,9 @@ describe("SimulationImpl", () => {
       appliedEffects: () => [],
       speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
       disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+      dampenedSensorSpec: (spec) => spec,
+      dampenedSensorSpecIgnoringRange: (spec) => spec,
+      dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config: SimConfig = {
@@ -360,6 +382,9 @@ describe("SimulationImpl", () => {
       appliedEffects: () => [],
       speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
       disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+      dampenedSensorSpec: (spec) => spec,
+      dampenedSensorSpecIgnoringRange: (spec) => spec,
+      dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config: SimConfig = {
@@ -382,6 +407,9 @@ describe("SimulationImpl", () => {
       appliedEffects: () => [],
       speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
       disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+      dampenedSensorSpec: (spec) => spec,
+      dampenedSensorSpecIgnoringRange: (spec) => spec,
+      dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config: SimConfig = {

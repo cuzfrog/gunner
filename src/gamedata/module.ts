@@ -53,6 +53,7 @@ export function registerGameDataModule<T extends GameDataCradle>(cradle: AwilixC
     itemNameResolver: asValue(resolver),
     itemNameLoader: asValue(loader),
     presetFitTexts: asFunction(() => new StaticPresetFitTexts()).singleton(),
+    skillBonuses: asValue(FITTING_DB.skillBonuses),
   });
 }
 

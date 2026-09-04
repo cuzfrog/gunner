@@ -1,18 +1,18 @@
 @layer layout {
-/* Page reflow map. Breakpoints: 1100px, 900px, 480px. Wide centering at 901px. */
-@media (max-width: 1100px) {
+/* Page reflow map. Breakpoints: 1210px, 990px, 528px. Wide centering at 991px. */
+@media (max-width: 1210px) {
   .app-main {
-    grid-template-columns: minmax(260px, 280px) minmax(0, 1fr) minmax(260px, 280px);
-    gap: 12px;
+    grid-template-columns: minmax(286px, 308px) minmax(0, 1fr) minmax(286px, 308px);
+    gap: 13px;
   }
 
   .app-footer {
     grid-template-columns: 1fr 1fr;
-    gap: 14px 24px;
+    gap: 15px 26px;
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 990px) {
   .app-main { grid-template-columns: 1fr; }
 
   .result-grid {
@@ -21,7 +21,7 @@
     scrollbar-width: thin;
   }
 
-  .result-grid::-webkit-scrollbar { height: 6px; }
+  .result-grid::-webkit-scrollbar { height: 7px; }
 
   .result-grid::-webkit-scrollbar-thumb {
     background: var(--border-dim);
@@ -31,23 +31,23 @@
   .skill-section { margin-top: 0; }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 528px) {
   .app-footer { grid-template-columns: 1fr; }
 
-  .combatant-portrait { bottom: 152px; }
+  .combatant-portrait { bottom: 167px; }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 792px) {
   .result-grid { flex-direction: column; }
   .result-range { order: 2; }
 }
 
-@media (min-width: 901px) {
+@media (min-width: 991px) {
   .control-bar {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: 10px;
+    gap: 11px;
   }
 
   .control-bar-playback {

@@ -2,6 +2,7 @@ import { join } from "path";
 import type { PropulsionModule, ShipNameLanguage, ShipProfile, Ships, StatConditions } from "../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { DisruptionScriptSpec, StackingPenalty } from "../sim";
+import { damageVectorSum } from "../sim";
 import { ChargeCatalogImpl } from "./chargeCatalog";
 import { DroneCatalogImpl } from "./droneCatalog";
 import { DroneSkillModelImpl } from "./droneStats";
@@ -25,6 +26,11 @@ import {
   OMNIDIRECTIONAL_TRACKING_ENHANCERS,
   OMNIDIRECTIONAL_TRACKING_LINKS,
   SCRIPTS,
+  SENSOR_BOOSTER_SCRIPTS,
+  SENSOR_BOOSTERS,
+  SENSOR_DAMPENER_SCRIPTS,
+  SENSOR_DAMPENERS,
+  SIGNAL_AMPLIFIERS,
   SKILL_BONUSES,
   STASIS_GRAPPLERS,
   STASIS_WEBS,
@@ -105,9 +111,19 @@ const profile: ShipProfile = {
   inertiaModifier: 0.45,
   baseSpeed: 165,
   sigRadius: 270,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const frigateProfile: ShipProfile = {
@@ -119,9 +135,19 @@ const frigateProfile: ShipProfile = {
   inertiaModifier: 3.2,
   baseSpeed: 365,
   sigRadius: 35,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const bonusProfile: ShipProfile = {
@@ -133,9 +159,19 @@ const bonusProfile: ShipProfile = {
   inertiaModifier: 0.5,
   baseSpeed: 205,
   sigRadius: 130,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const roleBonusProfile: ShipProfile = {
@@ -147,9 +183,19 @@ const roleBonusProfile: ShipProfile = {
   inertiaModifier: 0.51,
   baseSpeed: 195,
   sigRadius: 135,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const abaddonProfile: ShipProfile = {
@@ -161,9 +207,19 @@ const abaddonProfile: ShipProfile = {
   inertiaModifier: 0.14,
   baseSpeed: 89,
   sigRadius: 470,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const kestrelProfile: ShipProfile = {
@@ -175,9 +231,19 @@ const kestrelProfile: ShipProfile = {
   inertiaModifier: 3.1,
   baseSpeed: 325,
   sigRadius: 38,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const propulsionModules: readonly PropulsionModule[] = [
@@ -206,8 +272,8 @@ const ships = vi.mocked<Ships>({
 
 const db: FittingDb = {
   modules: {
-    "1600mm Steel Plates II": row("1600mm Steel Plates II", "1600mm Steel Plates II", { massAddition: 3_750_000 }),
-    "Reinforced Bulkheads II": row("Reinforced Bulkheads II", "Reinforced Bulkheads II", { agilityMultiplier: 1.05 }),
+    "1600mm Steel Plates II": row("1600mm Steel Plates II", "1600mm Steel Plates II", { massAddition: 3_750_000, defense: { kind: "armorPlate", armorHpAdd: 4800 } }),
+    "Reinforced Bulkheads II": row("Reinforced Bulkheads II", "Reinforced Bulkheads II", { agilityMultiplier: 1.05, defense: { kind: "hullBulkhead", hullHpPercent: 25 } }),
     "5MN Microwarpdrive I": row("5MN Microwarpdrive I", "5MN Microwarpdrive I", {
       propulsion: {
         kind: "microwarpdrive",
@@ -229,8 +295,8 @@ const db: FittingDb = {
       },
     }),
     "Inertial Stabilizers II": row("Inertial Stabilizers II", "Inertial Stabilizers II", { agilityMultiplier: 0.8, sigBonusPercent: 11 }),
-    "Nanofiber Internal Structure II": row("Nanofiber Internal Structure II", "Nanofiber Internal Structure II", { speedBonusPercent: 9.5, agilityMultiplier: 0.8425 }),
-    "Medium Shield Extender II": row("Medium Shield Extender II", "Medium Shield Extender II", { sigRadiusAdd: 7 }),
+    "Nanofiber Internal Structure II": row("Nanofiber Internal Structure II", "Nanofiber Internal Structure II", { speedBonusPercent: 9.5, agilityMultiplier: 0.8425, defense: { kind: "hullBulkhead", hullHpPercent: -20 } }),
+    "Medium Shield Extender II": row("Medium Shield Extender II", "Medium Shield Extender II", { sigRadiusAdd: 7, defense: { kind: "shieldExtender", shieldHpAdd: 1100, sigRadiusPenalty: 7 } }),
     "Medium Higgs Anchor I": row("Medium Higgs Anchor I", "Medium Higgs Anchor I", { massBonusPercentage: 100, agilityMultiplier: 0.45, speedBonusPercent: -75 }),
     "Overdrive Injector System II": row("Overdrive Injector System II", "Overdrive Injector System II", { speedBonusPercent: 12.5 }),
     "Medium Trimark Armor Pump II": row("Medium Trimark Armor Pump II", "Medium Trimark Armor Pump II", { agilityDrawbackPercent: 10 }),
@@ -242,8 +308,8 @@ const db: FittingDb = {
     "Gyrostabilizer II": row("Gyrostabilizer II", "Gyrostabilizer II", { turretDamageMultiplier: 1.15, turretSpeedMultiplier: 0.89, turretWeaponGroup: "Projectile Weapon" }),
   },
   turrets: {
-    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", metaLevel: 5, metaGroupID: 2 }),
-    "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, damageMultiplier: 3, cycleTime: 5, turretSkill: "Small Projectile Turret", metaLevel: 5, metaGroupID: 2 }),
+    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", requiredSkillIds: [toTypeId("3300"), toTypeId("3306"), toTypeId("12214")], groupID: 53, metaLevel: 5, metaGroupID: 2 }),
+    "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, damageMultiplier: 3, cycleTime: 5, turretSkill: "Small Projectile Turret", requiredSkillIds: [toTypeId("3300"), toTypeId("3302"), toTypeId("11079")], groupID: 55, metaLevel: 5, metaGroupID: 2 }),
   },
   charges: {
     "Conflagration M": row("Conflagration M", "Conflagration M", { trackingMultiplier: 0.7, rangeMultiplier: 0.5 }),
@@ -266,52 +332,65 @@ const db: FittingDb = {
   missileGuidanceEnhancers: {},
   missileScripts: {},
   hullBonuses: {},
-  skillBonuses: [],
+  skillBonuses: [
+    { skillId: toTypeId("3312"), bonusType: "turretTracking", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
+    { skillId: toTypeId("3311"), bonusType: "turretOptimal", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
+    { skillId: toTypeId("3317"), bonusType: "turretFalloff", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
+  ],
   drones: {},
   combatDrones: {},
   omnidirectionalTrackingLinks: {},
   omnidirectionalTrackingEnhancers: {},
+  sensorDampeners: {},
+  sensorBoosters: {},
+  signalAmplifiers: {},
+  sensorBoosterScripts: {},
+  sensorDampenerScripts: {},
 };
 
 const hullBonusDb: FittingDb = {
   ...db,
   hullBonuses: {
     [bonusProfile.id]: [
-      { attribute: "maxVelocity", magnitude: 5, skill: "Minmatar Cruiser" },
-      { attribute: "agility", magnitude: -4, skill: "Minmatar Cruiser" },
-      { attribute: "turretTracking", magnitude: 10, skill: "Minmatar Cruiser", turretSkill: "Small Projectile Turret" },
-      { attribute: "turretFalloff", magnitude: 10 },
-      { attribute: "turretOptimal", magnitude: 25, turretSkill: "Medium Projectile Turret" },
+      { attribute: "maxVelocity", magnitude: 5, scalesWithHullSkill: true },
+      { attribute: "agility", magnitude: -4, scalesWithHullSkill: true },
+      { attribute: "turretTracking", magnitude: 10, scalesWithHullSkill: true, moduleSkillId: toTypeId("3302") },
+      { attribute: "turretFalloff", magnitude: 10, scalesWithHullSkill: false },
+      { attribute: "turretOptimal", magnitude: 25, scalesWithHullSkill: false, moduleSkillId: toTypeId("3305") },
     ],
     [roleBonusProfile.id]: [
-      { attribute: "maxVelocity", magnitude: 50 },
-      { attribute: "agility", magnitude: -5 },
+      { attribute: "maxVelocity", magnitude: 50, scalesWithHullSkill: false },
+      { attribute: "agility", magnitude: -5, scalesWithHullSkill: false },
     ],
     [profile.id]: [
-      { attribute: "turretDamage", magnitude: 10, skill: "Amarr Battlecruiser", turretSkill: "Medium Energy Turret" },
+      { attribute: "turretDamage", magnitude: 10, scalesWithHullSkill: true, moduleSkillId: toTypeId("3306") },
     ],
   },
-  skillBonuses: [],
+  skillBonuses: [
+    { skillId: toTypeId("3312"), bonusType: "turretTracking", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
+    { skillId: toTypeId("3311"), bonusType: "turretOptimal", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
+    { skillId: toTypeId("3317"), bonusType: "turretFalloff", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
+  ],
 };
 
 const gunFamilies = new GunFamiliesImpl({ fittingDb: db });
 
 const chargeCatalog = new ChargeCatalogImpl({ fittingDb: db, gunFamilies });
-const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty });
+const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonuses: db.skillBonuses });
 const missileCatalog = new MissileCatalogImpl({ fittingDb: db, missileSkillModel });
 const droneSkillModel = new DroneSkillModelImpl();
 const droneCatalog = new DroneCatalogImpl({ fittingDb: db });
 
 const mockSkillBonuses: readonly SkillBonus[] = [
-  { skillId: "3300" as TypeId, bonusType: "turretRoF", magnitudePerLevel: -2 },
-  { skillId: "3310" as TypeId, bonusType: "turretRoF", magnitudePerLevel: -4 },
-  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, weaponGroup: "Energy Weapon" },
-  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, weaponGroup: "Projectile Weapon" },
-  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, weaponGroup: "Hybrid Weapon" },
-  { skillId: "3306" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, turretSkill: "Medium Energy Turret" },
-  { skillId: "3305" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, turretSkill: "Medium Projectile Turret" },
-  { skillId: "3302" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, turretSkill: "Small Projectile Turret" },
-  { skillId: "12214" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 2, specializationSkill: "Medium Pulse Laser Specialization" },
+  { skillId: "3300" as TypeId, bonusType: "turretRoF", magnitudePerLevel: -2, appliesTo: "module" },
+  { skillId: "3310" as TypeId, bonusType: "turretRoF", magnitudePerLevel: -4, appliesTo: "module" },
+  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, moduleGroupId: 53, appliesTo: "module" },
+  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, moduleGroupId: 55, appliesTo: "module" },
+  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, moduleGroupId: 74, appliesTo: "module" },
+  { skillId: "3306" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, requiredSkillId: toTypeId("3306"), appliesTo: "module" },
+  { skillId: "3305" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, requiredSkillId: toTypeId("3305"), appliesTo: "module" },
+  { skillId: "3302" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, requiredSkillId: toTypeId("3302"), appliesTo: "module" },
+  { skillId: "12214" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 2, requiredSkillId: toTypeId("12214"), appliesTo: "module" },
 ];
 
 const skillBonusDb: FittingDb = {
@@ -342,10 +421,15 @@ const fullFittingDb: FittingDb = {
   combatDrones: COMBAT_DRONES,
   omnidirectionalTrackingLinks: OMNIDIRECTIONAL_TRACKING_LINKS,
   omnidirectionalTrackingEnhancers: OMNIDIRECTIONAL_TRACKING_ENHANCERS,
+  sensorDampeners: SENSOR_DAMPENERS,
+  sensorBoosters: SENSOR_BOOSTERS,
+  signalAmplifiers: SIGNAL_AMPLIFIERS,
+  sensorBoosterScripts: SENSOR_BOOSTER_SCRIPTS,
+  sensorDampenerScripts: SENSOR_DAMPENER_SCRIPTS,
 };
 const fullGunFamilies = new GunFamiliesImpl({ fittingDb: fullFittingDb });
 const fullChargeCatalog = new ChargeCatalogImpl({ fittingDb: fullFittingDb, gunFamilies: fullGunFamilies });
-const fullMissileSkillModel = new MissileSkillModelImpl({ stackingPenalty });
+const fullMissileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonuses: fullFittingDb.skillBonuses });
 const fullMissileCatalog = new MissileCatalogImpl({ fittingDb: fullFittingDb, missileSkillModel: fullMissileSkillModel });
 const fullDroneSkillModel = new DroneSkillModelImpl();
 const fullDroneCatalog = new DroneCatalogImpl({ fittingDb: fullFittingDb });
@@ -394,11 +478,12 @@ describe("FittingImportImpl", () => {
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(1.05, 6);
   });
 
-  test("adds shield extender signature radius", () => {
+  test("shield extender signature radius is handled by defense calculator, not resolveHull", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Shieldy]\nMedium Shield Extender II`, conditions);
-    expect(result!.fitted.sigRadiusAdd).toBe(7);
+    expect(result!.fitted.sigRadiusAdd).toBe(0);
     expect(result!.fitted.sigMultiplier).toBe(1);
+    expect(result!.defense!.signaturePenalty).toBe(7);
   });
 
   test("applies stacking penalty to two agility modules", () => {
@@ -468,6 +553,32 @@ describe("FittingImportImpl", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Kiter]\nOverdrive Injector System II`, conditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.125, 6);
+  });
+
+  test("nanofiber in defenseModules applies speed and agility bonuses", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(`[Harbinger, Nano]\nNanofiber Internal Structure II`, conditions);
+    expect(result!.fitted.speedMultiplier).toBeCloseTo(1.095, 6);
+    expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.8425, 6);
+  });
+
+  test("armor plate in defenseModules applies mass addition", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(`[Harbinger, Armor]\n1600mm Steel Plates II`, conditions);
+    expect(result!.fitted.mass).toBe(profile.mass + 3_750_000);
+  });
+
+  test("bulkhead in defenseModules applies agility multiplier", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(`[Harbinger, Bulk]\nReinforced Bulkheads II`, conditions);
+    expect(result!.fitted.inertiaMultiplier).toBeCloseTo(1.05, 6);
+  });
+
+  test("nanofiber and overdrive speed bonuses stack", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(`[Harbinger, Fast]\nOverdrive Injector System II\nNanofiber Internal Structure II`, conditions);
+    const expected = stackingPenalty.apply([1.125, 1.095]);
+    expect(result!.fitted.speedMultiplier).toBeCloseTo(expected, 6);
   });
 
   test("applies mass percentage bonuses with stacking penalty", () => {
@@ -548,7 +659,8 @@ describe("FittingImportImpl", () => {
       conditions,
     );
     expect(result!.fitted.mass).toBe(profile.mass + 3_750_000);
-    expect(result!.fitted.sigRadiusAdd).toBe(7);
+    expect(result!.fitted.sigRadiusAdd).toBe(0);
+    expect(result!.defense!.signaturePenalty).toBe(7);
   });
 
   test("resolves the first turret and charge", () => {
@@ -882,7 +994,7 @@ Heat Sink II`,
       ...db,
       hullBonuses: {
         [profile.id]: [
-          { attribute: "turretRoF", magnitude: -5, skill: "Amarr Battlecruiser", turretSkill: "Medium Energy Turret" },
+          { attribute: "turretRoF", magnitude: -5, scalesWithHullSkill: true, moduleSkillId: toTypeId("3306") },
         ],
       },
       skillBonuses: [],
@@ -1188,7 +1300,7 @@ Ballistic Control System I`,
     const baseCycle = withoutBcs!.launcher!.cycleTime;
     const bcsDamageMultiplier = stackingPenalty.apply([1.07, 1.07]);
     const bcsCycleMultiplier = stackingPenalty.apply([0.92, 0.92]);
-    expect(withBcs!.launcher!.damagePerMissile).toBeCloseTo(baseDamage * bcsDamageMultiplier, 6);
+    expect(damageVectorSum(withBcs!.launcher!.damagePerMissile)).toBeCloseTo(damageVectorSum(baseDamage) * bcsDamageMultiplier, 6);
     expect(withBcs!.launcher!.cycleTime).toBeCloseTo(baseCycle * bcsCycleMultiplier, 6);
   });
 
@@ -1368,7 +1480,7 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
     expect(result!.launcher!.count).toBe(3);
     expect(result!.launcher!.name).toBe("Arbalest Compact Light Missile Launcher");
     expect(result!.launcher!.chargeName).toBe("Caldari Navy Inferno Light Missile");
-    expect(result!.launcher!.damagePerMissile).toBeGreaterThan(0);
+    expect(damageVectorSum(result!.launcher!.damagePerMissile)).toBeGreaterThan(0);
     expect(result!.launcher!.cycleTime).toBeGreaterThan(0);
     expect(result!.launcher!.explosionRadius).toBeGreaterThan(0);
     expect(result!.launcher!.maxVelocity).toBeGreaterThan(0);
@@ -1388,10 +1500,10 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
     );
     expect(result!.launcher).toBeDefined();
     const baseDamage = 95;
-    const skillDamageMultiplier = 1 + 0.02 * 4;
+    const skillDamageMultiplier = (1 + 0.05 * 4) * (1 + 0.02 * 4);
     const hullDamagePercent = 5 * 4;
     const hullDamageMultiplier = stackingPenalty.apply([1 + hullDamagePercent / 100]);
-    expect(result!.launcher!.damagePerMissile).toBeCloseTo(baseDamage * skillDamageMultiplier * hullDamageMultiplier, 4);
+    expect(damageVectorSum(result!.launcher!.damagePerMissile)).toBeCloseTo(baseDamage * skillDamageMultiplier * hullDamageMultiplier, 4);
     const skillRofMultiplier = (1 - 0.02 * 4) * (1 - 0.03 * 4);
     expect(result!.launcher!.cycleTime).toBeCloseTo(13.6 * skillRofMultiplier, 4);
   });
@@ -1542,7 +1654,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, hullBonuses: {}, skillBonuses: [], drones: DRONES, combatDrones: COMBAT_DRONES };
+  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, skillBonuses: [], drones: DRONES, combatDrones: COMBAT_DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {

@@ -1,6 +1,7 @@
 import type { ImportedFitting } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type {
+  DefenseSkills,
   FittedHull,
   PropulsionId,
   PropulsionModule,
@@ -9,6 +10,7 @@ import type {
   Ships,
   SkillLevel,
   StatConditions,
+  TargetingSkills,
 } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection } from "../../../appstate";
@@ -57,6 +59,14 @@ export interface ISkillOverloadSection {
   closeSkillPopup(): void;
   isSkillPopupOpen(): boolean;
   onSkillChoiceInput(): void;
+  currentDefenseSkills(): DefenseSkills | undefined;
+  setDefenseSkills(skills: DefenseSkills): void;
+  resetDefenseSkills(): void;
+  renderDefenseSkills(): void;
+  currentTargetingSkills(): TargetingSkills | undefined;
+  setTargetingSkills(skills: TargetingSkills): void;
+  resetTargetingSkills(): void;
+  renderTargetingSkills(): void;
 }
 
 export interface IPropulsionSection {

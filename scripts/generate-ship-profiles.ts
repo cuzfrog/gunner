@@ -35,12 +35,22 @@ export interface SdeGroup {
   published: number;
 }
 
+export interface SdeDogmaAttribute {
+  attributeID: number;
+  name: string;
+}
+
+export interface SdeTypeDogma {
+  dogmaAttributes: readonly { attributeID: number; value: number }[];
+}
+
 const DATA_PATH = "data/ship-profiles.json";
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const OUTPUT_PATH = "src/gamedata/shipProfiles/profiles.ts";
 const SHIP_CATEGORY_ID = 6;
 const LEGACY_PREFIX = "legacy";
 const DEFAULT_MAX_ACTIVE_DRONES = 5;
+const SHIELD_RECHARGE_RATE_MS = 1_000; // SDE stores shieldRechargeRate in milliseconds
 
 function parseNumber(input: string): number {
   const match = input.match(/[\d,.]+(?:\.\d+)?/);
@@ -48,6 +58,12 @@ function parseNumber(input: string): number {
   const cleaned = match[0].replaceAll(",", "");
   const value = Number(cleaned);
   if (Number.isNaN(value)) throw new Error(`Cannot parse number from "${input}"`);
+  return value;
+}
+
+function parseDistance(input: string): number {
+  const value = parseNumber(input);
+  if (input.toLowerCase().includes("km")) return value * 1000;
   return value;
 }
 
@@ -62,6 +78,12 @@ function hasObject(value: unknown, key: string): Record<string, unknown> {
 function hasString(value: Record<string, unknown>, key: string, context: string): string {
   const field = value[key];
   if (typeof field !== "string") throw new Error(`${context}: missing or invalid ${key}`);
+  return field;
+}
+
+function hasNumber(value: Record<string, unknown>, key: string, context: string): number {
+  const field = value[key];
+  if (typeof field !== "number") throw new Error(`${context}: missing or invalid ${key}`);
   return field;
 }
 
@@ -118,12 +140,87 @@ async function loadMerged<T>(prefix: string, sdeDir = SDE_DIR): Promise<Record<s
   return all;
 }
 
-async function loadSdeData(sdeDir = SDE_DIR): Promise<{ types: Record<string, SdeType>; groups: Record<string, SdeGroup> }> {
-  const [types, groups] = await Promise.all([
+interface SdeData {
+  readonly types: Record<string, SdeType>;
+  readonly groups: Record<string, SdeGroup>;
+  readonly typedogmas: Record<string, SdeTypeDogma>;
+  readonly attributeNames: Map<number, string>;
+}
+
+async function loadSdeData(sdeDir = SDE_DIR): Promise<SdeData> {
+  const [types, groups, typedogmas, attributes] = await Promise.all([
     loadMerged<SdeType>("types", sdeDir),
     loadMerged<SdeGroup>("groups", sdeDir),
+    loadMerged<SdeTypeDogma>("typedogma", sdeDir),
+    loadMerged<SdeDogmaAttribute>("dogmaattributes", sdeDir),
   ]);
-  return { types, groups };
+  const attributeNames = buildAttributeNameMap(attributes);
+  return { types, groups, typedogmas, attributeNames };
+}
+
+function buildAttributeNameMap(attributes: Record<string, SdeDogmaAttribute>): Map<number, string> {
+  const map = new Map<number, string>();
+  for (const attribute of Object.values(attributes)) {
+    if (!map.has(attribute.attributeID)) map.set(attribute.attributeID, attribute.name);
+  }
+  return map;
+}
+
+interface DefenseData {
+  readonly shieldHp: number;
+  readonly shieldRechargeTime: number;
+  readonly armorHp: number;
+  readonly hullHp: number;
+  readonly shieldResists: Resists;
+  readonly armorResists: Resists;
+  readonly hullResists: Resists;
+}
+
+function extractDefenseData(typeId: string, typedogmas: Record<string, SdeTypeDogma>, attributeNames: Map<number, string>): DefenseData {
+  const typeDogma = typedogmas[typeId];
+  const values = buildAttributeValues(attributeNames, typeDogma);
+  const shieldHp = values.get("shieldCapacity") ?? 0;
+  const armorHp = values.get("armorHP") ?? 0;
+  const hullHp = values.get("hp") ?? 0;
+  const shieldRechargeTime = (values.get("shieldRechargeRate") ?? 0) / SHIELD_RECHARGE_RATE_MS;
+  return {
+    shieldHp,
+    shieldRechargeTime,
+    armorHp,
+    hullHp,
+    shieldResists: resistsFromResonances(values, "shield"),
+    armorResists: resistsFromResonances(values, "armor"),
+    hullResists: resistsFromResonances(values, ""),
+  };
+}
+
+function buildAttributeValues(attributeNames: Map<number, string>, typeDogma: SdeTypeDogma | undefined): Map<string, number> {
+  const values = new Map<string, number>();
+  if (!typeDogma) return values;
+  for (const { attributeID, value } of typeDogma.dogmaAttributes) {
+    const name = attributeNames.get(attributeID);
+    if (name) values.set(name, value);
+  }
+  return values;
+}
+
+type Resists = { readonly em: number; readonly thermal: number; readonly kinetic: number; readonly explosive: number };
+
+function resistsFromResonances(values: Map<string, number>, prefix: string): Resists {
+  const emAttr = prefix ? `${prefix}EmDamageResonance` : "emDamageResonance";
+  const thermalAttr = prefix ? `${prefix}ThermalDamageResonance` : "thermalDamageResonance";
+  const kineticAttr = prefix ? `${prefix}KineticDamageResonance` : "kineticDamageResonance";
+  const explosiveAttr = prefix ? `${prefix}ExplosiveDamageResonance` : "explosiveDamageResonance";
+  return {
+    em: roundResist(1 - (values.get(emAttr) ?? 1)),
+    thermal: roundResist(1 - (values.get(thermalAttr) ?? 1)),
+    kinetic: roundResist(1 - (values.get(kineticAttr) ?? 1)),
+    explosive: roundResist(1 - (values.get(explosiveAttr) ?? 1)),
+  };
+}
+
+function roundResist(value: number): number {
+  return Math.round(value * 1e6) / 1e6;
 }
 
 function buildShipNameToType(
@@ -163,7 +260,13 @@ function resolveShipIds(
   };
 }
 
-function parseProfile(raw: unknown, index: number, shipNameToType: ReadonlyMap<string, SdeType>): ShipProfile {
+function parseProfile(
+  raw: unknown,
+  index: number,
+  shipNameToType: ReadonlyMap<string, SdeType>,
+  typedogmas: Record<string, SdeTypeDogma>,
+  attributeNames: Map<number, string>,
+): ShipProfile {
   if (!raw || typeof raw !== "object") throw new Error(`Entry ${index} is not an object`);
   const record = raw as Record<string, unknown>;
 
@@ -179,6 +282,7 @@ function parseProfile(raw: unknown, index: number, shipNameToType: ReadonlyMap<s
   const { id, factionId, hullTypeId } = resolveShipIds({ name, faction, hullType }, shipNameToType);
 
   const droneLimits = parseDroneLimits(record["drones"], name);
+  const defense = extractDefenseData(String(id), typedogmas, attributeNames);
 
   return {
     id,
@@ -189,9 +293,19 @@ function parseProfile(raw: unknown, index: number, shipNameToType: ReadonlyMap<s
     inertiaModifier: parseNumber(hasString(navigation, "inertiaModifier", name)),
     baseSpeed: parseNumber(hasString(navigation, "maxVelocity", name)),
     sigRadius: parseNumber(hasString(targeting, "sigRadius", name)),
+    scanResolution: parseNumber(hasString(targeting, "scanResolution", name)),
+    maxTargetingRange: parseDistance(hasString(targeting, "maxTargetingRange", name)),
+    maxLockedTargets: hasNumber(targeting, "maxLockedTargets", name),
     droneBandwidth: droneLimits.bandwidth,
     droneCapacity: droneLimits.capacity,
     maxActiveDrones: droneLimits.maxActive,
+    shieldHp: defense.shieldHp,
+    shieldRechargeTime: defense.shieldRechargeTime,
+    armorHp: defense.armorHp,
+    hullHp: defense.hullHp,
+    shieldResists: defense.shieldResists,
+    armorResists: defense.armorResists,
+    hullResists: defense.hullResists,
   };
 }
 
@@ -213,9 +327,19 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push(`    inertiaModifier: ${p.inertiaModifier},`);
     lines.push(`    baseSpeed: ${p.baseSpeed},`);
     lines.push(`    sigRadius: ${p.sigRadius},`);
+    lines.push(`    scanResolution: ${p.scanResolution},`);
+    lines.push(`    maxTargetingRange: ${p.maxTargetingRange},`);
+    lines.push(`    maxLockedTargets: ${p.maxLockedTargets},`);
     lines.push(`    droneBandwidth: ${p.droneBandwidth},`);
     lines.push(`    droneCapacity: ${p.droneCapacity},`);
     lines.push(`    maxActiveDrones: ${p.maxActiveDrones},`);
+    lines.push(`    shieldHp: ${p.shieldHp},`);
+    lines.push(`    shieldRechargeTime: ${p.shieldRechargeTime},`);
+    lines.push(`    armorHp: ${p.armorHp},`);
+    lines.push(`    hullHp: ${p.hullHp},`);
+    lines.push(`    shieldResists: ${formatResists(p.shieldResists)},`);
+    lines.push(`    armorResists: ${formatResists(p.armorResists)},`);
+    lines.push(`    hullResists: ${formatResists(p.hullResists)},`);
     lines.push("  },");
   }
 
@@ -224,17 +348,21 @@ function buildSource(profiles: readonly ShipProfile[]): string {
   return lines.join("\n");
 }
 
+function formatResists(resists: Resists): string {
+  return `{ em: ${resists.em}, thermal: ${resists.thermal}, kinetic: ${resists.kinetic}, explosive: ${resists.explosive} }`;
+}
+
 async function main(): Promise<void> {
   const file = Bun.file(DATA_PATH);
   const raw = await file.json();
   if (!Array.isArray(raw)) throw new Error(`${DATA_PATH} does not contain an array`);
 
-  const { types, groups } = await loadSdeData();
+  const { types, groups, typedogmas, attributeNames } = await loadSdeData();
   const shipNameToType = buildShipNameToType(types, groups);
 
   const profiles: ShipProfile[] = [];
   for (let i = 0; i < raw.length; i++) {
-    profiles.push(parseProfile(raw[i], i, shipNameToType));
+    profiles.push(parseProfile(raw[i], i, shipNameToType, typedogmas, attributeNames));
   }
 
   for (const profile of profiles) {
@@ -248,7 +376,15 @@ async function main(): Promise<void> {
   console.log(`Generated ${OUTPUT_PATH} with ${profiles.length} profiles.`);
 }
 
-export { buildShipNameToType as _buildShipNameToType, parseDroneLimits as _parseDroneLimits, parseProfile as _parseProfile, resolveShipIds as _resolveShipIds, slugify as _slugify };
+export {
+  buildAttributeNameMap as _buildAttributeNameMap,
+  buildShipNameToType as _buildShipNameToType,
+  extractDefenseData as _extractDefenseData,
+  parseDroneLimits as _parseDroneLimits,
+  parseProfile as _parseProfile,
+  resolveShipIds as _resolveShipIds,
+  slugify as _slugify,
+};
 
 if (import.meta.main) {
   main().catch((error) => {

@@ -2,11 +2,11 @@
 .app-footer {
   display: grid;
   grid-template-columns: 1fr 1.2fr 1.2fr 1.2fr auto;
-  gap: 24px;
-  margin-top: 14px;
-  padding: 12px 4px 2px;
+  gap: 26px;
+  margin-top: 15px;
+  padding: 13px 4px 2px;
   border-top: 1px solid var(--border-dim);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.55;
   color: var(--text-dim);
 }
@@ -43,11 +43,11 @@
 
 .footer-heading {
   font-family: "Chakra Petch", sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-secondary);
-  margin: 0 0 6px;
+  margin: 0 0 7px;
 }
 
 .footer-author {
@@ -63,12 +63,12 @@
 .footer-author-emblems {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 }
 
 .footer-author-portrait {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid var(--border-dim);
@@ -76,8 +76,8 @@
 }
 
 .footer-corporation-emblem {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
   flex: none;
 }

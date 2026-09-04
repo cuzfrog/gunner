@@ -62,6 +62,7 @@ const controlsCradleKeys = {
   simConfigSource: "simConfigSource",
   importController: "importController",
   ewarController: "ewarController",
+  defenseController: "defenseController",
   boosterController: "boosterController",
   missileBoosterController: "missileBoosterController",
   portraitsController: "portraitsController",
@@ -88,6 +89,8 @@ const controlsCradleKeys = {
   viewStore: "viewStore",
   appliedDpsHintRenderer: "appliedDpsHintRenderer",
   appliedDpsHintProvider: "appliedDpsHintProvider",
+  lockStateHintRenderer: "lockStateHintRenderer",
+  lockStateHintProvider: "lockStateHintProvider",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 
 describe("registerControlsModule", () => {

@@ -38,9 +38,19 @@ function makeProfile(overrides: { droneBandwidth?: number; droneCapacity?: numbe
     inertiaModifier: 3,
     baseSpeed: 300,
     sigRadius: 35,
+    scanResolution: 200,
+    maxTargetingRange: 30000,
+    maxLockedTargets: 4,
     droneBandwidth: overrides.droneBandwidth ?? 75,
     droneCapacity: overrides.droneCapacity ?? 75,
     maxActiveDrones: overrides.maxActiveDrones ?? 5,
+    shieldHp: 0,
+    shieldRechargeTime: 0,
+    armorHp: 0,
+    hullHp: 0,
+    shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+    armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+    hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   };
 }
 

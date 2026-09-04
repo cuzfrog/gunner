@@ -6,22 +6,22 @@
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
-  box-shadow: 0 4px 16px var(--shadow-color);
-  padding: 6px;
+  box-shadow: 0 4px 18px var(--shadow-color);
+  padding: 7px;
 }
 
 .popup-below { top: calc(100% + 4px); }
 
 .popup-above {
   bottom: calc(100% + 4px);
-  box-shadow: 0 -4px 16px var(--shadow-color);
+  box-shadow: 0 -4px 18px var(--shadow-color);
 }
 
 .popup-left { left: 0; }
 .popup-right { right: 0; }
 
 .popup-scroll {
-  max-height: 260px;
+  max-height: 286px;
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -32,12 +32,12 @@
 .popup-item {
   display: flex;
   align-items: center;
-  padding: 4px 8px;
+  padding: 4px 9px;
   background: transparent;
   border: none;
   color: var(--text-primary);
   font-family: "Saira", sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   text-align: left;
   text-transform: none;
   letter-spacing: 0;
@@ -71,13 +71,13 @@
 .trigger {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   width: 100%;
-  padding: 3px 8px;
+  padding: 3px 9px;
   background: var(--bg-inset);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
-  min-height: 24px;
+  min-height: 26px;
   cursor: pointer;
   color: var(--text-primary);
   font: inherit;
@@ -126,8 +126,8 @@
   font-family: "Chakra Petch", sans-serif;
   cursor: pointer;
   border-radius: 2px;
-  padding: 4px 10px;
-  min-height: 24px;
+  padding: 4px 11px;
+  min-height: 26px;
   text-transform: uppercase;
   transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -153,13 +153,13 @@
 .btn.is-unsaved {
   border-color: var(--warn-yellow-65);
   color: var(--warn-yellow-85);
-  box-shadow: 0 0 6px var(--warn-yellow-12);
+  box-shadow: 0 0 7px var(--warn-yellow-12);
 }
 
 .btn.is-unsaved:hover {
   border-color: var(--warn-yellow);
   color: var(--warn-yellow);
-  box-shadow: 0 0 8px var(--warn-yellow-25);
+  box-shadow: 0 0 9px var(--warn-yellow-25);
 }
 
 /* ---- chevron ---- */
@@ -176,7 +176,7 @@
 /* ---- field-label ---- */
 .field-label {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -186,14 +186,14 @@
 /* ---- input-field ---- */
 .input-field {
   width: 100%;
-  padding: 5px 8px;
+  padding: 6px 9px;
   background-color: var(--bg-inset);
   border: 1px solid var(--border-dim);
   color: var(--text-primary);
   font-family: "Share Tech Mono", monospace;
-  font-size: 14px;
+  font-size: 15px;
   border-radius: 2px;
-  min-height: 28px;
+  min-height: 31px;
   transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -202,7 +202,7 @@ select.input-field {
   appearance: none;
   background-image: var(--dropdown-arrow);
   background-repeat: no-repeat;
-  background-position: right 8px center;
+  background-position: right 9px center;
 }
 
 .input-field:hover:not(:disabled) { border-color: var(--accent-teal); }
@@ -233,22 +233,22 @@ select.input-field:disabled {
 .turret-mode-select {
   text-align: left;
   text-align-last: left;
-  padding: 5px 24px 5px 8px;
+  padding: 6px 26px 6px 9px;
 }
 
 .input-with-unit { position: relative; }
 
-.input-with-unit > .input-field { padding-right: 32px; }
+.input-with-unit > .input-field { padding-right: 35px; }
 
-.input-with-unit.input-with-unit-has-effective > .input-field { padding-right: 72px; }
+.input-with-unit.input-with-unit-has-effective > .input-field { padding-right: 79px; }
 
 .input-suffix,
 .effective-value {
   position: absolute;
-  right: 8px;
+  right: 9px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--accent-teal);
   white-space: nowrap;
 }
@@ -272,7 +272,7 @@ select.input-field:disabled {
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
-  padding: 12px;
+  padding: 13px;
 }
 
 /* ---- truncate ---- */
@@ -290,7 +290,7 @@ select.input-field:disabled {
 
 .form-field-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 110px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 121px), 1fr));
   gap: var(--gap-field);
   align-items: end;
 }
@@ -300,13 +300,13 @@ select.input-field:disabled {
 .form-slider-label-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   margin-bottom: 4px;
 }
 
 .form-slider-value {
   margin-left: auto;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   text-align: right;
   color: var(--accent-teal);
@@ -319,7 +319,7 @@ select.input-field:disabled {
   background: transparent;
   border: 0;
   padding: 0;
-  min-height: 20px;
+  min-height: 22px;
   cursor: pointer;
 }
 
@@ -332,13 +332,13 @@ select.input-field:disabled {
 
 .form-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 12px;
-  height: 16px;
-  margin-top: -7px;
+  width: 13px;
+  height: 18px;
+  margin-top: -8px;
   background: var(--bg-panel);
   border: 1px solid var(--accent-teal);
   border-radius: 2px;
-  box-shadow: 0 0 6px var(--accent-teal-35);
+  box-shadow: 0 0 7px var(--accent-teal-35);
 }
 
 .form-slider:hover::-webkit-slider-thumb, .form-slider:hover::-moz-range-thumb { border-color: var(--accent-blue); }
@@ -357,12 +357,12 @@ select.input-field:disabled {
 }
 
 .form-slider::-moz-range-thumb {
-  width: 10px;
-  height: 14px;
+  width: 11px;
+  height: 15px;
   background: var(--bg-panel);
   border: 1px solid var(--accent-teal);
   border-radius: 2px;
-  box-shadow: 0 0 6px var(--accent-teal-35);
+  box-shadow: 0 0 7px var(--accent-teal-35);
 }
 
 .form-slider:disabled { cursor: not-allowed; }
@@ -402,19 +402,19 @@ select.input-field:disabled {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 3px 8px;
-  font-size: 11px;
+  padding: 3px 9px;
+  font-size: 12px;
 }
 
 .choice-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .choice-value {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--text-dim);
   flex-basis: 100%;
   text-align: center;
@@ -432,7 +432,7 @@ select.input-field:disabled {
   border-color: var(--accent-orange);
   color: var(--accent-orange);
   background: var(--accent-orange-12);
-  box-shadow: 0 0 8px var(--accent-orange-35);
+  box-shadow: 0 0 9px var(--accent-orange-35);
 }
 
 .segmented-control > .btn:disabled {
@@ -444,9 +444,9 @@ select.input-field:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
-  min-height: 24px;
-  padding: 0 6px;
+  min-width: 26px;
+  min-height: 26px;
+  padding: 0 7px;
   flex: none;
 }
 

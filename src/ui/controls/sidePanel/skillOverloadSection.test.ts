@@ -4,6 +4,7 @@ import type { Popup, PopupGroup } from "../popup";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
 import { SkillOverloadSection, type SkillOverloadSectionEls } from "./skillOverloadSection";
+import { defaultDefenseSkills, defaultTargetingSkills } from "../../../ships";
 
 function mockI18n(): I18n {
   return vi.mocked<I18n>({
@@ -29,6 +30,8 @@ function buildSkillSection() {
     overloadButton: getFake(document, "ship-a-overload-button") as unknown as HTMLButtonElement,
     turretWeaponOverloadButton: getFake(document, "ship-a-turret-weapon-overload-button") as unknown as HTMLButtonElement,
     launcherWeaponOverloadButton: getFake(document, "ship-a-launcher-weapon-overload-button") as unknown as HTMLButtonElement,
+    defenseSkills: document.createElement("div"),
+    targetingSkills: document.createElement("div"),
   };
 
   const sections = vi.mocked<ISidePanelSections>({
@@ -72,7 +75,7 @@ function buildSkillSection() {
     onKeyDown: vi.fn(),
   });
   const section = new SkillOverloadSection({ panel, els, i18n, popupGroup });
-  return { document, panel, section, host, popupGroup };
+  return { document, panel, section, host, popupGroup, els };
 }
 
 describe("SkillOverloadSection", () => {
@@ -87,7 +90,7 @@ describe("SkillOverloadSection", () => {
     const { document, section } = buildSkillSection();
     getFake(document, "ship-a-skills").value = "2";
     getFake(document, "ship-a-overload").checked = true;
-    expect(section.skillConditions()).toEqual({ skillLevel: 2, overloaded: true, weaponOverloaded: false });
+    expect(section.skillConditions()).toEqual({ skillLevel: 2, overloaded: true, weaponOverloaded: false, defenseSkills: defaultDefenseSkills(2), targetingSkills: defaultTargetingSkills(2) });
   });
 
   test("setOverloadActive toggles the overload input and button", () => {
@@ -184,9 +187,59 @@ describe("SkillOverloadSection", () => {
     getFake(document, "ship-a-skills").value = "5";
     getFake(document, "ship-a-overload").checked = true;
     section.setWeaponOverloaded(false);
-    expect(section.skillConditions()).toEqual({ skillLevel: 5, overloaded: true, weaponOverloaded: false });
+    expect(section.skillConditions()).toEqual({ skillLevel: 5, overloaded: true, weaponOverloaded: false, defenseSkills: defaultDefenseSkills(5), targetingSkills: defaultTargetingSkills(5) });
     section.setWeaponOverloaded(true);
     getFake(document, "ship-a-overload").checked = false;
-    expect(section.skillConditions()).toEqual({ skillLevel: 5, overloaded: false, weaponOverloaded: true });
+    expect(section.skillConditions()).toEqual({ skillLevel: 5, overloaded: false, weaponOverloaded: true, defenseSkills: defaultDefenseSkills(5), targetingSkills: defaultTargetingSkills(5) });
+  });
+
+  test("setDefenseSkills updates internal state so currentDefenseSkills returns the set values", () => {
+    const { section } = buildSkillSection();
+    const skills = defaultDefenseSkills(3);
+    section.setDefenseSkills(skills);
+    expect(section.currentDefenseSkills()).toEqual(skills);
+  });
+
+  test("resetDefenseSkills clears internal state so currentDefenseSkills returns undefined", () => {
+    const { section } = buildSkillSection();
+    section.setDefenseSkills(defaultDefenseSkills(3));
+    expect(section.currentDefenseSkills()).toBeDefined();
+    section.resetDefenseSkills();
+    expect(section.currentDefenseSkills()).toBeUndefined();
+  });
+
+  test("renderDefenseSkills creates choice buttons for each defense skill row", () => {
+    const { section, els } = buildSkillSection();
+    section.renderDefenseSkills();
+    const container = els.defenseSkills;
+    expect(container.children.length).toBeGreaterThan(0);
+    for (const row of container.children) {
+      expect(row.children.length).toBeGreaterThan(0);
+    }
+  });
+
+  test("setTargetingSkills updates internal state so currentTargetingSkills returns the set values", () => {
+    const { section } = buildSkillSection();
+    const skills = defaultTargetingSkills(3);
+    section.setTargetingSkills(skills);
+    expect(section.currentTargetingSkills()).toEqual(skills);
+  });
+
+  test("resetTargetingSkills clears internal state so currentTargetingSkills returns undefined", () => {
+    const { section } = buildSkillSection();
+    section.setTargetingSkills(defaultTargetingSkills(3));
+    expect(section.currentTargetingSkills()).toBeDefined();
+    section.resetTargetingSkills();
+    expect(section.currentTargetingSkills()).toBeUndefined();
+  });
+
+  test("renderTargetingSkills creates choice buttons for each targeting skill row", () => {
+    const { section, els } = buildSkillSection();
+    section.renderTargetingSkills();
+    const container = els.targetingSkills;
+    expect(container.children.length).toBeGreaterThan(0);
+    for (const row of container.children) {
+      expect(row.children.length).toBeGreaterThan(0);
+    }
   });
 });

@@ -34,6 +34,7 @@ export interface FittingState {
   readonly profile: ShipProfile;
   readonly hullBonuses: readonly HullBonus[];
   readonly supportModules: readonly FittedModule[];
+  readonly defenseModules: readonly FittedModule[];
   readonly turretGroups: readonly TurretGroup[];
   readonly launcherGroups: readonly LauncherGroup[];
   readonly propulsionModule?: FittedModule;
@@ -41,6 +42,8 @@ export interface FittingState {
   readonly boosterModules: readonly FittedModule[];
   readonly missileBoosterModules: readonly FittedModule[];
   readonly droneBoosterModules: readonly FittedModule[];
+  readonly sensorBoosterModules: readonly FittedModule[];
+  readonly sensorAmplifierModules: readonly FittedModule[];
   readonly droneGroups: readonly DroneGroup[];
   readonly drones: readonly CargoEntry[];
   readonly cargo: readonly CargoEntry[];
@@ -59,10 +62,13 @@ export class FittingStateFactory {
     const turretCounts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
     const launcherCounts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
     const supportModules: FittedModule[] = [];
+    const defenseModules: FittedModule[] = [];
     const ewarModules: FittedModule[] = [];
     const boosterModules: FittedModule[] = [];
     const missileBoosterModules: FittedModule[] = [];
     const droneBoosterModules: FittedModule[] = [];
+    const sensorBoosterModules: FittedModule[] = [];
+    const sensorAmplifierModules: FittedModule[] = [];
     let propulsionModule: FittedModule | undefined;
     let order = 0;
 
@@ -106,6 +112,16 @@ export class FittingStateFactory {
         continue;
       }
 
+      if (this.db.sensorBoosters[mod.moduleId]) {
+        sensorBoosterModules.push(mod);
+        continue;
+      }
+
+      if (this.db.signalAmplifiers[mod.moduleId]) {
+        sensorAmplifierModules.push(mod);
+        continue;
+      }
+
       const stats = this.db.modules[mod.moduleId];
       if (!stats) continue;
 
@@ -116,6 +132,11 @@ export class FittingStateFactory {
 
       if (stats.propulsion) {
         if (!propulsionModule) propulsionModule = mod;
+        continue;
+      }
+
+      if (stats.defense) {
+        defenseModules.push(mod);
         continue;
       }
 
@@ -143,6 +164,7 @@ export class FittingStateFactory {
       profile,
       hullBonuses,
       supportModules,
+      defenseModules,
       turretGroups: [...turretCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([moduleId, e]) => ({ moduleId, chargeId: e.chargeId, count: e.count })),
       launcherGroups: [...launcherCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([moduleId, e]) => ({ moduleId, chargeId: e.chargeId, count: e.count })),
       propulsionModule,
@@ -150,6 +172,8 @@ export class FittingStateFactory {
       boosterModules,
       missileBoosterModules,
       droneBoosterModules,
+      sensorBoosterModules,
+      sensorAmplifierModules,
       droneGroups: [...droneCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([typeId, e]) => ({ typeId, count: e.count })),
       drones,
       cargo,
@@ -157,7 +181,7 @@ export class FittingStateFactory {
   }
 
   private isEwarModule(moduleId: TypeId): boolean {
-    return this.db.stasisWebs[moduleId] !== undefined || this.db.stasisGrapplers[moduleId] !== undefined || this.db.trackingDisruptors[moduleId] !== undefined || this.db.warpScramblers[moduleId] !== undefined || this.db.targetPainters[moduleId] !== undefined;
+    return this.db.stasisWebs[moduleId] !== undefined || this.db.stasisGrapplers[moduleId] !== undefined || this.db.trackingDisruptors[moduleId] !== undefined || this.db.warpScramblers[moduleId] !== undefined || this.db.targetPainters[moduleId] !== undefined || this.db.sensorDampeners[moduleId] !== undefined;
   }
 }
 

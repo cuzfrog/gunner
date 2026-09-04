@@ -39,6 +39,7 @@ function syntheticFittingState(context: DroneLoadoutContext, groups: readonly Dr
     profile: context.profile,
     hullBonuses: context.hullBonuses,
     supportModules: [],
+    defenseModules: [],
     turretGroups: [],
     launcherGroups: [],
     propulsionModule: undefined,
@@ -49,5 +50,7 @@ function syntheticFittingState(context: DroneLoadoutContext, groups: readonly Dr
     droneGroups: groups,
     drones: [],
     cargo: [],
+    sensorBoosterModules: [],
+    sensorAmplifierModules: [],
   };
 }

@@ -2,6 +2,7 @@ import { asFunction, type AwilixContainer } from "awilix";
 import { isHtmlImageElement } from "../controlsDom";
 import type { createControlsEls } from "../elements";
 import type { ControlsCradle } from "../cradle";
+import type { ViewStore } from "../controlsContract";
 import type { Side } from "../side";
 import { PortraitsControllerImpl } from "./portraitsController";
 import type { PortraitsEls } from "./portraitsControllerContract";
@@ -15,6 +16,7 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
       imageCatalog,
       ewarController,
       ewarResolver,
+      defenseController,
       uiEvents,
       i18n,
       shipASide,
@@ -24,11 +26,17 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
       imageCatalog,
       ewarController,
       ewarResolver,
+      defenseController,
       combatantProfiles: { profile: (side: Side) => (side === "shipA" ? shipASide.profile : shipBSide.profile) },
       events: uiEvents,
       i18n,
+      viewStore: lazyViewStore(cradle.cradle),
     })).singleton(),
   });
+}
+
+function lazyViewStore(cradle: ControlsCradle): ViewStore {
+  return { currentView: () => cradle.viewStore.currentView() };
 }
 
 function collectPortraitsEls(els: ControlsElements): PortraitsEls {
@@ -42,6 +50,14 @@ function collectPortraitsEls(els: ControlsElements): PortraitsEls {
   if (!shipAEffects) throw new Error("Missing .portrait-effects in #ship-a-portrait");
   const shipBEffects = els.shipB.portrait.querySelector<HTMLElement>(".portrait-effects");
   if (!shipBEffects) throw new Error("Missing .portrait-effects in #ship-b-portrait");
+  const shipAHpBars = els.shipA.portrait.querySelector<HTMLElement>(".portrait-hp-bars");
+  if (!shipAHpBars) throw new Error("Missing .portrait-hp-bars in #ship-a-portrait");
+  const shipBHpBars = els.shipB.portrait.querySelector<HTMLElement>(".portrait-hp-bars");
+  if (!shipBHpBars) throw new Error("Missing .portrait-hp-bars in #ship-b-portrait");
+  const shipALockBadge = els.shipA.portrait.querySelector<HTMLElement>(".portrait-lock-badge");
+  if (!shipALockBadge) throw new Error("Missing .portrait-lock-badge in #ship-a-portrait");
+  const shipBLockBadge = els.shipB.portrait.querySelector<HTMLElement>(".portrait-lock-badge");
+  if (!shipBLockBadge) throw new Error("Missing .portrait-lock-badge in #ship-b-portrait");
   return {
     shipA: els.shipA.portrait,
     shipB: els.shipB.portrait,
@@ -49,5 +65,9 @@ function collectPortraitsEls(els: ControlsElements): PortraitsEls {
     shipBImage,
     shipAEffects,
     shipBEffects,
+    shipAHpBars,
+    shipBHpBars,
+    shipALockBadge,
+    shipBLockBadge,
   };
 }

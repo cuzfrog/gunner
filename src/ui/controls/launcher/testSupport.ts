@@ -48,18 +48,18 @@ export function collectLauncherEls(document: Document, side: Side): LauncherEls 
 
 const SCOURGE_LIGHT: MissileStats = {
   damage: 83, damageType: "kinetic", explosionRadius: 50, explosionVelocity: 170,
-  damageReductionFactor: 0.5, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384,
+  damageReductionFactor: 0.5, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384, requiredSkillIds: [],
   id: "206" as TypeId, name: "Scourge Light Missile",
 };
 
 const NOVA_LIGHT: MissileStats = {
   damage: 83, damageType: "explosive", explosionRadius: 50, explosionVelocity: 170,
-  damageReductionFactor: 0.5, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384,
+  damageReductionFactor: 0.5, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384, requiredSkillIds: [],
   id: "202" as TypeId, name: "Nova Light Missile",
 };
 
 const LIGHT_MISSILE_LAUNCHER: LauncherStats = {
-  rateOfFire: 16, launcherGroup: 509, chargeGroups: [384, 394], metaLevel: 0, metaGroupID: 1,
+  rateOfFire: 16, launcherGroup: 509, chargeGroups: [384, 394], requiredSkillIds: [], metaLevel: 0, metaGroupID: 1,
   id: "499" as TypeId, name: "Light Missile Launcher I",
 };
 
@@ -75,7 +75,7 @@ export function importedLauncherFixture(overrides: Partial<ImportedLauncher> = {
     count: 2,
     chargeId: "206" as TypeId,
     chargeName: "Scourge Light Missile",
-    damagePerMissile: 83,
+    damagePerMissile: { em: 0, thermal: 0, kinetic: 83, explosive: 0 },
     cycleTime: 16,
     explosionRadius: 50,
     explosionVelocity: 170,
@@ -179,9 +179,9 @@ export function buildLauncher(
     }),
     resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
     resolvePropulsion: vi.fn(() => undefined),
-    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] })),
+    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], })),
     resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
-    resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveDrones: vi.fn(() => []), resolveCargoCharges: vi.fn(() => []),
+    resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [] })), resolveSensorSpec: vi.fn(() => ({ scanResolution: 0, maxTargetingRange: 0, maxLockedTargets: 0 })), resolveDrones: vi.fn(() => []), resolveCargoCharges: vi.fn(() => []),
   });
   const controller = new LauncherControllerImpl({
     side,

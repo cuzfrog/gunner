@@ -52,7 +52,7 @@ export class MissileCatalogImpl implements MissileCatalog {
     const launcherStats = this.launchers[launcher.moduleId];
     if (!launcherStats || !launcherStats.chargeGroups.includes(missile.chargeGroup)) return launcher;
     const output = this.skillModel.compute(launcherStats, missile, hullBonuses, skillLevel);
-    const factors = rebuildMissileFactors(output.skillDamageMultiplier, output.skillDamageId, output.hullDamageMultiplier, launcher.name);
+    const factors = rebuildMissileFactors(output.skillDamageMultiplier, output.skillDamageIds, output.hullDamageMultiplier, launcher.name);
     return {
       moduleId: launcher.moduleId,
       name: launcher.name,
@@ -154,9 +154,9 @@ function baseStem(stem: string): string {
   return stem;
 }
 
-function rebuildMissileFactors(skillDamageMultiplier: number, skillId: TypeId, hullDamageMultiplier: number, hullName: string): readonly DamageFactor[] {
+function rebuildMissileFactors(skillDamageMultiplier: number, skillIds: readonly TypeId[], hullDamageMultiplier: number, hullName: string): readonly DamageFactor[] {
   const factors: DamageFactor[] = [{ kind: "base", multiplier: 1 }];
-  if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillIds: [skillId] });
+  if (skillDamageMultiplier !== 1 && skillIds.length > 0) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillIds: skillIds });
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
   return factors;
 }

@@ -1,0 +1,251 @@
+@layer components {
+.defense-label {
+  display: block;
+  flex: 1 1 auto;
+  text-align: left;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.defense-group { position: relative; }
+
+.defense-popup { width: 100%; }
+
+.defense-layer-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px;
+}
+
+.defense-layer-label {
+  flex: 0 0 66px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.defense-resist-grid {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1 1 auto;
+}
+
+.defense-resist-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.defense-resist-icon {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.defense-resist-value {
+  font-size: 12px;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.defense-hp-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px;
+}
+
+.defense-hp-label {
+  flex: 0 0 66px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.defense-hp-value {
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.defense-ehp-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px;
+}
+
+.defense-ehp-label {
+  flex: 0 0 66px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.defense-ehp-value {
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: var(--accent-teal);
+  text-align: right;
+}
+
+.defense-repairer-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px;
+}
+
+.defense-repairer-name {
+  flex: 0 0 66px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.defense-repairer-stats {
+  flex: 1 1 auto;
+  font-size: 12px;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.defense-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 0 0 auto;
+}
+
+.defense-summary-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.defense-summary-count {
+  font-size: 12px;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.defense-damage-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 9px;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.defense-damage-toggle:hover {
+  border-color: var(--accent-teal);
+}
+
+.defense-damage-toggle[aria-pressed="true"] {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+
+.defense-repair-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.defense-repair-mode-toggle:hover {
+  border-color: var(--accent-teal);
+}
+
+.defense-repair-mode-toggle[aria-pressed="true"] {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+
+.defense-module-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px;
+}
+
+.defense-module-name {
+  flex: 0 0 66px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.defense-module-status {
+  flex: 1 1 auto;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.defense-module-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 auto;
+}
+
+.defense-module-toggle {
+  padding: 3px 9px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.defense-module-toggle:hover {
+  border-color: var(--accent-teal);
+}
+
+.defense-module-toggle[aria-pressed="true"] {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+
+.defense-module-overload {
+  padding: 3px 9px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.defense-module-overload:hover {
+  border-color: var(--accent-orange);
+}
+
+.defense-module-overload[aria-pressed="true"] {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+
+.defense-module-toggle:disabled,
+.defense-module-overload:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+}

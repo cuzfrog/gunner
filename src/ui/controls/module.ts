@@ -22,6 +22,7 @@ import type { Side } from "./side";
 import { registerSidePanelModule } from "./sidePanel";
 import { registerTurretModule } from "./turret";
 import { registerEwarModule } from "./ewar";
+import { registerDefenseModule } from "./defense";
 import { registerBoosterModule } from "./booster";
 import { registerMissileBoosterModule } from "./missileBooster";
 import { registerRangeOverlayModule } from "./rangeOverlay";
@@ -30,6 +31,7 @@ import { registerHoverHintModule } from "./hoverHint";
 import { registerDpsHintModule, wireDpsHintProvider } from "./dpsHint";
 import { registerAmmoHintModule, wireAmmoHintProvider } from "./ammoHint";
 import { registerAppliedDpsHintModule, wireAppliedDpsHintProvider } from "./appliedDpsHint";
+import { registerLockStateHintModule, wireLockStateHintProvider } from "./lockStateHint";
 
 export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   if (!cradle.hasRegistration("now")) {
@@ -44,6 +46,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerDroneModule(cradle);
   registerSidePanelModule(cradle);
   registerEwarModule(cradle);
+  registerDefenseModule(cradle);
   registerBoosterModule(cradle);
   registerMissileBoosterModule(cradle);
   registerRangeOverlayModule(cradle);
@@ -62,6 +65,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerSessionModule(cradle);
   registerDomControlsModule(cradle);
   registerAppliedDpsHintModule(cradle);
+  registerLockStateHintModule(cradle);
   wire(cradle);
 }
 
@@ -70,6 +74,7 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   wireDpsHintProvider(cradle);
   wireAmmoHintProvider(cradle);
   wireAppliedDpsHintProvider(cradle);
+  wireLockStateHintProvider(cradle);
   const sides = combatantSidesOf(c.shipASide, c.shipBSide);
   const fittingPopups = { shipA: c.shipAFittingPopup, shipB: c.shipBFittingPopup } as const;
   const host = {

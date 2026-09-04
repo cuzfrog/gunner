@@ -1,7 +1,8 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
+import { toTypeId } from "../src/gamedata/ids";
+import { buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats } from "./generate-fitting-db";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
@@ -263,25 +264,27 @@ describe("_buildModuleStats", () => {
 });
 
 describe("buildLauncherStats", () => {
+  const skillIds = [toTypeId("3319"), toTypeId("3321")];
+
   test("returns undefined when speed attribute is missing", () => {
-    expect(buildLauncherStats(values({ chargeGroup1: 384 }), 509, sdeType())).toBeUndefined();
+    expect(buildLauncherStats(values({ chargeGroup1: 384 }), 509, sdeType(), skillIds)).toBeUndefined();
   });
 
   test("returns undefined when speed is non-positive", () => {
-    expect(buildLauncherStats(values({ speed: 0, chargeGroup1: 384 }), 509, sdeType())).toBeUndefined();
-    expect(buildLauncherStats(values({ speed: -100, chargeGroup1: 384 }), 509, sdeType())).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: 0, chargeGroup1: 384 }), 509, sdeType(), skillIds)).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: -100, chargeGroup1: 384 }), 509, sdeType(), skillIds)).toBeUndefined();
   });
 
   test("returns undefined when no charge groups are present", () => {
-    expect(buildLauncherStats(values({ speed: 13600 }), 509, sdeType())).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: 13600 }), 509, sdeType(), skillIds)).toBeUndefined();
   });
 
   test("converts cycle time from milliseconds to seconds and preserves launcher group with charge groups", () => {
-    // Arbalest Compact Light Missile Launcher: speed=13600ms, group 509, chargeGroup1=384, chargeGroup2=394
-    expect(buildLauncherStats(values({ speed: 13600, chargeGroup1: 384, chargeGroup2: 394 }), 509, sdeType())).toEqual({
+    expect(buildLauncherStats(values({ speed: 13600, chargeGroup1: 384, chargeGroup2: 394 }), 509, sdeType(), skillIds)).toEqual({
       rateOfFire: 13.6,
       launcherGroup: 509,
       chargeGroups: [384, 394],
+      requiredSkillIds: skillIds,
       metaLevel: 0,
       metaGroupID: 1,
     });
@@ -290,26 +293,28 @@ describe("buildLauncherStats", () => {
   test("collects charge groups from chargeGroup1 through chargeGroup5", () => {
     expect(buildLauncherStats(values({
       speed: 18000, chargeGroup1: 657, chargeGroup3: 89,
-    }), 508, sdeType())).toEqual({
+    }), 508, sdeType(), skillIds)).toEqual({
       rateOfFire: 18,
       launcherGroup: 508,
       chargeGroups: [657, 89],
+      requiredSkillIds: skillIds,
       metaLevel: 0,
       metaGroupID: 1,
     });
   });
 
   test("preserves torpedo launcher group (508) with chargeGroup3", () => {
-    const stats = buildLauncherStats(values({ speed: 18000, chargeGroup3: 89 }), 508, sdeType());
+    const stats = buildLauncherStats(values({ speed: 18000, chargeGroup3: 89 }), 508, sdeType(), skillIds);
     expect(stats?.launcherGroup).toBe(508);
     expect(stats?.chargeGroups).toEqual([89]);
   });
 
   test("preserves metaLevel and metaGroupID from SDE type", () => {
-    expect(buildLauncherStats(values({ speed: 12800, chargeGroup1: 384 }), 509, sdeType(5, 2))).toEqual({
+    expect(buildLauncherStats(values({ speed: 12800, chargeGroup1: 384 }), 509, sdeType(5, 2), skillIds)).toEqual({
       rateOfFire: 12.8,
       launcherGroup: 509,
       chargeGroups: [384],
+      requiredSkillIds: skillIds,
       metaLevel: 5,
       metaGroupID: 2,
     });
@@ -317,24 +322,25 @@ describe("buildLauncherStats", () => {
 });
 
 describe("buildMissileStats", () => {
+  const skillIds = [toTypeId("3319"), toTypeId("3321")];
+
   test("returns undefined when all damage attributes are zero or missing", () => {
     expect(buildMissileStats(values({
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3000, explosionDelay: 5000, launcherGroup: 509,
-    }), 384)).toBeUndefined();
+    }), 384, skillIds)).toBeUndefined();
   });
 
   test("returns undefined when application attributes are missing", () => {
-    expect(buildMissileStats(values({ kineticDamage: 100 }), 384)).toBeUndefined();
+    expect(buildMissileStats(values({ kineticDamage: 100 }), 384, skillIds)).toBeUndefined();
   });
 
   test("builds a kinetic light missile from SDE attributes", () => {
-    // Mjolnir Light Missile is EM, but we test with kinetic here
     expect(buildMissileStats(values({
       emDamage: 0, thermalDamage: 0, kineticDamage: 113, explosiveDamage: 0,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384)).toEqual({
+    }), 384, skillIds)).toEqual({
       damage: 113,
       damageType: "kinetic",
       explosionRadius: 50,
@@ -344,6 +350,7 @@ describe("buildMissileStats", () => {
       flightTime: 5,
       launcherGroup: 509,
       chargeGroup: 384,
+      requiredSkillIds: skillIds,
     });
   });
 
@@ -352,7 +359,7 @@ describe("buildMissileStats", () => {
       emDamage: 113, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 0,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384);
+    }), 384, skillIds);
     expect(stats?.damageType).toBe("em");
     expect(stats?.damage).toBe(113);
   });
@@ -362,7 +369,7 @@ describe("buildMissileStats", () => {
       emDamage: 0, thermalDamage: 113, kineticDamage: 0, explosiveDamage: 0,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384);
+    }), 384, skillIds);
     expect(stats?.damageType).toBe("thermal");
   });
 
@@ -371,7 +378,7 @@ describe("buildMissileStats", () => {
       emDamage: 0, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 113,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384);
+    }), 384, skillIds);
     expect(stats?.damageType).toBe("explosive");
   });
 
@@ -380,7 +387,7 @@ describe("buildMissileStats", () => {
       emDamage: 0, thermalDamage: 0, kineticDamage: 100, explosiveDamage: 0,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 10000, launcherGroup: 509,
-    }), 384);
+    }), 384, skillIds);
     expect(stats?.flightTime).toBe(10);
   });
 
@@ -389,7 +396,7 @@ describe("buildMissileStats", () => {
       emDamage: 30, thermalDamage: 30, kineticDamage: 30, explosiveDamage: 30,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384);
+    }), 384, skillIds);
     expect(stats?.damage).toBe(120);
   });
 });
@@ -718,5 +725,173 @@ describe("_writeI18nFiles", () => {
     await _writeI18nFiles(itemNames, "2026-08-24", paths);
     const zhCollisions = parseExport(paths.collisionZhFile, "ITEM_NAME_COLLISIONS_ZH");
     expect(zhCollisions).toEqual({ "same-zh": "B" });
+  });
+});
+
+describe("_buildDefenseStats", () => {
+  test("Damage Control II extracts shield, armor, and hull resists from resonances", () => {
+    expect(_buildDefenseStats(values({
+      armorEmDamageResonance: 0.85, armorExplosiveDamageResonance: 0.85, armorKineticDamageResonance: 0.85, armorThermalDamageResonance: 0.85,
+      shieldEmDamageResonance: 0.875, shieldExplosiveDamageResonance: 0.875, shieldKineticDamageResonance: 0.875, shieldThermalDamageResonance: 0.875,
+      hullEmDamageResonance: 0.6, hullExplosiveDamageResonance: 0.6, hullKineticDamageResonance: 0.6, hullThermalDamageResonance: 0.6,
+    }), new Set([2302]), 0)).toEqual({
+      kind: "damageControl",
+      shieldResists: { em: 0.125, thermal: 0.125, kinetic: 0.125, explosive: 0.125 },
+      armorResists: { em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 },
+      hullResists: { em: 0.4, thermal: 0.4, kinetic: 0.4, explosive: 0.4 },
+    });
+  });
+
+  test("EM Shield Hardener II extracts active shield resist bonus with overload", () => {
+    expect(_buildDefenseStats(values({
+      emDamageResistanceBonus: -55, explosiveDamageResistanceBonus: 0, kineticDamageResistanceBonus: 0, thermalDamageResistanceBonus: 0,
+      duration: 10000, capacitorNeed: 20, heatDamage: 3.4, overloadHardeningBonus: 20,
+    }), new Set([5230]), 0)).toEqual({
+      kind: "resistModule",
+      layer: "shield",
+      active: true,
+      resistBonus: { em: 0.55, thermal: 0, kinetic: 0, explosive: 0 },
+      overloadBonusMultiplier: 1.2,
+      cycleTime: 10,
+      capacitorNeed: 20,
+      heatDamage: 3.4,
+    });
+  });
+
+  test("Multispectrum Energized Membrane II extracts passive armor resist bonus", () => {
+    expect(_buildDefenseStats(values({
+      emDamageResistanceBonus: -20, thermalDamageResistanceBonus: -20, kineticDamageResistanceBonus: -20, explosiveDamageResistanceBonus: -20,
+    }), new Set([2041]), 0)).toEqual({
+      kind: "resistModule",
+      layer: "armor",
+      active: false,
+      resistBonus: { em: 0.2, thermal: 0.2, kinetic: 0.2, explosive: 0.2 },
+    });
+  });
+
+  test("Large Shield Booster II extracts shield repair amount with overload multipliers", () => {
+    expect(_buildDefenseStats(values({
+      shieldBonus: 276, duration: 4000, capacitorNeed: 160, heatDamage: 1.3, overloadShieldBonus: 10, overloadSelfDurationBonus: -15,
+    }), new Set([4]), 0)).toEqual({
+      kind: "repairer",
+      layer: "shield",
+      amount: 276,
+      cycleTime: 4,
+      capacitorNeed: 160,
+      heatDamage: 1.3,
+      overload: { amountMultiplier: 1.1, cycleTimeMultiplier: 0.85 },
+    });
+  });
+
+  test("Large Armor Repairer II extracts armor repair amount with overload multipliers", () => {
+    expect(_buildDefenseStats(values({
+      armorDamageAmount: 920, duration: 15000, capacitorNeed: 400, heatDamage: 5.4, overloadArmorDamageAmount: 10, overloadSelfDurationBonus: -15,
+    }), new Set([27]), 62)).toEqual({
+      kind: "repairer",
+      layer: "armor",
+      amount: 920,
+      cycleTime: 15,
+      capacitorNeed: 400,
+      heatDamage: 5.4,
+      overload: { amountMultiplier: 1.1, cycleTimeMultiplier: 0.85 },
+    });
+  });
+
+  test("Large Ancillary Shield Booster extracts ancillary charge multiplier and reload time", () => {
+    expect(_buildDefenseStats(values({
+      shieldBonus: 390, duration: 4000, capacitorNeed: 528, heatDamage: 1.3, overloadShieldBonus: 10, overloadSelfDurationBonus: -15, chargeSize: 2, reloadTime: 60000,
+    }), new Set([4936]), 1156)).toMatchObject({
+      kind: "repairer",
+      layer: "shield",
+      amount: 390,
+      cycleTime: 4,
+      ancillary: { chargeMultiplier: 1, shots: 0, reloadTime: 60 },
+    });
+  });
+
+  test("Medium Ancillary Armor Repairer extracts ancillary charge multiplier and reload time", () => {
+    expect(_buildDefenseStats(values({
+      armorDamageAmount: 207, duration: 12000, capacitorNeed: 160, heatDamage: 5.3, overloadArmorDamageAmount: 10, overloadSelfDurationBonus: -15, chargedArmorDamageMultiplier: 3, reloadTime: 60000,
+    }), new Set([5275]), 1199)).toMatchObject({
+      kind: "repairer",
+      layer: "armor",
+      amount: 207,
+      cycleTime: 12,
+      ancillary: { chargeMultiplier: 3, shots: 0, reloadTime: 60 },
+    });
+  });
+
+  test("Reactive Armor Hardener extracts base armor resists and shift amount", () => {
+    expect(_buildDefenseStats(values({
+      armorEmDamageResonance: 0.85, armorExplosiveDamageResonance: 0.85, armorKineticDamageResonance: 0.85, armorThermalDamageResonance: 0.85,
+      resistanceShiftAmount: 6, duration: 10000, capacitorNeed: 42, overloadSelfDurationBonus: -15,
+    }), new Set([4928]), 1150)).toEqual({
+      kind: "rah",
+      baseArmorResists: { em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 },
+      resistanceShiftAmount: 6,
+      cycleTime: 10,
+      capacitorNeed: 42,
+      overloadCycleTimeMultiplier: 0.85,
+    });
+  });
+
+  test("1600mm Steel Plates II extracts armor HP bonus", () => {
+    expect(_buildDefenseStats(values({ armorHPBonusAdd: 4800, massAddition: 3750000 }), new Set([1959]), 0)).toEqual({
+      kind: "armorPlate",
+      armorHpAdd: 4800,
+    });
+  });
+
+  test("Medium Shield Extender II extracts shield HP and signature radius penalty", () => {
+    expect(_buildDefenseStats(values({ capacityBonus: 1100, signatureRadiusAdd: 7 }), new Set([21]), 0)).toEqual({
+      kind: "shieldExtender",
+      shieldHpAdd: 1100,
+      sigRadiusPenalty: 7,
+    });
+  });
+
+  test("Shield Boost Amplifier II extracts boost multiplier", () => {
+    expect(_buildDefenseStats(values({ shieldBoostMultiplier: 36 }), new Set([1720]), 0)).toEqual({
+      kind: "boostAmplifier",
+      multiplier: 1.36,
+    });
+  });
+
+  test("Hull Repairer extracts structure repair amount with no overload", () => {
+    expect(_buildDefenseStats(values({ structureDamageAmount: 500, duration: 12000, capacitorNeed: 80 }), new Set([26]), 0)).toEqual({
+      kind: "repairer",
+      layer: "hull",
+      amount: 500,
+      cycleTime: 12,
+      capacitorNeed: 80,
+      heatDamage: undefined,
+      overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 },
+    });
+  });
+
+  test("returns undefined when no defense effects are present", () => {
+    expect(_buildDefenseStats(values({}), new Set([999]), 0)).toBeUndefined();
+  });
+
+  test("Shield Recharger II extracts recharge multiplier", () => {
+    expect(_buildDefenseStats(values({ rechargeratebonus: -15 }), new Set([50]), 0)).toEqual({
+      kind: "rechargeModule",
+      rechargeMultiplier: 0.85,
+    });
+  });
+
+  test("Damage Control resonances are rounded to 6 decimals", () => {
+    const stats = _buildDefenseStats(values({
+      shieldEmDamageResonance: 0.8575, shieldThermalDamageResonance: 0.8575,
+      shieldKineticDamageResonance: 0.8575, shieldExplosiveDamageResonance: 0.8575,
+    }), new Set([2302]), 0);
+    expect(stats?.shieldResists).toEqual({ em: 0.1425, thermal: 0.1425, kinetic: 0.1425, explosive: 0.1425 });
+  });
+
+  test("dispatch prioritizes passive resist over shield extender for effect 21 + 2052", () => {
+    const stats = _buildDefenseStats(values({ emDamageResistanceBonus: -25, capacityBonus: 1000 }), new Set([21, 2052]), 0);
+    expect(stats?.kind).toBe("resistModule");
+    expect(stats?.layer).toBe("shield");
+    expect(stats?.active).toBe(false);
   });
 });

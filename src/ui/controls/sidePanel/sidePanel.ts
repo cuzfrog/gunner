@@ -1,7 +1,7 @@
 import type { ShipProfile, Ships, StatConditions } from "../../../ships";
 import type { ShipId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import type { AutopilotMode } from "../../../sim";
+import type { AutopilotMode, SensorBoostLoadout, SensorSpec } from "../../../sim";
 import {
   type FittedHullSummary,
   type ProfileParamOverrides,
@@ -68,6 +68,8 @@ export class SidePanelImpl implements SidePanel {
   private fittingTextValue?: string;
   private lastCommittedHullValue?: ShipId;
   private importerValue?: SideImporter;
+  private sensorSpecValue?: SensorSpec;
+  private sensorBoostsValue?: SensorBoostLoadout;
   readonly sections: ISidePanelSections;
   private fittingPopup?: FittingPopupControl;
   private fittingPreview?: FittingPreviewControl;
@@ -106,6 +108,8 @@ export class SidePanelImpl implements SidePanel {
       this.sections.hull.refreshHullInputs();
       this.sections.hull.updateHullHint();
       this.sections.skill.renderSkillOptions();
+      this.sections.skill.renderDefenseSkills();
+      this.sections.skill.renderTargetingSkills();
     });
   }
 
@@ -117,6 +121,10 @@ export class SidePanelImpl implements SidePanel {
   set fittingText(value: string | undefined) { this.fittingTextValue = value; }
   get lastCommittedHull(): ShipId | undefined { return this.lastCommittedHullValue; }
   set lastCommittedHull(value: ShipId | undefined) { this.lastCommittedHullValue = value; }
+  setSensorData(spec: SensorSpec | undefined, boosts: SensorBoostLoadout | undefined): void {
+    this.sensorSpecValue = spec;
+    this.sensorBoostsValue = boosts;
+  }
   get importer(): SideImporter {
     if (!this.importerValue) throw new Error("SidePanel importer not set");
     return this.importerValue;
@@ -177,6 +185,8 @@ export class SidePanelImpl implements SidePanel {
       inertia: num(this.els.inertia),
       ...nav,
       skillLevel: this.sections.skill.currentSkillLevel(),
+      defenseSkills: this.sections.skill.currentDefenseSkills(),
+      targetingSkills: this.sections.skill.currentTargetingSkills(),
       overload: this.els.overload.checked,
       weaponOverload: this.sections.skill.isWeaponOverloaded(),
       hull: this.profile?.id,
@@ -185,6 +195,8 @@ export class SidePanelImpl implements SidePanel {
       overrides: this.overrides.get(),
       fittedHull: this.fittedHull,
       sig: Math.max(num(this.els.shipSig), 1),
+      sensorSpec: this.sensorSpecValue,
+      sensorBoosts: this.sensorBoostsValue,
     };
   }
 
@@ -197,6 +209,10 @@ export class SidePanelImpl implements SidePanel {
     this.sections.nav.restore({ mode: state.mode, range: state.range, aggressivity: state.aggressivity });
     this.sections.hull.loadHull(state.hull, state.propulsion);
     this.sections.skill.setSkillLevel(state.skillLevel ?? 5);
+    if (state.defenseSkills) this.sections.skill.setDefenseSkills(state.defenseSkills);
+    else this.sections.skill.resetDefenseSkills();
+    if (state.targetingSkills) this.sections.skill.setTargetingSkills(state.targetingSkills);
+    else this.sections.skill.resetTargetingSkills();
     this.sections.skill.setOverloadActive(state.overload);
     this.sections.skill.setWeaponOverloaded(state.weaponOverload);
     this.sections.skill.setOverloadDisabled();

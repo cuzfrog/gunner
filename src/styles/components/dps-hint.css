@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 220px;
+  min-width: 242px;
 }
 
 .dps-hint-group {
@@ -33,8 +33,8 @@
 }
 
 .dps-hint-type-icon {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
 }
 
@@ -72,7 +72,7 @@
 
 .dps-hint-factor-main {
   display: grid;
-  grid-template-columns: 64px 1fr auto auto;
+  grid-template-columns: 70px 1fr auto auto;
   align-items: center;
   gap: 4px;
 }
@@ -95,8 +95,8 @@
 
 .dps-hint-factor-source {
   color: var(--text-dim);
-  font-size: 11px;
-  padding-left: 12px;
+  font-size: 12px;
+  padding-left: 13px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

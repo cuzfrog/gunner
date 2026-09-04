@@ -16,6 +16,7 @@ import type { HintRotator } from "./hints";
 import type { BoosterController } from "./booster";
 import type { MissileBoosterController } from "./missileBooster";
 import type { EwarController } from "./ewar";
+import type { DefenseController } from "./defense";
 import type { ImportController } from "./import";
 import type { ConfirmController } from "./confirm";
 import type { FittingPopupController, FittingPreview, FittingPreviewManager, PopupGroup } from "./popup";
@@ -37,8 +38,8 @@ import type { DpsHintProvider } from "./dpsHint";
 import type { DpsHintRenderer } from "./dpsHint";
 import type { AmmoHintProvider } from "./ammoHint";
 import type { AmmoHintRenderer } from "./ammoHint";
-import type { AppliedDpsHintProvider } from "./appliedDpsHint";
-import type { AppliedDpsHintRenderer } from "./appliedDpsHint";
+import type { AppliedDpsHintProvider, AppliedDpsHintRenderer } from "./appliedDpsHint";
+import type { LockStateHintProvider, LockStateHintRenderer } from "./lockStateHint";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -104,6 +105,7 @@ export interface ControlsCradle {
   readonly shipAFittingPopup: FittingPopupController;
   readonly shipBFittingPopup: FittingPopupController;
   readonly ewarController: EwarController;
+  readonly defenseController: DefenseController;
   readonly boosterController: BoosterController;
   readonly missileBoosterController: MissileBoosterController;
   readonly portraitsController: PortraitsController;
@@ -125,4 +127,6 @@ export interface ControlsCradle {
   readonly viewStore: ViewStore;
   readonly appliedDpsHintRenderer: AppliedDpsHintRenderer;
   readonly appliedDpsHintProvider: AppliedDpsHintProvider;
+  readonly lockStateHintRenderer: LockStateHintRenderer;
+  readonly lockStateHintProvider: LockStateHintProvider;
 }

@@ -1,6 +1,7 @@
 import type { TypeId } from "../gamedata/ids";
 import type { DroneSizeClass, DroneStats, FittingDb } from "../gamedata/fittingDb";
-import type { DamageBreakdown, DamageType } from "./damageBreakdown";
+import type { DamageType } from "../sim";
+import type { DamageBreakdown } from "./damageBreakdown";
 
 export interface ImportedDrone {
   readonly typeId: TypeId;

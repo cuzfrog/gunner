@@ -1,6 +1,8 @@
 export type { FittingDb, FittingImport, FittingRow, FittingSection, FittingSummary, ImportedFitting, ImportedTurret, ImportedLauncher } from "./fittingImport";
+export type { DefenseModuleStats, DefenseLayer, DefenseRepairerOverload, DefenseAncillary } from "../gamedata/fittingDb";
 export type { CargoCharge, ChargeCatalog, ChargeOption, ImportedTurretBase } from "./chargeCatalog";
-export type { DamageType, DamageFactor, DamageFactorKind, DamageBreakdown } from "./damageBreakdown";
+export type { DamageType, DamageResists } from "../sim";
+export type { DamageFactor, DamageFactorKind, DamageBreakdown } from "./damageBreakdown";
 export { EMPTY_DAMAGE_BREAKDOWN } from "./damageBreakdown";
 export type { MissileCatalog, MissileOption } from "./missileCatalog";
 export type { MissileSkillModel } from "./missileStats";
@@ -14,6 +16,7 @@ export type { GunFamilies, GunFamily } from "./gunFamilies";
 export type { LauncherClass, LauncherClasses } from "./launcherClasses";
 export type { FittingState, FittedModule, TurretGroup, LauncherGroup, DroneGroup, CargoEntry, FittingModuleEntry } from "./fittingState";
 export type { FittingCalculator, HullSideAggregation, PropulsionResult } from "./fittingCalculator";
+export type { DefenseCalculator } from "./defenseCalculator";
 export type { FittingOverrides, FittingOverridesStore } from "./fittingOverrides";
 export { applyFittingOverrides, FittingOverridesStoreImpl } from "./fittingOverrides";
 export type { FittingCradle } from "./cradle";

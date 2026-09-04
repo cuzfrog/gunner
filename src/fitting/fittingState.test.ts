@@ -12,9 +12,19 @@ const profile: ShipProfile = {
   inertiaModifier: 0.45,
   baseSpeed: 165,
   sigRadius: 270,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const hullBonuses: readonly HullBonus[] = FITTING_DB.hullBonuses[profile.id] ?? [];
@@ -80,7 +90,9 @@ describe("FittingStateFactory", () => {
       entry("1600mm Steel Plates I"),
     ], [], []);
     expect(state.turretGroups.length).toBe(1);
-    expect(state.supportModules.length).toBe(3);
+    expect(state.supportModules.length).toBe(2);
+    expect(state.defenseModules.length).toBe(1);
+    expect(state.defenseModules[0].moduleId).toBe(moduleId("1600mm Steel Plates I"));
     expect(state.supportModules.every((m) => m.moduleId !== moduleId("Heavy Pulse Laser II"))).toBe(true);
   });
 

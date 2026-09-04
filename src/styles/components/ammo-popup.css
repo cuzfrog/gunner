@@ -3,7 +3,7 @@
   display: block;
   flex: 0 0 auto;
   text-align: left;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -14,13 +14,13 @@
 .ammo-summary-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   flex: 1 1 auto;
   min-width: 0;
 }
 
 .ammo-summary-value {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--accent-teal);
   text-transform: uppercase;
   letter-spacing: 0;
@@ -30,8 +30,8 @@
 }
 
 .ammo-summary-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -47,12 +47,12 @@
 .ammo-expand {
   display: block;
   width: 100%;
-  padding: 4px 6px;
+  padding: 4px 7px;
   background: transparent;
   border: none;
   color: var(--text-secondary);
   font-family: "Saira", sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   text-align: left;
@@ -69,14 +69,14 @@
 .ammo-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   width: 100%;
-  padding: 4px 6px;
+  padding: 4px 7px;
   background: transparent;
   border: none;
   color: var(--text-primary);
   font-family: "Saira", sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   text-align: left;
   cursor: pointer;
   border-radius: 2px;
@@ -86,8 +86,8 @@
 .ammo-item:hover { background: var(--bg-inset); }
 
 .ammo-item-icon {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -97,6 +97,6 @@
 .ammo-item-quantity {
   flex: none;
   color: var(--text-dim);
-  font-size: 10px;
+  font-size: 11px;
 }
 }

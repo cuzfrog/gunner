@@ -82,6 +82,25 @@ function addPortraitChildren(document: Document): void {
     image.tagName = "IMG";
     image.className = "portrait-image";
     root.appendChild(image);
+    const lockBadge = new FakeElement();
+    lockBadge.tagName = "DIV";
+    lockBadge.className = "portrait-lock-badge";
+    lockBadge.hidden = true;
+    root.appendChild(lockBadge);
+    const hpBars = new FakeElement();
+    hpBars.tagName = "DIV";
+    hpBars.className = "portrait-hp-bars";
+    for (const layer of ["shield", "armor", "hull"]) {
+      const bar = new FakeElement();
+      bar.tagName = "DIV";
+      bar.className = `portrait-hp-bar portrait-hp-bar-${layer}`;
+      const fill = new FakeElement();
+      fill.tagName = "SPAN";
+      fill.className = "portrait-hp-fill";
+      bar.appendChild(fill);
+      hpBars.appendChild(bar);
+    }
+    root.appendChild(hpBars);
     const effects = new FakeElement();
     effects.tagName = "DIV";
     effects.className = "portrait-effects";
@@ -183,6 +202,9 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
       appliedEffects: vi.fn(() => []),
       speedBreakdown: vi.fn(() => ({ effects: [], propulsionSuppressed: false })),
       disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
+      dampenedSensorSpec: vi.fn((spec) => spec),
+      dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
+      dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
     })),
     hitChance: asValue(vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance })),
     ships: asValue(vi.mocked<Ships>({ ...mockShips(), ...options.ships })),
@@ -207,9 +229,9 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
       resolveLauncher: vi.fn(() => undefined),
       resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
       resolvePropulsion: vi.fn(() => undefined),
-      resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] })),
+      resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], })),
       resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
-      resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveDrones: vi.fn(() => []), resolveCargoCharges: vi.fn(() => []),
+      resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [] })), resolveSensorSpec: vi.fn(() => ({ scanResolution: 0, maxTargetingRange: 0, maxLockedTargets: 0 })), resolveDrones: vi.fn(() => []), resolveCargoCharges: vi.fn(() => []),
     })),
     profileEquality: asValue<ProfileEquality>({ equal() { return true; } }),
     itemNameLoader: asValue({ ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) }),
@@ -271,8 +293,8 @@ class StubTurretController implements TurretController {
   restore(fittingText?: string, conditions?: StatConditions, ammo?: string, tracking?: number, sigRes?: SigResolutionClass, optimal?: number, falloff?: number): void;
   restore(..._args: unknown[]): void {}
   clear = vi.fn();
-  currentTurretSpec = vi.fn((): TurretSpec | undefined => ({ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: 12, cycleTime: 5, turretCount: 1 }));
-  currentTurretSpecs = vi.fn((): readonly TurretSpec[] => [{ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: 12, cycleTime: 5, turretCount: 1 }]);
+  currentTurretSpec = vi.fn((): TurretSpec | undefined => ({ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 }));
+  currentTurretSpecs = vi.fn((): readonly TurretSpec[] => [{ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 }]);
   currentSigResClass = vi.fn((): SigResolutionClass => "S");
   capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "12608" as TypeId }));
   isAmmoPopupOpen = vi.fn();

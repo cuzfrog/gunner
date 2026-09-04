@@ -3,7 +3,7 @@ import type { ChargeCatalog, FittingCalculator, FittingImport, FittingOverridesS
 import { FittingOverridesStoreImpl, EMPTY_DAMAGE_BREAKDOWN } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { Ships } from "../../../ships";
-import { registerSimModule, type SigResolutionClass, type SimCradle, type SimValueParser } from "../../../sim";
+import { registerSimModule, type SigResolutionClass, type SimCradle, type SimValueParser, damageVectorScale } from "../../../sim";
 import { createContainer, InjectionMode } from "awilix";
 import type { I18n, Language } from "../../i18n";
 import { UiEventsImpl } from "../../events";
@@ -165,15 +165,15 @@ export function buildTurret(
         tracking: TURRET.base.tracking * trackingMultiplier,
         optimal: TURRET.base.optimal * rangeMultiplier,
         falloff: TURRET.base.falloff * falloffMultiplier,
-        damagePerShot: TURRET.damageMultiplier * (charge ? 20 : TURRET.damagePerShot / TURRET.damageMultiplier),
+        damagePerShot: charge ? damageVectorScale({ em: 0, thermal: 0, kinetic: 20, explosive: 0 }, TURRET.damageMultiplier) : TURRET.damagePerShot,
       };
     })),
     resolveLauncher: vi.fn(() => undefined),
     resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
     resolvePropulsion: vi.fn(() => undefined),
-    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] })),
+    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], })),
     resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
-    resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveDrones: vi.fn(() => []), resolveCargoCharges: vi.fn(() => []),
+    resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [] })), resolveSensorSpec: vi.fn(() => ({ scanResolution: 0, maxTargetingRange: 0, maxLockedTargets: 0 })), resolveDrones: vi.fn(() => []), resolveCargoCharges: vi.fn(() => []),
   });
   const controller = new TurretControllerImpl({
     side,

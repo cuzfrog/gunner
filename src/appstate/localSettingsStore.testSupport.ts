@@ -1,4 +1,4 @@
-import { registerSimModule, type SimCradle, type SimValueParser } from "../sim";
+import { EMPTY_DEFENSE_SPEC, EMPTY_SENSOR_BOOST_LOADOUT, registerSimModule, type SimCradle, type SimValueParser } from "../sim";
 import { createContainer, InjectionMode } from "awilix";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
 import { toShipId, toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
@@ -50,6 +50,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   shipASkillLevel: 5,
   shipAOverload: true,
   shipAWeaponOverload: false,
+  shipADamageEnabled: true,
   initialDistance: 20000,
   shipBSpeed: 1000,
   shipBMode: "orbit",
@@ -59,6 +60,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   shipBSkillLevel: 5,
   shipBOverload: true,
   shipBWeaponOverload: false,
+  shipBDamageEnabled: true,
   shipBSig: 40,
   shipAEwarActivation: { webs: [{ active: true, overloaded: true }], grapplers: [], disruptors: [{ active: true, overloaded: true, script: "none" }], scramblers: [] },
   shipBEwarActivation: { webs: [{ active: false, overloaded: true }], grapplers: [], disruptors: [{ active: true, overloaded: true, script: toTypeId("29005") }], scramblers: [] },
@@ -121,9 +123,19 @@ export const RIFTER_PROFILE: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 300,
   sigRadius: 36,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const THRASHER_PROFILE: ShipProfile = {
@@ -135,9 +147,19 @@ const THRASHER_PROFILE: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 250,
   sigRadius: 120,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const BRUTIX_PROFILE: ShipProfile = {
@@ -149,9 +171,19 @@ const BRUTIX_PROFILE: ShipProfile = {
   inertiaModifier: 0.55,
   baseSpeed: 165,
   sigRadius: 300,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const WRAITH_PROFILE: ShipProfile = {
@@ -163,9 +195,19 @@ const WRAITH_PROFILE: ShipProfile = {
   inertiaModifier: 2,
   baseSpeed: 300,
   sigRadius: 36,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const KNOWN_HULLS: readonly ShipProfile[] = [RIFTER_PROFILE, THRASHER_PROFILE, BRUTIX_PROFILE, WRAITH_PROFILE];
@@ -211,6 +253,7 @@ const EMPTY_FITTING_STATE: FittingState = {
   profile: RIFTER_PROFILE,
   hullBonuses: [],
   supportModules: [],
+  defenseModules: [],
   turretGroups: [],
   launcherGroups: [],
   propulsionModule: undefined,
@@ -220,6 +263,8 @@ const EMPTY_FITTING_STATE: FittingState = {
   droneGroups: [],
   drones: [],
   cargo: [],
+  sensorBoosterModules: [],
+  sensorAmplifierModules: [],
 };
 
 export const IMPORTED_RIFTER: ImportedFitting = {
@@ -238,16 +283,19 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
     moduleId: toTypeId("486"),
     damageMultiplier: 3,
-    damagePerShot: 12,
+    damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 },
     cycleTime: 5,
     turretCount: 1,
     damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
   },
   drones: [],
   cargoCharges: [],
-  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
+  defense: EMPTY_DEFENSE_SPEC,
+  sensorSpec: { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4 },
+  sensorBoosts: EMPTY_SENSOR_BOOST_LOADOUT,
 };
 export function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();

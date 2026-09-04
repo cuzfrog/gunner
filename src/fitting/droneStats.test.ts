@@ -29,8 +29,8 @@ function drone(overrides: Partial<DroneStats> = {}): DroneStats {
   };
 }
 
-function hullBonus(attribute: string, magnitude: number, skill?: string): HullBonus {
-  return { attribute: attribute as HullBonus["attribute"], magnitude, skill };
+function hullBonus(attribute: string, magnitude: number, scalesWithHullSkill = false): HullBonus {
+  return { attribute: attribute as HullBonus["attribute"], magnitude, scalesWithHullSkill };
 }
 
 describe("DroneSkillModelImpl", () => {
@@ -78,7 +78,7 @@ describe("DroneSkillModelImpl", () => {
   });
 
   test("hull droneDamage bonus multiplies damage", () => {
-    const bonuses: HullBonus[] = [hullBonus("droneDamage", 10, "Drones")];
+    const bonuses: HullBonus[] = [hullBonus("droneDamage", 10, true)];
     const result = new DroneSkillModelImpl().compute(drone(), bonuses, 5);
     const expectedSkill = (1 + 0.1 * 5) * (1 + 0.05 * 5);
     const expectedHull = 1 + 10 * 5 / 100;
@@ -87,7 +87,7 @@ describe("DroneSkillModelImpl", () => {
   });
 
   test("non-droneDamage hull bonuses are ignored", () => {
-    const bonuses: HullBonus[] = [hullBonus("turretDamage", 10, "Drones")];
+    const bonuses: HullBonus[] = [hullBonus("turretDamage", 10, true)];
     const result = new DroneSkillModelImpl().compute(drone(), bonuses, 5);
     expect(result.hullDamageMultiplier).toBe(1);
   });

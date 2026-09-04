@@ -1,7 +1,6 @@
 import type { TypeId } from "../gamedata/ids";
 import type { ChargeStats, DroneStats, MissileStats } from "../gamedata/fittingDb";
-
-export type DamageType = "em" | "thermal" | "kinetic" | "explosive";
+import type { DamageType } from "../sim";
 
 export type DamageFactorKind = "base" | "module" | "skill" | "hull" | "overload";
 

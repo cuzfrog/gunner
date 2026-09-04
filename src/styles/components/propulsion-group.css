@@ -23,13 +23,13 @@
   min-width: 0;
   flex-wrap: nowrap;
   overflow: hidden;
-  min-height: 22px;
+  min-height: 24px;
 }
 
 .propulsion-gear {
-  flex: 0 0 22px;
-  min-width: 22px;
-  min-height: 22px;
+  flex: 0 0 24px;
+  min-width: 24px;
+  min-height: 24px;
   padding: 0;
 }
 
@@ -41,10 +41,10 @@
 .propulsion-variants-popup.fitting-popup {
   left: auto;
   right: 0;
-  min-width: 220px;
+  min-width: 242px;
 }
 
-.propulsion-variants-popup .propulsion-icon { margin-right: 6px; }
+.propulsion-variants-popup .propulsion-icon { margin-right: 7px; }
 
 .propulsion-group .overload-button {
   grid-column: 2;
@@ -57,6 +57,6 @@
 }
 
 .segmented-control.propulsion-selector > .btn {
-  gap: 6px;
+  gap: 7px;
 }
 }

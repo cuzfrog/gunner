@@ -73,7 +73,7 @@ Keep selectors short: one or two classes, plus at most one state. Never use `!im
 
 ## 11. Responsive: page concern first
 
-Viewport breakpoints (1100px, 900px, 480px) belong to the page: their rules live in `src/styles/layout.css`, keeping the whole reflow map readable in one place. A rule describing how a component behaves when it itself runs out of room (hide its own label, floor its own slider width) belongs in that component's file instead — keyed off its container rather than the viewport where possible. Before adding any responsive rule, first attempt elimination with intrinsically adaptive CSS: flex wrapping and shrinking, grid `auto-fit`/`minmax()`, `clamp()`. Accept a responsive rule only when no fluid equivalent exists.
+Viewport breakpoints (1210px, 990px, 528px) belong to the page: their rules live in `src/styles/layout.css`, keeping the whole reflow map readable in one place. A rule describing how a component behaves when it itself runs out of room (hide its own label, floor its own slider width) belongs in that component's file instead — keyed off its container rather than the viewport where possible. Before adding any responsive rule, first attempt elimination with intrinsically adaptive CSS: flex wrapping and shrinking, grid `auto-fit`/`minmax()`, `clamp()`. Accept a responsive rule only when no fluid equivalent exists.
 
 ## Violations to watch for (agent checklist)
 

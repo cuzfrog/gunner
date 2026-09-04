@@ -1,7 +1,9 @@
-import { fakeDocument, getFake } from "../../testing";
+import { fakeDocument, getFake, FakeElement } from "../../testing";
 import { UiEventsImpl } from "../../events";
-import type { EwarProjection, EwarResolver, SpeedBreakdown, DisruptionBreakdown } from "../../../sim";
+import type { EngagementView, EwarProjection, EwarResolver, LockState, SpeedBreakdown, DisruptionBreakdown } from "../../../sim";
 import type { EwarController } from "../ewar";
+import type { DefenseController } from "../defense";
+import type { ViewStore } from "../controlsContract";
 import type { ImageCatalog } from "../../icons";
 import type { ShipProfile } from "../../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId } from "../../../gamedata/ids";
@@ -18,9 +20,19 @@ const SHIP_A_PROFILE: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 300,
   sigRadius: 36,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 const SHIP_B_PROFILE: ShipProfile = {
   id: "603" as ShipId,
@@ -31,9 +43,19 @@ const SHIP_B_PROFILE: ShipProfile = {
   inertiaModifier: 3,
   baseSpeed: 300,
   sigRadius: 36,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 function createFakePortraitEls(document: Document): PortraitsEls {
@@ -41,6 +63,21 @@ function createFakePortraitEls(document: Document): PortraitsEls {
   const shipAImage = document.createElement("img");
   shipAImage.className = "portrait-image";
   shipARoot.appendChild(shipAImage);
+  const shipALockBadge = document.createElement("div");
+  shipALockBadge.className = "portrait-lock-badge";
+  shipALockBadge.hidden = true;
+  shipARoot.appendChild(shipALockBadge);
+  const shipAHpBars = document.createElement("div");
+  shipAHpBars.className = "portrait-hp-bars";
+  for (const layer of ["shield", "armor", "hull"]) {
+    const bar = document.createElement("div");
+    bar.className = `portrait-hp-bar portrait-hp-bar-${layer}`;
+    const fill = document.createElement("span");
+    fill.className = "portrait-hp-fill";
+    bar.appendChild(fill);
+    shipAHpBars.appendChild(bar);
+  }
+  shipARoot.appendChild(shipAHpBars);
   const shipAEffects = document.createElement("div");
   shipAEffects.className = "portrait-effects";
   shipARoot.appendChild(shipAEffects);
@@ -48,6 +85,21 @@ function createFakePortraitEls(document: Document): PortraitsEls {
   const shipBImage = document.createElement("img");
   shipBImage.className = "portrait-image";
   shipBRoot.appendChild(shipBImage);
+  const shipBLockBadge = document.createElement("div");
+  shipBLockBadge.className = "portrait-lock-badge";
+  shipBLockBadge.hidden = true;
+  shipBRoot.appendChild(shipBLockBadge);
+  const shipBHpBars = document.createElement("div");
+  shipBHpBars.className = "portrait-hp-bars";
+  for (const layer of ["shield", "armor", "hull"]) {
+    const bar = document.createElement("div");
+    bar.className = `portrait-hp-bar portrait-hp-bar-${layer}`;
+    const fill = document.createElement("span");
+    fill.className = "portrait-hp-fill";
+    bar.appendChild(fill);
+    shipBHpBars.appendChild(bar);
+  }
+  shipBRoot.appendChild(shipBHpBars);
   const shipBEffects = document.createElement("div");
   shipBEffects.className = "portrait-effects";
   shipBRoot.appendChild(shipBEffects);
@@ -58,6 +110,10 @@ function createFakePortraitEls(document: Document): PortraitsEls {
     shipBImage: shipBImage as unknown as HTMLImageElement,
     shipAEffects,
     shipBEffects,
+    shipAHpBars,
+    shipBHpBars,
+    shipALockBadge,
+    shipBLockBadge,
   };
 }
 
@@ -86,6 +142,9 @@ function buildController() {
     appliedEffects: vi.fn(() => []),
     speedBreakdown: vi.fn((): SpeedBreakdown => ({ effects: [], propulsionSuppressed: false })),
     disruptionBreakdown: vi.fn((): DisruptionBreakdown => ({ tracking: [], optimal: [], falloff: [] })),
+    dampenedSensorSpec: vi.fn((spec) => spec),
+    dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
+    dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
   });
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((_shipId) => "images/ships/Rifter.webp"),
@@ -99,16 +158,40 @@ function buildController() {
     t: vi.fn((key: string) => key),
     translateDocument: vi.fn(),
   });
+  const defenseController = vi.mocked<DefenseController>({
+    setDefenseSpec: vi.fn(),
+    spec: vi.fn(() => undefined),
+    updateAssessments: vi.fn(),
+    updateDefenseView: vi.fn(),
+    updateSummaries: vi.fn(),
+    render: vi.fn(),
+    signaturePenalty: vi.fn(() => 0),
+    updateEffectiveSig: vi.fn(),
+    damageEnabled: vi.fn(() => true),
+    setDamageEnabled: vi.fn(),
+    repairMode: vi.fn(() => "auto" as const),
+    setRepairMode: vi.fn(),
+    repairerActivation: vi.fn(() => []),
+    setRepairerActivation: vi.fn(),
+    rahActivation: vi.fn(() => undefined),
+    setRahActivation: vi.fn(),
+    restore: vi.fn(),
+    cyclingEffects: vi.fn(() => []),
+    hpPercentages: vi.fn(() => undefined),
+  });
+  const viewStore = vi.mocked<ViewStore>({ currentView: vi.fn(() => undefined) });
   const controller = new PortraitsControllerImpl({
     els,
     imageCatalog,
     ewarController,
     ewarResolver,
+    defenseController,
     combatantProfiles,
     events,
     i18n,
+    viewStore,
   });
-  return { controller, els, profiles, projections, ewarController, ewarResolver, imageCatalog, events, createElementSpy, i18n };
+  return { controller, els, profiles, projections, ewarController, ewarResolver, defenseController, imageCatalog, events, createElementSpy, i18n, viewStore };
 }
 
 describe("PortraitsController", () => {
@@ -295,12 +378,14 @@ describe("PortraitsController", () => {
     projections.shipB = {
       loadout: {
         webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
-        grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [],
+        grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [],
+        dampenerScripts: [],
       },
       activation: {
         webs: [{ active: true, overloaded: false }],
         grapplers: [], disruptors: [], scramblers: [],
       painters: [],
+      dampeners: [],
       },
     };
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("527") ? "images/icons/1234@1x.png" : undefined));
@@ -431,5 +516,144 @@ describe("PortraitsController", () => {
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
     expect(icon.getAttribute("data-hint")).toBe("ewar.hover.tracking -45% · ewar.hover.optimal -17%");
+  });
+
+  describe("HP bars", () => {
+    function hpFillWidth(els: PortraitsEls, side: "shipA" | "shipB", layerIndex: number): string {
+      const container = side === "shipA" ? els.shipAHpBars : els.shipBHpBars;
+      const bars = container.querySelectorAll(".portrait-hp-bar");
+      const fill = bars[layerIndex].querySelector(".portrait-hp-fill") as unknown as FakeElement;
+      return (fill.style as unknown as Record<string, string>).width ?? "";
+    }
+
+    test("undefined hpPercentages hides HP bars", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue(undefined);
+      controller.update();
+      expect(els.shipAHpBars.hidden).toBe(true);
+    });
+
+    test("defined hpPercentages shows HP bars", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 1, armor: 1, hull: 1 });
+      controller.update();
+      expect(els.shipAHpBars.hidden).toBe(false);
+    });
+
+    test("full HP sets all fill widths to 0%", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 1, armor: 1, hull: 1 });
+      controller.update();
+      expect(hpFillWidth(els, "shipA", 0)).toBe("0%");
+      expect(hpFillWidth(els, "shipA", 1)).toBe("0%");
+      expect(hpFillWidth(els, "shipA", 2)).toBe("0%");
+    });
+
+    test("partial damage sets fill widths to lost percentage", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 0.5, armor: 1, hull: 0.25 });
+      controller.update();
+      expect(hpFillWidth(els, "shipA", 0)).toBe("50%");
+      expect(hpFillWidth(els, "shipA", 1)).toBe("0%");
+      expect(hpFillWidth(els, "shipA", 2)).toBe("75%");
+    });
+
+    test("dead ship (all 0) sets all fill widths to 100%", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 0, armor: 0, hull: 0 });
+      controller.update();
+      expect(hpFillWidth(els, "shipA", 0)).toBe("100%");
+      expect(hpFillWidth(els, "shipA", 1)).toBe("100%");
+      expect(hpFillWidth(els, "shipA", 2)).toBe("100%");
+    });
+
+    test("transition from undefined to defined shows bars and updates fills", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue(undefined);
+      controller.update();
+      expect(els.shipAHpBars.hidden).toBe(true);
+      defenseController.hpPercentages.mockReturnValue({ shield: 0.5, armor: 0.5, hull: 0.5 });
+      controller.update();
+      expect(els.shipAHpBars.hidden).toBe(false);
+      expect(hpFillWidth(els, "shipA", 0)).toBe("50%");
+      expect(hpFillWidth(els, "shipA", 1)).toBe("50%");
+      expect(hpFillWidth(els, "shipA", 2)).toBe("50%");
+    });
+
+    test("sub-percent damage updates fill widths without other state changes", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 0.9999, armor: 1, hull: 1 });
+      controller.update();
+      const before = hpFillWidth(els, "shipA", 0);
+      expect(before).toContain("0.00999");
+      defenseController.hpPercentages.mockReturnValue({ shield: 0.999, armor: 1, hull: 1 });
+      controller.update();
+      const after = hpFillWidth(els, "shipA", 0);
+      expect(after).toContain("0.1000");
+      expect(after).not.toBe(before);
+    });
+  });
+
+  describe("lock badge", () => {
+    const LOCKED: LockState = { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true };
+    const LOCKING: LockState = { status: "locking", progress: 0.5, remaining: 5, lockTime: 10, inRange: true };
+    const IDLE: LockState = { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: false };
+
+    function makeView(locks: { shipA: LockState; shipB: LockState }): EngagementView {
+      return { locks, frame: {} as unknown as EngagementView["frame"], attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: {} as unknown, shipB: {} as unknown } } as unknown as EngagementView;
+    }
+
+    test("hidden when no view is available", () => {
+      const { controller, els, profiles } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      controller.update();
+      expect(els.shipALockBadge.hidden).toBe(true);
+    });
+
+    test("hidden when lock status is idle", () => {
+      const { controller, els, profiles, viewStore } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      viewStore.currentView.mockReturnValue(makeView({ shipA: IDLE, shipB: IDLE }));
+      controller.update();
+      expect(els.shipALockBadge.hidden).toBe(true);
+    });
+
+    test("hidden when lock status is locking", () => {
+      const { controller, els, profiles, viewStore } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      viewStore.currentView.mockReturnValue(makeView({ shipA: LOCKING, shipB: IDLE }));
+      controller.update();
+      expect(els.shipALockBadge.hidden).toBe(true);
+    });
+
+    test("visible when lock status is locked with non-zero lockTime", () => {
+      const { controller, els, profiles, viewStore } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      viewStore.currentView.mockReturnValue(makeView({ shipA: LOCKED, shipB: IDLE }));
+      controller.update();
+      expect(els.shipALockBadge.hidden).toBe(false);
+    });
+
+    test("hidden when locked but lockTime is zero (backward-compatible)", () => {
+      const { controller, els, profiles, viewStore } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      viewStore.currentView.mockReturnValue(makeView({ shipA: { ...LOCKED, lockTime: 0 }, shipB: IDLE }));
+      controller.update();
+      expect(els.shipALockBadge.hidden).toBe(true);
+    });
+
+    test("hidden when profile is undefined even if locked", () => {
+      const { controller, els, viewStore } = buildController();
+      viewStore.currentView.mockReturnValue(makeView({ shipA: LOCKED, shipB: IDLE }));
+      controller.update();
+      expect(els.shipALockBadge.hidden).toBe(true);
+    });
   });
 });

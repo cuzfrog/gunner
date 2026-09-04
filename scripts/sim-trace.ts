@@ -247,6 +247,7 @@ function buildEwarProjection(loadout: EwarProjection["loadout"], overloaded: boo
       disruptors: disruptors.map(() => ({ active: true, overloaded, script: undefined })),
       scramblers: scramblers.map(() => ({ active: true, overloaded })),
       painters: painters.map(() => ({ active: true, overloaded })),
+      dampeners: [],
     },
   };
 }

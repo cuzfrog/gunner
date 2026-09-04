@@ -1,8 +1,8 @@
 import type { TypeId } from "../gamedata/ids";
-import type { SigResolutionClass } from "../sim";
+import { type DamageVector, type DamageType, type SigResolutionClass, damageVectorFromPartial, damageVectorScale } from "../sim";
 import { FITTING_DB, type ChargeStats, type FittingDb } from "../gamedata/fittingDb";
 import type { GunFamilies, GunFamily } from "./gunFamilies";
-import { type DamageBreakdown, type DamageType, chargeDamageByType } from "./damageBreakdown";
+import { type DamageBreakdown, chargeDamageByType } from "./damageBreakdown";
 
 export interface ImportedTurretBase {
   readonly tracking: number;
@@ -20,7 +20,7 @@ export interface ImportedTurret {
   readonly base: ImportedTurretBase;
   readonly moduleId: TypeId;
   readonly damageMultiplier: number;
-  readonly damagePerShot: number;
+  readonly damagePerShot: DamageVector;
   readonly cycleTime: number;
   readonly turretCount: number;
   readonly damageBreakdown: DamageBreakdown;
@@ -32,7 +32,7 @@ export interface ImportedLauncher {
   readonly count: number;
   readonly chargeId: TypeId;
   readonly chargeName: string;
-  readonly damagePerMissile: number;
+  readonly damagePerMissile: DamageVector;
   readonly cycleTime: number;
   readonly explosionRadius: number;
   readonly explosionVelocity: number;
@@ -56,7 +56,7 @@ export interface ChargeOption {
   readonly damageByType: Readonly<Partial<Record<DamageType, number>>>;
 }
 
-export type ChargeFamily = "projectile" | "hybrid" | "laser";
+export type ChargeFamily = "projectile" | "hybrid" | "laser" | "precursor";
 
 export interface ChargeCatalog {
   usualForChargeSize(chargeSize: number): TypeId;
@@ -111,14 +111,14 @@ export class ChargeCatalogImpl implements ChargeCatalog {
     if (!stats) return turret;
     const family = _turretChargeFamily(turret.moduleId, this.gunFamilies);
     if (family !== undefined && _chargeFamilyOf(stats.name) !== family) return turret;
-    const chargeDamage = (stats.emDamage ?? 0) + (stats.thermalDamage ?? 0) + (stats.kineticDamage ?? 0) + (stats.explosiveDamage ?? 0);
+    const chargeDamageVec = damageVectorFromPartial(chargeDamageByType(stats));
     return {
       ...turret,
       chargeId: charge,
       tracking: turret.base.tracking * (stats.trackingMultiplier ?? 1),
       optimal: turret.base.optimal * (stats.rangeMultiplier ?? 1),
       falloff: turret.base.falloff * (stats.falloffMultiplier ?? 1),
-      damagePerShot: turret.damageMultiplier * chargeDamage,
+      damagePerShot: damageVectorScale(chargeDamageVec, turret.damageMultiplier),
       damageBreakdown: { ...turret.damageBreakdown, damageByType: chargeDamageByType(stats) },
     };
   }
@@ -219,6 +219,7 @@ const TURRET_CHARGE_FAMILIES: Readonly<Record<GunFamily, ChargeFamily>> = {
   blaster: "hybrid",
   pulseLaser: "laser",
   beamLaser: "laser",
+  disintegrator: "precursor",
 } as const;
 
 const CHARGE_FAMILY_BY_BASE: Readonly<Record<string, ChargeFamily>> = {

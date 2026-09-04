@@ -1,5 +1,5 @@
-import type { DisruptionBreakdown, EngagementView, SimConfig, SpeedBreakdown, WeaponSpec } from "../../sim";
-import type { WeaponRangeVisibility } from "../../appstate";
+import type { DefenseSpec, DefenseView, DisruptionBreakdown, EngagementView, SimConfig, SpeedBreakdown, WeaponSpec } from "../../sim";
+import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation, WeaponRangeVisibility } from "../../appstate";
 import type { RangeOverlay } from "../renderer";
 import type { Side } from "./side";
 
@@ -66,6 +66,12 @@ export interface Controls {
   getWeapon(side: Side): WeaponSpec | undefined;
   getWeapons(side: Side): readonly WeaponSpec[];
   getSig(side: Side): number;
+  getDefense(side: Side): DefenseSpec;
+  getDamageEnabled(side: Side): boolean;
+  getRepairMode(side: Side): StoredRepairMode;
+  getRepairerActivation(side: Side): readonly StoredRepairerActivation[];
+  getRahActivation(side: Side): StoredRahActivation | undefined;
+  getOverloaded(side: Side): boolean;
   getConfig(): SimConfig;
   getSpeed(): number;
   getGridBrightness(): number;
@@ -76,7 +82,7 @@ export interface Controls {
   getDroneControlRangeVisibility(): WeaponRangeVisibility;
   getOverlays(): readonly RangeOverlay[];
   hasWeapon(side: Side): boolean;
-  update(view: EngagementView, effective: EffectiveReadouts): void;
+  update(view: EngagementView, effective: EffectiveReadouts, defenseView: DefenseView): void;
   setPlaying(playing: boolean): void;
   setCallbacks(callbacks: ControlsCallbacks): void;
 }

@@ -15,8 +15,8 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 8px;
-  font-size: 11px;
+  gap: 9px;
+  font-size: 12px;
 }
 
 .drone-telemetry-label {
@@ -31,16 +31,16 @@
 }
 
 .drone-popup {
-  min-width: 240px;
+  min-width: 264px;
 }
 
 .drone-loadout-section {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding-bottom: 6px;
+  padding-bottom: 7px;
   border-bottom: 1px solid var(--border-subtle);
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
 
 .drone-loadout-list {
@@ -52,20 +52,20 @@
 .drone-loadout-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   padding: 2px 0;
 }
 
 .drone-loadout-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex: 0 0 auto;
 }
 
 .drone-loadout-name {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .drone-stepper {
@@ -75,10 +75,10 @@
 }
 
 .drone-stepper-btn {
-  min-width: 20px;
-  height: 20px;
+  min-width: 22px;
+  height: 22px;
   padding: 0 4px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1;
   border: 1px solid var(--border-subtle);
   background: var(--bg-inset);
@@ -91,24 +91,24 @@
 }
 
 .drone-stepper-minus {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .drone-stepper-plus {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .drone-stepper-count {
-  min-width: 16px;
+  min-width: 18px;
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .drone-remove-btn {
-  min-width: 20px;
-  height: 20px;
+  min-width: 22px;
+  height: 22px;
   padding: 0 4px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   border: 1px solid var(--border-subtle);
   background: transparent;
@@ -123,9 +123,9 @@
 
 .drone-summary-bar {
   display: flex;
-  gap: 12px;
+  gap: 13px;
   padding: 4px 0;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .drone-summary-bar.is-invalid .drone-summary-value {
@@ -142,7 +142,7 @@
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .drone-summary-value {
@@ -160,7 +160,7 @@
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: 10px;
+  font-size: 11px;
   margin-top: 4px;
 }
 
@@ -176,15 +176,15 @@
 .drone-catalog-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 6px;
+  gap: 7px;
+  padding: 4px 7px;
   cursor: pointer;
   border: none;
   background: transparent;
   color: var(--text-primary);
   text-align: left;
   width: 100%;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .drone-catalog-item:hover {
@@ -192,8 +192,8 @@
 }
 
 .drone-catalog-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex: 0 0 auto;
 }
 

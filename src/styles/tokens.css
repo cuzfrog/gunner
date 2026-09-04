@@ -31,10 +31,10 @@
   --warn-yellow-65: rgba(252, 228, 71, 0.65);
   --warn-yellow-85: rgba(252, 228, 71, 0.85);
   --shadow-color: rgba(0, 0, 0, 0.45);
-  --gap-field: 8px;
+  --gap-field: 9px;
   --z-canvas-overlay: 5;
   --z-popup: 30;
-  --canvas-overlay-inset: 24px;
+  --canvas-overlay-inset: 26px;
   --control-height-profile: 30px;
   --dropdown-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235ccbcb' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
   --dropdown-arrow-disabled: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235d7078' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");

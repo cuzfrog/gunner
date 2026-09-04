@@ -1,8 +1,8 @@
 @layer components {
 .hull-ship-image {
   display: block;
-  width: 28px;
-  height: 28px;
+  width: 31px;
+  height: 31px;
   object-fit: contain;
   background: var(--bg-inset);
   border: 1px solid var(--border-dim);
@@ -15,7 +15,7 @@
   align-items: center;
   flex: 1;
   min-width: 0;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1;
   text-transform: none;
   letter-spacing: 0;

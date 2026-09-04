@@ -9,7 +9,7 @@ import type {
   Ships,
   StatConditions,
 } from "../ships";
-import { type BoostLoadout, type EwarLoadout, type MissileBoosterLoadout, type StackingPenalty } from "../sim";
+import { type BoostLoadout, type EwarLoadout, type MissileBoosterLoadout, type SensorBoostLoadout, type SensorSpec, type StackingPenalty } from "../sim";
 import { parseEft, type BankKind, type EftDocument, type EftLine, type QuantityItem } from "./eft";
 
 import type { ItemNameCatalog, ItemNameResolver } from "../gamedata/itemNames";
@@ -23,7 +23,9 @@ import type { DroneCatalog } from "./droneCatalog";
 import type { DroneSkillModel } from "./droneStats";
 import { FittingStateFactory, type FittingState, type FittingModuleEntry, type CargoEntry } from "./fittingState";
 import { FittingCalculatorImpl, type FittingCalculator } from "./fittingCalculator";
+import { DefenseCalculatorImpl, type DefenseCalculator } from "./defenseCalculator";
 import type { FittingDb, FittingModuleStats, HullBonus } from "../gamedata/fittingDb";
+import type { DefenseSpec } from "../sim";
 
 export type { FittingDb } from "../gamedata/fittingDb";
 export type { ImportedTurret, ImportedLauncher, CargoCharge } from "./chargeCatalog";
@@ -64,7 +66,10 @@ export interface ImportedFitting {
   readonly ewar: EwarLoadout;
   readonly boosts: BoostLoadout;
   readonly missileBoosts: MissileBoosterLoadout;
+  readonly sensorSpec: SensorSpec;
+  readonly sensorBoosts: SensorBoostLoadout;
   readonly hullBonuses: readonly HullBonus[];
+  readonly defense: DefenseSpec;
 }
 
 export interface PropulsionVariant {
@@ -91,6 +96,7 @@ export class FittingImportImpl implements FittingImport {
   private readonly moduleSlotCatalog: ModuleSlotCatalog;
   private readonly fittingStateFactory: FittingStateFactory;
   private readonly calculator: FittingCalculator;
+  private readonly defenseCalculator: DefenseCalculator;
 
   constructor({
     ships,
@@ -126,6 +132,7 @@ export class FittingImportImpl implements FittingImport {
     this.moduleSlotCatalog = moduleSlotCatalog;
     this.fittingStateFactory = new FittingStateFactory(fittingDb);
     this.calculator = new FittingCalculatorImpl({ fittingDb, ships, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog });
+    this.defenseCalculator = new DefenseCalculatorImpl({ fittingDb, stackingPenalty });
   }
 
   propulsionVariantNames(module: PropulsionModule): readonly PropulsionVariant[] {
@@ -177,6 +184,9 @@ export class FittingImportImpl implements FittingImport {
     const ewar = this.calculator.resolveEwar(fittingState);
     const boosts = this.calculator.resolveBoosts(fittingState);
     const missileBoosts = this.calculator.resolveMissileBoosts(fittingState);
+    const sensorSpec = this.calculator.resolveSensorSpec(fittingState, conditions);
+    const sensorBoosts = this.calculator.resolveSensorBoosts(fittingState);
+    const defense = this.defenseCalculator.resolve(fittingState, conditions);
 
     return {
       profile: resolved.profile,
@@ -192,7 +202,10 @@ export class FittingImportImpl implements FittingImport {
       ewar,
       boosts,
       missileBoosts,
+      sensorSpec,
+      sensorBoosts,
       hullBonuses,
+      defense,
     };
   }
 

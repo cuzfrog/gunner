@@ -1,5 +1,6 @@
 import { buildDrone, importedDroneFixture, NEUTRAL_CONDITIONS } from "./testSupport";
 import { FakeElement, getFake, IMPORTED_RIFTER } from "../testSupport";
+import { damageVectorSum } from "../../../sim";
 import type { DroneCatalog, DroneGroup, DroneLoadoutContext, DroneLoadoutViolation, ImportedFitting } from "../../../fitting";
 import type { DroneSizeClass } from "../../../gamedata/fittingDb";
 import type { TypeId } from "../../../gamedata/ids";
@@ -80,7 +81,7 @@ describe("DroneController", () => {
     expect(spec.sigResolution).toBe(25);
     expect(spec.optimal).toBe(1000);
     expect(spec.falloff).toBe(500);
-    expect(spec.damagePerShot).toBe(100);
+    expect(damageVectorSum(spec.damagePerShot)).toBe(100);
     expect(spec.cycleTime).toBe(4);
     expect(spec.droneCount).toBe(5);
     expect(spec.maxVelocity).toBe(1200);

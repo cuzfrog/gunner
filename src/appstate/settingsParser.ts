@@ -30,16 +30,21 @@ import {
   isNonNegative,
   isOptionalBoosterActivations,
   isOptionalBoolean,
+  isOptionalDefenseSkills,
   isOptionalDroneGroups,
   isOptionalEwarActivation,
   isOptionalFittedHullSummary,
   isFiniteNumber,
   isOptionalFittingText,
   isOptionalMissileBoosterActivations,
+  isOptionalTargetingSkills,
   isOptionalNonEmptyString,
   isOptionalNonNegative,
   isOptionalPositive,
   isOptionalProfileParamOverrides,
+  isOptionalRahActivation,
+  isOptionalRepairMode,
+  isOptionalRepairerActivations,
   isOptionalSkillLevel,
   isPositive,
   isSettingsVersion,
@@ -215,8 +220,11 @@ export class SettingsParser {
       isNonNegative(s[`${p}Inertia`]) &&
       isOptionalNonNegative(s[`${p}Aggressivity`]) &&
       isOptionalSkillLevel(s[`${p}SkillLevel`]) &&
+      isOptionalDefenseSkills(s[`${p}DefenseSkills`]) &&
+      isOptionalTargetingSkills(s[`${p}TargetingSkills`]) &&
       isOptionalBoolean(s[`${p}Overload`]) &&
       isOptionalBoolean(s[`${p}WeaponOverload`]) &&
+      isOptionalBoolean(s[`${p}DamageEnabled`]) &&
       isOptionalNonEmptyString(s[`${p}HullId`]) &&
       this.isOptionalPropulsionSelection(s[`${p}Propulsion`]) &&
       isOptionalFittingText(s[`${p}Fitting`]) &&
@@ -225,6 +233,9 @@ export class SettingsParser {
       isOptionalEwarActivation(s[`${p}EwarActivation`]) &&
       isOptionalBoosterActivations(s[`${p}BoosterActivation`]) &&
       isOptionalMissileBoosterActivations(s[`${p}MissileBoosterActivation`]) &&
+      isOptionalRepairMode(s[`${p}RepMode`]) &&
+      isOptionalRepairerActivations(s[`${p}RepairerActivation`]) &&
+      isOptionalRahActivation(s[`${p}RahActivation`]) &&
       isOptionalWeaponKind(s[`${p}WeaponKind`]) &&
       isOptionalNonEmptyString(s[`${p}MissileAmmo`]) &&
       isOptionalDroneGroups(s[`${p}DroneGroups`]) &&
@@ -481,8 +492,11 @@ function toWireSettings(session: SessionSettings): UserSettingsWire {
 function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSettings, side: "shipA" | "shipB"): void {
   const p = side;
   if (combatant.skillLevel !== undefined) wire[`${p}SkillLevel` as const] = combatant.skillLevel;
+  if (combatant.defenseSkills !== undefined) wire[`${p}DefenseSkills` as const] = combatant.defenseSkills;
+  if (combatant.targetingSkills !== undefined) wire[`${p}TargetingSkills` as const] = combatant.targetingSkills;
   wire[`${p}Overload` as const] = combatant.overload;
   wire[`${p}WeaponOverload` as const] = combatant.weaponOverload;
+  wire[`${p}DamageEnabled` as const] = combatant.damageEnabled;
   if (combatant.hull !== undefined) wire[`${p}HullId` as const] = combatant.hull;
   if (combatant.propulsion !== undefined) wire[`${p}Propulsion` as const] = combatant.propulsion;
   if (combatant.fitting !== undefined) wire[`${p}Fitting` as const] = combatant.fitting;
@@ -491,6 +505,9 @@ function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSetti
   if (combatant.ewarActivation !== undefined) wire[`${p}EwarActivation` as const] = combatant.ewarActivation;
   if (combatant.boosterActivation !== undefined) wire[`${p}BoosterActivation` as const] = combatant.boosterActivation;
   if (combatant.missileBoosterActivation !== undefined) wire[`${p}MissileBoosterActivation` as const] = combatant.missileBoosterActivation;
+  if (combatant.repMode !== undefined) wire[`${p}RepMode` as const] = combatant.repMode;
+  if (combatant.repairerActivation !== undefined) wire[`${p}RepairerActivation` as const] = combatant.repairerActivation;
+  if (combatant.rahActivation !== undefined) wire[`${p}RahActivation` as const] = combatant.rahActivation;
   if (combatant.weaponKind !== undefined) wire[`${p}WeaponKind` as const] = combatant.weaponKind;
   if (combatant.missileAmmo !== undefined) wire[`${p}MissileAmmo` as const] = combatant.missileAmmo;
   if (combatant.droneGroups !== undefined) wire[`${p}DroneGroups` as const] = combatant.droneGroups;
@@ -509,8 +526,11 @@ function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"
     inertia: sideValue(side, settings.shipAInertia, settings.shipBInertia),
     aggressivity: sideValue(side, settings.shipAAggressivity, settings.shipBAggressivity) ?? 1,
     skillLevel: sideValue(side, settings.shipASkillLevel, settings.shipBSkillLevel),
+    defenseSkills: sideValue(side, settings.shipADefenseSkills, settings.shipBDefenseSkills),
+    targetingSkills: sideValue(side, settings.shipATargetingSkills, settings.shipBTargetingSkills),
     overload: sideValue(side, settings.shipAOverload, settings.shipBOverload) ?? true,
     weaponOverload: sideValue(side, settings.shipAWeaponOverload, settings.shipBWeaponOverload) ?? false,
+    damageEnabled: sideValue(side, settings.shipADamageEnabled, settings.shipBDamageEnabled) ?? true,
     hull: sideValue(side, settings.shipAHullId, settings.shipBHullId),
     propulsion: sideValue(side, settings.shipAPropulsion, settings.shipBPropulsion),
     fitting: sideValue(side, settings.shipAFitting, settings.shipBFitting),
@@ -519,6 +539,9 @@ function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"
     ewarActivation: sideValue(side, settings.shipAEwarActivation, settings.shipBEwarActivation),
     boosterActivation: sideValue(side, settings.shipABoosterActivation, settings.shipBBoosterActivation),
     missileBoosterActivation: sideValue(side, settings.shipAMissileBoosterActivation, settings.shipBMissileBoosterActivation),
+    repMode: sideValue(side, settings.shipARepMode, settings.shipBRepMode),
+    repairerActivation: sideValue(side, settings.shipARepairerActivation, settings.shipBRepairerActivation),
+    rahActivation: sideValue(side, settings.shipARahActivation, settings.shipBRahActivation),
     sig,
     tracking: sideValue(side, settings.shipATracking, settings.shipBTracking) ?? settings.tracking ?? 0,
     sigRes: sideValue(side, settings.shipASigRes, settings.shipBSigRes) ?? settings.sigRes ?? "S",

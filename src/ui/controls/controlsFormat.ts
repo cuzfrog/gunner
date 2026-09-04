@@ -1,4 +1,4 @@
-import { type DisruptionScriptSpec, type MissileScriptSpec, type TurretScriptSpec } from "../../sim";
+import { type DisruptionScriptSpec, type MissileScriptSpec, type SensorDampenerScriptSpec, type TurretScriptSpec } from "../../sim";
 import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
 import type { I18n } from "../i18n";
 
