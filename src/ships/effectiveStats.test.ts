@@ -238,6 +238,12 @@ describe("fittedStats", () => {
     expect(stats.sigRadius).toBeCloseTo(55, 6);
   });
 
+  test("combines flat addition, percentage multiplier and MWD bloom in EVE order: (base + flat) * percent * (1 + bloom)", () => {
+    const fittedWithSig: FittedHull = { ...fitted, sigMultiplier: 1.1 };
+    const stats = fittedStats(frigate, fittedWithSig, mwd5, conditions(0));
+    expect(stats.sigRadius).toBeCloseTo((35 + 15) * 1.1 * (1 + 5), 6);
+  });
+
   test("with propulsion adds active mass and applies the speed and align time", () => {
     const stats = fittedStats(frigate, fitted, ab1, conditions(0));
     expect(stats.mass).toBe(1_750_000);
