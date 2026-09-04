@@ -432,6 +432,7 @@ describe("buildDefenseStatsFromIntents - amplifiers", () => {
     });
     expect(buildDefenseStatsFromIntents(ctx)).toEqual({
       kind: "repairAmplifier",
+      layer: "armor",
       repairAmountMultiplier: 1.15,
     });
   });
@@ -450,6 +451,7 @@ describe("buildDefenseStatsFromIntents - amplifiers", () => {
     });
     expect(buildDefenseStatsFromIntents(ctx)).toEqual({
       kind: "repairAmplifier",
+      layer: "armor",
       repairCycleTimeMultiplier: 0.85,
     });
   });

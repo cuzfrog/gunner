@@ -5,7 +5,8 @@ import type { ShipId, TypeId } from "../src/gamedata/ids";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 import type { ShipNameLanguage } from "../src/ships";
 import type { DamageResists } from "../src/sim";
-import { buildDefenseStatsFromIntents } from "./fittingDb/buildDefenseStats";
+import { buildDefenseStatsFromIntents, type DefenseModuleStats } from "./fittingDb/buildDefenseStats";
+import type { SdeDogmaAttribute, SdeDogmaEffect, SdeDogmaEffectModifier, SdeGroup, SdeTypeDogma } from "./fittingDb/dogmaTypes";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const OUT_FILE = join(import.meta.dir, "..", "src", "gamedata", "fittingDb", "fittingDb.ts");
@@ -48,37 +49,6 @@ type Row<T> = T & { readonly id: TypeId; readonly name: string };
 interface DroneEntry {
   readonly id: TypeId;
   readonly name: string;
-}
-
-interface SdeDogmaAttribute {
-  attributeID: number;
-  name: string;
-}
-
-interface SdeDogmaEffectModifier {
-  readonly domain: string;
-  readonly func: string;
-  readonly modifiedAttributeID: number;
-  readonly modifyingAttributeID: number;
-  readonly operation: number;
-  readonly skillTypeID?: number;
-  readonly groupID?: number;
-}
-
-interface SdeDogmaEffect {
-  effectID: number;
-  effectName?: string;
-  modifierInfo?: readonly SdeDogmaEffectModifier[];
-}
-
-interface SdeGroup {
-  groupID: number;
-  categoryID: number;
-}
-
-interface SdeTypeDogma {
-  dogmaAttributes: readonly { attributeID: number; value: number }[];
-  dogmaEffects: readonly SdeDogmaEffect[];
 }
 
 type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity" | "turretDamage" | "turretRoF" | "droneDamage" | "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
@@ -800,48 +770,6 @@ function resolveDamageModuleGroup(effects: Set<number>): TurretWeaponGroup | und
   return undefined;
 }
 
-interface DefenseRepairerOverload {
-  readonly amountMultiplier: number;
-  readonly cycleTimeMultiplier: number;
-}
-
-interface DefenseAncillary {
-  readonly chargeMultiplier: number;
-  readonly shots: number;
-  readonly reloadTime: number;
-}
-
-interface DefenseModuleStats {
-  readonly kind: "damageControl" | "rah" | "repairer" | "boostAmplifier"
-    | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule" | "hullBulkhead"
-    | "hpPercent" | "rechargeAmplifier" | "repairAmplifier";
-  readonly layer?: "shield" | "armor" | "hull";
-  readonly active?: boolean;
-  readonly resistBonus?: DamageResists;
-  readonly overloadBonusMultiplier?: number;
-  readonly shieldResists?: DamageResists;
-  readonly armorResists?: DamageResists;
-  readonly hullResists?: DamageResists;
-  readonly baseArmorResists?: DamageResists;
-  readonly resistanceShiftAmount?: number;
-  readonly amount?: number;
-  readonly cycleTime?: number;
-  readonly capacitorNeed?: number;
-  readonly heatDamage?: number;
-  readonly overload?: DefenseRepairerOverload;
-  readonly overloadCycleTimeMultiplier?: number;
-  readonly ancillary?: DefenseAncillary;
-  readonly multiplier?: number;
-  readonly shieldHpAdd?: number;
-  readonly armorHpAdd?: number;
-  readonly hullHpPercent?: number;
-  readonly hpPercent?: number;
-  readonly sigRadiusPenalty?: number;
-  readonly rechargeMultiplier?: number;
-  readonly repairAmountMultiplier?: number;
-  readonly repairCycleTimeMultiplier?: number;
-}
-
 function buildDefenseStats(
   values: Map<string, number>,
   effects: Set<number>,
@@ -850,10 +778,6 @@ function buildDefenseStats(
   dogmaEffects: Readonly<Record<string, SdeDogmaEffect>>,
 ): DefenseModuleStats | undefined {
   return buildDefenseStatsFromIntents({ values, effects, groupId, typeDogma, dogmaEffects });
-}
-
-function round6(value: number): number {
-  return Math.round(value * 1e6) / 1e6;
 }
 
 export function buildStasisWebStats(values: Map<string, number>): StasisWebStats | undefined {

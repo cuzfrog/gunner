@@ -27,8 +27,8 @@ export class DefenseCalculatorImpl implements DefenseCalculator {
     const modules = collectDefenseModules(this.db, fitting);
     const skills = conditions.defenseSkills ?? defaultDefenseSkills(conditions.skillLevel);
 
-    const shieldHp = resolveShieldHp(profile, modules, fitting.hullBonuses, skills, conditions.skillLevel);
-    const armorHp = resolveArmorHp(profile, modules, fitting.hullBonuses, skills, conditions.skillLevel);
+    const shieldHp = resolveShieldHp(profile, modules, fitting.hullBonuses, skills, conditions.skillLevel, this.stacking);
+    const armorHp = resolveArmorHp(profile, modules, fitting.hullBonuses, skills, conditions.skillLevel, this.stacking);
     const hullHp = resolveHullHp(profile, modules, fitting.hullBonuses, skills, conditions.skillLevel);
     const shieldRechargeTime = resolveShieldRecharge(profile, modules, skills, this.stacking);
 
@@ -71,44 +71,46 @@ function collectDefenseModules(db: FittingDb, fitting: FittingState): readonly D
   return entries;
 }
 
-function resolveShieldHp(profile: ShipProfile, modules: readonly DefenseModuleEntry[], hullBonuses: readonly HullBonus[], skills: DefenseSkills, skillLevel: SkillLevel): number {
+function resolveShieldHp(profile: ShipProfile, modules: readonly DefenseModuleEntry[], hullBonuses: readonly HullBonus[], skills: DefenseSkills, skillLevel: SkillLevel, stacking: StackingPenalty): number {
   const shieldHpPercentMultiplier = hullBonusMultiplier(hullBonuses, "shieldHpPercent", skillLevel);
   let hp = profile.shieldHp * shieldHpPercentMultiplier;
-  let hpPercentMultiplier = 1;
+  const hpPercentMultipliers: number[] = [];
   const extenderAdds: number[] = [];
   for (const mod of modules) {
     if (mod.stats.kind === "shieldExtender" && mod.stats.shieldHpAdd !== undefined) {
       extenderAdds.push(mod.stats.shieldHpAdd);
     }
     if (mod.stats.kind === "hpPercent" && mod.stats.layer === "shield" && mod.stats.hpPercent !== undefined) {
-      hpPercentMultiplier *= 1 + mod.stats.hpPercent / 100;
+      hpPercentMultipliers.push(1 + mod.stats.hpPercent / 100);
     }
   }
-  hp *= hpPercentMultiplier;
   const extenderTotal = extenderAdds.reduce((sum, add) => sum + add, 0);
   const extenderBonusMultiplier = hullBonusMultiplier(hullBonuses, "extenderHpPercent", skillLevel);
   hp += extenderTotal * extenderBonusMultiplier;
+  const hpPercentMultiplier = hpPercentMultipliers.length > 0 ? stacking.apply(hpPercentMultipliers) : 1;
+  hp *= hpPercentMultiplier;
   const shieldManagementMultiplier = 1 + SHIELD_MANAGEMENT_BONUS * skills.shieldManagement;
   return roundHp(hp * shieldManagementMultiplier);
 }
 
-function resolveArmorHp(profile: ShipProfile, modules: readonly DefenseModuleEntry[], hullBonuses: readonly HullBonus[], skills: DefenseSkills, skillLevel: SkillLevel): number {
+function resolveArmorHp(profile: ShipProfile, modules: readonly DefenseModuleEntry[], hullBonuses: readonly HullBonus[], skills: DefenseSkills, skillLevel: SkillLevel, stacking: StackingPenalty): number {
   const armorHpPercentMultiplier = hullBonusMultiplier(hullBonuses, "armorHpPercent", skillLevel);
   let hp = profile.armorHp * armorHpPercentMultiplier;
-  let hpPercentMultiplier = 1;
+  const hpPercentMultipliers: number[] = [];
   const plateAdds: number[] = [];
   for (const mod of modules) {
     if (mod.stats.kind === "armorPlate" && mod.stats.armorHpAdd !== undefined) {
       plateAdds.push(mod.stats.armorHpAdd);
     }
     if (mod.stats.kind === "hpPercent" && mod.stats.layer === "armor" && mod.stats.hpPercent !== undefined) {
-      hpPercentMultiplier *= 1 + mod.stats.hpPercent / 100;
+      hpPercentMultipliers.push(1 + mod.stats.hpPercent / 100);
     }
   }
-  hp *= hpPercentMultiplier;
   const plateTotal = plateAdds.reduce((sum, add) => sum + add, 0);
   const plateBonusMultiplier = hullBonusMultiplier(hullBonuses, "plateHpPercent", skillLevel);
   hp += plateTotal * plateBonusMultiplier;
+  const hpPercentMultiplier = hpPercentMultipliers.length > 0 ? stacking.apply(hpPercentMultipliers) : 1;
+  hp *= hpPercentMultiplier;
   const hullUpgradesMultiplier = 1 + HULL_UPGRADES_BONUS * skills.hullUpgrades;
   return roundHp(hp * hullUpgradesMultiplier);
 }
@@ -203,27 +205,28 @@ function resolveResistForType(
 function resolveRepairers(modules: readonly DefenseModuleEntry[], skills: DefenseSkills, stacking: StackingPenalty): readonly RepairerSpec[] {
   const repairers: RepairerSpec[] = [];
   const boostAmplifierMultiplier = resolveBoostAmplifierMultiplier(modules, stacking);
-  const repairAmountMultipliers: number[] = [];
-  const repairCycleTimeMultipliers: number[] = [];
+  const armorRepairAmountMultipliers: number[] = [];
+  const armorRepairCycleTimeMultipliers: number[] = [];
   for (const mod of modules) {
-    if (mod.stats.kind === "repairAmplifier") {
-      if (mod.stats.repairAmountMultiplier !== undefined) repairAmountMultipliers.push(mod.stats.repairAmountMultiplier);
-      if (mod.stats.repairCycleTimeMultiplier !== undefined) repairCycleTimeMultipliers.push(mod.stats.repairCycleTimeMultiplier);
+    if (mod.stats.kind === "repairAmplifier" && mod.stats.layer === "armor") {
+      if (mod.stats.repairAmountMultiplier !== undefined) armorRepairAmountMultipliers.push(mod.stats.repairAmountMultiplier);
+      if (mod.stats.repairCycleTimeMultiplier !== undefined) armorRepairCycleTimeMultipliers.push(mod.stats.repairCycleTimeMultiplier);
     }
   }
-  const repairAmountMultiplier = repairAmountMultipliers.length > 0 ? stacking.apply(repairAmountMultipliers) : 1;
-  const repairCycleTimeMultiplier = repairCycleTimeMultipliers.length > 0 ? stacking.apply(repairCycleTimeMultipliers) : 1;
+  const armorAmountMultiplier = armorRepairAmountMultipliers.length > 0 ? stacking.apply(armorRepairAmountMultipliers) : 1;
+  const armorCycleTimeMultiplier = armorRepairCycleTimeMultipliers.length > 0 ? stacking.apply(armorRepairCycleTimeMultipliers) : 1;
   for (const mod of modules) {
     const stats = mod.stats;
     if (stats.kind !== "repairer") continue;
     if (stats.amount === undefined || stats.cycleTime === undefined) continue;
     const layer = stats.layer ?? "shield";
     const baseAmount = layer === "shield" ? stats.amount * boostAmplifierMultiplier : stats.amount;
-    const amount = baseAmount * repairAmountMultiplier;
+    const amountMultiplier = layer === "armor" ? armorAmountMultiplier : 1;
+    const cycleTimeMultiplier = layer === "armor" ? armorCycleTimeMultiplier : 1;
     repairers.push({
       layer,
-      amount,
-      cycleTime: stats.cycleTime * repairCycleTimeMultiplier,
+      amount: baseAmount * amountMultiplier,
+      cycleTime: stats.cycleTime * cycleTimeMultiplier,
       capacitorNeed: stats.capacitorNeed ?? 0,
       heatDamage: stats.heatDamage ?? 0,
       overload: stats.overload ?? { amountMultiplier: 1, cycleTimeMultiplier: 1 },

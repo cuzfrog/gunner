@@ -1,5 +1,5 @@
-import { type FactionId, type HullTypeId, type ShipId } from "../gamedata/ids";
-import { FITTING_DB, type HullBonus } from "../gamedata/fittingDb";
+import { type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
+import { FITTING_DB, type HullBonus, type DefenseModuleStats } from "../gamedata/fittingDb";
 import { type DefenseSkills, type ShipProfile, type SkillLevel, defaultDefenseSkills } from "../ships";
 import type { StackingPenalty } from "../sim";
 import { FittingStateFactory, type CargoEntry, type FittingModuleEntry } from "./fittingState";
@@ -336,5 +336,121 @@ describe("DefenseCalculatorImpl", () => {
     const withDcOnly = resolve([moduleEntry("Damage Control II")]);
     expect(withBoth.layers.hull.hp).toBeGreaterThan(withDcOnly.layers.hull.hp);
     expect(withBoth.layers.hull.resists.em).toBeCloseTo(withDcOnly.layers.hull.resists.em, 5);
+  });
+});
+
+function mockModuleDb(extraDefense: Record<string, DefenseModuleStats>): typeof FITTING_DB {
+  const modules: Record<string, { id: TypeId; name: string; defense: DefenseModuleStats }> = {};
+  for (const [id, defense] of Object.entries(extraDefense)) {
+    modules[id] = { id: id as TypeId, name: id, defense };
+  }
+  return { ...FITTING_DB, modules: { ...FITTING_DB.modules, ...modules } };
+}
+
+function resolveWithCustomDefense(defenseModules: readonly { id: string; defense: DefenseModuleStats }[]): ReturnType<DefenseCalculatorImpl["resolve"]> {
+  const defenseMap: Record<string, DefenseModuleStats> = {};
+  for (const { id, defense } of defenseModules) defenseMap[id] = defense;
+  const db = mockModuleDb(defenseMap);
+  const factory = new FittingStateFactory(db);
+  const calc = new DefenseCalculatorImpl({ fittingDb: db, stackingPenalty: new TestStackingPenalty() });
+  const entries: FittingModuleEntry[] = defenseModules.map(({ id }) => ({ moduleId: id as TypeId, offline: false }));
+  const state = factory.create(profile, hullBonuses, entries, [], [] as readonly CargoEntry[]);
+  return calc.resolve(state, conditions);
+}
+
+function resolveMixedDefense(namedModules: readonly string[], defenseModules: readonly { id: string; defense: DefenseModuleStats }[]): ReturnType<DefenseCalculatorImpl["resolve"]> {
+  const defenseMap: Record<string, DefenseModuleStats> = {};
+  for (const { id, defense } of defenseModules) defenseMap[id] = defense;
+  const db = mockModuleDb(defenseMap);
+  const factory = new FittingStateFactory(db);
+  const calc = new DefenseCalculatorImpl({ fittingDb: db, stackingPenalty: new TestStackingPenalty() });
+  const entries: FittingModuleEntry[] = [
+    ...namedModules.map((name) => moduleEntry(name)),
+    ...defenseModules.map(({ id }) => ({ moduleId: id as TypeId, offline: false })),
+  ];
+  const state = factory.create(profile, hullBonuses, entries, [], [] as readonly CargoEntry[]);
+  return calc.resolve(state, conditions);
+}
+
+describe("DefenseCalculatorImpl - hpPercent modules", () => {
+  test("shield hpPercent rig multiplies (base + extender) HP", () => {
+    const base = resolve([]);
+    const withExtender = resolve([moduleEntry("Large Shield Extender II")]);
+    const extenderAdd = withExtender.layers.shield.hp - base.layers.shield.hp;
+    const withRig = resolveWithCustomDefense([{ id: "test-hpPercent-shield", defense: { kind: "hpPercent", layer: "shield", hpPercent: 15 } }]);
+    const expectedRigOnly = base.layers.shield.hp * 1.15;
+    expect(withRig.layers.shield.hp).toBeCloseTo(expectedRigOnly, 0);
+    const withRigAndExtender = resolveMixedDefense(["Large Shield Extender II"], [{ id: "test-hpPercent-shield", defense: { kind: "hpPercent", layer: "shield", hpPercent: 15 } }]);
+    const expectedWithExtender = (base.layers.shield.hp + extenderAdd) * 1.15;
+    expect(withRigAndExtender.layers.shield.hp).toBeCloseTo(expectedWithExtender, 0);
+  });
+
+  test("armor hpPercent rig multiplies (base + plate) HP", () => {
+    const base = resolve([]);
+    const withPlate = resolve([moduleEntry("1600mm Steel Plates II")]);
+    const plateAdd = withPlate.layers.armor.hp - base.layers.armor.hp;
+    const withRig = resolveWithCustomDefense([{ id: "test-hpPercent-armor", defense: { kind: "hpPercent", layer: "armor", hpPercent: 15 } }]);
+    const expectedRigOnly = base.layers.armor.hp * 1.15;
+    expect(withRig.layers.armor.hp).toBeCloseTo(expectedRigOnly, 0);
+    const withRigAndPlate = resolveMixedDefense(["1600mm Steel Plates II"], [{ id: "test-hpPercent-armor", defense: { kind: "hpPercent", layer: "armor", hpPercent: 15 } }]);
+    const expectedWithPlate = (base.layers.armor.hp + plateAdd) * 1.15;
+    expect(withRigAndPlate.layers.armor.hp).toBeCloseTo(expectedWithPlate, 0);
+  });
+
+  test("two shield hpPercent rigs are stacking-penalized", () => {
+    const base = resolve([]);
+    const stacking = new TestStackingPenalty();
+    const expectedMultiplier = stacking.apply([1.15, 1.15]);
+    const withTwoRigs = resolveWithCustomDefense([
+      { id: "test-hpPercent-shield-1", defense: { kind: "hpPercent", layer: "shield", hpPercent: 15 } },
+      { id: "test-hpPercent-shield-2", defense: { kind: "hpPercent", layer: "shield", hpPercent: 15 } },
+    ]);
+    const expectedHp = base.layers.shield.hp * expectedMultiplier;
+    expect(withTwoRigs.layers.shield.hp).toBeCloseTo(expectedHp, 0);
+  });
+});
+
+describe("DefenseCalculatorImpl - rechargeAmplifier modules", () => {
+  test("rechargeAmplifier rig reduces shield recharge time", () => {
+    const base = resolve([]);
+    const withRig = resolveWithCustomDefense([{ id: "test-rechargeAmp", defense: { kind: "rechargeAmplifier", rechargeMultiplier: 0.85 } }]);
+    expect(withRig.shieldRechargeTime).toBeLessThan(base.shieldRechargeTime);
+  });
+
+  test("rechargeAmplifier stacks with rechargeModule", () => {
+    const withBoth = resolveWithCustomDefense([
+      { id: "test-rechargeModule", defense: { kind: "rechargeModule", rechargeMultiplier: 0.85 } },
+      { id: "test-rechargeAmp", defense: { kind: "rechargeAmplifier", rechargeMultiplier: 0.85 } },
+    ]);
+    const withRechargerOnly = resolveWithCustomDefense([{ id: "test-rechargeModule", defense: { kind: "rechargeModule", rechargeMultiplier: 0.85 } }]);
+    expect(withBoth.shieldRechargeTime).toBeLessThan(withRechargerOnly.shieldRechargeTime);
+  });
+});
+
+describe("DefenseCalculatorImpl - repairAmplifier modules", () => {
+  test("repairAmplifier amount increases armor repairer but not shield booster", () => {
+    const withAmp = resolveMixedDefense(["Large Armor Repairer II"], [{ id: "test-repAmp-amount", defense: { kind: "repairAmplifier", layer: "armor", repairAmountMultiplier: 1.15 } }]);
+    const withoutAmp = resolve([moduleEntry("Large Armor Repairer II")]);
+    const armorWithAmp = withAmp.repairers.find((r) => r.layer === "armor");
+    const armorWithoutAmp = withoutAmp.repairers.find((r) => r.layer === "armor");
+    expect(armorWithAmp!.amount).toBeGreaterThan(armorWithoutAmp!.amount);
+    const withShieldAmp = resolveMixedDefense(["Large Shield Booster II"], [{ id: "test-repAmp-amount", defense: { kind: "repairAmplifier", layer: "armor", repairAmountMultiplier: 1.15 } }]);
+    const withoutShieldAmp = resolve([moduleEntry("Large Shield Booster II")]);
+    const shieldWithAmp = withShieldAmp.repairers.find((r) => r.layer === "shield");
+    const shieldWithoutAmp = withoutShieldAmp.repairers.find((r) => r.layer === "shield");
+    expect(shieldWithAmp!.amount).toBeCloseTo(shieldWithoutAmp!.amount, 5);
+  });
+
+  test("repairAmplifier cycleTime decreases armor repairer but not shield booster", () => {
+    const withAmp = resolveMixedDefense(["Large Armor Repairer II"], [{ id: "test-repAmp-cycle", defense: { kind: "repairAmplifier", layer: "armor", repairCycleTimeMultiplier: 0.85 } }]);
+    const withoutAmp = resolve([moduleEntry("Large Armor Repairer II")]);
+    const armorWithAmp = withAmp.repairers.find((r) => r.layer === "armor");
+    const armorWithoutAmp = withoutAmp.repairers.find((r) => r.layer === "armor");
+    expect(armorWithAmp!.cycleTime).toBeLessThan(armorWithoutAmp!.cycleTime);
+    const withShieldAmp = resolveMixedDefense(["Large Shield Booster II"], [{ id: "test-repAmp-cycle", defense: { kind: "repairAmplifier", layer: "armor", repairCycleTimeMultiplier: 0.85 } }]);
+    const withoutShieldAmp = resolve([moduleEntry("Large Shield Booster II")]);
+    const shieldWithAmp = withShieldAmp.repairers.find((r) => r.layer === "shield");
+    const shieldWithoutAmp = withoutShieldAmp.repairers.find((r) => r.layer === "shield");
+    expect(shieldWithAmp!.cycleTime).toBeCloseTo(shieldWithoutAmp!.cycleTime, 5);
   });
 });

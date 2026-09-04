@@ -101,9 +101,9 @@ function buildStatsForIntent(intent: DefenseIntent, ctx: BuildDefenseStatsContex
     case "hullBulkheadMultiplier":
       return buildHullBulkheadStatsFromMultiplier(ctx.values);
     case "recharge":
-      return buildRechargeModuleStats(ctx.values);
+      return buildRechargeStats("rechargeModule", ctx.values);
     case "rechargePercent":
-      return buildRechargeAmplifierStats(ctx.values);
+      return buildRechargeStats("rechargeAmplifier", ctx.values);
     case "repairAmplifier":
       return buildRepairAmplifierStats(intent.sub, ctx.values);
     default:
@@ -265,27 +265,21 @@ function buildHullBulkheadStatsFromMultiplier(values: Map<string, number>): Defe
   return { kind: "hullBulkhead", hullHpPercent: round6((multiplier - 1) * 100) };
 }
 
-function buildRechargeModuleStats(values: Map<string, number>): DefenseModuleStats | undefined {
+function buildRechargeStats(kind: "rechargeModule" | "rechargeAmplifier", values: Map<string, number>): DefenseModuleStats | undefined {
   const rechargeBonus = optionalNumber(values.get("rechargeratebonus")) ?? optionalNumber(values.get("shieldRechargeRateMultiplier"));
   if (rechargeBonus === undefined) return undefined;
-  return { kind: "rechargeModule", rechargeMultiplier: 1 + rechargeBonus / 100 };
-}
-
-function buildRechargeAmplifierStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const rechargeBonus = optionalNumber(values.get("rechargeratebonus")) ?? optionalNumber(values.get("shieldRechargeRateMultiplier"));
-  if (rechargeBonus === undefined) return undefined;
-  return { kind: "rechargeAmplifier", rechargeMultiplier: 1 + rechargeBonus / 100 };
+  return { kind, rechargeMultiplier: 1 + rechargeBonus / 100 };
 }
 
 function buildRepairAmplifierStats(sub: "amount" | "cycleTime", values: Map<string, number>): DefenseModuleStats | undefined {
   if (sub === "amount") {
     const bonus = optionalNumber(values.get("repairBonus"));
     if (bonus === undefined) return undefined;
-    return { kind: "repairAmplifier", repairAmountMultiplier: 1 + bonus / 100 };
+    return { kind: "repairAmplifier", layer: "armor", repairAmountMultiplier: 1 + bonus / 100 };
   }
   const bonus = optionalNumber(values.get("durationSkillBonus"));
   if (bonus === undefined) return undefined;
-  return { kind: "repairAmplifier", repairCycleTimeMultiplier: 1 + bonus / 100 };
+  return { kind: "repairAmplifier", layer: "armor", repairCycleTimeMultiplier: 1 + bonus / 100 };
 }
 
 function resolveEffects(effectIds: Set<number>, dogmaEffects: Readonly<Record<string, SdeDogmaEffect>>): readonly SdeDogmaEffect[] {
