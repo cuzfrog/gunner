@@ -1,6 +1,6 @@
 import { Vec2 } from "./vec2";
-import { ReactiveAutopilot } from "./autopilot";
-import type { AutopilotMode, OrbitDirection, ShipState } from "./types";
+import { aggressivityFraction, aggressivityFromFraction, ReactiveAutopilot } from "./autopilot";
+import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, type AutopilotMode, type OrbitDirection, type ShipState } from "./types";
 
 const autopilot = new ReactiveAutopilot();
 const DT = 0.1;
@@ -48,6 +48,43 @@ function runBoth(shipA: ShipState, shipB: ShipState, dt: number, steps: number):
   }
   return shipA.position.dist(shipB.position);
 }
+
+describe("aggressivity log-scale mapping", () => {
+  test("fraction is 0 at the minimum and 1 at the maximum", () => {
+    expect(aggressivityFraction(AGGRESSIVITY_MIN)).toBeCloseTo(0, 12);
+    expect(aggressivityFraction(AGGRESSIVITY_MAX)).toBeCloseTo(1, 12);
+  });
+
+  test("fromFraction recovers the span endpoints", () => {
+    expect(aggressivityFromFraction(0)).toBeCloseTo(AGGRESSIVITY_MIN, 12);
+    expect(aggressivityFromFraction(1)).toBeCloseTo(AGGRESSIVITY_MAX, 12);
+  });
+
+  test("round-trips through the log span for representative aggressivities", () => {
+    for (const value of [AGGRESSIVITY_MIN, 0.1, 1, 10, 50, AGGRESSIVITY_MAX]) {
+      const roundTrip = aggressivityFromFraction(aggressivityFraction(value));
+      expect(roundTrip).toBeCloseTo(value, 10);
+    }
+  });
+
+  test("fraction clamps out-of-range aggressivities into the span", () => {
+    expect(aggressivityFraction(AGGRESSIVITY_MIN / 10)).toBeCloseTo(0, 12);
+    expect(aggressivityFraction(AGGRESSIVITY_MAX * 10)).toBeCloseTo(1, 12);
+  });
+
+  test("fromFraction clamps out-of-range fractions into the span", () => {
+    expect(aggressivityFromFraction(-1)).toBeCloseTo(AGGRESSIVITY_MIN, 12);
+    expect(aggressivityFromFraction(2)).toBeCloseTo(AGGRESSIVITY_MAX, 12);
+  });
+
+  test("fraction is monotonic across the span", () => {
+    const low = aggressivityFraction(0.1);
+    const mid = aggressivityFraction(1);
+    const high = aggressivityFraction(10);
+    expect(low).toBeLessThan(mid);
+    expect(mid).toBeLessThan(high);
+  });
+});
 
 describe("ReactiveAutopilot", () => {
   test("orbit points tangentially around the reference", () => {

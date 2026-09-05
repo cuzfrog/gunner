@@ -2,7 +2,6 @@
 no-new-exports:
   - autopilot.test.ts
   - autopilot-dynamics.test.ts
-  - autopilot.ts
   - dynamics.test.ts
   - dynamics.ts
   - fireControl.test.ts
@@ -59,7 +58,7 @@ no-new-exports:
   - types.test.ts
 ---
 
-Gate relaxed: `defenseSimulator.ts` was removed from `no-new-exports` to add the `project` method to `DefenseSimulator`. `types.ts` was removed from `no-new-exports` to add `DEFENSE_LAYERS`, `LayerHpLoss`, `DamageProjection`, and `EMPTY_PROJECTION` as cross-boundary DTOs/constants consumed by `app`, `engagementFrameComposer`, and `ui` for the layer-aware actual DPS projection. `ewarResolver.ts` exports `EwarResolverImpl` as a test seam (same pattern as `StackingPenaltyImpl`) so UI tests can instantiate the real resolver; `reach` and `potentials` were added to the `EwarResolver` interface to consolidate per-family reach and range-ignored effect potentials, eliminating duplicate loops in `ewarEffectDescriber` and `rangeOverlayController`.
+Gate relaxed: `defenseSimulator.ts` was removed from `no-new-exports` to add the `project` method to `DefenseSimulator`. `types.ts` was removed from `no-new-exports` to add `DEFENSE_LAYERS`, `LayerHpLoss`, `DamageProjection`, and `EMPTY_PROJECTION` as cross-boundary DTOs/constants consumed by `app`, `engagementFrameComposer`, and `ui` for the layer-aware actual DPS projection. `ewarResolver.ts` exports `EwarResolverImpl` as a test seam (same pattern as `StackingPenaltyImpl`) so UI tests can instantiate the real resolver; `reach` and `potentials` were added to the `EwarResolver` interface to consolidate per-family reach and range-ignored effect potentials, eliminating duplicate loops in `ewarEffectDescriber` and `rangeOverlayController`. `autopilot.ts` was removed from `no-new-exports` to export `aggressivityFraction` and `aggressivityFromFraction` — the canonical aggressivity log-scale mapping (position 0..1 in the `AGGRESSIVITY_MIN..MAX` log span and its inverse) — so `ui/controls/sidePanel/navSection.ts` maps its slider position to/from aggressivity through the sim instead of re-implementing the log math.
 
 
 

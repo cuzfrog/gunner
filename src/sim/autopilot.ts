@@ -32,6 +32,18 @@ export class ReactiveAutopilot implements Autopilot {
   }
 }
 
+export function aggressivityFraction(value: number): number {
+  const clamped = normalizeAggressivity(value);
+  const span = Math.log10(AGGRESSIVITY_MAX) - Math.log10(AGGRESSIVITY_MIN);
+  return (Math.log10(clamped) - Math.log10(AGGRESSIVITY_MIN)) / span;
+}
+
+export function aggressivityFromFraction(fraction: number): number {
+  const clamped = Math.max(0, Math.min(1, fraction));
+  const span = Math.log10(AGGRESSIVITY_MAX) - Math.log10(AGGRESSIVITY_MIN);
+  return Math.pow(10, Math.log10(AGGRESSIVITY_MIN) + clamped * span);
+}
+
 const ORBIT_RANGE_GAIN = 20.0;
 const KEEP_RANGE_GAIN = 2.0;
 
@@ -85,9 +97,7 @@ function dampingGain(ship: ShipState, gain: number): number {
 }
 
 function zetaFromAggressivity(aggressivity: number): number {
-  const clamped = normalizeAggressivity(aggressivity);
-  const span = Math.log10(AGGRESSIVITY_MAX) - Math.log10(AGGRESSIVITY_MIN);
-  return Math.max(0, Math.min(1, (Math.log10(AGGRESSIVITY_MAX) - Math.log10(clamped)) / span));
+  return Math.max(0, Math.min(1, 1 - aggressivityFraction(aggressivity)));
 }
 
 function midships(ship: ShipState, other: ShipState, distance: number): Vec2 {

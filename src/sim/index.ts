@@ -1,4 +1,4 @@
-export { ReactiveAutopilot } from "./autopilot";
+export { ReactiveAutopilot, aggressivityFraction, aggressivityFromFraction } from "./autopilot";
 export type { Autopilot } from "./autopilot";
 export type { HitChance } from "./hitChance";
 export type { Kinematics } from "./kinematics";

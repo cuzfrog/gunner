@@ -1,4 +1,4 @@
-import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, type AutopilotMode, type SimValueParser } from "../../../sim";
+import { aggressivityFraction, aggressivityFromFraction, type AutopilotMode, type SimValueParser } from "../../../sim";
 import { num, setText } from "../controlsDom";
 import type { SidePanel, SidePanelState } from "./sidePanelContract";
 
@@ -44,7 +44,7 @@ export class NavSection implements INavSection {
     this.els.range.value = String(state.range);
     const current = state.aggressivity;
     this.els.aggressivity.value = String(current);
-    const pos = this.positionFromAggressivity(current);
+    const pos = aggressivityFraction(current);
     this.els.aggressivitySlider.value = String(pos);
     setText(this.els.aggressivityValue, current.toFixed(2));
     this.els.aggressivitySlider.style.setProperty("--fill", `${pos * 100}%`);
@@ -64,7 +64,7 @@ export class NavSection implements INavSection {
 
   private onSliderInput(): void {
     const pos = Number.parseFloat(this.els.aggressivitySlider.value);
-    const value = Math.round(this.aggressivityFromPosition(pos) * 100) / 100;
+    const value = Math.round(aggressivityFromFraction(pos) * 100) / 100;
     this.els.aggressivity.value = String(value);
     setText(this.els.aggressivityValue, value.toFixed(2));
     this.els.aggressivitySlider.style.setProperty("--fill", `${pos * 100}%`);
@@ -79,15 +79,5 @@ export class NavSection implements INavSection {
 
   private parseAggressivity(): number {
     return this.simValueParser.normalizeAggressivity(Number.parseFloat(this.els.aggressivity.value));
-  }
-
-  private positionFromAggressivity(value: number): number {
-    const clamped = this.simValueParser.normalizeAggressivity(value);
-    return Math.log(clamped / AGGRESSIVITY_MIN) / Math.log(AGGRESSIVITY_MAX / AGGRESSIVITY_MIN);
-  }
-
-  private aggressivityFromPosition(pos: number): number {
-    const clamped = Math.max(0, Math.min(1, pos));
-    return AGGRESSIVITY_MIN * (AGGRESSIVITY_MAX / AGGRESSIVITY_MIN) ** clamped;
   }
 }
