@@ -372,7 +372,7 @@ function isModuleRole(id: TypeId, db: FittingDb): boolean {
 }
 
 function isChargeRole(id: TypeId, db: FittingDb): boolean {
-  return db.charges[id] !== undefined || db.scripts[id] !== undefined || db.disruptionScripts[id] !== undefined || db.missiles[id] !== undefined || db.missileScripts[id] !== undefined;
+  return db.charges[id] !== undefined || db.scripts[id] !== undefined || db.disruptionScripts[id] !== undefined || db.missiles[id] !== undefined || db.missileScripts[id] !== undefined || db.sensorBoosterScripts[id] !== undefined || db.sensorDampenerScripts[id] !== undefined;
 }
 
 function moduleByName(db: FittingDb, name: string): FittingModuleStats | undefined {
