@@ -25,6 +25,7 @@ import {
   MISSILE_SCRIPTS,
   OMNIDIRECTIONAL_TRACKING_ENHANCERS,
   OMNIDIRECTIONAL_TRACKING_LINKS,
+  RIG_DRAWBACK_REDUCTIONS,
   SCRIPTS,
   SENSOR_BOOSTER_SCRIPTS,
   SENSOR_BOOSTERS,
@@ -304,8 +305,8 @@ const db: FittingDb = {
     "Medium Shield Extender II": row("Medium Shield Extender II", "Medium Shield Extender II", { sigRadiusAdd: 7, defense: { kind: "shieldExtender", shieldHpAdd: 1100, sigRadiusPenalty: 7 } }),
     "Medium Higgs Anchor I": row("Medium Higgs Anchor I", "Medium Higgs Anchor I", { massBonusPercentage: 100, agilityMultiplier: 0.45, speedBonusPercent: -75 }),
     "Overdrive Injector System II": row("Overdrive Injector System II", "Overdrive Injector System II", { speedBonusPercent: 12.5 }),
-    "Medium Trimark Armor Pump II": row("Medium Trimark Armor Pump II", "Medium Trimark Armor Pump II", { agilityDrawbackPercent: 10 }),
-    "Medium Core Defense Field Extender I": row("Medium Core Defense Field Extender I", "Medium Core Defense Field Extender I", { sigDrawbackPercent: 10 }),
+    "Medium Trimark Armor Pump II": row("Medium Trimark Armor Pump II", "Medium Trimark Armor Pump II", { rigDrawback: { kind: "agility", percent: 10, groupId: 773 } }),
+    "Medium Core Defense Field Extender I": row("Medium Core Defense Field Extender I", "Medium Core Defense Field Extender I", { rigDrawback: { kind: "signature", percent: 10, groupId: 774 } }),
     "Tracking Enhancer II": row("Tracking Enhancer II", "Tracking Enhancer II", { turretTrackingPercent: 9.5, turretOptimalPercent: 10, turretFalloffPercent: 20 }),
     "Caldari Navy Tracking Enhancer": row("Caldari Navy Tracking Enhancer", "Caldari Navy Tracking Enhancer", { turretTrackingPercent: 12, turretOptimalPercent: 7.5, turretFalloffPercent: 15 }),
     "Medium Energy Metastasis Adjuster II": row("Medium Energy Metastasis Adjuster II", "Medium Energy Metastasis Adjuster II", { turretTrackingPercent: 20 }),
@@ -342,6 +343,7 @@ const db: FittingDb = {
     { skillId: toTypeId("3311"), bonusType: "turretOptimal", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
     { skillId: toTypeId("3317"), bonusType: "turretFalloff", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
   ],
+  rigDrawbackReductions: [],
   drones: {},
   combatDrones: {},
   omnidirectionalTrackingLinks: {},
@@ -425,6 +427,7 @@ const fullFittingDb: FittingDb = {
   missileScripts: MISSILE_SCRIPTS,
   hullBonuses: HULL_BONUSES,
   skillBonuses: SKILL_BONUSES,
+  rigDrawbackReductions: RIG_DRAWBACK_REDUCTIONS,
   drones: DRONES,
   combatDrones: COMBAT_DRONES,
   omnidirectionalTrackingLinks: OMNIDIRECTIONAL_TRACKING_LINKS,
@@ -1669,7 +1672,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, skillBonuses: [], drones: DRONES, combatDrones: COMBAT_DRONES };
+  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {

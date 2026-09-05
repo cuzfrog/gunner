@@ -1,7 +1,6 @@
 ---
 no-new-exports:
   - fittingDb.test.ts
-  - types.ts
   - catalog.ts
 ---
 

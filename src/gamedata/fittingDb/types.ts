@@ -53,6 +53,20 @@ export interface DefenseModuleStats {
   readonly repairCycleTimeMultiplier?: number;
 }
 
+export type RigDrawbackKind = "signature" | "agility" | "armorHp" | "shieldHp" | "cpu" | "cpuNeed" | "powerNeed" | "capacitorRecharge" | "cargoCapacity" | "warpSpeed" | "repairPowerGrid";
+
+export interface RigDrawback {
+  readonly kind: RigDrawbackKind;
+  readonly percent: number;
+  readonly groupId: number;
+}
+
+export interface RigDrawbackReduction {
+  readonly skillId: TypeId;
+  readonly groupId: number;
+  readonly magnitudePerLevel: number;
+}
+
 export interface FittingModuleStats {
   readonly massAddition?: number;
   readonly massBonusPercentage?: number;
@@ -60,8 +74,7 @@ export interface FittingModuleStats {
   readonly agilityMultiplier?: number;
   readonly sigRadiusAdd?: number;
   readonly sigBonusPercent?: number;
-  readonly sigDrawbackPercent?: number;
-  readonly agilityDrawbackPercent?: number;
+  readonly rigDrawback?: RigDrawback;
   readonly turretTrackingPercent?: number;
   readonly turretOptimalPercent?: number;
   readonly turretFalloffPercent?: number;
@@ -372,6 +385,7 @@ export interface FittingDbData {
   readonly sensorDampenerScripts: Readonly<Record<string, SensorDampenerScriptStats>>;
   readonly hullBonuses: Readonly<Record<ShipId, readonly HullBonus[]>>;
   readonly skillBonuses: readonly SkillBonus[];
+  readonly rigDrawbackReductions: readonly RigDrawbackReduction[];
   readonly drones: Readonly<Record<string, { readonly id: TypeId; readonly name: string }>>;
   readonly combatDrones: Readonly<Record<string, DroneStats>>;
 }

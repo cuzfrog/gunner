@@ -2,7 +2,7 @@ import { homedir } from "node:os";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { ShipId, TypeId } from "../src/gamedata/ids";
-import type { HullBonusAttribute, SkillBonusType } from "../src/gamedata/fittingDb/types";
+import type { HullBonusAttribute, SkillBonusType, RigDrawback, RigDrawbackReduction } from "../src/gamedata/fittingDb/types";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 import type { ShipNameLanguage } from "../src/ships";
 import type { DamageResists } from "../src/sim";
@@ -14,8 +14,7 @@ import { buildProjection, writeProjection, loadMerged } from "./fittingDb/projec
 import { assertClassificationComplete, failOnClassificationErrors } from "./fittingDb/classification/classify";
 import { ATTRIBUTE_CLASSIFICATION } from "./fittingDb/classification/attributeClassification";
 import { EFFECT_CLASSIFICATION } from "./fittingDb/classification/effectClassification";
-import { RIG_SIG_DRAWBACK_EFFECT, RIG_AGILITY_DRAWBACK_EFFECT } from "./fittingDb/classification/knownMaps";
-import { semanticAttributeToHullBonus, isOutOfScopeAttribute, isNonScalingEffect } from "./fittingDb/classification/classifyLookup";
+import { semanticAttributeToHullBonus, isOutOfScopeAttribute, isNonScalingEffect, effectDrawbackKind } from "./fittingDb/classification/classifyLookup";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const PROJECTION_FILE = join(import.meta.dir, "..", "generated", "sde", "projection.json");
@@ -231,6 +230,14 @@ function stringifySkillBonuses(bonuses: readonly RawSkillBonus[]): string {
   return `[${entries.join(",")}]`;
 }
 
+function stringifyRigDrawbackReductions(reductions: readonly RigDrawbackReduction[]): string {
+  const entries = reductions.map((r) => {
+    const obj = { skillId: String(r.skillId), groupId: r.groupId, magnitudePerLevel: r.magnitudePerLevel };
+    return JSON.stringify(obj).replace(/"skillId":"(\d+)"/, '"skillId":"$1" as TypeId');
+  });
+  return `[${entries.join(",")}]`;
+}
+
 function buildShipNameToId(): ReadonlyMap<string, ShipId> {
   const map = new Map<string, ShipId>();
   for (const profile of SHIP_PROFILES) map.set(profile.name, profile.id);
@@ -404,6 +411,38 @@ function resolveSkillBonusAttribute(
   return { kind: "skip", reason: "attribute not applicable as a skill bonus" };
 }
 
+const RIG_DRAWBACK_REDUCTION_EFFECT_IDS = new Set([6697, 6698, 6699, 6700, 6701, 6702, 6703, 6704, 6705]);
+
+function buildRigDrawbackReductions(
+  typedogmas: Record<string, SdeTypeDogma>,
+  types: Record<string, SdeType>,
+  dogmaEffects: Record<string, SdeDogmaEffect>,
+): readonly RigDrawbackReduction[] {
+  const reductions: RigDrawbackReduction[] = [];
+  for (const [skillIdStr, td] of Object.entries(typedogmas)) {
+    const skillType = types[skillIdStr];
+    if (skillType?.published !== 1) continue;
+    const effectIds = td.dogmaEffects.map((e) => e.effectID);
+    const reductionEffectIds = effectIds.filter((eid) => RIG_DRAWBACK_REDUCTION_EFFECT_IDS.has(eid));
+    if (reductionEffectIds.length === 0) continue;
+    const skillAttrs = new Map<number, number>();
+    for (const a of td.dogmaAttributes) skillAttrs.set(a.attributeID, a.value);
+    const magnitudePerLevel = skillAttrs.get(1139);
+    if (magnitudePerLevel === undefined || !Number.isFinite(magnitudePerLevel) || magnitudePerLevel === 0) continue;
+    const skillId = String(skillIdStr) as TypeId;
+    for (const eid of reductionEffectIds) {
+      const eff = dogmaEffects[String(eid)];
+      if (!eff?.modifierInfo) continue;
+      for (const m of eff.modifierInfo) {
+        if (m.func === "LocationGroupModifier" && m.groupID !== undefined) {
+          reductions.push({ skillId, groupId: m.groupID, magnitudePerLevel });
+        }
+      }
+    }
+  }
+  return reductions;
+}
+
 function sizeTierFromPropulsionName(name: string): "small" | "medium" | "large" | "capital" {
   if (/10000MN|50000MN/.test(name)) return "capital";
   if (/100MN|500MN/.test(name)) return "large";
@@ -431,8 +470,7 @@ interface FittingModuleStats {
   readonly agilityMultiplier?: number;
   readonly sigRadiusAdd?: number;
   readonly sigBonusPercent?: number;
-  readonly sigDrawbackPercent?: number;
-  readonly agilityDrawbackPercent?: number;
+  readonly rigDrawback?: RigDrawback;
   readonly turretTrackingPercent?: number;
   readonly turretOptimalPercent?: number;
   readonly turretFalloffPercent?: number;
@@ -665,7 +703,7 @@ function buildPropulsionStats(values: Map<string, number>, type: SdeType): Fitti
   };
 }
 
-function buildModuleStats(values: Map<string, number>, effects: Set<number>, typeDogma: SdeTypeDogma | undefined, dogmaEffects: Readonly<Record<string, SdeDogmaEffect>>): FittingModuleStats | undefined {
+function buildModuleStats(values: Map<string, number>, effects: Set<number>, groupId: number, typeDogma: SdeTypeDogma | undefined, dogmaEffects: Readonly<Record<string, SdeDogmaEffect>>): FittingModuleStats | undefined {
   const stats: { -readonly [K in keyof FittingModuleStats]?: FittingModuleStats[K] } = {};
 
   const massAddition = optionalNumber(values.get("massAddition"));
@@ -699,11 +737,14 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>, typ
   if (turretFalloffPercent !== undefined) stats.turretFalloffPercent = turretFalloffPercent;
 
   const drawback = values.get("drawback") ?? 0;
-  if (effects.has(RIG_SIG_DRAWBACK_EFFECT) && Number.isFinite(drawback) && drawback !== 0) {
-    stats.sigDrawbackPercent = drawback;
-  }
-  if (effects.has(RIG_AGILITY_DRAWBACK_EFFECT) && Number.isFinite(drawback) && drawback !== 0) {
-    stats.agilityDrawbackPercent = drawback;
+  if (Number.isFinite(drawback) && drawback !== 0) {
+    for (const effectID of effects) {
+      const kind = effectDrawbackKind(effectID);
+      if (kind !== undefined) {
+        stats.rigDrawback = { kind, percent: drawback, groupId };
+        break;
+      }
+    }
   }
 
   const combatStats = buildCombatModuleStats({ values, effects, dogmaEffects, typeDogma });
@@ -1454,7 +1495,7 @@ async function main() {
         fittingModules[id] = { ...buildPropulsionStats(values, type), id, name: enName };
         addItemName(itemNames, id, type);
       } else {
-        const stats = buildModuleStats(values, effects, typeDogma, dogmaEffects);
+        const stats = buildModuleStats(values, effects, type.groupID, typeDogma, dogmaEffects);
         const defense = buildDefenseStats(values, effects, type.groupID, typeDogma, dogmaEffects);
         if (stats || defense) {
           fittingModules[id] = { ...stats, defense, id, name: enName };
@@ -1472,6 +1513,7 @@ async function main() {
   );
 
   const skillBonuses = buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, unmappedHullAttributes);
+  const rigDrawbackReductions = buildRigDrawbackReductions(typedogmas, types, dogmaEffects);
 
   const date = new Date().toISOString().split("T")[0];
   const header =
@@ -1481,7 +1523,7 @@ async function main() {
     `import type {\n` +
     `  ChargeStats, DisruptionScriptStats, DroneStats, FittingModuleStats, HullBonus, LauncherStats,\n` +
     `  MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats,\n` +
-    `  OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats,\n` +
+    `  OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, RigDrawbackReduction,\n` +
     `  SensorBoosterScriptStats, SensorBoosterStats, SensorDampenerScriptStats, SensorDampenerStats,\n` +
     `  SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats,\n` +
     `  TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, WarpScramblerStats,\n` +
@@ -1541,6 +1583,8 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     `export const HULL_BONUSES: Readonly<Record<ShipId, readonly HullBonus[]>> = ${stringifyHullBonuses(hullBonuses)};`,
     ``,
     `export const SKILL_BONUSES: readonly SkillBonus[] = ${stringifySkillBonuses(skillBonuses)};`,
+    ``,
+    `export const RIG_DRAWBACK_REDUCTIONS: readonly RigDrawbackReduction[] = ${stringifyRigDrawbackReductions(rigDrawbackReductions)};`,
     ``,
     `export const DRONES: Readonly<Record<string, { readonly id: TypeId; readonly name: string }>> = ${stringifyWithTypeIds(sortedDrones)};`,
     ``,

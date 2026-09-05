@@ -1,5 +1,5 @@
 import type { TypeId } from "../gamedata/ids";
-import type { FittingDb, FittingModuleStats, HullBonus, LauncherStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, PropulsionBonusAttribute, SensorBoosterStats, SensorDampenerStats, SensorBoosterScriptStats, SensorDampenerScriptStats, SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, TurretBonusAttribute, TurretScriptStats, TurretStats, TurretWeaponGroup, WarpScramblerStats, DisruptionScriptStats } from "../gamedata/fittingDb";
+import type { FittingDb, FittingModuleStats, HullBonus, LauncherStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, PropulsionBonusAttribute, RigDrawback, RigDrawbackReduction, SensorBoosterStats, SensorDampenerStats, SensorBoosterScriptStats, SensorDampenerScriptStats, SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, TurretBonusAttribute, TurretScriptStats, TurretStats, TurretWeaponGroup, WarpScramblerStats, DisruptionScriptStats } from "../gamedata/fittingDb";
 import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../ships";
 import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec } from "../sim";
 import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, ZERO_DAMAGE, damageVectorFromPartial, damageVectorScale } from "../sim";
@@ -269,10 +269,24 @@ export class FittingCalculatorImpl implements FittingCalculator {
       if (stats.massBonusPercentage) massPercentages.push(stats.massBonusPercentage / 100);
       if (stats.speedBonusPercent) speedPercents.push(stats.speedBonusPercent / 100);
       if (stats.agilityMultiplier) agilityMultipliers.push(stats.agilityMultiplier);
-      if (stats.agilityDrawbackPercent) agilityMultipliers.push(1 + stats.agilityDrawbackPercent / 100);
       if (stats.sigRadiusAdd) sigRadiusAdd += stats.sigRadiusAdd;
       if (stats.sigBonusPercent) sigPercents.push(stats.sigBonusPercent / 100);
-      if (stats.sigDrawbackPercent) sigPercents.push(stats.sigDrawbackPercent / 100);
+      if (stats.rigDrawback) {
+        const reducedPercent = applyRigDrawbackReduction(stats.rigDrawback, this.db.rigDrawbackReductions, conditions.skillLevel);
+        switch (stats.rigDrawback.kind) {
+          case "agility": agilityMultipliers.push(1 + reducedPercent / 100); break;
+          case "signature": sigPercents.push(reducedPercent / 100); break;
+          case "armorHp": break;
+          case "shieldHp": break;
+          case "cpu": break;
+          case "cpuNeed": break;
+          case "powerNeed": break;
+          case "capacitorRecharge": break;
+          case "cargoCapacity": break;
+          case "warpSpeed": break;
+          case "repairPowerGrid": break;
+        }
+      }
     }
 
     let mwdSigBloomMultiplier = 1;
@@ -747,6 +761,18 @@ function buildDroneDamageFactors(baseMultiplier: number, moduleDamageBonus: numb
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
   return factors;
 }
+
+function applyRigDrawbackReduction(drawback: RigDrawback, reductions: readonly RigDrawbackReduction[], skillLevel: SkillLevel): number {
+  let reductionPercent = 0;
+  for (const r of reductions) {
+    if (r.groupId === drawback.groupId) {
+      reductionPercent += r.magnitudePerLevel * skillLevel;
+    }
+  }
+  return drawback.percent * (1 + reductionPercent / 100);
+}
+
+export { applyRigDrawbackReduction as _applyRigDrawbackReduction };
 
 const DRONE_CONTROL_RANGE_BASE = 20000;
 const DRONE_CONTROL_RANGE_PER_SKILL_LEVEL = 8000;

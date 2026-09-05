@@ -1,6 +1,6 @@
 import type { HullBonusAttribute, SkillBonusType } from "../../../src/gamedata/fittingDb/types";
 
-export type RigDrawbackKind = "signature" | "agility" | "velocity" | "droneRange" | "cpu" | "power" | "missile";
+export type RigDrawbackKind = "signature" | "agility" | "armorHp" | "shieldHp" | "cpu" | "cpuNeed" | "powerNeed" | "capacitorRecharge" | "cargoCapacity" | "warpSpeed" | "repairPowerGrid";
 
 export type AttributeDomain =
   | "combatBonus" | "moduleStat" | "rigDrawback" | "charge" | "drone"

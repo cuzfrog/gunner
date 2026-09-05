@@ -15,6 +15,7 @@ import type {
   MissileStats,
   OmnidirectionalTrackingEnhancerStats,
   OmnidirectionalTrackingLinkStats,
+  RigDrawbackReduction,
   SensorBoosterScriptStats,
   SensorBoosterStats,
   SensorDampenerScriptStats,
@@ -46,6 +47,7 @@ import {
   MISSILE_SCRIPTS,
   OMNIDIRECTIONAL_TRACKING_ENHANCERS,
   OMNIDIRECTIONAL_TRACKING_LINKS,
+  RIG_DRAWBACK_REDUCTIONS,
   SCRIPTS,
   SENSOR_BOOSTER_SCRIPTS,
   SENSOR_BOOSTERS,
@@ -124,6 +126,7 @@ export const FITTING_DB: FittingDbData = {
   sensorDampenerScripts: SENSOR_DAMPENER_SCRIPTS,
   hullBonuses: HULL_BONUSES,
   skillBonuses: SKILL_BONUSES,
+  rigDrawbackReductions: RIG_DRAWBACK_REDUCTIONS,
   drones: DRONES,
   combatDrones: COMBAT_DRONES,
 };

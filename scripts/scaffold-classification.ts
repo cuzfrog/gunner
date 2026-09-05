@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { buildProjection } from "./fittingDb/projection";
 import { scaffoldClassificationFiles } from "./fittingDb/classification/scaffold";
 import type { RigDrawbackKind } from "./fittingDb/classification/classificationTypes";
-import { COMBAT_ATTRIBUTE_MAP, OUT_OF_SCOPE_ATTRIBUTE_IDS, RIG_SIG_DRAWBACK_EFFECT, RIG_AGILITY_DRAWBACK_EFFECT, NON_SCALING_EFFECT_IDS } from "./fittingDb/classification/knownMaps";
+import { COMBAT_ATTRIBUTE_MAP, OUT_OF_SCOPE_ATTRIBUTE_IDS, NON_SCALING_EFFECT_IDS } from "./fittingDb/classification/knownMaps";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const OUT_DIR = join(import.meta.dir, "fittingDb", "classification");
@@ -12,8 +12,20 @@ async function main(): Promise<void> {
   const projection = await buildProjection(SDE_DIR);
   const contextDependentAttributeIds = new Set([37, 51, 54, 64, 554]);
   const rigDrawbackEffectIds = new Map<number, RigDrawbackKind>([
-    [RIG_SIG_DRAWBACK_EFFECT, "signature"],
-    [RIG_AGILITY_DRAWBACK_EFFECT, "agility"],
+    [2716, "signature"],
+    [2717, "agility"],
+    [2712, "armorHp"],
+    [2718, "shieldHp"],
+    [2713, "cpu"],
+    [2714, "cpuNeed"],
+    [2706, "powerNeed"],
+    [2707, "powerNeed"],
+    [2708, "powerNeed"],
+    [3528, "capacitorRecharge"],
+    [5868, "cargoCapacity"],
+    [5951, "warpSpeed"],
+    [5267, "repairPowerGrid"],
+    [5268, "repairPowerGrid"],
   ]);
   const knownModifierEffectIds = new Map<number, "hullBonus" | "skillBonus" | "moduleStat" | "none">();
   const knownActionEffectIds = new Map<number, "defense" | "none">();

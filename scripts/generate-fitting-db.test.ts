@@ -45,9 +45,9 @@ function combatEffect(eid: number, category: number, modifiers: readonly SdeDogm
   return { effectID: eid, effectName: name, effectCategory: category, modifierInfo: modifiers };
 }
 
-function callBuildModuleStats(vals: Map<string, number>, effects: readonly SdeDogmaEffect[], typeDogma?: SdeTypeDogma): ReturnType<typeof _buildModuleStats> {
+function callBuildModuleStats(vals: Map<string, number>, effects: readonly SdeDogmaEffect[], typeDogma?: SdeTypeDogma, groupId = 0): ReturnType<typeof _buildModuleStats> {
   const effectIds = new Set(effects.map((e) => e.effectID));
-  return _buildModuleStats(vals, effectIds, typeDogma, dogmaEffectsMap(effects));
+  return _buildModuleStats(vals, effectIds, groupId, typeDogma, dogmaEffectsMap(effects));
 }
 
 function sdeType(metaLevel = 0, metaGroupID = 1, volume?: number): { typeID: number; "typeName_en-us": string; groupID: number; published: number; metaLevel: number; metaGroupID: number; volume?: number } {
