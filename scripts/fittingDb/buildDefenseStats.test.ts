@@ -56,10 +56,11 @@ describe("buildDefenseStatsFromIntents - passive resist modules", () => {
       layer: "shield",
       active: false,
       resistBonus: { em: 0.25, thermal: 0, kinetic: 0, explosive: 0 },
+      compensationApplies: true,
     });
   });
 
-  test("shield resist rig (effect 2795) builds same resistModule as 2052", () => {
+  test("shield resist rig (effect 2795) builds resistModule with compensationApplies false", () => {
     const dogmaEffects: Record<string, SdeDogmaEffect> = {
       "2795": makeEffect(2795, {
         category: 0,
@@ -81,6 +82,7 @@ describe("buildDefenseStatsFromIntents - passive resist modules", () => {
       layer: "shield",
       active: false,
       resistBonus: { em: 0.3, thermal: 0, kinetic: 0, explosive: 0 },
+      compensationApplies: false,
     });
   });
 
@@ -106,6 +108,7 @@ describe("buildDefenseStatsFromIntents - passive resist modules", () => {
       layer: "armor",
       active: false,
       resistBonus: { em: 0.3, thermal: 0, kinetic: 0, explosive: 0 },
+      compensationApplies: false,
     });
   });
 });
@@ -128,6 +131,7 @@ describe("buildDefenseStatsFromIntents - active hardeners", () => {
       layer: "shield",
       active: true,
       resistBonus: { em: 0.55, thermal: 0, kinetic: 0, explosive: 0 },
+      compensationApplies: false,
       overloadBonusMultiplier: 1.2,
       cycleTime: 10,
       capacitorNeed: 20,

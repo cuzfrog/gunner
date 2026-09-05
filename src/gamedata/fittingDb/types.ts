@@ -29,6 +29,7 @@ export interface DefenseModuleStats {
   readonly layer?: DefenseLayer;
   readonly active?: boolean;
   readonly resistBonus?: DamageResists;
+  readonly compensationApplies?: boolean;
   readonly overloadBonusMultiplier?: number;
   readonly shieldResists?: DamageResists;
   readonly armorResists?: DamageResists;

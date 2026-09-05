@@ -187,7 +187,7 @@ function resolveResistForType(
       if (overloaded && stats.overloadBonusMultiplier !== undefined) {
         bonus = bonus * stats.overloadBonusMultiplier;
       }
-      if (!stats.active) {
+      if (stats.compensationApplies) {
         bonus = applyCompensationSkill(bonus, layer, type, skills);
       }
       hardenerMultipliers.push(1 - bonus);

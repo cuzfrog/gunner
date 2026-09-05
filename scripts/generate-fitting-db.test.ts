@@ -802,6 +802,7 @@ describe("_buildDefenseStats", () => {
       layer: "shield",
       active: true,
       resistBonus: { em: 0.55, thermal: 0, kinetic: 0, explosive: 0 },
+      compensationApplies: false,
       overloadBonusMultiplier: 1.2,
       cycleTime: 10,
       capacitorNeed: 20,
@@ -817,6 +818,7 @@ describe("_buildDefenseStats", () => {
       layer: "armor",
       active: false,
       resistBonus: { em: 0.2, thermal: 0.2, kinetic: 0.2, explosive: 0.2 },
+      compensationApplies: true,
     });
   });
 
@@ -828,6 +830,7 @@ describe("_buildDefenseStats", () => {
       layer: "shield",
       active: false,
       resistBonus: { em: 0.3, thermal: 0, kinetic: 0, explosive: 0 },
+      compensationApplies: false,
     });
   });
 
@@ -839,6 +842,7 @@ describe("_buildDefenseStats", () => {
       layer: "armor",
       active: false,
       resistBonus: { em: 0.3, thermal: 0, kinetic: 0, explosive: 0 },
+      compensationApplies: false,
     });
   });
 

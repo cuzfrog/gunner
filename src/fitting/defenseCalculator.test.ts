@@ -204,9 +204,10 @@ describe("DefenseCalculatorImpl", () => {
     expect(two.repairers[0].amount).toBeLessThan(naiveProduct);
   });
 
-  test("compensation skills boost passive resist modules but not active hardeners", () => {
+  test("compensation skills boost passive resist modules but not active hardeners or rigs", () => {
     const amplifier = moduleEntry("EM Shield Amplifier II");
     const hardener = moduleEntry("EM Shield Hardener II");
+    const rig = moduleEntry("Small EM Shield Reinforcer II");
     const skillsLevel0: DefenseSkills = { ...defaultDefenseSkills(5), shieldCompensationEm: 0 };
     const skillsLevel5: DefenseSkills = { ...defaultDefenseSkills(5), shieldCompensationEm: 5 };
     const state0 = factory.create(profile, hullBonuses, [amplifier], [], [] as readonly CargoEntry[]);
@@ -219,6 +220,11 @@ describe("DefenseCalculatorImpl", () => {
     const hardener0 = calculator.resolve(hardenerState0, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skillsLevel0 });
     const hardener5 = calculator.resolve(hardenerState5, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skillsLevel5 });
     expect(hardener5.layers.shield.resists.em).toBeCloseTo(hardener0.layers.shield.resists.em, 5);
+    const rigState0 = factory.create(profile, hullBonuses, [rig], [], [] as readonly CargoEntry[]);
+    const rigState5 = factory.create(profile, hullBonuses, [rig], [], [] as readonly CargoEntry[]);
+    const rig0 = calculator.resolve(rigState0, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skillsLevel0 });
+    const rig5 = calculator.resolve(rigState5, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skillsLevel5 });
+    expect(rig5.layers.shield.resists.em).toBeCloseTo(rig0.layers.shield.resists.em, 5);
   });
 
   test("RAH is excluded from armor resists and emitted as RahSpec", () => {

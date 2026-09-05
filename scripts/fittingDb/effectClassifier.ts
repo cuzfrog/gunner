@@ -1,9 +1,9 @@
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./dogmaTypes";
-import { EFFECT_CATEGORY_ACTIVE, EFFECT_CATEGORY_REMOTE, FUNC_ITEM_MODIFIER, FUNC_LOCATION_GROUP, FUNC_LOCATION_REQUIRED_SKILL, OPERATION_ADD, OPERATION_POST_PERCENT, OPERATION_POST_PERCENT_DIV, OPERATION_PRE_ASSIGN } from "./dogmaTypes";
+import { EFFECT_CATEGORY_ACTIVE, EFFECT_CATEGORY_ONLINE, EFFECT_CATEGORY_REMOTE, FUNC_ITEM_MODIFIER, FUNC_LOCATION_GROUP, FUNC_LOCATION_REQUIRED_SKILL, OPERATION_ADD, OPERATION_POST_PERCENT, OPERATION_POST_PERCENT_DIV, OPERATION_PRE_ASSIGN } from "./dogmaTypes";
 import { ARMOR_DAMAGE_AMOUNT, DURATION, RESISTANCE_SHIFT_AMOUNT, REPAIR_SKILL_IDS, SHIELD_BONUS, SHIELD_RECHARGE_RATE, STRUCTURE_DAMAGE_AMOUNT, TURRET_DAMAGE_MULTIPLIER, TURRET_SPEED, MISSILE_DAMAGE_MULTIPLIER, MISSILE_LAUNCHER_OPERATION_SKILL, TURRET_WEAPON_GROUP_IDS, DefenseLayer, TurretWeaponGroupName, hpLayerForAttr, resistLayerForAttr, turretWeaponGroupForGroupId } from "./combatAttributes";
 
 export type DefenseIntent =
-  | { readonly tag: "resist"; readonly layer: DefenseLayer; readonly active: boolean }
+  | { readonly tag: "resist"; readonly layer: DefenseLayer; readonly active: boolean; readonly compensationApplies: boolean }
   | { readonly tag: "damageControl" }
   | { readonly tag: "hpFlat"; readonly layer: "shield" | "armor" }
   | { readonly tag: "hpPercent"; readonly layer: DefenseLayer }
@@ -116,7 +116,8 @@ function classifyResistModifiers(modifiers: readonly SdeDogmaEffectModifier[], e
 
   const layer = [...layers][0];
   const active = effectCategory === EFFECT_CATEGORY_ACTIVE;
-  return { tag: "resist", layer, active };
+  const compensationApplies = effectCategory === EFFECT_CATEGORY_ONLINE;
+  return { tag: "resist", layer, active, compensationApplies };
 }
 
 function classifyHpModifiers(modifiers: readonly SdeDogmaEffectModifier[]): DefenseIntent | undefined {

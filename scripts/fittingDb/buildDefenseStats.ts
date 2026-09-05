@@ -33,6 +33,7 @@ export interface DefenseModuleStats {
   readonly layer?: DefenseLayer;
   readonly active?: boolean;
   readonly resistBonus?: DamageResists;
+  readonly compensationApplies?: boolean;
   readonly overloadBonusMultiplier?: number;
   readonly shieldResists?: DamageResists;
   readonly armorResists?: DamageResists;
@@ -111,7 +112,7 @@ function buildStatsForIntent(intent: DefenseIntent, ctx: BuildDefenseStatsContex
     case "boostAmplifier":
       return buildBoostAmplifierStats(ctx.values);
     case "resist":
-      return buildResistModuleStats(intent.layer, intent.active, ctx.values);
+      return buildResistModuleStats(intent.layer, intent.active, intent.compensationApplies, ctx.values);
     case "hpFlat":
       return buildHpFlatStats(intent.layer, ctx.values);
     case "hpPercent":
@@ -233,7 +234,7 @@ function buildBoostAmplifierStats(values: Map<string, number>): DefenseModuleSta
   return { kind: "boostAmplifier", multiplier: round6(1 + shieldBoostMultiplier / 100) };
 }
 
-function buildResistModuleStats(layer: DefenseLayer, active: boolean, values: Map<string, number>): DefenseModuleStats | undefined {
+function buildResistModuleStats(layer: DefenseLayer, active: boolean, compensationApplies: boolean, values: Map<string, number>): DefenseModuleStats | undefined {
   const resistBonus = extractResistBonus(values);
   if (!resistBonus) return undefined;
   if (active) {
@@ -246,13 +247,14 @@ function buildResistModuleStats(layer: DefenseLayer, active: boolean, values: Ma
       layer,
       active: true,
       resistBonus,
+      compensationApplies,
       overloadBonusMultiplier: overloadHardeningBonus !== undefined ? 1 + overloadHardeningBonus / 100 : undefined,
       cycleTime: duration !== undefined ? duration / 1000 : undefined,
       capacitorNeed,
       heatDamage,
     };
   }
-  return { kind: "resistModule", layer, active: false, resistBonus };
+  return { kind: "resistModule", layer, active: false, resistBonus, compensationApplies };
 }
 
 function buildHpFlatStats(layer: "shield" | "armor", values: Map<string, number>): DefenseModuleStats | undefined {

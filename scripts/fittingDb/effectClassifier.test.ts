@@ -41,7 +41,7 @@ describe("classifyDefenseEffects - passive resist modules", () => {
       ],
     });
     const result = classifyDefenseEffects([e], undefined);
-    expect(firstIntent(result)).toEqual({ tag: "resist", layer: "shield", active: false });
+    expect(firstIntent(result)).toEqual({ tag: "resist", layer: "shield", active: false, compensationApplies: true });
   });
 
   test("passive armor resist (effect 2041, category 4) classifies as passive armor resist", () => {
@@ -55,10 +55,10 @@ describe("classifyDefenseEffects - passive resist modules", () => {
       ],
     });
     const result = classifyDefenseEffects([e], undefined);
-    expect(firstIntent(result)).toEqual({ tag: "resist", layer: "armor", active: false });
+    expect(firstIntent(result)).toEqual({ tag: "resist", layer: "armor", active: false, compensationApplies: true });
   });
 
-  test("shield resist rig (effect 2795, category 0) classifies same as passive shield resist 2052", () => {
+  test("shield resist rig (effect 2795, category 0) classifies with compensationApplies false", () => {
     const e = effect(2795, {
       category: 0,
       modifiers: [
@@ -69,10 +69,10 @@ describe("classifyDefenseEffects - passive resist modules", () => {
       ],
     });
     const result = classifyDefenseEffects([e], undefined);
-    expect(firstIntent(result)).toEqual({ tag: "resist", layer: "shield", active: false });
+    expect(firstIntent(result)).toEqual({ tag: "resist", layer: "shield", active: false, compensationApplies: false });
   });
 
-  test("armor resist rig (effect 2792, category 0) classifies same as passive armor resist 2041", () => {
+  test("armor resist rig (effect 2792, category 0) classifies with compensationApplies false", () => {
     const e = effect(2792, {
       category: 0,
       modifiers: [
@@ -83,7 +83,7 @@ describe("classifyDefenseEffects - passive resist modules", () => {
       ],
     });
     const result = classifyDefenseEffects([e], undefined);
-    expect(firstIntent(result)).toEqual({ tag: "resist", layer: "armor", active: false });
+    expect(firstIntent(result)).toEqual({ tag: "resist", layer: "armor", active: false, compensationApplies: false });
   });
 });
 
@@ -99,7 +99,7 @@ describe("classifyDefenseEffects - active hardeners", () => {
       ],
     });
     const result = classifyDefenseEffects([e], undefined);
-    expect(firstIntent(result)).toEqual({ tag: "resist", layer: "shield", active: true });
+    expect(firstIntent(result)).toEqual({ tag: "resist", layer: "shield", active: true, compensationApplies: false });
   });
 
   test("active armor hardener (effect 5231, category 1) classifies as active armor resist", () => {
@@ -113,7 +113,7 @@ describe("classifyDefenseEffects - active hardeners", () => {
       ],
     });
     const result = classifyDefenseEffects([e], undefined);
-    expect(firstIntent(result)).toEqual({ tag: "resist", layer: "armor", active: true });
+    expect(firstIntent(result)).toEqual({ tag: "resist", layer: "armor", active: true, compensationApplies: false });
   });
 });
 
@@ -589,7 +589,7 @@ describe("classifyCombatEffect - defense effects still classify via combat path"
       category: 4,
       modifiers: [mod({ modifiedAttributeID: 271, modifyingAttributeID: 984 })],
     });
-    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "resist", layer: "shield", active: false });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "resist", layer: "shield", active: false, compensationApplies: true });
   });
 
   test("damage control effect classifies as damageControl via classifyCombatEffect", () => {
