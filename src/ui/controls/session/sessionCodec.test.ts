@@ -7,6 +7,7 @@ import {
   type StartupState,
   type StoredEwarActivation,
   type StoredMissileBoosterActivation,
+  type StoredSensorBoosterActivation,
   type TrackingUnit,
   type UserSettings,
 } from "../../../appstate";
@@ -727,6 +728,42 @@ describe("SessionCodec", () => {
     codec.restore(sessionFromWire(settings));
     expect(missileBoosterController.restore).toHaveBeenCalledWith("shipA", expect.any(Object), settings.shipAMissileBoosterActivation);
     expect(missileBoosterController.restore).toHaveBeenCalledWith("shipB", undefined, settings.shipBMissileBoosterActivation);
+    expect(onSessionRestored).toHaveBeenCalled();
+  });
+
+  test("capture and restore include sensor booster activations", () => {
+    const sensorBoosterController = mockSensorBoosterController();
+    const fittingImport = mockFittingImport();
+    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nSensor Booster II", overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    const shipABooster: readonly StoredSensorBoosterActivation[] = [{ active: true, overloaded: false, script: "none" }];
+    const shipBBooster: readonly StoredSensorBoosterActivation[] = [{ active: false, overloaded: true, script: "none" }];
+    vi.mocked(sensorBoosterController.capture).mockImplementation((side: Side) => side === "shipA" ? shipABooster : shipBBooster);
+    vi.mocked(fittingImport.importFitting).mockReturnValue({
+      profile: {} as unknown,
+      fittingName: "Brawler",
+      ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+      boosts: { computers: [], scripts: [] },
+      missileBoosts: { computers: [], enhancers: [], scripts: [] },
+      sensorBoosts: { boosters: [{ moduleName: "Sensor Booster II", moduleId: toTypeId("1952"), scanResolutionBonusPercent: 30, maxTargetRangeBonusPercent: 30, overloadStrengthBonusPercent: 15, defaultScript: undefined }], amplifiers: [], boosterScripts: [] },
+      weapon: undefined,
+      defense: undefined,
+      modules: [],
+    } as unknown as ImportedFitting);
+    const events = new UiEventsImpl();
+    const onSessionRestored = vi.fn();
+    events.onSessionRestored(onSessionRestored);
+    const { codec } = buildCodec({ shipA, shipB, sensorBoosterController, fittingImport, events });
+
+    const settings = codec.capture();
+    expect(sensorBoosterController.capture).toHaveBeenCalledWith("shipA");
+    expect(sensorBoosterController.capture).toHaveBeenCalledWith("shipB");
+    expect(settings.shipASensorBoosterActivation).toEqual(shipABooster);
+    expect(settings.shipBSensorBoosterActivation).toEqual(shipBBooster);
+
+    codec.restore(sessionFromWire(settings));
+    expect(sensorBoosterController.restore).toHaveBeenCalledWith("shipA", expect.any(Object), settings.shipASensorBoosterActivation);
+    expect(sensorBoosterController.restore).toHaveBeenCalledWith("shipB", undefined, settings.shipBSensorBoosterActivation);
     expect(onSessionRestored).toHaveBeenCalled();
   });
 

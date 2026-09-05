@@ -138,6 +138,8 @@ describe("SimConfigSourceImpl", () => {
     expect(config.shipA.boosts).toBe(deps.boost);
     expect(config.shipA.missileBoosts).toBe(deps.missileBoost);
     expect(config.shipA.sensorBoosts).toBe(deps.sensorBoost);
+    expect(deps.sensorBoosterController.projection).toHaveBeenCalledWith("shipA");
+    expect(deps.sensorBoosterController.projection).toHaveBeenCalledWith("shipB");
     expect(config.shipB.id).toBe("shipB");
     expect(config.shipB.maxSpeed).toBe(250);
     expect(config.shipB.baseMaxSpeed).toBe(250);
