@@ -1,6 +1,9 @@
 export interface SdeDogmaAttribute {
   readonly attributeID: number;
   readonly name: string;
+  readonly defaultValue?: number;
+  readonly highIsGood?: number;
+  readonly stackable?: number;
 }
 
 export interface SdeDogmaEffectModifier {
