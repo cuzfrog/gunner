@@ -1,6 +1,7 @@
 import type { CombatantConfig, SimConfig } from "../../../sim";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
+import type { SensorBoosterController } from "../sensorBooster";
 import type { EwarController } from "../ewar";
 import type { Side } from "../side";
 import type { SidePanelState } from "../sidePanel";
@@ -15,6 +16,7 @@ interface SimConfigSourceDeps {
   readonly ewarController: EwarController;
   readonly boosterController: BoosterController;
   readonly missileBoosterController: MissileBoosterController;
+  readonly sensorBoosterController: SensorBoosterController;
   readonly distanceSource: { getInitialDistance(): number };
 }
 
@@ -24,6 +26,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
   private readonly missileBoosterController: MissileBoosterController;
+  private readonly sensorBoosterController: SensorBoosterController;
   private readonly distanceSource: { getInitialDistance(): number };
 
   constructor(deps: SimConfigSourceDeps) {
@@ -32,6 +35,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
     this.ewarController = deps.ewarController;
     this.boosterController = deps.boosterController;
     this.missileBoosterController = deps.missileBoosterController;
+    this.sensorBoosterController = deps.sensorBoosterController;
     this.distanceSource = deps.distanceSource;
   }
 
@@ -61,7 +65,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
       boosts: this.boosterController.projection(side),
       missileBoosts: this.missileBoosterController.projection(side),
       sensorSpec: state.sensorSpec,
-      sensorBoosts: state.sensorBoosts ? { loadout: state.sensorBoosts } : undefined,
+      sensorBoosts: this.sensorBoosterController.projection(side),
     };
   }
 }

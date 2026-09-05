@@ -30,6 +30,7 @@ import type { TrackingInput } from "../trackingInput";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
+import type { SensorBoosterController } from "../sensorBooster";
 import type { DefenseController } from "../defense";
 import type { TargetingController } from "../targeting";
 import type { LauncherController } from "../launcher";
@@ -194,6 +195,17 @@ function mockMissileBoosterController(): MissileBoosterController {
     render: vi.fn(),
     updateSummaries: vi.fn(),
   } as unknown as MissileBoosterController;
+}
+
+function mockSensorBoosterController(): SensorBoosterController {
+  return {
+    setLoadout: vi.fn(),
+    restore: vi.fn(),
+    projection: vi.fn(),
+    capture: vi.fn(),
+    render: vi.fn(),
+    updateSummaries: vi.fn(),
+  } as unknown as SensorBoosterController;
 }
 
 function mockDefenseController(): DefenseController {
