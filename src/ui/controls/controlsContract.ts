@@ -1,4 +1,4 @@
-import type { DefenseSpec, DefenseView, EngagementView, SideReadoutValues, SimConfig, WeaponSpec } from "../../sim";
+import type { DefenseSpec, DefenseView, EngineConfig, EngagementView, SideReadoutValues, SimConfig, WeaponSpec } from "../../sim";
 import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation, WeaponRangeVisibility } from "../../appstate";
 import type { RangeOverlay } from "../renderer";
 import type { Side } from "./side";
@@ -30,6 +30,7 @@ export interface Controls {
   getRahActivation(side: Side): StoredRahActivation | undefined;
   getOverloaded(side: Side): boolean;
   getConfig(): SimConfig;
+  getEngineConfig(): EngineConfig;
   getSpeed(): number;
   getGridBrightness(): number;
   getAutoZoom(): boolean;

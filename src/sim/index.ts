@@ -9,6 +9,7 @@ export type { MissileBoosterResolver } from "./missileBoosterResolver";
 export type { SensorBoosterResolver } from "./sensorBoosterResolver";
 export type { LockClock, LockStepInput } from "./lockClock";
 export type { EngagementFrameComposer, EngagementInput, EngagementView, WeaponAttack } from "./engagementFrameComposer";
+export type { EngineConfig } from "./engagementEngine";
 export type { DefenseAssessor, DefenseAssessment, LayerEhp } from "./defenseAssessment";
 export { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
 export type { DefenseSimulator, DefenseView, DefensePoolState, DefenseSimConfig, RepairerViewState, RahViewState, RepairMode } from "./defenseSimulator";

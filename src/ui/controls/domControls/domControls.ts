@@ -1,6 +1,7 @@
 import {
   type DefenseSpec,
   type DefenseView,
+  type EngineConfig,
   type EngagementView,
   type SimConfig,
   type WeaponSpec,
@@ -283,6 +284,7 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   getRahActivation(side: Side): StoredRahActivation | undefined { return this.defenseController.rahActivation(side); }
   getOverloaded(side: Side): boolean { return this.sideFor(side).skillConditions().overloaded; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
+  getEngineConfig(): EngineConfig { return this.simConfigSource.getEngineConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
   getGridBrightness(): number { return this.preferencesController.getGridBrightness(); }
   getAutoZoom(): boolean { return this.preferencesController.getAutoZoom(); }

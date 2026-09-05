@@ -46,6 +46,11 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       missileBoosterController: proxy.missileBoosterController,
       sensorBoosterController: proxy.sensorBoosterController,
       distanceSource: proxy.sessionCodec,
+      weaponSystemSwitches: proxy.weaponSystemSwitches,
+      turretControllers: proxy.turretControllers,
+      launcherControllers: proxy.launcherControllers,
+      droneControllers: proxy.droneControllers,
+      defenseController: proxy.defenseController,
     })).singleton(),
   });
 }

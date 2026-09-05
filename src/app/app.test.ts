@@ -47,6 +47,7 @@ const controls = vi.mocked<Controls>({
   getRepairerActivation: vi.fn(() => []),
   getRahActivation: vi.fn(() => undefined),
   getConfig: vi.fn(),
+  getEngineConfig: vi.fn(),
   getSpeed: vi.fn(),
   getGridBrightness: vi.fn(),
   getAutoZoom: vi.fn(),
