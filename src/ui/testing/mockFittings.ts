@@ -94,7 +94,7 @@ export function mockTimer(): Timer {
 }
 
 export function mockHitChance(): HitChance {
-  return { compute: vi.fn(() => ({ chance: 0, trackingTerm: 0, rangeTerm: 0 })), findBestDistance: vi.fn(() => 5000) };
+  return { compute: vi.fn(() => ({ chance: 0, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 })), findBestDistance: vi.fn(() => 5000) };
 }
 
 const MOCK_REPRESENTATIVES: Record<GunFamily, Record<SigResolutionClass, TypeId>> = {

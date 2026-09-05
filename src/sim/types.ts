@@ -238,6 +238,8 @@ export interface HitChanceBreakdown {
   readonly chance: number; // 0..1
   readonly trackingTerm: number;
   readonly rangeTerm: number;
+  readonly trackingPenalty: number; // 0.5 ** trackingTerm, 0 when infinite
+  readonly rangePenalty: number; // 0.5 ** rangeTerm, 0 when infinite
 }
 
 export interface DisruptionScriptSpec {

@@ -82,8 +82,8 @@ export class EngagementReadoutImpl implements EngagementReadout {
     setText(els.resHitLabel, t("result.hitChance"));
     setText(els.resTrackPenLabel, t("result.trackingPenalty"));
     setText(els.resRangePenLabel, t("result.rangePenalty"));
-    const trackPenalty = Number.isFinite(hit.trackingTerm) ? (0.5 ** hit.trackingTerm) * 100 : 0;
-    const rangePenalty = Number.isFinite(hit.rangeTerm) ? (0.5 ** hit.rangeTerm) * 100 : 0;
+    const trackPenalty = hit.trackingPenalty * 100;
+    const rangePenalty = hit.rangePenalty * 100;
     setText(els.resTrackPen, `${formatWithCommas(trackPenalty, 1)}%`);
     setText(els.resRangePen, `${formatWithCommas(rangePenalty, 1)}%`);
     setText(els.resHit, `${formatWithCommas(hit.chance * 100, 1)}%`);

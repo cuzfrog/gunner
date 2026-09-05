@@ -10,7 +10,7 @@ function makeAttack(appliedByType: { em: number; thermal: number; kinetic: numbe
   return {
     boostedWeapon: turret, effectiveWeapon: turret,
     damage: { nominalDps: 100, appliedDps, application: 0.8, volley: 400, baseVolleyByType: ZERO_DAMAGE, appliedByType, appliedVolleyByType: ZERO_DAMAGE },
-    turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8 },
+    turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1, trackingPenalty: 0.5 ** 0.1, rangePenalty: 0.5 ** 0.1 }, expectedMultiplier: 0.8 },
   };
 }
 

@@ -13,7 +13,7 @@ import { type DamageAssessment, type DroneDamageBreakdown, type DroneSpec, type 
 const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.05, sigResolution: 40, optimal: 4000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
-const hit: HitChanceBreakdown = { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 };
+const hit: HitChanceBreakdown = { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1, trackingPenalty: 0.5 ** 0.1, rangePenalty: 0.5 ** 0.1 };
 const expectedMultiplier = computeExpectedMultiplier(0.8);
 const turretDamageResult: DamageAssessment = { nominalDps: 20, appliedDps: 20 * expectedMultiplier, application: expectedMultiplier, volley: 100, baseVolleyByType: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, appliedByType: { em: 0, thermal: 0, kinetic: 20 * expectedMultiplier, explosive: 0 }, appliedVolleyByType: { em: 0, thermal: 0, kinetic: 100 * expectedMultiplier, explosive: 0 } };
 
@@ -84,7 +84,7 @@ const missileApplicationResult = { application: 0.8, signatureTerm: 1, velocityT
 const drone: DroneSpec = { kind: "drone", tracking: 2.0, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 38.4, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000 };
 
 const droneBreakdownResult: DroneDamageBreakdown & DamageAssessment = {
-  hit: { chance: 0.5, trackingTerm: 0, rangeTerm: 0 },
+  hit: { chance: 0.5, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 },
   expectedMultiplier: 1.0,
   inRange: true,
   inWeaponRange: true,

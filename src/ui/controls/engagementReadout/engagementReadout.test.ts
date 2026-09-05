@@ -81,7 +81,7 @@ function makeProjection(totalHpLost: number): DamageProjection {
   return { totalHpLost, byLayer: { shield: 0, armor: 0, hull: 0 } };
 }
 
-function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipADamage?: DamageAssessment; shipALock?: LockState; shipBActualDps?: number }) {
+function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipALock?: LockState; shipBActualDps?: number }) {
   const ship = fakeShipState();
   const frame = {
     time: 0, shipA: ship, shipB: ship,
@@ -90,8 +90,8 @@ function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: num
     relVelocity: new Vec2(0, 0), radialVelocity: 0,
     transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
   };
-  const shipAHit = overrides.shipAHit ?? { chance: 0, trackingTerm: 0, rangeTerm: 0 };
-  const shipBHit = overrides.shipBHit ?? { chance: 0, trackingTerm: 0, rangeTerm: 0 };
+  const shipAHit = overrides.shipAHit ?? { chance: 0, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 };
+  const shipBHit = overrides.shipBHit ?? { chance: 0, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 };
   const shipADamage = overrides.shipADamage ?? { nominalDps: 2.4, appliedDps: 2.0, application: 0.83, volley: 12, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
   const shipAAttack: AttackAssessment = {
     boostedWeapon: DUMMY_TURRET, effectiveWeapon: DUMMY_TURRET,
@@ -130,7 +130,7 @@ function makeMissileView(overrides: { distance?: number; shipADamage?: DamageAss
   return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_MISSILE, shipB: undefined }, defenses, projection, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK } } as unknown as EngagementView;
 }
 
-function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number }; shipADamage?: DamageAssessment; shipBActualDps?: number }) {
+function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipBActualDps?: number }) {
   const ship = fakeShipState();
   const frame = {
     time: 0, shipA: ship, shipB: ship,
@@ -139,7 +139,7 @@ function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: numb
     relVelocity: new Vec2(0, 0), radialVelocity: 0,
     transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
   };
-  const shipAHit = overrides.shipAHit ?? { chance: 0.5, trackingTerm: 1, rangeTerm: 0 };
+  const shipAHit = overrides.shipAHit ?? { chance: 0.5, trackingTerm: 1, rangeTerm: 0, trackingPenalty: 0.5, rangePenalty: 1 };
   const shipADamage = overrides.shipADamage ?? { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
   const shipAAttack: AttackAssessment = {
     boostedWeapon: DUMMY_DRONE, effectiveWeapon: DUMMY_DRONE,
@@ -186,7 +186,7 @@ describe("EngagementReadout", () => {
   test("computes tracking and range penalties from terms for shipA", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
-    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.5, trackingTerm: 1, rangeTerm: 2 } }), T);
+    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.5, trackingTerm: 1, rangeTerm: 2, trackingPenalty: 0.5, rangePenalty: 0.25 } }), T);
     expect(els.shipA.resTrackPen.textContent).toBe("50.0%");
     expect(els.shipA.resRangePen.textContent).toBe("25.0%");
     expect(els.shipA.resHit.textContent).toBe("50.0%");
@@ -195,7 +195,7 @@ describe("EngagementReadout", () => {
   test("treats non-finite terms as zero penalty", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
-    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.5, trackingTerm: Number.NaN, rangeTerm: Number.POSITIVE_INFINITY } }), T);
+    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.5, trackingTerm: Number.NaN, rangeTerm: Number.POSITIVE_INFINITY, trackingPenalty: 0, rangePenalty: 0 } }), T);
     expect(els.shipA.resTrackPen.textContent).toBe("0.0%");
     expect(els.shipA.resRangePen.textContent).toBe("0.0%");
   });
@@ -203,18 +203,18 @@ describe("EngagementReadout", () => {
   test("colors hit chance by threshold for both sides", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
-    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.95, trackingTerm: 0, rangeTerm: 0 }, shipBHit: { chance: 0.04, trackingTerm: 0, rangeTerm: 0 } }), T);
+    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.95, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 }, shipBHit: { chance: 0.04, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 } }), T);
     expect(els.shipA.resHit.classList.contains("is-optimal")).toBe(true);
     expect(els.shipB.resHit.classList.contains("is-danger")).toBe(true);
 
-    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.3, trackingTerm: 0, rangeTerm: 0 } }), T);
+    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.3, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 } }), T);
     expect(els.shipA.resHit.classList.contains("is-caution")).toBe(true);
   });
 
   test("colors tracking and range penalties by their ratio", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
-    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.95, trackingTerm: 0, rangeTerm: 0 } }), T);
+    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.95, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 } }), T);
     expect(els.shipA.resTrackPen.classList.contains("is-optimal")).toBe(true);
     expect(els.shipA.resRangePen.classList.contains("is-optimal")).toBe(true);
   });
@@ -310,7 +310,7 @@ describe("EngagementReadout", () => {
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeNoWeaponView(1000), T);
     expect(els.shipA.resHit.classList.contains("is-dim")).toBe(true);
-    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.5, trackingTerm: 0, rangeTerm: 0 } }), T);
+    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.5, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 } }), T);
     expect(els.shipA.resHit.classList.contains("is-dim")).toBe(false);
     expect(els.shipA.resTrackPen.classList.contains("is-dim")).toBe(false);
     expect(els.shipA.resRangePen.classList.contains("is-dim")).toBe(false);

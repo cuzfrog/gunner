@@ -12,8 +12,8 @@ const shipBTurret: TurretSpec = { kind: "turret", tracking: 0.28, sigResolution:
 const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const shipBEffectiveTurret: TurretSpec = { kind: "turret", tracking: 0.3, sigResolution: 125, optimal: 8500, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
-const hit = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
-const shipBHit = { chance: 0.7, trackingTerm: 0.2, rangeTerm: 0.3 };
+const hit = { chance: 1, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 };
+const shipBHit = { chance: 0.7, trackingTerm: 0.2, rangeTerm: 0.3, trackingPenalty: 0.5 ** 0.2, rangePenalty: 0.5 ** 0.3 };
 const shipADamage = { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
 const shipBDamage = { nominalDps: 20, appliedDps: 14, application: 0.7, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
 const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };
@@ -134,7 +134,7 @@ describe("EngagementFrameComposerImpl", () => {
       boostedWeapon: secondTurret,
       effectiveWeapon: secondTurret,
       damage: secondDamage,
-      turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8 },
+      turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1, trackingPenalty: 0.5 ** 0.1, rangePenalty: 0.5 ** 0.1 }, expectedMultiplier: 0.8 },
     };
     engagementEvaluator.evaluate.mockImplementation((_frame, attacks) => {
       if (attacks.shipA?.weapon === shipATurret) return { shipA: shipAAssessment, shipB: undefined };

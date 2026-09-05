@@ -140,7 +140,7 @@ const frame: EngagementFrame = {
   angularVelocity: 0,
 };
 const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
-const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
+const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 };
 const shipConfig: ShipConfig = { id: "shipA", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1 };
 const config: SimConfig = {
   shipA: shipConfig,
@@ -418,7 +418,7 @@ describe("AppImpl", () => {
     const attackWithDamage: AttackAssessment = {
       boostedWeapon: turret, effectiveWeapon: turret,
       damage: { nominalDps: 100, appliedDps: 80, application: 0.8, volley: 400, baseVolleyByType: ZERO_DAMAGE, appliedByType: { em: 80, thermal: 0, kinetic: 0, explosive: 0 }, appliedVolleyByType: ZERO_DAMAGE },
-      turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8 },
+      turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1, trackingPenalty: 0.5 ** 0.1, rangePenalty: 0.5 ** 0.1 }, expectedMultiplier: 0.8 },
     };
     const viewWithDamage: EngagementView = {
       frame,
@@ -471,12 +471,12 @@ describe("AppImpl", () => {
     const shipAAttack: AttackAssessment = {
       boostedWeapon: turret, effectiveWeapon: turret,
       damage: { nominalDps: 80, appliedDps: 80, application: 1, volley: 400, baseVolleyByType: ZERO_DAMAGE, appliedByType: { em: 80, thermal: 0, kinetic: 0, explosive: 0 }, appliedVolleyByType: ZERO_DAMAGE },
-      turret: { hit: { chance: 1, trackingTerm: 0, rangeTerm: 0 }, expectedMultiplier: 1 },
+      turret: { hit: { chance: 1, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 }, expectedMultiplier: 1 },
     };
     const shipBAttack: AttackAssessment = {
       boostedWeapon: turret, effectiveWeapon: turret,
       damage: { nominalDps: 50, appliedDps: 50, application: 1, volley: 200, baseVolleyByType: ZERO_DAMAGE, appliedByType: { em: 0, thermal: 0, kinetic: 0, explosive: 50 }, appliedVolleyByType: ZERO_DAMAGE },
-      turret: { hit: { chance: 1, trackingTerm: 0, rangeTerm: 0 }, expectedMultiplier: 1 },
+      turret: { hit: { chance: 1, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 }, expectedMultiplier: 1 },
     };
     const viewAsymmetric: EngagementView = {
       frame,
