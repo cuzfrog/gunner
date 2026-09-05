@@ -1,6 +1,8 @@
 import { type FakeElement, fakeDocument } from "../../testing";
 import type { DamageBreakdown, ImportedDrone, ImportedLauncher, ImportedTurret } from "../../../fitting";
 import type { ItemNameCatalog } from "../../../gamedata";
+import type { DamageAssessment, DroneSpec, MissileSpec, TurretSpec, WeaponDamageAssessor, WeaponSpec } from "../../../sim";
+import { SIG_RESOLUTIONS, ZERO_DAMAGE } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { DroneController } from "../drone";
 import type { LauncherController } from "../launcher";
@@ -43,7 +45,8 @@ function makeTurret(breakdown: DamageBreakdown = TURRET_BREAKDOWN): ImportedTurr
   return {
     chargeSize: "Medium",
     chargeId: "1" as never,
-    base: { tracking: 0.1, optimal: 10000, falloff: 5000, sigResolution: 40 },
+    sigResolutionClass: "M",
+    base: { tracking: 0.1, optimal: 10000, falloff: 5000 },
     moduleId: "200" as never,
     damageMultiplier: 3,
     damagePerShot: { em: 0, thermal: 0, kinetic: 50, explosive: 0 },
@@ -86,12 +89,62 @@ function makeItemNameCatalog(): ItemNameCatalog {
   } as unknown as ItemNameCatalog;
 }
 
+function makeTurretSpec(turret: ImportedTurret): TurretSpec {
+  return {
+    kind: "turret",
+    tracking: turret.base.tracking,
+    sigResolution: SIG_RESOLUTIONS[turret.sigResolutionClass],
+    optimal: turret.base.optimal,
+    falloff: turret.base.falloff,
+    damagePerShot: turret.damagePerShot,
+    cycleTime: turret.cycleTime,
+    turretCount: turret.turretCount,
+  };
+}
+
+function makeMissileSpec(launcher: ImportedLauncher): MissileSpec {
+  return {
+    kind: "missile",
+    damagePerMissile: launcher.damagePerMissile,
+    cycleTime: launcher.cycleTime,
+    launcherCount: launcher.count,
+    explosionRadius: launcher.explosionRadius,
+    explosionVelocity: launcher.explosionVelocity,
+    damageReductionFactor: launcher.damageReductionFactor,
+    maxVelocity: launcher.maxVelocity,
+    flightTime: launcher.flightTime,
+    flightRange: launcher.maxVelocity * launcher.flightTime,
+  };
+}
+
+function makeDroneSpec(drone: ImportedDrone): DroneSpec {
+  return {
+    kind: "drone",
+    tracking: drone.tracking,
+    sigResolution: drone.sigResolution,
+    optimal: drone.optimal,
+    falloff: drone.falloff,
+    damagePerShot: { em: drone.emDamage * drone.damageMultiplier, thermal: drone.thermalDamage * drone.damageMultiplier, kinetic: drone.kineticDamage * drone.damageMultiplier, explosive: drone.explosiveDamage * drone.damageMultiplier },
+    cycleTime: drone.cycleTime,
+    droneCount: drone.count,
+    maxVelocity: drone.maxVelocity,
+    orbitSpeed: drone.orbitSpeed,
+    orbitRange: drone.orbitRange,
+    isSentry: drone.sizeClass === "sentry",
+    controlRange: drone.controlRange,
+  };
+}
+
+function makeWeaponDamageAssessor(assessment: DamageAssessment): WeaponDamageAssessor {
+  return { assess: vi.fn((_spec: WeaponSpec, _factor: number, _inRange: boolean) => assessment) } as unknown as WeaponDamageAssessor;
+}
+
 function makeTurretController(turret?: ImportedTurret): TurretController {
-  return { turret: vi.fn(() => turret) } as unknown as TurretController;
+  return { turret: vi.fn(() => turret), currentTurretSpec: vi.fn(() => turret ? makeTurretSpec(turret) : undefined) } as unknown as TurretController;
 }
 
 function makeLauncherController(launcher?: ImportedLauncher): LauncherController {
-  return { launcher: vi.fn(() => launcher) } as unknown as LauncherController;
+  return { launcher: vi.fn(() => launcher), currentMissileSpec: vi.fn(() => launcher ? makeMissileSpec(launcher) : undefined) } as unknown as LauncherController;
 }
 
 function makeDrone(droneBreakdown: DamageBreakdown = DRONE_BREAKDOWN): ImportedDrone {
@@ -121,7 +174,7 @@ function makeDrone(droneBreakdown: DamageBreakdown = DRONE_BREAKDOWN): ImportedD
 }
 
 function makeDroneController(drone?: ImportedDrone): DroneController {
-  return { drone: vi.fn(() => drone) } as unknown as DroneController;
+  return { drone: vi.fn(() => drone), currentDroneSpecs: vi.fn(() => drone ? [makeDroneSpec(drone)] : []) } as unknown as DroneController;
 }
 
 function makeRenderer(): DpsHintRenderer {
@@ -137,6 +190,7 @@ function makeDeps(overrides: Partial<DpsHintProviderDeps> = {}): DpsHintProvider
     droneControllers: { shipA: makeDroneController(), shipB: makeDroneController() },
     itemNameCatalog: makeItemNameCatalog(),
     dpsHintRenderer: makeRenderer(),
+    weaponDamageAssessor: makeWeaponDamageAssessor({ nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE }),
     ...overrides,
   };
 }
@@ -375,5 +429,66 @@ describe("DpsHintProviderImpl", () => {
     provider.render(anchor, container);
     expect(catalog.nameForId).toHaveBeenCalledWith("3436", "en");
     expect(catalog.nameForId).toHaveBeenCalledWith("438", "en");
+  });
+
+  test("DPS and volley come from WeaponDamageAssessor, not a parallel formula", () => {
+    const turret = makeTurret();
+    const spec = makeTurretSpec(turret);
+    const assessment: DamageAssessment = { nominalDps: 171.6, appliedDps: 171.6, application: 1, volley: 858, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+    const assessor = makeWeaponDamageAssessor(assessment);
+    const provider = new DpsHintProviderImpl(makeDeps({
+      turretControllers: { shipA: makeTurretController(turret), shipB: makeTurretController() },
+      weaponDamageAssessor: assessor,
+    }));
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(assessor.assess).toHaveBeenCalledWith(spec, 1, true);
+    const dpsRows = (container as unknown as FakeElement).querySelectorAll(".dps-hint-dps-row");
+    expect(dpsRows.length).toBe(1);
+    const dpsValue = elementChildren(dpsRows[0])[1];
+    expect(dpsValue.textContent).toBe(assessment.nominalDps.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+    const volleyRows = (container as unknown as FakeElement).querySelectorAll(".dps-hint-summary-row");
+    expect(volleyRows.length).toBe(2);
+    const volleyValue = elementChildren(volleyRows[0])[1];
+    expect(volleyValue.textContent).toContain(assessment.volley.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+  });
+
+  test("launcher DPS comes from WeaponDamageAssessor with the missile spec", () => {
+    const launcher = makeLauncher();
+    const spec = makeMissileSpec(launcher);
+    const assessment: DamageAssessment = { nominalDps: 22, appliedDps: 22, application: 1, volley: 220, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+    const assessor = makeWeaponDamageAssessor(assessment);
+    const provider = new DpsHintProviderImpl(makeDeps({
+      launcherControllers: { shipA: makeLauncherController(launcher), shipB: makeLauncherController() },
+      weaponDamageAssessor: assessor,
+    }));
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(assessor.assess).toHaveBeenCalledWith(spec, 1, true);
+    const dpsRows = (container as unknown as FakeElement).querySelectorAll(".dps-hint-dps-row");
+    expect(dpsRows.length).toBe(1);
+    const dpsValue = elementChildren(dpsRows[0])[1];
+    expect(dpsValue.textContent).toBe(assessment.nominalDps.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+  });
+
+  test("drone DPS comes from WeaponDamageAssessor with the drone spec", () => {
+    const drone = makeDrone();
+    const spec = makeDroneSpec(drone);
+    const assessment: DamageAssessment = { nominalDps: 50, appliedDps: 50, application: 1, volley: 200, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+    const assessor = makeWeaponDamageAssessor(assessment);
+    const provider = new DpsHintProviderImpl(makeDeps({
+      droneControllers: { shipA: makeDroneController(drone), shipB: makeDroneController() },
+      weaponDamageAssessor: assessor,
+    }));
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(assessor.assess).toHaveBeenCalledWith(spec, 1, true);
+    const dpsRows = (container as unknown as FakeElement).querySelectorAll(".dps-hint-dps-row");
+    expect(dpsRows.length).toBe(1);
+    const dpsValue = elementChildren(dpsRows[0])[1];
+    expect(dpsValue.textContent).toBe(assessment.nominalDps.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
   });
 });

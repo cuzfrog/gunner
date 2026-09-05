@@ -71,6 +71,7 @@ const controlsCradleKeys = {
   portraitsController: "portraitsController",
   ewarResolver: "ewarResolver",
   defenseAssessor: "defenseAssessor",
+  weaponDamageAssessor: "weaponDamageAssessor",
   sensorBoosterResolver: "sensorBoosterResolver",
   shareController: "shareController",
   rangeOverlayController: "rangeOverlayController",
