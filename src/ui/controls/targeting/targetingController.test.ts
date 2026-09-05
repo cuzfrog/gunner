@@ -118,6 +118,49 @@ describe("TargetingController", () => {
     expect(resolver.boostedSensorSpec).toHaveBeenCalledWith(SPEC, undefined);
   });
 
+  test("forwards controller projection to resolver", () => {
+    const els = fakeEls();
+    const projection = { loadout: { boosters: [], amplifiers: [], boosterScripts: [] }, activation: [] } as unknown as SensorBoostProjection;
+    const sensorBoosterController = fakeSensorBoosterController(projection);
+    const resolver = {
+      boostedSensorSpec: vi.fn((spec: SensorSpec) => spec),
+    } as unknown as SensorBoosterResolver;
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController, resolver });
+    controller.setSensorData("shipA", SPEC);
+    expect(sensorBoosterController.projection).toHaveBeenCalledWith("shipA");
+    expect(resolver.boostedSensorSpec).toHaveBeenCalledWith(SPEC, projection);
+  });
+
+  test("updates displayed values when config is invalidated after projection change", () => {
+    const els = fakeEls();
+    const events = fakeEvents();
+    let currentBoosted: SensorSpec = { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4 };
+    const resolver = {
+      boostedSensorSpec: vi.fn(() => currentBoosted),
+    } as unknown as SensorBoosterResolver;
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events, sensorBoosterController: fakeSensorBoosterController(), resolver });
+    controller.setSensorData("shipA", SPEC);
+    expect(sectionText(els.shipA.summary)).toContain("30,000");
+    currentBoosted = { scanResolution: 260, maxTargetingRange: 39000, maxLockedTargets: 5 };
+    for (const cb of events.listeners.onConfigInvalidated ?? []) cb();
+    expect(sectionText(els.shipA.summary)).toContain("39,000");
+  });
+
+  test("renders boosted values for shipB", () => {
+    const els = fakeEls();
+    const boosted: SensorSpec = { scanResolution: 400, maxTargetingRange: 50000, maxLockedTargets: 6 };
+    const resolver = {
+      boostedSensorSpec: vi.fn(() => boosted),
+    } as unknown as SensorBoosterResolver;
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver });
+    controller.setSensorData("shipB", SPEC);
+    const text = sectionText(els.shipB.section);
+    expect(text).toContain("400");
+    expect(text).toContain("50,000");
+    expect(text).toContain("6");
+    expect(resolver.boostedSensorSpec).toHaveBeenCalledWith(SPEC, undefined);
+  });
+
   test("updates summary with boosted max targeting range", () => {
     const els = fakeEls();
     const boosted: SensorSpec = { scanResolution: 260, maxTargetingRange: 39000, maxLockedTargets: 5 };

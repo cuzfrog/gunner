@@ -281,7 +281,7 @@ export class SessionCodecImpl implements SessionCodec {
   private restoreSensorData(side: Side, fitting: string | undefined): void {
     const panel = side === "shipA" ? this.shipASide : this.shipBSide;
     const imported = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions()) : undefined;
-    panel.setSensorData(imported?.sensorSpec, imported?.sensorBoosts);
+    panel.setSensorData(imported?.sensorSpec);
     this.targetingController.setSensorData(side, imported?.sensorSpec);
   }
 

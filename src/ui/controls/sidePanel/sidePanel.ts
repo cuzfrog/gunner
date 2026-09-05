@@ -1,7 +1,7 @@
 import type { ShipProfile, Ships, StatConditions } from "../../../ships";
 import type { ShipId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import type { AutopilotMode, SensorBoostLoadout, SensorSpec } from "../../../sim";
+import type { AutopilotMode, SensorSpec } from "../../../sim";
 import {
   type FittedHullSummary,
   type ProfileParamOverrides,
@@ -71,7 +71,6 @@ export class SidePanelImpl implements SidePanel {
   private lastCommittedHullValue?: ShipId;
   private importerValue?: SideImporter;
   private sensorSpecValue?: SensorSpec;
-  private sensorBoostsValue?: SensorBoostLoadout;
   readonly sections: ISidePanelSections;
   private fittingPopup?: FittingPopupControl;
   private fittingPreview?: FittingPreviewControl;
@@ -124,9 +123,8 @@ export class SidePanelImpl implements SidePanel {
   set fittingText(value: string | undefined) { this.fittingTextValue = value; }
   get lastCommittedHull(): ShipId | undefined { return this.lastCommittedHullValue; }
   set lastCommittedHull(value: ShipId | undefined) { this.lastCommittedHullValue = value; }
-  setSensorData(spec: SensorSpec | undefined, boosts: SensorBoostLoadout | undefined): void {
+  setSensorData(spec: SensorSpec | undefined): void {
     this.sensorSpecValue = spec;
-    this.sensorBoostsValue = boosts;
   }
   get importer(): SideImporter {
     if (!this.importerValue) throw new Error("SidePanel importer not set");
@@ -199,7 +197,6 @@ export class SidePanelImpl implements SidePanel {
       fittedHull: this.fittedHull,
       sig: Math.max(num(this.els.shipSig), 1),
       sensorSpec: this.sensorSpecValue,
-      sensorBoosts: this.sensorBoostsValue,
     };
   }
 
