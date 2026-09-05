@@ -285,6 +285,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
           case "cargoCapacity": break;
           case "warpSpeed": break;
           case "repairPowerGrid": break;
+          default: { const _exhaustive: never = stats.rigDrawback.kind; void _exhaustive; }
         }
       }
     }
