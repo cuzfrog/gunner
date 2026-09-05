@@ -372,6 +372,7 @@ function buildCodec(options: {
   ewarController?: Partial<EwarController>;
   boosterController?: Partial<BoosterController>;
   missileBoosterController?: Partial<MissileBoosterController>;
+  sensorBoosterController?: Partial<SensorBoosterController>;
   defenseController?: Partial<DefenseController>;
   targetingController?: Partial<TargetingController>;
   fittingImport?: Partial<FittingImport>;
@@ -411,6 +412,7 @@ function buildCodec(options: {
   const ewarController = { ...mockEwarController(), ...options.ewarController } as unknown as EwarController;
   const boosterController = { ...mockBoosterController(), ...options.boosterController } as unknown as BoosterController;
   const missileBoosterController = { ...mockMissileBoosterController(), ...options.missileBoosterController } as unknown as MissileBoosterController;
+  const sensorBoosterController = { ...mockSensorBoosterController(), ...options.sensorBoosterController } as unknown as SensorBoosterController;
   const defenseController = { ...mockDefenseController(), ...options.defenseController } as unknown as DefenseController;
   const targetingController = { ...mockTargetingController(), ...options.targetingController } as unknown as TargetingController;
   const fittingImport = { ...mockFittingImport(), ...options.fittingImport } as unknown as FittingImport;
@@ -437,12 +439,13 @@ function buildCodec(options: {
     ewarController,
     boosterController,
     missileBoosterController,
+    sensorBoosterController,
     defenseController,
     targetingController,
     fittingImport,
     parser,
   });
-  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, defenseController, targetingController, fittingImport, parser };
+  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, sensorBoosterController, defenseController, targetingController, fittingImport, parser };
 }
 
 function makeProfile(): ProfileSettings {

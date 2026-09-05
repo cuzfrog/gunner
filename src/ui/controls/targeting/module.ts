@@ -8,8 +8,8 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export function registerTargetingModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    targetingController: asFunction(({ els, popupGroup, i18n, uiEvents }) => new TargetingControllerImpl({
-      els: targetingEls(els), popupGroup, i18n, events: uiEvents,
+    targetingController: asFunction(({ els, popupGroup, i18n, uiEvents, sensorBoosterController, sensorBoosterResolver }) => new TargetingControllerImpl({
+      els: targetingEls(els), popupGroup, i18n, events: uiEvents, sensorBoosterController, resolver: sensorBoosterResolver,
     })).singleton(),
   });
 }

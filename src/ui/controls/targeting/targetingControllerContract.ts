@@ -1,4 +1,4 @@
-import type { SensorBoostLoadout, SensorSpec } from "../../../sim";
+import type { SensorSpec } from "../../../sim";
 import type { Side, Sided } from "../side";
 import type { PopupFieldEls } from "../shared";
 
@@ -9,6 +9,6 @@ export interface TargetingFieldEls extends PopupFieldEls {
 export type TargetingEls = Sided<TargetingFieldEls>;
 
 export interface TargetingController {
-  setSensorData(side: Side, spec: SensorSpec | undefined, boosts: SensorBoostLoadout | undefined): void;
+  setSensorData(side: Side, spec: SensorSpec | undefined): void;
   render(): void;
 }

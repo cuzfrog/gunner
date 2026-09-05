@@ -1,7 +1,9 @@
-import { EMPTY_SENSOR_BOOST_LOADOUT, type SensorBoostLoadout, type SensorSpec } from "../../../sim";
+import type { SensorBoostProjection, SensorSpec } from "../../../sim";
+import type { SensorBoosterResolver } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import type { PopupGroup } from "../popup";
+import type { SensorBoosterController } from "../sensorBooster";
 import { FakeElement, fakeDocument } from "../../testing";
 import { TargetingControllerImpl } from "./targetingController";
 import type { TargetingController, TargetingEls } from "./targetingControllerContract";
@@ -23,24 +25,23 @@ function fakeI18n(): I18n {
     "targeting.scanResolution": "Scan resolution",
     "targeting.maxTargetingRange": "Max targeting range",
     "targeting.maxLockedTargets": "Max locked targets",
-    "targeting.sensorBoosters": "Sensor boosters",
-    "targeting.signalAmplifiers": "Signal amplifiers",
-    "targeting.overload": "Overload",
     "unit.mm": "mm",
     "unit.meter": "m",
   };
   return { t: (key: string) => map[key] ?? key } as unknown as I18n;
 }
 
-function fakeEvents(): UiEvents {
+function fakeEvents(): UiEvents & { readonly listeners: Record<string, ((...args: unknown[]) => void)[]> } {
   const listeners: Record<string, ((...args: unknown[]) => void)[]> = {};
   return {
+    listeners,
     onFittingImported: (cb: (...args: unknown[]) => void): void => { (listeners.onFittingImported ??= []).push(cb); },
     onLanguageChanged: (cb: (...args: unknown[]) => void): void => { (listeners.onLanguageChanged ??= []).push(cb); },
+    onConfigInvalidated: (cb: (...args: unknown[]) => void): void => { (listeners.onConfigInvalidated ??= []).push(cb); },
     emitConfigInvalidated: (): void => {},
     emitDistanceChanged: (): void => {},
     emitLanguageChanged: (): void => {},
-  } as unknown as UiEvents;
+  } as unknown as UiEvents & { readonly listeners: Record<string, ((...args: unknown[]) => void)[]> };
 }
 
 function fakePopupGroup(): PopupGroup {
@@ -49,6 +50,23 @@ function fakePopupGroup(): PopupGroup {
     toggle: (): void => {},
     closeAll: (): void => {},
   } as unknown as PopupGroup;
+}
+
+function fakeSensorBoosterController(projection: SensorBoostProjection | undefined = undefined): SensorBoosterController {
+  return {
+    setLoadout: vi.fn(),
+    restore: vi.fn(),
+    projection: vi.fn(() => projection),
+    capture: vi.fn(),
+    render: vi.fn(),
+    updateSummaries: vi.fn(),
+  } as unknown as SensorBoosterController;
+}
+
+function fakeResolver(): SensorBoosterResolver {
+  return {
+    boostedSensorSpec: vi.fn((spec: SensorSpec) => spec),
+  } as unknown as SensorBoosterResolver;
 }
 
 const SPEC: SensorSpec = { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4 };
@@ -62,65 +80,76 @@ describe("TargetingController", () => {
 
   test("renders disabled trigger when no sensor spec is set", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents() });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
     controller.render();
     expect(els.shipA.trigger.disabled).toBe(true);
   });
 
   test("enables trigger and renders sensor attributes when spec is set", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents() });
-    controller.setSensorData("shipA", SPEC, undefined);
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    controller.setSensorData("shipA", SPEC);
     expect(els.shipA.trigger.disabled).toBe(false);
     expect((els.shipA.section as unknown as FakeElement).children.length).toBeGreaterThan(0);
   });
 
-  test("renders sensor booster modules when boosts are set", () => {
+  test("does not render booster or amplifier module lists", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents() });
-    const boosts: SensorBoostLoadout = {
-      boosters: [{ moduleName: "Sensor Booster II", moduleId: "1952" as never, scanResolutionBonusPercent: 30, maxTargetRangeBonusPercent: 30, overloadStrengthBonusPercent: 15, defaultScript: undefined }],
-      amplifiers: [],
-      boosterScripts: [],
-    };
-    controller.setSensorData("shipA", SPEC, boosts);
-    expect(sectionText(els.shipA.section)).toContain("Sensor Booster II");
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    controller.setSensorData("shipA", SPEC);
+    const text = sectionText(els.shipA.section);
+    expect(text).not.toContain("Sensor boosters");
+    expect(text).not.toContain("Signal amplifiers");
+    expect(text).not.toContain("Sensor Booster II");
   });
 
-  test("renders signal amplifier modules when amplifiers are set", () => {
+  test("displays boosted sensor attributes from resolver", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents() });
-    const boosts: SensorBoostLoadout = {
-      boosters: [],
-      amplifiers: [{ moduleName: "Signal Amplifier II", moduleId: "1987" as never, scanResolutionBonusPercent: 15, maxTargetRangeBonusPercent: 30, maxLockedTargetsBonus: 2 }],
-      boosterScripts: [],
-    };
-    controller.setSensorData("shipA", SPEC, boosts);
-    expect(sectionText(els.shipA.section)).toContain("Signal Amplifier II");
+    const boosted: SensorSpec = { scanResolution: 260, maxTargetingRange: 39000, maxLockedTargets: 5 };
+    const resolver = {
+      boostedSensorSpec: vi.fn(() => boosted),
+    } as unknown as SensorBoosterResolver;
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver });
+    controller.setSensorData("shipA", SPEC);
+    const text = sectionText(els.shipA.section);
+    expect(text).toContain("260");
+    expect(text).toContain("39,000");
+    expect(text).toContain("5");
+    expect(resolver.boostedSensorSpec).toHaveBeenCalledWith(SPEC, undefined);
   });
 
-  test("does not render booster section when loadout is empty", () => {
+  test("updates summary with boosted max targeting range", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents() });
-    controller.setSensorData("shipA", SPEC, EMPTY_SENSOR_BOOST_LOADOUT);
-    expect(sectionText(els.shipA.section)).not.toContain("Sensor boosters");
-    expect(sectionText(els.shipA.section)).not.toContain("Signal amplifiers");
-  });
-
-  test("updates summary with max targeting range", () => {
-    const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents() });
-    controller.setSensorData("shipA", SPEC, undefined);
-    expect((els.shipA.summary as unknown as FakeElement).children.length).toBeGreaterThan(0);
+    const boosted: SensorSpec = { scanResolution: 260, maxTargetingRange: 39000, maxLockedTargets: 5 };
+    const resolver = {
+      boostedSensorSpec: vi.fn(() => boosted),
+    } as unknown as SensorBoosterResolver;
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver });
+    controller.setSensorData("shipA", SPEC);
+    expect(sectionText(els.shipA.summary)).toContain("39,000");
   });
 
   test("clears summary when spec is removed", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents() });
-    controller.setSensorData("shipA", SPEC, undefined);
-    controller.setSensorData("shipA", undefined, undefined);
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    controller.setSensorData("shipA", SPEC);
+    controller.setSensorData("shipA", undefined);
     expect(els.shipA.summary.textContent).toBe("");
     expect(els.shipA.trigger.disabled).toBe(true);
+  });
+
+  test("re-renders on config invalidated to reflect booster toggle changes", () => {
+    const els = fakeEls();
+    const events = fakeEvents();
+    const resolver = fakeResolver();
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events, sensorBoosterController: fakeSensorBoosterController(), resolver });
+    controller.setSensorData("shipA", SPEC);
+    expect(events.listeners.onConfigInvalidated?.length).toBe(1);
+    const summaryBefore = (els.shipA.summary as unknown as FakeElement).children.length;
+    expect(summaryBefore).toBeGreaterThan(0);
+    for (const cb of events.listeners.onConfigInvalidated ?? []) cb();
+    const summaryAfter = (els.shipA.summary as unknown as FakeElement).children.length;
+    expect(summaryAfter).toBeGreaterThan(0);
   });
 });
 
