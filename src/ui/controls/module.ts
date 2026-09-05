@@ -27,6 +27,7 @@ import { registerDefenseModule } from "./defense";
 import { registerTargetingModule } from "./targeting";
 import { registerBoosterModule } from "./booster";
 import { registerMissileBoosterModule } from "./missileBooster";
+import { registerSensorBoosterModule } from "./sensorBooster";
 import { registerRangeOverlayModule } from "./rangeOverlay";
 import { registerPortraitsModule } from "./portraits";
 import { registerHoverHintModule } from "./hoverHint";
@@ -53,6 +54,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerTargetingModule(cradle);
   registerBoosterModule(cradle);
   registerMissileBoosterModule(cradle);
+  registerSensorBoosterModule(cradle);
   registerRangeOverlayModule(cradle);
   registerPortraitsModule(cradle);
   registerHoverHintModule(cradle);

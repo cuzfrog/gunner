@@ -1212,13 +1212,31 @@ Sensor Booster II, Scan Resolution Script`,
       conditions,
     );
     expect(result).toBeDefined();
+    const expectedScript = result!.sensorBoosts.boosterScripts.find((s) => s.name === "Scan Resolution Script");
     expect(result!.sensorBoosts.boosters).toEqual([
-      expect.objectContaining({ moduleName: "Sensor Booster II", scanResolutionBonusPercent: 30, maxTargetRangeBonusPercent: 30, overloadStrengthBonusPercent: 15 }),
+      expect.objectContaining({ moduleName: "Sensor Booster II", scanResolutionBonusPercent: 30, maxTargetRangeBonusPercent: 30, overloadStrengthBonusPercent: 15, defaultScript: expectedScript }),
     ]);
     expect(result!.sensorBoosts.boosterScripts).toEqual([
       { name: "Targeting Range Script", moduleId: "29009" as TypeId, scanResolutionMultiplier: 0, maxTargetRangeMultiplier: 2 },
       { name: "Scan Resolution Script", moduleId: "29011" as TypeId, scanResolutionMultiplier: 2, maxTargetRangeMultiplier: 0 },
       { name: "ECCM Script", moduleId: "41155" as TypeId, scanResolutionMultiplier: 0, maxTargetRangeMultiplier: 0 },
+    ]);
+  });
+
+  test("resolves a sensor dampener with a scan resolution dampening script", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Sd]
+200mm AutoCannon I, Hail S
+Remote Sensor Dampener II, Scan Resolution Dampening Script`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    const expectedScript = result!.ewar.dampenerScripts.find((s) => s.name === "Scan Resolution Dampening Script");
+    expect(result!.ewar.dampeners).toEqual([
+      expect.objectContaining({ defaultScript: expectedScript }),
     ]);
   });
 

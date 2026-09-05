@@ -15,6 +15,7 @@ import type { EngagementReadout } from "./engagementReadout";
 import type { HintRotator } from "./hints";
 import type { BoosterController } from "./booster";
 import type { MissileBoosterController } from "./missileBooster";
+import type { SensorBoosterController } from "./sensorBooster";
 import type { EwarController } from "./ewar";
 import type { DefenseController } from "./defense";
 import type { TargetingController } from "./targeting";
@@ -110,6 +111,7 @@ export interface ControlsCradle {
   readonly targetingController: TargetingController;
   readonly boosterController: BoosterController;
   readonly missileBoosterController: MissileBoosterController;
+  readonly sensorBoosterController: SensorBoosterController;
   readonly portraitsController: PortraitsController;
   readonly ewarResolver: EwarResolver;
   readonly sessionCodec: SessionCodec;

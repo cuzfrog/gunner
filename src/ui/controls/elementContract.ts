@@ -227,6 +227,8 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   boosterSummary: { tag: "SPAN" as const, baseId: "booster-summary", defaultValue: undefined },
   missileBoosterSection: { tag: "DIV" as const, baseId: "missile-booster-section", defaultValue: undefined },
   missileBoosterSummary: { tag: "SPAN" as const, baseId: "missile-booster-summary", defaultValue: undefined },
+  sensorBoosterSection: { tag: "DIV" as const, baseId: "sensor-booster-section", defaultValue: undefined },
+  sensorBoosterSummary: { tag: "SPAN" as const, baseId: "sensor-booster-summary", defaultValue: undefined },
   speed: {
     tag: "INPUT" as const,
     baseId: "speed",

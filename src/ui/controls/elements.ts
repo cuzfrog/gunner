@@ -85,6 +85,8 @@ interface CombatantEls {
   readonly boosterSummary: HTMLElement;
   readonly missileBoosterSection: HTMLElement;
   readonly missileBoosterSummary: HTMLElement;
+  readonly sensorBoosterSection: HTMLElement;
+  readonly sensorBoosterSummary: HTMLElement;
   readonly speed: HTMLInputElement;
   readonly mass: HTMLInputElement;
   readonly inertia: HTMLInputElement;
@@ -341,6 +343,8 @@ function createCombatantEls(side: Side): CombatantEls {
     boosterSummary: el(combatantElementId("boosterSummary", side)),
     missileBoosterSection: el(combatantElementId("missileBoosterSection", side)),
     missileBoosterSummary: el(combatantElementId("missileBoosterSummary", side)),
+    sensorBoosterSection: el(combatantElementId("sensorBoosterSection", side)),
+    sensorBoosterSummary: el(combatantElementId("sensorBoosterSummary", side)),
     speed: elOf(combatantElementId("speed", side), isHtmlInputElement),
     mass: elOf(combatantElementId("mass", side), isHtmlInputElement),
     inertia: elOf(combatantElementId("inertia", side), isHtmlInputElement),
