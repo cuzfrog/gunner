@@ -5,7 +5,8 @@ import type { Language, StoredSensorBoosterActivation } from "../../../appstate"
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { createControlsEls } from "../elements";
-import type { PopupGroup } from "../popup";
+import type { Popup, PopupGroup } from "../popup";
+import type { ModulesPopup } from "../modulesPopup";
 import { FakeElement, fakeDocument, getFake, mockFittingImport } from "../../testing";
 import { UiEventsImpl } from "../../events";
 import { SensorBoosterControllerImpl } from "./sensorBoosterController";
@@ -86,9 +87,22 @@ function buildSensorBoosterController() {
   getFake(document, "ship-b-ewar-popup").appendChild(els.shipB.sensorBoosterSection as unknown as FakeElement);
   getFake(document, "ship-a-sensor-booster-section").hidden = true;
   getFake(document, "ship-b-sensor-booster-section").hidden = true;
+  const stubPopup: Popup = {
+    isOpen: () => false,
+    open: vi.fn(),
+    close: vi.fn(),
+    focusTrigger: vi.fn(),
+    contains: vi.fn(() => false),
+  };
+  const modulesPopup = vi.mocked<ModulesPopup>({
+    popup: vi.fn(() => stubPopup),
+    registerOnClose: vi.fn(),
+    syncEnabled: vi.fn(),
+  });
   const sensorBoosterEls: SensorBoosterEls = {
     sections: { shipA: els.shipA.sensorBoosterSection, shipB: els.shipB.sensorBoosterSection },
     summaries: { shipA: els.shipA.sensorBoosterSummary, shipB: els.shipB.sensorBoosterSummary },
+    modulesFields: { shipA: els.shipA.ewar.field, shipB: els.shipB.ewar.field },
   };
   const NAME_FOR_ID: Record<string, string> = {
     "1952": "Sensor Booster II",
@@ -105,8 +119,8 @@ function buildSensorBoosterController() {
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
   const describer = new SensorBoosterEffectDescriberImpl({ i18n });
-  const controller = new SensorBoosterControllerImpl({ els: sensorBoosterEls, popupGroup, imageCatalog, fittingImport, i18n, events, describer });
-  return { document, controller, els, sensorBoosterEls, i18n, imageCatalog, popupGroup, fittingImport, events, emitConfigInvalidated };
+  const controller = new SensorBoosterControllerImpl({ els: sensorBoosterEls, popupGroup, modulesPopup, imageCatalog, fittingImport, i18n, events, describer });
+  return { document, controller, els, sensorBoosterEls, i18n, imageCatalog, popupGroup, modulesPopup, fittingImport, events, emitConfigInvalidated };
 }
 
 function sensorBoosterSection(document: Document, side: "shipA" | "shipB"): FakeElement {
@@ -257,7 +271,7 @@ describe("SensorBoosterController", () => {
     const row = boosterRows(section)[0];
     const gear = row.children.find((c) => c.className.split(" ").includes("ewar-script-gear"))!;
     gear.dispatchEvent(new Event("click"));
-    const popup = section.children.find((c) => c.id === "ship-a-sensor-booster-script-popup");
+    const popup = getFake(document, "ship-a-ewar-field").children.find((c) => c.id === "ship-a-sensor-booster-script-popup");
     expect(popup).toBeDefined();
     const scanOption = popup!.children.find((c) => c.getAttribute("data-value") === String(toTypeId("29011")));
     expect(scanOption).toBeDefined();

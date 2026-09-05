@@ -5,6 +5,7 @@ import type { Side } from "../side";
 export interface SensorBoosterEls {
   readonly sections: Record<Side, HTMLElement>;
   readonly summaries: Record<Side, HTMLElement>;
+  readonly modulesFields: Record<Side, HTMLElement>;
 }
 
 export interface SensorBoosterController {

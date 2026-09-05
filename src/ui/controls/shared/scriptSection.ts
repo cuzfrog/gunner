@@ -78,6 +78,7 @@ export class ScriptSection<K> {
 
   close(): void {
     this.popup.close();
+    this.currentGear = undefined;
   }
 
   isOpen(): boolean {

@@ -6,9 +6,10 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
 import { html } from "../markup";
-import type { Popup, PopupGroup } from "../popup";
+import type { PopupGroup } from "../popup";
+import type { ModulesPopup } from "../modulesPopup";
 import type { Side } from "../side";
-import { SelectableListImpl, type SelectableItem, IconActionImpl, SectionBlockImpl, spriteIcon } from "../shared";
+import { ScriptSection, type ScriptOption, IconActionImpl, SectionBlockImpl, spriteIcon } from "../shared";
 import type { SensorBoosterController, SensorBoosterEls } from "./sensorBoosterControllerContract";
 import type { SensorBoosterEffectDescriber } from "./sensorBoosterEffectDescriber";
 
@@ -26,50 +27,39 @@ interface SensorBoosterState {
 export class SensorBoosterControllerImpl implements SensorBoosterController {
   private readonly els: SensorBoosterEls;
   private readonly popupGroup: PopupGroup;
+  private readonly modulesPopup: ModulesPopup;
   private readonly imageCatalog: ImageCatalog;
   private readonly fittingImport: FittingImport;
   private readonly i18n: I18n;
   private readonly events: UiEvents;
   private readonly describer: SensorBoosterEffectDescriber;
   private readonly states = new Map<Side, SensorBoosterState>();
-  private readonly scriptPopups: Record<Side, Popup>;
-  private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
-  private readonly scriptPopupEls = new Map<Side, HTMLElement>();
+  private readonly scriptSections: Record<Side, ScriptSection<number>>;
   private readonly boosterNameSpans = new Map<Side, HTMLSpanElement[]>();
-  private readonly scriptOptionList: SelectableListImpl;
-  private readonly gearAction: IconActionImpl;
   private readonly overloadAction: IconActionImpl;
   private readonly sectionBlock: SectionBlockImpl;
 
-  constructor(deps: { els: SensorBoosterEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; events: UiEvents; describer: SensorBoosterEffectDescriber }) {
+  constructor(deps: { els: SensorBoosterEls; popupGroup: PopupGroup; modulesPopup: ModulesPopup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; events: UiEvents; describer: SensorBoosterEffectDescriber }) {
     this.els = deps.els;
     this.popupGroup = deps.popupGroup;
+    this.modulesPopup = deps.modulesPopup;
     this.imageCatalog = deps.imageCatalog;
     this.fittingImport = deps.fittingImport;
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.describer = deps.describer;
-    this.scriptOptionList = new SelectableListImpl({
-      itemClass: "ewar-script-option",
-      nameClass: "",
-      role: "menuitem",
-    });
-    this.gearAction = new IconActionImpl({
-      buttonClass: "ewar-script-gear btn icon-button",
-      iconSvg: spriteIcon("gear"),
-      hint: "",
-      ariaHaspopup: "menu",
-      ariaExpanded: false,
-    });
     this.overloadAction = new IconActionImpl({
       buttonClass: "ewar-overload-button btn icon-button",
       iconSvg: spriteIcon("overload", 14, "currentColor", "overload-button-icon"),
       hint: "",
     });
     this.sectionBlock = new SectionBlockImpl();
-    this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
-    this.popupGroup.register(this.scriptPopups.shipA);
-    this.popupGroup.register(this.scriptPopups.shipB);
+    this.scriptSections = {
+      shipA: this.buildScriptSection("shipA"),
+      shipB: this.buildScriptSection("shipB"),
+    };
+    this.modulesPopup.registerOnClose("shipA", () => this.scriptSections.shipA.close());
+    this.modulesPopup.registerOnClose("shipB", () => this.scriptSections.shipB.close());
     this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.sensorBoosts));
     this.events.onLanguageChanged(() => this.render());
     this.render();
@@ -119,33 +109,27 @@ export class SensorBoosterControllerImpl implements SensorBoosterController {
     this.updateSummary("shipB");
   }
 
-  private buildScriptPopup(side: Side): Popup {
-    const section = this.els.sections[side];
-    const popup = html`<div id="${sideId(side)}-sensor-booster-script-popup" class="ewar-script-popup popup" role="menu" hidden></div>` as unknown as HTMLElement;
-    section.appendChild(popup);
-    this.scriptPopupEls.set(side, popup);
-    return {
-      isOpen: () => !popup.hidden,
-      open: () => { popup.hidden = false; },
-      close: () => {
-        popup.hidden = true;
-        const gear = this.scriptGears.get(side)?.gear;
-        if (gear) gear.setAttribute("aria-expanded", "false");
-      },
-      focusTrigger: () => this.scriptGears.get(side)?.gear?.focus(),
-      contains: (target) => target instanceof Element && target.closest(`#${sideId(side)}-sensor-booster-script-popup, #${sideId(side)}-sensor-booster-section`) !== null,
-    };
+  private buildScriptSection(side: Side): ScriptSection<number> {
+    return new ScriptSection<number>({
+      popupId: `${sideId(side)}-sensor-booster-script-popup`,
+      mountEl: this.els.modulesFields[side],
+      parentPopup: this.modulesPopup.popup(side),
+      popupGroup: this.popupGroup,
+      listShape: { itemClass: "ewar-script-option", nameClass: "", role: "menuitem" },
+      placement: side === "shipA" ? "alongside-end" : "alongside-start",
+      options: (index) => this.buildScriptOptions(side, index),
+      onSelect: (index, value) => this.onScriptSelected(side, index, value),
+      gearHint: (index) => this.gearHintForSide(side, index),
+    });
   }
 
   private renderSide(side: Side): void {
     const section = this.els.sections[side];
     const summary = this.els.summaries[side];
     const state = this.states.get(side);
-    this.scriptPopups[side].close();
-    this.scriptGears.delete(side);
+    this.scriptSections[side].close();
     this.boosterNameSpans.delete(side);
     section.innerHTML = "";
-    section.appendChild(this.scriptPopupEls.get(side)!);
     if (!state || this.isEmpty(state.loadout)) {
       section.hidden = true;
       summary.innerHTML = "";
@@ -237,7 +221,11 @@ export class SensorBoosterControllerImpl implements SensorBoosterController {
       row.appendChild(button);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, booster, () => this.toggleBoosterOverload(side, i, overloadButton));
       row.appendChild(overloadButton);
-      const gear = this.createScriptGear(side, i, activation.script, activation.active);
+      const gear = this.scriptSections[side].createGear(i, {
+        hint: this.gearHintForScript(activation.script),
+        disabled: !activation.active,
+        dataIndex: i,
+      });
       row.appendChild(gear);
       section.appendChild(row);
     }
@@ -290,60 +278,46 @@ export class SensorBoosterControllerImpl implements SensorBoosterController {
     return button;
   }
 
-  private createScriptGear(side: Side, index: number, script: SensorBoosterScriptSpec | undefined, active: boolean): HTMLButtonElement {
-    const gear = this.gearAction.create(() => this.openScriptPopup(side, index, gear));
-    gear.setAttribute("data-index", String(index));
-    gear.setAttribute("aria-controls", `${sideId(side)}-sensor-booster-script-popup`);
-    this.updateGearHint(gear, script);
-    if (!active) gear.setAttribute("disabled", "");
-    return gear;
-  }
-
-  private updateGearHint(gear: HTMLButtonElement, script: SensorBoosterScriptSpec | undefined): void {
+  private gearHintForScript(script: SensorBoosterScriptSpec | undefined): string {
     const name = this.scriptDisplayName(script);
-    const hint = `${name}${script ? ` · ${scriptStatSuffix(script)}` : ""}`;
-    gear.setAttribute("data-hint", hint);
-    gear.setAttribute("aria-label", hint);
+    return `${name}${script ? ` · ${scriptStatSuffix(script)}` : ""}`;
   }
 
-  private openScriptPopup(side: Side, index: number, gear: HTMLButtonElement): void {
+  private gearHintForSide(side: Side, index: number): string {
     const state = this.states.get(side);
-    if (!state) return;
-    this.scriptGears.set(side, { index, gear });
-    const popup = this.scriptPopupEls.get(side);
-    if (!popup) return;
+    if (!state) return this.i18n.t("sensorBooster.script.none");
+    return this.gearHintForScript(state.activation[index].script);
+  }
+
+  private buildScriptOptions(side: Side, index: number): readonly ScriptOption[] {
+    const state = this.states.get(side);
+    if (!state) return [];
     const current = state.activation[index].script;
-    const items: SelectableItem[] = [
+    return [
       { value: "none", label: this.i18n.t("sensorBooster.script.none"), selected: current === undefined },
       ...state.loadout.boosterScripts.map((script) => ({
-        value: script.moduleId,
+        value: String(script.moduleId),
         label: `${this.scriptDisplayName(script)} · ${scriptStatSuffix(script)}`,
-        selected: this.isSameScript(current, script),
+        selected: current !== undefined && current.moduleId === script.moduleId,
       })),
     ];
-    const buttons = this.scriptOptionList.render(popup, items);
-    buttons[0].addEventListener("click", () => this.setScript(side, index, undefined, gear));
-    for (let i = 0; i < state.loadout.boosterScripts.length; i++) {
-      const script = state.loadout.boosterScripts[i];
-      buttons[i + 1].addEventListener("click", () => this.setScript(side, index, script, gear));
-    }
-    gear.setAttribute("aria-expanded", "true");
-    this.scriptPopups[side].open();
   }
 
-  private isSameScript(a: SensorBoosterScriptSpec | undefined, b: SensorBoosterScriptSpec | undefined): boolean {
-    if (a === undefined || b === undefined) return a === b;
-    return a.moduleId === b.moduleId;
-  }
-
-  private setScript(side: Side, index: number, script: SensorBoosterScriptSpec | undefined, gear: HTMLButtonElement): void {
+  private onScriptSelected(side: Side, index: number, value: string): void {
     const state = this.states.get(side);
     if (!state) return;
-    state.activation[index].script = script;
-    this.updateGearHint(gear, script);
+    if (value === "none") {
+      state.activation[index].script = undefined;
+    } else {
+      const byId = typeIdFromString(value);
+      if (byId === undefined) return;
+      const script = state.loadout.boosterScripts.find((s) => s.moduleId === byId);
+      if (script === undefined) return;
+      state.activation[index].script = script;
+    }
+    const script = state.activation[index].script;
     const nameSpan = this.boosterNameSpans.get(side)?.[index];
     if (nameSpan) nameSpan.setAttribute("data-hint", this.describer.boosterModuleEffect(state.loadout.boosters[index], script, state.activation[index].overloaded));
-    this.scriptPopups[side].close();
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }

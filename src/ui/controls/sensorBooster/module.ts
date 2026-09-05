@@ -10,9 +10,10 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 export function registerSensorBoosterModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     sensorBoosterEffectDescriber: asClass(SensorBoosterEffectDescriberImpl).singleton(),
-    sensorBoosterController: asFunction(({ els, popupGroup, imageCatalog, fittingImport, i18n, sensorBoosterEffectDescriber, uiEvents }) => new SensorBoosterControllerImpl({
+    sensorBoosterController: asFunction(({ els, popupGroup, modulesPopup, imageCatalog, fittingImport, i18n, sensorBoosterEffectDescriber, uiEvents }) => new SensorBoosterControllerImpl({
       els: collectSensorBoosterEls(els),
       popupGroup,
+      modulesPopup,
       imageCatalog,
       fittingImport,
       i18n,
@@ -31,6 +32,10 @@ function collectSensorBoosterEls(els: ControlsElements): SensorBoosterEls {
     summaries: {
       shipA: els.shipA.sensorBoosterSummary,
       shipB: els.shipB.sensorBoosterSummary,
+    },
+    modulesFields: {
+      shipA: els.shipA.ewar.field,
+      shipB: els.shipB.ewar.field,
     },
   };
 }

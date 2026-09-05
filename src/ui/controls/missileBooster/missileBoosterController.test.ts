@@ -5,7 +5,8 @@ import type { Language, StoredMissileBoosterActivation } from "../../../appstate
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { createControlsEls } from "../elements";
-import type { PopupGroup } from "../popup";
+import type { Popup, PopupGroup } from "../popup";
+import type { ModulesPopup } from "../modulesPopup";
 import { FakeElement, fakeDocument, getFake, mockFittingImport } from "../../testing";
 import { UiEventsImpl } from "../../events";
 import { MissileBoosterControllerImpl } from "./missileBoosterController";
@@ -86,9 +87,22 @@ function buildMissileBoosterController() {
   getFake(document, "ship-b-ewar-popup").appendChild(els.shipB.missileBoosterSection as unknown as FakeElement);
   getFake(document, "ship-a-missile-booster-section").hidden = true;
   getFake(document, "ship-b-missile-booster-section").hidden = true;
+  const stubPopup: Popup = {
+    isOpen: () => false,
+    open: vi.fn(),
+    close: vi.fn(),
+    focusTrigger: vi.fn(),
+    contains: vi.fn(() => false),
+  };
+  const modulesPopup = vi.mocked<ModulesPopup>({
+    popup: vi.fn(() => stubPopup),
+    registerOnClose: vi.fn(),
+    syncEnabled: vi.fn(),
+  });
   const missileBoosterEls: MissileBoosterEls = {
     sections: { shipA: els.shipA.missileBoosterSection, shipB: els.shipB.missileBoosterSection },
     summaries: { shipA: els.shipA.missileBoosterSummary, shipB: els.shipB.missileBoosterSummary },
+    modulesFields: { shipA: els.shipA.ewar.field, shipB: els.shipB.ewar.field },
   };
   const NAME_FOR_ID: Record<string, string> = {
     "35790": "Missile Guidance Computer II",
@@ -104,8 +118,8 @@ function buildMissileBoosterController() {
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
   const describer = new MissileBoosterEffectDescriberImpl({ i18n });
-  const controller = new MissileBoosterControllerImpl({ els: missileBoosterEls, popupGroup, imageCatalog, fittingImport, i18n, events, describer });
-  return { document, controller, els, missileBoosterEls, i18n, imageCatalog, popupGroup, fittingImport, events, emitConfigInvalidated };
+  const controller = new MissileBoosterControllerImpl({ els: missileBoosterEls, popupGroup, modulesPopup, imageCatalog, fittingImport, i18n, events, describer });
+  return { document, controller, els, missileBoosterEls, i18n, imageCatalog, popupGroup, modulesPopup, fittingImport, events, emitConfigInvalidated };
 }
 
 function missileBoosterSection(document: Document, side: "shipA" | "shipB"): FakeElement {
@@ -252,7 +266,8 @@ describe("MissileBoosterController", () => {
     const row = computerRows(section)[0];
     const gear = row.children.find((c) => c.className.split(" ").includes("ewar-script-gear"))!;
     gear.dispatchEvent(new Event("click"));
-    const popup = section.children.find((c) => c.id === "ship-a-missile-booster-script-popup");
+    const field = getFake(document, "ship-a-ewar-field");
+    const popup = field.children.find((c) => c.id === "ship-a-missile-booster-script-popup");
     expect(popup).toBeDefined();
     const precisionOption = popup!.children.find((c) => c.getAttribute("data-value") === String(toTypeId("35795")));
     expect(precisionOption).toBeDefined();
