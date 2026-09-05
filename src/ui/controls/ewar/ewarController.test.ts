@@ -236,15 +236,15 @@ describe("EwarController", () => {
     expect(summary.children.length).toBe(2);
 
     const webSummary = summary.children[0];
-    expect(webSummary.className).toBe("ewar-summary-item");
+    expect(webSummary.className).toBe("trigger-summary-item");
     expect(webSummary.children[0].tagName).toBe("IMG");
     expect(webSummary.children[0].src).toBe("icons/527.png");
     expect(webSummary.children[0].hidden).toBe(false);
-    expect(webSummary.children[1].className).toBe("ewar-summary-count mono");
+    expect(webSummary.children[1].className).toBe("trigger-summary-count mono");
     expect(webSummary.children[1].textContent).toBe("1/1");
 
     const disruptorSummary = summary.children[1];
-    expect(disruptorSummary.className).toBe("ewar-summary-item");
+    expect(disruptorSummary.className).toBe("trigger-summary-item");
     expect(disruptorSummary.children[0].tagName).toBe("IMG");
     expect(disruptorSummary.children[0].src).toBe("icons/2108.png");
     expect(disruptorSummary.children[0].hidden).toBe(false);

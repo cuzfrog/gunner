@@ -183,7 +183,7 @@ export class DefenseControllerImpl implements DefenseController {
     const section = side === "shipA" ? this.els.shipADefenseSection : this.els.shipBDefenseSection;
     const spec = this.specs.get(side);
     const defenseLabel = this.i18n.t("label.defense");
-    const labelSpan = trigger.querySelector?.(".defense-label");
+    const labelSpan = trigger.querySelector?.(".trigger-label");
     if (labelSpan) labelSpan.textContent = defenseLabel;
     trigger.setAttribute("aria-label", defenseLabel);
     popup.setAttribute("aria-label", defenseLabel);
@@ -358,7 +358,7 @@ export class DefenseControllerImpl implements DefenseController {
     }
     const assessment = this.assessments.get(side);
     const totalEhp = assessment?.totalEhp ?? computeTotalEhp(spec);
-    const item = html`<span class="defense-summary-item"><span class="defense-summary-count mono">${formatWithCommas(totalEhp)} EHP</span></span>`;
+    const item = html`<span class="trigger-summary-item"><span class="trigger-summary-count mono">${formatWithCommas(totalEhp)} EHP</span></span>`;
     summary.appendChild(item);
   }
 }

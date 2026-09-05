@@ -186,7 +186,7 @@ export class EwarControllerImpl implements EwarController {
     const summary = side === "shipA" ? this.els.shipAEwarSummary : this.els.shipBEwarSummary;
     const state = this.states.get(side);
     const modulesLabel = this.i18n.t("label.modules");
-    const labelSpan = trigger.querySelector?.(".ewar-label");
+    const labelSpan = trigger.querySelector?.(".trigger-label");
     if (labelSpan) labelSpan.textContent = modulesLabel;
     trigger.setAttribute("aria-label", modulesLabel);
     popup.setAttribute("aria-label", modulesLabel);
@@ -277,7 +277,7 @@ export class EwarControllerImpl implements EwarController {
     const iconUrl = this.imageCatalog.itemIconUrl(moduleId);
     const img = html`<img class="ewar-summary-icon" alt="" src=${iconUrl}>` as unknown as HTMLImageElement;
     if (iconUrl === undefined) img.hidden = true;
-    const item = html`<span class="ewar-summary-item" data-hint=${hint}>${img}<span class="ewar-summary-count mono">${active}/${total}</span></span>`;
+    const item = html`<span class="trigger-summary-item" data-hint=${hint}>${img}<span class="trigger-summary-count mono">${active}/${total}</span></span>`;
     summary.appendChild(item);
   }
 

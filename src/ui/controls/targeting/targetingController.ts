@@ -72,7 +72,7 @@ export class TargetingControllerImpl implements TargetingController {
     const section = side === "shipA" ? this.els.shipATargetingSection : this.els.shipBTargetingSection;
     const spec = this.specs.get(side);
     const targetingLabel = this.i18n.t("label.targeting");
-    const labelSpan = trigger.querySelector?.(".targeting-label");
+    const labelSpan = trigger.querySelector?.(".trigger-label");
     if (labelSpan) labelSpan.textContent = targetingLabel;
     trigger.setAttribute("aria-label", targetingLabel);
     popup.setAttribute("aria-label", targetingLabel);
@@ -139,7 +139,7 @@ export class TargetingControllerImpl implements TargetingController {
       summary.textContent = "";
       return;
     }
-    const item = html`<span class="targeting-summary-item"><span class="targeting-summary-count mono">${formatWithCommas(spec.maxTargetingRange)}${this.i18n.t("unit.meter")}</span></span>`;
+    const item = html`<span class="trigger-summary-item"><span class="trigger-summary-count mono">${formatWithCommas(spec.maxTargetingRange)}${this.i18n.t("unit.meter")}</span></span>`;
     summary.appendChild(item);
   }
 }

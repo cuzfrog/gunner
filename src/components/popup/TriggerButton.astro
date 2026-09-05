@@ -1,8 +1,10 @@
 ---
+import Chevron from "../controls/Chevron.astro";
+
 interface Props {
   readonly id: string;
   readonly popupId: string;
-  readonly labelClass: string;
+  readonly labelClass?: string;
   readonly labelI18n?: string;
   readonly labelText?: string;
   readonly hintI18n?: string;
@@ -16,7 +18,7 @@ interface Props {
 const {
   id,
   popupId,
-  labelClass,
+  labelClass = "trigger-label truncate",
   labelI18n,
   labelText,
   hintI18n,
@@ -36,4 +38,5 @@ const {
   data-hint={hint} aria-label={ariaLabel}>
   {labelI18n || labelText ? <span class={labelClass} data-i18n={labelI18n}>{labelText}</span> : null}
   <slot />
+  <Chevron />
 </button>

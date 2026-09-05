@@ -1,33 +1,5 @@
 @layer components {
-.ammo-label {
-  display: block;
-  flex: 0 0 auto;
-  text-align: left;
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.ammo-group { position: relative; }
-
-.ammo-summary-row {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.ammo-summary-value {
-  font-size: 12px;
-  color: var(--accent-teal);
-  text-transform: uppercase;
-  letter-spacing: 0;
-  flex: 1 1 auto;
-  min-width: 0;
-  max-width: none;
-}
+.ammo-popup { }
 
 .ammo-summary-icon {
   width: 20px;
@@ -35,8 +7,6 @@
   object-fit: contain;
   flex-shrink: 0;
 }
-
-.ammo-popup { width: 100%; }
 
 .ammo-list {
   margin: 0;

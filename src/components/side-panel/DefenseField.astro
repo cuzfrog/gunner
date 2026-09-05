@@ -1,5 +1,4 @@
 ---
-import Chevron from "../controls/Chevron.astro";
 import PopupBox from "../popup/PopupBox.astro";
 import TriggerButton from "../popup/TriggerButton.astro";
 
@@ -9,17 +8,16 @@ interface Props {
 const { idPrefix } = Astro.props;
 ---
 
-<div class="form-field-group defense-group" id={`${idPrefix}-defense-field`}>
+<div class="form-field-group" id={`${idPrefix}-defense-field`}>
   <TriggerButton id={`${idPrefix}-defense-trigger`} popupId={`${idPrefix}-defense-popup`}
-          labelClass="defense-label truncate" labelI18n="label.defense" labelText="Defense"
+          labelI18n="label.defense" labelText="Defense"
           ariaLabelI18n="label.defense" ariaHaspopup="dialog" disabled
           ariaDescribedby={`${idPrefix}-defense-summary-row`}>
-    <span class="defense-summary-row" id={`${idPrefix}-defense-summary-row`}>
+    <span class="trigger-summary" id={`${idPrefix}-defense-summary-row`}>
       <span id={`${idPrefix}-defense-summary`}></span>
     </span>
-    <Chevron />
   </TriggerButton>
-  <PopupBox id={`${idPrefix}-defense-popup`} extraClass="defense-popup" position="below" align="both" scroll role="dialog" ariaModal={false} i18nAriaLabel="label.defense">
+  <PopupBox id={`${idPrefix}-defense-popup`} extraClass="defense-popup popup-stretch" position="below" align="both" scroll role="dialog" ariaModal={false} i18nAriaLabel="label.defense">
     <div class="preview-section" id={`${idPrefix}-defense-section`}></div>
   </PopupBox>
 </div>

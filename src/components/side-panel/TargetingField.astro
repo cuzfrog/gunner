@@ -1,5 +1,4 @@
 ---
-import Chevron from "../controls/Chevron.astro";
 import PopupBox from "../popup/PopupBox.astro";
 import TriggerButton from "../popup/TriggerButton.astro";
 
@@ -9,17 +8,16 @@ interface Props {
 const { idPrefix } = Astro.props;
 ---
 
-<div class="form-field-group targeting-group" id={`${idPrefix}-targeting-field`}>
+<div class="form-field-group" id={`${idPrefix}-targeting-field`}>
   <TriggerButton id={`${idPrefix}-targeting-trigger`} popupId={`${idPrefix}-targeting-popup`}
-          labelClass="targeting-label truncate" labelI18n="label.targeting" labelText="Targeting"
+          labelI18n="label.targeting" labelText="Targeting"
           ariaLabelI18n="label.targeting" ariaHaspopup="dialog" disabled
           ariaDescribedby={`${idPrefix}-targeting-summary-row`}>
-    <span class="targeting-summary-row" id={`${idPrefix}-targeting-summary-row`}>
+    <span class="trigger-summary" id={`${idPrefix}-targeting-summary-row`}>
       <span id={`${idPrefix}-targeting-summary`}></span>
     </span>
-    <Chevron />
   </TriggerButton>
-  <PopupBox id={`${idPrefix}-targeting-popup`} extraClass="targeting-popup" position="below" align="both" scroll role="dialog" ariaModal={false} i18nAriaLabel="label.targeting">
+  <PopupBox id={`${idPrefix}-targeting-popup`} extraClass="targeting-popup popup-stretch" position="below" align="both" scroll role="dialog" ariaModal={false} i18nAriaLabel="label.targeting">
     <div class="preview-section" id={`${idPrefix}-targeting-section`}></div>
   </PopupBox>
 </div>

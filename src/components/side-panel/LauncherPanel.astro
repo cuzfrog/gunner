@@ -1,5 +1,4 @@
 ---
-import Chevron from "../controls/Chevron.astro";
 import IconButton from "../controls/IconButton.astro";
 import PopupBox from "../popup/PopupBox.astro";
 import TriggerButton from "../popup/TriggerButton.astro";
@@ -51,10 +50,9 @@ const ADVANCED_ROWS = [
       ))}
     </div>
     <TriggerButton id={`${idPrefix}-launcher-attributes-trigger`} popupId={`${idPrefix}-launcher-attributes-popup`}
-            labelClass="ammo-label truncate" labelI18n="label.moreAttributes" labelText="More attributes"
+            labelI18n="label.moreAttributes" labelText="More attributes"
             hintI18n="button.missileAttributes" ariaLabelI18n="button.missileAttributes"
             data-hint="Missile attributes" ariaLabel="Missile attributes" ariaHaspopup="dialog">
-      <Chevron />
     </TriggerButton>
     <PopupBox id={`${idPrefix}-launcher-attributes-popup`} extraClass="launcher-attributes-popup" position="below" align="both" scroll role="dialog" ariaModal={false}>
       {ADVANCED_ROWS.map((row) => (
@@ -65,17 +63,16 @@ const ADVANCED_ROWS = [
       ))}
     </PopupBox>
   </div>
-  <div class="form-field-group ammo-group" id={`${idPrefix}-launcher-ammo-field`}>
+  <div class="form-field-group" id={`${idPrefix}-launcher-ammo-field`}>
     <TriggerButton id={`${idPrefix}-launcher-ammo-trigger`} popupId={`${idPrefix}-launcher-ammo-popup`}
             hintI18n="button.selectAmmo" ariaLabelI18n="button.selectAmmo"
             data-hint="Select missile" ariaLabel="Select missile" ariaHaspopup="listbox">
-      <span class="ammo-summary-row">
+      <span class="trigger-summary">
         <img id={`${idPrefix}-launcher-ammo-summary-icon`} class="ammo-summary-icon" alt="" hidden>
-        <span class="ammo-summary-value mono truncate" id={`${idPrefix}-launcher-ammo-summary`}></span>
-        <Chevron />
+        <span class="trigger-summary-value mono truncate" id={`${idPrefix}-launcher-ammo-summary`}></span>
       </span>
     </TriggerButton>
-    <PopupBox id={`${idPrefix}-launcher-ammo-popup`} extraClass="launcher-ammo-popup" position="below" align="both" scroll>
+    <PopupBox id={`${idPrefix}-launcher-ammo-popup`} extraClass="launcher-ammo-popup popup-stretch" position="below" align="both" scroll>
       <ul class="launcher-ammo-list" id={`${idPrefix}-launcher-ammo-list`} role="listbox"></ul>
     </PopupBox>
   </div>

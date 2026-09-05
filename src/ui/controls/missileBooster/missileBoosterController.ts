@@ -200,7 +200,7 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
 
   private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, hint: string): void {
     const iconUrl = this.imageCatalog.itemIconUrl(moduleId);
-    const item = html`<span class="ewar-summary-item" data-hint=${hint}><img class="ewar-summary-icon" alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}><span class="ewar-summary-count mono">${active}/${total}</span></span>` as unknown as HTMLSpanElement;
+    const item = html`<span class="trigger-summary-item" data-hint=${hint}><img class="ewar-summary-icon" alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}><span class="trigger-summary-count mono">${active}/${total}</span></span>` as unknown as HTMLSpanElement;
     summary.appendChild(item);
   }
 

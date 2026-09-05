@@ -1,17 +1,5 @@
 @layer components {
-.targeting-label {
-  display: block;
-  flex: 1 1 auto;
-  text-align: left;
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.targeting-group { position: relative; }
-
-.targeting-popup { width: 100%; }
+.targeting-popup { }
 
 .targeting-attr-row {
   display: flex;
@@ -52,27 +40,6 @@
   font-size: 12px;
   color: var(--text-primary);
   text-align: right;
-  white-space: nowrap;
-}
-
-.targeting-summary-row {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex: 0 0 auto;
-}
-
-.targeting-summary-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.targeting-summary-count {
-  font-size: 12px;
-  color: var(--accent-teal);
-  text-transform: uppercase;
-  letter-spacing: 0;
   white-space: nowrap;
 }
 }
