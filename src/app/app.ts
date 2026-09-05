@@ -1,5 +1,5 @@
-import { Vec2 } from "../sim";
-import type { DamageEvent, DefenseSimConfig, DefenseSimulator, DefenseView, DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, LockClock, LockState, MissileAttackFacts, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, SensorBoosterResolver, SensorSpec, ShipState, Side, Simulation, WeaponClock, WeaponSpec } from "../sim";
+import { Vec2, ZERO_DAMAGE } from "../sim";
+import type { DamageEvent, DamageProjection, DamageVector, DefenseAssessment, DefenseSimConfig, DefenseSimulator, DefenseView, DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, LockClock, LockState, MissileAttackFacts, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, SensorBoosterResolver, SensorSpec, ShipState, Side, Simulation, WeaponClock, WeaponSpec } from "../sim";
 import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, MissileRenderCollection, Renderer, WeaponRange, WeaponRanges } from "../ui";
 
 export interface App {
@@ -215,7 +215,8 @@ export class AppImpl implements App {
 
   private renderFrame(): void {
     const snapshot = this.simulation.snapshot();
-    const view = this.engagementFrameComposer.compose(snapshot, this.engagementInput(snapshot, this.lockClock.states()));
+    const composed = this.engagementFrameComposer.compose(snapshot, this.engagementInput(snapshot, this.lockClock.states()));
+    const view = this.overlayProjection(composed);
     const effectiveReadouts: EffectiveReadouts = {
       shipA: this.sideReadoutValues(snapshot.shipA, snapshot.shipB, view, "shipA"),
       shipB: this.sideReadoutValues(snapshot.shipB, snapshot.shipA, view, "shipB"),
@@ -228,6 +229,18 @@ export class AppImpl implements App {
     this.renderer.setLockStates(view.locks);
     this.renderer.draw(snapshot, view.frame, this.rendererWeaponRanges(view), this.controls.getOverlays(), this.droneRenderInfo(), this.missileRenderInfo(), this.defenseSimulator.view());
     this.controls.update(view, effectiveReadouts, this.defenseSimulator.view());
+  }
+
+  private overlayProjection(composed: EngagementView): EngagementView {
+    const incoming = incomingByTarget(composed);
+    const projection = this.defenseSimulator.project(incoming, 1);
+    return {
+      ...composed,
+      defenses: {
+        shipA: withProjection(composed.defenses.shipA, projection.shipA),
+        shipB: withProjection(composed.defenses.shipB, projection.shipB),
+      },
+    };
   }
 
   private rendererWeaponRanges(view: EngagementView): WeaponRanges {
@@ -327,4 +340,19 @@ function droneGroupRenderInfo(states: readonly DroneRuntimeState[], specs: reado
     out.push({ positions: state?.positions ?? [new Vec2(0, 0)], optimal: spec.optimal, falloff: spec.falloff, controlRange: spec.controlRange });
   }
   return out;
+}
+
+function incomingByTarget(view: EngagementView): Record<Side, DamageVector> {
+  return {
+    shipA: view.attacks.shipB?.damage.appliedByType ?? ZERO_DAMAGE,
+    shipB: view.attacks.shipA?.damage.appliedByType ?? ZERO_DAMAGE,
+  };
+}
+
+function withProjection(defense: DefenseAssessment, projection: DamageProjection): DefenseAssessment {
+  return {
+    ...defense,
+    actualIncomingDps: projection.totalHpLost,
+    actualIncomingByLayer: projection.byLayer,
+  };
 }

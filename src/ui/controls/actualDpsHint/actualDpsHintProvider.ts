@@ -25,8 +25,8 @@ export class ActualDpsHintProviderImpl implements HintContentProvider {
     if (side === undefined) return;
     const view = this.viewStore.currentView();
     if (view === undefined) return;
+    if (view.attacks[side] === undefined) return;
     const model = this.buildModel(side, view);
-    if (model.layers.length === 0) return;
     this.renderer.render(model, container);
   }
 
@@ -40,8 +40,9 @@ export class ActualDpsHintProviderImpl implements HintContentProvider {
     const byLayer = defense.actualIncomingByLayer;
     const layers: ActualDpsHintLayerRow[] = [];
     for (const layer of DEFENSE_LAYERS) {
-      if (byLayer[layer] <= 0) continue;
-      layers.push({ layer, hpLost: byLayer[layer] });
+      const hpLost = byLayer[layer];
+      if (hpLost <= 0) continue;
+      layers.push({ layer, hpLost });
     }
     return { layers, totalAppliedDps, totalActualDps };
   }

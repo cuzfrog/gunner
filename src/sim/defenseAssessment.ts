@@ -1,4 +1,4 @@
-import { type DamageVector, type DefenseLayer, type DefenseLayerSpec, type DefenseSpec, type RepairerSpec, DAMAGE_TYPES } from "./types";
+import { type DamageVector, type DefenseLayer, type DefenseLayerSpec, type DefenseSpec, type LayerHpLoss, type RepairerSpec, DAMAGE_TYPES } from "./types";
 
 export interface LayerEhp {
   readonly layer: DefenseLayer;
@@ -12,7 +12,7 @@ export interface DefenseAssessment {
   readonly repairPerSecond: Readonly<Record<DefenseLayer, number>>;
   readonly shieldRegenPerSecond: number;
   readonly actualIncomingDps: number;
-  readonly actualIncomingByLayer: Readonly<Record<DefenseLayer, number>>;
+  readonly actualIncomingByLayer: LayerHpLoss;
 }
 
 export interface DefenseAssessor {

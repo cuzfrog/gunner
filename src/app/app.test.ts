@@ -408,4 +408,55 @@ describe("AppImpl", () => {
       shipB: { kind: "drone", speed: 0, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40, speedBreakdown: emptySpeedBreakdown },
     }, emptyDefenseView);
   });
+
+  test("renderFrame overlays defense projection onto defense assessments", () => {
+    const attackWithDamage: AttackAssessment = {
+      boostedWeapon: turret, effectiveWeapon: turret,
+      damage: { nominalDps: 100, appliedDps: 80, application: 0.8, volley: 400, baseVolleyByType: ZERO_DAMAGE, appliedByType: { em: 80, thermal: 0, kinetic: 0, explosive: 0 }, appliedVolleyByType: ZERO_DAMAGE },
+      turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8 },
+    };
+    const viewWithDamage: EngagementView = {
+      frame,
+      attacks: { shipA: attackWithDamage, shipB: attackWithDamage },
+      weaponAttacks: { shipA: [], shipB: [] },
+      effectiveWeapons: { shipA: turret, shipB: turret },
+      defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+      locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+    };
+    engagementFrameComposer.compose.mockReturnValue(viewWithDamage);
+    defenseSimulator.project.mockReturnValue({
+      shipA: { totalHpLost: 60, byLayer: { shield: 40, armor: 20, hull: 0 } },
+      shipB: { totalHpLost: 70, byLayer: { shield: 50, armor: 20, hull: 0 } },
+    });
+    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, sensorBoosterResolver, weaponClock, lockClock, renderer, loop });
+    app.start();
+    expect(defenseSimulator.project).toHaveBeenCalledWith({ shipA: { em: 80, thermal: 0, kinetic: 0, explosive: 0 }, shipB: { em: 80, thermal: 0, kinetic: 0, explosive: 0 } }, 1);
+    const updatedView = controls.update.mock.calls[0][0] as EngagementView;
+    expect(updatedView.defenses.shipA.actualIncomingDps).toBe(60);
+    expect(updatedView.defenses.shipA.actualIncomingByLayer).toEqual({ shield: 40, armor: 20, hull: 0 });
+    expect(updatedView.defenses.shipB.actualIncomingDps).toBe(70);
+    expect(updatedView.defenses.shipB.actualIncomingByLayer).toEqual({ shield: 50, armor: 20, hull: 0 });
+  });
+
+  test("renderFrame yields zero actual DPS when no attack exists", () => {
+    const viewNoAttack: EngagementView = {
+      frame,
+      attacks: { shipA: undefined, shipB: undefined },
+      weaponAttacks: { shipA: [], shipB: [] },
+      effectiveWeapons: { shipA: turret, shipB: turret },
+      defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+      locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+    };
+    engagementFrameComposer.compose.mockReturnValue(viewNoAttack);
+    defenseSimulator.project.mockReturnValue({
+      shipA: { totalHpLost: 0, byLayer: { shield: 0, armor: 0, hull: 0 } },
+      shipB: { totalHpLost: 0, byLayer: { shield: 0, armor: 0, hull: 0 } },
+    });
+    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, sensorBoosterResolver, weaponClock, lockClock, renderer, loop });
+    app.start();
+    expect(defenseSimulator.project).toHaveBeenCalledWith({ shipA: ZERO_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    const updatedView = controls.update.mock.calls[0][0] as EngagementView;
+    expect(updatedView.defenses.shipA.actualIncomingDps).toBe(0);
+    expect(updatedView.defenses.shipB.actualIncomingDps).toBe(0);
+  });
 });

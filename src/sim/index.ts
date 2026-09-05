@@ -11,7 +11,7 @@ export type { LockClock, LockStepInput } from "./lockClock";
 export type { EngagementFrameComposer, EngagementInput, EngagementView, WeaponAttack } from "./engagementFrameComposer";
 export type { DefenseAssessor, DefenseAssessment, LayerEhp } from "./defenseAssessment";
 export { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
-export type { DefenseSimulator, DefenseView, DefensePoolState, DefenseSimConfig, RepairerViewState, RahViewState, RepairMode, DamageProjection, LayerHpLoss } from "./defenseSimulator";
+export type { DefenseSimulator, DefenseView, DefensePoolState, DefenseSimConfig, RepairerViewState, RahViewState, RepairMode, DamageProjection } from "./defenseSimulator";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { MissileApplication } from "./missileApplication";
 export type { DroneApplication } from "./droneApplication";
@@ -36,6 +36,7 @@ export type {
   DamageVector,
   DefenseLayer,
   DefenseLayerSpec,
+  LayerHpLoss,
   DefenseSpec,
   RahSpec,
   RepairerSpec,

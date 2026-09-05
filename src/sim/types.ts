@@ -11,6 +11,12 @@ export type DamageVector = Readonly<Record<DamageType, number>>;
 export type DamageResists = Readonly<Record<DamageType, number>>;
 export type DefenseLayer = "shield" | "armor" | "hull";
 
+export interface LayerHpLoss {
+  readonly shield: number;
+  readonly armor: number;
+  readonly hull: number;
+}
+
 export const ZERO_DAMAGE: DamageVector = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
 export const DAMAGE_TYPES: readonly DamageType[] = ["em", "thermal", "kinetic", "explosive"];
 export const DEFENSE_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];

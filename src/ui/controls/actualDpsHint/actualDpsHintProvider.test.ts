@@ -138,6 +138,21 @@ describe("ActualDpsHintProviderImpl", () => {
     expect(model.layers[0].layer).toBe("shield");
   });
 
+  test("renders summary even when all layers have zero HP lost", () => {
+    const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
+    const defense = makeDefense(0, { shield: 0, armor: 0, hull: 0 });
+    const deps = makeDeps({ viewStore: makeViewStore(makeView(attack, defense)) });
+    const provider = new ActualDpsHintProviderImpl(deps);
+    const anchor = makeAnchor("a");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(deps.renderMock).toHaveBeenCalledTimes(1);
+    const model = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
+    expect(model.layers).toHaveLength(0);
+    expect(model.totalAppliedDps).toBe(100);
+    expect(model.totalActualDps).toBe(0);
+  });
+
   test("uses shipB defense for shipA side and shipA defense for shipB side", () => {
     const shipAAttack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
     const shipADefense = makeDefense(30, { shield: 30, armor: 0, hull: 0 });
