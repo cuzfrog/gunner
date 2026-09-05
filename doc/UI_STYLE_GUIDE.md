@@ -80,10 +80,10 @@ Label treatment pattern: uppercase + letter-spacing `0.05em` (labels) / `0.08em`
 
 | Context | min-height |
 |---|---|
-| Compact toggles, triggers, gear/icon buttons | 24–26px |
-| Panel inputs, selects | 31px |
-| Profile bar controls | 33px |
+| Compact toggles, triggers, inputs, gear/icon buttons, profile bar controls | 26px |
 | Main playback controls | 35px |
+
+Single-line text controls (`.trigger`, `.btn`, `.input-field`, `.popup-item`) set unitless `line-height: 1` so `min-height` is the real floor on every OS. `line-height: normal` is font-dependent and makes content blow past `min-height`; do not remove the `line-height: 1` contract from these primitives.
 
 ## Components
 
