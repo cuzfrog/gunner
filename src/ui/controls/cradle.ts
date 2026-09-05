@@ -1,6 +1,6 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser, SettingsStore } from "../../appstate";
 import type { ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
-import type { EwarResolver, HitChance, SensorBoosterResolver, SimValueParser } from "../../sim";
+import type { EwarResolver, HitChance, SensorBoosterResolver, SimValueParser, DefenseAssessor } from "../../sim";
 import type { Ships } from "../../ships";
 import type { ItemNameCatalog, ItemNameLoader } from "../../gamedata";
 import type { I18n } from "../i18n";
@@ -116,6 +116,7 @@ export interface ControlsCradle {
   readonly sensorBoosterController: SensorBoosterController;
   readonly portraitsController: PortraitsController;
   readonly ewarResolver: EwarResolver;
+  readonly defenseAssessor: DefenseAssessor;
   readonly sensorBoosterResolver: SensorBoosterResolver;
   readonly sessionCodec: SessionCodec;
   readonly simConfigSource: SimConfigSource;

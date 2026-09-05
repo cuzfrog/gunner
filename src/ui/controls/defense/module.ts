@@ -8,8 +8,8 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export function registerDefenseModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    defenseController: asFunction(({ els, popupGroup, i18n, uiEvents }) => new DefenseControllerImpl({
-      els: defenseEls(els), popupGroup, i18n, events: uiEvents,
+    defenseController: asFunction(({ els, popupGroup, i18n, uiEvents, defenseAssessor }) => new DefenseControllerImpl({
+      els: defenseEls(els), popupGroup, i18n, events: uiEvents, defenseAssessor,
     })).singleton(),
   });
 }

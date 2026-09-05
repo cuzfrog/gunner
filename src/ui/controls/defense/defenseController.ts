@@ -1,4 +1,4 @@
-import { type DefenseAssessment, type DefenseLayer, type DefenseSpec, type DefenseView, type EngagementView, type RepairerSpec, EMPTY_DEFENSE_SPEC } from "../../../sim";
+import { type DefenseAssessment, type DefenseAssessor, type DefenseLayer, type DefenseSpec, type DefenseView, type EngagementView, type RepairerSpec, EMPTY_DEFENSE_SPEC, ZERO_DAMAGE } from "../../../sim";
 import type { TypeId } from "../../../gamedata/ids";
 import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation } from "../../../appstate";
 import type { I18n } from "../../i18n";
@@ -17,6 +17,7 @@ export class DefenseControllerImpl implements DefenseController {
   private readonly els: DefenseEls;
   private readonly i18n: I18n;
   private readonly events: UiEvents;
+  private readonly defenseAssessor: DefenseAssessor;
   private readonly specs = new Map<Side, DefenseSpec>();
   private readonly assessments = new Map<Side, DefenseAssessment>();
   private readonly damageEnabledState: Record<Side, boolean> = { shipA: true, shipB: true };
@@ -28,10 +29,11 @@ export class DefenseControllerImpl implements DefenseController {
   private readonly fields: Record<Side, PopupField>;
   private defenseView: DefenseView | undefined;
 
-  constructor(deps: { els: DefenseEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents }) {
+  constructor(deps: { els: DefenseEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents; defenseAssessor: DefenseAssessor }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.events = deps.events;
+    this.defenseAssessor = deps.defenseAssessor;
     this.sectionBlock = new SectionBlockImpl();
     this.fields = {
       shipA: new PopupField({ els: deps.els.shipA, popupGroup: deps.popupGroup }),
@@ -181,7 +183,7 @@ export class DefenseControllerImpl implements DefenseController {
     this.renderResistsSection(section, spec);
     this.renderHpSection(section, spec);
     this.renderEhpSection(section, side);
-    this.renderRepairerSection(section, spec);
+    this.renderRepairerSection(section, side, spec);
     this.renderShieldRegenSection(section, side);
     this.renderDamageEnabledSection(section, side);
     this.renderRepairModeSection(section, side);
@@ -234,11 +236,14 @@ export class DefenseControllerImpl implements DefenseController {
     section.appendChild(block);
   }
 
-  private renderRepairerSection(section: HTMLElement, spec: DefenseSpec): void {
+  private renderRepairerSection(section: HTMLElement, side: Side, spec: DefenseSpec): void {
     if (spec.repairers.length === 0) return;
+    const repairerViews = this.defenseView?.repairers[side] ?? [];
     const rows: (Element | DocumentFragment)[] = [];
-    for (const repairer of spec.repairers) {
-      const hpPerSecond = repairer.amount / repairer.cycleTime;
+    for (let i = 0; i < spec.repairers.length; i++) {
+      const repairer = spec.repairers[i];
+      const view = repairerViews[i];
+      const hpPerSecond = view ? view.hpPerSecond : repairer.amount / repairer.cycleTime;
       const row = html`<div class="defense-repairer-row"><span class="defense-repairer-name">${this.i18n.t(layerLabelKey(repairer.layer))}</span><span class="defense-repairer-stats mono">${formatWithCommas(hpPerSecond, 1)} ${this.i18n.t("defense.repairPerSecond")} · ${formatWithCommas(repairer.cycleTime, 1)}s ${this.i18n.t("defense.cycleTime")}</span></div>`;
       rows.push(row);
     }
@@ -334,8 +339,8 @@ export class DefenseControllerImpl implements DefenseController {
       summary.textContent = "";
       return;
     }
-    const assessment = this.assessments.get(side);
-    const totalEhp = assessment?.totalEhp ?? computeTotalEhp(spec);
+    const assessment = this.assessments.get(side) ?? this.defenseAssessor.assess(spec, ZERO_DAMAGE, true);
+    const totalEhp = assessment.totalEhp;
     const item = html`<span class="trigger-summary-item"><span class="trigger-summary-count mono">${formatWithCommas(totalEhp)} EHP</span></span>`;
     summary.appendChild(item);
   }
@@ -353,17 +358,4 @@ function layerLabelKey(layer: DefenseLayer): string {
 
 function repairerSpecHasAncillary(spec: RepairerSpec): boolean {
   return spec.ancillary !== undefined;
-}
-
-function computeTotalEhp(spec: DefenseSpec): number {
-  let total = 0;
-  for (const layer of DEFENSE_LAYERS) {
-    const layerSpec = spec.layers[layer];
-    let effectiveResonance = 0;
-    for (const type of DAMAGE_TYPE_ORDER) {
-      effectiveResonance += 0.25 * (1 - layerSpec.resists[type]);
-    }
-    total += effectiveResonance > 0 ? layerSpec.hp / effectiveResonance : 0;
-  }
-  return Math.round(total);
 }
