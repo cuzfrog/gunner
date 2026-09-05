@@ -1,12 +1,11 @@
 import {
-  type DefenseView,
   type EngineConfig,
-  type EngagementView,
+  type EngineView,
   type SimConfig,
   type WeaponSpec,
 } from "../../../sim";
 import { isEventTargetWithClosest, num } from "../controlsDom";
-import type { Controls, ControlsCallbacks, EffectiveReadouts, ViewStore } from "../controlsContract";
+import type { Controls, ControlsCallbacks, EffectiveReadouts } from "../controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
 import type { EffectiveReadout } from "../effectiveReadout";
 import type { FittingPreviewManager, PopupGroup } from "../popup";
@@ -31,6 +30,7 @@ import type { WeaponRangeVisibility } from "../../../appstate";
 import type { RangeOverlayController } from "../rangeOverlay";
 import type { PortraitsController } from "../portraits";
 import type { HoverHintController } from "../hoverHint";
+import type { ViewStream } from "../../viewStream";
 
 export type { Controls, ControlsCallbacks } from "../controlsContract";
 
@@ -67,11 +67,12 @@ interface DomControlsAllDeps extends DomControlsDeps {
   hoverHintController: HoverHintController;
   previewManager: FittingPreviewManager;
   simConfigSource: SimConfigSource;
+  viewStream: ViewStream;
 }
 
 const READOUT_INTERVAL_MS = 50;
 
-export class DomControls implements Controls, DomControlsHost, ViewStore {
+export class DomControls implements Controls, DomControlsHost {
   private readonly deps: DomControlsDeps;
   private readonly els: DomControlsEls;
   private readonly popupGroup: PopupGroup;
@@ -98,10 +99,11 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   private readonly hoverHintController: HoverHintController;
   private readonly previewManager: FittingPreviewManager;
   private readonly simConfigSource: SimConfigSource;
+  private readonly viewStream: ViewStream;
   private readonly now: () => number;
   private currentDistanceValue: number;
   private lastReadoutApplyMs = -Infinity;
-  private cachedReadouts?: { view: EngagementView; effective: EffectiveReadouts };
+  private cachedView?: EngineView;
 
   private callbacks?: ControlsCallbacks;
   private playing = false;
@@ -133,15 +135,16 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     this.hoverHintController = all.hoverHintController;
     this.previewManager = all.previewManager;
     this.simConfigSource = all.simConfigSource;
+    this.viewStream = all.viewStream;
     this.now = all.now;
     this.currentDistanceValue = num(this.els.initialDistance);
-    this.deps.events.emitDistanceChanged(this.currentDistanceValue);
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated(() => this.onConfigInvalidated());
     this.deps.events.onDisplayInvalidated(() => this.onDisplayChange());
     this.deps.events.onSessionRestored(() => this.onSessionRestored());
     this.deps.events.onSessionReset(() => this.onSessionReset());
     this.deps.events.onStartupDefaultsApplied(() => this.onStartupDefaultsApplied());
+    this.viewStream.onViewUpdated((view) => this.onReadouts(view));
   }
 
   wireControls(): void {
@@ -284,22 +287,9 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   getDroneRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneRangeVisibility(); }
   getDroneControlRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneControlRangeVisibility(); }
   hasWeapon(side: Side): boolean { return this.turretControllers[side].turret() !== undefined || this.launcherControllers[side].launcher() !== undefined || this.droneControllers[side].drone() !== undefined; }
-  update(view: EngagementView, effective: EffectiveReadouts, defenseView: DefenseView): void {
-    this.currentDistanceValue = view.frame.distance;
-    this.deps.events.emitDistanceChanged(this.currentDistanceValue);
-    this.cachedReadouts = { view, effective };
-    this.defenseController.updateDefenseView(defenseView);
-    this.applyReadoutsIfReady();
-    this.rangeOverlayController.update();
-    this.portraitsController.update();
-    this.hoverHintController.refresh();
-  }
-  currentView(): EngagementView | undefined {
-    return this.cachedReadouts?.view;
-  }
   setPlaying(playing: boolean): void {
-    if (!playing && this.playing && this.cachedReadouts) {
-      this.applyReadouts(this.cachedReadouts.view, this.cachedReadouts.effective);
+    if (!playing && this.playing && this.cachedView) {
+      this.applyReadouts(this.cachedView);
       this.lastReadoutApplyMs = this.now();
     }
     this.playing = playing;
@@ -308,17 +298,24 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   }
   setCallbacks(callbacks: ControlsCallbacks): void { this.callbacks = callbacks; }
 
+  private onReadouts(view: EngineView): void {
+    this.currentDistanceValue = view.frame.distance;
+    this.cachedView = view;
+    this.defenseController.updateDefenseView(view.defenseRuntime);
+    this.applyReadoutsIfReady();
+  }
+
   private applyReadoutsIfReady(): void {
     const now = this.now();
     if (this.playing && now - this.lastReadoutApplyMs < READOUT_INTERVAL_MS) return;
-    if (!this.cachedReadouts) return;
-    this.applyReadouts(this.cachedReadouts.view, this.cachedReadouts.effective);
+    if (!this.cachedView) return;
+    this.applyReadouts(this.cachedView);
     this.lastReadoutApplyMs = now;
   }
 
-  private applyReadouts(view: EngagementView, effective: EffectiveReadouts): void {
+  private applyReadouts(view: EngineView): void {
     this.engagementReadout.update(view, (key) => this.deps.i18n.t(key));
-    this.effectiveReadout.update(effective);
+    this.effectiveReadout.update(view.readouts);
     this.defenseController.updateAssessments(view);
     this.defenseController.updateEffectiveSig("shipA", this.getSig("shipA"));
     this.defenseController.updateEffectiveSig("shipB", this.getSig("shipB"));

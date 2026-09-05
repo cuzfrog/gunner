@@ -1,6 +1,7 @@
-import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, EMPTY_PROJECTION, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type MissileRuntimeState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, EMPTY_PROJECTION, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineEvents, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type MissileRuntimeState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "../sim";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
 import type { EngagementEngine } from "../sim";
+import type { Side } from "../sim";
 import { AppImpl } from "./app";
 
 const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };
@@ -84,26 +85,33 @@ const controls = vi.mocked<Controls>({
   getDroneControlRangeVisibility: vi.fn(() => "none" as const),
   getOverlays: vi.fn(() => []),
   hasWeapon: vi.fn(),
-  update: vi.fn(),
   setPlaying: vi.fn(),
   setCallbacks: vi.fn(),
 });
+
+const viewListeners = new Set<(view: EngineView) => void>();
+const destroyListeners = new Set<(side: Side) => void>();
+const engineEvents: EngineEvents = {
+  onViewUpdated: (l) => viewListeners.add(l),
+  offViewUpdated: (l) => viewListeners.delete(l),
+  onShipDestroyed: (l) => destroyListeners.add(l),
+  offShipDestroyed: (l) => destroyListeners.delete(l),
+};
+function emitView(view: EngineView): void { for (const l of Array.from(viewListeners)) l(view); }
+function emitDestroy(side: Side): void { for (const l of Array.from(destroyListeners)) l(side); }
+
 const engine = vi.mocked<EngagementEngine>({
-  reset: vi.fn(() => baseView()),
-  update: vi.fn(() => baseView()),
-  step: vi.fn(() => baseView()),
+  reset: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
+  update: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
+  step: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
   view: vi.fn(() => baseView()),
-  events: vi.fn(() => ({
-    onViewUpdated: vi.fn(),
-    offViewUpdated: vi.fn(),
-    onShipDestroyed: vi.fn(),
-    offShipDestroyed: vi.fn(),
-  })),
+  events: vi.fn(() => engineEvents),
   setDamageEnabled: vi.fn(),
   setRepairMode: vi.fn(),
   setRepairerActivation: vi.fn(),
   setRahActivation: vi.fn(),
 });
+
 const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setDroneRangeVisibility: vi.fn(), setDroneControlRangeVisibility: vi.fn(), setManualZoom: vi.fn(), setLockStates: vi.fn() });
 const loop = vi.mocked<Loop>({
   setTickHandler: vi.fn(),
@@ -121,6 +129,12 @@ describe("AppImpl", () => {
   beforeEach(() => {
     controls.getWeapon.mockReturnValue(turret);
     controls.hasWeapon.mockReturnValue(true);
+    viewListeners.clear();
+    destroyListeners.clear();
+    engine.reset.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
+    engine.update.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
+    engine.step.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
+    engine.view.mockReturnValue(baseView());
     app = new AppImpl({ controls, engine, renderer, loop });
   });
 
@@ -128,7 +142,7 @@ describe("AppImpl", () => {
     return controls.setCallbacks.mock.calls.at(-1)![0];
   }
 
-  test("start wires the loop, controls callbacks, resets the engine, and renders the initial frame", () => {
+  test("start wires the loop, controls callbacks, resets the engine, and renders the initial frame via view event", () => {
     app.start();
     expect(loop.setTickHandler).toHaveBeenCalled();
     expect(loop.setSpeed).toHaveBeenCalledWith(1);
@@ -136,30 +150,26 @@ describe("AppImpl", () => {
     expect(engine.reset).toHaveBeenCalledWith(engineConfig);
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
     expect(renderer.draw).toHaveBeenCalledTimes(1);
-    expect(controls.update).toHaveBeenCalledTimes(1);
   });
 
-  test("tick delegates to engine.step and renders", () => {
+  test("tick delegates only to engine.step; no direct death check in tick", () => {
     app.start();
-    engine.step.mockClear();
     renderer.draw.mockClear();
-    controls.update.mockClear();
+    engine.step.mockClear();
     app.tick(0.1);
     expect(engine.step).toHaveBeenCalledWith(0.1);
-    expect(renderer.draw).toHaveBeenCalledTimes(1);
-    expect(controls.update).toHaveBeenCalledTimes(1);
   });
 
-  test("tick stops the loop and sets playing false on death", () => {
-    const deadView: EngineView = { ...baseView(), defenseRuntime: { ...emptyDefenseView, dead: { shipA: true, shipB: false } } };
-    engine.step.mockReturnValue(deadView);
+  test("shipDestroyed event stops the loop and sets playing false", () => {
     app.start();
-    app.tick(0.1);
+    loop.stop.mockClear();
+    controls.setPlaying.mockClear();
+    emitDestroy("shipA");
     expect(loop.stop).toHaveBeenCalled();
     expect(controls.setPlaying).toHaveBeenCalledWith(false);
   });
 
-  test("reset callback re-initializes the engine and loop, then renders", () => {
+  test("reset callback re-initializes the engine and loop; rendering is driven by view event", () => {
     app.start();
     engine.reset.mockClear();
     renderer.draw.mockClear();
@@ -169,7 +179,7 @@ describe("AppImpl", () => {
     expect(renderer.draw).toHaveBeenCalledTimes(1);
   });
 
-  test("config change updates the engine and renders without restarting the loop", () => {
+  test("config change updates the engine without restarting the loop; rendering is driven by view event", () => {
     app.start();
     engine.update.mockClear();
     loop.reset.mockClear();
@@ -180,7 +190,7 @@ describe("AppImpl", () => {
     expect(renderer.draw).toHaveBeenCalledTimes(1);
   });
 
-  test("display change re-renders without stepping the engine", () => {
+  test("display change re-renders from engine.view() without stepping the engine", () => {
     app.start();
     engine.step.mockClear();
     const before = renderer.draw.mock.calls.length;
@@ -213,7 +223,6 @@ describe("AppImpl", () => {
   test("renderFrame passes engine view snapshot, frame, weapon ranges, and defense runtime to renderer", () => {
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, emptyDefenseView);
-    expect(controls.update).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), emptyDefenseView);
   });
 
   test("renderFrame passes drone render info from engine view drone states and specs", () => {
@@ -225,7 +234,7 @@ describe("AppImpl", () => {
       drones: { shipA: [droneState], shipB: [droneState] },
       droneSpecs: { shipA: [drone], shipB: [drone] },
     };
-    engine.reset.mockReturnValue(droneView);
+    engine.reset.mockImplementation(() => { emitView(droneView); return droneView; });
     engine.view.mockReturnValue(droneView);
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "drone", optimal: 1000, falloff: 500 }, shipB: { kind: "drone", optimal: 1000, falloff: 500 } }, [], { shipA: [{ positions: [new Vec2(100, 200)], optimal: 1000, falloff: 500, controlRange: 60000 }], shipB: [{ positions: [new Vec2(100, 200)], optimal: 1000, falloff: 500, controlRange: 60000 }] }, { shipA: [], shipB: [] }, emptyDefenseView);
@@ -237,7 +246,7 @@ describe("AppImpl", () => {
       ...baseView(),
       missiles: { shipA: [missileState], shipB: [] },
     };
-    engine.reset.mockReturnValue(missileView);
+    engine.reset.mockImplementation(() => { emitView(missileView); return missileView; });
     engine.view.mockReturnValue(missileView);
     app.start();
     const drawCall = renderer.draw.mock.calls[0];

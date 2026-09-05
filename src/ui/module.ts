@@ -19,10 +19,10 @@ export function registerUiModule<T extends UiCradle>(cradle: AwilixContainer<T>)
   registerAppstateModule(cradle);
   cradle.register({
     timer: asClass(DefaultTimer).singleton(),
+    viewStream: asClass(ViewStreamImpl).singleton(),
   });
   registerControlsModule(cradle);
   cradle.register({
-    viewStream: asClass(ViewStreamImpl).singleton(),
     renderer: asClass(CanvasRenderer).singleton(),
     loop: asClass(RafLoop).singleton(),
   });

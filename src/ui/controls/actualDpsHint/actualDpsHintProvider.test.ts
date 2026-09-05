@@ -1,6 +1,6 @@
 import { type FakeElement, fakeDocument } from "../../testing";
 import { ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, type AttackAssessment, type DamageProjection, type EngagementView, type TurretSpec } from "../../../sim";
-import type { ViewStore } from "../controlsContract";
+import type { ViewStream } from "../../viewStream";
 import type { ActualDpsHintModel, ActualDpsHintRenderer } from "./actualDpsHintRenderer";
 import { type ActualDpsHintProviderDeps, ActualDpsHintProviderImpl } from "./actualDpsHintProvider";
 
@@ -30,8 +30,8 @@ function makeView(shipAAttack: AttackAssessment | undefined, shipBProjection: Da
   } as unknown as EngagementView;
 }
 
-function makeViewStore(view: EngagementView | undefined): ViewStore {
-  return { currentView: vi.fn(() => view) } as unknown as ViewStore;
+function makeViewStream(view: EngagementView | undefined): ViewStream {
+  return { connect: vi.fn(), onViewUpdated: vi.fn(), offViewUpdated: vi.fn(), currentView: vi.fn(() => view) } as unknown as ViewStream;
 }
 
 function makeMockRenderer(): { renderer: ActualDpsHintRenderer; renderMock: ReturnType<typeof vi.fn> } {
@@ -45,7 +45,7 @@ function makeDeps(overrides: Partial<ActualDpsHintProviderDeps> = {}): ActualDps
   const attack = makeAttack({ em: 100, thermal: 50, kinetic: 0, explosive: 0 }, 150);
   const projection = makeProjection(110, { shield: 80, armor: 30, hull: 0 });
   return {
-    viewStore: makeViewStore(makeView(attack, projection)),
+    viewStream: makeViewStream(makeView(attack, projection)),
     actualDpsHintRenderer: renderer,
     ...overrides,
     renderMock,
@@ -91,7 +91,7 @@ describe("ActualDpsHintProviderImpl", () => {
   });
 
   test("renders nothing when view store has no current view", () => {
-    const deps = makeDeps({ viewStore: makeViewStore(undefined) });
+    const deps = makeDeps({ viewStream: makeViewStream(undefined) });
     const provider = new ActualDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
@@ -101,7 +101,7 @@ describe("ActualDpsHintProviderImpl", () => {
 
   test("renders nothing when side has no attack", () => {
     const projection = makeProjection(0, { shield: 0, armor: 0, hull: 0 });
-    const deps = makeDeps({ viewStore: makeViewStore(makeView(undefined, projection)) });
+    const deps = makeDeps({ viewStream: makeViewStream(makeView(undefined, projection)) });
     const provider = new ActualDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
@@ -129,7 +129,7 @@ describe("ActualDpsHintProviderImpl", () => {
   test("skips layers with zero HP lost", () => {
     const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
     const projection = makeProjection(50, { shield: 50, armor: 0, hull: 0 });
-    const deps = makeDeps({ viewStore: makeViewStore(makeView(attack, projection)) });
+    const deps = makeDeps({ viewStream: makeViewStream(makeView(attack, projection)) });
     const provider = new ActualDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
@@ -142,7 +142,7 @@ describe("ActualDpsHintProviderImpl", () => {
   test("renders summary even when all layers have zero HP lost", () => {
     const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
     const projection = makeProjection(0, { shield: 0, armor: 0, hull: 0 });
-    const deps = makeDeps({ viewStore: makeViewStore(makeView(attack, projection)) });
+    const deps = makeDeps({ viewStream: makeViewStream(makeView(attack, projection)) });
     const provider = new ActualDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
@@ -167,7 +167,7 @@ describe("ActualDpsHintProviderImpl", () => {
       projection: { shipA: shipAProjection, shipB: shipBProjection },
       locks: { shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true }, shipB: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true } },
     } as unknown as EngagementView;
-    const deps = makeDeps({ viewStore: makeViewStore(view) });
+    const deps = makeDeps({ viewStream: makeViewStream(view) });
     const provider = new ActualDpsHintProviderImpl(deps);
     const container = globalThis.document.createElement("div");
     provider.render(makeAnchor("shipA"), container);

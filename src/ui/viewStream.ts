@@ -1,6 +1,7 @@
 import type { EngineView, EngagementEngine } from "../sim";
 
 export interface ViewStream {
+  connect(engine: EngagementEngine): void;
   onViewUpdated(listener: (view: EngineView) => void): void;
   offViewUpdated(listener: (view: EngineView) => void): void;
   currentView(): EngineView | undefined;
@@ -9,9 +10,9 @@ export interface ViewStream {
 export class ViewStreamImpl implements ViewStream {
   private readonly listeners = new Set<(view: EngineView) => void>();
   private latest: EngineView | undefined;
-  private readonly engineListener: (view: EngineView) => void;
+  private engineListener?: (view: EngineView) => void;
 
-  constructor(engine: EngagementEngine) {
+  connect(engine: EngagementEngine): void {
     this.engineListener = (view) => {
       this.latest = view;
       for (const listener of Array.from(this.listeners)) listener(view);

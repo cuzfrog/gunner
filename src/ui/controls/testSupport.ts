@@ -2,11 +2,12 @@ import { asClass, asFunction, asValue, createContainer, InjectionMode, type Awil
 import type { ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingImport, PresetFittings } from "../../fitting";
 import type { TypeId } from "../../gamedata/ids";
 import type { Ships } from "../../ships";
-import { registerSimModule, type EwarResolver, type HitChance, type SimCradle } from "../../sim";
+import { registerSimModule, type EwarResolver, type HitChance, type SimCradle, type EngineView } from "../../sim";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { ProfileEquality, ProfileParamOverrides, ProfileTextCodec, SavedFittings, SettingsStore, TrackingUnit } from "../../appstate";
 import { UiEventsImpl, type UiEvents } from "../events";
+import type { ViewStream } from "../viewStream";
 import {
   FakeElement,
   fakeDocument,
@@ -44,6 +45,20 @@ import type { DroneController } from "./drone";
 
 export { createControlsEls } from "./elements";
 export * from "../testing";
+
+type TestViewStream = ViewStream & { emit(view: EngineView): void };
+
+function createTestViewStream(): TestViewStream {
+  const listeners = new Set<(view: EngineView) => void>();
+  let latest: EngineView | undefined;
+  return {
+    connect: () => {},
+    onViewUpdated: (l) => listeners.add(l),
+    offViewUpdated: (l) => listeners.delete(l),
+    currentView: () => latest,
+    emit: (view) => { latest = view; for (const l of Array.from(listeners)) l(view); },
+  };
+}
 
 export function mockTrackingInput(): TrackingInput {
   return new TrackingInputImpl();
@@ -188,6 +203,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
   globalThis.Element = FakeElement as unknown as typeof Element;
   const cradle = createContainer<TestControlsCradle>({ injectionMode: InjectionMode.PROXY });
   cradle.register({ uiEvents: asClass(UiEventsImpl).singleton() });
+  cradle.register({ viewStream: asValue(createTestViewStream()) });
   registerSimModule(cradle);
   cradle.register({
     now: asValue(options.now ?? (() => Date.now())),
@@ -264,6 +280,7 @@ export function buildDomControls(options: BuildDomControlsOptions = {}) {
     hitChance: cradle.cradle.hitChance,
     i18n: cradle.cradle.i18n,
     clipboard: cradle.cradle.clipboard,
+    viewStream: cradle.cradle.viewStream as TestViewStream,
   };
 }
 

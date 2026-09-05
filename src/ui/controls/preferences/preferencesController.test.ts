@@ -234,9 +234,6 @@ function build() {
     onStartupDefaultsApplied: vi.fn(),
     offStartupDefaultsApplied: vi.fn(),
     emitStartupDefaultsApplied: vi.fn(),
-    onDistanceChanged: vi.fn(),
-    offDistanceChanged: vi.fn(),
-    emitDistanceChanged: vi.fn(),
   };
   const rangeOverlayController = mockRangeOverlayController();
   const popupGroup = mockPopupGroup();

@@ -8,7 +8,8 @@ import type { ImageCatalog } from "../icons";
 import type { Timer } from "../timer";
 import type { UiEvents } from "../events";
 import type { createControlsEls } from "./elements";
-import type { Controls, ViewStore } from "./controlsContract";
+import type { Controls } from "./controlsContract";
+import type { ViewStream } from "../viewStream";
 import type { DomControlsHost } from "./domControls";
 import type { EffectiveReadout } from "./effectiveReadout";
 import type { EngagementReadout } from "./engagementReadout";
@@ -124,7 +125,7 @@ export interface ControlsCradle {
   readonly importController: ImportController;
   readonly shareController: ShareController;
   readonly rangeOverlayController: RangeOverlayController;
-  readonly controls: Controls & DomControlsHost & ViewStore;
+  readonly controls: Controls & DomControlsHost;
   readonly confirmController: ConfirmController;
   readonly profileEquality: ProfileEquality;
   readonly profileChangeTracker: ProfileChangeTracker;
@@ -133,7 +134,7 @@ export interface ControlsCradle {
   readonly dpsHintProvider: DpsHintProvider;
   readonly ammoHintRenderer: AmmoHintRenderer;
   readonly ammoHintProvider: AmmoHintProvider;
-  readonly viewStore: ViewStore;
+  readonly viewStream: ViewStream;
   readonly appliedDpsHintRenderer: AppliedDpsHintRenderer;
   readonly appliedDpsHintProvider: AppliedDpsHintProvider;
   readonly actualDpsHintRenderer: ActualDpsHintRenderer;

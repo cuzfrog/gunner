@@ -32,11 +32,9 @@ export class AppImpl implements App {
       onReset: () => {
         this.engine.reset(this.controls.getEngineConfig());
         this.loop.reset();
-        this.renderFrame();
       },
       onConfigChange: () => {
         this.engine.update(this.controls.getEngineConfig());
-        this.renderFrame();
       },
       onDisplayChange: () => this.renderFrame(),
       onPlayPause: () => {
@@ -49,18 +47,15 @@ export class AppImpl implements App {
       },
       onSpeedChange: (speed) => this.loop.setSpeed(speed),
     });
-    this.engine.reset(this.controls.getEngineConfig());
-    this.renderFrame();
-  }
-
-  tick(dt: number): void {
-    const view = this.engine.step(dt);
-    if (view.defenseRuntime.dead.shipA || view.defenseRuntime.dead.shipB) {
+    this.engine.events().onViewUpdated((view) => this.renderFrame(view));
+    this.engine.events().onShipDestroyed(() => {
       this.loop.stop();
       this.controls.setPlaying(false);
-    }
-    this.renderFrame(view);
+    });
+    this.engine.reset(this.controls.getEngineConfig());
   }
+
+  tick(dt: number): void { this.engine.step(dt); }
 
   private renderFrame(view?: EngineView): void {
     const v = view ?? this.engine.view();
@@ -71,7 +66,6 @@ export class AppImpl implements App {
     this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
     this.renderer.setLockStates(v.locks);
     this.renderer.draw(v.snapshot, v.frame, this.rendererWeaponRanges(v), this.controls.getOverlays(), this.droneRenderInfo(v), this.missileRenderInfo(v), v.defenseRuntime);
-    this.controls.update(v, v.readouts, v.defenseRuntime);
   }
 
   private rendererWeaponRanges(view: EngineView): WeaponRanges {

@@ -92,7 +92,7 @@ const controlsCradleKeys = {
   droneCatalog: "droneCatalog",
   droneLoadoutResolver: "droneLoadoutResolver",
   droneLoadoutValidator: "droneLoadoutValidator",
-  viewStore: "viewStore",
+  viewStream: "viewStream",
   appliedDpsHintRenderer: "appliedDpsHintRenderer",
   appliedDpsHintProvider: "appliedDpsHintProvider",
   actualDpsHintRenderer: "actualDpsHintRenderer",

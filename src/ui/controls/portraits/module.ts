@@ -2,7 +2,6 @@ import { asFunction, type AwilixContainer } from "awilix";
 import { isHtmlImageElement } from "../controlsDom";
 import type { createControlsEls } from "../elements";
 import type { ControlsCradle } from "../cradle";
-import type { ViewStore } from "../controlsContract";
 import type { Side } from "../side";
 import { PortraitsControllerImpl } from "./portraitsController";
 import type { PortraitsEls } from "./portraitsControllerContract";
@@ -21,6 +20,7 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
       i18n,
       shipASide,
       shipBSide,
+      viewStream,
     }) => new PortraitsControllerImpl({
       els: collectPortraitsEls(els),
       imageCatalog,
@@ -30,13 +30,9 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
       combatantProfiles: { profile: (side: Side) => (side === "shipA" ? shipASide.profile : shipBSide.profile) },
       events: uiEvents,
       i18n,
-      viewStore: lazyViewStore(cradle.cradle),
+      viewStream,
     })).singleton(),
   });
-}
-
-function lazyViewStore(cradle: ControlsCradle): ViewStore {
-  return { currentView: () => cradle.viewStore.currentView() };
 }
 
 function collectPortraitsEls(els: ControlsElements): PortraitsEls {

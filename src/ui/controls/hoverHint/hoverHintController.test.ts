@@ -1,7 +1,19 @@
 import { fakeDocument, getFake } from "../../testing";
 import type { TimeoutId, Timer } from "../../timer";
+import type { EngineView } from "../../../sim";
+import type { ViewStream } from "../../viewStream";
 import type { HintContentProvider } from "./hintContentProvider";
 import { HoverHintControllerImpl } from "./hoverHintController";
+
+function makeViewStream(): ViewStream {
+  const listeners = new Set<(view: EngineView) => void>();
+  return {
+    connect: vi.fn(),
+    onViewUpdated: (l: (view: EngineView) => void) => listeners.add(l),
+    offViewUpdated: (l: (view: EngineView) => void) => listeners.delete(l),
+    currentView: vi.fn(() => undefined),
+  } as unknown as ViewStream;
+}
 
 class ControllableTimer implements Timer {
   private nextId = 1;
@@ -54,7 +66,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint", "effect text");
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "pointerover", anchor);
 
@@ -74,7 +86,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint", "effect text");
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "pointerover", anchor);
     dispatch(document, "pointerout", anchor, null);
@@ -92,7 +104,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint", "effect text");
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "pointerover", anchor);
     dispatch(document, "pointerout", anchor, null);
@@ -110,7 +122,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint", "effect text");
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "pointerover", anchor);
     const initialCallCount = timer.setTimeout.mock.calls.length;
@@ -129,7 +141,7 @@ describe("HoverHintControllerImpl", () => {
     anchor.setAttribute("data-hint", "effect text");
     const child = document.createElement("svg");
     anchor.appendChild(child);
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "pointerover", anchor);
     timer.fire();
@@ -145,7 +157,7 @@ describe("HoverHintControllerImpl", () => {
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint", "effect text");
     const plain = document.createElement("button");
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "pointerover", anchor);
     timer.fire();
@@ -161,7 +173,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint", "focused hint");
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "focusin", anchor);
 
@@ -175,7 +187,7 @@ describe("HoverHintControllerImpl", () => {
     const timer = new ControllableTimer();
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const plain = document.createElement("button");
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "pointerover", plain);
 
@@ -189,7 +201,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint", "");
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "pointerover", anchor);
 
@@ -205,7 +217,7 @@ describe("HoverHintControllerImpl", () => {
     anchor.setAttribute("data-hint", "parent hint");
     const child = document.createElement("svg");
     anchor.appendChild(child);
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "pointerover", child);
     timer.fire();
@@ -221,7 +233,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint", "effect text");
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "pointerover", anchor);
     controller.dispose();
@@ -236,7 +248,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint", "effect text");
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     controller.dispose();
     dispatch(document, "pointerover", anchor);
@@ -252,7 +264,7 @@ describe("HoverHintControllerImpl", () => {
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint", "effect text");
     anchor.setAttribute("aria-describedby", "existing-description");
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "focusin", anchor);
     expect(anchor.getAttribute("aria-describedby")).toBe("hover-hint");
@@ -267,7 +279,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint", "effect text");
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "focusin", anchor);
     dispatch(document, "focusout", anchor);
@@ -281,7 +293,7 @@ describe("HoverHintControllerImpl", () => {
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
     const provider: HintContentProvider = { render: vi.fn() };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     dispatch(document, "pointerover", anchor);
@@ -299,7 +311,7 @@ describe("HoverHintControllerImpl", () => {
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
     const provider: HintContentProvider = { render: vi.fn() };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     dispatch(document, "focusin", anchor);
@@ -315,7 +327,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "unknown");
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "focusin", anchor);
 
@@ -331,7 +343,7 @@ describe("HoverHintControllerImpl", () => {
     anchor.setAttribute("data-hint", "plain string");
     anchor.setAttribute("data-hint-content", "dps");
     const provider: HintContentProvider = { render: vi.fn() };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     dispatch(document, "focusin", anchor);
@@ -348,7 +360,7 @@ describe("HoverHintControllerImpl", () => {
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
     const provider: HintContentProvider = { render: vi.fn() };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     dispatch(document, "focusin", anchor);
@@ -363,7 +375,7 @@ describe("HoverHintControllerImpl", () => {
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
     const provider: HintContentProvider = { render: (_a, container) => { container.textContent = "rendered"; } };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     dispatch(document, "focusin", anchor);
@@ -381,7 +393,7 @@ describe("HoverHintControllerImpl", () => {
     const child = document.createElement("svg");
     anchor.appendChild(child);
     const provider: HintContentProvider = { render: vi.fn() };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     dispatch(document, "pointerover", child);
@@ -397,7 +409,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "");
-    new HoverHintControllerImpl({ hintEl, timer });
+    new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
 
     dispatch(document, "pointerover", anchor);
 
@@ -412,7 +424,7 @@ describe("HoverHintControllerImpl", () => {
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
     const provider: HintContentProvider = { render: vi.fn() };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     dispatch(document, "pointerover", anchor);
@@ -433,7 +445,7 @@ describe("HoverHintControllerImpl", () => {
     anchor.setAttribute("data-hint-content", "dps");
     let value = "first";
     const provider: HintContentProvider = { render: (_a, container) => { container.textContent = value; } };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     dispatch(document, "focusin", anchor);
@@ -449,7 +461,7 @@ describe("HoverHintControllerImpl", () => {
     const timer = new ControllableTimer();
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const provider: HintContentProvider = { render: vi.fn() };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     controller.refresh();
@@ -469,7 +481,7 @@ describe("HoverHintControllerImpl", () => {
         container.textContent = "ok";
       },
     };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     dispatch(document, "focusin", anchor);
@@ -488,7 +500,7 @@ describe("HoverHintControllerImpl", () => {
     anchor.setAttribute("data-hint-content", "dps");
     anchor.setAttribute("aria-describedby", "existing-description");
     const provider: HintContentProvider = { render: vi.fn() };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     dispatch(document, "focusin", anchor);
@@ -504,7 +516,7 @@ describe("HoverHintControllerImpl", () => {
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
     const provider: HintContentProvider = { render: (_a, container) => { container.textContent = "rendered"; }, hide: vi.fn() };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     dispatch(document, "focusin", anchor);
@@ -521,7 +533,7 @@ describe("HoverHintControllerImpl", () => {
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
     const provider: HintContentProvider = { render: () => { throw new Error("boom"); } };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
     expect(() => dispatch(document, "focusin", anchor)).toThrow("boom");
@@ -538,7 +550,7 @@ describe("HoverHintControllerImpl", () => {
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
     const provider: HintContentProvider = { render: vi.fn() };
-    const controller = new HoverHintControllerImpl({ hintEl, timer });
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
     controller.dispose();
 

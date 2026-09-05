@@ -1,9 +1,9 @@
 import { fakeDocument, getFake, FakeElement } from "../../testing";
 import { UiEventsImpl } from "../../events";
-import type { EngagementView, EwarProjection, EwarResolver, LockState, SpeedBreakdown, DisruptionBreakdown } from "../../../sim";
+import type { EngagementView, EngineView, EwarProjection, EwarResolver, LockState, SpeedBreakdown, DisruptionBreakdown } from "../../../sim";
 import type { EwarController } from "../ewar";
 import type { DefenseController } from "../defense";
-import type { ViewStore } from "../controlsContract";
+import type { ViewStream } from "../../viewStream";
 import type { ImageCatalog } from "../../icons";
 import type { ShipProfile } from "../../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId } from "../../../gamedata/ids";
@@ -117,6 +117,11 @@ function createFakePortraitEls(document: Document): PortraitsEls {
   };
 }
 
+function emitView(listeners: Set<(view: EngagementView) => void>, distance: number): void {
+  const view = { frame: { distance } } as unknown as EngagementView;
+  for (const listener of Array.from(listeners)) listener(view);
+}
+
 function buildController() {
   const document = fakeDocument();
   globalThis.document = document;
@@ -181,7 +186,13 @@ function buildController() {
     cyclingEffects: vi.fn(() => []),
     hpPercentages: vi.fn(() => undefined),
   });
-  const viewStore = vi.mocked<ViewStore>({ currentView: vi.fn(() => undefined) });
+  const viewStreamListeners = new Set<(view: EngagementView) => void>();
+  const viewStream = vi.mocked<ViewStream>({
+    connect: vi.fn(),
+    onViewUpdated: vi.fn((l: (view: EngagementView) => void) => viewStreamListeners.add(l)),
+    offViewUpdated: vi.fn((l: (view: EngagementView) => void) => viewStreamListeners.delete(l)),
+    currentView: vi.fn(() => undefined),
+  });
   const controller = new PortraitsControllerImpl({
     els,
     imageCatalog,
@@ -191,9 +202,9 @@ function buildController() {
     combatantProfiles,
     events,
     i18n,
-    viewStore,
+    viewStream,
   });
-  return { controller, els, profiles, projections, ewarController, ewarResolver, defenseController, imageCatalog, events, createElementSpy, i18n, viewStore };
+  return { controller, els, profiles, projections, ewarController, ewarResolver, defenseController, imageCatalog, events, createElementSpy, i18n, viewStream, viewStreamListeners };
 }
 
 describe("PortraitsController", () => {
@@ -375,7 +386,7 @@ describe("PortraitsController", () => {
   });
 
   test("distance change crossing into range flips the effects row from hidden to visible", () => {
-    const { controller, els, profiles, projections, ewarResolver, imageCatalog, events } = buildController();
+    const { els, profiles, projections, ewarResolver, imageCatalog, viewStreamListeners } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     projections.shipB = {
       loadout: {
@@ -394,12 +405,10 @@ describe("PortraitsController", () => {
     ewarResolver.speedBreakdown.mockImplementation((_projection, distance) =>
       distance <= 10000 ? { effects: [{ family: "web", moduleId: toTypeId("527"), multiplier: 0.4 }], propulsionSuppressed: false } : { effects: [], propulsionSuppressed: false }
     );
-    events.emitDistanceChanged(15000);
-    controller.update();
+    emitView(viewStreamListeners, 15000);
     expect(els.shipAEffects.children.length).toBe(0);
     expect(els.shipAEffects.hidden).toBe(true);
-    events.emitDistanceChanged(10000);
-    controller.update();
+    emitView(viewStreamListeners, 10000);
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
@@ -408,19 +417,17 @@ describe("PortraitsController", () => {
   });
 
   test("distance changes that do not change the applied set do not create new img elements", () => {
-    const { controller, els, profiles, ewarResolver, events, createElementSpy } = buildController();
+    const { els, profiles, ewarResolver, createElementSpy, viewStreamListeners } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     ewarResolver.speedBreakdown.mockReturnValue({
       effects: [{ family: "web", moduleId: toTypeId("527"), multiplier: 0.4 }],
       propulsionSuppressed: false,
     });
-    events.emitDistanceChanged(5000);
-    controller.update();
+    emitView(viewStreamListeners, 5000);
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
     const imageCount = createElementSpy.mock.calls.filter(([tag]) => tag === "img").length;
-    events.emitDistanceChanged(6000);
-    controller.update();
+    emitView(viewStreamListeners, 6000);
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
     expect(createElementSpy.mock.calls.filter(([tag]) => tag === "img").length).toBe(imageCount);
@@ -608,8 +615,8 @@ describe("PortraitsController", () => {
     const LOCKING: LockState = { status: "locking", progress: 0.5, remaining: 5, lockTime: 10, inRange: true };
     const IDLE: LockState = { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: false };
 
-    function makeView(locks: { shipA: LockState; shipB: LockState }): EngagementView {
-      return { locks, frame: {} as unknown as EngagementView["frame"], attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: {} as unknown, shipB: {} as unknown } } as unknown as EngagementView;
+    function makeView(locks: { shipA: LockState; shipB: LockState }): EngineView {
+      return { locks, frame: {} as unknown as EngagementView["frame"], attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: {} as unknown, shipB: {} as unknown } } as unknown as EngineView;
     }
 
     test("hidden when no view is available", () => {
@@ -620,40 +627,40 @@ describe("PortraitsController", () => {
     });
 
     test("hidden when lock status is idle", () => {
-      const { controller, els, profiles, viewStore } = buildController();
+      const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      viewStore.currentView.mockReturnValue(makeView({ shipA: IDLE, shipB: IDLE }));
+      viewStream.currentView.mockReturnValue(makeView({ shipA: IDLE, shipB: IDLE }));
       controller.update();
       expect(els.shipALockBadge.hidden).toBe(true);
     });
 
     test("hidden when lock status is locking", () => {
-      const { controller, els, profiles, viewStore } = buildController();
+      const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      viewStore.currentView.mockReturnValue(makeView({ shipA: LOCKING, shipB: IDLE }));
+      viewStream.currentView.mockReturnValue(makeView({ shipA: LOCKING, shipB: IDLE }));
       controller.update();
       expect(els.shipALockBadge.hidden).toBe(true);
     });
 
     test("visible when lock status is locked with non-zero lockTime", () => {
-      const { controller, els, profiles, viewStore } = buildController();
+      const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      viewStore.currentView.mockReturnValue(makeView({ shipA: LOCKED, shipB: IDLE }));
+      viewStream.currentView.mockReturnValue(makeView({ shipA: LOCKED, shipB: IDLE }));
       controller.update();
       expect(els.shipALockBadge.hidden).toBe(false);
     });
 
     test("hidden when locked but lockTime is zero (backward-compatible)", () => {
-      const { controller, els, profiles, viewStore } = buildController();
+      const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      viewStore.currentView.mockReturnValue(makeView({ shipA: { ...LOCKED, lockTime: 0 }, shipB: IDLE }));
+      viewStream.currentView.mockReturnValue(makeView({ shipA: { ...LOCKED, lockTime: 0 }, shipB: IDLE }));
       controller.update();
       expect(els.shipALockBadge.hidden).toBe(true);
     });
 
     test("hidden when profile is undefined even if locked", () => {
-      const { controller, els, viewStore } = buildController();
-      viewStore.currentView.mockReturnValue(makeView({ shipA: LOCKED, shipB: IDLE }));
+      const { controller, els, viewStream } = buildController();
+      viewStream.currentView.mockReturnValue(makeView({ shipA: LOCKED, shipB: IDLE }));
       controller.update();
       expect(els.shipALockBadge.hidden).toBe(true);
     });

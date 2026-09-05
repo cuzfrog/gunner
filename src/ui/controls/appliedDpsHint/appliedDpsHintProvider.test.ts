@@ -1,6 +1,6 @@
 import { type FakeElement, fakeDocument } from "../../testing";
 import { ZERO_DAMAGE, type AttackAssessment, type EngagementView, type TurretSpec, type DroneSpec } from "../../../sim";
-import type { ViewStore } from "../controlsContract";
+import type { ViewStream } from "../../viewStream";
 import type { AppliedDpsHintModel, AppliedDpsHintRenderer } from "./appliedDpsHintRenderer";
 import { type AppliedDpsHintProviderDeps, AppliedDpsHintProviderImpl } from "./appliedDpsHintProvider";
 
@@ -28,8 +28,8 @@ function makeView(weaponAttacks: { shipA: readonly { weapon: TurretSpec | DroneS
   } as unknown as EngagementView;
 }
 
-function makeViewStore(view: EngagementView | undefined): ViewStore {
-  return { currentView: vi.fn(() => view) } as unknown as ViewStore;
+function makeViewStream(view: EngagementView | undefined): ViewStream {
+  return { connect: vi.fn(), onViewUpdated: vi.fn(), offViewUpdated: vi.fn(), currentView: vi.fn(() => view) } as unknown as ViewStream;
 }
 
 function makeMockRenderer(): { renderer: AppliedDpsHintRenderer; renderMock: ReturnType<typeof vi.fn> } {
@@ -41,7 +41,7 @@ function makeMockRenderer(): { renderer: AppliedDpsHintRenderer; renderMock: Ret
 function makeDeps(overrides: Partial<AppliedDpsHintProviderDeps> = {}): AppliedDpsHintProviderDeps & { renderMock: ReturnType<typeof vi.fn> } {
   const { renderer, renderMock } = makeMockRenderer();
   return {
-    viewStore: makeViewStore(makeView({ shipA: [{ weapon: turret, assessment: turretAssessment }], shipB: [] })),
+    viewStream: makeViewStream(makeView({ shipA: [{ weapon: turret, assessment: turretAssessment }], shipB: [] })),
     appliedDpsHintRenderer: renderer,
     ...overrides,
     renderMock,
@@ -87,7 +87,7 @@ describe("AppliedDpsHintProviderImpl", () => {
   });
 
   test("renders nothing when view store has no current view", () => {
-    const deps = makeDeps({ viewStore: makeViewStore(undefined) });
+    const deps = makeDeps({ viewStream: makeViewStream(undefined) });
     const provider = new AppliedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
@@ -97,7 +97,7 @@ describe("AppliedDpsHintProviderImpl", () => {
 
   test("renders nothing when side has no weapon attacks and no combined attack", () => {
     const view = makeView({ shipA: [], shipB: [] }, { shipA: undefined, shipB: undefined });
-    const deps = makeDeps({ viewStore: makeViewStore(view) });
+    const deps = makeDeps({ viewStream: makeViewStream(view) });
     const provider = new AppliedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
@@ -107,7 +107,7 @@ describe("AppliedDpsHintProviderImpl", () => {
 
   test("renders per-weapon rows for ship A with correct totals", () => {
     const view = makeView({ shipA: [{ weapon: turret, assessment: turretAssessment }, { weapon: drone, assessment: droneAssessment }], shipB: [] });
-    const deps = makeDeps({ viewStore: makeViewStore(view) });
+    const deps = makeDeps({ viewStream: makeViewStream(view) });
     const provider = new AppliedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("shipA");
     const container = globalThis.document.createElement("div");
@@ -127,7 +127,7 @@ describe("AppliedDpsHintProviderImpl", () => {
 
   test("falls back to combined attack when weaponAttacks is empty", () => {
     const view = makeView({ shipA: [], shipB: [] }, { shipA: turretAssessment, shipB: undefined });
-    const deps = makeDeps({ viewStore: makeViewStore(view) });
+    const deps = makeDeps({ viewStream: makeViewStream(view) });
     const provider = new AppliedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");

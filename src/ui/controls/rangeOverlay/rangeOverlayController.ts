@@ -5,6 +5,7 @@ import type { RangeOverlay, RangeOverlayKind } from "../../renderer";
 import type { EwarController, EwarEffectDescriber } from "../ewar";
 import type { Side } from "../side";
 import type { UiEvents } from "../../events";
+import type { ViewStream } from "../../viewStream";
 import type { RangeOverlayController, RangeOverlayEls } from "./rangeOverlayControllerContract";
 import { html } from "../markup";
 
@@ -26,7 +27,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   private lastTitleRefresh = 0;
   private lastDescriptors: readonly RangeOverlayKind[] = [];
 
-  constructor(deps: { els: RangeOverlayEls; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; ewarController: EwarController; ewarResolver: EwarResolver; events: UiEvents; now: () => number }) {
+  constructor(deps: { els: RangeOverlayEls; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; ewarController: EwarController; ewarResolver: EwarResolver; events: UiEvents; viewStream: ViewStream; now: () => number }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.ewarEffectDescriber = deps.ewarEffectDescriber;
@@ -35,8 +36,8 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     this.events = deps.events;
     this.now = deps.now;
     for (const kind of ALL_KINDS) this.visibilityMap.set(kind, "none");
-    this.events.onDistanceChanged((d) => { this.distance = d; });
     this.events.onLanguageChanged(() => this.render());
+    deps.viewStream.onViewUpdated((view) => { this.distance = view.frame.distance; this.update(); });
     this.render();
   }
 

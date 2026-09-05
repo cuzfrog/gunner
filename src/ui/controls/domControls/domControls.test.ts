@@ -1,7 +1,7 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type EngineView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
 import type { Ships } from "../../../ships";
 import type { EffectiveReadouts } from "../controlsContract";
 import { USER_SETTINGS_VERSION } from "../../../appstate";
@@ -77,6 +77,10 @@ function mockDefenseView(): DefenseView {
     repairMode: { shipA: "auto", shipB: "auto" },
     rah: { shipA: undefined, shipB: undefined },
   };
+}
+
+function makeEngineView(view: EngagementView, effective: EffectiveReadouts, defenseView: DefenseView): EngineView {
+  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView } as unknown as EngineView;
 }
 
 function baseSettings(): UserSettings {
@@ -404,12 +408,12 @@ describe("DomControls", () => {
   });
 
   test("update displays effective attributes and highlights affected values", () => {
-    const { document, controls } = buildDomControls();
+    const { document, controls, viewStream } = buildDomControls();
     const view = makeView(0);
     const sideA = sideReadoutValues(300, 0.32, 1000, 3000, 0.32, 2000, 3000);
     const sideB = sideReadoutValues(150, 0.32, 1000, 3000, 0.32, 1000, 3000);
     const effective: EffectiveReadouts = { shipA: sideA, shipB: sideB };
-    controls.update(view, effective, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
     expect(getFake(document, "effective-ship-a-speed").textContent).toBe("300 m/s");
     expect(getFake(document, "effective-ship-b-speed").textContent).toBe("150 m/s");
     expect(getFake(document, "effective-ship-a-tracking").textContent).toBe("0.32 rad/s");
@@ -459,42 +463,42 @@ describe("DomControls", () => {
   }
 
   test("readouts update immediately when not playing", () => {
-    const { controls, cradle } = buildDomControls({ now: () => 0 });
+    const { controls, cradle, viewStream } = buildDomControls({ now: () => 0 });
     const engagementUpdate = vi.spyOn(cradle.cradle.engagementReadout, "update");
     const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
     const { view, effective } = readoutFixtures();
-    controls.update(view, effective, mockDefenseView());
-    controls.update(view, effective, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
     expect(engagementUpdate).toHaveBeenCalledTimes(2);
     expect(effectiveUpdate).toHaveBeenCalledTimes(2);
   });
 
   test("readouts throttle while playing and resume after 50 ms", () => {
     let fakeNow = 0;
-    const { controls, cradle } = buildDomControls({ now: () => fakeNow });
+    const { controls, cradle, viewStream } = buildDomControls({ now: () => fakeNow });
     const engagementUpdate = vi.spyOn(cradle.cradle.engagementReadout, "update");
     const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
     const { view, effective } = readoutFixtures();
     controls.setPlaying(true);
-    controls.update(view, effective, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
     fakeNow = 10;
-    controls.update(view, effective, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
     fakeNow = 60;
-    controls.update(view, effective, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
     expect(engagementUpdate).toHaveBeenCalledTimes(2);
     expect(effectiveUpdate).toHaveBeenCalledTimes(2);
   });
 
   test("pause flushes the latest cached readouts even when the last tick was skipped", () => {
     let fakeNow = 0;
-    const { controls, cradle } = buildDomControls({ now: () => fakeNow });
+    const { controls, cradle, viewStream } = buildDomControls({ now: () => fakeNow });
     const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
     const { view, effective } = readoutFixtures();
     const effective2: EffectiveReadouts = { ...effective, shipB: { ...effective.shipB, speed: 50 } };
     controls.setPlaying(true);
-    controls.update(view, effective, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
     fakeNow = 10;
-    controls.update(view, effective2, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective2, mockDefenseView()));
     controls.setPlaying(false);
     expect(effectiveUpdate).toHaveBeenLastCalledWith(effective2);
     expect(effectiveUpdate).toHaveBeenCalledTimes(2);

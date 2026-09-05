@@ -214,24 +214,4 @@ describe("UiEvents", () => {
     events.emitStartupDefaultsApplied();
     expect(defaultsApplied).toHaveBeenCalled();
   });
-
-  test("emitDistanceChanged passes the distance to listeners", () => {
-    const events = new UiEventsImpl();
-    const listener = vi.fn();
-    events.onDistanceChanged(listener);
-    events.emitDistanceChanged(7500);
-    expect(listener).toHaveBeenCalledWith(7500);
-  });
-
-  test("offDistanceChanged removes a listener", () => {
-    const events = new UiEventsImpl();
-    const a = vi.fn();
-    const b = vi.fn();
-    events.onDistanceChanged(a);
-    events.onDistanceChanged(b);
-    events.offDistanceChanged(a);
-    events.emitDistanceChanged(1000);
-    expect(a).not.toHaveBeenCalled();
-    expect(b).toHaveBeenCalledWith(1000);
-  });
 });

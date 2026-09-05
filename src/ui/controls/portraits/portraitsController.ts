@@ -5,7 +5,7 @@ import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import type { EwarController } from "../ewar";
 import type { DefenseController } from "../defense";
-import type { ViewStore } from "../controlsContract";
+import type { ViewStream } from "../../viewStream";
 import type { Side } from "../side";
 import type { CombatantProfiles, PortraitsEls, PortraitsController } from "./portraitsControllerContract";
 import { html } from "../markup";
@@ -32,7 +32,7 @@ export class PortraitsControllerImpl implements PortraitsController {
   private readonly combatantProfiles: CombatantProfiles;
   private readonly events: UiEvents;
   private readonly i18n: I18n;
-  private readonly viewStore: ViewStore;
+  private readonly viewStream: ViewStream;
   private distance = 0;
   private readonly shipAState: SideState = { lastKey: "", lastId: "" };
   private readonly shipBState: SideState = { lastKey: "", lastId: "" };
@@ -46,7 +46,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     combatantProfiles: CombatantProfiles;
     events: UiEvents;
     i18n: I18n;
-    viewStore: ViewStore;
+    viewStream: ViewStream;
   }) {
     this.els = deps.els;
     this.imageCatalog = deps.imageCatalog;
@@ -56,8 +56,8 @@ export class PortraitsControllerImpl implements PortraitsController {
     this.combatantProfiles = deps.combatantProfiles;
     this.events = deps.events;
     this.i18n = deps.i18n;
-    this.viewStore = deps.viewStore;
-    this.events.onDistanceChanged((d) => { this.distance = d; });
+    this.viewStream = deps.viewStream;
+    deps.viewStream.onViewUpdated((view) => { this.distance = view.frame.distance; this.update(); });
     this.update();
   }
 
@@ -94,7 +94,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     const hpPercentages = this.defenseController.hpPercentages(side);
     updateHpBars(hpBars, hpPercentages);
     hpBars.hidden = hpPercentages === undefined;
-    const lock = this.viewStore.currentView()?.locks[side];
+    const lock = this.viewStream.currentView()?.locks[side];
     const lockBadgeVisible = lock !== undefined && lock.status === "locked" && lock.lockTime > 0;
     if (lockBadge.hidden !== !lockBadgeVisible) lockBadge.hidden = !lockBadgeVisible;
     const key = buildDiffKey(profile.id, allEffects, lockBadgeVisible);

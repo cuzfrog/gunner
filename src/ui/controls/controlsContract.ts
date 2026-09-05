@@ -1,4 +1,4 @@
-import type { DefenseView, EngineConfig, EngagementView, SideReadoutValues, SimConfig, WeaponSpec } from "../../sim";
+import type { EngineConfig, SideReadoutValues, SimConfig, WeaponSpec } from "../../sim";
 import type { WeaponRangeVisibility } from "../../appstate";
 import type { RangeOverlay } from "../renderer";
 import type { Side } from "./side";
@@ -33,11 +33,6 @@ export interface Controls {
   getDroneControlRangeVisibility(): WeaponRangeVisibility;
   getOverlays(): readonly RangeOverlay[];
   hasWeapon(side: Side): boolean;
-  update(view: EngagementView, effective: EffectiveReadouts, defenseView: DefenseView): void;
   setPlaying(playing: boolean): void;
   setCallbacks(callbacks: ControlsCallbacks): void;
-}
-
-export interface ViewStore {
-  currentView(): EngagementView | undefined;
 }

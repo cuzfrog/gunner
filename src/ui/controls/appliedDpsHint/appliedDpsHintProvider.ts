@@ -1,28 +1,28 @@
 import type { AttackAssessment, EngagementView, WeaponAttack, WeaponKind } from "../../../sim";
-import type { ViewStore } from "../controlsContract";
+import type { ViewStream } from "../../viewStream";
 import type { HintContentProvider } from "../hoverHint";
 import type { AppliedDpsHintModel, AppliedDpsHintRenderer, AppliedDpsHintRow } from "./appliedDpsHintRenderer";
 
 export type AppliedDpsHintProvider = HintContentProvider;
 
 export interface AppliedDpsHintProviderDeps {
-  readonly viewStore: ViewStore;
+  readonly viewStream: ViewStream;
   readonly appliedDpsHintRenderer: AppliedDpsHintRenderer;
 }
 
 export class AppliedDpsHintProviderImpl implements HintContentProvider {
-  private readonly viewStore: ViewStore;
+  private readonly viewStream: ViewStream;
   private readonly renderer: AppliedDpsHintRenderer;
 
   constructor(deps: AppliedDpsHintProviderDeps) {
-    this.viewStore = deps.viewStore;
+    this.viewStream = deps.viewStream;
     this.renderer = deps.appliedDpsHintRenderer;
   }
 
   render(anchor: HTMLElement, container: HTMLElement): void {
     const side = sideFromAnchor(anchor);
     if (side === undefined) return;
-    const view = this.viewStore.currentView();
+    const view = this.viewStream.currentView();
     if (view === undefined) return;
     const model = this.buildModel(side, view);
     if (model.rows.length === 0) return;

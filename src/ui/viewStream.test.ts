@@ -19,15 +19,18 @@ function makeEngine(): { engine: EngagementEngine; events: EngineEvents; emit: (
 const fakeView = {} as EngineView;
 
 describe("ViewStreamImpl", () => {
-  test("currentView is undefined before first publish", () => {
+  test("currentView is undefined before connect and first publish", () => {
     const { engine } = makeEngine();
-    const stream = new ViewStreamImpl(engine);
+    const stream = new ViewStreamImpl();
+    expect(stream.currentView()).toBeUndefined();
+    stream.connect(engine);
     expect(stream.currentView()).toBeUndefined();
   });
 
-  test("caches and re-emits the latest view from engine events", () => {
+  test("caches and re-emits the latest view from engine events after connect", () => {
     const { engine, emit } = makeEngine();
-    const stream = new ViewStreamImpl(engine);
+    const stream = new ViewStreamImpl();
+    stream.connect(engine);
     const received: EngineView[] = [];
     stream.onViewUpdated((v) => received.push(v));
     emit(fakeView);
@@ -37,7 +40,8 @@ describe("ViewStreamImpl", () => {
 
   test("offViewUpdated stops delivery to that listener", () => {
     const { engine, emit } = makeEngine();
-    const stream = new ViewStreamImpl(engine);
+    const stream = new ViewStreamImpl();
+    stream.connect(engine);
     const received: EngineView[] = [];
     const listener = (v: EngineView) => received.push(v);
     stream.onViewUpdated(listener);
@@ -49,7 +53,8 @@ describe("ViewStreamImpl", () => {
 
   test("fans out to multiple listeners", () => {
     const { engine, emit } = makeEngine();
-    const stream = new ViewStreamImpl(engine);
+    const stream = new ViewStreamImpl();
+    stream.connect(engine);
     const a: EngineView[] = [];
     const b: EngineView[] = [];
     stream.onViewUpdated((v) => a.push(v));

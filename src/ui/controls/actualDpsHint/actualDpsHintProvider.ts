@@ -1,29 +1,29 @@
 import type { DefenseLayer, EngagementView } from "../../../sim";
 import { DEFENSE_LAYERS } from "../../../sim";
-import type { ViewStore } from "../controlsContract";
+import type { ViewStream } from "../../viewStream";
 import type { HintContentProvider } from "../hoverHint";
 import type { ActualDpsHintLayerRow, ActualDpsHintModel, ActualDpsHintRenderer } from "./actualDpsHintRenderer";
 
 export type ActualDpsHintProvider = HintContentProvider;
 
 export interface ActualDpsHintProviderDeps {
-  readonly viewStore: ViewStore;
+  readonly viewStream: ViewStream;
   readonly actualDpsHintRenderer: ActualDpsHintRenderer;
 }
 
 export class ActualDpsHintProviderImpl implements HintContentProvider {
-  private readonly viewStore: ViewStore;
+  private readonly viewStream: ViewStream;
   private readonly renderer: ActualDpsHintRenderer;
 
   constructor(deps: ActualDpsHintProviderDeps) {
-    this.viewStore = deps.viewStore;
+    this.viewStream = deps.viewStream;
     this.renderer = deps.actualDpsHintRenderer;
   }
 
   render(anchor: HTMLElement, container: HTMLElement): void {
     const side = sideFromAnchor(anchor);
     if (side === undefined) return;
-    const view = this.viewStore.currentView();
+    const view = this.viewStream.currentView();
     if (view === undefined) return;
     if (view.attacks[side] === undefined) return;
     const model = this.buildModel(side, view);

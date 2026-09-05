@@ -36,8 +36,8 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
       hoverHintController: proxy.hoverHintController,
       previewManager: proxy.previewManager,
       simConfigSource: proxy.simConfigSource,
+      viewStream: proxy.viewStream,
     })).singleton(),
-    viewStore: asFunction((proxy: ControlsCradle) => proxy.controls).singleton(),
   });
 }
 
