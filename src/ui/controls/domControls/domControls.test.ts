@@ -1,7 +1,7 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import { EMPTY_DEFENSE_ASSESSMENT, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
 import type { Ships } from "../../../ships";
 import type { EffectiveReadouts } from "../controlsContract";
 import { USER_SETTINGS_VERSION } from "../../../appstate";
@@ -60,7 +60,7 @@ function makeView(distance: number): EngagementView {
     relPosition: new Vec2(0, distance), distance, relVelocity: new Vec2(0, 0),
     radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
   };
-  return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } };
+  return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } };
 }
 
 function mockDefenseView(): DefenseView {

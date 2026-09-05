@@ -87,11 +87,4 @@ describe("DefenseAssessorImpl", () => {
     const result = assessor.assess(spec, incoming, false);
     expect(result.layers.shield.ehp).toBeCloseTo(1000 / (0.5 * 1.0 + 0.5 * 0.1), 1);
   });
-
-  test("actualIncomingDps is zero from assessor (overlaid by AppImpl)", () => {
-    const spec = makeSpec({ shieldHp: 1000, shieldResistEm: 0.5 });
-    const result = assessor.assess(spec, { em: 100, thermal: 0, kinetic: 0, explosive: 0 }, false);
-    expect(result.actualIncomingDps).toBe(0);
-    expect(result.actualIncomingByLayer).toEqual({ shield: 0, armor: 0, hull: 0 });
-  });
 });

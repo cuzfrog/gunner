@@ -1,4 +1,4 @@
-import type { AttackAssessment, DefenseAssessment, EngagementView, HitChanceBreakdown } from "../../../sim";
+import type { AttackAssessment, DamageProjection, EngagementView, HitChanceBreakdown } from "../../../sim";
 import { setText } from "../controlsDom";
 import { formatDistance, formatWithCommas, hitChanceClass } from "../controlsFormat";
 
@@ -46,19 +46,19 @@ export class EngagementReadoutImpl implements EngagementReadout {
   }
 
   update(view: EngagementView, t: (key: string) => string): void {
-    const { frame, attacks, defenses } = view;
+    const { frame, attacks, projection } = view;
     setText(this.els.resDistance, formatDistance(frame.distance, t));
-    this.updateSide(this.els.shipA, attacks.shipA, defenses.shipB, t);
-    this.updateSide(this.els.shipB, attacks.shipB, defenses.shipA, t);
+    this.updateSide(this.els.shipA, attacks.shipA, projection.shipB, t);
+    this.updateSide(this.els.shipB, attacks.shipB, projection.shipA, t);
   }
 
-  private updateSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment | undefined, opponentDefense: DefenseAssessment, t: (key: string) => string): void {
+  private updateSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment | undefined, opponentProjection: DamageProjection, t: (key: string) => string): void {
     this.clearColorClasses(els);
     const hitChance = attack?.turret?.hit ?? attack?.drone?.hit;
     if (hitChance) {
-      this.updateHitChanceSide(els, attack!, opponentDefense, hitChance, t);
+      this.updateHitChanceSide(els, attack!, opponentProjection, hitChance, t);
     } else if (attack?.missile) {
-      this.updateMissileSide(els, attack, opponentDefense, t);
+      this.updateMissileSide(els, attack, opponentProjection, t);
     } else {
       this.updateNoWeaponSide(els);
     }
@@ -77,7 +77,7 @@ export class EngagementReadoutImpl implements EngagementReadout {
     els.resTimeToImpact.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
   }
 
-  private updateHitChanceSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment, opponentDefense: DefenseAssessment, hit: HitChanceBreakdown, t: (key: string) => string): void {
+  private updateHitChanceSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment, opponentProjection: DamageProjection, hit: HitChanceBreakdown, t: (key: string) => string): void {
     setWeaponMode(els, "turret");
     setText(els.resHitLabel, t("result.hitChance"));
     setText(els.resTrackPenLabel, t("result.trackingPenalty"));
@@ -90,16 +90,16 @@ export class EngagementReadoutImpl implements EngagementReadout {
     els.resHit.classList.add(hitChanceClass(hit.chance));
     els.resTrackPen.classList.add(hitChanceClass(trackPenalty / 100));
     els.resRangePen.classList.add(hitChanceClass(rangePenalty / 100));
-    writeDpsFields(els, attack, opponentDefense, t);
+    writeDpsFields(els, attack, opponentProjection, t);
   }
 
-  private updateMissileSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment, opponentDefense: DefenseAssessment, t: (key: string) => string): void {
+  private updateMissileSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment, opponentProjection: DamageProjection, t: (key: string) => string): void {
     setWeaponMode(els, "missile");
     const missile = attack.missile!;
     setText(els.resTimeToImpactLabel, t("result.timeToImpact"));
     setText(els.resSigFactorLabel, t("result.signatureFactor"));
     setText(els.resVelocityFactorLabel, t("result.velocityFactor"));
-    writeDpsFields(els, attack, opponentDefense, t);
+    writeDpsFields(els, attack, opponentProjection, t);
     setText(els.resTimeToImpact, `${formatWithCommas(missile.timeToImpact, 1)}s`);
     const sigPercent = Math.min(1, missile.signatureTerm) * 100;
     const velPercent = Math.min(1, missile.velocityTerm) * 100;
@@ -141,7 +141,7 @@ function setWeaponMode(els: SideDpsEls, mode: WeaponMode): void {
   els.resSide.classList.add(`is-${mode}`);
 }
 
-function writeDpsFields(els: SideDpsEls, attack: AttackAssessment, opponentDefense: DefenseAssessment, t: (key: string) => string): void {
+function writeDpsFields(els: SideDpsEls, attack: AttackAssessment, opponentProjection: DamageProjection, t: (key: string) => string): void {
   setText(els.resNominalDpsLabel, t("result.nominalDps"));
   setText(els.resAppliedDpsLabel, t("result.appliedDps"));
   setText(els.resActualDpsLabel, t("result.actualDps"));
@@ -149,5 +149,5 @@ function writeDpsFields(els: SideDpsEls, attack: AttackAssessment, opponentDefen
   setText(els.resAppliedDps, formatWithCommas(attack.damage.appliedDps, 1));
   setText(els.resAppliedDpsApplication, `(${formatWithCommas(attack.damage.application * 100, 1)}%)`);
   els.resAppliedDpsApplication.classList.add(hitChanceClass(attack.damage.application));
-  setText(els.resActualDps, formatWithCommas(opponentDefense.actualIncomingDps, 1));
+  setText(els.resActualDps, formatWithCommas(opponentProjection.totalHpLost, 1));
 }

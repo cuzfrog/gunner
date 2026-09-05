@@ -1,6 +1,7 @@
 import {
   EMPTY_DEFENSE_ASSESSMENT,
   EMPTY_DEFENSE_SPEC,
+  EMPTY_PROJECTION,
   Vec2,
   ZERO_DAMAGE,
   damageVectorScale,
@@ -152,7 +153,7 @@ function baseView(): EngagementView {
     damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
     turret: { hit, expectedMultiplier: 1 },
   };
-  return { frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } };
+  return { frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } };
 }
 
 function sideReadoutValues(
@@ -227,6 +228,7 @@ describe("AppImpl", () => {
       weaponAttacks: { shipA: [], shipB: [] },
       effectiveWeapons: { shipA: effectiveTurret, shipB: effectiveTurret },
       defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+      projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
       locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
     };
     simulation.snapshot.mockReturnValue(boostedSnapshot);
@@ -241,7 +243,7 @@ describe("AppImpl", () => {
   });
 
   test("falls back to the view's effective weapon when the composer returns no assessment", () => {
-    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } };
+    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } };
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, sensorBoosterResolver, weaponClock, lockClock, renderer, loop });
     app.start();
@@ -258,7 +260,7 @@ describe("AppImpl", () => {
     expect(simulation.step).toHaveBeenCalledWith(0.1);
     expect(droneSimulator.step).toHaveBeenCalledWith(0.1, frame);
     expect(missileSimulator.step).toHaveBeenCalledWith(0.1, frame, { shipA: [], shipB: [] });
-    expect(engagementFrameComposer.compose).toHaveBeenCalledTimes(3);
+    expect(engagementFrameComposer.compose).toHaveBeenCalledTimes(2);
     expect(renderer.draw).toHaveBeenCalledTimes(2);
   });
 
@@ -395,6 +397,7 @@ describe("AppImpl", () => {
       weaponAttacks: { shipA: [], shipB: [] },
       effectiveWeapons: { shipA: drone, shipB: drone },
       defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+      projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
       locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
     };
     engagementFrameComposer.compose.mockReturnValue(droneView);
@@ -409,7 +412,7 @@ describe("AppImpl", () => {
     }, emptyDefenseView);
   });
 
-  test("renderFrame overlays defense projection onto defense assessments", () => {
+  test("renderFrame overlays defense projection onto view", () => {
     const attackWithDamage: AttackAssessment = {
       boostedWeapon: turret, effectiveWeapon: turret,
       damage: { nominalDps: 100, appliedDps: 80, application: 0.8, volley: 400, baseVolleyByType: ZERO_DAMAGE, appliedByType: { em: 80, thermal: 0, kinetic: 0, explosive: 0 }, appliedVolleyByType: ZERO_DAMAGE },
@@ -421,6 +424,7 @@ describe("AppImpl", () => {
       weaponAttacks: { shipA: [], shipB: [] },
       effectiveWeapons: { shipA: turret, shipB: turret },
       defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+      projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
       locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
     };
     engagementFrameComposer.compose.mockReturnValue(viewWithDamage);
@@ -432,10 +436,10 @@ describe("AppImpl", () => {
     app.start();
     expect(defenseSimulator.project).toHaveBeenCalledWith({ shipA: { em: 80, thermal: 0, kinetic: 0, explosive: 0 }, shipB: { em: 80, thermal: 0, kinetic: 0, explosive: 0 } }, 1);
     const updatedView = controls.update.mock.calls[0][0] as EngagementView;
-    expect(updatedView.defenses.shipA.actualIncomingDps).toBe(60);
-    expect(updatedView.defenses.shipA.actualIncomingByLayer).toEqual({ shield: 40, armor: 20, hull: 0 });
-    expect(updatedView.defenses.shipB.actualIncomingDps).toBe(70);
-    expect(updatedView.defenses.shipB.actualIncomingByLayer).toEqual({ shield: 50, armor: 20, hull: 0 });
+    expect(updatedView.projection.shipA.totalHpLost).toBe(60);
+    expect(updatedView.projection.shipA.byLayer).toEqual({ shield: 40, armor: 20, hull: 0 });
+    expect(updatedView.projection.shipB.totalHpLost).toBe(70);
+    expect(updatedView.projection.shipB.byLayer).toEqual({ shield: 50, armor: 20, hull: 0 });
   });
 
   test("renderFrame yields zero actual DPS when no attack exists", () => {
@@ -445,6 +449,7 @@ describe("AppImpl", () => {
       weaponAttacks: { shipA: [], shipB: [] },
       effectiveWeapons: { shipA: turret, shipB: turret },
       defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+      projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
       locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
     };
     engagementFrameComposer.compose.mockReturnValue(viewNoAttack);
@@ -456,8 +461,8 @@ describe("AppImpl", () => {
     app.start();
     expect(defenseSimulator.project).toHaveBeenCalledWith({ shipA: ZERO_DAMAGE, shipB: ZERO_DAMAGE }, 1);
     const updatedView = controls.update.mock.calls[0][0] as EngagementView;
-    expect(updatedView.defenses.shipA.actualIncomingDps).toBe(0);
-    expect(updatedView.defenses.shipB.actualIncomingDps).toBe(0);
+    expect(updatedView.projection.shipA.totalHpLost).toBe(0);
+    expect(updatedView.projection.shipB.totalHpLost).toBe(0);
   });
 
   test("renderFrame maps asymmetric attacks to the correct target", () => {
@@ -477,6 +482,7 @@ describe("AppImpl", () => {
       weaponAttacks: { shipA: [], shipB: [] },
       effectiveWeapons: { shipA: turret, shipB: turret },
       defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+      projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
       locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
     };
     engagementFrameComposer.compose.mockReturnValue(viewAsymmetric);
@@ -488,7 +494,7 @@ describe("AppImpl", () => {
     app.start();
     expect(defenseSimulator.project).toHaveBeenCalledWith({ shipA: { em: 0, thermal: 0, kinetic: 0, explosive: 50 }, shipB: { em: 80, thermal: 0, kinetic: 0, explosive: 0 } }, 1);
     const updatedView = controls.update.mock.calls[0][0] as EngagementView;
-    expect(updatedView.defenses.shipA.actualIncomingDps).toBe(40);
-    expect(updatedView.defenses.shipB.actualIncomingDps).toBe(60);
+    expect(updatedView.projection.shipA.totalHpLost).toBe(40);
+    expect(updatedView.projection.shipB.totalHpLost).toBe(60);
   });
 });

@@ -75,6 +75,8 @@ export interface DamageProjection {
   readonly byLayer: LayerHpLoss;
 }
 
+export const EMPTY_PROJECTION: DamageProjection = { totalHpLost: 0, byLayer: { shield: 0, armor: 0, hull: 0 } };
+
 const RAH_TOTAL_BUDGET = 0.6;
 
 type MutableDamageVector = Record<DamageType, number>;

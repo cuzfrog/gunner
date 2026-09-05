@@ -33,11 +33,11 @@ export class ActualDpsHintProviderImpl implements HintContentProvider {
   private buildModel(side: "shipA" | "shipB", view: EngagementView): ActualDpsHintModel {
     const opponent = side === "shipA" ? "shipB" : "shipA";
     const attack = view.attacks[side];
-    const defense = view.defenses[opponent];
-    if (attack === undefined || defense === undefined) return { layers: [], totalAppliedDps: 0, totalActualDps: 0 };
+    if (attack === undefined) return { layers: [], totalAppliedDps: 0, totalActualDps: 0 };
+    const projection = view.projection[opponent];
     const totalAppliedDps = attack.damage.appliedDps;
-    const totalActualDps = defense.actualIncomingDps;
-    const byLayer = defense.actualIncomingByLayer;
+    const totalActualDps = projection.totalHpLost;
+    const byLayer = projection.byLayer;
     const layers: ActualDpsHintLayerRow[] = [];
     for (const layer of DEFENSE_LAYERS) {
       const hpLost = byLayer[layer];

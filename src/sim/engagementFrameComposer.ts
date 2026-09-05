@@ -1,6 +1,8 @@
 import type { AttackAssessment, AttackState, EngagementEvaluator } from "./fireControl";
 import type { Kinematics } from "./kinematics";
 import type { DefenseAssessor, DefenseAssessment } from "./defenseAssessment";
+import type { DamageProjection } from "./defenseSimulator";
+import { EMPTY_PROJECTION } from "./defenseSimulator";
 import { type DamageAssessment, type DefenseSpec, type DroneRuntimeState, type EngagementFrame, type LockState, type MissileAttackFacts, type Side, type SimSnapshot, type WeaponSpec, ZERO_DAMAGE, damageVectorAdd, IDLE_LOCK } from "./types";
 export interface EngagementInput {
   readonly weapons: Record<Side, readonly WeaponSpec[]>;
@@ -23,6 +25,7 @@ export interface EngagementView {
   readonly weaponAttacks: Record<Side, readonly WeaponAttack[]>;
   readonly effectiveWeapons: Record<Side, WeaponSpec | undefined>;
   readonly defenses: Record<Side, DefenseAssessment>;
+  readonly projection: Record<Side, DamageProjection>;
   readonly locks: Record<Side, LockState>;
 }
 
@@ -64,7 +67,7 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
         shipB: attacks.shipB?.effectiveWeapon ?? shipBWeapons[0],
       };
       const defenses = this.assessDefenses(input, attacks);
-      return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, locks };
+      return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks };
     }
     const shipAResult = this.assessSide(frame, "shipA", shipAWeapons, input.sigRadii.shipB, input.droneStates.shipA, input.missileFacts.shipA, locks.shipA.status === "locked");
     const shipBResult = this.assessSide(frame, "shipB", shipBWeapons, input.sigRadii.shipA, input.droneStates.shipB, input.missileFacts.shipB, locks.shipB.status === "locked");
@@ -75,7 +78,7 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
       shipB: attacks.shipB?.effectiveWeapon ?? shipBWeapons[0],
     };
     const defenses = this.assessDefenses(input, attacks);
-    return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, locks };
+    return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks };
   }
 
   private assessDefenses(input: EngagementInput, attacks: Record<Side, AttackAssessment | undefined>): Record<Side, DefenseAssessment> {

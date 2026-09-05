@@ -1,4 +1,4 @@
-import { type DamageVector, type DefenseLayer, type DefenseLayerSpec, type DefenseSpec, type LayerHpLoss, type RepairerSpec, DAMAGE_TYPES } from "./types";
+import { type DamageVector, type DefenseLayer, type DefenseLayerSpec, type DefenseSpec, type RepairerSpec, DAMAGE_TYPES } from "./types";
 
 export interface LayerEhp {
   readonly layer: DefenseLayer;
@@ -11,8 +11,6 @@ export interface DefenseAssessment {
   readonly totalEhp: number;
   readonly repairPerSecond: Readonly<Record<DefenseLayer, number>>;
   readonly shieldRegenPerSecond: number;
-  readonly actualIncomingDps: number;
-  readonly actualIncomingByLayer: LayerHpLoss;
 }
 
 export interface DefenseAssessor {
@@ -28,8 +26,6 @@ export const EMPTY_DEFENSE_ASSESSMENT: DefenseAssessment = {
   totalEhp: 0,
   repairPerSecond: { shield: 0, armor: 0, hull: 0 },
   shieldRegenPerSecond: 0,
-  actualIncomingDps: 0,
-  actualIncomingByLayer: { shield: 0, armor: 0, hull: 0 },
 };
 
 export class DefenseAssessorImpl implements DefenseAssessor {
@@ -54,8 +50,6 @@ export class DefenseAssessorImpl implements DefenseAssessor {
       totalEhp,
       repairPerSecond,
       shieldRegenPerSecond,
-      actualIncomingDps: 0,
-      actualIncomingByLayer: { shield: 0, armor: 0, hull: 0 },
     };
   }
 }

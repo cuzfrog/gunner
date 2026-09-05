@@ -1,5 +1,5 @@
 import { type FakeElement, fakeDocument } from "../../testing";
-import { ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, type AttackAssessment, type DefenseAssessment, type EngagementView, type TurretSpec } from "../../../sim";
+import { ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, type AttackAssessment, type DamageProjection, type EngagementView, type TurretSpec } from "../../../sim";
 import type { ViewStore } from "../controlsContract";
 import type { ActualDpsHintModel, ActualDpsHintRenderer } from "./actualDpsHintRenderer";
 import { type ActualDpsHintProviderDeps, ActualDpsHintProviderImpl } from "./actualDpsHintProvider";
@@ -14,17 +14,18 @@ function makeAttack(appliedByType: { em: number; thermal: number; kinetic: numbe
   };
 }
 
-function makeDefense(actualIncomingDps: number, actualIncomingByLayer: { shield: number; armor: number; hull: number }): DefenseAssessment {
-  return { ...EMPTY_DEFENSE_ASSESSMENT, actualIncomingDps, actualIncomingByLayer };
+function makeProjection(totalHpLost: number, byLayer: { shield: number; armor: number; hull: number }): DamageProjection {
+  return { totalHpLost, byLayer };
 }
 
-function makeView(shipAAttack: AttackAssessment | undefined, shipBDefense: DefenseAssessment): EngagementView {
+function makeView(shipAAttack: AttackAssessment | undefined, shipBProjection: DamageProjection): EngagementView {
   return {
     frame: { time: 0, shipA: {} as never, shipB: {} as never, relPosition: {} as never, distance: 5000, relVelocity: {} as never, radialVelocity: 0, transversalVelocity: {} as never, transversalSpeed: 0, angularVelocity: 0 },
     attacks: { shipA: shipAAttack, shipB: undefined },
     weaponAttacks: { shipA: [], shipB: [] },
     effectiveWeapons: { shipA: turret, shipB: undefined },
-    defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: shipBDefense },
+    defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+    projection: { shipA: EMPTY_PROJECTION, shipB: shipBProjection },
     locks: { shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true }, shipB: { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: false } },
   } as unknown as EngagementView;
 }
@@ -42,9 +43,9 @@ function makeMockRenderer(): { renderer: ActualDpsHintRenderer; renderMock: Retu
 function makeDeps(overrides: Partial<ActualDpsHintProviderDeps> = {}): ActualDpsHintProviderDeps & { renderMock: ReturnType<typeof vi.fn> } {
   const { renderer, renderMock } = makeMockRenderer();
   const attack = makeAttack({ em: 100, thermal: 50, kinetic: 0, explosive: 0 }, 150);
-  const defense = makeDefense(110, { shield: 80, armor: 30, hull: 0 });
+  const projection = makeProjection(110, { shield: 80, armor: 30, hull: 0 });
   return {
-    viewStore: makeViewStore(makeView(attack, defense)),
+    viewStore: makeViewStore(makeView(attack, projection)),
     actualDpsHintRenderer: renderer,
     ...overrides,
     renderMock,
@@ -99,8 +100,8 @@ describe("ActualDpsHintProviderImpl", () => {
   });
 
   test("renders nothing when side has no attack", () => {
-    const defense = makeDefense(0, { shield: 0, armor: 0, hull: 0 });
-    const deps = makeDeps({ viewStore: makeViewStore(makeView(undefined, defense)) });
+    const projection = makeProjection(0, { shield: 0, armor: 0, hull: 0 });
+    const deps = makeDeps({ viewStore: makeViewStore(makeView(undefined, projection)) });
     const provider = new ActualDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
@@ -108,7 +109,7 @@ describe("ActualDpsHintProviderImpl", () => {
     expect(deps.renderMock).not.toHaveBeenCalled();
   });
 
-  test("builds model with per-layer rows from opponent defense", () => {
+  test("builds model with per-layer rows from opponent projection", () => {
     const deps = makeDeps();
     const provider = new ActualDpsHintProviderImpl(deps);
     const anchor = makeAnchor("shipA");
@@ -127,8 +128,8 @@ describe("ActualDpsHintProviderImpl", () => {
 
   test("skips layers with zero HP lost", () => {
     const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
-    const defense = makeDefense(50, { shield: 50, armor: 0, hull: 0 });
-    const deps = makeDeps({ viewStore: makeViewStore(makeView(attack, defense)) });
+    const projection = makeProjection(50, { shield: 50, armor: 0, hull: 0 });
+    const deps = makeDeps({ viewStore: makeViewStore(makeView(attack, projection)) });
     const provider = new ActualDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
@@ -140,8 +141,8 @@ describe("ActualDpsHintProviderImpl", () => {
 
   test("renders summary even when all layers have zero HP lost", () => {
     const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
-    const defense = makeDefense(0, { shield: 0, armor: 0, hull: 0 });
-    const deps = makeDeps({ viewStore: makeViewStore(makeView(attack, defense)) });
+    const projection = makeProjection(0, { shield: 0, armor: 0, hull: 0 });
+    const deps = makeDeps({ viewStore: makeViewStore(makeView(attack, projection)) });
     const provider = new ActualDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
@@ -153,16 +154,17 @@ describe("ActualDpsHintProviderImpl", () => {
     expect(model.totalActualDps).toBe(0);
   });
 
-  test("uses shipB defense for shipA side and shipA defense for shipB side", () => {
+  test("uses shipB projection for shipA side and shipA projection for shipB side", () => {
     const shipAAttack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
-    const shipADefense = makeDefense(30, { shield: 30, armor: 0, hull: 0 });
-    const shipBDefense = makeDefense(70, { shield: 70, armor: 0, hull: 0 });
+    const shipAProjection = makeProjection(30, { shield: 30, armor: 0, hull: 0 });
+    const shipBProjection = makeProjection(70, { shield: 70, armor: 0, hull: 0 });
     const view: EngagementView = {
       frame: { time: 0, shipA: {} as never, shipB: {} as never, relPosition: {} as never, distance: 5000, relVelocity: {} as never, radialVelocity: 0, transversalVelocity: {} as never, transversalSpeed: 0, angularVelocity: 0 },
       attacks: { shipA: shipAAttack, shipB: shipAAttack },
       weaponAttacks: { shipA: [], shipB: [] },
       effectiveWeapons: { shipA: turret, shipB: turret },
-      defenses: { shipA: shipADefense, shipB: shipBDefense },
+      defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+      projection: { shipA: shipAProjection, shipB: shipBProjection },
       locks: { shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true }, shipB: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true } },
     } as unknown as EngagementView;
     const deps = makeDeps({ viewStore: makeViewStore(view) });

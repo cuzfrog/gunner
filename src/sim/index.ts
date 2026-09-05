@@ -12,6 +12,7 @@ export type { EngagementFrameComposer, EngagementInput, EngagementView, WeaponAt
 export type { DefenseAssessor, DefenseAssessment, LayerEhp } from "./defenseAssessment";
 export { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
 export type { DefenseSimulator, DefenseView, DefensePoolState, DefenseSimConfig, RepairerViewState, RahViewState, RepairMode, DamageProjection } from "./defenseSimulator";
+export { EMPTY_PROJECTION } from "./defenseSimulator";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { MissileApplication } from "./missileApplication";
 export type { DroneApplication } from "./droneApplication";

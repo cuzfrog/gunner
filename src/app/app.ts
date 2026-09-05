@@ -1,5 +1,5 @@
 import { Vec2, ZERO_DAMAGE } from "../sim";
-import type { DamageEvent, DamageProjection, DamageVector, DefenseAssessment, DefenseSimConfig, DefenseSimulator, DefenseView, DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, LockClock, LockState, MissileAttackFacts, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, SensorBoosterResolver, SensorSpec, ShipState, Side, Simulation, WeaponClock, WeaponSpec } from "../sim";
+import type { DamageEvent, DamageVector, DefenseSimConfig, DefenseSimulator, DefenseView, DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, LockClock, LockState, MissileAttackFacts, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, SensorBoosterResolver, SensorSpec, ShipState, Side, Simulation, WeaponClock, WeaponSpec } from "../sim";
 import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, MissileRenderCollection, Renderer, WeaponRange, WeaponRanges } from "../ui";
 
 const PROJECTION_HORIZON_SECONDS = 1;
@@ -116,7 +116,7 @@ export class AppImpl implements App {
       this.loop.stop();
       this.controls.setPlaying(false);
     }
-    this.renderFrame();
+    this.renderFrame(view);
   }
 
   private droneSimConfig(): DroneSimConfig {
@@ -215,10 +215,10 @@ export class AppImpl implements App {
     return specs;
   }
 
-  private renderFrame(): void {
+  private renderFrame(composed?: EngagementView): void {
+    const base = composed ?? this.composeView();
+    const view = this.overlayProjection(base);
     const snapshot = this.simulation.snapshot();
-    const composed = this.engagementFrameComposer.compose(snapshot, this.engagementInput(snapshot, this.lockClock.states()));
-    const view = this.overlayProjection(composed);
     const effectiveReadouts: EffectiveReadouts = {
       shipA: this.sideReadoutValues(snapshot.shipA, snapshot.shipB, view, "shipA"),
       shipB: this.sideReadoutValues(snapshot.shipB, snapshot.shipA, view, "shipB"),
@@ -233,16 +233,15 @@ export class AppImpl implements App {
     this.controls.update(view, effectiveReadouts, this.defenseSimulator.view());
   }
 
+  private composeView(): EngagementView {
+    const snapshot = this.simulation.snapshot();
+    return this.engagementFrameComposer.compose(snapshot, this.engagementInput(snapshot, this.lockClock.states()));
+  }
+
   private overlayProjection(composed: EngagementView): EngagementView {
     const incoming = incomingByTarget(composed);
     const projection = this.defenseSimulator.project(incoming, PROJECTION_HORIZON_SECONDS);
-    return {
-      ...composed,
-      defenses: {
-        shipA: withProjection(composed.defenses.shipA, projection.shipA),
-        shipB: withProjection(composed.defenses.shipB, projection.shipB),
-      },
-    };
+    return { ...composed, projection };
   }
 
   private rendererWeaponRanges(view: EngagementView): WeaponRanges {
@@ -348,13 +347,5 @@ function incomingByTarget(view: EngagementView): Record<Side, DamageVector> {
   return {
     shipA: view.attacks.shipB?.damage.appliedByType ?? ZERO_DAMAGE,
     shipB: view.attacks.shipA?.damage.appliedByType ?? ZERO_DAMAGE,
-  };
-}
-
-function withProjection(defense: DefenseAssessment, projection: DamageProjection): DefenseAssessment {
-  return {
-    ...defense,
-    actualIncomingDps: projection.totalHpLost,
-    actualIncomingByLayer: projection.byLayer,
   };
 }
