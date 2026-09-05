@@ -62,6 +62,7 @@ export class FooControllerImpl implements FooController {
 ```
 
 - Controllers self-subscribe to `onLanguageChanged` and re-render.
+- For per-frame simulation data, subscribe to `ViewStream.onViewUpdated`; use `ViewStream.currentView()` for on-demand reads; use direct sim read-model calls only for out-of-band queries (e.g. config changes before the first view). Never compute domain quantities in the UI.
 - Render methods are synchronous; for lazy-loaded data, use placeholder-then-rerender (see `LazyItemNameCatalog`).
 - Register in the module's `module.ts` via `asFunction(...).singleton()`.
 - Implementation types are visible only to unit tests and `module.ts`.

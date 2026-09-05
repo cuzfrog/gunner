@@ -2,6 +2,7 @@ import type { I18n } from "../../i18n";
 import type { Language, TrackingUnit } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
+import { percentFromMultiplier } from "../../format";
 import type { EffectiveReadouts, SideReadoutValues } from "../controlsContract";
 import type { SpeedBreakdown, StatEffectAttribution } from "../../../sim";
 import type { Side } from "../side";
@@ -159,7 +160,7 @@ function buildSpeedHint(breakdown: SpeedBreakdown | undefined, fittingImport: Fi
       if (breakdown.propulsionSuppressed) entries.push(`${moduleName} ${t("readout.stoppedMwd")}`);
       continue;
     }
-    entries.push(`${moduleName} -${percentOf(effect.multiplier)}%`);
+    entries.push(`${moduleName} -${percentFromMultiplier(effect.multiplier)}%`);
   }
   return entries.join("; ");
 }
@@ -169,12 +170,8 @@ function buildStatHint(entries: readonly StatEffectAttribution[], fittingImport:
   return entries.map((entry) => {
     const moduleName = fittingImport.itemNameForId(entry.moduleId, language);
     const prefix = entry.scriptId === undefined ? moduleName : `${moduleName} (${fittingImport.itemNameForId(entry.scriptId, language)})`;
-    return `${prefix} -${percentOf(entry.multiplier)}% ${t(statKey)}`;
+    return `${prefix} -${percentFromMultiplier(entry.multiplier)}% ${t(statKey)}`;
   }).join("; ");
-}
-
-function percentOf(multiplier: number): number {
-  return Math.round((1 - multiplier) * 100);
 }
 
 export { formatSpeed as _formatSpeed, isNegative as _isAffected, tryReadNumber as _readNumber };
