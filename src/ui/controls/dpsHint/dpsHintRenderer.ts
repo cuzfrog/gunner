@@ -1,6 +1,7 @@
 import type { DamageFactorKind, DamageType } from "../../../fitting";
 import type { WeaponKind } from "../../../sim";
 import { formatWithCommas } from "../../format";
+import { formatMultiplier } from "../controlsFormat";
 import { html } from "../markup";
 
 export interface DpsHintTypeRow {
@@ -130,10 +131,6 @@ function renderSummary(summary: DpsHintSummary, weaponKind: WeaponKind, t: (key:
       <span class="dps-hint-value">${formatWithCommas(summary.dps, 1)}</span>
     </div>
   </div>` as unknown as HTMLElement;
-}
-
-function formatMultiplier(value: number): string {
-  return String(Number(value.toFixed(2)));
 }
 
 function formatPercent(value: number): string {
