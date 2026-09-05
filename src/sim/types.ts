@@ -13,6 +13,7 @@ export type DefenseLayer = "shield" | "armor" | "hull";
 
 export const ZERO_DAMAGE: DamageVector = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
 export const DAMAGE_TYPES: readonly DamageType[] = ["em", "thermal", "kinetic", "explosive"];
+export const DEFENSE_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
 
 export function damageVectorSum(vec: DamageVector): number {
   return vec.em + vec.thermal + vec.kinetic + vec.explosive;

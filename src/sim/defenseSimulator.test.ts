@@ -780,4 +780,66 @@ describe("DefenseSimulatorImpl", () => {
     expect(withRegen.shipA.byLayer.shield).toBeGreaterThan(0);
     expect(withRegenSim.view().pools.shipA.shield).toBe(shieldBefore);
   });
+
+  test("project: active armor repairer reduces net HP lost in projection", () => {
+    const sim = new DefenseSimulatorImpl();
+    const repairSpec = spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, armorResists: { em: 0 }, repairers: [{ layer: "armor", amount: 100, cycleTime: 2, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }] });
+    sim.reset(config(repairSpec));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const armorBefore = sim.view().pools.shipA.armor;
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.byLayer.armor).toBe(0);
+    expect(sim.view().pools.shipA.armor).toBe(armorBefore);
+  });
+
+  test("project: RAH active does not mutate live RAH state", () => {
+    const sim = new DefenseSimulatorImpl();
+    const rahSpec: RahSpec = { baseResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 }, armorResistsWithoutRah: { em: 0, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime: 1, shiftAmount: 0.1, overloadCycleTimeMultiplier: 0.5 };
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 10000, hullHp: 10000, armorResists: { em: 0 }, rah: rahSpec })));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const rahBefore = sim.view().rah.shipA;
+    expect(rahBefore).toBeDefined();
+    sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    const rahAfter = sim.view().rah.shipA;
+    expect(rahAfter?.resists).toEqual(rahBefore?.resists);
+    expect(rahAfter?.cycleProgress).toBe(rahBefore?.cycleProgress);
+  });
+
+  test("project: multi-type damage applies per-type resists in projection", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5, thermal: 0.25 } })));
+    const projection = sim.project({ shipA: MIXED_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.byLayer.shield).toBeCloseTo(50 * 0.5 + 50 * 0.75, 6);
+    expect(projection.shipA.totalHpLost).toBeCloseTo(62.5, 6);
+  });
+
+  test("project: damage reaches hull when shield and armor are depleted", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 0, hullHp: 1000, hullResists: { em: 0 } })));
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.byLayer.hull).toBe(100);
+    expect(projection.shipA.totalHpLost).toBe(100);
+  });
+
+  test("project: shield bleed-through applies when shield is below uniformity threshold", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
+    sim.step(1, events({ em: 750, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(250);
+    sim.step(1, events({ em: 125, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(125);
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.byLayer.shield).toBeLessThan(100);
+    expect(projection.shipA.byLayer.armor).toBeGreaterThan(0);
+    expect(projection.shipA.totalHpLost).toBe(100);
+  });
+
+  test("project: horizon of 2 seconds doubles damage and regen time", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 } })));
+    const projection1 = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    const projection2 = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 2);
+    expect(projection2.shipA.byLayer.shield).toBeCloseTo(projection1.shipA.byLayer.shield * 2, 6);
+    expect(projection2.shipA.totalHpLost).toBeCloseTo(projection1.shipA.totalHpLost * 2, 6);
+  });
 });

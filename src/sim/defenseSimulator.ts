@@ -264,6 +264,13 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
   }
 }
 
+function stepProjection(sides: Record<Side, SidePools>, dt: number, events: readonly DamageEvent[], time: number): void {
+  const shipAEvents = events.filter((e) => e.target === "shipA");
+  const shipBEvents = events.filter((e) => e.target === "shipB");
+  stepSidePools(sides.shipA, dt, shipAEvents, time);
+  stepSidePools(sides.shipB, dt, shipBEvents, time);
+}
+
 function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEvent[], time: number): void {
   if (pools.dead) return;
   if (!pools.damageEnabled) {
@@ -312,13 +319,6 @@ function hpLossProjection(before: DefensePoolState, after: SidePools): DamagePro
   const armorLost = Math.max(0, before.armor - after.armor);
   const hullLost = Math.max(0, before.hull - after.hull);
   return { totalHpLost: shieldLost + armorLost + hullLost, byLayer: { shield: shieldLost, armor: armorLost, hull: hullLost } };
-}
-
-function stepProjection(sides: Record<Side, SidePools>, dt: number, events: readonly DamageEvent[], time: number): void {
-  const shipAEvents = events.filter((e) => e.target === "shipA");
-  const shipBEvents = events.filter((e) => e.target === "shipB");
-  stepSidePools(sides.shipA, dt, shipAEvents, time);
-  stepSidePools(sides.shipB, dt, shipBEvents, time);
 }
 
 function emptyPools(): SidePools {

@@ -1,7 +1,6 @@
 ---
 no-new-exports:
   - actualDpsHintProvider.ts
-  - actualDpsHintRenderer.ts
   - module.ts
   - index.ts
   - actualDpsHintRenderer.test.ts
@@ -12,17 +11,16 @@ no-new-exports:
 # actualDpsHint
 
 Hover hint content provider for the actual DPS readout. Implements
-`HintContentProvider` with key `"actualDps"`. Renders a per-damage-type
-breakdown showing applied DPS, effective resist, and actual DPS per
-type, plus a combined total row.
+`HintContentProvider` with key `"actualDps"`. Renders a per-layer
+HP loss breakdown showing how the next 1-second damage batch splits
+across shield, armor, and hull, plus a combined total row.
 
 The provider reads the current `EngagementView` from `ViewStore`
 (implemented by `DomControls`) to obtain the attacker's
-`AttackAssessment.damage.appliedByType` and the opponent's
-`DefenseAssessment.effectiveResists` and `actualIncomingByType`.
+`AttackAssessment.damage.appliedDps` and the opponent's
+`DefenseAssessment.actualIncomingDps` and `actualIncomingByLayer`.
 The opponent is the opposite side: shipA's actual DPS uses shipB's
-defense, and vice versa. Damage types with zero applied DPS are
-skipped.
+defense, and vice versa. Layers with zero HP loss are skipped.
 
 Registration must happen after `registerHoverHintModule` and
 `registerDomControlsModule` because the provider depends on the

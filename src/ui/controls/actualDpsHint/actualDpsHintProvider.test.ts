@@ -1,5 +1,5 @@
 import { type FakeElement, fakeDocument } from "../../testing";
-import { ZERO_DAMAGE, ZERO_RESISTS, EMPTY_DEFENSE_ASSESSMENT, type AttackAssessment, type DefenseAssessment, type EngagementView, type TurretSpec } from "../../../sim";
+import { ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, type AttackAssessment, type DefenseAssessment, type EngagementView, type TurretSpec } from "../../../sim";
 import type { ViewStore } from "../controlsContract";
 import type { ActualDpsHintModel, ActualDpsHintRenderer } from "./actualDpsHintRenderer";
 import { type ActualDpsHintProviderDeps, ActualDpsHintProviderImpl } from "./actualDpsHintProvider";
@@ -14,8 +14,8 @@ function makeAttack(appliedByType: { em: number; thermal: number; kinetic: numbe
   };
 }
 
-function makeDefense(actualIncomingDps: number, actualIncomingByType: { em: number; thermal: number; kinetic: number; explosive: number }, effectiveResists: { em: number; thermal: number; kinetic: number; explosive: number }): DefenseAssessment {
-  return { ...EMPTY_DEFENSE_ASSESSMENT, actualIncomingDps, actualIncomingByType, effectiveResists };
+function makeDefense(actualIncomingDps: number, actualIncomingByLayer: { shield: number; armor: number; hull: number }): DefenseAssessment {
+  return { ...EMPTY_DEFENSE_ASSESSMENT, actualIncomingDps, actualIncomingByLayer };
 }
 
 function makeView(shipAAttack: AttackAssessment | undefined, shipBDefense: DefenseAssessment): EngagementView {
@@ -42,7 +42,7 @@ function makeMockRenderer(): { renderer: ActualDpsHintRenderer; renderMock: Retu
 function makeDeps(overrides: Partial<ActualDpsHintProviderDeps> = {}): ActualDpsHintProviderDeps & { renderMock: ReturnType<typeof vi.fn> } {
   const { renderer, renderMock } = makeMockRenderer();
   const attack = makeAttack({ em: 100, thermal: 50, kinetic: 0, explosive: 0 }, 150);
-  const defense = makeDefense(110, { em: 50, thermal: 40, kinetic: 0, explosive: 0 }, { em: 0.5, thermal: 0.2, kinetic: 0, explosive: 0 });
+  const defense = makeDefense(110, { shield: 80, armor: 30, hull: 0 });
   return {
     viewStore: makeViewStore(makeView(attack, defense)),
     actualDpsHintRenderer: renderer,
@@ -99,7 +99,7 @@ describe("ActualDpsHintProviderImpl", () => {
   });
 
   test("renders nothing when side has no attack", () => {
-    const defense = makeDefense(0, ZERO_DAMAGE, ZERO_RESISTS);
+    const defense = makeDefense(0, { shield: 0, armor: 0, hull: 0 });
     const deps = makeDeps({ viewStore: makeViewStore(makeView(undefined, defense)) });
     const provider = new ActualDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
@@ -108,7 +108,7 @@ describe("ActualDpsHintProviderImpl", () => {
     expect(deps.renderMock).not.toHaveBeenCalled();
   });
 
-  test("builds model with per-type rows from attacker appliedByType and opponent defense", () => {
+  test("builds model with per-layer rows from opponent defense", () => {
     const deps = makeDeps();
     const provider = new ActualDpsHintProviderImpl(deps);
     const anchor = makeAnchor("shipA");
@@ -116,36 +116,32 @@ describe("ActualDpsHintProviderImpl", () => {
     provider.render(anchor, container);
     expect(deps.renderMock).toHaveBeenCalledTimes(1);
     const model = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
-    expect(model.types).toHaveLength(2);
-    expect(model.types[0].type).toBe("em");
-    expect(model.types[0].appliedDps).toBe(100);
-    expect(model.types[0].resist).toBe(0.5);
-    expect(model.types[0].actualDps).toBe(50);
-    expect(model.types[1].type).toBe("thermal");
-    expect(model.types[1].appliedDps).toBe(50);
-    expect(model.types[1].resist).toBe(0.2);
-    expect(model.types[1].actualDps).toBe(40);
+    expect(model.layers).toHaveLength(2);
+    expect(model.layers[0].layer).toBe("shield");
+    expect(model.layers[0].hpLost).toBe(80);
+    expect(model.layers[1].layer).toBe("armor");
+    expect(model.layers[1].hpLost).toBe(30);
     expect(model.totalAppliedDps).toBe(150);
     expect(model.totalActualDps).toBe(110);
   });
 
-  test("skips damage types with zero applied DPS", () => {
+  test("skips layers with zero HP lost", () => {
     const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
-    const defense = makeDefense(50, { em: 50, thermal: 0, kinetic: 0, explosive: 0 }, { em: 0.5, thermal: 0, kinetic: 0, explosive: 0 });
+    const defense = makeDefense(50, { shield: 50, armor: 0, hull: 0 });
     const deps = makeDeps({ viewStore: makeViewStore(makeView(attack, defense)) });
     const provider = new ActualDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
     provider.render(anchor, container);
     const model = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
-    expect(model.types).toHaveLength(1);
-    expect(model.types[0].type).toBe("em");
+    expect(model.layers).toHaveLength(1);
+    expect(model.layers[0].layer).toBe("shield");
   });
 
   test("uses shipB defense for shipA side and shipA defense for shipB side", () => {
     const shipAAttack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
-    const shipADefense = makeDefense(30, { em: 30, thermal: 0, kinetic: 0, explosive: 0 }, { em: 0.7, thermal: 0, kinetic: 0, explosive: 0 });
-    const shipBDefense = makeDefense(70, { em: 70, thermal: 0, kinetic: 0, explosive: 0 }, { em: 0.3, thermal: 0, kinetic: 0, explosive: 0 });
+    const shipADefense = makeDefense(30, { shield: 30, armor: 0, hull: 0 });
+    const shipBDefense = makeDefense(70, { shield: 70, armor: 0, hull: 0 });
     const view: EngagementView = {
       frame: { time: 0, shipA: {} as never, shipB: {} as never, relPosition: {} as never, distance: 5000, relVelocity: {} as never, radialVelocity: 0, transversalVelocity: {} as never, transversalSpeed: 0, angularVelocity: 0 },
       attacks: { shipA: shipAAttack, shipB: shipAAttack },

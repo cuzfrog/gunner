@@ -1,9 +1,8 @@
-import type { DamageType, EngagementView } from "../../../sim";
-import { DAMAGE_TYPES } from "../../../sim";
+import type { DefenseLayer, EngagementView } from "../../../sim";
+import { DEFENSE_LAYERS } from "../../../sim";
 import type { ViewStore } from "../controlsContract";
 import type { HintContentProvider } from "../hoverHint";
-import { DAMAGE_ICON_URLS } from "../damageTypeIcons";
-import type { ActualDpsHintModel, ActualDpsHintRenderer, ActualDpsHintTypeRow } from "./actualDpsHintRenderer";
+import type { ActualDpsHintLayerRow, ActualDpsHintModel, ActualDpsHintRenderer } from "./actualDpsHintRenderer";
 
 export type ActualDpsHintProvider = HintContentProvider;
 
@@ -27,7 +26,7 @@ export class ActualDpsHintProviderImpl implements HintContentProvider {
     const view = this.viewStore.currentView();
     if (view === undefined) return;
     const model = this.buildModel(side, view);
-    if (model.types.length === 0) return;
+    if (model.layers.length === 0) return;
     this.renderer.render(model, container);
   }
 
@@ -35,18 +34,16 @@ export class ActualDpsHintProviderImpl implements HintContentProvider {
     const opponent = side === "shipA" ? "shipB" : "shipA";
     const attack = view.attacks[side];
     const defense = view.defenses[opponent];
-    if (attack === undefined || defense === undefined) return { types: [], totalAppliedDps: 0, totalActualDps: 0 };
-    const appliedByType = attack.damage.appliedByType;
-    const effectiveResists = defense.effectiveResists;
-    const actualByType = defense.actualIncomingByType;
-    const types: ActualDpsHintTypeRow[] = [];
-    for (const type of DAMAGE_TYPES) {
-      if (appliedByType[type] <= 0) continue;
-      types.push(buildTypeRow(type, appliedByType[type], effectiveResists[type], actualByType[type]));
-    }
+    if (attack === undefined || defense === undefined) return { layers: [], totalAppliedDps: 0, totalActualDps: 0 };
     const totalAppliedDps = attack.damage.appliedDps;
     const totalActualDps = defense.actualIncomingDps;
-    return { types, totalAppliedDps, totalActualDps };
+    const byLayer = defense.actualIncomingByLayer;
+    const layers: ActualDpsHintLayerRow[] = [];
+    for (const layer of DEFENSE_LAYERS) {
+      if (byLayer[layer] <= 0) continue;
+      layers.push({ layer, hpLost: byLayer[layer] });
+    }
+    return { layers, totalAppliedDps, totalActualDps };
   }
 }
 
@@ -56,8 +53,4 @@ function sideFromAnchor(anchor: HTMLElement): "shipA" | "shipB" | undefined {
   if (side === "a") return "shipA";
   if (side === "b") return "shipB";
   return undefined;
-}
-
-function buildTypeRow(type: DamageType, appliedDps: number, resist: number, actualDps: number): ActualDpsHintTypeRow {
-  return { type, iconUrl: DAMAGE_ICON_URLS[type], appliedDps, resist, actualDps };
 }

@@ -1,6 +1,6 @@
 import { DefenseAssessorImpl } from "./defenseAssessment";
 import type { DefenseSpec } from "./types";
-import { ZERO_DAMAGE, ZERO_RESISTS } from "./types";
+import { ZERO_DAMAGE } from "./types";
 
 const assessor = new DefenseAssessorImpl();
 
@@ -88,85 +88,10 @@ describe("DefenseAssessorImpl", () => {
     expect(result.layers.shield.ehp).toBeCloseTo(1000 / (0.5 * 1.0 + 0.5 * 0.1), 1);
   });
 
-  test("actual incoming DPS is zero when incoming damage is zero", () => {
+  test("actualIncomingDps is zero from assessor (overlaid by AppImpl)", () => {
     const spec = makeSpec({ shieldHp: 1000, shieldResistEm: 0.5 });
-    const result = assessor.assess(spec, ZERO_DAMAGE, false);
+    const result = assessor.assess(spec, { em: 100, thermal: 0, kinetic: 0, explosive: 0 }, false);
     expect(result.actualIncomingDps).toBe(0);
-    expect(result.actualIncomingByType).toEqual(ZERO_DAMAGE);
-  });
-
-  test("actual incoming DPS equals applied DPS when all resists are zero", () => {
-    const spec = makeSpec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000 });
-    const incoming = { em: 100, thermal: 50, kinetic: 0, explosive: 0 };
-    const result = assessor.assess(spec, incoming, false);
-    expect(result.actualIncomingDps).toBeCloseTo(150, 6);
-    expect(result.actualIncomingByType.em).toBeCloseTo(100, 6);
-    expect(result.actualIncomingByType.thermal).toBeCloseTo(50, 6);
-  });
-
-  test("50% EM resist on all layers halves EM actual DPS", () => {
-    const spec: DefenseSpec = {
-      layers: {
-        shield: { hp: 1000, resists: { em: 0.5, thermal: 0, kinetic: 0, explosive: 0 } },
-        armor: { hp: 1000, resists: { em: 0.5, thermal: 0, kinetic: 0, explosive: 0 } },
-        hull: { hp: 1000, resists: { em: 0.5, thermal: 0, kinetic: 0, explosive: 0 } },
-      },
-      shieldRechargeTime: 100, repairers: [], signaturePenalty: 0, shieldUniformity: 0.25,
-    };
-    const incoming = { em: 100, thermal: 0, kinetic: 0, explosive: 0 };
-    const result = assessor.assess(spec, incoming, false);
-    expect(result.effectiveResists.em).toBeCloseTo(0.5, 6);
-    expect(result.actualIncomingByType.em).toBeCloseTo(50, 6);
-    expect(result.actualIncomingDps).toBeCloseTo(50, 6);
-  });
-
-  test("effective resists are HP-weighted average across layers", () => {
-    const spec: DefenseSpec = {
-      layers: {
-        shield: { hp: 1000, resists: { em: 0.6, thermal: 0, kinetic: 0, explosive: 0 } },
-        armor: { hp: 2000, resists: { em: 0.3, thermal: 0, kinetic: 0, explosive: 0 } },
-        hull: { hp: 1000, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
-      },
-      shieldRechargeTime: 100, repairers: [], signaturePenalty: 0, shieldUniformity: 0.25,
-    };
-    const incoming = { em: 100, thermal: 0, kinetic: 0, explosive: 0 };
-    const result = assessor.assess(spec, incoming, false);
-    expect(result.effectiveResists.em).toBeCloseTo((1000 * 0.6 + 2000 * 0.3 + 1000 * 0) / 4000, 6);
-    expect(result.actualIncomingByType.em).toBeCloseTo(100 * (1 - (1000 * 0.6 + 2000 * 0.3 + 1000 * 0) / 4000), 6);
-  });
-
-  test("zero HP in all layers yields zero effective resists and zero actual DPS", () => {
-    const spec: DefenseSpec = {
-      layers: {
-        shield: { hp: 0, resists: { em: 0.5, thermal: 0, kinetic: 0, explosive: 0 } },
-        armor: { hp: 0, resists: { em: 0.5, thermal: 0, kinetic: 0, explosive: 0 } },
-        hull: { hp: 0, resists: { em: 0.5, thermal: 0, kinetic: 0, explosive: 0 } },
-      },
-      shieldRechargeTime: 100, repairers: [], signaturePenalty: 0, shieldUniformity: 0.25,
-    };
-    const incoming = { em: 100, thermal: 0, kinetic: 0, explosive: 0 };
-    const result = assessor.assess(spec, incoming, false);
-    expect(result.effectiveResists).toEqual(ZERO_RESISTS);
-    expect(result.actualIncomingDps).toBe(0);
-  });
-
-  test("multi-type incoming damage applies per-type effective resists", () => {
-    const spec: DefenseSpec = {
-      layers: {
-        shield: { hp: 1000, resists: { em: 0.5, thermal: 0.25, kinetic: 0, explosive: 0 } },
-        armor: { hp: 1000, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
-        hull: { hp: 1000, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
-      },
-      shieldRechargeTime: 100, repairers: [], signaturePenalty: 0, shieldUniformity: 0.25,
-    };
-    const incoming = { em: 100, thermal: 80, kinetic: 60, explosive: 40 };
-    const result = assessor.assess(spec, incoming, false);
-    expect(result.effectiveResists.em).toBeCloseTo(0.5 / 3, 6);
-    expect(result.effectiveResists.thermal).toBeCloseTo(0.25 / 3, 6);
-    expect(result.actualIncomingByType.em).toBeCloseTo(100 * (1 - 0.5 / 3), 6);
-    expect(result.actualIncomingByType.thermal).toBeCloseTo(80 * (1 - 0.25 / 3), 6);
-    expect(result.actualIncomingByType.kinetic).toBeCloseTo(60, 6);
-    expect(result.actualIncomingByType.explosive).toBeCloseTo(40, 6);
-    expect(result.actualIncomingDps).toBeCloseTo(100 * (1 - 0.5 / 3) + 80 * (1 - 0.25 / 3) + 60 + 40, 6);
+    expect(result.actualIncomingByLayer).toEqual({ shield: 0, armor: 0, hull: 0 });
   });
 });

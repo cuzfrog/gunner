@@ -4,11 +4,11 @@ import { ActualDpsHintRendererImpl } from "./actualDpsHintRenderer";
 
 function makeModel(): ActualDpsHintModel {
   return {
-    types: [
-      { type: "em", iconUrl: "/em.png", appliedDps: 100, resist: 0.5, actualDps: 50 },
-      { type: "thermal", iconUrl: "/thermal.png", appliedDps: 80, resist: 0.25, actualDps: 60 },
+    layers: [
+      { layer: "shield", hpLost: 80 },
+      { layer: "armor", hpLost: 30 },
     ],
-    totalAppliedDps: 180,
+    totalAppliedDps: 150,
     totalActualDps: 110,
   };
 }
@@ -48,7 +48,7 @@ describe("ActualDpsHintRendererImpl", () => {
     expect(container.children[0].className).toBe("dps-hint");
   });
 
-  test("renders one row per damage type plus a summary", () => {
+  test("renders one row per non-zero layer plus a summary", () => {
     const renderer = new ActualDpsHintRendererImpl({ t: (key) => key });
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
     renderer.render(makeModel(), container as unknown as HTMLElement);
@@ -60,19 +60,18 @@ describe("ActualDpsHintRendererImpl", () => {
     expect(children[2].className).toBe("dps-hint-summary");
   });
 
-  test("renders damage type label, formula with pass-through fraction, and icon per type row", () => {
+  test("renders layer label and HP lost per layer row", () => {
     const renderer = new ActualDpsHintRendererImpl({ t: (key) => key });
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
     renderer.render(makeModel(), container as unknown as HTMLElement);
     const root = container.children[0] as FakeElement;
     const rows = elementChildren(root);
-    const emRow = elementChildren(rows[0]);
-    expect(emRow[0].tagName).toBe("IMG");
-    expect(emRow[1].textContent).toBe("dpsHint.damageType.em");
-    expect(emRow[2].textContent).toBe("100.0 × 50.0% = 50.0");
-    const thermalRow = elementChildren(rows[1]);
-    expect(thermalRow[1].textContent).toBe("dpsHint.damageType.thermal");
-    expect(thermalRow[2].textContent).toBe("80.0 × 75.0% = 60.0");
+    const shieldRow = elementChildren(rows[0]);
+    expect(shieldRow[0].textContent).toBe("defense.layer.shield");
+    expect(shieldRow[1].textContent).toBe("80.0");
+    const armorRow = elementChildren(rows[1]);
+    expect(armorRow[0].textContent).toBe("defense.layer.armor");
+    expect(armorRow[1].textContent).toBe("30.0");
   });
 
   test("renders total applied and total actual in summary", () => {
@@ -83,7 +82,7 @@ describe("ActualDpsHintRendererImpl", () => {
     const summary = elementChildren(root)[2];
     const summaryChildren = elementChildren(summary);
     expect(elementChildren(summaryChildren[0])[0].textContent).toBe("actualDpsHint.totalApplied");
-    expect(elementChildren(summaryChildren[0])[1].textContent).toBe("180.0");
+    expect(elementChildren(summaryChildren[0])[1].textContent).toBe("150.0");
     expect(elementChildren(summaryChildren[1])[0].textContent).toBe("actualDpsHint.totalActual");
     expect(elementChildren(summaryChildren[1])[1].textContent).toBe("110.0");
   });
@@ -91,10 +90,21 @@ describe("ActualDpsHintRendererImpl", () => {
   test("renders only summary for empty model", () => {
     const renderer = new ActualDpsHintRendererImpl({ t: (key) => key });
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
-    renderer.render({ types: [], totalAppliedDps: 0, totalActualDps: 0 }, container as unknown as HTMLElement);
+    renderer.render({ layers: [], totalAppliedDps: 0, totalActualDps: 0 }, container as unknown as HTMLElement);
     const root = container.children[0] as FakeElement;
     expect(root.className).toBe("dps-hint");
     expect(elementChildren(root).length).toBe(1);
     expect(elementChildren(root)[0].className).toBe("dps-hint-summary");
+  });
+
+  test("skips layers with zero HP lost", () => {
+    const renderer = new ActualDpsHintRendererImpl({ t: (key) => key });
+    const container = globalThis.document.createElement("div") as unknown as FakeElement;
+    renderer.render({ layers: [{ layer: "shield", hpLost: 50 }, { layer: "armor", hpLost: 0 }, { layer: "hull", hpLost: 0 }], totalAppliedDps: 100, totalActualDps: 50 }, container as unknown as HTMLElement);
+    const root = container.children[0] as FakeElement;
+    const rows = elementChildren(root);
+    expect(rows.length).toBe(2);
+    expect(rows[0].className).toBe("dps-hint-row");
+    expect(rows[1].className).toBe("dps-hint-summary");
   });
 });
