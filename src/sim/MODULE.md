@@ -59,7 +59,7 @@ no-new-exports:
   - types.test.ts
 ---
 
-Gate relaxed: `defenseSimulator.ts` was removed from `no-new-exports` to add `DamageProjection`, `LayerHpLoss`, and the `project` method to `DefenseSimulator`. These types are cross-boundary DTOs consumed by `app` and `ui` for the layer-aware actual DPS projection. `types.ts` was removed from `no-new-exports` to add `DEFENSE_LAYERS` as a cross-boundary constant consumed by `ui` for iterating defense layers in the per-layer actual DPS hint.
+Gate relaxed: `defenseSimulator.ts` was removed from `no-new-exports` to add `DamageProjection` and the `project` method to `DefenseSimulator`. These types are cross-boundary DTOs consumed by `app` and `ui` for the layer-aware actual DPS projection. `types.ts` was removed from `no-new-exports` to add `DEFENSE_LAYERS` and `LayerHpLoss` as cross-boundary DTOs/constants consumed by `app` and `ui` for the per-layer actual DPS hint.
 
 
 

@@ -2,6 +2,8 @@ import { Vec2, ZERO_DAMAGE } from "../sim";
 import type { DamageEvent, DamageProjection, DamageVector, DefenseAssessment, DefenseSimConfig, DefenseSimulator, DefenseView, DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, LockClock, LockState, MissileAttackFacts, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, SensorBoosterResolver, SensorSpec, ShipState, Side, Simulation, WeaponClock, WeaponSpec } from "../sim";
 import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, MissileRenderCollection, Renderer, WeaponRange, WeaponRanges } from "../ui";
 
+const PROJECTION_HORIZON_SECONDS = 1;
+
 export interface App {
   start(): void;
   tick(dt: number): void;
@@ -233,7 +235,7 @@ export class AppImpl implements App {
 
   private overlayProjection(composed: EngagementView): EngagementView {
     const incoming = incomingByTarget(composed);
-    const projection = this.defenseSimulator.project(incoming, 1);
+    const projection = this.defenseSimulator.project(incoming, PROJECTION_HORIZON_SECONDS);
     return {
       ...composed,
       defenses: {

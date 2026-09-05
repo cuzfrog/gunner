@@ -459,4 +459,36 @@ describe("AppImpl", () => {
     expect(updatedView.defenses.shipA.actualIncomingDps).toBe(0);
     expect(updatedView.defenses.shipB.actualIncomingDps).toBe(0);
   });
+
+  test("renderFrame maps asymmetric attacks to the correct target", () => {
+    const shipAAttack: AttackAssessment = {
+      boostedWeapon: turret, effectiveWeapon: turret,
+      damage: { nominalDps: 80, appliedDps: 80, application: 1, volley: 400, baseVolleyByType: ZERO_DAMAGE, appliedByType: { em: 80, thermal: 0, kinetic: 0, explosive: 0 }, appliedVolleyByType: ZERO_DAMAGE },
+      turret: { hit: { chance: 1, trackingTerm: 0, rangeTerm: 0 }, expectedMultiplier: 1 },
+    };
+    const shipBAttack: AttackAssessment = {
+      boostedWeapon: turret, effectiveWeapon: turret,
+      damage: { nominalDps: 50, appliedDps: 50, application: 1, volley: 200, baseVolleyByType: ZERO_DAMAGE, appliedByType: { em: 0, thermal: 0, kinetic: 0, explosive: 50 }, appliedVolleyByType: ZERO_DAMAGE },
+      turret: { hit: { chance: 1, trackingTerm: 0, rangeTerm: 0 }, expectedMultiplier: 1 },
+    };
+    const viewAsymmetric: EngagementView = {
+      frame,
+      attacks: { shipA: shipAAttack, shipB: shipBAttack },
+      weaponAttacks: { shipA: [], shipB: [] },
+      effectiveWeapons: { shipA: turret, shipB: turret },
+      defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+      locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+    };
+    engagementFrameComposer.compose.mockReturnValue(viewAsymmetric);
+    defenseSimulator.project.mockReturnValue({
+      shipA: { totalHpLost: 40, byLayer: { shield: 40, armor: 0, hull: 0 } },
+      shipB: { totalHpLost: 60, byLayer: { shield: 60, armor: 0, hull: 0 } },
+    });
+    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, sensorBoosterResolver, weaponClock, lockClock, renderer, loop });
+    app.start();
+    expect(defenseSimulator.project).toHaveBeenCalledWith({ shipA: { em: 0, thermal: 0, kinetic: 0, explosive: 50 }, shipB: { em: 80, thermal: 0, kinetic: 0, explosive: 0 } }, 1);
+    const updatedView = controls.update.mock.calls[0][0] as EngagementView;
+    expect(updatedView.defenses.shipA.actualIncomingDps).toBe(40);
+    expect(updatedView.defenses.shipB.actualIncomingDps).toBe(60);
+  });
 });
