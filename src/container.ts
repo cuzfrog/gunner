@@ -5,7 +5,7 @@ import type { FittingCradle } from "./fitting";
 import type { ShipsCradle } from "./ships";
 import type { SimConfig, SimCradle } from "./sim";
 import type { ControlsCradle } from "./ui/controls";
-import type { Loop, Renderer } from "./ui";
+import type { Loop, Renderer, ViewStream } from "./ui";
 
 interface RuntimeValues {
   readonly canvas: HTMLCanvasElement;
@@ -16,7 +16,7 @@ interface RuntimeValues {
   readonly simConfig: SimConfig;
 }
 
-type UiCradle = ControlsCradle & AppstateCradle & { readonly renderer: Renderer; readonly loop: Loop };
+type UiCradle = ControlsCradle & AppstateCradle & { readonly renderer: Renderer; readonly loop: Loop; readonly viewStream: ViewStream };
 
 export type AppCradle = RuntimeValues & SimCradle & FittingCradle & ShipsCradle & AppstateCradle & AppModuleCradle & UiCradle;
 
