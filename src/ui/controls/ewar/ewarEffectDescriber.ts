@@ -2,6 +2,7 @@ import type { EwarResolver } from "../../../sim";
 import type { DisruptionScriptSpec, EwarEffectPotentials, EwarProjection, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TurretSpec, TrackingDisruptorSpec } from "../../../sim";
 import { ZERO_DAMAGE } from "../../../sim";
 import type { I18n } from "../../i18n";
+import { formatDistance, percentFromMultiplier, signedPercentFromMultiplier } from "../../format";
 
 export interface EwarEffectDescriber {
   webDescription(projection: EwarProjection, distance: number): string;
@@ -77,13 +78,13 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
 
   private speedDescription(multiplier: number): string {
     if (multiplier === 1) return this.i18n.t("ewar.hover.outOfRange");
-    return `${this.i18n.t("ewar.hover.web")} ${Math.round((1 - multiplier) * 100)}%`;
+    return `${this.i18n.t("ewar.hover.web")} ${percentFromMultiplier(multiplier)}%`;
   }
 
   private turretDescription(turret: TurretSpec): string {
-    const tracking = Math.round((1 - turret.tracking) * 100);
-    const optimal = Math.round((1 - turret.optimal) * 100);
-    const falloff = Math.round((1 - turret.falloff) * 100);
+    const tracking = percentFromMultiplier(turret.tracking);
+    const optimal = percentFromMultiplier(turret.optimal);
+    const falloff = percentFromMultiplier(turret.falloff);
     if (tracking === 0 && optimal === 0 && falloff === 0) return this.i18n.t("ewar.hover.outOfRange");
     const trackingLabel = this.i18n.t("ewar.hover.tracking");
     const optimalLabel = this.i18n.t("ewar.hover.optimal");
@@ -92,9 +93,9 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   }
 
   private turretFromPotentials(potentials: EwarEffectPotentials): string {
-    const tracking = Math.round((1 - potentials.trackingMultiplier) * 100);
-    const optimal = Math.round((1 - potentials.optimalMultiplier) * 100);
-    const falloff = Math.round((1 - potentials.falloffMultiplier) * 100);
+    const tracking = percentFromMultiplier(potentials.trackingMultiplier);
+    const optimal = percentFromMultiplier(potentials.optimalMultiplier);
+    const falloff = percentFromMultiplier(potentials.falloffMultiplier);
     if (tracking === 0 && optimal === 0 && falloff === 0) return this.i18n.t("ewar.hover.outOfRange");
     const trackingLabel = this.i18n.t("ewar.hover.tracking");
     const optimalLabel = this.i18n.t("ewar.hover.optimal");
@@ -103,9 +104,7 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   }
 
   private formatRange(meters: number): string {
-    const value = meters >= 10_000
-      ? `${(meters / 1000).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${this.i18n.t("unit.kilometer")}`
-      : `${Math.round(meters)} ${this.i18n.t("unit.meter")}`;
+    const value = formatDistance(meters, (key) => this.i18n.t(key));
     return this.i18n.t("ewar.hint.range").replace("{0}", value);
   }
 
@@ -155,8 +154,8 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   }
 
   private dampenerDescription(sensor: SensorSpec): string {
-    const scanRes = Math.round((1 - sensor.scanResolution) * 100);
-    const range = Math.round((1 - sensor.maxTargetingRange) * 100);
+    const scanRes = percentFromMultiplier(sensor.scanResolution);
+    const range = percentFromMultiplier(sensor.maxTargetingRange);
     if (scanRes === 0 && range === 0) return this.i18n.t("ewar.hover.outOfRange");
     const scanResLabel = this.i18n.t("ewar.hover.scanResolution");
     const rangeLabel = this.i18n.t("ewar.hover.targetingRange");
@@ -165,13 +164,13 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
 
   private sigDescription(multiplier: number): string {
     if (multiplier === 1) return this.i18n.t("ewar.hover.outOfRange");
-    const percent = Math.round((multiplier - 1) * 100);
+    const percent = signedPercentFromMultiplier(multiplier);
     return `${this.i18n.t("ewar.hover.sigRadius")} ${percent > 0 ? "+" : ""}${percent}%`;
   }
 
   private dampenerFromPotentials(potentials: EwarEffectPotentials): string {
-    const scanRes = Math.round((1 - potentials.scanResolutionMultiplier) * 100);
-    const range = Math.round((1 - potentials.targetingRangeMultiplier) * 100);
+    const scanRes = percentFromMultiplier(potentials.scanResolutionMultiplier);
+    const range = percentFromMultiplier(potentials.targetingRangeMultiplier);
     if (scanRes === 0 && range === 0) return this.i18n.t("ewar.hover.outOfRange");
     const scanResLabel = this.i18n.t("ewar.hover.scanResolution");
     const rangeLabel = this.i18n.t("ewar.hover.targetingRange");

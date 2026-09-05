@@ -9,6 +9,7 @@ import type { ViewStore } from "../controlsContract";
 import type { Side } from "../side";
 import type { CombatantProfiles, PortraitsEls, PortraitsController } from "./portraitsControllerContract";
 import { html } from "../markup";
+import { percentFromMultiplier } from "../../format";
 
 interface SideState {
   lastKey: string;
@@ -131,7 +132,7 @@ function buildPortraitEffects(speed: SpeedBreakdown, disruption: DisruptionBreak
     if (effect.family === "scrambler") {
       effects.push({ moduleId: effect.moduleId, hint: i18n.t("ewar.hover.scrambler") });
     } else {
-      const percent = Math.round((1 - effect.multiplier) * 100);
+      const percent = percentFromMultiplier(effect.multiplier);
       effects.push({ moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.web")} ${percent}%` });
     }
   }
@@ -141,9 +142,9 @@ function buildPortraitEffects(speed: SpeedBreakdown, disruption: DisruptionBreak
   for (const entry of disruption.falloff) accumulateDisruption(disruptorMap, entry, "falloff");
   for (const [moduleId, channels] of disruptorMap) {
     const parts: string[] = [];
-    if (channels.tracking < 1) parts.push(`${i18n.t("ewar.hover.tracking")} -${Math.round((1 - channels.tracking) * 100)}%`);
-    if (channels.optimal < 1) parts.push(`${i18n.t("ewar.hover.optimal")} -${Math.round((1 - channels.optimal) * 100)}%`);
-    if (channels.falloff < 1) parts.push(`${i18n.t("ewar.hover.falloff")} -${Math.round((1 - channels.falloff) * 100)}%`);
+    if (channels.tracking < 1) parts.push(`${i18n.t("ewar.hover.tracking")} -${percentFromMultiplier(channels.tracking)}%`);
+    if (channels.optimal < 1) parts.push(`${i18n.t("ewar.hover.optimal")} -${percentFromMultiplier(channels.optimal)}%`);
+    if (channels.falloff < 1) parts.push(`${i18n.t("ewar.hover.falloff")} -${percentFromMultiplier(channels.falloff)}%`);
     if (parts.length > 0) effects.push({ moduleId, hint: parts.join(" · ") });
   }
   const dampenerMap = new Map<TypeId, { scanResolution: number; maxTargetRange: number }>();
@@ -151,8 +152,8 @@ function buildPortraitEffects(speed: SpeedBreakdown, disruption: DisruptionBreak
   for (const entry of dampener.maxTargetRange) accumulateDampener(dampenerMap, entry, "maxTargetRange");
   for (const [moduleId, channels] of dampenerMap) {
     const parts: string[] = [];
-    if (channels.scanResolution < 1) parts.push(`${i18n.t("ewar.hover.scanResolution")} -${Math.round((1 - channels.scanResolution) * 100)}%`);
-    if (channels.maxTargetRange < 1) parts.push(`${i18n.t("ewar.hover.targetingRange")} -${Math.round((1 - channels.maxTargetRange) * 100)}%`);
+    if (channels.scanResolution < 1) parts.push(`${i18n.t("ewar.hover.scanResolution")} -${percentFromMultiplier(channels.scanResolution)}%`);
+    if (channels.maxTargetRange < 1) parts.push(`${i18n.t("ewar.hover.targetingRange")} -${percentFromMultiplier(channels.maxTargetRange)}%`);
     if (parts.length > 0) effects.push({ moduleId, hint: parts.join(" · ") });
   }
   return effects;
