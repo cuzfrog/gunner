@@ -311,6 +311,8 @@ export class SettingsParser {
     this.migrateSideBoosterActivation(value, "shipBBoosterActivation");
     this.migrateSideMissileBoosterActivation(value, "shipAMissileBoosterActivation");
     this.migrateSideMissileBoosterActivation(value, "shipBMissileBoosterActivation");
+    this.migrateSideSensorBoosterActivation(value, "shipASensorBoosterActivation");
+    this.migrateSideSensorBoosterActivation(value, "shipBSensorBoosterActivation");
   }
 
   private migrateSideBoosterActivation(value: Record<string, unknown>, key: string): void {
@@ -343,6 +345,22 @@ export class SettingsParser {
     if (record.script === undefined) return { active, overloaded, script: "none" };
     if (typeof record.script !== "string") return item;
     return { active, overloaded, script: resolveBoosterScript(record.script, this.itemNameResolver) };
+  }
+
+  private migrateSideSensorBoosterActivation(value: Record<string, unknown>, key: string): void {
+    const saved = value[key];
+    if (!Array.isArray(saved)) return;
+    value[key] = saved.map((item) => this.migrateSensorBoosterEntry(item));
+  }
+
+  private migrateSensorBoosterEntry(item: unknown): unknown {
+    if (!isRecord(item)) return item;
+    const record = { ...item };
+    const active = typeof record.active === "boolean" ? record.active : false;
+    const overloaded = typeof record.overloaded === "boolean" ? record.overloaded : false;
+    if (record.script === undefined) return { active, overloaded, script: "none" };
+    if (typeof record.script !== "string") return item;
+    return { active, overloaded, script: resolveDisruptionScript(record.script, this.itemNameResolver) };
   }
 
   private migrateEwarActivation(value: Record<string, unknown>): void {

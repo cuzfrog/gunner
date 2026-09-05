@@ -232,6 +232,57 @@ describe("SettingsParser", () => {
     expect(wire.shipBMissileBoosterActivation).toEqual([{ active: false, overloaded: false, script: "none" }]);
   });
 
+  test("parseUserSettings parses sensor booster activation with script and overload", () => {
+    const v15 = {
+      ...DEFAULT_SETTINGS,
+      version: 15,
+      shipASensorBoosterActivation: [{ active: true, overloaded: true, script: "Scan Resolution Script" }, { active: false, overloaded: false, script: "none" }],
+      shipBSensorBoosterActivation: [{ active: true, overloaded: false, script: "Targeting Range Script" }],
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(v15));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.sensorBoosterActivation).toEqual([{ active: true, overloaded: true, script: toTypeId("29011") }, { active: false, overloaded: false, script: "none" }]);
+    expect(parsed!.shipB.sensorBoosterActivation).toEqual([{ active: true, overloaded: false, script: toTypeId("29009") }]);
+  });
+
+  test("parseUserSettings leaves absent sensor booster activation undefined", () => {
+    const parsed = makeParser().parseUserSettings(JSON.stringify(DEFAULT_SETTINGS));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.sensorBoosterActivation).toBeUndefined();
+    expect(parsed!.shipB.sensorBoosterActivation).toBeUndefined();
+  });
+
+  test("parseUserSettings defaults missing overloaded field to false in sensor booster entries", () => {
+    const v15 = {
+      ...DEFAULT_SETTINGS,
+      version: 15,
+      shipASensorBoosterActivation: [{ active: true, script: "Scan Resolution Script" }],
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(v15));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.sensorBoosterActivation).toEqual([{ active: true, overloaded: false, script: toTypeId("29011") }]);
+  });
+
+  test("parseUserSettings rejects malformed sensor booster activations", () => {
+    const bad = {
+      ...DEFAULT_SETTINGS,
+      shipASensorBoosterActivation: [{ active: true, overloaded: false, script: 123 }],
+    };
+    expect(makeParser().parseUserSettings(JSON.stringify(bad))).toBeNull();
+  });
+
+  test("toWire round-trips sensor booster activation", () => {
+    const parser = makeParser();
+    const session = parser.fromWire({
+      ...DEFAULT_SETTINGS,
+      shipASensorBoosterActivation: [{ active: true, overloaded: true, script: toTypeId("29011") }],
+      shipBSensorBoosterActivation: [{ active: false, overloaded: false, script: "none" }],
+    });
+    const wire = parser.toWire(session);
+    expect(wire.shipASensorBoosterActivation).toEqual([{ active: true, overloaded: true, script: toTypeId("29011") }]);
+    expect(wire.shipBSensorBoosterActivation).toEqual([{ active: false, overloaded: false, script: "none" }]);
+  });
+
   test("parseUserSettings migrates v6 enum disruptor scripts to item names and adds per-module overload", () => {
     const v6 = {
       ...DEFAULT_SETTINGS,
