@@ -18,9 +18,10 @@ across shield, armor, and hull, plus a combined total row.
 The provider reads the current `EngagementView` from `ViewStore`
 (implemented by `DomControls`) to obtain the attacker's
 `AttackAssessment.damage.appliedDps` and the opponent's
-`DefenseAssessment.actualIncomingDps` and `actualIncomingByLayer`.
-The opponent is the opposite side: shipA's actual DPS uses shipB's
-defense, and vice versa. Layers with zero HP loss are skipped.
+`DamageProjection` from `EngagementView.projection[opponent]`
+(`totalHpLost` and `byLayer`). The opponent is the opposite side:
+shipA's actual DPS uses shipB's projection, and vice versa. Layers
+with zero HP loss are skipped.
 
 Registration must happen after `registerHoverHintModule` and
 `registerDomControlsModule` because the provider depends on the
