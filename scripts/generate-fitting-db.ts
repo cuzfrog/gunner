@@ -9,8 +9,13 @@ import { buildDefenseStatsFromIntents, type DefenseModuleStats } from "./fitting
 import { buildCombatModuleStats } from "./fittingDb/buildModuleStats";
 import { auditCoverage, type AuditModuleEntry } from "./fittingDb/coverageAudit";
 import type { SdeDogmaAttribute, SdeDogmaEffect, SdeDogmaEffectModifier, SdeGroup, SdeTypeDogma } from "./fittingDb/dogmaTypes";
+import { buildProjection, writeProjection } from "./fittingDb/projection";
+import { assertClassificationComplete, failOnClassificationErrors } from "./fittingDb/classification/classify";
+import { ATTRIBUTE_CLASSIFICATION } from "./fittingDb/classification/attributeClassification";
+import { EFFECT_CLASSIFICATION } from "./fittingDb/classification/effectClassification";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
+const PROJECTION_FILE = join(import.meta.dir, "..", "generated", "sde", "projection.json");
 const OUT_FILE = join(import.meta.dir, "..", "src", "gamedata", "fittingDb", "generated", "fittingDb.data.ts");
 const I18N_EN_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-names-en.ts");
 const I18N_ZH_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-names-zh.ts");
@@ -1252,6 +1257,11 @@ export function buildOmnidirectionalTrackingEnhancerStats(values: Map<string, nu
 }
 
 async function main() {
+  const projection = await buildProjection(SDE_DIR);
+  await writeProjection(projection, PROJECTION_FILE);
+  const classificationResult = assertClassificationComplete(projection, ATTRIBUTE_CLASSIFICATION, EFFECT_CLASSIFICATION);
+  failOnClassificationErrors(classificationResult);
+
   const types = await loadMerged<SdeType>("types.");
   const typedogmas = await loadMerged<SdeTypeDogma>("typedogma.");
   const attributes = await loadMerged<SdeDogmaAttribute>("dogmaattributes.");
@@ -2032,7 +2042,7 @@ async function writeI18nFiles(
   await writeFile(collisionJaFile, collisionJaContent);
 }
 
-export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses };
+export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses, COMBAT_ATTRIBUTE_MAP as _COMBAT_ATTRIBUTE_MAP, OUT_OF_SCOPE_ATTRIBUTE_IDS as _OUT_OF_SCOPE_ATTRIBUTE_IDS, RIG_SIG_DRAWBACK_EFFECT as _RIG_SIG_DRAWBACK_EFFECT, RIG_AGILITY_DRAWBACK_EFFECT as _RIG_AGILITY_DRAWBACK_EFFECT };
 
 if (import.meta.main) {
   main().catch((error) => {

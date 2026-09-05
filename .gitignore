@@ -7,3 +7,4 @@ tmp/
 .astro/
 test-results/
 src/gamedata/fittingDb/generated/fittingDb.data.ts
+generated/sde/
