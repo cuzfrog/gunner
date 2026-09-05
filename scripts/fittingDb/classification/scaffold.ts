@@ -81,7 +81,7 @@ function scaffoldEffectClassification(
     if (eff.modifiers.length === 0) {
       result[id] = { kind: "ignored", id, name, reason: "no modifier info" };
     } else {
-      result[id] = { kind: "ignored", id, name, reason: "not consumed by fitting simulator" };
+      result[id] = { kind: "ignored", id, name, reason: "not in modifier or action projection set; may still be consumed via attribute resolution" };
     }
   }
   return result;
