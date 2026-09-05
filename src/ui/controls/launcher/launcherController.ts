@@ -220,7 +220,7 @@ export class LauncherControllerImpl implements LauncherController {
     setText(this.els.explosionVelocity, `${formatWithCommas(launcher.explosionVelocity, 0)} m/s`);
     setText(this.els.missileVelocity, `${formatWithCommas(launcher.maxVelocity, 0)} m/s`);
     setText(this.els.flightTime, `${formatNumber(launcher.flightTime, 1)} s`);
-    setText(this.els.flightRange, formatDistance(launcher.maxVelocity * launcher.flightTime, t));
+    setText(this.els.flightRange, formatDistance(importedLauncherToMissileSpec(launcher).flightRange, t));
     setText(this.els.damageReductionFactor, formatNumber(launcher.damageReductionFactor, 2));
     this.renderAmmoList(launcher);
     this.renderClassSelector();

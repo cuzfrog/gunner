@@ -1,6 +1,7 @@
 import { buildLauncher, importedLauncherFixture } from "./testSupport";
 import { FakeElement, getFake, IMPORTED_RIFTER } from "../testSupport";
 import { damageVectorSum } from "../../../sim";
+import { formatDistance } from "../controlsFormat";
 import type { ImportedFitting } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 
@@ -40,6 +41,25 @@ describe("LauncherController", () => {
     expect(getFake(document, "ship-a-launcher-explosion-velocity").textContent).toContain("170");
     expect(getFake(document, "ship-a-launcher-missile-velocity").textContent).toContain("3,750");
     expect(getFake(document, "ship-a-launcher-flight-time").textContent).toContain("5");
+  });
+
+  test("displayed flight range equals the produced spec flight range", () => {
+    const { document, controller } = buildLauncher();
+    const launcher = importedLauncherFixture();
+    controller.applyImported(importedWithLauncher(launcher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
+    const spec = controller.currentMissileSpec()!;
+    const expected = formatDistance(spec.flightRange, (key: string) => key);
+    expect(getFake(document, "ship-a-launcher-flight-range").textContent).toBe(expected);
+  });
+
+  test("displayed flight range tracks spec flight range when launcher fields change", () => {
+    const { document, controller } = buildLauncher();
+    const launcher = importedLauncherFixture({ maxVelocity: 5000, flightTime: 8 });
+    controller.applyImported(importedWithLauncher(launcher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
+    const spec = controller.currentMissileSpec()!;
+    const expected = formatDistance(spec.flightRange, (key: string) => key);
+    expect(getFake(document, "ship-a-launcher-flight-range").textContent).toBe(expected);
+    expect(spec.flightRange).toBe(5000 * 8);
   });
 
   test("applyImported without a launcher leaves no launcher", () => {
