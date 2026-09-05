@@ -249,4 +249,48 @@ describe("EngagementEngineImpl", () => {
     expect(launches.shipA).toHaveLength(1);
     expect(launches.shipA[0].paintedTargetSig).toBe(120);
   });
+
+  test("viewUpdated fires once per reset, update, and step with the returned view", () => {
+    const deps = makeEngine();
+    const views: import("./engagementEngine").EngineView[] = [];
+    const listener = (view: import("./engagementEngine").EngineView) => views.push(view);
+    deps.engine.events().onViewUpdated(listener);
+    const resetView = deps.engine.reset(engineConfig());
+    const updateView = deps.engine.update(engineConfig());
+    const stepView = deps.engine.step(0.1);
+    expect(views).toEqual([resetView, updateView, stepView]);
+    expect(views).toHaveLength(3);
+    deps.engine.events().offViewUpdated(listener);
+    deps.engine.step(0.1);
+    expect(views).toHaveLength(3);
+  });
+
+  test("shipDestroyed fires exactly once per side even if dead persists across steps", () => {
+    const deps = makeEngine();
+    const deadView: import("./engagementEngine").EngineView = { ...deps.engine.reset(engineConfig()), defenseRuntime: { ...emptyDefenseView, dead: { shipA: true, shipB: false } } };
+    deps.defenseSimulator.view.mockReturnValue(deadView.defenseRuntime);
+    deps.engagementFrameComposer.compose.mockReturnValue(deadView);
+    const destroyed: import("./types").Side[] = [];
+    deps.engine.events().onShipDestroyed((side) => destroyed.push(side));
+    deps.engine.step(0.1);
+    deps.engine.step(0.1);
+    deps.engine.step(0.1);
+    expect(destroyed).toEqual(["shipA"]);
+  });
+
+  test("reset clears the destroyed-sides tracker so shipDestroyed can fire again", () => {
+    const deps = makeEngine();
+    const deadView: import("./engagementEngine").EngineView = { ...deps.engine.reset(engineConfig()), defenseRuntime: { ...emptyDefenseView, dead: { shipA: true, shipB: false } } };
+    deps.defenseSimulator.view.mockReturnValue(deadView.defenseRuntime);
+    deps.engagementFrameComposer.compose.mockReturnValue(deadView);
+    const destroyed: import("./types").Side[] = [];
+    deps.engine.events().onShipDestroyed((side) => destroyed.push(side));
+    deps.engine.step(0.1);
+    expect(destroyed).toEqual(["shipA"]);
+    deps.engine.reset(engineConfig());
+    deps.defenseSimulator.view.mockReturnValue(deadView.defenseRuntime);
+    deps.engagementFrameComposer.compose.mockReturnValue(deadView);
+    deps.engine.step(0.1);
+    expect(destroyed).toEqual(["shipA", "shipA"]);
+  });
 });

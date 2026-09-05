@@ -26,11 +26,19 @@ export interface EngineView extends EngagementView {
   readonly missiles: Record<Side, readonly MissileRuntimeState[]>;
 }
 
+export interface EngineEvents {
+  onViewUpdated(listener: (view: EngineView) => void): void;
+  offViewUpdated(listener: (view: EngineView) => void): void;
+  onShipDestroyed(listener: (side: Side) => void): void;
+  offShipDestroyed(listener: (side: Side) => void): void;
+}
+
 export interface EngagementEngine {
   reset(config: EngineConfig): EngineView;
   update(config: EngineConfig): EngineView;
   step(dt: number): EngineView;
   view(): EngineView;
+  events(): EngineEvents;
   setDamageEnabled(side: Side, enabled: boolean): void;
   setRepairMode(side: Side, mode: RepairMode): void;
   setRepairerActivation(side: Side, index: number, active: boolean, overloaded: boolean): void;
@@ -49,6 +57,9 @@ export class EngagementEngineImpl implements EngagementEngine {
   private readonly engagementFrameComposer: EngagementFrameComposer;
   private readonly ewarResolver: EwarResolver;
   private readonly sensorBoosterResolver: SensorBoosterResolver;
+  private readonly viewUpdatedListeners = new Set<(view: EngineView) => void>();
+  private readonly shipDestroyedListeners = new Set<(side: Side) => void>();
+  private readonly destroyedSides = new Set<Side>();
   private config: EngineConfig | undefined;
   private lastView: EngineView | undefined;
 
@@ -76,6 +87,7 @@ export class EngagementEngineImpl implements EngagementEngine {
 
   reset(config: EngineConfig): EngineView {
     this.config = config;
+    this.destroyedSides.clear();
     this.simulation.reset(config.sim);
     this.droneSimulator.reset(droneSimConfigFrom(config));
     this.missileSimulator.reset(missileSimConfigFrom(config));
@@ -84,6 +96,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     this.defenseSimulator.reset(config.defense);
     this.initializeLocks();
     this.lastView = this.composeView();
+    this.publishView(this.lastView);
     return this.lastView;
   }
 
@@ -94,6 +107,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     this.missileSimulator.update(missileSimConfigFrom(config));
     this.defenseSimulator.update(config.defense);
     this.lastView = this.composeView();
+    this.publishView(this.lastView);
     return this.lastView;
   }
 
@@ -112,6 +126,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     const events: DamageEvent[] = [...missileEvents, ...weaponEvents];
     this.defenseSimulator.step(dt, events);
     this.lastView = this.buildView(composed, snapshot);
+    this.publishView(this.lastView);
     return this.lastView;
   }
 
@@ -120,10 +135,33 @@ export class EngagementEngineImpl implements EngagementEngine {
     return this.lastView;
   }
 
+  events(): EngineEvents { return this; }
+
+  onViewUpdated(listener: (view: EngineView) => void): void { this.viewUpdatedListeners.add(listener); }
+  offViewUpdated(listener: (view: EngineView) => void): void { this.viewUpdatedListeners.delete(listener); }
+  onShipDestroyed(listener: (side: Side) => void): void { this.shipDestroyedListeners.add(listener); }
+  offShipDestroyed(listener: (side: Side) => void): void { this.shipDestroyedListeners.delete(listener); }
+
   setDamageEnabled(side: Side, enabled: boolean): void { this.defenseSimulator.setDamageEnabled(side, enabled); }
   setRepairMode(side: Side, mode: RepairMode): void { this.defenseSimulator.setRepairMode(side, mode); }
   setRepairerActivation(side: Side, index: number, active: boolean, overloaded: boolean): void { this.defenseSimulator.setRepairerActivation(side, index, active, overloaded); }
   setRahActivation(side: Side, active: boolean, overloaded: boolean): void { this.defenseSimulator.setRahActivation(side, active, overloaded); }
+
+  private publishView(view: EngineView): void {
+    this.checkDeath(view);
+    for (const listener of Array.from(this.viewUpdatedListeners)) listener(view);
+  }
+
+  private checkDeath(view: EngineView): void {
+    if (view.defenseRuntime.dead.shipA && !this.destroyedSides.has("shipA")) {
+      this.destroyedSides.add("shipA");
+      for (const listener of Array.from(this.shipDestroyedListeners)) listener("shipA");
+    }
+    if (view.defenseRuntime.dead.shipB && !this.destroyedSides.has("shipB")) {
+      this.destroyedSides.add("shipB");
+      for (const listener of Array.from(this.shipDestroyedListeners)) listener("shipB");
+    }
+  }
 
   private composeView(): EngineView {
     const config = this.config;

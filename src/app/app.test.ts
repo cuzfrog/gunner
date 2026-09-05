@@ -93,6 +93,12 @@ const engine = vi.mocked<EngagementEngine>({
   update: vi.fn(() => baseView()),
   step: vi.fn(() => baseView()),
   view: vi.fn(() => baseView()),
+  events: vi.fn(() => ({
+    onViewUpdated: vi.fn(),
+    offViewUpdated: vi.fn(),
+    onShipDestroyed: vi.fn(),
+    offShipDestroyed: vi.fn(),
+  })),
   setDamageEnabled: vi.fn(),
   setRepairMode: vi.fn(),
   setRepairerActivation: vi.fn(),
