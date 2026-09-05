@@ -1,4 +1,4 @@
-import type { AttackAssessment, DefenseAssessment, EngagementView, HitChanceBreakdown, LockState } from "../../../sim";
+import type { AttackAssessment, DefenseAssessment, EngagementView, HitChanceBreakdown } from "../../../sim";
 import { setText } from "../controlsDom";
 import { formatDistance, formatWithCommas, hitChanceClass } from "../controlsFormat";
 
@@ -13,7 +13,6 @@ interface SideHitEls {
 
 interface SideDpsEls {
   readonly resNominalDps: HTMLElement;
-  readonly resLockState: HTMLElement;
   readonly resAppliedDps: HTMLElement;
   readonly resAppliedDpsApplication: HTMLElement;
   readonly resActualDps: HTMLElement;
@@ -21,7 +20,6 @@ interface SideDpsEls {
   readonly resSigFactor: HTMLElement;
   readonly resVelocityFactor: HTMLElement;
   readonly resNominalDpsLabel: HTMLElement;
-  readonly resLockStateLabel: HTMLElement;
   readonly resAppliedDpsLabel: HTMLElement;
   readonly resActualDpsLabel: HTMLElement;
   readonly resTimeToImpactLabel: HTMLElement;
@@ -48,15 +46,14 @@ export class EngagementReadoutImpl implements EngagementReadout {
   }
 
   update(view: EngagementView, t: (key: string) => string): void {
-    const { frame, attacks, locks, defenses } = view;
+    const { frame, attacks, defenses } = view;
     setText(this.els.resDistance, formatDistance(frame.distance, t));
-    this.updateSide(this.els.shipA, attacks.shipA, defenses.shipB, locks.shipA, t);
-    this.updateSide(this.els.shipB, attacks.shipB, defenses.shipA, locks.shipB, t);
+    this.updateSide(this.els.shipA, attacks.shipA, defenses.shipB, t);
+    this.updateSide(this.els.shipB, attacks.shipB, defenses.shipA, t);
   }
 
-  private updateSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment | undefined, opponentDefense: DefenseAssessment, lock: LockState | undefined, t: (key: string) => string): void {
+  private updateSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment | undefined, opponentDefense: DefenseAssessment, t: (key: string) => string): void {
     this.clearColorClasses(els);
-    this.updateLockState(els, lock, t);
     const hitChance = attack?.turret?.hit ?? attack?.drone?.hit;
     if (hitChance) {
       this.updateHitChanceSide(els, attack!, opponentDefense, hitChance, t);
@@ -64,26 +61,6 @@ export class EngagementReadoutImpl implements EngagementReadout {
       this.updateMissileSide(els, attack, opponentDefense, t);
     } else {
       this.updateNoWeaponSide(els);
-    }
-  }
-
-  private updateLockState(els: SideHitEls & SideDpsEls, lock: LockState | undefined, t: (key: string) => string): void {
-    setText(els.resLockStateLabel, t("result.lockState"));
-    if (lock === undefined || lock.lockTime === 0) {
-      setText(els.resLockState, "-");
-      els.resLockState.classList.add("is-dim");
-      return;
-    }
-    els.resLockState.classList.remove("is-dim");
-    if (lock.status === "locked") {
-      setText(els.resLockState, t("lockHint.locked"));
-      els.resLockState.classList.add("is-optimal");
-    } else if (lock.status === "locking") {
-      setText(els.resLockState, `${Math.round(lock.progress * 100)}%`);
-      els.resLockState.classList.add("is-caution");
-    } else {
-      setText(els.resLockState, t("lockHint.idle"));
-      els.resLockState.classList.add("is-dim");
     }
   }
 
@@ -95,7 +72,6 @@ export class EngagementReadoutImpl implements EngagementReadout {
     els.resAppliedDpsApplication.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resActualDps.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resNominalDps.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
-    els.resLockState.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resSigFactor.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resVelocityFactor.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resTimeToImpact.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");

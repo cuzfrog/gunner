@@ -17,6 +17,7 @@ import type { BoosterController } from "./booster";
 import type { MissileBoosterController } from "./missileBooster";
 import type { EwarController } from "./ewar";
 import type { DefenseController } from "./defense";
+import type { TargetingController } from "./targeting";
 import type { ImportController } from "./import";
 import type { ConfirmController } from "./confirm";
 import type { FittingPopupController, FittingPreview, FittingPreviewManager, PopupGroup } from "./popup";
@@ -40,7 +41,6 @@ import type { AmmoHintProvider } from "./ammoHint";
 import type { AmmoHintRenderer } from "./ammoHint";
 import type { AppliedDpsHintProvider, AppliedDpsHintRenderer } from "./appliedDpsHint";
 import type { ActualDpsHintProvider, ActualDpsHintRenderer } from "./actualDpsHint";
-import type { LockStateHintProvider, LockStateHintRenderer } from "./lockStateHint";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -107,6 +107,7 @@ export interface ControlsCradle {
   readonly shipBFittingPopup: FittingPopupController;
   readonly ewarController: EwarController;
   readonly defenseController: DefenseController;
+  readonly targetingController: TargetingController;
   readonly boosterController: BoosterController;
   readonly missileBoosterController: MissileBoosterController;
   readonly portraitsController: PortraitsController;
@@ -130,6 +131,4 @@ export interface ControlsCradle {
   readonly appliedDpsHintProvider: AppliedDpsHintProvider;
   readonly actualDpsHintRenderer: ActualDpsHintRenderer;
   readonly actualDpsHintProvider: ActualDpsHintProvider;
-  readonly lockStateHintRenderer: LockStateHintRenderer;
-  readonly lockStateHintProvider: LockStateHintProvider;
 }

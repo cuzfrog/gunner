@@ -10,6 +10,7 @@ import LauncherPanel from "./LauncherPanel.astro";
 import DronePanel from "./DronePanel.astro";
 import EwarField from "./EwarField.astro";
 import DefenseField from "./DefenseField.astro";
+import TargetingField from "./TargetingField.astro";
 import PropulsionGroup from "./PropulsionGroup.astro";
 import SkillsField from "./SkillsField.astro";
 
@@ -47,6 +48,7 @@ const modeSecond = side === "shipA"
 
     <EwarField idPrefix={idPrefix} />
     <DefenseField idPrefix={idPrefix} />
+    <TargetingField idPrefix={idPrefix} />
   </div>
 
   <hr class="side-panel-divider">

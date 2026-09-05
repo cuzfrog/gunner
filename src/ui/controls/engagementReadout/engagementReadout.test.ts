@@ -28,7 +28,6 @@ function fakeSideEls(): ReadoutEls["shipA"] {
     resNominalDpsLabel: make(), resAppliedDpsLabel: make(), resActualDpsLabel: make(),
     resTimeToImpactLabel: make(),
     resSigFactorLabel: make(), resVelocityFactorLabel: make(),
-    resLockState: make(), resLockStateLabel: make(),
     resSide: make(),
   };
 }
@@ -335,29 +334,5 @@ describe("EngagementReadout", () => {
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeDroneView({ distance: 1000, shipADamage: { nominalDps: 25, appliedDps: 0, application: 0, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE } }), T);
     expect(els.shipA.resAppliedDpsApplication.classList.contains("is-danger")).toBe(true);
-  });
-
-  test("locked lock state shows lockHint.locked text and is-optimal class", () => {
-    const els = fakeReadoutEls();
-    const readout = new EngagementReadoutImpl(els);
-    readout.update(makeTurretView({ distance: 1000, shipALock: { ...IDLE_LOCK, status: "locked", lockTime: 5, inRange: true } }), T);
-    expect(els.shipA.resLockState.textContent).toBe("lockHint.locked");
-    expect(els.shipA.resLockState.classList.contains("is-optimal")).toBe(true);
-  });
-
-  test("locking lock state shows progress percentage and is-caution class", () => {
-    const els = fakeReadoutEls();
-    const readout = new EngagementReadoutImpl(els);
-    readout.update(makeTurretView({ distance: 1000, shipALock: { ...IDLE_LOCK, status: "locking", progress: 0.6, lockTime: 5, inRange: true } }), T);
-    expect(els.shipA.resLockState.textContent).toBe("60%");
-    expect(els.shipA.resLockState.classList.contains("is-caution")).toBe(true);
-  });
-
-  test("lockTime of zero shows dash and is-dim class", () => {
-    const els = fakeReadoutEls();
-    const readout = new EngagementReadoutImpl(els);
-    readout.update(makeTurretView({ distance: 1000 }), T);
-    expect(els.shipA.resLockState.textContent).toBe("-");
-    expect(els.shipA.resLockState.classList.contains("is-dim")).toBe(true);
   });
 });

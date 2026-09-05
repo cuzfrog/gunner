@@ -33,6 +33,7 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       boosterController: proxy.boosterController,
       missileBoosterController: proxy.missileBoosterController,
       defenseController: proxy.defenseController,
+      targetingController: proxy.targetingController,
       fittingImport: proxy.fittingImport,
       parser: proxy.parser,
     })).singleton(),

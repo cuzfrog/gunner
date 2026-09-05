@@ -22,6 +22,7 @@ import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
 import type { DefenseController } from "../defense";
+import type { TargetingController } from "../targeting";
 import type { LauncherController } from "../launcher";
 import type { DroneController } from "../drone";
 import type { WeaponSystemSwitch } from "../sidePanel";
@@ -68,6 +69,7 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly boosterController: BoosterController;
   private readonly missileBoosterController: MissileBoosterController;
   private readonly defenseController: DefenseController;
+  private readonly targetingController: TargetingController;
   private readonly fittingImport: FittingImport;
   private readonly parser: SettingsParser;
   private readonly pristineSettings: SessionSettings;
@@ -92,6 +94,7 @@ export class SessionCodecImpl implements SessionCodec {
     boosterController: BoosterController;
     missileBoosterController: MissileBoosterController;
     defenseController: DefenseController;
+    targetingController: TargetingController;
     fittingImport: FittingImport;
     parser: SettingsParser;
   }) {
@@ -114,6 +117,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.boosterController = deps.boosterController;
     this.missileBoosterController = deps.missileBoosterController;
     this.defenseController = deps.defenseController;
+    this.targetingController = deps.targetingController;
     this.fittingImport = deps.fittingImport;
     this.parser = deps.parser;
     this.pristineSettings = this.parser.fromWire(this.capture());
@@ -265,6 +269,7 @@ export class SessionCodecImpl implements SessionCodec {
     const panel = side === "shipA" ? this.shipASide : this.shipBSide;
     const imported = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions()) : undefined;
     panel.setSensorData(imported?.sensorSpec, imported?.sensorBoosts);
+    this.targetingController.setSensorData(side, imported?.sensorSpec, imported?.sensorBoosts);
   }
 
   private restoreLauncher(side: Side, fitting: string | undefined, ammoId: TypeId | undefined): void {

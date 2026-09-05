@@ -86,6 +86,7 @@ const APPROVED_PREFIXES = [
   "choice-selector",
   "ewar",
   "defense",
+  "targeting",
   "booster",
   "profile",
   "new-profile",

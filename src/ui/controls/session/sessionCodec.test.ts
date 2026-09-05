@@ -29,6 +29,7 @@ import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
 import type { DefenseController } from "../defense";
+import type { TargetingController } from "../targeting";
 import type { LauncherController } from "../launcher";
 import type { DroneController } from "../drone";
 import type { WeaponSystemSwitch } from "../sidePanel";
@@ -217,6 +218,10 @@ function mockDefenseController(): DefenseController {
   } as unknown as DefenseController;
 }
 
+function mockTargetingController(): TargetingController {
+  return { setSensorData: vi.fn(), render: vi.fn() } as unknown as TargetingController;
+}
+
 function mockFittingImport(): FittingImport {
   return { importFitting: vi.fn(), moduleNameFor: vi.fn() } as unknown as FittingImport;
 }
@@ -354,6 +359,7 @@ function buildCodec(options: {
   boosterController?: Partial<BoosterController>;
   missileBoosterController?: Partial<MissileBoosterController>;
   defenseController?: Partial<DefenseController>;
+  targetingController?: Partial<TargetingController>;
   fittingImport?: Partial<FittingImport>;
   parser?: Partial<SettingsParser>;
   events?: UiEvents;
@@ -392,6 +398,7 @@ function buildCodec(options: {
   const boosterController = { ...mockBoosterController(), ...options.boosterController } as unknown as BoosterController;
   const missileBoosterController = { ...mockMissileBoosterController(), ...options.missileBoosterController } as unknown as MissileBoosterController;
   const defenseController = { ...mockDefenseController(), ...options.defenseController } as unknown as DefenseController;
+  const targetingController = { ...mockTargetingController(), ...options.targetingController } as unknown as TargetingController;
   const fittingImport = { ...mockFittingImport(), ...options.fittingImport } as unknown as FittingImport;
   const parser = { ...mockParser(), ...options.parser } as unknown as SettingsParser;
   const events = options.events ?? new UiEventsImpl();
@@ -417,10 +424,11 @@ function buildCodec(options: {
     boosterController,
     missileBoosterController,
     defenseController,
+    targetingController,
     fittingImport,
     parser,
   });
-  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, defenseController, fittingImport, parser };
+  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, defenseController, targetingController, fittingImport, parser };
 }
 
 function makeProfile(): ProfileSettings {

@@ -24,6 +24,7 @@ import { registerTurretModule } from "./turret";
 import { registerSelectionSessionModule } from "../selectionSession";
 import { registerEwarModule } from "./ewar";
 import { registerDefenseModule } from "./defense";
+import { registerTargetingModule } from "./targeting";
 import { registerBoosterModule } from "./booster";
 import { registerMissileBoosterModule } from "./missileBooster";
 import { registerRangeOverlayModule } from "./rangeOverlay";
@@ -33,7 +34,6 @@ import { registerDpsHintModule, wireDpsHintProvider } from "./dpsHint";
 import { registerAmmoHintModule, wireAmmoHintProvider } from "./ammoHint";
 import { registerAppliedDpsHintModule, wireAppliedDpsHintProvider } from "./appliedDpsHint";
 import { registerActualDpsHintModule, wireActualDpsHintProvider } from "./actualDpsHint";
-import { registerLockStateHintModule, wireLockStateHintProvider } from "./lockStateHint";
 
 export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   if (!cradle.hasRegistration("now")) {
@@ -50,6 +50,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerSidePanelModule(cradle);
   registerEwarModule(cradle);
   registerDefenseModule(cradle);
+  registerTargetingModule(cradle);
   registerBoosterModule(cradle);
   registerMissileBoosterModule(cradle);
   registerRangeOverlayModule(cradle);
@@ -69,7 +70,6 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerDomControlsModule(cradle);
   registerAppliedDpsHintModule(cradle);
   registerActualDpsHintModule(cradle);
-  registerLockStateHintModule(cradle);
   wire(cradle);
 }
 
@@ -79,7 +79,6 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   wireAmmoHintProvider(cradle);
   wireAppliedDpsHintProvider(cradle);
   wireActualDpsHintProvider(cradle);
-  wireLockStateHintProvider(cradle);
   const sides = combatantSidesOf(c.shipASide, c.shipBSide);
   const fittingPopups = { shipA: c.shipAFittingPopup, shipB: c.shipBFittingPopup } as const;
   const host = {
