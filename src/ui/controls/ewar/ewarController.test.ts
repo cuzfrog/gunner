@@ -103,22 +103,14 @@ function buildEwarController(
   const popupGroup = new FakePopupGroup();
   const els = createControlsEls();
   const ewarEls: EwarEls = {
-    shipAEwarField: els.shipA.ewarField,
-    shipAEwarTrigger: els.shipA.ewarTrigger,
-    shipAEwarPopup: els.shipA.ewarPopup,
-    shipAEwarSection: els.shipA.ewarSection,
-    shipAEwarSummary: els.shipA.ewarSummary,
-    shipBEwarField: els.shipB.ewarField,
-    shipBEwarTrigger: els.shipB.ewarTrigger,
-    shipBEwarPopup: els.shipB.ewarPopup,
-    shipBEwarSection: els.shipB.ewarSection,
-    shipBEwarSummary: els.shipB.ewarSummary,
+    shipA: els.shipA.ewar,
+    shipB: els.shipB.ewar,
   };
-  const shipAPopup = ewarEls.shipAEwarPopup;
-  const shipBPopup = ewarEls.shipBEwarPopup;
-  shipAPopup.appendChild(els.shipA.ewarSection);
+  const shipAPopup = ewarEls.shipA.popup;
+  const shipBPopup = ewarEls.shipB.popup;
+  shipAPopup.appendChild(els.shipA.ewar.section);
   shipAPopup.appendChild(els.shipA.boosterSection);
-  shipBPopup.appendChild(els.shipB.ewarSection);
+  shipBPopup.appendChild(els.shipB.ewar.section);
   shipBPopup.appendChild(els.shipB.boosterSection);
   shipAPopup.hidden = true;
   shipBPopup.hidden = true;

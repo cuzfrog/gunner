@@ -15,14 +15,141 @@ import {
   type GlobalElementDefinitionMap,
   type CombatantElementDefinitionMap,
 } from "./elementContract";
+import type { PopupFieldEls } from "./shared";
+import type { DefenseFieldEls } from "./defense";
+import type { EwarFieldEls } from "./ewar";
+import type { TargetingFieldEls } from "./targeting";
 
 type GlobalControlsEls = {
   readonly [K in keyof GlobalElementDefinitionMap]: ElementForTag<GlobalElementDefinitionMap[K]["tag"]>;
 };
 
-type CombatantEls = {
-  readonly [K in keyof CombatantElementDefinitionMap]: ElementForTag<CombatantElementDefinitionMap[K]["tag"]>;
-};
+interface CombatantEls {
+  readonly tracking: HTMLInputElement;
+  readonly trackingUnitRad: HTMLButtonElement;
+  readonly trackingUnitScore: HTMLButtonElement;
+  readonly sigRes: HTMLSelectElement;
+  readonly sigResOptions: HTMLElement;
+  readonly turretVariantGear: HTMLButtonElement;
+  readonly turretVariants: HTMLElement;
+  readonly turretWeaponOverloadButton: HTMLButtonElement;
+  readonly optimal: HTMLInputElement;
+  readonly falloff: HTMLInputElement;
+  readonly effectiveTracking: HTMLElement;
+  readonly effectiveOptimal: HTMLElement;
+  readonly effectiveFalloff: HTMLElement;
+  readonly effectiveSpeed: HTMLElement;
+  readonly ammoField: HTMLElement;
+  readonly ammoTrigger: HTMLButtonElement;
+  readonly ammoSummary: HTMLElement;
+  readonly ammoSummaryIcon: HTMLImageElement;
+  readonly ammoPopup: HTMLElement;
+  readonly ammoCargoLabel: HTMLElement;
+  readonly ammoCargoList: HTMLElement;
+  readonly ammoExpand: HTMLButtonElement;
+  readonly ammoAllSection: HTMLElement;
+  readonly ammoAllList: HTMLElement;
+  readonly hull: HTMLInputElement;
+  readonly fittingName: HTMLElement;
+  readonly hullHint: HTMLElement;
+  readonly shipSelectTrigger: HTMLButtonElement;
+  readonly fittingEye: HTMLButtonElement;
+  readonly shipSelectPopup: HTMLElement;
+  readonly fittingPreview: HTMLElement;
+  readonly fittingSavedLabel: HTMLElement;
+  readonly fittingSavedList: HTMLElement;
+  readonly fittingPresetLabel: HTMLElement;
+  readonly fittingPresetList: HTMLElement;
+  readonly fittingEmpty: HTMLElement;
+  readonly importFitting: HTMLButtonElement;
+  readonly pastePopup: HTMLElement;
+  readonly pasteInput: HTMLTextAreaElement;
+  readonly propulsion: HTMLSelectElement;
+  readonly propulsionOptions: HTMLElement;
+  readonly propulsionGear: HTMLButtonElement;
+  readonly propulsionVariants: HTMLElement;
+  readonly skills: HTMLSelectElement;
+  readonly skillOptions: HTMLElement;
+  readonly skillSummary: HTMLElement;
+  readonly skillTrigger: HTMLButtonElement;
+  readonly skillPopup: HTMLElement;
+  readonly skillField: HTMLElement;
+  readonly defenseSkills: HTMLElement;
+  readonly targetingSkills: HTMLElement;
+  readonly overload: HTMLInputElement;
+  readonly overloadButton: HTMLButtonElement;
+  readonly defense: DefenseFieldEls;
+  readonly ewar: EwarFieldEls;
+  readonly targeting: TargetingFieldEls;
+  readonly boosterSection: HTMLElement;
+  readonly boosterSummary: HTMLElement;
+  readonly missileBoosterSection: HTMLElement;
+  readonly missileBoosterSummary: HTMLElement;
+  readonly speed: HTMLInputElement;
+  readonly mass: HTMLInputElement;
+  readonly inertia: HTMLInputElement;
+  readonly alignTime: HTMLElement;
+  readonly mode: HTMLSelectElement;
+  readonly range: HTMLInputElement;
+  readonly aggressivity: HTMLInputElement;
+  readonly aggressivitySlider: HTMLInputElement;
+  readonly aggressivityValue: HTMLElement;
+  readonly aggressivityField: HTMLElement;
+  readonly shipSig: HTMLInputElement;
+  readonly portrait: HTMLElement;
+  readonly turretPanel: HTMLElement;
+  readonly launcherPanel: HTMLElement;
+  readonly weaponSystem: HTMLElement;
+  readonly weaponSystemTurret: HTMLButtonElement;
+  readonly weaponSystemMissile: HTMLButtonElement;
+  readonly weaponSystemDrone: HTMLButtonElement;
+  readonly launcherAmmoTrigger: HTMLButtonElement;
+  readonly launcherAmmoSummary: HTMLElement;
+  readonly launcherAmmoSummaryIcon: HTMLImageElement;
+  readonly launcherAmmoPopup: HTMLElement;
+  readonly launcherAmmoList: HTMLElement;
+  readonly launcherAmmoField: HTMLElement;
+  readonly launcherClassOptions: HTMLElement;
+  readonly launcherVariantGear: HTMLButtonElement;
+  readonly launcherVariants: HTMLElement;
+  readonly launcherWeaponOverloadButton: HTMLButtonElement;
+  readonly launcherAttributesTrigger: HTMLButtonElement;
+  readonly launcherAttributesPopup: HTMLElement;
+  readonly launcherAttributesField: HTMLElement;
+  readonly launcherVolleyDamage: HTMLElement;
+  readonly launcherRateOfFire: HTMLElement;
+  readonly launcherExplosionRadius: HTMLElement;
+  readonly launcherExplosionVelocity: HTMLElement;
+  readonly launcherMissileVelocity: HTMLElement;
+  readonly launcherFlightTime: HTMLElement;
+  readonly launcherFlightRange: HTMLElement;
+  readonly launcherDamageReductionFactor: HTMLElement;
+  readonly dronePanel: HTMLElement;
+  readonly droneTrigger: HTMLButtonElement;
+  readonly droneSummary: HTMLElement;
+  readonly droneSummaryIcon: HTMLImageElement;
+  readonly dronePopup: HTMLElement;
+  readonly droneField: HTMLElement;
+  readonly droneTracking: HTMLElement;
+  readonly droneOptimal: HTMLElement;
+  readonly droneFalloff: HTMLElement;
+  readonly droneDamage: HTMLElement;
+  readonly droneCycleTime: HTMLElement;
+  readonly droneOrbitSpeed: HTMLElement;
+  readonly droneMaxVelocity: HTMLElement;
+  readonly droneCount: HTMLElement;
+  readonly droneLoadoutSection: HTMLElement;
+  readonly droneLoadoutList: HTMLElement;
+  readonly droneSummaryBar: HTMLElement;
+  readonly droneSummaryCount: HTMLElement;
+  readonly droneSummaryBandwidth: HTMLElement;
+  readonly droneSummaryBay: HTMLElement;
+  readonly droneCatalogSection: HTMLElement;
+  readonly droneCatalogLight: HTMLElement;
+  readonly droneCatalogMedium: HTMLElement;
+  readonly droneCatalogHeavy: HTMLElement;
+  readonly droneCatalogSentry: HTMLElement;
+}
 
 interface ControlsElements extends GlobalControlsEls {
   readonly shipA: CombatantEls;
@@ -149,7 +276,6 @@ function createCombatantEls(side: Side): CombatantEls {
     effectiveOptimal: el(combatantElementId("effectiveOptimal", side)),
     effectiveFalloff: el(combatantElementId("effectiveFalloff", side)),
     effectiveSpeed: el(combatantElementId("effectiveSpeed", side)),
-    effectiveSig: el(combatantElementId("effectiveSig", side)),
     ammoField: el(combatantElementId("ammoField", side)),
     ammoTrigger: elOf(combatantElementId("ammoTrigger", side), isHtmlButtonElement),
     ammoSummary: el(combatantElementId("ammoSummary", side)),
@@ -189,24 +315,28 @@ function createCombatantEls(side: Side): CombatantEls {
     targetingSkills: el(combatantElementId("targetingSkills", side)),
     overload: elOf(combatantElementId("overload", side), isHtmlInputElement),
     overloadButton: elOf(combatantElementId("overloadButton", side), isHtmlButtonElement),
-    ewarField: el(combatantElementId("ewarField", side)),
-    ewarTrigger: elOf(combatantElementId("ewarTrigger", side), isHtmlButtonElement),
-    ewarPopup: el(combatantElementId("ewarPopup", side)),
-    ewarSection: el(combatantElementId("ewarSection", side)),
-    ewarSummaryRow: el(combatantElementId("ewarSummaryRow", side)),
-    ewarSummary: el(combatantElementId("ewarSummary", side)),
-    defenseField: el(combatantElementId("defenseField", side)),
-    defenseTrigger: elOf(combatantElementId("defenseTrigger", side), isHtmlButtonElement),
-    defensePopup: el(combatantElementId("defensePopup", side)),
-    defenseSection: el(combatantElementId("defenseSection", side)),
-    defenseSummaryRow: el(combatantElementId("defenseSummaryRow", side)),
-    defenseSummary: el(combatantElementId("defenseSummary", side)),
-    targetingField: el(combatantElementId("targetingField", side)),
-    targetingTrigger: elOf(combatantElementId("targetingTrigger", side), isHtmlButtonElement),
-    targetingPopup: el(combatantElementId("targetingPopup", side)),
-    targetingSection: el(combatantElementId("targetingSection", side)),
-    targetingSummaryRow: el(combatantElementId("targetingSummaryRow", side)),
-    targetingSummary: el(combatantElementId("targetingSummary", side)),
+    defense: {
+      field: el(combatantElementId("defenseField", side)),
+      trigger: elOf(combatantElementId("defenseTrigger", side), isHtmlButtonElement),
+      popup: el(combatantElementId("defensePopup", side)),
+      section: el(combatantElementId("defenseSection", side)),
+      summary: el(combatantElementId("defenseSummary", side)),
+      effectiveSig: el(combatantElementId("effectiveSig", side)),
+    },
+    ewar: {
+      field: el(combatantElementId("ewarField", side)),
+      trigger: elOf(combatantElementId("ewarTrigger", side), isHtmlButtonElement),
+      popup: el(combatantElementId("ewarPopup", side)),
+      section: el(combatantElementId("ewarSection", side)),
+      summary: el(combatantElementId("ewarSummary", side)),
+    },
+    targeting: {
+      field: el(combatantElementId("targetingField", side)),
+      trigger: elOf(combatantElementId("targetingTrigger", side), isHtmlButtonElement),
+      popup: el(combatantElementId("targetingPopup", side)),
+      section: el(combatantElementId("targetingSection", side)),
+      summary: el(combatantElementId("targetingSummary", side)),
+    },
     boosterSection: el(combatantElementId("boosterSection", side)),
     boosterSummary: el(combatantElementId("boosterSummary", side)),
     missileBoosterSection: el(combatantElementId("missileBoosterSection", side)),

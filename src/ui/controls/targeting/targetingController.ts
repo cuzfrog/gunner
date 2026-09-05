@@ -23,14 +23,8 @@ export class TargetingControllerImpl implements TargetingController {
     this.events = deps.events;
     this.sectionBlock = new SectionBlockImpl();
     this.fields = {
-      shipA: new PopupField({
-        els: { field: deps.els.shipATargetingField, trigger: deps.els.shipATargetingTrigger, popup: deps.els.shipATargetingPopup, section: deps.els.shipATargetingSection, summary: deps.els.shipATargetingSummary },
-        popupGroup: deps.popupGroup,
-      }),
-      shipB: new PopupField({
-        els: { field: deps.els.shipBTargetingField, trigger: deps.els.shipBTargetingTrigger, popup: deps.els.shipBTargetingPopup, section: deps.els.shipBTargetingSection, summary: deps.els.shipBTargetingSummary },
-        popupGroup: deps.popupGroup,
-      }),
+      shipA: new PopupField({ els: deps.els.shipA, popupGroup: deps.popupGroup }),
+      shipB: new PopupField({ els: deps.els.shipB, popupGroup: deps.popupGroup }),
     };
     this.events.onFittingImported((side, imported) => this.setSensorData(side, imported.sensorSpec, imported.sensorBoosts));
     this.events.onLanguageChanged(() => this.render());
@@ -116,7 +110,7 @@ export class TargetingControllerImpl implements TargetingController {
   }
 
   private updateSummary(side: Side): void {
-    const summary = side === "shipA" ? this.els.shipATargetingSummary : this.els.shipBTargetingSummary;
+    const summary = this.els[side].summary;
     const spec = this.specs.get(side);
     summary.innerHTML = "";
     if (!spec) {

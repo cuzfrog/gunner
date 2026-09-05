@@ -11,7 +11,7 @@ export function registerEwarModule<T extends ControlsCradle>(cradle: AwilixConta
   cradle.register({
     ewarEffectDescriber: asClass(EwarEffectDescriberImpl).singleton(),
     ewarController: asFunction(({ els, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber, uiEvents }) => new EwarControllerImpl({
-      els: collectEwarEls(els),
+      els: ewarEls(els),
       popupGroup,
       imageCatalog,
       fittingImport,
@@ -22,17 +22,9 @@ export function registerEwarModule<T extends ControlsCradle>(cradle: AwilixConta
   });
 }
 
-function collectEwarEls(els: ControlsElements): EwarEls {
+function ewarEls(els: ControlsElements): EwarEls {
   return {
-    shipAEwarField: els.shipA.ewarField,
-    shipAEwarTrigger: els.shipA.ewarTrigger,
-    shipAEwarPopup: els.shipA.ewarPopup,
-    shipAEwarSection: els.shipA.ewarSection,
-    shipAEwarSummary: els.shipA.ewarSummary,
-    shipBEwarField: els.shipB.ewarField,
-    shipBEwarTrigger: els.shipB.ewarTrigger,
-    shipBEwarPopup: els.shipB.ewarPopup,
-    shipBEwarSection: els.shipB.ewarSection,
-    shipBEwarSummary: els.shipB.ewarSummary,
+    shipA: els.shipA.ewar,
+    shipB: els.shipB.ewar,
   };
 }

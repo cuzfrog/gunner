@@ -40,7 +40,7 @@ export class PopupField {
   }
 
   applyLabel(text: string): void {
-    const labelSpan = this.els.trigger.querySelector?.(".trigger-label");
+    const labelSpan = this.els.trigger.querySelector(".trigger-label");
     if (labelSpan) labelSpan.textContent = text;
     this.els.trigger.setAttribute("aria-label", text);
     this.els.popup.setAttribute("aria-label", text);

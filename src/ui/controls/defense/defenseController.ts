@@ -34,14 +34,8 @@ export class DefenseControllerImpl implements DefenseController {
     this.events = deps.events;
     this.sectionBlock = new SectionBlockImpl();
     this.fields = {
-      shipA: new PopupField({
-        els: { field: deps.els.shipADefenseField, trigger: deps.els.shipADefenseTrigger, popup: deps.els.shipADefensePopup, section: deps.els.shipADefenseSection, summary: deps.els.shipADefenseSummary },
-        popupGroup: deps.popupGroup,
-      }),
-      shipB: new PopupField({
-        els: { field: deps.els.shipBDefenseField, trigger: deps.els.shipBDefenseTrigger, popup: deps.els.shipBDefensePopup, section: deps.els.shipBDefenseSection, summary: deps.els.shipBDefenseSummary },
-        popupGroup: deps.popupGroup,
-      }),
+      shipA: new PopupField({ els: deps.els.shipA, popupGroup: deps.popupGroup }),
+      shipB: new PopupField({ els: deps.els.shipB, popupGroup: deps.popupGroup }),
     };
     this.events.onFittingImported((side, imported) => this.setDefenseSpec(side, imported.defense));
     this.events.onLanguageChanged(() => this.render());
@@ -82,7 +76,7 @@ export class DefenseControllerImpl implements DefenseController {
   }
 
   updateEffectiveSig(side: Side, sig: number): void {
-    const el = side === "shipA" ? this.els.shipAEffectiveSig : this.els.shipBEffectiveSig;
+    const el = this.els[side].effectiveSig;
     const penalty = this.signaturePenalty(side);
     if (penalty > 0) {
       el.textContent = `${formatWithCommas(sig)}m`;
@@ -333,7 +327,7 @@ export class DefenseControllerImpl implements DefenseController {
   }
 
   private updateSummary(side: Side): void {
-    const summary = side === "shipA" ? this.els.shipADefenseSummary : this.els.shipBDefenseSummary;
+    const summary = this.els[side].summary;
     const spec = this.specs.get(side);
     summary.innerHTML = "";
     if (!spec) {

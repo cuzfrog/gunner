@@ -10,16 +10,8 @@ function fakeEls(): TargetingEls {
   const make = (): HTMLElement => new FakeElement() as unknown as HTMLElement;
   const makeButton = (): HTMLButtonElement => new FakeElement() as unknown as HTMLButtonElement;
   return {
-    shipATargetingField: make(),
-    shipATargetingTrigger: makeButton(),
-    shipATargetingPopup: make(),
-    shipATargetingSection: make(),
-    shipATargetingSummary: make(),
-    shipBTargetingField: make(),
-    shipBTargetingTrigger: makeButton(),
-    shipBTargetingPopup: make(),
-    shipBTargetingSection: make(),
-    shipBTargetingSummary: make(),
+    shipA: { field: make(), trigger: makeButton(), popup: make(), section: make(), summary: make() },
+    shipB: { field: make(), trigger: makeButton(), popup: make(), section: make(), summary: make() },
   };
 }
 
@@ -72,15 +64,15 @@ describe("TargetingController", () => {
     const els = fakeEls();
     const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents() });
     controller.render();
-    expect(els.shipATargetingTrigger.disabled).toBe(true);
+    expect(els.shipA.trigger.disabled).toBe(true);
   });
 
   test("enables trigger and renders sensor attributes when spec is set", () => {
     const els = fakeEls();
     const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents() });
     controller.setSensorData("shipA", SPEC, undefined);
-    expect(els.shipATargetingTrigger.disabled).toBe(false);
-    expect((els.shipATargetingSection as unknown as FakeElement).children.length).toBeGreaterThan(0);
+    expect(els.shipA.trigger.disabled).toBe(false);
+    expect((els.shipA.section as unknown as FakeElement).children.length).toBeGreaterThan(0);
   });
 
   test("renders sensor booster modules when boosts are set", () => {
@@ -92,7 +84,7 @@ describe("TargetingController", () => {
       boosterScripts: [],
     };
     controller.setSensorData("shipA", SPEC, boosts);
-    expect(sectionText(els.shipATargetingSection)).toContain("Sensor Booster II");
+    expect(sectionText(els.shipA.section)).toContain("Sensor Booster II");
   });
 
   test("renders signal amplifier modules when amplifiers are set", () => {
@@ -104,22 +96,22 @@ describe("TargetingController", () => {
       boosterScripts: [],
     };
     controller.setSensorData("shipA", SPEC, boosts);
-    expect(sectionText(els.shipATargetingSection)).toContain("Signal Amplifier II");
+    expect(sectionText(els.shipA.section)).toContain("Signal Amplifier II");
   });
 
   test("does not render booster section when loadout is empty", () => {
     const els = fakeEls();
     const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents() });
     controller.setSensorData("shipA", SPEC, EMPTY_SENSOR_BOOST_LOADOUT);
-    expect(sectionText(els.shipATargetingSection)).not.toContain("Sensor boosters");
-    expect(sectionText(els.shipATargetingSection)).not.toContain("Signal amplifiers");
+    expect(sectionText(els.shipA.section)).not.toContain("Sensor boosters");
+    expect(sectionText(els.shipA.section)).not.toContain("Signal amplifiers");
   });
 
   test("updates summary with max targeting range", () => {
     const els = fakeEls();
     const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents() });
     controller.setSensorData("shipA", SPEC, undefined);
-    expect((els.shipATargetingSummary as unknown as FakeElement).children.length).toBeGreaterThan(0);
+    expect((els.shipA.summary as unknown as FakeElement).children.length).toBeGreaterThan(0);
   });
 
   test("clears summary when spec is removed", () => {
@@ -127,8 +119,8 @@ describe("TargetingController", () => {
     const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents() });
     controller.setSensorData("shipA", SPEC, undefined);
     controller.setSensorData("shipA", undefined, undefined);
-    expect(els.shipATargetingSummary.textContent).toBe("");
-    expect(els.shipATargetingTrigger.disabled).toBe(true);
+    expect(els.shipA.summary.textContent).toBe("");
+    expect(els.shipA.trigger.disabled).toBe(true);
   });
 });
 

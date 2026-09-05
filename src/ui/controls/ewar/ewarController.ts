@@ -76,16 +76,8 @@ export class EwarControllerImpl implements EwarController {
     deps.popupGroup.register(this.scriptPopups.shipA);
     deps.popupGroup.register(this.scriptPopups.shipB);
     this.fields = {
-      shipA: new PopupField({
-        els: { field: deps.els.shipAEwarField, trigger: deps.els.shipAEwarTrigger, popup: deps.els.shipAEwarPopup, section: deps.els.shipAEwarSection, summary: deps.els.shipAEwarSummary },
-        popupGroup: deps.popupGroup,
-        onClose: () => this.scriptPopups.shipA.close(),
-      }),
-      shipB: new PopupField({
-        els: { field: deps.els.shipBEwarField, trigger: deps.els.shipBEwarTrigger, popup: deps.els.shipBEwarPopup, section: deps.els.shipBEwarSection, summary: deps.els.shipBEwarSummary },
-        popupGroup: deps.popupGroup,
-        onClose: () => this.scriptPopups.shipB.close(),
-      }),
+      shipA: new PopupField({ els: deps.els.shipA, popupGroup: deps.popupGroup, onClose: () => this.scriptPopups.shipA.close() }),
+      shipB: new PopupField({ els: deps.els.shipB, popupGroup: deps.popupGroup, onClose: () => this.scriptPopups.shipB.close() }),
     };
     this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.ewar));
     this.events.onLanguageChanged(() => this.render());
@@ -151,7 +143,7 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private buildScriptPopup(side: Side): Popup {
-    const field = side === "shipA" ? this.els.shipAEwarField : this.els.shipBEwarField;
+    const field = this.els[side].field;
     const popup = html`<div id="${sideId(side)}-ewar-script-popup" class="ewar-script-popup popup" role="menu" hidden></div>` as unknown as HTMLDivElement;
     field.appendChild(popup);
     this.scriptPopupEls.set(side, popup);
@@ -170,7 +162,7 @@ export class EwarControllerImpl implements EwarController {
 
   private renderSide(side: Side): void {
     const field = this.fields[side];
-    const summary = side === "shipA" ? this.els.shipAEwarSummary : this.els.shipBEwarSummary;
+    const summary = this.els[side].summary;
     const state = this.states.get(side);
     const modulesLabel = this.i18n.t("label.modules");
     field.applyLabel(modulesLabel);
@@ -224,7 +216,7 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private updateSummary(side: Side): void {
-    const summary = side === "shipA" ? this.els.shipAEwarSummary : this.els.shipBEwarSummary;
+    const summary = this.els[side].summary;
     const state = this.states.get(side);
     summary.innerHTML = "";
     if (!state || this.isEmpty(state.loadout)) {

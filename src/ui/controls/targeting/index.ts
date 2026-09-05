@@ -1,2 +1,2 @@
-export type { TargetingController, TargetingEls } from "./targetingControllerContract";
+export type { TargetingController, TargetingEls, TargetingFieldEls } from "./targetingControllerContract";
 export { registerTargetingModule } from "./module";

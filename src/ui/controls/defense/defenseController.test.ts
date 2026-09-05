@@ -20,18 +20,8 @@ class FakePopupGroup implements PopupGroup {
 
 function buildEls(): DefenseEls {
   return {
-    shipADefenseField: new FakeElement(),
-    shipADefenseTrigger: new FakeElement() as unknown as HTMLButtonElement,
-    shipADefensePopup: new FakeElement(),
-    shipADefenseSection: new FakeElement(),
-    shipADefenseSummary: new FakeElement(),
-    shipAEffectiveSig: new FakeElement(),
-    shipBDefenseField: new FakeElement(),
-    shipBDefenseTrigger: new FakeElement() as unknown as HTMLButtonElement,
-    shipBDefensePopup: new FakeElement(),
-    shipBDefenseSection: new FakeElement(),
-    shipBDefenseSummary: new FakeElement(),
-    shipBEffectiveSig: new FakeElement(),
+    shipA: { field: new FakeElement(), trigger: new FakeElement() as unknown as HTMLButtonElement, popup: new FakeElement(), section: new FakeElement(), summary: new FakeElement(), effectiveSig: new FakeElement() },
+    shipB: { field: new FakeElement(), trigger: new FakeElement() as unknown as HTMLButtonElement, popup: new FakeElement(), section: new FakeElement(), summary: new FakeElement(), effectiveSig: new FakeElement() },
   };
 }
 
@@ -82,8 +72,8 @@ describe("DefenseControllerImpl.updateEffectiveSig", () => {
     const controller = new DefenseControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildUiEvents() });
     controller.setDefenseSpec("shipA", defenseSpecWithPenalty(7));
     controller.updateEffectiveSig("shipA", 42);
-    expect(els.shipAEffectiveSig.textContent).toBe("42m");
-    expect(els.shipAEffectiveSig.classList.add).toHaveBeenCalledWith("is-negative");
+    expect(els.shipA.effectiveSig.textContent).toBe("42m");
+    expect(els.shipA.effectiveSig.classList.add).toHaveBeenCalledWith("is-negative");
   });
 
   test("sets attribution hint with penalty value, not a second radius", () => {
@@ -92,8 +82,8 @@ describe("DefenseControllerImpl.updateEffectiveSig", () => {
     const controller = new DefenseControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n, events: buildUiEvents() });
     controller.setDefenseSpec("shipA", defenseSpecWithPenalty(7));
     controller.updateEffectiveSig("shipA", 42);
-    expect(els.shipAEffectiveSig.getAttribute("data-hint")).toContain("7");
-    expect(els.shipAEffectiveSig.textContent).not.toContain("49");
+    expect(els.shipA.effectiveSig.getAttribute("data-hint")).toContain("7");
+    expect(els.shipA.effectiveSig.textContent).not.toContain("49");
   });
 
   test("clears the suffix when no shield extender penalty is present", () => {
@@ -101,8 +91,8 @@ describe("DefenseControllerImpl.updateEffectiveSig", () => {
     const controller = new DefenseControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildUiEvents() });
     controller.setDefenseSpec("shipA", defenseSpecWithPenalty(0));
     controller.updateEffectiveSig("shipA", 35);
-    expect(els.shipAEffectiveSig.textContent).toBe("");
-    expect(els.shipAEffectiveSig.classList.remove).toHaveBeenCalledWith("is-negative");
+    expect(els.shipA.effectiveSig.textContent).toBe("");
+    expect(els.shipA.effectiveSig.classList.remove).toHaveBeenCalledWith("is-negative");
   });
 
   test("applies to shipB side independently", () => {
@@ -110,7 +100,7 @@ describe("DefenseControllerImpl.updateEffectiveSig", () => {
     const controller = new DefenseControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildUiEvents() });
     controller.setDefenseSpec("shipB", defenseSpecWithPenalty(25));
     controller.updateEffectiveSig("shipB", 300);
-    expect(els.shipBEffectiveSig.textContent).toBe("300m");
-    expect(els.shipBEffectiveSig.classList.add).toHaveBeenCalledWith("is-negative");
+    expect(els.shipB.effectiveSig.textContent).toBe("300m");
+    expect(els.shipB.effectiveSig.classList.add).toHaveBeenCalledWith("is-negative");
   });
 });
