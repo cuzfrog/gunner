@@ -1,11 +1,9 @@
 import {
-  type DefenseSpec,
   type DefenseView,
   type EngineConfig,
   type EngagementView,
   type SimConfig,
   type WeaponSpec,
-  EMPTY_DEFENSE_SPEC,
 } from "../../../sim";
 import { isEventTargetWithClosest, num } from "../controlsDom";
 import type { Controls, ControlsCallbacks, EffectiveReadouts, ViewStore } from "../controlsContract";
@@ -29,7 +27,7 @@ import type { MissileBoosterController } from "../missileBooster";
 import type { ImportController } from "../import";
 import type { ShareController } from "../share";
 import type { RangeOverlay } from "../../renderer";
-import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation, WeaponRangeVisibility } from "../../../appstate";
+import type { WeaponRangeVisibility } from "../../../appstate";
 import type { RangeOverlayController } from "../rangeOverlay";
 import type { PortraitsController } from "../portraits";
 import type { HoverHintController } from "../hoverHint";
@@ -275,14 +273,6 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     return weapons;
   }
   getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
-  getDefense(side: Side): DefenseSpec {
-    return this.defenseController.spec(side) ?? EMPTY_DEFENSE_SPEC;
-  }
-  getDamageEnabled(side: Side): boolean { return this.defenseController.damageEnabled(side); }
-  getRepairMode(side: Side): StoredRepairMode { return this.defenseController.repairMode(side); }
-  getRepairerActivation(side: Side): readonly StoredRepairerActivation[] { return this.defenseController.repairerActivation(side); }
-  getRahActivation(side: Side): StoredRahActivation | undefined { return this.defenseController.rahActivation(side); }
-  getOverloaded(side: Side): boolean { return this.sideFor(side).skillConditions().overloaded; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
   getEngineConfig(): EngineConfig { return this.simConfigSource.getEngineConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }

@@ -217,4 +217,36 @@ describe("EngagementEngineImpl", () => {
     expect(launches.shipA).toEqual([]);
     expect(launches.shipB).toEqual([]);
   });
+
+  test("step uses painted signature from ship state for missile launch specs", () => {
+    const deps = makeEngine();
+    deps.ewarResolver.sigMultiplier.mockReturnValue(2);
+    const shipWithSig: ShipState = { ...ship, sig: 50 };
+    const opponentWithSig: ShipState = { ...ship, id: "shipB", position: new Vec2(0, 5000), sig: 60 };
+    const snapshotWithSig: SimSnapshot = { ...snapshot, shipA: shipWithSig, shipB: opponentWithSig };
+    deps.simulation.snapshot.mockReturnValue(snapshotWithSig);
+    const frameWithSig: EngagementFrame = { ...frame, shipA: shipWithSig, shipB: opponentWithSig };
+    const missile: import("./types").MissileSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 1, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 0.5, maxVelocity: 5000, flightTime: 5, flightRange: 25000 };
+    const missileAssessment: AttackAssessment = {
+      boostedWeapon: missile, effectiveWeapon: missile,
+      damage: { nominalDps: 10, appliedDps: 8, application: 0.8, volley: 100, baseVolleyByType: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, appliedByType: { em: 0, thermal: 0, kinetic: 80, explosive: 0 }, appliedVolleyByType: { em: 0, thermal: 0, kinetic: 80, explosive: 0 } },
+      missile: { application: 0.8, signatureTerm: 1, velocityTerm: 0.8, inRange: true, timeToImpact: 1 },
+    };
+    const viewWithMissile: EngagementView = {
+      ...baseView(),
+      frame: frameWithSig,
+      weaponAttacks: { shipA: [{ weapon: missile, assessment: missileAssessment }], shipB: [] },
+    };
+    deps.engagementFrameComposer.compose.mockReturnValue(viewWithMissile);
+    const configWithMissile: import("./engagementEngine").EngineConfig = {
+      ...engineConfig(),
+      weapons: { shipA: [missile], shipB: [turret] },
+    };
+    deps.engine.reset(configWithMissile);
+    deps.missileSimulator.step.mockClear();
+    deps.engine.step(0.1);
+    const launches = deps.missileSimulator.step.mock.calls[0][2];
+    expect(launches.shipA).toHaveLength(1);
+    expect(launches.shipA[0].paintedTargetSig).toBe(120);
+  });
 });

@@ -107,7 +107,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     const input = this.engagementInput(snapshot, locks, config);
     const composed = this.engagementFrameComposer.compose(snapshot, input);
     this.droneSimulator.step(dt, composed.frame);
-    const missileEvents = this.missileSimulator.step(dt, composed.frame, this.missileLaunchSpecs(composed, locks, config));
+    const missileEvents = this.missileSimulator.step(dt, composed.frame, this.missileLaunchSpecs(composed, locks));
     const weaponEvents = this.weaponClock.step(dt, composed);
     const events: DamageEvent[] = [...missileEvents, ...weaponEvents];
     this.defenseSimulator.step(dt, events);
@@ -200,17 +200,17 @@ export class EngagementEngineImpl implements EngagementEngine {
     return facts;
   }
 
-  private missileLaunchSpecs(view: EngagementView, locks: Record<Side, LockState>, config: EngineConfig): Record<Side, readonly MissileLaunchSpec[]> {
+  private missileLaunchSpecs(view: EngagementView, locks: Record<Side, LockState>): Record<Side, readonly MissileLaunchSpec[]> {
     return {
-      shipA: locks.shipA.status === "locked" ? this.buildLaunchSpecs("shipA", view, config) : [],
-      shipB: locks.shipB.status === "locked" ? this.buildLaunchSpecs("shipB", view, config) : [],
+      shipA: locks.shipA.status === "locked" ? this.buildLaunchSpecs("shipA", view) : [],
+      shipB: locks.shipB.status === "locked" ? this.buildLaunchSpecs("shipB", view) : [],
     };
   }
 
-  private buildLaunchSpecs(side: Side, view: EngagementView, config: EngineConfig): readonly MissileLaunchSpec[] {
+  private buildLaunchSpecs(side: Side, view: EngagementView): readonly MissileLaunchSpec[] {
     const shipState = side === "shipA" ? view.frame.shipA : view.frame.shipB;
-    const opponentSig = side === "shipA" ? config.sigRadii.shipB : config.sigRadii.shipA;
-    const painted = opponentSig * this.ewarResolver.sigMultiplier(shipState.ewar, view.frame.distance);
+    const opponent = side === "shipA" ? view.frame.shipB : view.frame.shipA;
+    const painted = this.paintedSig(shipState, opponent, view.frame.distance);
     const specs: MissileLaunchSpec[] = [];
     let missileIndex = 0;
     for (const attack of view.weaponAttacks[side]) {

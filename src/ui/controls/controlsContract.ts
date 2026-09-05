@@ -1,5 +1,5 @@
-import type { DefenseSpec, DefenseView, EngineConfig, EngagementView, SideReadoutValues, SimConfig, WeaponSpec } from "../../sim";
-import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation, WeaponRangeVisibility } from "../../appstate";
+import type { DefenseView, EngineConfig, EngagementView, SideReadoutValues, SimConfig, WeaponSpec } from "../../sim";
+import type { WeaponRangeVisibility } from "../../appstate";
 import type { RangeOverlay } from "../renderer";
 import type { Side } from "./side";
 
@@ -21,14 +21,7 @@ export interface EffectiveReadouts {
 
 export interface Controls {
   getWeapon(side: Side): WeaponSpec | undefined;
-  getWeapons(side: Side): readonly WeaponSpec[];
   getSig(side: Side): number;
-  getDefense(side: Side): DefenseSpec;
-  getDamageEnabled(side: Side): boolean;
-  getRepairMode(side: Side): StoredRepairMode;
-  getRepairerActivation(side: Side): readonly StoredRepairerActivation[];
-  getRahActivation(side: Side): StoredRahActivation | undefined;
-  getOverloaded(side: Side): boolean;
   getConfig(): SimConfig;
   getEngineConfig(): EngineConfig;
   getSpeed(): number;
