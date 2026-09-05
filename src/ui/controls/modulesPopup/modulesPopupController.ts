@@ -1,6 +1,6 @@
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
-import type { PopupGroup } from "../popup";
+import type { Popup, PopupGroup } from "../popup";
 import { PopupField } from "../shared";
 import type { Side } from "../side";
 import type { ModulesPopup, ModulesPopupEls } from "./modulesPopupControllerContract";
@@ -29,6 +29,10 @@ export class ModulesPopupImpl implements ModulesPopup {
     const list = this.closeCallbacks.get(side) ?? [];
     list.push(fn);
     this.closeCallbacks.set(side, list);
+  }
+
+  popup(side: Side): Popup {
+    return this.fields[side].popup;
   }
 
   syncEnabled(): void {

@@ -157,7 +157,7 @@ function buildEwarController(
   });
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
-  const modulesPopup = vi.mocked<ModulesPopup>({ registerOnClose: vi.fn(), syncEnabled: vi.fn() });
+  const modulesPopup = vi.mocked<ModulesPopup>({ popup: vi.fn(() => ({ isOpen: () => false, open: vi.fn(), close: vi.fn(), focusTrigger: vi.fn(), contains: vi.fn(() => false) })), registerOnClose: vi.fn(), syncEnabled: vi.fn() });
   const controller = new EwarControllerImpl({ els: ewarEls, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber, events, modulesPopup });
   events.emitDistanceChanged(5000);
   return { document, controller, els, i18n, imageCatalog, popupGroup, fittingImport, ewarEffectDescriber, events, emitConfigInvalidated, modulesPopup };

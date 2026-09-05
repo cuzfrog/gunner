@@ -5,7 +5,8 @@ import type { Language, StoredBoosterActivation } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { createControlsEls } from "../elements";
-import type { PopupGroup } from "../popup";
+import type { Popup, PopupGroup } from "../popup";
+import type { ModulesPopup } from "../modulesPopup";
 import { FakeElement, fakeDocument, getFake, mockFittingImport } from "../../testing";
 import { UiEventsImpl } from "../../events";
 import { BoosterControllerImpl } from "./boosterController";
@@ -52,9 +53,22 @@ function buildBoosterController() {
   getFake(document, "ship-b-ewar-popup").appendChild(els.shipB.boosterSection as unknown as FakeElement);
   getFake(document, "ship-a-booster-section").hidden = true;
   getFake(document, "ship-b-booster-section").hidden = true;
+  const stubPopup: Popup = {
+    isOpen: () => false,
+    open: vi.fn(),
+    close: vi.fn(),
+    focusTrigger: vi.fn(),
+    contains: vi.fn(() => false),
+  };
+  const modulesPopup = vi.mocked<ModulesPopup>({
+    popup: vi.fn(() => stubPopup),
+    registerOnClose: vi.fn(),
+    syncEnabled: vi.fn(),
+  });
   const boosterEls: BoosterEls = {
     sections: { shipA: els.shipA.boosterSection, shipB: els.shipB.boosterSection },
     summaries: { shipA: els.shipA.boosterSummary, shipB: els.shipB.boosterSummary },
+    modulesFields: { shipA: els.shipA.ewar.field, shipB: els.shipB.ewar.field },
   };
   const NAME_FOR_ID: Record<string, string> = {
     "1977": "Tracking Computer I",
@@ -69,12 +83,14 @@ function buildBoosterController() {
   });
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
-  const controller = new BoosterControllerImpl({ els: boosterEls, popupGroup, imageCatalog, fittingImport, i18n, events });
-  return { document, controller, els, boosterEls, i18n, imageCatalog, popupGroup, fittingImport, events, emitConfigInvalidated };
+  const controller = new BoosterControllerImpl({ els: boosterEls, popupGroup, modulesPopup, imageCatalog, fittingImport, i18n, events });
+  return { document, controller, els, boosterEls, i18n, imageCatalog, popupGroup, modulesPopup, fittingImport, events, emitConfigInvalidated };
 }
 
-function scriptPopupFor(section: FakeElement): FakeElement | undefined {
-  return section.children.find((child) => child.id === "ship-a-booster-script-popup");
+function scriptPopupFor(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
+  const fieldId = side === "shipA" ? "ship-a-ewar-field" : "ship-b-ewar-field";
+  const field = getFake(document, fieldId);
+  return field.children.find((child) => child.id === `${side === "shipA" ? "ship-a" : "ship-b"}-booster-script-popup`);
 }
 
 function firstRow(section: FakeElement): FakeElement | undefined {
@@ -89,8 +105,7 @@ describe("BoosterController", () => {
     controller.setLoadout("shipA", LOADOUT);
     const section = boosterEls.sections.shipA as unknown as FakeElement;
     expect(section.hidden).toBe(false);
-    expect(section.children[0]?.id).toBe("ship-a-booster-script-popup");
-    const block = section.children[1] as unknown as FakeElement;
+    const block = section.children[0] as unknown as FakeElement;
     expect(block.className).toBe("preview-section");
     expect(block.children[0]?.textContent).toBe("label.booster.computer");
     const rows = block.children.filter((child) => child.className.split(" ").includes("ewar-row"));
@@ -102,7 +117,7 @@ describe("BoosterController", () => {
     const { controller, boosterEls } = buildBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const section = boosterEls.sections.shipA as unknown as FakeElement;
-    const block = section.children[1] as unknown as FakeElement;
+    const block = section.children[0] as unknown as FakeElement;
     const rows = block.children.filter((child) => child.className.split(" ").includes("ewar-row"));
     const firstButton = rows[0]?.children[0] as unknown as FakeElement;
     const nameSpan = firstButton.children[1] as unknown as FakeElement;
@@ -151,25 +166,25 @@ describe("BoosterController", () => {
     expect(controller.projection("shipA")).toBeUndefined();
   });
 
-  test("script popup is appended to the booster section and containment uses the booster section", () => {
-    const { controller, boosterEls, popupGroup } = buildBoosterController();
+  test("script popup is mounted on the modules field and registered with group", () => {
+    const { controller, document, popupGroup } = buildBoosterController();
     controller.setLoadout("shipA", LOADOUT);
-    const section = boosterEls.sections.shipA as unknown as FakeElement;
-    const popup = scriptPopupFor(section);
+    const popup = scriptPopupFor(document, "shipA");
     expect(popup).toBeDefined();
-    expect(popup?.parent).toBe(section);
     expect(popup?.id).toBe("ship-a-booster-script-popup");
+    const field = getFake(document, "ship-a-ewar-field");
+    expect(popup?.parent).toBe(field);
     expect(popupGroup.register).toHaveBeenCalled();
   });
 
   test("selecting a script persists and updates the gear title", () => {
-    const { controller, boosterEls } = buildBoosterController();
+    const { controller, boosterEls, document } = buildBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const section = boosterEls.sections.shipA as unknown as FakeElement;
     const row = firstRow(section)!;
     const gear = row.children.find((child) => child.className.split(" ").includes("ewar-script-gear"))!;
     gear.trigger("click");
-    const popup = scriptPopupFor(section)!;
+    const popup = scriptPopupFor(document, "shipA")!;
     const optimalOption = popup.children.find((child) => child.textContent?.includes(OPTIMAL_SCRIPT.name));
     expect(optimalOption).toBeDefined();
     optimalOption!.trigger("click");
@@ -178,7 +193,7 @@ describe("BoosterController", () => {
   });
 
   test("selecting a script updates the module button title to reflect the script multipliers", () => {
-    const { controller, boosterEls } = buildBoosterController();
+    const { controller, boosterEls, document } = buildBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const section = boosterEls.sections.shipA as unknown as FakeElement;
     const row = firstRow(section)!;
@@ -187,7 +202,7 @@ describe("BoosterController", () => {
     expect(nameSpan.getAttribute("data-hint")).toBe("ewar.hover.tracking +10.0% · ewar.hover.optimal +5.0% · ewar.hover.falloff +10.0%");
     const gear = row.children.find((child) => child.className.split(" ").includes("ewar-script-gear"))!;
     gear.trigger("click");
-    const popup = scriptPopupFor(section)!;
+    const popup = scriptPopupFor(document, "shipA")!;
     const optimalOption = popup.children.find((child) => child.textContent?.includes(OPTIMAL_SCRIPT.name));
     optimalOption!.trigger("click");
     expect(nameSpan.getAttribute("data-hint")).toBe("ewar.hover.optimal +10.0% · ewar.hover.falloff +20.0%");
