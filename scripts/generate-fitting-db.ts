@@ -14,7 +14,8 @@ import { buildProjection, writeProjection, loadMerged } from "./fittingDb/projec
 import { assertClassificationComplete, failOnClassificationErrors } from "./fittingDb/classification/classify";
 import { ATTRIBUTE_CLASSIFICATION } from "./fittingDb/classification/attributeClassification";
 import { EFFECT_CLASSIFICATION } from "./fittingDb/classification/effectClassification";
-import { COMBAT_ATTRIBUTE_MAP, OUT_OF_SCOPE_ATTRIBUTE_IDS, RIG_SIG_DRAWBACK_EFFECT, RIG_AGILITY_DRAWBACK_EFFECT, NON_SCALING_EFFECT_IDS } from "./fittingDb/classification/knownMaps";
+import { RIG_SIG_DRAWBACK_EFFECT, RIG_AGILITY_DRAWBACK_EFFECT } from "./fittingDb/classification/knownMaps";
+import { semanticAttributeToHullBonus, isOutOfScopeAttribute, isNonScalingEffect } from "./fittingDb/classification/classifyLookup";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const PROJECTION_FILE = join(import.meta.dir, "..", "generated", "sde", "projection.json");
@@ -323,9 +324,9 @@ function buildSkillBonuses(
       }
       for (const modifier of eff.modifierInfo ?? []) {
         if (modifier.func === "ItemModifier") continue;
-        const base = COMBAT_ATTRIBUTE_MAP[modifier.modifiedAttributeID];
+        const base = semanticAttributeToHullBonus(modifier.modifiedAttributeID);
         if (base === undefined) {
-          if (!OUT_OF_SCOPE_ATTRIBUTE_IDS.has(modifier.modifiedAttributeID)) {
+          if (!isOutOfScopeAttribute(modifier.modifiedAttributeID)) {
             unmappedCollector.push({ shipTypeId: skillId, shipName: type["typeName_en-us"] ?? String(skillId), effectId: eid, attributeId: modifier.modifiedAttributeID, attributeName: attributeNames.get(modifier.modifiedAttributeID) ?? "unknown", func: modifier.func });
           }
           continue;
@@ -913,7 +914,7 @@ function buildHullBonuses(
   for (const effectID of effects) {
     const effect = dogmaEffects[String(effectID)];
     if (!effect?.modifierInfo) continue;
-    const effectNonScaling = NON_SCALING_EFFECT_IDS.has(effectID);
+    const effectNonScaling = isNonScalingEffect(effectID);
     const specialMagnitude = SPECIAL_MAGNITUDES[effectID];
     for (const modifier of effect.modifierInfo) {
       const resolution = resolveHullBonusAttribute(modifier, attributeNames);
@@ -942,9 +943,9 @@ function resolveHullBonusAttribute(
   modifier: SdeDogmaEffectModifier,
   attributeNames: Map<number, string>,
 ): HullBonusResolution {
-  const base = COMBAT_ATTRIBUTE_MAP[modifier.modifiedAttributeID];
+  const base = semanticAttributeToHullBonus(modifier.modifiedAttributeID);
   if (!base) {
-    if (OUT_OF_SCOPE_ATTRIBUTE_IDS.has(modifier.modifiedAttributeID)) return { kind: "skip", reason: "out of scope" };
+    if (isOutOfScopeAttribute(modifier.modifiedAttributeID)) return { kind: "skip", reason: "out of scope" };
     return { kind: "unmapped", attributeId: modifier.modifiedAttributeID };
   }
   const skillId = modifier.skillTypeID;
@@ -1641,7 +1642,7 @@ function reportUnmappedAttributes(unmapped: readonly UnmappedAttribute[]): void 
     byAttribute.set(entry.attributeId, list);
   }
   console.error(`\nERROR: ${unmapped.length} unmapped hull bonus modifiers across ${byAttribute.size} attributes.`);
-  console.error("Add them to COMBAT_ATTRIBUTE_MAP or add an intentional skip in resolveHullBonusAttribute.\n");
+  console.error("Add them to ATTRIBUTE_CLASSIFICATION or add an intentional skip in resolveHullBonusAttribute.\n");
   for (const [attrId, entries] of byAttribute) {
     const attrName = entries[0].attributeName;
     const sample = entries.slice(0, 3);
