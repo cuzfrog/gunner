@@ -313,25 +313,49 @@ function cssClasses(cssText: string): Set<string> {
   }
 }
 
+let cachedAstroClasses: Set<string> | undefined;
+let cachedTsClasses: StringMap | undefined;
+let cachedCssText: string | undefined;
+let cachedCssPaths: string[] | undefined;
+
+async function allUsedClasses(): Promise<Set<string>> {
+  if (!cachedAstroClasses) cachedAstroClasses = await astroClasses();
+  if (!cachedTsClasses) cachedTsClasses = await tsClasses();
+  const used = new Set(cachedAstroClasses);
+  for (const hits of cachedTsClasses.values()) for (const c of hits) used.add(c);
+  return used;
+}
+
+async function allCssClasses(): Promise<Set<string>> {
+  if (!cachedCssText) cachedCssText = await cssText();
+  return cssClasses(cachedCssText);
+}
+
+async function allCssPaths(): Promise<string[]> {
+  if (!cachedCssPaths) {
+    const glob = new Bun.Glob(CSS_GLOB);
+    cachedCssPaths = [];
+    for await (const path of glob.scan({ cwd: "." })) cachedCssPaths.push(path);
+  }
+  return cachedCssPaths;
+}
+
 test("every used class has a CSS definition", async () => {
-  const used = await astroClasses();
-  for (const hits of (await tsClasses()).values()) for (const c of hits) used.add(c);
-  const defined = cssClasses(await cssText());
+  const used = await allUsedClasses();
+  const defined = await allCssClasses();
   const missing = [...used].filter((c) => !defined.has(c) && !ALLOWED_UNDEFINED.has(c));
   expect(missing).toEqual([]);
 });
 
 test("every CSS class is referenced somewhere", async () => {
-  const used = await astroClasses();
-  for (const hits of (await tsClasses()).values()) for (const c of hits) used.add(c);
-  const defined = cssClasses(await cssText());
+  const used = await allUsedClasses();
+  const defined = await allCssClasses();
   const orphans = [...defined].filter((c) => !used.has(c) && !ALLOWED_ORPHAN.has(c));
   expect(orphans).toEqual([]);
 });
 
 test("every CSS file starts with an @layer wrapper", async () => {
-  const glob = new Bun.Glob(CSS_GLOB);
-  for await (const path of glob.scan({ cwd: "." })) {
+  for (const path of await allCssPaths()) {
     if (path === "src/styles/styles.css") continue;
     const text = await Bun.file(path).text();
     expect(text.trimStart().startsWith("@layer")).toBe(true);
@@ -339,8 +363,7 @@ test("every CSS file starts with an @layer wrapper", async () => {
 });
 
 test("viewport @media queries are confined to layout.css", async () => {
-  const glob = new Bun.Glob(CSS_GLOB);
-  for await (const path of glob.scan({ cwd: "." })) {
+  for (const path of await allCssPaths()) {
     if (path === "src/styles/layout.css") continue;
     const text = await Bun.file(path).text();
     expect(text.includes("@media")).toBe(false);
@@ -348,8 +371,7 @@ test("viewport @media queries are confined to layout.css", async () => {
 });
 
 test("every used class is an approved component or primitive prefix", async () => {
-  const used = await astroClasses();
-  for (const hits of (await tsClasses()).values()) for (const c of hits) used.add(c);
+  const used = await allUsedClasses();
   const bad = [...used].filter((c) => !isApproved(c));
   expect(bad).toEqual([]);
 });

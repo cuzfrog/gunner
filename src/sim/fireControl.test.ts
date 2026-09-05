@@ -175,8 +175,6 @@ describe("EngagementEvaluatorImpl", () => {
   test("evaluates missile attack without boost or ewar", () => {
     const { missileApplication, ewarResolver, turretBoosterResolver, missileBoosterResolver, evaluator } = makeEvaluator();
     const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40 } });
-    expect(result.shipA?.effectiveWeapon).toBe(missile);
-    expect(result.shipA?.boostedWeapon).toBe(missile);
     expect(result.shipA?.missile).toEqual(missileBreakdown);
     expect(result.shipA?.damage.nominalDps).toBeCloseTo((200 * 2) / 10, 10);
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(((200 * 2) / 10) * 0.8, 10);

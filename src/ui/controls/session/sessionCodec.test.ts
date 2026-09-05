@@ -5,6 +5,8 @@ import {
   type SettingsParser,
   type SettingsStore,
   type StartupState,
+  type StoredEwarActivation,
+  type StoredMissileBoosterActivation,
   type TrackingUnit,
   type UserSettings,
 } from "../../../appstate";
@@ -649,11 +651,9 @@ describe("SessionCodec", () => {
     const fittingImport = mockFittingImport();
     const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nStasis Webifier I", overrides: {}, fittedHull: undefined });
     const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
-    vi.mocked(ewarController.capture).mockReturnValue({
-      webs: [{ active: true, overloaded: false }],
-      grapplers: [],
-      disruptors: [{ active: true, overloaded: false, script: "none" }],
-    });
+    const shipAEwar: StoredEwarActivation = { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [{ active: true, overloaded: false, script: "none" }] };
+    const shipBEwar: StoredEwarActivation = { webs: [], grapplers: [{ active: false, overloaded: true }], disruptors: [] };
+    vi.mocked(ewarController.capture).mockImplementation((side: Side) => side === "shipA" ? shipAEwar : shipBEwar);
     vi.mocked(fittingImport.importFitting).mockReturnValue({
       profile: {} as unknown,
       fittingName: "Brawler",
@@ -669,11 +669,10 @@ describe("SessionCodec", () => {
     const { codec } = buildCodec({ shipA, shipB, ewarController, fittingImport, events });
 
     const settings = codec.capture();
-    expect(settings.shipAEwarActivation).toEqual({
-      webs: [{ active: true, overloaded: false }],
-      grapplers: [],
-      disruptors: [{ active: true, overloaded: false, script: "none" }],
-    });
+    expect(ewarController.capture).toHaveBeenCalledWith("shipA");
+    expect(ewarController.capture).toHaveBeenCalledWith("shipB");
+    expect(settings.shipAEwarActivation).toEqual(shipAEwar);
+    expect(settings.shipBEwarActivation).toEqual(shipBEwar);
 
     codec.restore(sessionFromWire(settings));
     expect(ewarController.restore).toHaveBeenCalledWith("shipA", expect.any(Object), settings.shipAEwarActivation);
@@ -686,7 +685,9 @@ describe("SessionCodec", () => {
     const fittingImport = mockFittingImport();
     const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nMissile Guidance Computer I", overrides: {}, fittedHull: undefined });
     const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
-    vi.mocked(missileBoosterController.capture).mockReturnValue([{ active: true, overloaded: false, script: "none" }]);
+    const shipABooster: readonly StoredMissileBoosterActivation[] = [{ active: true, overloaded: false, script: "none" }];
+    const shipBBooster: readonly StoredMissileBoosterActivation[] = [{ active: false, overloaded: true, script: "none" }];
+    vi.mocked(missileBoosterController.capture).mockImplementation((side: Side) => side === "shipA" ? shipABooster : shipBBooster);
     vi.mocked(fittingImport.importFitting).mockReturnValue({
       profile: {} as unknown,
       fittingName: "Brawler",
@@ -703,7 +704,10 @@ describe("SessionCodec", () => {
     const { codec } = buildCodec({ shipA, shipB, missileBoosterController, fittingImport, events });
 
     const settings = codec.capture();
-    expect(settings.shipAMissileBoosterActivation).toEqual([{ active: true, overloaded: false, script: "none" }]);
+    expect(missileBoosterController.capture).toHaveBeenCalledWith("shipA");
+    expect(missileBoosterController.capture).toHaveBeenCalledWith("shipB");
+    expect(settings.shipAMissileBoosterActivation).toEqual(shipABooster);
+    expect(settings.shipBMissileBoosterActivation).toEqual(shipBBooster);
 
     codec.restore(sessionFromWire(settings));
     expect(missileBoosterController.restore).toHaveBeenCalledWith("shipA", expect.any(Object), settings.shipAMissileBoosterActivation);
@@ -893,20 +897,28 @@ describe("SessionCodec", () => {
 
   test("capture and restore round-trips defense repair mode and activation state", () => {
     const defenseController = mockDefenseController();
+    const shipARepairer = [{ active: false, overloaded: true }];
+    const shipBRepairer = [{ active: true, overloaded: false }];
+    const shipARah = { active: true, overloaded: false };
+    const shipBRah = { active: false, overloaded: true };
     defenseController.damageEnabled = vi.fn(() => true);
-    defenseController.repairMode = vi.fn(() => "manual" as const);
-    defenseController.repairerActivation = vi.fn(() => [{ active: false, overloaded: true }]);
-    defenseController.rahActivation = vi.fn(() => ({ active: true, overloaded: false }));
+    defenseController.repairMode = vi.fn((side: Side) => side === "shipA" ? "manual" : "auto");
+    defenseController.repairerActivation = vi.fn((side: Side) => side === "shipA" ? shipARepairer : shipBRepairer);
+    defenseController.rahActivation = vi.fn((side: Side) => side === "shipA" ? shipARah : shipBRah);
     const { codec } = buildCodec({ defenseController });
     const captured = codec.capture();
+    expect(defenseController.repairMode).toHaveBeenCalledWith("shipA");
+    expect(defenseController.repairMode).toHaveBeenCalledWith("shipB");
     expect(captured.shipARepMode).toBe("manual");
-    expect(captured.shipBRepMode).toBe("manual");
-    expect(captured.shipARepairerActivation).toEqual([{ active: false, overloaded: true }]);
-    expect(captured.shipARahActivation).toEqual({ active: true, overloaded: false });
+    expect(captured.shipBRepMode).toBe("auto");
+    expect(captured.shipARepairerActivation).toEqual(shipARepairer);
+    expect(captured.shipBRepairerActivation).toEqual(shipBRepairer);
+    expect(captured.shipARahActivation).toEqual(shipARah);
+    expect(captured.shipBRahActivation).toEqual(shipBRah);
     const session = codec.fromProfile(codec.captureProfile());
     codec.restore(session, "");
-    expect(defenseController.restore).toHaveBeenCalledWith("shipA", true, "manual", [{ active: false, overloaded: true }], { active: true, overloaded: false });
-    expect(defenseController.restore).toHaveBeenCalledWith("shipB", true, "manual", [{ active: false, overloaded: true }], { active: true, overloaded: false });
+    expect(defenseController.restore).toHaveBeenCalledWith("shipA", true, "manual", shipARepairer, shipARah);
+    expect(defenseController.restore).toHaveBeenCalledWith("shipB", true, "auto", shipBRepairer, shipBRah);
   });
 
   test("restore sets defense spec from fitting text", () => {

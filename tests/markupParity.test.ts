@@ -1,10 +1,12 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { TAG_BY_ID } from "../src/ui/controls";
 import pkg from "../package.json";
 
 const DIST_HTML = "dist/index.html";
 const BASELINE_PATH = "tests/markup-parity-baseline.json";
+const SRC_DIRS = ["src/components", "src/layouts", "src/pages"];
 
 interface Baseline {
   readonly ids: readonly string[];
@@ -12,7 +14,23 @@ interface Baseline {
   readonly i18nKeys: readonly string[];
 }
 
+function newestMtime(dir: string): number {
+  let newest = 0;
+  for (const entry of readdirSync(dir)) {
+    const path = join(dir, entry);
+    const stat = statSync(path);
+    if (stat.isDirectory()) newest = Math.max(newest, newestMtime(path));
+    else newest = Math.max(newest, stat.mtimeMs);
+  }
+  return newest;
+}
+
 function ensureBuild(): void {
+  if (existsSync(DIST_HTML)) {
+    const distMtime = statSync(DIST_HTML).mtimeMs;
+    const srcNewest = Math.max(...SRC_DIRS.filter(existsSync).map(newestMtime));
+    if (distMtime > srcNewest) return;
+  }
   spawnSync("bun", ["run", "build"], { stdio: "inherit" });
 }
 

@@ -416,10 +416,12 @@ describe("CanvasRenderer", () => {
 
     test("draws no drone range rings when visibility is none", () => {
       const positions = [new Vec2(1000, 0)];
-      const { arcs } = rendererWithDrones("none", { shipA: [{ positions, optimal: 1500, falloff: 500, controlRange: 60000 }], shipB: [] });
-      // No drone range rings should be drawn (only grid/ship rings may appear)
-      // The drone range rings use optimal=1500 and falloff=2000, check none match
-      expect(arcs.some((a) => Math.abs(a[2] - 1500) < 50)).toBe(false);
+      const { renderer, arcs } = rendererWithDrones("none", { shipA: [{ positions, optimal: 1500, falloff: 500, controlRange: 60000 }], shipB: [] });
+      const scale = scaleOf(renderer);
+      const optimalRadius = 1500 * scale;
+      const falloffRadius = (1500 + 500) * scale;
+      expect(arcs.some((a) => Math.abs(a[2] - optimalRadius) < 0.5)).toBe(false);
+      expect(arcs.some((a) => Math.abs(a[2] - falloffRadius) < 0.5)).toBe(false);
     });
 
     test("draws drone control range rings from ship position", () => {
