@@ -19,9 +19,10 @@ class FakePopupGroup implements PopupGroup {
 }
 
 function buildEls(): DefenseEls {
+  const cast = (el: FakeElement) => el as unknown as HTMLElement;
   return {
-    shipA: { field: new FakeElement(), trigger: new FakeElement() as unknown as HTMLButtonElement, popup: new FakeElement(), section: new FakeElement(), summary: new FakeElement(), effectiveSig: new FakeElement() },
-    shipB: { field: new FakeElement(), trigger: new FakeElement() as unknown as HTMLButtonElement, popup: new FakeElement(), section: new FakeElement(), summary: new FakeElement(), effectiveSig: new FakeElement() },
+    shipA: { field: cast(new FakeElement()), trigger: new FakeElement() as unknown as HTMLButtonElement, popup: cast(new FakeElement()), section: cast(new FakeElement()), summary: cast(new FakeElement()), effectiveSig: cast(new FakeElement()) },
+    shipB: { field: cast(new FakeElement()), trigger: new FakeElement() as unknown as HTMLButtonElement, popup: cast(new FakeElement()), section: cast(new FakeElement()), summary: cast(new FakeElement()), effectiveSig: cast(new FakeElement()) },
   };
 }
 
@@ -128,6 +129,8 @@ describe("DefenseControllerImpl EHP and repairer HP/s", () => {
         layer: "armor",
         amount: 100,
         cycleTime: 4,
+        capacitorNeed: 0,
+        heatDamage: 0,
         overload: { amountMultiplier: overloadAmountMultiplier, cycleTimeMultiplier: overloadCycleMultiplier },
       }],
       signaturePenalty: 0,
@@ -219,19 +222,21 @@ describe("DefenseControllerImpl EHP and repairer HP/s", () => {
   });
 });
 
-function findRepairerStatsText(root: FakeElement): string {
-  for (const child of root.children) {
+function findRepairerStatsText(root: HTMLElement): string {
+  const fake = root as unknown as FakeElement;
+  for (const child of fake.children) {
     if (child.className.includes("defense-repairer-stats")) return child.textContent;
-    const found = findRepairerStatsText(child);
+    const found = findRepairerStatsText(child as unknown as HTMLElement);
     if (found) return found;
   }
   return "";
 }
 
-function findSummaryText(root: FakeElement): string {
-  for (const child of root.children) {
+function findSummaryText(root: HTMLElement): string {
+  const fake = root as unknown as FakeElement;
+  for (const child of fake.children) {
     if (child.textContent) return child.textContent;
-    const found = findSummaryText(child);
+    const found = findSummaryText(child as unknown as HTMLElement);
     if (found) return found;
   }
   return "";

@@ -531,8 +531,6 @@ export class CanvasRenderer implements Renderer {
 
 }
 
-
-
 function weaponRangeMax(range: WeaponRange): number {
   return range.kind === "missile" ? range.range : range.optimal + range.falloff;
 }
