@@ -1,4 +1,4 @@
-export type { FittingDb, FittingDbData } from "./catalog";
+export type { FittingDb, FittingDbData } from "./types";
 export { FITTING_DB } from "./catalog";
 export type {
   ChargeStats,
@@ -41,7 +41,7 @@ export type {
   TurretStats,
   TurretWeaponGroup,
   WarpScramblerStats,
-} from "./fittingDb";
+} from "./types";
 export {
   CHARGES,
   COMBAT_DRONES,
@@ -70,4 +70,4 @@ export {
   TRACKING_DISRUPTORS,
   TURRETS,
   WARP_SCRAMBLERS,
-} from "./fittingDb";
+} from "./generated/fittingDb.data";

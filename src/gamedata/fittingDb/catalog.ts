@@ -1,36 +1,38 @@
-import type { ShipId, TypeId } from "../ids";
+import type {
+  ChargeStats,
+  DisruptionScriptStats,
+  DroneSizeClass,
+  DroneStats,
+  FittingDbData,
+  FittingModuleStats,
+  FittingPropulsionStats,
+  HullBonus,
+  HullBonusAttribute,
+  LauncherStats,
+  MissileGuidanceComputerStats,
+  MissileGuidanceEnhancerStats,
+  MissileScriptStats,
+  MissileStats,
+  OmnidirectionalTrackingEnhancerStats,
+  OmnidirectionalTrackingLinkStats,
+  SensorBoosterScriptStats,
+  SensorBoosterStats,
+  SensorDampenerScriptStats,
+  SensorDampenerStats,
+  SignalAmplifierStats,
+  SkillBonus,
+  SkillBonusType,
+  StasisGrapplerStats,
+  StasisWebStats,
+  TargetPainterStats,
+  TrackingComputerStats,
+  TrackingDisruptorStats,
+  TurretScriptStats,
+  TurretStats,
+  TurretWeaponGroup,
+  WarpScramblerStats,
+} from "./types";
 import {
-  type ChargeStats,
-  type DisruptionScriptStats,
-  type DroneSizeClass,
-  type DroneStats,
-  type FittingModuleStats,
-  type FittingPropulsionStats,
-  type HullBonus,
-  type HullBonusAttribute,
-  type LauncherStats,
-  type MissileGuidanceComputerStats,
-  type MissileGuidanceEnhancerStats,
-  type MissileScriptStats,
-  type MissileStats,
-  type OmnidirectionalTrackingEnhancerStats,
-  type OmnidirectionalTrackingLinkStats,
-  type SensorBoosterScriptStats,
-  type SensorBoosterStats,
-  type SensorDampenerScriptStats,
-  type SensorDampenerStats,
-  type SignalAmplifierStats,
-  type SkillBonus,
-  type SkillBonusType,
-  type StasisGrapplerStats,
-  type StasisWebStats,
-  type TargetPainterStats,
-  type TrackingComputerStats,
-  type TrackingDisruptorStats,
-  type TurretScriptStats,
-  type TurretStats,
-  type TurretWeaponGroup,
-  type WarpScramblerStats,
   CHARGES,
   COMBAT_DRONES,
   DISRUPTION_SCRIPTS,
@@ -58,7 +60,7 @@ import {
   TRACKING_DISRUPTORS,
   TURRETS,
   WARP_SCRAMBLERS,
-} from "./fittingDb";
+} from "./generated/fittingDb.data";
 
 export type {
   ChargeStats,
@@ -92,42 +94,9 @@ export type {
   TurretStats,
   TurretWeaponGroup,
   WarpScramblerStats,
-} from "./fittingDb";
+} from "./types";
 
-type Row<T> = T & { readonly id: TypeId; readonly name: string };
-type DroneEntry = (typeof DRONES)[string];
-
-export interface FittingDbData {
-  readonly modules: Readonly<Record<string, Row<FittingModuleStats>>>;
-  readonly turrets: Readonly<Record<string, Row<TurretStats>>>;
-  readonly charges: Readonly<Record<string, Row<ChargeStats>>>;
-  readonly launchers: Readonly<Record<string, Row<LauncherStats>>>;
-  readonly missiles: Readonly<Record<string, Row<MissileStats>>>;
-  readonly scripts: Readonly<Record<string, Row<TurretScriptStats>>>;
-  readonly stasisWebs: Readonly<Record<string, Row<StasisWebStats>>>;
-  readonly stasisGrapplers: Readonly<Record<string, Row<StasisGrapplerStats>>>;
-  readonly trackingComputers: Readonly<Record<string, Row<TrackingComputerStats>>>;
-  readonly trackingDisruptors: Readonly<Record<string, Row<TrackingDisruptorStats>>>;
-  readonly warpScramblers: Readonly<Record<string, Row<WarpScramblerStats>>>;
-  readonly disruptionScripts: Readonly<Record<string, Row<DisruptionScriptStats>>>;
-  readonly targetPainters: Readonly<Record<string, Row<TargetPainterStats>>>;
-  readonly missileGuidanceComputers: Readonly<Record<string, Row<MissileGuidanceComputerStats>>>;
-  readonly missileGuidanceEnhancers: Readonly<Record<string, Row<MissileGuidanceEnhancerStats>>>;
-  readonly missileScripts: Readonly<Record<string, Row<MissileScriptStats>>>;
-  readonly omnidirectionalTrackingLinks: Readonly<Record<string, Row<OmnidirectionalTrackingLinkStats>>>;
-  readonly omnidirectionalTrackingEnhancers: Readonly<Record<string, Row<OmnidirectionalTrackingEnhancerStats>>>;
-  readonly sensorDampeners: Readonly<Record<string, Row<SensorDampenerStats>>>;
-  readonly sensorBoosters: Readonly<Record<string, Row<SensorBoosterStats>>>;
-  readonly signalAmplifiers: Readonly<Record<string, Row<SignalAmplifierStats>>>;
-  readonly sensorBoosterScripts: Readonly<Record<string, Row<SensorBoosterScriptStats>>>;
-  readonly sensorDampenerScripts: Readonly<Record<string, Row<SensorDampenerScriptStats>>>;
-  readonly hullBonuses: Readonly<Record<ShipId, readonly HullBonus[]>>;
-  readonly skillBonuses: readonly SkillBonus[];
-  readonly drones: Readonly<Record<string, DroneEntry>>;
-  readonly combatDrones: Readonly<Record<string, Row<DroneStats>>>;
-}
-
-export type FittingDb = FittingDbData;
+export type { FittingDbData, FittingDb } from "./types";
 
 export const FITTING_DB: FittingDbData = {
   modules: FITTING_MODULES,
