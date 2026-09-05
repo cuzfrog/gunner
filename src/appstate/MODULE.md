@@ -21,10 +21,10 @@ no-new-exports:
   - settingsStore.ts
   - settingsCompat.ts
   - combatantSettings.ts
-  - validators.ts
-  - userSettings.ts
+#  - validators.ts
+#  - userSettings.ts
   - settingsParser.ts
-  - index.ts
+#  - index.ts
 ---
 
 

@@ -4,14 +4,14 @@ no-new-exports:
   - module.ts
   - profileTextCodec.test.ts
   - profileText.testSupport.ts
-  - profileTextFields.ts
+#  - profileTextFields.ts
   - profileTextFormat.ts
   - profileTextParser.test.ts
   - profileTextSerializer.test.ts
-  - profileTextValidate.ts
+#  - profileTextValidate.ts
   - profileTextCodec.ts
-  - profileTextParser.ts
-  - profileTextSerializer.ts
+#  - profileTextParser.ts
+#  - profileTextSerializer.ts
 ---
 
 

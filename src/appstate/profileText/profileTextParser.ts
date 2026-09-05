@@ -1,10 +1,10 @@
-import type { ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredDisruptionScript, StoredEwarActivation, StoredMissileBoosterActivation } from "../userSettings";
+import type { ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredDisruptionScript, StoredEwarActivation, StoredMissileBoosterActivation, StoredSensorBoosterActivation } from "../userSettings";
 import type { ChargeCatalog } from "../../fitting";
 import type { ItemNameResolver } from "../../gamedata/itemNames";
 import type { SimValueParser } from "../../sim";
 import type { Ships } from "../../ships";
 import { resolveBoosterScript, resolveDisruptionScript } from "../settingsCompat";
-import { isOptionalBoosterActivations, isOptionalEwarActivation, isOptionalMissileBoosterActivations } from "../validators";
+import { isOptionalBoosterActivations, isOptionalEwarActivation, isOptionalMissileBoosterActivations, isOptionalSensorBoosterActivations } from "../validators";
 import { DOT_KEY_TO_FIELD, OVERRIDE_DOT_KEY_TO_FULL, sideFromFittingDotKey, type ScalarField } from "./profileTextFields";
 import { parseFittedHullSummary, parseOverrideValue, parseScalarValue, profileSettingsFromRaw } from "./profileTextValidate";
 import { PROFILE_TEXT_HEADER, stripCarriageReturn } from "./profileTextFormat";
@@ -48,6 +48,8 @@ export class ProfileTextParser {
     let shipBBoosterActivationRaw: string | undefined;
     let shipAMissileBoosterActivationRaw: string | undefined;
     let shipBMissileBoosterActivationRaw: string | undefined;
+    let shipASensorBoosterActivationRaw: string | undefined;
+    let shipBSensorBoosterActivationRaw: string | undefined;
 
     let i = firstLine + 1;
     while (i < rawLines.length) {
@@ -111,6 +113,14 @@ export class ProfileTextParser {
         shipBMissileBoosterActivationRaw = value;
         continue;
       }
+      if (field === "shipASensorBoosterActivation") {
+        shipASensorBoosterActivationRaw = value;
+        continue;
+      }
+      if (field === "shipBSensorBoosterActivation") {
+        shipBSensorBoosterActivationRaw = value;
+        continue;
+      }
       const parsed = parseScalarValue(field, value, this.simValueParser, this.ships, this.chargeCatalog);
       if (parsed === undefined) {
         if (DEGRADABLE_FIELDS.has(field)) continue;
@@ -138,6 +148,15 @@ export class ProfileTextParser {
     if (shipBMissileBoosterActivationRaw !== undefined) {
       const activation = this.parseMissileBoosterActivation(shipBMissileBoosterActivationRaw);
       if (activation !== undefined) raw = { ...raw, shipBMissileBoosterActivation: activation };
+    }
+
+    if (shipASensorBoosterActivationRaw !== undefined) {
+      const activation = this.parseSensorBoosterActivation(shipASensorBoosterActivationRaw);
+      if (activation !== undefined) raw = { ...raw, shipASensorBoosterActivation: activation };
+    }
+    if (shipBSensorBoosterActivationRaw !== undefined) {
+      const activation = this.parseSensorBoosterActivation(shipBSensorBoosterActivationRaw);
+      if (activation !== undefined) raw = { ...raw, shipBSensorBoosterActivation: activation };
     }
 
     if (shipAEwarActivationRaw !== undefined) {
@@ -216,6 +235,22 @@ export class ProfileTextParser {
     }
   }
 
+  private parseSensorBoosterActivation(raw: string): readonly StoredSensorBoosterActivation[] | undefined {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return undefined;
+      const result: StoredSensorBoosterActivation[] = [];
+      for (const item of parsed) {
+        const row = this.parseSensorBoosterRow(item);
+        if (row === undefined) return undefined;
+        result.push(row);
+      }
+      return isOptionalSensorBoosterActivations(result) ? result : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
   private migrateToggleableArray(value: unknown, sideOverload: boolean): readonly { active: boolean; overloaded: boolean }[] | undefined {
     if (value === undefined) return undefined;
     if (!Array.isArray(value)) return undefined;
@@ -268,6 +303,16 @@ export class ProfileTextParser {
   }
 
   private parseMissileBoosterRow(item: unknown): StoredMissileBoosterActivation | undefined {
+    if (typeof item === "boolean") return { active: item, overloaded: false, script: "none" };
+    if (!isRecord(item)) return undefined;
+    const active = typeof item.active === "boolean" ? item.active : false;
+    const overloaded = typeof item.overloaded === "boolean" ? item.overloaded : false;
+    if (item.script === undefined) return { active, overloaded, script: "none" };
+    if (typeof item.script !== "string") return undefined;
+    return { active, overloaded, script: resolveDisruptionScript(item.script, this.itemNameResolver) };
+  }
+
+  private parseSensorBoosterRow(item: unknown): StoredSensorBoosterActivation | undefined {
     if (typeof item === "boolean") return { active: item, overloaded: false, script: "none" };
     if (!isRecord(item)) return undefined;
     const active = typeof item.active === "boolean" ? item.active : false;

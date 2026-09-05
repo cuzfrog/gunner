@@ -37,6 +37,7 @@ import {
   isFiniteNumber,
   isOptionalFittingText,
   isOptionalMissileBoosterActivations,
+  isOptionalSensorBoosterActivations,
   isOptionalTargetingSkills,
   isOptionalNonEmptyString,
   isOptionalNonNegative,
@@ -233,6 +234,7 @@ export class SettingsParser {
       isOptionalEwarActivation(s[`${p}EwarActivation`]) &&
       isOptionalBoosterActivations(s[`${p}BoosterActivation`]) &&
       isOptionalMissileBoosterActivations(s[`${p}MissileBoosterActivation`]) &&
+      isOptionalSensorBoosterActivations(s[`${p}SensorBoosterActivation`]) &&
       isOptionalRepairMode(s[`${p}RepMode`]) &&
       isOptionalRepairerActivations(s[`${p}RepairerActivation`]) &&
       isOptionalRahActivation(s[`${p}RahActivation`]) &&
@@ -505,6 +507,7 @@ function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSetti
   if (combatant.ewarActivation !== undefined) wire[`${p}EwarActivation` as const] = combatant.ewarActivation;
   if (combatant.boosterActivation !== undefined) wire[`${p}BoosterActivation` as const] = combatant.boosterActivation;
   if (combatant.missileBoosterActivation !== undefined) wire[`${p}MissileBoosterActivation` as const] = combatant.missileBoosterActivation;
+  if (combatant.sensorBoosterActivation !== undefined) wire[`${p}SensorBoosterActivation` as const] = combatant.sensorBoosterActivation;
   if (combatant.repMode !== undefined) wire[`${p}RepMode` as const] = combatant.repMode;
   if (combatant.repairerActivation !== undefined) wire[`${p}RepairerActivation` as const] = combatant.repairerActivation;
   if (combatant.rahActivation !== undefined) wire[`${p}RahActivation` as const] = combatant.rahActivation;
@@ -539,6 +542,7 @@ function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"
     ewarActivation: sideValue(side, settings.shipAEwarActivation, settings.shipBEwarActivation),
     boosterActivation: sideValue(side, settings.shipABoosterActivation, settings.shipBBoosterActivation),
     missileBoosterActivation: sideValue(side, settings.shipAMissileBoosterActivation, settings.shipBMissileBoosterActivation),
+    sensorBoosterActivation: sideValue(side, settings.shipASensorBoosterActivation, settings.shipBSensorBoosterActivation),
     repMode: sideValue(side, settings.shipARepMode, settings.shipBRepMode),
     repairerActivation: sideValue(side, settings.shipARepairerActivation, settings.shipBRepairerActivation),
     rahActivation: sideValue(side, settings.shipARahActivation, settings.shipBRahActivation),

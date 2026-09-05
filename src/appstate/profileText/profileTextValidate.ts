@@ -196,6 +196,7 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
     shipAEwarActivation: raw.shipAEwarActivation,
     shipABoosterActivation: raw.shipABoosterActivation,
     shipAMissileBoosterActivation: raw.shipAMissileBoosterActivation,
+    shipASensorBoosterActivation: raw.shipASensorBoosterActivation,
     shipAAmmo: raw.shipAAmmo,
     shipAWeaponKind: raw.shipAWeaponKind,
     shipAMissileAmmo: raw.shipAMissileAmmo,
@@ -218,6 +219,7 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
     shipBEwarActivation: raw.shipBEwarActivation,
     shipBBoosterActivation: raw.shipBBoosterActivation,
     shipBMissileBoosterActivation: raw.shipBMissileBoosterActivation,
+    shipBSensorBoosterActivation: raw.shipBSensorBoosterActivation,
   };
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(fields)) {

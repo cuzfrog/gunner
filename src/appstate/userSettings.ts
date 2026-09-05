@@ -4,7 +4,7 @@ import type { ShipId, TypeId } from "../gamedata/ids";
 import type { DroneGroup } from "../fitting";
 import type { Language } from "./language";
 
-export const USER_SETTINGS_VERSION = 14 as const;
+export const USER_SETTINGS_VERSION = 15 as const;
 export const PROPULSION_NONE = "none" as const;
 export type TrackingUnit = "rad" | "score";
 export type WeaponRangeVisibility = "shipA" | "shipB" | "both" | "none";
@@ -26,6 +26,12 @@ export interface StoredEwarActivation {
 }
 
 export interface StoredMissileBoosterActivation {
+  readonly active: boolean;
+  readonly overloaded: boolean;
+  readonly script: StoredDisruptionScript;
+}
+
+export interface StoredSensorBoosterActivation {
   readonly active: boolean;
   readonly overloaded: boolean;
   readonly script: StoredDisruptionScript;
@@ -135,6 +141,8 @@ export interface UserSettings {
   shipBBoosterActivation?: readonly StoredBoosterActivation[];
   shipAMissileBoosterActivation?: readonly StoredMissileBoosterActivation[];
   shipBMissileBoosterActivation?: readonly StoredMissileBoosterActivation[];
+  shipASensorBoosterActivation?: readonly StoredSensorBoosterActivation[];
+  shipBSensorBoosterActivation?: readonly StoredSensorBoosterActivation[];
   shipARepMode?: StoredRepairMode;
   shipBRepMode?: StoredRepairMode;
   shipARepairerActivation?: readonly StoredRepairerActivation[];

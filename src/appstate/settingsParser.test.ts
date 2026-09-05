@@ -53,19 +53,19 @@ describe("SettingsParser", () => {
     expect(makeParser().parseUserSettings(JSON.stringify({ ...DEFAULT_SETTINGS, version: 4 }))).toBeNull();
   });
 
-  test("parseUserSettings accepts version 5 through 10 and stamps 12", () => {
+  test("parseUserSettings accepts version 5 through 10 and stamps 15", () => {
     const v5 = { ...DEFAULT_SETTINGS, version: 5 };
     const v6 = { ...DEFAULT_SETTINGS, version: 6 };
     const v7 = { ...DEFAULT_SETTINGS, version: 7 };
     const v8 = { ...DEFAULT_SETTINGS, version: 8 };
     const v9 = { ...DEFAULT_SETTINGS, version: 9 };
     const v10 = { ...DEFAULT_SETTINGS, version: 10 };
-    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(14);
-    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(14);
-    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(14);
-    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(14);
-    expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(14);
-    expect(makeParser().parseUserSettings(JSON.stringify(v10))?.version).toBe(14);
+    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(15);
+    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(15);
+    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(15);
+    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(15);
+    expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(15);
+    expect(makeParser().parseUserSettings(JSON.stringify(v10))?.version).toBe(15);
   });
 
   test("parseUserSettings defaults missing shipAAmmo", () => {
@@ -184,7 +184,7 @@ describe("SettingsParser", () => {
   test("parseUserSettings parses missile booster activation with script and overload", () => {
     const v13 = {
       ...DEFAULT_SETTINGS,
-      version: 14,
+      version: 15,
       shipAMissileBoosterActivation: [{ active: true, overloaded: true, script: "Missile Precision Script" }, { active: false, overloaded: false, script: "none" }],
       shipBMissileBoosterActivation: [{ active: true, overloaded: false, script: "Missile Range Script" }],
     };
@@ -204,7 +204,7 @@ describe("SettingsParser", () => {
   test("parseUserSettings defaults missing overloaded field to false in missile booster entries", () => {
     const v13 = {
       ...DEFAULT_SETTINGS,
-      version: 14,
+      version: 15,
       shipAMissileBoosterActivation: [{ active: true, script: "Missile Precision Script" }],
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(v13));
@@ -785,12 +785,12 @@ describe("SettingsParser", () => {
     expect(session.shipB.weaponKind).toBeUndefined();
   });
 
-  test("version 12 settings migrate to version 14", () => {
+  test("version 12 settings migrate to version 15", () => {
     const parser = makeParser();
     const v12 = JSON.stringify({ ...DEFAULT_SETTINGS, version: 12 });
     const parsed = parser.parseUserSettings(v12);
     expect(parsed).not.toBeNull();
-    expect(parsed!.version).toBe(14);
+    expect(parsed!.version).toBe(15);
     expect(parsed!.shipA.weaponKind).toBeUndefined();
   });
 

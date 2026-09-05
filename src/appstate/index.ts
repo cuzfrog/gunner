@@ -11,6 +11,7 @@ export type {
   StoredEwarActivation,
   StoredMissileBoosterActivation,
   StoredRahActivation,
+  StoredSensorBoosterActivation,
   StoredRepairMode,
   StoredRepairerActivation,
   TrackingUnit,
