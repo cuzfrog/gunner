@@ -35,9 +35,11 @@ const ALLOWED_ORPHAN = new Set<string>([
   "side-panel-ship-b",
   "popup-below",
   "popup-above",
-  // ScriptSection builds placement class dynamically via class=${classAttr}.
+  // ScriptSection builds placement and popup class names dynamically via class=${classAttr}.
   "script-popup-alongside-end",
   "script-popup-alongside-start",
+  "ewar-script-popup",
+  "ewar-script-popup-label",
 ]);
 
 // Approved component / primitive prefixes. A class is valid if it equals one of these or starts with `<prefix>-`.
