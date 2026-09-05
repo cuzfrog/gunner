@@ -4,6 +4,7 @@ import type {
   DefenseSimulator,
   DroneApplication,
   DroneSimulator,
+  EngagementEngine,
   EwarResolver,
   EngagementEvaluator,
   EngagementFrameComposer,
@@ -49,5 +50,6 @@ export interface SimCradle {
   readonly rngFactory: RngFactory;
   readonly weaponClock: WeaponClock;
   readonly lockClock: LockClock;
+  readonly engagementEngine: EngagementEngine;
   readonly simConfig: SimConfig;
 }
