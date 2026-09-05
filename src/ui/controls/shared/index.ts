@@ -6,3 +6,4 @@ export { createPopup, type PopupConfig } from "./createPopup";
 export { spriteIcon, spriteIconStroked } from "./spriteIcon";
 export { VariantSection, type VariantItem, type VariantSectionConfig } from "./variantSection";
 export { PopupField, type PopupFieldEls, type PopupFieldConfig } from "./popupField";
+export { ScriptSection, type ScriptOption, type ScriptGearOptions, type ScriptSectionConfig } from "./scriptSection";
