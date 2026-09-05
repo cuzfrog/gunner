@@ -1,7 +1,7 @@
 import { join } from "path";
 import type { PropulsionModule, ShipNameLanguage, ShipProfile, Ships, StatConditions } from "../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
-import type { DisruptionScriptSpec, StackingPenalty } from "../sim";
+import { StackingPenaltyImpl, type DisruptionScriptSpec } from "../sim";
 import { damageVectorSum } from "../sim";
 import { ChargeCatalogImpl } from "./chargeCatalog";
 import { DroneCatalogImpl } from "./droneCatalog";
@@ -64,26 +64,7 @@ const TRACKING_SPEED_SCRIPT: DisruptionScriptSpec = {
 };
 const DISRUPTION_SCRIPT_CATALOG: readonly DisruptionScriptSpec[] = [OPTIMAL_RANGE_SCRIPT, TRACKING_SPEED_SCRIPT];
 
-class TestStackingPenalty implements StackingPenalty {
-  // Mirrors the sim StackingPenaltyImpl so fitting tests can assert expected
-  // multipliers without instantiating the full sim module. Keep in sync.
-  apply(multipliers: readonly number[]): number {
-    const values = multipliers.filter((value) => value !== 1);
-    const positive = values.filter((value) => value > 1).sort((a, b) => Math.abs(b - 1) - Math.abs(a - 1));
-    const negative = values.filter((value) => value < 1).sort((a, b) => Math.abs(b - 1) - Math.abs(a - 1));
-
-    let product = 1;
-    for (const list of [positive, negative]) {
-      for (let i = 0; i < list.length; i++) {
-        const bonus = list[i];
-        product *= 1 + (bonus - 1) * Math.exp(-(i * i) / 7.1289);
-      }
-    }
-    return product;
-  }
-}
-
-const stackingPenalty = new TestStackingPenalty();
+const stackingPenalty = new StackingPenaltyImpl();
 
 class TestItemNames implements ItemNameCatalog {
   nameForId(id: TypeId, language: ShipNameLanguage): string {
@@ -438,11 +419,6 @@ const conditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOve
 
 const skillConditions: StatConditions = { skillLevel: 4, overloaded: false, weaponOverloaded: false };
 
-function stackingPenaltyForTwo(first: number, second: number): number {
-  const penalty = Math.exp(-1 / 7.1289);
-  return first * (1 + (second - 1) * penalty);
-}
-
 describe("FittingImportImpl", () => {
   beforeEach(() => {
     ships.findHullByName.mockReturnValue(profile);
@@ -492,9 +468,7 @@ describe("FittingImportImpl", () => {
       `[Harbinger, Agile]\nInertial Stabilizers II\nNanofiber Internal Structure II`,
       conditions,
     );
-    const first = 0.8;
-    const second = 0.8425;
-    const expected = stackingPenaltyForTwo(first, second);
+    const expected = stackingPenalty.apply([0.8, 0.8425]);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(expected, 6);
   });
 
@@ -504,9 +478,7 @@ describe("FittingImportImpl", () => {
       `[Harbinger, Siggy]\nInertial Stabilizers II\nInertial Stabilizers II`,
       conditions,
     );
-    const first = 1.11;
-    const second = 1.11;
-    const expected = stackingPenaltyForTwo(first, second);
+    const expected = stackingPenalty.apply([1.11, 1.11]);
     expect(result!.fitted.sigMultiplier).toBeCloseTo(expected, 6);
   });
 

@@ -140,13 +140,23 @@ describe("DefenseSimulatorImpl", () => {
   test("shield regen peak is at 25% shield capacity", () => {
     const max = 1000;
     const rechargeTime = 100;
-    const peakRate = shieldRegenRateAt(max, rechargeTime, 0.25);
-    const rateAt50 = shieldRegenRateAt(max, rechargeTime, 0.50);
-    const rateAt10 = shieldRegenRateAt(max, rechargeTime, 0.10);
-    expect(peakRate).toBeGreaterThan(rateAt50);
-    expect(peakRate).toBeGreaterThan(rateAt10);
-    // Peak regen = 2.5 * max / rechargeTime
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: max, shieldRechargeTime: rechargeTime, shieldResists: { em: 0 } })));
+
+    sim.step(1, events({ em: 750, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(250);
+    const peakRate = sim.view().shieldRegenPerSecond.shipA;
     expect(peakRate).toBeCloseTo(2.5 * max / rechargeTime, 5);
+
+    sim.reset(config(spec({ shieldHp: max, shieldRechargeTime: rechargeTime, shieldResists: { em: 0 } })));
+    sim.step(1, events({ em: 500, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    const rateAt50 = sim.view().shieldRegenPerSecond.shipA;
+    expect(peakRate).toBeGreaterThan(rateAt50);
+
+    sim.reset(config(spec({ shieldHp: max, shieldRechargeTime: rechargeTime, shieldResists: { em: 0 } })));
+    sim.step(1, events({ em: 900, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    const rateAt10 = sim.view().shieldRegenPerSecond.shipA;
+    expect(peakRate).toBeGreaterThan(rateAt10);
   });
 
   test("death stops sim: hull reaches 0, dead flag set, deadAt recorded", () => {
@@ -685,8 +695,3 @@ describe("DefenseSimulatorImpl", () => {
     expect(sim.view().pools.shipA.armor).toBeLessThan(1000);
   });
 });
-
-function shieldRegenRateAt(max: number, rechargeTime: number, ratio: number): number {
-  const sqrtRatio = Math.sqrt(ratio);
-  return (10 * max / rechargeTime) * sqrtRatio * (1 - sqrtRatio);
-}

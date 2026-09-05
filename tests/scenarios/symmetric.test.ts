@@ -7,7 +7,7 @@ import { KinematicsImpl } from "../../src/sim/kinematics";
 import { MissileApplicationImpl } from "../../src/sim/missileApplication";
 import { DroneApplicationImpl } from "../../src/sim/droneApplication";
 import { MissileBoosterResolverImpl } from "../../src/sim/missileBoosterResolver";
-import { StackingPenaltyImpl } from "../../src/sim/stackingPenalty";
+import { StackingPenaltyImpl } from "../../src/sim";
 import { WeaponDamageAssessorImpl } from "../../src/sim/weaponDamageAssessor";
 import { Vec2 } from "../../src/sim/vec2";
 import { toTypeId } from "../../src/gamedata/ids";

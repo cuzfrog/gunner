@@ -12,7 +12,7 @@ import { FITTING_DB } from "../../src/gamedata/fittingDb";
 import { StaticShipProfileCatalog } from "../../src/gamedata/shipProfiles";
 import { StaticNameI18nCatalog } from "../../src/gamedata/nameI18n";
 import { ShipsImpl } from "../../src/ships/ships";
-import { StackingPenaltyImpl } from "../../src/sim/stackingPenalty";
+import { StackingPenaltyImpl } from "../../src/sim";
 import { EngagementEvaluatorImpl } from "../../src/sim/fireControl";
 import { EngagementFrameComposerImpl } from "../../src/sim/engagementFrameComposer";
 import { DefenseAssessorImpl } from "../../src/sim/defenseAssessment";

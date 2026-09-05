@@ -1,24 +1,9 @@
 import { type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import { FITTING_DB, type HullBonus, type DefenseModuleStats } from "../gamedata/fittingDb";
 import { type DefenseSkills, type ShipProfile, type SkillLevel, defaultDefenseSkills } from "../ships";
-import type { StackingPenalty } from "../sim";
+import { StackingPenaltyImpl } from "../sim";
 import { FittingStateFactory, type CargoEntry, type FittingModuleEntry } from "./fittingState";
 import { DefenseCalculatorImpl } from "./defenseCalculator";
-
-class TestStackingPenalty implements StackingPenalty {
-  apply(multipliers: readonly number[]): number {
-    const values = multipliers.filter((value) => value !== 1);
-    const positive = values.filter((value) => value > 1).sort((a, b) => Math.abs(b - 1) - Math.abs(a - 1));
-    const negative = values.filter((value) => value < 1).sort((a, b) => Math.abs(b - 1) - Math.abs(a - 1));
-    let product = 1;
-    for (const list of [positive, negative]) {
-      for (let i = 0; i < list.length; i++) {
-        product *= 1 + (list[i] - 1) * Math.exp(-(i * i) / 7.1289);
-      }
-    }
-    return product;
-  }
-}
 
 const profile: ShipProfile = {
   id: "24692" as ShipId,
@@ -46,7 +31,7 @@ const profile: ShipProfile = {
 
 const hullBonuses: readonly HullBonus[] = FITTING_DB.hullBonuses[profile.id] ?? [];
 const factory = new FittingStateFactory(FITTING_DB);
-const calculator = new DefenseCalculatorImpl({ fittingDb: FITTING_DB, stackingPenalty: new TestStackingPenalty() });
+const calculator = new DefenseCalculatorImpl({ fittingDb: FITTING_DB, stackingPenalty: new StackingPenaltyImpl() });
 
 const conditions = { skillLevel: 5 as const, overloaded: false, weaponOverloaded: false };
 
@@ -352,7 +337,7 @@ function resolveWithCustomDefense(defenseModules: readonly { id: string; defense
   for (const { id, defense } of defenseModules) defenseMap[id] = defense;
   const db = mockModuleDb(defenseMap);
   const factory = new FittingStateFactory(db);
-  const calc = new DefenseCalculatorImpl({ fittingDb: db, stackingPenalty: new TestStackingPenalty() });
+  const calc = new DefenseCalculatorImpl({ fittingDb: db, stackingPenalty: new StackingPenaltyImpl() });
   const entries: FittingModuleEntry[] = defenseModules.map(({ id }) => ({ moduleId: id as TypeId, offline: false }));
   const state = factory.create(profile, hullBonuses, entries, [], [] as readonly CargoEntry[]);
   return calc.resolve(state, conditions);
@@ -363,7 +348,7 @@ function resolveMixedDefense(namedModules: readonly string[], defenseModules: re
   for (const { id, defense } of defenseModules) defenseMap[id] = defense;
   const db = mockModuleDb(defenseMap);
   const factory = new FittingStateFactory(db);
-  const calc = new DefenseCalculatorImpl({ fittingDb: db, stackingPenalty: new TestStackingPenalty() });
+  const calc = new DefenseCalculatorImpl({ fittingDb: db, stackingPenalty: new StackingPenaltyImpl() });
   const entries: FittingModuleEntry[] = [
     ...namedModules.map((name) => moduleEntry(name)),
     ...defenseModules.map(({ id }) => ({ moduleId: id as TypeId, offline: false })),
@@ -399,7 +384,7 @@ describe("DefenseCalculatorImpl - hpPercent modules", () => {
 
   test("two shield hpPercent rigs are stacking-penalized", () => {
     const base = resolve([]);
-    const stacking = new TestStackingPenalty();
+    const stacking = new StackingPenaltyImpl();
     const expectedMultiplier = stacking.apply([1.15, 1.15]);
     const withTwoRigs = resolveWithCustomDefense([
       { id: "test-hpPercent-shield-1", defense: { kind: "hpPercent", layer: "shield", hpPercent: 15 } },

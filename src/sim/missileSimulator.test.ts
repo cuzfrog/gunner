@@ -446,9 +446,11 @@ describe("MissileSimulatorImpl", () => {
     sim.step(0.1, frame(new Vec2(0, 0), targetPos), launches);
     const overshootVelocity = new Vec2(0, 1000);
     const lowMaxSpeed = 100;
+    let impactFound = false;
     for (let i = 0; i < 100; i++) {
       const events = sim.step(0.1, frame(new Vec2(0, 0), targetPos, new Vec2(0, 0), overshootVelocity, 0, lowMaxSpeed), { shipA: [], shipB: [] });
       if (events.length > 0) {
+        impactFound = true;
         const impactCall = computeSpy.mock.calls.find((c) => c[1] === overshootVelocity.len());
         expect(impactCall).toBeDefined();
         expect(impactCall![1]).toBeCloseTo(1000, 6);
@@ -456,5 +458,6 @@ describe("MissileSimulatorImpl", () => {
         break;
       }
     }
+    expect(impactFound, "expected at least one impact event within 100 steps").toBe(true);
   });
 });

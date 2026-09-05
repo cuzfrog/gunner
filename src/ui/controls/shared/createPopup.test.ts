@@ -56,7 +56,7 @@ describe("createPopup", () => {
       isOpen: () => false,
     });
     popup.focusTrigger();
-    expect((triggerEl as unknown as FakeElement).textContent).toBe("");
+    expect((triggerEl as unknown as FakeElement).focus).toHaveBeenCalled();
   });
 
   test("contains returns true for child of fieldEl", () => {

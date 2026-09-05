@@ -20,6 +20,7 @@ export type { MissileSimulator } from "./missileSimulator";
 export type { Rng, RngFactory } from "./rng";
 export type { WeaponDamageAssessor } from "./weaponDamageAssessor";
 export type { WeaponClock } from "./weaponClock";
+export { StackingPenaltyImpl } from "./stackingPenalty";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
   AppliedEwarEffect,
