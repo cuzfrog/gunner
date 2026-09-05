@@ -55,11 +55,12 @@ no-new-exports:
   - weaponDamageAssessor.test.ts
   - module.ts
   - defenseSimulator.test.ts
-  - defenseSimulator.ts
   - types.ts
   - defenseAssessment.test.ts
   - types.test.ts
 ---
+
+Gate relaxed: `defenseSimulator.ts` was removed from `no-new-exports` to add `DamageProjection`, `LayerHpLoss`, and the `project` method to `DefenseSimulator`. These types are cross-boundary DTOs consumed by `app` and `ui` for the layer-aware actual DPS projection.
 
 
 

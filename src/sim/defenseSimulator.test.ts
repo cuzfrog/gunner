@@ -694,4 +694,90 @@ describe("DefenseSimulatorImpl", () => {
     expect(sim.view().pools.shipA.shield).toBe(0);
     expect(sim.view().pools.shipA.armor).toBeLessThan(1000);
   });
+
+  test("project: full HP, 0% resists, 100 EM DPS for 1s => 100 shield lost, 0 armor, 0 hull", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, hullResists: { em: 0 } })));
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.totalHpLost).toBe(100);
+    expect(projection.shipA.byLayer.shield).toBe(100);
+    expect(projection.shipA.byLayer.armor).toBe(0);
+    expect(projection.shipA.byLayer.hull).toBe(0);
+  });
+
+  test("project: does not mutate live state", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 } })));
+    const before = sim.view().pools.shipA;
+    sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    const after = sim.view().pools.shipA;
+    expect(after).toEqual(before);
+  });
+
+  test("project: nearly depleted shield splits damage across shield and armor", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
+    sim.step(1, events({ em: 985, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(15);
+    const projection = sim.project({ shipA: { em: 200, thermal: 0, kinetic: 0, explosive: 0 }, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.byLayer.shield).toBe(12);
+    expect(projection.shipA.byLayer.armor).toBe(188);
+    expect(projection.shipA.totalHpLost).toBe(200);
+  });
+
+  test("project: 50% shield resist halves shield damage", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 } })));
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.byLayer.shield).toBe(50);
+    expect(projection.shipA.totalHpLost).toBe(50);
+  });
+
+  test("project: dead ship loses no HP", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 0, hullHp: 100, hullResists: { em: 0 } })));
+    sim.step(1, events({ em: 200, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().dead.shipA).toBe(true);
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.totalHpLost).toBe(0);
+  });
+
+  test("project: damage disabled refills pools, no HP lost", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000 }), spec(), { shipA: false, shipB: true }));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.totalHpLost).toBe(0);
+  });
+
+  test("project: zero incoming => zero HP lost", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000 })));
+    const projection = sim.project({ shipA: ZERO_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.totalHpLost).toBe(0);
+    expect(projection.shipB.totalHpLost).toBe(0);
+  });
+
+  test("project: both sides receive damage independently", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, shieldResists: { em: 0 } }), spec({ shieldHp: 500, shieldResists: { em: 0 } })));
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: { em: 200, thermal: 0, kinetic: 0, explosive: 0 } }, 1);
+    expect(projection.shipA.byLayer.shield).toBe(100);
+    expect(projection.shipB.byLayer.shield).toBe(200);
+  });
+
+  test("project: shield regen reduces net HP lost", () => {
+    const withRegenSim = new DefenseSimulatorImpl();
+    withRegenSim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, shieldRechargeTime: 1000 })));
+    withRegenSim.step(1, events({ em: 500, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    const shieldBefore = withRegenSim.view().pools.shipA.shield;
+    const withRegen = withRegenSim.project({ shipA: { em: 50, thermal: 0, kinetic: 0, explosive: 0 }, shipB: ZERO_DAMAGE }, 1);
+    const withoutRegenSim = new DefenseSimulatorImpl();
+    withoutRegenSim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, shieldRechargeTime: 0 })));
+    withoutRegenSim.step(1, events({ em: 500, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    const withoutRegen = withoutRegenSim.project({ shipA: { em: 50, thermal: 0, kinetic: 0, explosive: 0 }, shipB: ZERO_DAMAGE }, 1);
+    expect(withRegen.shipA.byLayer.shield).toBeLessThan(withoutRegen.shipA.byLayer.shield);
+    expect(withRegen.shipA.byLayer.shield).toBeGreaterThan(0);
+    expect(withRegenSim.view().pools.shipA.shield).toBe(shieldBefore);
+  });
 });

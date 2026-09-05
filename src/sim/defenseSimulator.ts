@@ -1,4 +1,4 @@
-import { type DamageEvent, type DamageResists, type DamageType, type DefenseLayer, type DefenseSpec, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS } from "./types";
+import { type DamageEvent, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS, damageVectorScale } from "./types";
 
 export type RepairMode = "auto" | "manual";
 
@@ -67,6 +67,18 @@ export interface DefenseSimulator {
   setRepairMode(side: Side, mode: RepairMode): void;
   setRepairerActivation(side: Side, index: number, active: boolean, overloaded: boolean): void;
   setRahActivation(side: Side, active: boolean, overloaded: boolean): void;
+  project(incomingByTarget: Record<Side, DamageVector>, horizonSeconds: number): Record<Side, DamageProjection>;
+}
+
+export interface LayerHpLoss {
+  readonly shield: number;
+  readonly armor: number;
+  readonly hull: number;
+}
+
+export interface DamageProjection {
+  readonly totalHpLost: number;
+  readonly byLayer: LayerHpLoss;
 }
 
 const RAH_TOTAL_BUDGET = 0.6;
@@ -209,6 +221,28 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     rah.overloaded = overloaded;
   }
 
+  project(incomingByTarget: Record<Side, DamageVector>, horizonSeconds: number): Record<Side, DamageProjection> {
+    const cloneA = clonePools(this.sides.shipA);
+    const cloneB = clonePools(this.sides.shipB);
+    const beforeA: DefensePoolState = { shield: cloneA.shield, armor: cloneA.armor, hull: cloneA.hull };
+    const beforeB: DefensePoolState = { shield: cloneB.shield, armor: cloneB.armor, hull: cloneB.hull };
+    const events: DamageEvent[] = [];
+    const incomingA = incomingByTarget.shipA;
+    if (incomingA.em > 0 || incomingA.thermal > 0 || incomingA.kinetic > 0 || incomingA.explosive > 0) {
+      events.push({ target: "shipA", source: "shipB", weaponIndex: 0, kind: "turret", rawByType: damageVectorScale(incomingA, horizonSeconds) });
+    }
+    const incomingB = incomingByTarget.shipB;
+    if (incomingB.em > 0 || incomingB.thermal > 0 || incomingB.kinetic > 0 || incomingB.explosive > 0) {
+      events.push({ target: "shipB", source: "shipA", weaponIndex: 0, kind: "turret", rawByType: damageVectorScale(incomingB, horizonSeconds) });
+    }
+    const projectionSides: Record<Side, SidePools> = { shipA: cloneA, shipB: cloneB };
+    stepProjection(projectionSides, horizonSeconds, events, this.time);
+    return {
+      shipA: hpLossProjection(beforeA, cloneA),
+      shipB: hpLossProjection(beforeB, cloneB),
+    };
+  }
+
   private collectReleasedEvents(): Record<Side, readonly DamageEvent[]> {
     const shipAEvents: DamageEvent[] = [];
     const shipBEvents: DamageEvent[] = [];
@@ -226,25 +260,65 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
   }
 
   private stepSide(side: Side, dt: number, events: readonly DamageEvent[]): void {
-    const pools = this.sides[side];
-    if (pools.dead) return;
-    if (!pools.damageEnabled) {
-      pools.shield = pools.shieldMax;
-      pools.armor = pools.armorMax;
-      pools.hull = pools.hullMax;
-      return;
-    }
-    updateRahResists(pools);
-    applyShieldRegen(pools, dt);
-    const armorDamageByType = applyEvents(pools, events);
-    stepRepairers(pools, dt);
-    stepRah(pools, dt, armorDamageByType);
-    if (pools.hullMax > 0 && pools.hull <= 0) {
-      pools.hull = 0;
-      pools.dead = true;
-      pools.deadAt = this.time;
-    }
+    stepSidePools(this.sides[side], dt, events, this.time);
   }
+}
+
+function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEvent[], time: number): void {
+  if (pools.dead) return;
+  if (!pools.damageEnabled) {
+    pools.shield = pools.shieldMax;
+    pools.armor = pools.armorMax;
+    pools.hull = pools.hullMax;
+    return;
+  }
+  updateRahResists(pools);
+  applyShieldRegen(pools, dt);
+  const armorDamageByType = applyEvents(pools, events);
+  stepRepairers(pools, dt);
+  stepRah(pools, dt, armorDamageByType);
+  if (pools.hullMax > 0 && pools.hull <= 0) {
+    pools.hull = 0;
+    pools.dead = true;
+    pools.deadAt = time;
+  }
+}
+
+function clonePools(pools: SidePools): SidePools {
+  return {
+    shield: pools.shield,
+    armor: pools.armor,
+    hull: pools.hull,
+    shieldMax: pools.shieldMax,
+    armorMax: pools.armorMax,
+    hullMax: pools.hullMax,
+    shieldRechargeTime: pools.shieldRechargeTime,
+    shieldUniformity: pools.shieldUniformity,
+    baseArmorResists: pools.baseArmorResists,
+    resists: { shield: pools.resists.shield, armor: pools.resists.armor, hull: pools.resists.hull },
+    dead: pools.dead,
+    deadAt: pools.deadAt,
+    damageEnabled: pools.damageEnabled,
+    repairers: pools.repairers,
+    repairerStates: pools.repairerStates.map((s) => ({ ...s })),
+    repairMode: pools.repairMode,
+    rahSpec: pools.rahSpec,
+    rahState: pools.rahState ? { ...pools.rahState, resists: { ...pools.rahState.resists }, armorDamageAccumulator: { ...pools.rahState.armorDamageAccumulator } } : undefined,
+  };
+}
+
+function hpLossProjection(before: DefensePoolState, after: SidePools): DamageProjection {
+  const shieldLost = Math.max(0, before.shield - after.shield);
+  const armorLost = Math.max(0, before.armor - after.armor);
+  const hullLost = Math.max(0, before.hull - after.hull);
+  return { totalHpLost: shieldLost + armorLost + hullLost, byLayer: { shield: shieldLost, armor: armorLost, hull: hullLost } };
+}
+
+function stepProjection(sides: Record<Side, SidePools>, dt: number, events: readonly DamageEvent[], time: number): void {
+  const shipAEvents = events.filter((e) => e.target === "shipA");
+  const shipBEvents = events.filter((e) => e.target === "shipB");
+  stepSidePools(sides.shipA, dt, shipAEvents, time);
+  stepSidePools(sides.shipB, dt, shipBEvents, time);
 }
 
 function emptyPools(): SidePools {

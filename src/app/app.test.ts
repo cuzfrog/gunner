@@ -8,6 +8,8 @@ import {
   type DisruptionBreakdown,
   type DefenseSimulator,
   type DefenseView,
+  type DamageProjection,
+  type DamageVector,
   type DroneSimulator,
   type DroneSpec,
   type EngagementFrame,
@@ -72,7 +74,11 @@ const emptyDefenseView: DefenseView = {
   repairMode: { shipA: "auto", shipB: "auto" },
   rah: { shipA: undefined, shipB: undefined },
 };
-const defenseSimulator = vi.mocked<DefenseSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(() => emptyDefenseView), setDamageEnabled: vi.fn(), setRepairMode: vi.fn(), setRepairerActivation: vi.fn(), setRahActivation: vi.fn() });
+const emptyProjection: Record<"shipA" | "shipB", DamageProjection> = {
+  shipA: { totalHpLost: 0, byLayer: { shield: 0, armor: 0, hull: 0 } },
+  shipB: { totalHpLost: 0, byLayer: { shield: 0, armor: 0, hull: 0 } },
+};
+const defenseSimulator = vi.mocked<DefenseSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(() => emptyDefenseView), setDamageEnabled: vi.fn(), setRepairMode: vi.fn(), setRepairerActivation: vi.fn(), setRahActivation: vi.fn(), project: vi.fn(() => emptyProjection) });
 const weaponClock = vi.mocked<WeaponClock>({ reset: vi.fn(), step: vi.fn(() => []) });
 const sensorBoosterResolver = vi.mocked<SensorBoosterResolver>({ boostedSensorSpec: vi.fn((spec) => spec) });
 const lockClock = vi.mocked<LockClock>({ reset: vi.fn(), step: vi.fn(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), states: vi.fn(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })) });
