@@ -5,7 +5,7 @@ import type { Kinematics } from "./kinematics";
 import type { AttackAssessment } from "./fireControl";
 import type { DefenseAssessor } from "./defenseAssessment";
 import { DefenseAssessorImpl } from "./defenseAssessment";
-import { type DefenseSpec, type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec, EMPTY_DEFENSE_SPEC, ZERO_DAMAGE, damageVectorAdd } from "./types";
+import { type DefenseSpec, type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec, EMPTY_DEFENSE_SPEC, EMPTY_PROJECTION, ZERO_DAMAGE, damageVectorAdd } from "./types";
 
 const shipATurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const shipBTurret: TurretSpec = { kind: "turret", tracking: 0.28, sigResolution: 125, optimal: 8000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
@@ -89,6 +89,7 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.frame).toBe(frame);
     expect(view.attacks.shipA).toEqual(shipAAssessment);
     expect(view.attacks.shipB).toEqual(shipBAssessment);
+    expect(view.projection).toEqual({ shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION });
     expect(view.effectiveWeapons.shipA).toBe(effectiveTurret);
     expect(view.effectiveWeapons.shipB).toBe(shipBEffectiveTurret);
     expect(view.weaponAttacks.shipA).toHaveLength(1);
@@ -154,6 +155,7 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.weaponAttacks.shipA[1].weapon).toBe(secondTurret);
     expect(view.weaponAttacks.shipA[1].assessment).toEqual(secondAssessment);
     expect(view.weaponAttacks.shipB).toHaveLength(0);
+    expect(view.projection).toEqual({ shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION });
   });
 
   test("combined damage.appliedByType is the component-wise sum of the two input vectors", () => {

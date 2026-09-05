@@ -11,8 +11,7 @@ export type { LockClock, LockStepInput } from "./lockClock";
 export type { EngagementFrameComposer, EngagementInput, EngagementView, WeaponAttack } from "./engagementFrameComposer";
 export type { DefenseAssessor, DefenseAssessment, LayerEhp } from "./defenseAssessment";
 export { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
-export type { DefenseSimulator, DefenseView, DefensePoolState, DefenseSimConfig, RepairerViewState, RahViewState, RepairMode, DamageProjection } from "./defenseSimulator";
-export { EMPTY_PROJECTION } from "./defenseSimulator";
+export type { DefenseSimulator, DefenseView, DefensePoolState, DefenseSimConfig, RepairerViewState, RahViewState, RepairMode } from "./defenseSimulator";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { MissileApplication } from "./missileApplication";
 export type { DroneApplication } from "./droneApplication";
@@ -32,6 +31,7 @@ export type {
   CombatantConfig,
   DamageAssessment,
   DamageEvent,
+  DamageProjection,
   DamageResists,
   DamageType,
   DamageVector,
@@ -109,7 +109,7 @@ export type {
   WeaponKind,
   WeaponSpec,
 } from "./types";
-export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, DAMAGE_TYPES, DEFENSE_LAYERS, EMPTY_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, IDLE_LOCK, SIG_RESOLUTIONS, ZERO_DAMAGE, ZERO_RESISTS, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum } from "./types";
+export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, DAMAGE_TYPES, DEFENSE_LAYERS, EMPTY_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_PROJECTION, EMPTY_SENSOR_BOOST_LOADOUT, IDLE_LOCK, SIG_RESOLUTIONS, ZERO_DAMAGE, ZERO_RESISTS, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum } from "./types";
 export type { SimValueParser } from "./simValueParser";
 export { Vec2 } from "./vec2";
 export type { SimCradle } from "./cradle";

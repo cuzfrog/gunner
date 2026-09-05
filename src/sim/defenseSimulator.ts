@@ -1,4 +1,4 @@
-import { type DamageEvent, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type LayerHpLoss, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS, damageVectorScale } from "./types";
+import { type DamageEvent, type DamageProjection, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type LayerHpLoss, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS, damageVectorScale } from "./types";
 
 export type RepairMode = "auto" | "manual";
 
@@ -69,13 +69,6 @@ export interface DefenseSimulator {
   setRahActivation(side: Side, active: boolean, overloaded: boolean): void;
   project(incomingByTarget: Record<Side, DamageVector>, horizonSeconds: number): Record<Side, DamageProjection>;
 }
-
-export interface DamageProjection {
-  readonly totalHpLost: number;
-  readonly byLayer: LayerHpLoss;
-}
-
-export const EMPTY_PROJECTION: DamageProjection = { totalHpLost: 0, byLayer: { shield: 0, armor: 0, hull: 0 } };
 
 const RAH_TOTAL_BUDGET = 0.6;
 

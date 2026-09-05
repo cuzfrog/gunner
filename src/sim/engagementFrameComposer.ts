@@ -1,9 +1,7 @@
 import type { AttackAssessment, AttackState, EngagementEvaluator } from "./fireControl";
 import type { Kinematics } from "./kinematics";
 import type { DefenseAssessor, DefenseAssessment } from "./defenseAssessment";
-import type { DamageProjection } from "./defenseSimulator";
-import { EMPTY_PROJECTION } from "./defenseSimulator";
-import { type DamageAssessment, type DefenseSpec, type DroneRuntimeState, type EngagementFrame, type LockState, type MissileAttackFacts, type Side, type SimSnapshot, type WeaponSpec, ZERO_DAMAGE, damageVectorAdd, IDLE_LOCK } from "./types";
+import { type DamageAssessment, type DamageProjection, type DefenseSpec, type DroneRuntimeState, type EngagementFrame, type LockState, type MissileAttackFacts, type Side, type SimSnapshot, type WeaponSpec, EMPTY_PROJECTION, ZERO_DAMAGE, damageVectorAdd, IDLE_LOCK } from "./types";
 export interface EngagementInput {
   readonly weapons: Record<Side, readonly WeaponSpec[]>;
   readonly sigRadii: Record<Side, number>;
