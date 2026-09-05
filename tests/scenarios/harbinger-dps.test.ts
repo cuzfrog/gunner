@@ -75,6 +75,8 @@ const noEwarResolver: EwarResolver = {
   dampenedSensorSpec: (spec) => spec,
   dampenedSensorSpecIgnoringRange: (spec) => spec,
   dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+  reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+  potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
 };
 
 const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };

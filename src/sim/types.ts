@@ -490,6 +490,26 @@ export interface EwarProjection {
   readonly activation?: EwarActivation;
 }
 
+export interface EwarReach {
+  readonly web: number;
+  readonly grappler: number;
+  readonly scrambler: number;
+  readonly disruptor: number;
+  readonly painter: number;
+  readonly dampener: number;
+}
+
+export interface EwarEffectPotentials {
+  readonly speedMultiplier: number;
+  readonly sigMultiplier: number;
+  readonly propulsionSuppressed: boolean;
+  readonly trackingMultiplier: number;
+  readonly optimalMultiplier: number;
+  readonly falloffMultiplier: number;
+  readonly scanResolutionMultiplier: number;
+  readonly targetingRangeMultiplier: number;
+}
+
 export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener";
 
 export interface AppliedEwarEffect {

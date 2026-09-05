@@ -1,6 +1,6 @@
 import { fakeDocument, getFake } from "../../testing";
 import { toTypeId } from "../../../gamedata/ids";
-import type { EwarProjection } from "../../../sim";
+import { EwarResolverImpl, StackingPenaltyImpl, type EwarProjection } from "../../../sim";
 import type { I18n, Language } from "../../i18n";
 import { UiEventsImpl } from "../../events";
 import type { EwarController, EwarEffectDescriber } from "../ewar";
@@ -63,11 +63,13 @@ function buildController(now: () => number = () => 0): {
   });
   const events = new UiEventsImpl();
   const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
+  const ewarResolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });
   const controller = new RangeOverlayControllerImpl({
     els,
     i18n,
     ewarEffectDescriber,
     ewarController,
+    ewarResolver,
     events,
     now,
   });

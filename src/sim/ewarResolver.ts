@@ -1,19 +1,6 @@
 import type { TypeId } from "../gamedata/ids";
 import type { StackingPenalty } from "./stackingPenalty";
-import type {
-  AppliedEwarEffect,
-  DampenerBreakdown,
-  DisruptionBreakdown,
-  EwarEffectFamily,
-  EwarProjection,
-  SensorDampenerSpec,
-  SensorSpec,
-  SpeedBreakdown,
-  SpeedEffectAttribution,
-  StatEffectAttribution,
-  TrackingDisruptorSpec,
-  TurretSpec,
-} from "./types";
+import { ZERO_DAMAGE, type AppliedEwarEffect, type DampenerBreakdown, type DisruptionBreakdown, type EwarEffectFamily, type EwarEffectPotentials, type EwarProjection, type EwarReach, type SensorDampenerSpec, type SensorSpec, type SpeedBreakdown, type SpeedEffectAttribution, type StatEffectAttribution, type TrackingDisruptorSpec, type TurretSpec } from "./types";
 
 export interface EwarResolver {
   speedMultiplier(projection: EwarProjection | undefined, distance: number): number;
@@ -30,12 +17,16 @@ export interface EwarResolver {
   dampenerBreakdown(projection: EwarProjection | undefined, distance: number): DampenerBreakdown;
   dampenedSensorSpec(spec: SensorSpec, projection: EwarProjection | undefined, distance: number): SensorSpec;
   dampenedSensorSpecIgnoringRange(spec: SensorSpec, projection: EwarProjection | undefined): SensorSpec;
+  reach(projection: EwarProjection | undefined): EwarReach;
+  potentials(projection: EwarProjection | undefined): EwarEffectPotentials;
 }
 
 const MIN_APPLIED_EFFECTIVENESS = 0.01;
 
 export class EwarResolverImpl implements EwarResolver {
   private readonly stacking: StackingPenalty;
+  private readonly unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+  private readonly unitSensor: SensorSpec = { scanResolution: 1, maxTargetingRange: 1, maxLockedTargets: 1 };
 
   constructor({ stackingPenalty }: { stackingPenalty: StackingPenalty }) {
     this.stacking = stackingPenalty;
@@ -196,6 +187,36 @@ export class EwarResolverImpl implements EwarResolver {
   dampenedSensorSpecIgnoringRange(spec: SensorSpec, projection: EwarProjection | undefined): SensorSpec {
     const modifiers = this.dampenerModifiers(projection, 0, true);
     return this.applyDampenerModifiers(spec, modifiers);
+  }
+
+  reach(projection: EwarProjection | undefined): EwarReach {
+    if (!projection) return { web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 };
+    return {
+      web: this.webReach(projection),
+      grappler: this.grapplerReach(projection),
+      scrambler: this.scramblerReach(projection),
+      disruptor: this.disruptorReach(projection),
+      painter: this.painterReach(projection),
+      dampener: this.dampenerReach(projection),
+    };
+  }
+
+  potentials(projection: EwarProjection | undefined): EwarEffectPotentials {
+    const speedMultiplier = this.speedMultiplierIgnoringRange(projection);
+    const sigMultiplier = this.sigMultiplierIgnoringRange(projection);
+    const propulsionSuppressed = this.propulsionSuppressedIgnoringRange(projection);
+    const turret = this.disruptedTurretIgnoringRange(this.unitTurret, projection);
+    const sensor = this.dampenedSensorSpecIgnoringRange(this.unitSensor, projection);
+    return {
+      speedMultiplier,
+      sigMultiplier,
+      propulsionSuppressed,
+      trackingMultiplier: turret.tracking,
+      optimalMultiplier: turret.optimal,
+      falloffMultiplier: turret.falloff,
+      scanResolutionMultiplier: sensor.scanResolution,
+      targetingRangeMultiplier: sensor.maxTargetingRange,
+    };
   }
 
   private representativeSpeedEffect(candidates: readonly SpeedEffectAttribution[]): SpeedEffectAttribution | undefined {
@@ -363,5 +384,74 @@ export class EwarResolverImpl implements EwarResolver {
     const scanResolution = Math.round(spec.scanResolution * this.stacking.apply(modifiers.scanResMultipliers));
     const maxTargetingRange = Math.round(spec.maxTargetingRange * this.stacking.apply(modifiers.rangeMultipliers));
     return { scanResolution, maxTargetingRange, maxLockedTargets: spec.maxLockedTargets };
+  }
+
+  private webReach(projection: EwarProjection): number {
+    let maxRange = 0;
+    for (let i = 0; i < projection.loadout.webs.length; i++) {
+      const activation = projection.activation?.webs[i];
+      if (activation && !activation.active) continue;
+      const spec = projection.loadout.webs[i];
+      const scale = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
+      maxRange = Math.max(maxRange, spec.maxRange * scale);
+    }
+    return maxRange;
+  }
+
+  private grapplerReach(projection: EwarProjection): number {
+    let reach = 0;
+    for (let i = 0; i < projection.loadout.grapplers.length; i++) {
+      const activation = projection.activation?.grapplers[i];
+      if (activation && !activation.active) continue;
+      const spec = projection.loadout.grapplers[i];
+      const scale = activation?.overloaded ? 1 + spec.overloadOptimalBonusPercent / 100 : 1;
+      reach = Math.max(reach, spec.optimal * scale + spec.falloff);
+    }
+    return reach;
+  }
+
+  private scramblerReach(projection: EwarProjection): number {
+    let maxRange = 0;
+    for (let i = 0; i < projection.loadout.scramblers.length; i++) {
+      const activation = projection.activation?.scramblers[i];
+      if (activation && !activation.active) continue;
+      const spec = projection.loadout.scramblers[i];
+      const scale = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
+      maxRange = Math.max(maxRange, spec.maxRange * scale);
+    }
+    return maxRange;
+  }
+
+  private disruptorReach(projection: EwarProjection): number {
+    let reach = 0;
+    for (let i = 0; i < projection.loadout.disruptors.length; i++) {
+      const activation = projection.activation?.disruptors[i];
+      if (activation && !activation.active) continue;
+      const spec = projection.loadout.disruptors[i];
+      reach = Math.max(reach, spec.optimal + spec.falloff);
+    }
+    return reach;
+  }
+
+  private painterReach(projection: EwarProjection): number {
+    let reach = 0;
+    for (let i = 0; i < projection.loadout.painters.length; i++) {
+      const activation = projection.activation?.painters[i];
+      if (activation && !activation.active) continue;
+      const spec = projection.loadout.painters[i];
+      reach = Math.max(reach, spec.maxRange + spec.falloff);
+    }
+    return reach;
+  }
+
+  private dampenerReach(projection: EwarProjection): number {
+    let reach = 0;
+    for (let i = 0; i < projection.loadout.dampeners.length; i++) {
+      const activation = projection.activation?.dampeners[i];
+      if (activation && !activation.active) continue;
+      const spec = projection.loadout.dampeners[i];
+      reach = Math.max(reach, spec.optimal + spec.falloff);
+    }
+    return reach;
   }
 }

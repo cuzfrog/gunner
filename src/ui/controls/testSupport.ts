@@ -206,6 +206,8 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
       dampenedSensorSpec: vi.fn((spec) => spec),
       dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
       dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
+      reach: vi.fn(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 })),
+      potentials: vi.fn(() => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 })),
     })),
     hitChance: asValue(vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance })),
     ships: asValue(vi.mocked<Ships>({ ...mockShips(), ...options.ships })),

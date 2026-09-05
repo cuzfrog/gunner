@@ -10,7 +10,7 @@ import type { CombatantConfig, EwarProjection, ShipConfig, SimConfig } from "./t
 
 const shipASteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 const shipBSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
-const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false, appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }), disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }), dampenedSensorSpec: (spec, projection, distance) => spec, dampenedSensorSpecIgnoringRange: (spec, projection) => spec, dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }) };
+const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false, appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }), disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }), dampenedSensorSpec: (spec, projection, distance) => spec, dampenedSensorSpecIgnoringRange: (spec, projection) => spec, dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }), reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }), potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }) };
 
 const scram: EwarProjection = {
   loadout: {
@@ -157,6 +157,8 @@ describe("SimulationImpl", () => {
       dampenedSensorSpec: (spec) => spec,
       dampenedSensorSpecIgnoringRange: (spec) => spec,
       dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+      reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+      potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config = simConfig("orbit");
@@ -179,6 +181,8 @@ describe("SimulationImpl", () => {
       dampenedSensorSpec: (spec) => spec,
       dampenedSensorSpecIgnoringRange: (spec) => spec,
       dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+      reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+      potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const shipAWeb: EwarProjection = {
@@ -214,6 +218,8 @@ describe("SimulationImpl", () => {
       dampenedSensorSpec: (spec) => spec,
       dampenedSensorSpecIgnoringRange: (spec) => spec,
       dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+      reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+      potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const config = {
@@ -239,6 +245,8 @@ describe("SimulationImpl", () => {
       dampenedSensorSpec: (spec) => spec,
       dampenedSensorSpecIgnoringRange: (spec) => spec,
       dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+      reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+      potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const config = { ...simConfig("orbit"), initialDistance: 5001 };
@@ -360,6 +368,8 @@ describe("SimulationImpl", () => {
       dampenedSensorSpec: (spec) => spec,
       dampenedSensorSpecIgnoringRange: (spec) => spec,
       dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+      reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+      potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config: SimConfig = {
@@ -385,6 +395,8 @@ describe("SimulationImpl", () => {
       dampenedSensorSpec: (spec) => spec,
       dampenedSensorSpecIgnoringRange: (spec) => spec,
       dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+      reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+      potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config: SimConfig = {
@@ -410,6 +422,8 @@ describe("SimulationImpl", () => {
       dampenedSensorSpec: (spec) => spec,
       dampenedSensorSpecIgnoringRange: (spec) => spec,
       dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+      reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+      potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config: SimConfig = {

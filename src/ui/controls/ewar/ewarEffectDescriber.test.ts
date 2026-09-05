@@ -1,10 +1,18 @@
 import { toTypeId } from "../../../gamedata/ids";
-import { ZERO_DAMAGE, type DisruptionScriptSpec, type EwarProjection, type EwarResolver, type SensorDampenerScriptSpec, type SensorDampenerSpec, type SensorSpec, type StasisGrapplerSpec, type StasisWebSpec, type TargetPainterSpec, type TrackingDisruptorSpec, type TurretSpec } from "../../../sim";
+import { ZERO_DAMAGE, type DisruptionScriptSpec, type EwarEffectPotentials, type EwarProjection, type EwarReach, type EwarResolver, type SensorDampenerScriptSpec, type SensorDampenerSpec, type SensorSpec, type StasisGrapplerSpec, type StasisWebSpec, type TargetPainterSpec, type TrackingDisruptorSpec, type TurretSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 import { EwarEffectDescriberImpl } from "./ewarEffectDescriber";
 
 const unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 const unitSensor: SensorSpec = { scanResolution: 1, maxTargetingRange: 1, maxLockedTargets: 1 };
+
+const IDENTITY_POTENTIALS: EwarEffectPotentials = {
+  speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false,
+  trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1,
+  scanResolutionMultiplier: 1, targetingRangeMultiplier: 1,
+};
+
+const ZERO_REACH: EwarReach = { web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 };
 
 const resolver = vi.mocked<EwarResolver>({
   speedMultiplier: vi.fn(),
@@ -21,6 +29,8 @@ const resolver = vi.mocked<EwarResolver>({
   dampenedSensorSpec: vi.fn((spec) => spec),
   dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
   dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
+  reach: vi.fn(() => ZERO_REACH),
+  potentials: vi.fn(() => IDENTITY_POTENTIALS),
 });
 
 const LABELS: Record<string, string> = {
@@ -56,6 +66,8 @@ beforeEach(() => {
   resolver.disruptedTurretIgnoringRange.mockReturnValue(unitTurret);
   resolver.propulsionSuppressed.mockReturnValue(false);
   resolver.propulsionSuppressedIgnoringRange.mockReturnValue(false);
+  resolver.reach.mockReturnValue(ZERO_REACH);
+  resolver.potentials.mockReturnValue(IDENTITY_POTENTIALS);
   i18n.t.mockImplementation((key) => LABELS[key] ?? key);
 });
 
@@ -105,32 +117,32 @@ describe("EwarEffectDescriber", () => {
   });
 
   test("webHint reports percentage and ignores the current distance", () => {
-    resolver.speedMultiplierIgnoringRange.mockReturnValue(0.63);
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, speedMultiplier: 0.63 });
     expect(describer.webHint(projection)).toBe("Reduce speed by 37% · range 0 m");
-    expect(resolver.speedMultiplierIgnoringRange).toHaveBeenCalledWith(projection);
+    expect(resolver.potentials).toHaveBeenCalledWith(projection);
     expect(resolver.speedMultiplier).not.toHaveBeenCalled();
   });
 
   test("grapplerHint reports percentage and ignores the current distance", () => {
-    resolver.speedMultiplierIgnoringRange.mockReturnValue(0.5);
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, speedMultiplier: 0.5 });
     expect(describer.grapplerHint(projection)).toBe("Reduce speed by 50% · range 0 m");
-    expect(resolver.speedMultiplierIgnoringRange).toHaveBeenCalledWith(projection);
+    expect(resolver.potentials).toHaveBeenCalledWith(projection);
   });
 
   test("disruptorHint reports percentages and ignores the current distance", () => {
-    resolver.disruptedTurretIgnoringRange.mockReturnValue({ ...unitTurret, tracking: 0.7, optimal: 0.55, falloff: 0.55 });
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, trackingMultiplier: 0.7, optimalMultiplier: 0.55, falloffMultiplier: 0.55 });
     expect(describer.disruptorHint(projection)).toBe("Tracking -30% · Optimal -45% · Falloff -45% · range 0 m");
-    expect(resolver.disruptedTurretIgnoringRange).toHaveBeenCalledWith(unitTurret, projection);
+    expect(resolver.potentials).toHaveBeenCalledWith(projection);
   });
 
   test("scramblerHint reports MWD disabled ignoring the current distance", () => {
-    resolver.propulsionSuppressedIgnoringRange.mockReturnValue(true);
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, propulsionSuppressed: true });
     expect(describer.scramblerHint(projection)).toBe("Disables MWD · range 0 m");
-    expect(resolver.propulsionSuppressedIgnoringRange).toHaveBeenCalledWith(projection);
+    expect(resolver.potentials).toHaveBeenCalledWith(projection);
   });
 
   test("scramblerHint reports out of range when no active scrambler is present", () => {
-    resolver.propulsionSuppressedIgnoringRange.mockReturnValue(false);
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, propulsionSuppressed: false });
     expect(describer.scramblerHint(projection)).toBe("No effect at this range · range 0 m");
   });
 
@@ -143,7 +155,8 @@ describe("EwarEffectDescriber", () => {
       },
       activation: { webs: [{ active: true, overloaded: true }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [] },
     } as EwarProjection;
-    resolver.speedMultiplierIgnoringRange.mockReturnValue(0.4);
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, speedMultiplier: 0.4 });
+    resolver.reach.mockReturnValue({ ...ZERO_REACH, web: 13000 });
     expect(describer.webHint(webProjection)).toBe("Reduce speed by 60% · range 13.0 km");
   });
 
@@ -157,7 +170,8 @@ describe("EwarEffectDescriber", () => {
       },
       activation: { webs: [], grapplers: [], disruptors: [{ active: true, overloaded: true, script: undefined }], scramblers: []  , painters: [], dampeners: [] },
     } as EwarProjection;
-    resolver.disruptedTurretIgnoringRange.mockReturnValue({ ...unitTurret, tracking: 0.7, optimal: 0.55, falloff: 0.55 });
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, trackingMultiplier: 0.7, optimalMultiplier: 0.55, falloffMultiplier: 0.55 });
+    resolver.reach.mockReturnValue({ ...ZERO_REACH, disruptor: 72000 });
     expect(describer.disruptorHint(disruptorProjection)).toBe("Tracking -30% · Optimal -45% · Falloff -45% · range 72.0 km");
   });
 
@@ -171,7 +185,8 @@ describe("EwarEffectDescriber", () => {
       },
       activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active: true, overloaded: true }], painters: [], dampeners: [] },
     } as EwarProjection;
-    resolver.propulsionSuppressedIgnoringRange.mockReturnValue(true);
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, propulsionSuppressed: true });
+    resolver.reach.mockReturnValue({ ...ZERO_REACH, scrambler: 10800 });
     expect(describer.scramblerHint(scramblerProjection)).toBe("Disables MWD · range 10.8 km");
   });
 
@@ -212,7 +227,7 @@ describe("EwarEffectDescriber", () => {
       loadout: { webs: [webSpec], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
       activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [] },
     } as EwarProjection;
-    resolver.speedMultiplierIgnoringRange.mockReturnValue(1 - speedFactor);
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, speedMultiplier: 1 - speedFactor });
     const hintEffect = describer.webHint(webProj).split(" · ")[0];
     expect(describer.webModuleEffect(webSpec)).toBe(hintEffect);
   });
@@ -223,7 +238,8 @@ describe("EwarEffectDescriber", () => {
       loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [painterSpec], dampeners: [], scripts: [], dampenerScripts: [], },
       activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [{ active: true, overloaded: false }], dampeners: [] },
     } as EwarProjection;
-    resolver.sigMultiplierIgnoringRange.mockReturnValue(1.3);
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, sigMultiplier: 1.3 });
+    resolver.reach.mockReturnValue({ ...ZERO_REACH, painter: 126000 });
     expect(describer.painterHint(painterProj)).toBe("Signature radius +30% · range 126.0 km");
   });
 
@@ -231,7 +247,7 @@ describe("EwarEffectDescriber", () => {
     const painterProj = {
       loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
     } as EwarProjection;
-    resolver.sigMultiplierIgnoringRange.mockReturnValue(1);
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, sigMultiplier: 1 });
     expect(describer.painterHint(painterProj)).toBe("No effect at this range · range 0 m");
   });
 
@@ -246,16 +262,16 @@ describe("EwarEffectDescriber", () => {
       loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [dampenerSpec], scripts: [], dampenerScripts: [], },
       activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [{ active: true, overloaded: false, script: undefined }] },
     } as EwarProjection;
-    resolver.dampenedSensorSpecIgnoringRange.mockReturnValue({ scanResolution: 0.6, maxTargetingRange: 0.6, maxLockedTargets: 1 });
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, scanResolutionMultiplier: 0.6, targetingRangeMultiplier: 0.6 });
+    resolver.reach.mockReturnValue({ ...ZERO_REACH, dampener: 72000 });
     expect(describer.dampenerHint(dampenerProj)).toBe("Scan resolution -40% · Targeting range -40% · range 72.0 km");
-    expect(resolver.dampenedSensorSpecIgnoringRange).toHaveBeenCalledWith(unitSensor, dampenerProj);
   });
 
   test("dampenerHint reports out of range when no active dampener", () => {
     const dampenerProj = {
       loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
     } as EwarProjection;
-    resolver.dampenedSensorSpecIgnoringRange.mockReturnValue(unitSensor);
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 });
     expect(describer.dampenerHint(dampenerProj)).toBe("No effect at this range · range 0 m");
   });
 

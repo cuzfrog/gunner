@@ -1,5 +1,5 @@
 import type { WeaponRangeVisibility } from "../../../appstate";
-import type { EwarActivation, EwarLoadout, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
+import type { EwarActivation, EwarLoadout, EwarProjection, EwarResolver } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { RangeOverlay, RangeOverlayKind } from "../../renderer";
 import type { EwarController, EwarEffectDescriber } from "../ewar";
@@ -18,6 +18,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   private readonly ewarEffectDescriber: EwarEffectDescriber;
   private readonly now: () => number;
   private readonly ewarController: EwarController;
+  private readonly ewarResolver: EwarResolver;
   private readonly events: UiEvents;
   private distance = 0;
   private readonly visibilityMap = new Map<RangeOverlayKind, WeaponRangeVisibility>();
@@ -25,11 +26,12 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   private lastTitleRefresh = 0;
   private lastDescriptors: readonly RangeOverlayKind[] = [];
 
-  constructor(deps: { els: RangeOverlayEls; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; ewarController: EwarController; events: UiEvents; now: () => number }) {
+  constructor(deps: { els: RangeOverlayEls; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; ewarController: EwarController; ewarResolver: EwarResolver; events: UiEvents; now: () => number }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.ewarEffectDescriber = deps.ewarEffectDescriber;
     this.ewarController = deps.ewarController;
+    this.ewarResolver = deps.ewarResolver;
     this.events = deps.events;
     this.now = deps.now;
     for (const kind of ALL_KINDS) this.visibilityMap.set(kind, "none");
@@ -161,82 +163,48 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   }
 
   private overlayFor(side: Side, kind: RangeOverlayKind, projection: EwarProjection): RangeOverlay | undefined {
+    const reach = this.ewarResolver.reach(projection);
     switch (kind) {
-      case "web": return this.webOverlay(side, projection);
-      case "grappler": return this.grapplerOverlay(side, projection);
-      case "scrambler": return this.scramblerOverlay(side, projection);
-      case "disruptor": return this.disruptorOverlay(side, projection);
+      case "web": {
+        const radius = reach.web;
+        return radius > 0 ? { side, kind: "web", radius } : undefined;
+      }
+      case "scrambler": {
+        const radius = reach.scrambler;
+        return radius > 0 ? { side, kind: "scrambler", radius } : undefined;
+      }
+      case "grappler":
+        return reach.grappler > 0 ? this.grapplerFalloffOverlay(side, projection) : undefined;
+      case "disruptor":
+        return reach.disruptor > 0 ? this.disruptorFalloffOverlay(side, projection) : undefined;
     }
   }
 
-  private webOverlay(side: Side, projection: EwarProjection): RangeOverlay | undefined {
-    let maxRange = 0;
-    for (let i = 0; i < projection.loadout.webs.length; i++) {
-      const activation = projection.activation?.webs[i];
+  private grapplerFalloffOverlay(side: Side, projection: EwarProjection): RangeOverlay | undefined {
+    let bestOptimal = 0;
+    let bestFalloff = 0;
+    for (let i = 0; i < projection.loadout.grapplers.length; i++) {
+      const spec = projection.loadout.grapplers[i];
+      const activation = projection.activation?.grapplers[i];
       if (activation && !activation.active) continue;
-      const spec = projection.loadout.webs[i];
-      const scale = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
-      const range = spec.maxRange * scale;
-      if (range > maxRange) maxRange = range;
+      const optimal = spec.optimal * (activation?.overloaded ? 1 + spec.overloadOptimalBonusPercent / 100 : 1);
+      if (optimal + spec.falloff > bestOptimal + bestFalloff) { bestOptimal = optimal; bestFalloff = spec.falloff; }
     }
-    if (maxRange <= 0) return undefined;
-    return { side, kind: "web", radius: maxRange };
+    if (bestOptimal <= 0) return undefined;
+    return { side, kind: "grappler", radius: bestOptimal, falloffRadius: bestFalloff };
   }
 
-  private scramblerOverlay(side: Side, projection: EwarProjection): RangeOverlay | undefined {
-    let maxRange = 0;
-    for (let i = 0; i < projection.loadout.scramblers.length; i++) {
-      const activation = projection.activation?.scramblers[i];
+  private disruptorFalloffOverlay(side: Side, projection: EwarProjection): RangeOverlay | undefined {
+    let bestOptimal = 0;
+    let bestFalloff = 0;
+    for (let i = 0; i < projection.loadout.disruptors.length; i++) {
+      const spec = projection.loadout.disruptors[i];
+      const activation = projection.activation?.disruptors[i];
       if (activation && !activation.active) continue;
-      const spec = projection.loadout.scramblers[i];
-      const scale = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
-      const range = spec.maxRange * scale;
-      if (range > maxRange) maxRange = range;
+      if (spec.optimal + spec.falloff > bestOptimal + bestFalloff) { bestOptimal = spec.optimal; bestFalloff = spec.falloff; }
     }
-    if (maxRange <= 0) return undefined;
-    return { side, kind: "scrambler", radius: maxRange };
-  }
-
-  private grapplerOverlay(side: Side, projection: EwarProjection): RangeOverlay | undefined {
-    return this.falloffOverlay(side, "grappler", projection, projection.loadout.grapplers, (spec, activation) => {
-      const scale = activation?.overloaded ? 1 + spec.overloadOptimalBonusPercent / 100 : 1;
-      return { optimal: spec.optimal * scale, falloff: spec.falloff };
-    });
-  }
-
-  private disruptorOverlay(side: Side, projection: EwarProjection): RangeOverlay | undefined {
-    return this.falloffOverlay(side, "disruptor", projection, projection.loadout.disruptors, (spec) => ({
-      optimal: spec.optimal,
-      falloff: spec.falloff,
-    }));
-  }
-
-  private falloffOverlay<T extends StasisGrapplerSpec | TrackingDisruptorSpec>(
-    side: Side,
-    kind: "grappler" | "disruptor",
-    projection: EwarProjection,
-    specs: readonly T[],
-    rangeOf: (spec: T, activation: { readonly active: boolean; readonly overloaded: boolean } | undefined) => { optimal: number; falloff: number },
-  ): RangeOverlay | undefined {
-    let best: { optimal: number; falloff: number } | undefined;
-    for (let i = 0; i < specs.length; i++) {
-      const activation = this.activationFor(projection.activation, kind, i);
-      if (activation && !activation.active) continue;
-      const ranges = rangeOf(specs[i], activation);
-      const reach = ranges.optimal + ranges.falloff;
-      if (!best || reach > best.optimal + best.falloff) best = ranges;
-    }
-    if (!best || best.optimal <= 0) return undefined;
-    return { side, kind, radius: best.optimal, falloffRadius: best.falloff };
-  }
-
-  private activationFor(activation: EwarActivation | undefined, kind: RangeOverlayKind, index: number): { readonly active: boolean; readonly overloaded: boolean } | undefined {
-    if (!activation) return undefined;
-    switch (kind) {
-      case "grappler": return activation.grapplers[index];
-      case "disruptor": return activation.disruptors[index];
-      default: return undefined;
-    }
+    if (bestOptimal <= 0) return undefined;
+    return { side, kind: "disruptor", radius: bestOptimal, falloffRadius: bestFalloff };
   }
 
   private createChip(kind: RangeOverlayKind): HTMLButtonElement {
