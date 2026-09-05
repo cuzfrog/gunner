@@ -22,6 +22,7 @@ export interface EngineView extends EngagementView {
   readonly snapshot: SimSnapshot;
   readonly defenseRuntime: DefenseView;
   readonly drones: Record<Side, readonly DroneRuntimeState[]>;
+  readonly droneSpecs: Record<Side, readonly DroneSpec[]>;
   readonly missiles: Record<Side, readonly MissileRuntimeState[]>;
 }
 
@@ -133,6 +134,8 @@ export class EngagementEngineImpl implements EngagementEngine {
   }
 
   private buildView(composed: EngagementView, snapshot: SimSnapshot): EngineView {
+    const config = this.config;
+    if (!config) throw new Error("buildView called before config set");
     const incoming = incomingByTarget(composed);
     const projection = this.defenseSimulator.project(incoming, PROJECTION_HORIZON_SECONDS);
     return {
@@ -141,6 +144,7 @@ export class EngagementEngineImpl implements EngagementEngine {
       snapshot,
       defenseRuntime: this.defenseSimulator.view(),
       drones: { shipA: this.droneSimulator.states("shipA"), shipB: this.droneSimulator.states("shipB") },
+      droneSpecs: { shipA: droneSpecsFrom(config.weapons.shipA), shipB: droneSpecsFrom(config.weapons.shipB) },
       missiles: { shipA: this.missileSimulator.states("shipA"), shipB: this.missileSimulator.states("shipB") },
     };
   }

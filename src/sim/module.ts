@@ -51,6 +51,6 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     rngFactory: asClass(Mulberry32RngFactory).singleton(),
     weaponClock: asClass(WeaponClockImpl).singleton(),
     lockClock: asClass(LockClockImpl).singleton(),
-    engagementEngine: asClass(EngagementEngineImpl).singleton(),
+    engine: asClass(EngagementEngineImpl).singleton(),
   });
 }

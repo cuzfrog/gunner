@@ -23,7 +23,6 @@ import type {
   WeaponClock,
   WeaponDamageAssessor,
 } from "./index";
-import type { SimConfig } from "./types";
 
 export interface SimCradle {
   readonly simValueParser: SimValueParser;
@@ -50,6 +49,5 @@ export interface SimCradle {
   readonly rngFactory: RngFactory;
   readonly weaponClock: WeaponClock;
   readonly lockClock: LockClock;
-  readonly engagementEngine: EngagementEngine;
-  readonly simConfig: SimConfig;
+  readonly engine: EngagementEngine;
 }
