@@ -62,7 +62,7 @@ function boostProjection(): TurretBoostProjection {
 function fittedHull(propulsionKind: "afterburner" | "microwarpdrive" | undefined): FittedHullSummary {
   return {
     fittingName: "Brawler",
-    fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
+    fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 },
     propulsionKind,
   };
 }

@@ -170,7 +170,7 @@ export function buildTurret(
       };
     })),
     resolveLauncher: vi.fn(() => undefined),
-    resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
+    resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } })),
     resolvePropulsion: vi.fn(() => undefined),
     resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], })),
     resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),

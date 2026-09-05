@@ -139,7 +139,7 @@ export const RIFTER: ShipProfile = {
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
-export const FITTED: FittedHull = { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
+export const FITTED: FittedHull = { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 };
 
 export const TURRET: ImportedTurret = {
   tracking: 0.315,

@@ -34,7 +34,7 @@ export function fittedStats(
   const maxSpeed = baseMaxSpeed * (propulsion ? 1 + (moduleSpeed * propulsion.thrust) / mass : 1);
   const effectiveBase = maxSpeedOverride !== undefined && maxSpeed > 0 ? baseMaxSpeed * (maxSpeedOverride / maxSpeed) : baseMaxSpeed;
   const inertiaModifier = profile.inertiaModifier * hull.inertiaMultiplier * inertiaFactor;
-  const sigRadius = (profile.sigRadius + hull.sigRadiusAdd) * hull.sigMultiplier * (1 + (propulsion ? propulsion.sigBloom : 0));
+  const sigRadius = (profile.sigRadius + hull.sigRadiusAdd) * hull.sigMultiplier * (1 + (propulsion ? propulsion.sigBloom * hull.mwdSigBloomMultiplier : 0));
   const alignTime = mass * inertiaModifier * ALIGN_TIME_FACTOR;
 
   return {
@@ -78,6 +78,7 @@ function nakedHull(profile: ShipProfile): FittedHull {
     inertiaMultiplier: 1,
     sigMultiplier: 1,
     sigRadiusAdd: 0,
+    mwdSigBloomMultiplier: 1,
   };
 }
 

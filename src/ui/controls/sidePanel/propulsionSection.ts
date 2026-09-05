@@ -224,7 +224,7 @@ export class PropulsionSection implements IPropulsionSection {
   }
 
   nakedFitted(profile: ShipProfile): FittedHull {
-    return { mass: profile.mass, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
+    return { mass: profile.mass, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 };
   }
 
 }

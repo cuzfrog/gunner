@@ -442,7 +442,7 @@ describe("PropulsionSection", () => {
   test("resolvePropulsionVariant preserves fitted variant id", () => {
     const { panel, section } = buildPropulsionSection();
     panel.profile = RIFTER;
-    const fitted: FittedHullSummary = { fittingName: "Test", propulsionModuleId: AB_VARIANT_II_ID, fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } };
+    const fitted: FittedHullSummary = { fittingName: "Test", propulsionModuleId: AB_VARIANT_II_ID, fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } };
     const variant = section.resolvePropulsionVariant(AB_MODULE, fitted);
     expect(variant?.id).toBe(AB_VARIANT_II_ID);
   });
@@ -450,7 +450,7 @@ describe("PropulsionSection", () => {
   test("resolvePropulsionVariant falls back to name when module id is stale", () => {
     const { panel, section } = buildPropulsionSection();
     panel.profile = RIFTER;
-    const fitted: FittedHullSummary = { fittingName: "Test", propulsionModuleId: toTypeId("999"), propulsionName: "1MN Afterburner II", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } };
+    const fitted: FittedHullSummary = { fittingName: "Test", propulsionModuleId: toTypeId("999"), propulsionName: "1MN Afterburner II", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } };
     const variant = section.resolvePropulsionVariant(AB_MODULE, fitted);
     expect(variant?.id).toBe(AB_VARIANT_II_ID);
   });

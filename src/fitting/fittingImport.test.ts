@@ -227,6 +227,30 @@ const kestrelProfile: ShipProfile = {
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
+const stilettoProfile: ShipProfile = {
+  id: "11198" as ShipId,
+  name: "Stiletto",
+  factionId: "minmatar-republic" as FactionId,
+  hullTypeId: "831" as HullTypeId,
+  mass: 1_010_000,
+  inertiaModifier: 1.6,
+  baseSpeed: 435,
+  sigRadius: 31,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+};
+
 const propulsionModules: readonly PropulsionModule[] = [
   { id: "ab-1mn", kind: "afterburner", sizeTier: "small", label: "1MN Afterburner I", iconId: toTypeId("439"), defaultModuleId: toTypeId("439"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 1.15, sigBloom: 0 },
   { id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN MWD", iconId: toTypeId("434"), defaultModuleId: toTypeId("434"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 5, sigBloom: 5 },
@@ -345,6 +369,9 @@ const hullBonusDb: FittingDb = {
     ],
     [profile.id]: [
       { attribute: "turretDamage", magnitude: 10, scalesWithHullSkill: true, moduleSkillId: toTypeId("3306") },
+    ],
+    [stilettoProfile.id]: [
+      { attribute: "mwdSigBloom", magnitude: -15, scalesWithHullSkill: true, moduleSkillId: toTypeId("3454") },
     ],
   },
   skillBonuses: [
@@ -797,6 +824,22 @@ Medium Energy Metastasis Adjuster II`,
     const result = importer.importFitting("[Muninn, Role]\n200mm AutoCannon II, EMP S", conditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.5, 6);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.95, 6);
+  });
+
+  test("Stiletto interceptor MWD sig bloom reduction applies at skill level 5", () => {
+    ships.findHullByName.mockReturnValue(stilettoProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting("[Stiletto, Speed]\n5MN Microwarpdrive I", { skillLevel: 5, overloaded: false, weaponOverloaded: false });
+    expect(result).toBeDefined();
+    expect(result!.fitted.mwdSigBloomMultiplier).toBeCloseTo(0.25, 6);
+  });
+
+  test("Stiletto interceptor MWD sig bloom reduction is 1 without the skill", () => {
+    ships.findHullByName.mockReturnValue(stilettoProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting("[Stiletto, Speed]\n5MN Microwarpdrive I", conditions);
+    expect(result).toBeDefined();
+    expect(result!.fitted.mwdSigBloomMultiplier).toBeCloseTo(1, 6);
   });
 
   test("hull turret bonuses match turret skill and share the module stacking chain", () => {

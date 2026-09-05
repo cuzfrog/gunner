@@ -178,7 +178,7 @@ export function buildLauncher(
       const template = launchersByModuleId[String(group.moduleId)] ?? importedLauncherFixture();
       return { ...template, moduleId: group.moduleId, chargeId: group.chargeId ?? template.chargeId, count: group.count };
     }),
-    resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
+    resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } })),
     resolvePropulsion: vi.fn(() => undefined),
     resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], })),
     resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),

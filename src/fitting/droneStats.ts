@@ -1,4 +1,4 @@
-import type { DroneSizeClass, DroneStats, HullBonus } from "../gamedata/fittingDb";
+import type { DroneBonusAttribute, DroneSizeClass, DroneStats, HullBonus } from "../gamedata/fittingDb";
 import { toTypeId, type TypeId } from "../gamedata/ids";
 import type { SkillLevel } from "../ships";
 
@@ -39,7 +39,7 @@ export class DroneSkillModelImpl implements DroneSkillModel {
     const skillDamageIds: TypeId[] = [DRONE_INTERFACING_ID];
     if (sizeSkillId !== undefined) skillDamageIds.push(sizeSkillId);
 
-    const droneHullBonuses = hullBonuses.filter((b) => b.attribute === "droneDamage" && (b.chargeSkillId === undefined || b.chargeSkillId === sizeSkillId || b.chargeSkillId === DRONES_SKILL_ID));
+    const droneHullBonuses = hullBonuses.filter((b) => isDroneBonusAttribute(b.attribute) && b.attribute === "droneDamage" && (b.chargeSkillId === undefined || b.chargeSkillId === sizeSkillId || b.chargeSkillId === DRONES_SKILL_ID));
     const hullDamageMultiplier = droneHullBonuses.length > 0 ? droneHullBonuses.reduce((acc, b) => acc * (1 + (b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1)) / 100), 1) : 1;
 
     const totalDamageMultiplier = drone.damageMultiplier * skillDamageMultiplier * hullDamageMultiplier;
@@ -67,4 +67,10 @@ function sizeSkillIdForClass(sizeClass: DroneSizeClass): TypeId | undefined {
     case "heavy": return HEAVY_DRONE_OPERATION_ID;
     case "sentry": return SENTRY_DRONE_INTERFACING_ID;
   }
+}
+
+const DRONE_BONUS_ATTRIBUTES: Record<DroneBonusAttribute, true> = { droneDamage: true };
+
+function isDroneBonusAttribute(attr: HullBonus["attribute"]): attr is DroneBonusAttribute {
+  return attr in DRONE_BONUS_ATTRIBUTES;
 }

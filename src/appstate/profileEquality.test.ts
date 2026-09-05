@@ -10,6 +10,7 @@ const baseFittedHull: FittedHull = {
   inertiaMultiplier: 1,
   sigMultiplier: 1,
   sigRadiusAdd: 0,
+  mwdSigBloomMultiplier: 1,
 };
 
 const baseFittedHullSummary: FittedHullSummary = {
@@ -93,6 +94,7 @@ describe("CanonicalProfileEquality", () => {
       inertiaMultiplier: 1,
       sigMultiplier: 1,
       sigRadiusAdd: 0,
+      mwdSigBloomMultiplier: 1,
     };
     const fittedB: FittedHull = {
       sigRadiusAdd: 0,
@@ -101,6 +103,7 @@ describe("CanonicalProfileEquality", () => {
       speedMultiplier: 1,
       massMultiplier: 1,
       mass: 1_000_000,
+      mwdSigBloomMultiplier: 1,
     };
     const a = baseProfileSettings({ shipAFittedHull: { ...baseFittedHullSummary, fitted: fittedA } });
     const b = baseProfileSettings({ shipAFittedHull: { ...baseFittedHullSummary, fitted: fittedB } });

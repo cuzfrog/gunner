@@ -1,4 +1,4 @@
-import type { FittingDb, HullBonus, DefenseModuleStats } from "../gamedata/fittingDb";
+import type { DefenseBonusAttribute, FittingDb, HullBonus, DefenseModuleStats } from "../gamedata/fittingDb";
 import type { TypeId } from "../gamedata/ids";
 import { type DefenseSkills, type ShipProfile, type SkillLevel, type StatConditions, defaultDefenseSkills } from "../ships";
 import { type DamageResists, type DefenseLayer, type DefenseSpec, type RahSpec, type RepairerSpec, type StackingPenalty, DAMAGE_TYPES, ZERO_RESISTS } from "../sim";
@@ -251,7 +251,7 @@ function resolveRahSpec(modules: readonly DefenseModuleEntry[], skills: DefenseS
   return { cycleTime, shiftAmount, baseResists, overloadCycleTimeMultiplier, armorResistsWithoutRah, moduleId: rahModule.moduleId };
 }
 
-function hullBonusMultiplier(hullBonuses: readonly HullBonus[], attribute: string, skillLevel: number): number {
+function hullBonusMultiplier(hullBonuses: readonly HullBonus[], attribute: DefenseBonusAttribute, skillLevel: number): number {
   let multiplier = 1;
   for (const bonus of hullBonuses) {
     if (bonus.attribute !== attribute) continue;

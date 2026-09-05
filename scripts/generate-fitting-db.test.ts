@@ -2,7 +2,8 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { toTypeId } from "../src/gamedata/ids";
-import { buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats } from "./generate-fitting-db";
+import { buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses } from "./generate-fitting-db";
+import type { UnmappedAttribute } from "./generate-fitting-db";
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./fittingDb/dogmaTypes";
 
 function values(entries: Record<string, number>): Map<string, number> {
@@ -970,5 +971,77 @@ describe("_buildDefenseStats", () => {
     expect(stats?.kind).toBe("resistModule");
     expect(stats?.layer).toBe("shield");
     expect(stats?.active).toBe(false);
+  });
+});
+
+describe("_resolveHullBonusAttribute", () => {
+  function attrNames(ids: Record<number, string>): Map<number, string> {
+    return new Map(Object.entries(ids).map(([k, v]) => [Number(k), v]));
+  }
+
+  test("returns mapped for a known combat attribute (turretDamage)", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 4, skillTypeID: 3302 }, attrNames({ 64: "damageMultiplier" }));
+    expect(result.kind).toBe("mapped");
+    if (result.kind === "mapped") expect(result.attribute).toBe("turretDamage");
+  });
+
+  test("returns skip for target painter signatureRadiusBonus (attribute 554 with painter skill)", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 554, modifyingAttributeID: 568, operation: 4, skillTypeID: 19921 }, attrNames({ 554: "signatureRadiusBonus" }));
+    expect(result.kind).toBe("skip");
+  });
+
+  test("returns skip for out-of-scope attribute (cargo capacity, attribute 38)", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 38, modifyingAttributeID: 38, operation: 4 }, attrNames({ 38: "capacity" }));
+    expect(result.kind).toBe("skip");
+  });
+
+  test("returns unmapped for an unknown attribute not in COMBAT_ATTRIBUTE_MAP or OUT_OF_SCOPE", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 99999, modifyingAttributeID: 99999, operation: 4 }, attrNames({ 99999: "unknownNewAttr" }));
+    expect(result.kind).toBe("unmapped");
+    if (result.kind === "unmapped") expect(result.attributeId).toBe(99999);
+  });
+
+  test("returns mapped for mwdSigBloom when not from target painter context", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 554, modifyingAttributeID: 568, operation: 4, skillTypeID: 3454 }, attrNames({ 554: "signatureRadiusBonus" }));
+    expect(result.kind).toBe("mapped");
+    if (result.kind === "mapped") expect(result.attribute).toBe("mwdSigBloom");
+  });
+});
+
+describe("_buildHullBonuses audit", () => {
+  function attrNames(ids: Record<number, string>): Map<number, string> {
+    return new Map(Object.entries(ids).map(([k, v]) => [Number(k), v]));
+  }
+
+  function attrValues(ids: Record<number, number>): Map<number, number> {
+    return new Map(Object.entries(ids).map(([k, v]) => [Number(k), v]));
+  }
+
+  test("collects unmapped attributes into the collector", () => {
+    const names = attrNames({ 99999: "unknownNewAttr", 204: "trackingSpeedBonus" });
+    const vals = attrValues({ 204: 10, 99999: 5 });
+    const typeDogma: SdeTypeDogma = { dogmaAttributes: [{ attributeID: 204, value: 10 }, { attributeID: 99999, value: 5 }], dogmaEffects: [{ effectID: 9999 }] };
+    const effects = dogmaEffectsMap([combatEffect(9999, 4, [
+      { domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 160, modifyingAttributeID: 204, operation: 4, skillTypeID: 3302 },
+      { domain: "shipID", func: "ItemModifier", modifiedAttributeID: 99999, modifyingAttributeID: 99999, operation: 4 },
+    ])]);
+    const unmapped: UnmappedAttribute[] = [];
+    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 12345, "TestShip", unmapped);
+    expect(bonuses.length).toBe(1);
+    expect(bonuses[0].attribute).toBe("turretTracking");
+    expect(unmapped.length).toBe(1);
+    expect(unmapped[0].attributeId).toBe(99999);
+    expect(unmapped[0].shipName).toBe("TestShip");
+  });
+
+  test("does not collect out-of-scope attributes as unmapped", () => {
+    const names = attrNames({ 38: "capacity" });
+    const vals = attrValues({ 38: 100 });
+    const typeDogma: SdeTypeDogma = { dogmaAttributes: [{ attributeID: 38, value: 100 }], dogmaEffects: [{ effectID: 9998 }] };
+    const effects = dogmaEffectsMap([combatEffect(9998, 4, [{ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 38, modifyingAttributeID: 38, operation: 4 }])]);
+    const unmapped: UnmappedAttribute[] = [];
+    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 12345, "TestShip", unmapped);
+    expect(bonuses.length).toBe(0);
+    expect(unmapped.length).toBe(0);
   });
 });

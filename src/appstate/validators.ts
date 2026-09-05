@@ -242,13 +242,15 @@ export function isFittedHull(value: unknown): value is FittedHull {
   if (!isRecord(value)) return false;
   const s = value;
   if (s.massMultiplier === undefined) s.massMultiplier = 1;
+  if (s.mwdSigBloomMultiplier === undefined) s.mwdSigBloomMultiplier = 1;
   return (
     isNonNegative(s.mass) &&
     isPositive(s.massMultiplier) &&
     isPositive(s.speedMultiplier) &&
     isPositive(s.inertiaMultiplier) &&
     isPositive(s.sigMultiplier) &&
-    isNonNegative(s.sigRadiusAdd)
+    isNonNegative(s.sigRadiusAdd) &&
+    isPositive(s.mwdSigBloomMultiplier)
   );
 }
 

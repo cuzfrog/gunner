@@ -132,4 +132,5 @@ export interface FittedHull {
   readonly inertiaMultiplier: number;
   readonly sigMultiplier: number;
   readonly sigRadiusAdd: number;
+  readonly mwdSigBloomMultiplier: number;
 }

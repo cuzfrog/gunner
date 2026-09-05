@@ -236,14 +236,14 @@ describe("HullSection", () => {
 
   test("applyImportedFitting with no propulsion passes PROPULSION_NONE to renderPropulsionOptions", () => {
     const { panel, section } = buildHullSection();
-    const summary: FittedHullSummary = { fittingName: "Brawler", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } };
+    const summary: FittedHullSummary = { fittingName: "Brawler", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } };
     section.applyImportedFitting(summary);
     expect(panel.sections.propulsion.renderPropulsionOptions).toHaveBeenCalledWith(PROPULSION_NONE);
   });
 
   test("applyImportedFitting with propulsion passes the propulsionId to renderPropulsionOptions", () => {
     const { panel, section } = buildHullSection();
-    const summary: FittedHullSummary = { fittingName: "Brawler", propulsionId: "ab-1mn", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } };
+    const summary: FittedHullSummary = { fittingName: "Brawler", propulsionId: "ab-1mn", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } };
     section.applyImportedFitting(summary);
     expect(panel.sections.propulsion.renderPropulsionOptions).toHaveBeenCalledWith("ab-1mn");
   });
