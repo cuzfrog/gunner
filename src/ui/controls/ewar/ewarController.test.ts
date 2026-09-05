@@ -215,6 +215,12 @@ function selectedScriptOption(popup: FakeElement): FakeElement | undefined {
 }
 
 describe("EwarController", () => {
+  test("registers script popup close callbacks with ModulesPopup for both sides", () => {
+    const { modulesPopup } = buildEwarController();
+    expect(modulesPopup.registerOnClose).toHaveBeenCalledWith("shipA", expect.any(Function));
+    expect(modulesPopup.registerOnClose).toHaveBeenCalledWith("shipB", expect.any(Function));
+  });
+
   test("setLoadout renders sections, rows, and per-kind summary for mixed loadouts and hides section for empty loadouts", () => {
     const { controller, document } = buildEwarController();
     const loadout: EwarLoadout = { webs: [WEB2], disruptors: [DISRUPTOR, DISRUPTOR2], grapplers: [], scramblers: [], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], };
@@ -536,7 +542,7 @@ describe("EwarController", () => {
     });
   });
 
-  test("popup controls visibility and trigger aria-expanded", () => {
+  test("popup starts hidden after loadout", () => {
     const { controller, document } = buildEwarController();
     const loadout: EwarLoadout = { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], };
     controller.setLoadout("shipA", loadout);

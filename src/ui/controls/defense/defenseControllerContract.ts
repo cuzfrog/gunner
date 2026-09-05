@@ -6,6 +6,7 @@ import type { PopupFieldEls } from "../shared";
 
 export interface DefenseFieldEls extends PopupFieldEls {
   readonly section: HTMLElement;
+  readonly summary: HTMLElement;
   readonly effectiveSig: HTMLElement;
 }
 

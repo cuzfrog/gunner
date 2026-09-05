@@ -15,8 +15,8 @@ export class ModulesPopupImpl implements ModulesPopup {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.fields = {
-      shipA: new PopupField({ els: { ...deps.els.fields.shipA, summary: deps.els.fields.shipA.field }, popupGroup: deps.popupGroup, onClose: () => this.fireClose("shipA") }),
-      shipB: new PopupField({ els: { ...deps.els.fields.shipB, summary: deps.els.fields.shipB.field }, popupGroup: deps.popupGroup, onClose: () => this.fireClose("shipB") }),
+      shipA: new PopupField({ els: deps.els.fields.shipA, popupGroup: deps.popupGroup, onClose: () => this.fireClose("shipA") }),
+      shipB: new PopupField({ els: deps.els.fields.shipB, popupGroup: deps.popupGroup, onClose: () => this.fireClose("shipB") }),
     };
     this.applyLabels();
     this.syncEnabled();

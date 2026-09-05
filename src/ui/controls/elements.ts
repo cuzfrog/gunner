@@ -15,7 +15,6 @@ import {
   type GlobalElementDefinitionMap,
   type CombatantElementDefinitionMap,
 } from "./elementContract";
-import type { PopupFieldEls } from "./shared";
 import type { DefenseFieldEls } from "./defense";
 import type { TargetingFieldEls } from "./targeting";
 

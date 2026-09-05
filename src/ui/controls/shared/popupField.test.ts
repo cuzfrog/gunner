@@ -33,7 +33,6 @@ function makeEls(): PopupFieldEls {
     trigger: document.createElement("button") as unknown as HTMLButtonElement,
     popup,
     section: document.createElement("div") as unknown as HTMLElement,
-    summary: document.createElement("span") as unknown as HTMLElement,
   };
 }
 
@@ -44,6 +43,14 @@ function makeConfig(overrides?: Partial<PopupFieldConfig> & { els?: PopupFieldEl
     popupGroup: new StubPopupGroup(),
     ...overrides,
   };
+}
+
+function makePreviewSection(hidden: boolean): HTMLElement {
+  const el = document.createElement("div") as unknown as FakeElement;
+  el.className = "preview-section";
+  el.hidden = hidden;
+  el.classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn(), contains: ((cls: string) => cls === "preview-section") as unknown as ReturnType<typeof vi.fn> };
+  return el as unknown as HTMLElement;
 }
 
 describe("PopupField", () => {
@@ -168,12 +175,8 @@ describe("PopupField", () => {
 
   test("syncEnabledFromSections disables trigger when all sections empty", () => {
     const els = makeEls();
-    const section1 = document.createElement("div") as unknown as HTMLElement;
-    section1.className = "preview-section";
-    section1.hidden = true;
-    const section2 = document.createElement("div") as unknown as HTMLElement;
-    section2.className = "preview-section";
-    section2.hidden = true;
+    const section1 = makePreviewSection(true);
+    const section2 = makePreviewSection(true);
     els.popup.appendChild(section1);
     els.popup.appendChild(section2);
     const field = new PopupField(makeConfig({ els }));
@@ -184,11 +187,8 @@ describe("PopupField", () => {
 
   test("syncEnabledFromSections enables trigger when a section is visible with content", () => {
     const els = makeEls();
-    const section1 = document.createElement("div") as unknown as HTMLElement;
-    section1.className = "preview-section";
-    section1.hidden = true;
-    const section2 = document.createElement("div") as unknown as HTMLElement;
-    section2.className = "preview-section";
+    const section1 = makePreviewSection(true);
+    const section2 = makePreviewSection(false);
     section2.appendChild(document.createElement("div") as unknown as HTMLElement);
     els.popup.appendChild(section1);
     els.popup.appendChild(section2);
@@ -200,9 +200,20 @@ describe("PopupField", () => {
 
   test("syncEnabledFromSections disables trigger when section is visible but empty", () => {
     const els = makeEls();
-    const section = document.createElement("div") as unknown as HTMLElement;
-    section.className = "preview-section";
+    const section = makePreviewSection(false);
     els.popup.appendChild(section);
+    const field = new PopupField(makeConfig({ els }));
+    field.syncEnabledFromSections("No modules");
+    expect(els.trigger.disabled).toBe(true);
+  });
+
+  test("syncEnabledFromSections ignores nested preview-section elements", () => {
+    const els = makeEls();
+    const outer = makePreviewSection(true);
+    const inner = makePreviewSection(false);
+    inner.appendChild(document.createElement("div") as unknown as HTMLElement);
+    outer.appendChild(inner);
+    els.popup.appendChild(outer);
     const field = new PopupField(makeConfig({ els }));
     field.syncEnabledFromSections("No modules");
     expect(els.trigger.disabled).toBe(true);

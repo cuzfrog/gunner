@@ -6,7 +6,7 @@ export interface PopupFieldEls {
   readonly trigger: HTMLButtonElement;
   readonly popup: HTMLElement;
   readonly section?: HTMLElement;
-  readonly summary: HTMLElement;
+  readonly summary?: HTMLElement;
 }
 
 export interface PopupFieldConfig {
@@ -66,8 +66,8 @@ export class PopupField {
   }
 
   syncEnabledFromSections(emptyHint: string): void {
-    const sections = this.els.popup.querySelectorAll<HTMLElement>(".preview-section");
-    const hasContent = Array.from(sections).some((s) => !s.hidden && s.children.length > 0);
+    const sections = Array.from(this.els.popup.children).filter((c): c is HTMLElement => c instanceof HTMLElement && c.classList.contains("preview-section"));
+    const hasContent = sections.some((s) => !s.hidden && s.children.length > 0);
     this.setEnabled(hasContent, hasContent ? "" : emptyHint);
   }
 }

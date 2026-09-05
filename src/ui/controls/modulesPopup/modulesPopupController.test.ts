@@ -3,7 +3,7 @@ import { UiEventsImpl } from "../../events";
 import { createControlsEls } from "../elements";
 import { ModulesPopupImpl } from "./modulesPopupController";
 import type { ModulesPopupEls } from "./modulesPopupControllerContract";
-import type { I18n } from "../../i18n";
+import type { I18n, Language } from "../../i18n";
 import type { PopupGroup, Popup } from "../popup";
 
 beforeEach(() => {
@@ -14,7 +14,7 @@ beforeEach(() => {
 
 function fakeI18n(): I18n {
   return vi.mocked<I18n>({
-    current: vi.fn(() => "en"),
+    current: vi.fn((): Language => "en"),
     setLanguage: vi.fn(),
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),
@@ -47,8 +47,10 @@ function buildModulesPopup() {
     },
   };
   for (const section of [els.shipA.ewar.section, els.shipA.boosterSection, els.shipB.ewar.section, els.shipB.boosterSection]) {
-    (section as unknown as FakeElement).className = "preview-section";
-    (section as unknown as FakeElement).hidden = true;
+    const el = section as unknown as FakeElement;
+    el.className = "preview-section";
+    el.hidden = true;
+    el.classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn(), contains: ((cls: string) => cls === "preview-section") as unknown as ReturnType<typeof vi.fn> };
   }
   (els.shipA.ewar.popup as unknown as FakeElement).appendChild(els.shipA.ewar.section as unknown as FakeElement);
   (els.shipA.ewar.popup as unknown as FakeElement).appendChild(els.shipA.boosterSection as unknown as FakeElement);
@@ -139,5 +141,30 @@ describe("ModulesPopup", () => {
     ewarSection.innerHTML = "";
     controller.syncEnabled();
     expect(trigger.disabled).toBe(false);
+  });
+
+  test("shipB trigger mirrors shipA behavior", () => {
+    const { document, els, controller } = buildModulesPopup();
+    const trigger = getFake(document, "ship-b-ewar-trigger") as unknown as HTMLButtonElement;
+    expect(trigger.disabled).toBe(true);
+    makeVisible(els.shipB.boosterSection);
+    controller.syncEnabled();
+    expect(trigger.disabled).toBe(false);
+  });
+
+  test("onFittingImported closes both popups", () => {
+    const { document, els, events, controller } = buildModulesPopup();
+    makeVisible(els.shipA.boosterSection);
+    makeVisible(els.shipB.boosterSection);
+    controller.syncEnabled();
+    const shipATrigger = getFake(document, "ship-a-ewar-trigger");
+    const shipBTrigger = getFake(document, "ship-b-ewar-trigger");
+    shipATrigger.dispatchEvent(new Event("click"));
+    shipBTrigger.dispatchEvent(new Event("click"));
+    expect(getFake(document, "ship-a-ewar-popup").hidden).toBe(false);
+    expect(getFake(document, "ship-b-ewar-popup").hidden).toBe(false);
+    events.emitFittingImported("shipA", {} as never);
+    expect(getFake(document, "ship-a-ewar-popup").hidden).toBe(true);
+    expect(getFake(document, "ship-b-ewar-popup").hidden).toBe(true);
   });
 });

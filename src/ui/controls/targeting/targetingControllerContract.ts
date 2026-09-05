@@ -4,6 +4,7 @@ import type { PopupFieldEls } from "../shared";
 
 export interface TargetingFieldEls extends PopupFieldEls {
   readonly section: HTMLElement;
+  readonly summary: HTMLElement;
 }
 
 export type TargetingEls = Sided<TargetingFieldEls>;
