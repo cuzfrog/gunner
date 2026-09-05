@@ -39,7 +39,6 @@ function fakeEvents(): UiEvents & { readonly listeners: Record<string, ((...args
     onLanguageChanged: (cb: (...args: unknown[]) => void): void => { (listeners.onLanguageChanged ??= []).push(cb); },
     onConfigInvalidated: (cb: (...args: unknown[]) => void): void => { (listeners.onConfigInvalidated ??= []).push(cb); },
     emitConfigInvalidated: (): void => {},
-    emitDistanceChanged: (): void => {},
     emitLanguageChanged: (): void => {},
   } as unknown as UiEvents & { readonly listeners: Record<string, ((...args: unknown[]) => void)[]> };
 }

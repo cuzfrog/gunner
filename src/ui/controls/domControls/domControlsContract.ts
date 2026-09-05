@@ -9,7 +9,6 @@ export interface DomControlsDeps {
 
 export interface DomControlsHost {
   wireControls(): void;
-  currentDistance(): number;
   onPlayPause(): void;
   onReset(): void;
   onSpeedChange(speed: number): void;

@@ -4,8 +4,8 @@ import {
   type SimConfig,
   type WeaponSpec,
 } from "../../../sim";
-import { isEventTargetWithClosest, num } from "../controlsDom";
-import type { Controls, ControlsCallbacks, EffectiveReadouts } from "../controlsContract";
+import { isEventTargetWithClosest } from "../controlsDom";
+import type { Controls, ControlsCallbacks } from "../controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
 import type { EffectiveReadout } from "../effectiveReadout";
 import type { FittingPreviewManager, PopupGroup } from "../popup";
@@ -101,7 +101,6 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly simConfigSource: SimConfigSource;
   private readonly viewStream: ViewStream;
   private readonly now: () => number;
-  private currentDistanceValue: number;
   private lastReadoutApplyMs = -Infinity;
   private cachedView?: EngineView;
 
@@ -137,7 +136,6 @@ export class DomControls implements Controls, DomControlsHost {
     this.simConfigSource = all.simConfigSource;
     this.viewStream = all.viewStream;
     this.now = all.now;
-    this.currentDistanceValue = num(this.els.initialDistance);
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated(() => this.onConfigInvalidated());
     this.deps.events.onDisplayInvalidated(() => this.onDisplayChange());
@@ -188,7 +186,6 @@ export class DomControls implements Controls, DomControlsHost {
     this.updatePlayEnabled();
     this.callbacks?.onConfigChange();
   }
-  currentDistance(): number { return this.currentDistanceValue; }
   onDisplayChange(): void {
     this.preferencesController.savePreferences();
     this.notifyDisplayChange();
@@ -299,7 +296,6 @@ export class DomControls implements Controls, DomControlsHost {
   setCallbacks(callbacks: ControlsCallbacks): void { this.callbacks = callbacks; }
 
   private onReadouts(view: EngineView): void {
-    this.currentDistanceValue = view.frame.distance;
     this.cachedView = view;
     this.defenseController.updateDefenseView(view.defenseRuntime);
     this.applyReadoutsIfReady();
