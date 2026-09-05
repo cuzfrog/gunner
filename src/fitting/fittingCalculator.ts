@@ -9,7 +9,7 @@ import type { MissileCatalog } from "./missileCatalog";
 import type { MissileSkillModel } from "./missileStats";
 import type { DroneCatalog, ImportedDrone } from "./droneCatalog";
 import type { DroneSkillModel } from "./droneStats";
-import { STANDARD_SIGNATURE_RESOLUTION, sigResolutionClassFromChargeSize } from "./turretStats";
+import { sigResolutionClassFromChargeSize, toTrackingRadPerSecond } from "./turretStats";
 import type { FittingState, FittedModule } from "./fittingState";
 import type { ItemNameCatalog } from "../gamedata/itemNames";
 import { type DamageBreakdown, type DamageFactor, chargeDamageByType, droneDamageByType, missileDamageByType } from "./damageBreakdown";
@@ -158,7 +158,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const falloffScore = turret.falloff * skillFalloffMultiplier * falloffBonus;
 
       const base: ImportedTurretBase = {
-        tracking: (trackingScore * sigRes) / STANDARD_SIGNATURE_RESOLUTION,
+        tracking: toTrackingRadPerSecond(trackingScore, sigRes),
         optimal: optimalScore,
         falloff: falloffScore,
       };

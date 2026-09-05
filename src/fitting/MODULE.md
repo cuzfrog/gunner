@@ -31,11 +31,9 @@ no-new-exports:
   - module.ts
   - presetFittings.test.ts
   - presetFittings.ts
-  - turretStats.ts
   - fittingState.ts
   - defenseCalculator.test.ts
   - defenseCalculator.ts
-  - index.ts
   - fittingCalculator.ts
   - damageBreakdown.ts
 ---
@@ -106,4 +104,4 @@ Internal files such as `eft.ts`, `fittingImport.ts`, `chargeCatalog.ts`,
 `presetFittings.ts` and their sibling tests are reached only by their
 sibling tests and by `module.ts`.
 
-Gate relaxed: `fittingState.ts`, `fittingCalculator.ts`, `damageBreakdown.ts`, `defenseCalculator.ts`, and `index.ts` were removed from `no-new-exports` to add `DroneGroup`, `droneBoosterModules`, `droneGroups`, `resolveDrones`, and `droneDamageByType` alongside the existing turret/missile fitting contracts, and to re-export `DefenseModuleStats`, `DefenseLayer`, `DefenseRepairerOverload`, `DefenseAncillary` from `gamedata/fittingDb` and `DamageResists` from `sim` for downstream defense-simulator consumption. `defenseCalculator.ts` exports `DefenseCalculator` for `FittingImport` and DI registration. These are cross-boundary DTOs and calculator methods consumed by `sim`, `app`, and `ui`.
+Gate relaxed: `fittingState.ts`, `fittingCalculator.ts`, `damageBreakdown.ts`, `defenseCalculator.ts`, and `index.ts` were removed from `no-new-exports` to add `DroneGroup`, `droneBoosterModules`, `droneGroups`, `resolveDrones`, and `droneDamageByType` alongside the existing turret/missile fitting contracts, and to re-export `DefenseModuleStats`, `DefenseLayer`, `DefenseRepairerOverload`, `DefenseAncillary` from `gamedata/fittingDb` and `DamageResists` from `sim` for downstream defense-simulator consumption. `defenseCalculator.ts` exports `DefenseCalculator` for `FittingImport` and DI registration. These are cross-boundary DTOs and calculator methods consumed by `sim`, `app`, and `ui`. `turretStats.ts` was removed from `no-new-exports` to add `toTrackingScore` and `toTrackingRadPerSecond` alongside the existing `STANDARD_SIGNATURE_RESOLUTION` constant. The score conversion functions are fitting-domain stats shared by `fittingCalculator` (score→rad/s) and the UI tracking input control (rad/s↔score), so the fitting module is the single home for the conversion.
