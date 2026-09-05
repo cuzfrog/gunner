@@ -55,6 +55,7 @@ export const EN: LanguageSlice<"en"> = {
   "label.ewar.dampener": { en: "Sensor Dampeners" },
   "label.rangeOverlays": { en: "EWAR range overlays" },
   "title.ewar.empty": { en: "No e-war modules fitted" },
+  "title.modules.empty": { en: "No modules fitted" },
   "label.defense": { en: "Defense" },
   "title.defense.empty": { en: "No defense data available" },
   "label.targeting": { en: "Targeting" },

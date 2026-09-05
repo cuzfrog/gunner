@@ -17,8 +17,15 @@ import {
 } from "./elementContract";
 import type { PopupFieldEls } from "./shared";
 import type { DefenseFieldEls } from "./defense";
-import type { EwarFieldEls } from "./ewar";
 import type { TargetingFieldEls } from "./targeting";
+
+interface ModulesFieldEls {
+  readonly field: HTMLElement;
+  readonly trigger: HTMLButtonElement;
+  readonly popup: HTMLElement;
+  readonly section: HTMLElement;
+  readonly summary: HTMLElement;
+}
 
 type GlobalControlsEls = {
   readonly [K in keyof GlobalElementDefinitionMap]: ElementForTag<GlobalElementDefinitionMap[K]["tag"]>;
@@ -79,7 +86,7 @@ interface CombatantEls {
   readonly overload: HTMLInputElement;
   readonly overloadButton: HTMLButtonElement;
   readonly defense: DefenseFieldEls;
-  readonly ewar: EwarFieldEls;
+  readonly ewar: ModulesFieldEls;
   readonly targeting: TargetingFieldEls;
   readonly boosterSection: HTMLElement;
   readonly boosterSummary: HTMLElement;

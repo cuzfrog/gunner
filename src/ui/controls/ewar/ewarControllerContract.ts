@@ -1,10 +1,11 @@
 import type { EwarLoadout, EwarProjection } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 import type { Sided } from "../side";
-import type { PopupFieldEls } from "../shared";
 
-export interface EwarFieldEls extends PopupFieldEls {
+export interface EwarFieldEls {
+  readonly field: HTMLElement;
   readonly section: HTMLElement;
+  readonly summary: HTMLElement;
 }
 
 export type EwarEls = Sided<EwarFieldEls>;

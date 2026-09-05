@@ -64,4 +64,10 @@ export class PopupField {
     section.innerHTML = "";
     return section;
   }
+
+  syncEnabledFromSections(emptyHint: string): void {
+    const sections = this.els.popup.querySelectorAll<HTMLElement>(".preview-section");
+    const hasContent = Array.from(sections).some((s) => !s.hidden && s.children.length > 0);
+    this.setEnabled(hasContent, hasContent ? "" : emptyHint);
+  }
 }

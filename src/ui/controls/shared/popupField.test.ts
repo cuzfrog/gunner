@@ -165,4 +165,46 @@ describe("PopupField", () => {
     expect(closed).toBe(true);
     void field;
   });
+
+  test("syncEnabledFromSections disables trigger when all sections empty", () => {
+    const els = makeEls();
+    const section1 = document.createElement("div") as unknown as HTMLElement;
+    section1.className = "preview-section";
+    section1.hidden = true;
+    const section2 = document.createElement("div") as unknown as HTMLElement;
+    section2.className = "preview-section";
+    section2.hidden = true;
+    els.popup.appendChild(section1);
+    els.popup.appendChild(section2);
+    const field = new PopupField(makeConfig({ els }));
+    field.syncEnabledFromSections("No modules");
+    expect(els.trigger.disabled).toBe(true);
+    expect(els.trigger.getAttribute("data-hint")).toBe("No modules");
+  });
+
+  test("syncEnabledFromSections enables trigger when a section is visible with content", () => {
+    const els = makeEls();
+    const section1 = document.createElement("div") as unknown as HTMLElement;
+    section1.className = "preview-section";
+    section1.hidden = true;
+    const section2 = document.createElement("div") as unknown as HTMLElement;
+    section2.className = "preview-section";
+    section2.appendChild(document.createElement("div") as unknown as HTMLElement);
+    els.popup.appendChild(section1);
+    els.popup.appendChild(section2);
+    const field = new PopupField(makeConfig({ els }));
+    field.syncEnabledFromSections("No modules");
+    expect(els.trigger.disabled).toBe(false);
+    expect(els.trigger.getAttribute("data-hint")).toBe("");
+  });
+
+  test("syncEnabledFromSections disables trigger when section is visible but empty", () => {
+    const els = makeEls();
+    const section = document.createElement("div") as unknown as HTMLElement;
+    section.className = "preview-section";
+    els.popup.appendChild(section);
+    const field = new PopupField(makeConfig({ els }));
+    field.syncEnabledFromSections("No modules");
+    expect(els.trigger.disabled).toBe(true);
+  });
 });

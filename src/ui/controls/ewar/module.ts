@@ -10,7 +10,7 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 export function registerEwarModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     ewarEffectDescriber: asClass(EwarEffectDescriberImpl).singleton(),
-    ewarController: asFunction(({ els, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber, uiEvents }) => new EwarControllerImpl({
+    ewarController: asFunction(({ els, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber, uiEvents, modulesPopup }) => new EwarControllerImpl({
       els: ewarEls(els),
       popupGroup,
       imageCatalog,
@@ -18,13 +18,14 @@ export function registerEwarModule<T extends ControlsCradle>(cradle: AwilixConta
       i18n,
       ewarEffectDescriber,
       events: uiEvents,
+      modulesPopup,
     })).singleton(),
   });
 }
 
 function ewarEls(els: ControlsElements): EwarEls {
   return {
-    shipA: els.shipA.ewar,
-    shipB: els.shipB.ewar,
+    shipA: { field: els.shipA.ewar.field, section: els.shipA.ewar.section, summary: els.shipA.ewar.summary },
+    shipB: { field: els.shipB.ewar.field, section: els.shipB.ewar.section, summary: els.shipB.ewar.summary },
   };
 }

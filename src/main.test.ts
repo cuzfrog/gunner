@@ -91,6 +91,14 @@ class FakeElement {
     return this.children[0] ?? null;
   }
 
+  querySelectorAll(selector: string): FakeElement[] {
+    if (selector.startsWith(".")) {
+      const className = selector.slice(1).split(/[.:\s>+~\[]/)[0];
+      return collectByClassName(this, className);
+    }
+    return [];
+  }
+
   contains(shipB: FakeElement): boolean {
     if (shipB === this) return true;
     return this.children.some((child) => child.contains(shipB));
@@ -317,3 +325,12 @@ describe("main", () => {
     await expect(container.cradle.clipboard.readText()).rejects.toThrow(ClipboardUnavailableError);
   });
 });
+
+function collectByClassName(root: FakeElement, className: string): FakeElement[] {
+  const results: FakeElement[] = [];
+  for (const child of root.children) {
+    if (child.className.split(" ").includes(className)) results.push(child);
+    results.push(...collectByClassName(child, className));
+  }
+  return results;
+}

@@ -55,6 +55,7 @@ export const JA: LanguageSlice<"ja"> = {
   "label.ewar.dampener": { ja: "センサーダンプナー" },
   "label.rangeOverlays": { ja: "EWARレンジオーバーレイ" },
   "title.ewar.empty": { ja: "電子戦モジュール未装備" },
+  "title.modules.empty": { ja: "モジュール未装備" },
   "label.defense": { ja: "防衛" },
   "title.defense.empty": { ja: "防御データなし" },
   "label.targeting": { ja: "ターゲッティング" },

@@ -9,9 +9,10 @@ import { formatMultiplier, scriptStatSuffix } from "../controlsFormat";
 import { html } from "../markup";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
-import { SelectableListImpl, type SelectableItem, IconActionImpl, PopupField, SectionBlockImpl, spriteIcon } from "../shared";
+import { SelectableListImpl, type SelectableItem, IconActionImpl, SectionBlockImpl, spriteIcon } from "../shared";
 import type { EwarController, EwarEls } from "./ewarControllerContract";
 import type { EwarEffectDescriber } from "./ewarEffectDescriber";
+import type { ModulesPopup } from "../modulesPopup";
 
 interface MutableEwarActivation {
   webs: { active: boolean; overloaded: boolean }[];
@@ -44,9 +45,8 @@ export class EwarControllerImpl implements EwarController {
   private readonly gearAction: IconActionImpl;
   private readonly overloadAction: IconActionImpl;
   private readonly sectionBlock: SectionBlockImpl;
-  private readonly fields: Record<Side, PopupField>;
 
-  constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; events: UiEvents }) {
+  constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; events: UiEvents; modulesPopup: ModulesPopup }) {
     this.els = deps.els;
     this.imageCatalog = deps.imageCatalog;
     this.fittingImport = deps.fittingImport;
@@ -75,10 +75,8 @@ export class EwarControllerImpl implements EwarController {
     this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
     deps.popupGroup.register(this.scriptPopups.shipA);
     deps.popupGroup.register(this.scriptPopups.shipB);
-    this.fields = {
-      shipA: new PopupField({ els: deps.els.shipA, popupGroup: deps.popupGroup, onClose: () => this.scriptPopups.shipA.close() }),
-      shipB: new PopupField({ els: deps.els.shipB, popupGroup: deps.popupGroup, onClose: () => this.scriptPopups.shipB.close() }),
-    };
+    deps.modulesPopup.registerOnClose("shipA", () => this.scriptPopups.shipA.close());
+    deps.modulesPopup.registerOnClose("shipB", () => this.scriptPopups.shipB.close());
     this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.ewar));
     this.events.onLanguageChanged(() => this.render());
     this.render();
@@ -161,25 +159,22 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private renderSide(side: Side): void {
-    const field = this.fields[side];
+    const section = this.els[side].section;
     const summary = this.els[side].summary;
     const state = this.states.get(side);
     const modulesLabel = this.i18n.t("label.modules");
-    field.applyLabel(modulesLabel);
     this.scriptPopups[side].close();
     this.scriptGears.delete(side);
     this.disruptorNameSpans.delete(side);
     this.dampenerNameSpans.delete(side);
-    const section = field.clearSection();
+    section.innerHTML = "";
     if (!state || this.isEmpty(state.loadout)) {
-      field.setEnabled(false, this.i18n.t("title.ewar.empty"));
+      section.hidden = true;
       summary.innerHTML = "";
-      field.close();
       return;
     }
-    field.setEnabled(true, "");
+    section.hidden = false;
     this.updateSummary(side);
-    if (!section) return;
     const heading = html`<div class="preview-section-label">${modulesLabel}</div>`;
     section.appendChild(heading);
     if (state.loadout.webs.length > 0) {
@@ -200,7 +195,6 @@ export class EwarControllerImpl implements EwarController {
     if (state.loadout.dampeners.length > 0) {
       this.renderSection(section, "label.ewar.dampener", (container) => this.renderDampeners(side, state, container));
     }
-    field.close();
   }
 
   private renderSection(

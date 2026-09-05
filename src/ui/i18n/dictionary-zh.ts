@@ -55,6 +55,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "label.ewar.dampener": { zh: "感应器抑阻器" },
   "label.rangeOverlays": { zh: "电子战距离覆盖" },
   "title.ewar.empty": { zh: "未装配电子战模块" },
+  "title.modules.empty": { zh: "未装配模块" },
   "label.defense": { zh: "防御" },
   "title.defense.empty": { zh: "无防御数据" },
   "label.targeting": { zh: "锁定" },

@@ -12,6 +12,7 @@ import { UiEventsImpl } from "../../events";
 import { EwarControllerImpl } from "./ewarController";
 import type { EwarEls } from "./ewarControllerContract";
 import type { EwarEffectDescriber } from "./ewarEffectDescriber";
+import type { ModulesPopup } from "../modulesPopup";
 
 const WEB: StasisWebSpec = { moduleName: "Stasis Webifier I", moduleId: toTypeId("526"), maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 15 };
 const WEB2: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 12000, speedFactor: -0.55, overloadRangeBonusPercent: 15 };
@@ -103,11 +104,11 @@ function buildEwarController(
   const popupGroup = new FakePopupGroup();
   const els = createControlsEls();
   const ewarEls: EwarEls = {
-    shipA: els.shipA.ewar,
-    shipB: els.shipB.ewar,
+    shipA: { field: els.shipA.ewar.field, section: els.shipA.ewar.section, summary: els.shipA.ewar.summary },
+    shipB: { field: els.shipB.ewar.field, section: els.shipB.ewar.section, summary: els.shipB.ewar.summary },
   };
-  const shipAPopup = ewarEls.shipA.popup;
-  const shipBPopup = ewarEls.shipB.popup;
+  const shipAPopup = els.shipA.ewar.popup;
+  const shipBPopup = els.shipB.ewar.popup;
   shipAPopup.appendChild(els.shipA.ewar.section);
   shipAPopup.appendChild(els.shipA.boosterSection);
   shipBPopup.appendChild(els.shipB.ewar.section);
@@ -156,9 +157,10 @@ function buildEwarController(
   });
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
-  const controller = new EwarControllerImpl({ els: ewarEls, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber, events });
+  const modulesPopup = vi.mocked<ModulesPopup>({ registerOnClose: vi.fn(), syncEnabled: vi.fn() });
+  const controller = new EwarControllerImpl({ els: ewarEls, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber, events, modulesPopup });
   events.emitDistanceChanged(5000);
-  return { document, controller, els, i18n, imageCatalog, popupGroup, fittingImport, ewarEffectDescriber, events, emitConfigInvalidated };
+  return { document, controller, els, i18n, imageCatalog, popupGroup, fittingImport, ewarEffectDescriber, events, emitConfigInvalidated, modulesPopup };
 }
 
 function ewarSection(document: Document, side: "shipA" | "shipB"): FakeElement {
@@ -213,18 +215,12 @@ function selectedScriptOption(popup: FakeElement): FakeElement | undefined {
 }
 
 describe("EwarController", () => {
-  test("setLoadout renders sections, rows, and per-kind summary for mixed loadouts and disables trigger for empty loadouts", () => {
+  test("setLoadout renders sections, rows, and per-kind summary for mixed loadouts and hides section for empty loadouts", () => {
     const { controller, document } = buildEwarController();
     const loadout: EwarLoadout = { webs: [WEB2], disruptors: [DISRUPTOR, DISRUPTOR2], grapplers: [], scramblers: [], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], };
     controller.setLoadout("shipA", loadout);
 
-    const trigger = getFake(document, "ship-a-ewar-trigger");
     const summary = getFake(document, "ship-a-ewar-summary");
-    const popup = getFake(document, "ship-a-ewar-popup");
-    expect(trigger.disabled).toBe(false);
-    expect(trigger.getAttribute("aria-label")).toBe("label.modules");
-    expect(trigger.getAttribute("data-hint")).toBe("");
-    expect(popup.getAttribute("aria-label")).toBe("label.modules");
     expect(summary.children.length).toBe(2);
 
     const webSummary = summary.children[0];
@@ -287,9 +283,7 @@ describe("EwarController", () => {
     expect(secondGear.disabled).toBe(false);
 
     controller.setLoadout("shipB", EMPTY_EWAR_LOADOUT);
-    const shipBTrigger = getFake(document, "ship-b-ewar-trigger");
-    expect(shipBTrigger.disabled).toBe(true);
-    expect(shipBTrigger.getAttribute("data-hint")).toBe("title.ewar.empty");
+    expect(ewarSection(document, "shipB").hidden).toBe(true);
     expect(getFake(document, "ship-b-ewar-summary").children.length).toBe(0);
     expect(ewarSection(document, "shipB").children.length).toBe(0);
   });
@@ -325,9 +319,7 @@ describe("EwarController", () => {
     const loadout: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], };
     controller.setLoadout("shipA", loadout);
 
-    const trigger = getFake(document, "ship-a-ewar-trigger");
     const summary = getFake(document, "ship-a-ewar-summary");
-    expect(trigger.disabled).toBe(false);
     expect(summary.children.length).toBe(1);
     expect(summary.children[0].getAttribute("data-hint")).toBe("scrambler-hint");
     expect(ewarSection(document, "shipA").children.filter((c) => c.className === "preview-section").length).toBe(1);
@@ -401,13 +393,10 @@ describe("EwarController", () => {
 
   test("renders one, two, or zero sections based on loadout contents", () => {
     const { controller, document } = buildEwarController();
-    const trigger = getFake(document, "ship-a-ewar-trigger");
-    const popup = getFake(document, "ship-a-ewar-popup");
     const ewar = ewarSection(document, "shipA");
 
     controller.setLoadout("shipA", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], });
-    expect(trigger.getAttribute("aria-label")).toBe("label.modules");
-    expect(popup.getAttribute("aria-label")).toBe("label.modules");
+    expect(ewar.hidden).toBe(false);
     expect(ewar.children.filter((c) => c.className === "preview-section").length).toBe(1);
     expect(webSection(document, "shipA")!.children[0].textContent).toBe("label.ewar.web");
 
@@ -421,6 +410,7 @@ describe("EwarController", () => {
     expect(disruptorSection(document, "shipA")!.children[0].textContent).toBe("label.ewar.disruptor");
 
     controller.setLoadout("shipA", EMPTY_EWAR_LOADOUT);
+    expect(ewar.hidden).toBe(true);
     expect(ewar.children.length).toBe(0);
   });
 
@@ -551,16 +541,8 @@ describe("EwarController", () => {
     const loadout: EwarLoadout = { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], };
     controller.setLoadout("shipA", loadout);
 
-    const trigger = getFake(document, "ship-a-ewar-trigger");
     const popup = getFake(document, "ship-a-ewar-popup");
     expect(popup.hidden).toBe(true);
-    expect(trigger.getAttribute("aria-expanded")).toBe("false");
-    trigger.trigger("click");
-    expect(popup.hidden).toBe(false);
-    expect(trigger.getAttribute("aria-expanded")).toBe("true");
-    trigger.trigger("click");
-    expect(popup.hidden).toBe(true);
-    expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 
   test("script popup opens from gear, highlights current option, and closes on selection", () => {
