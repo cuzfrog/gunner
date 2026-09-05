@@ -249,30 +249,7 @@ export class DomControls implements Controls, DomControlsHost {
     if (turret) return turret;
     return this.launcherControllers[side].currentMissileSpec();
   }
-  getWeapons(side: Side): readonly WeaponSpec[] {
-    const activeKind = this.weaponSystemSwitches[side].activeKind();
-    const weapons: WeaponSpec[] = [];
-    if (activeKind === "drone") {
-      for (const spec of this.droneControllers[side].currentDroneSpecs()) weapons.push(spec);
-    } else if (activeKind === "missile") {
-      const missile = this.launcherControllers[side].currentMissileSpec();
-      if (missile) weapons.push(missile);
-    } else {
-      for (const turret of this.turretControllers[side].currentTurretSpecs()) weapons.push(turret);
-    }
-    if (activeKind !== "turret") {
-      for (const turret of this.turretControllers[side].currentTurretSpecs()) weapons.push(turret);
-    }
-    if (activeKind !== "missile") {
-      const missile = this.launcherControllers[side].currentMissileSpec();
-      if (missile) weapons.push(missile);
-    }
-    if (activeKind !== "drone") {
-      for (const spec of this.droneControllers[side].currentDroneSpecs()) weapons.push(spec);
-    }
-    return weapons;
-  }
-  getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
+  private getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
   getEngineConfig(): EngineConfig { return this.simConfigSource.getEngineConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
@@ -283,7 +260,6 @@ export class DomControls implements Controls, DomControlsHost {
   getWeaponRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getWeaponRangeVisibility(); }
   getDroneRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneRangeVisibility(); }
   getDroneControlRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneControlRangeVisibility(); }
-  hasWeapon(side: Side): boolean { return this.turretControllers[side].turret() !== undefined || this.launcherControllers[side].launcher() !== undefined || this.droneControllers[side].drone() !== undefined; }
   setPlaying(playing: boolean): void {
     if (!playing && this.playing && this.cachedView) {
       this.applyReadouts(this.cachedView);

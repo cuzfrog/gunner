@@ -21,7 +21,6 @@ export interface EffectiveReadouts {
 
 export interface Controls {
   getWeapon(side: Side): WeaponSpec | undefined;
-  getSig(side: Side): number;
   getConfig(): SimConfig;
   getEngineConfig(): EngineConfig;
   getSpeed(): number;
@@ -32,7 +31,6 @@ export interface Controls {
   getDroneRangeVisibility(): WeaponRangeVisibility;
   getDroneControlRangeVisibility(): WeaponRangeVisibility;
   getOverlays(): readonly RangeOverlay[];
-  hasWeapon(side: Side): boolean;
   setPlaying(playing: boolean): void;
   setCallbacks(callbacks: ControlsCallbacks): void;
 }

@@ -73,7 +73,6 @@ function baseView(): EngineView {
 
 const controls = vi.mocked<Controls>({
   getWeapon: vi.fn(),
-  getSig: vi.fn(),
   getConfig: vi.fn(),
   getEngineConfig: vi.fn(() => engineConfig),
   getSpeed: vi.fn(() => 1),
@@ -84,7 +83,6 @@ const controls = vi.mocked<Controls>({
   getDroneRangeVisibility: vi.fn(() => "none" as const),
   getDroneControlRangeVisibility: vi.fn(() => "none" as const),
   getOverlays: vi.fn(() => []),
-  hasWeapon: vi.fn(),
   setPlaying: vi.fn(),
   setCallbacks: vi.fn(),
 });
@@ -128,7 +126,6 @@ describe("AppImpl", () => {
 
   beforeEach(() => {
     controls.getWeapon.mockReturnValue(turret);
-    controls.hasWeapon.mockReturnValue(true);
     viewListeners.clear();
     destroyListeners.clear();
     engine.reset.mockImplementation(() => { const v = baseView(); emitView(v); return v; });

@@ -1,4 +1,5 @@
 import type { WeaponKind } from "../../../sim";
+import { formatWithCommas } from "../../format";
 import { html } from "../markup";
 
 export interface AppliedDpsHintRow {
@@ -74,10 +75,6 @@ function renderTotal(model: AppliedDpsHintModel, t: (key: string) => string): HT
       <span class="dps-hint-value">${formatPercent(model.totalApplication)}</span>
     </div>
   </div>` as unknown as HTMLElement;
-}
-
-function formatWithCommas(value: number, decimals = 0): string {
-  return value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 
 function formatPercent(value: number): string {
