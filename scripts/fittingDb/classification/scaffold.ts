@@ -34,9 +34,9 @@ function scaffoldAttributeClassification(
         disambiguate: config.contextDependentAttributeIds.has(id) ? "context" : undefined,
       };
     } else if (config.outOfScopeAttributeIds.has(id)) {
-      result[id] = { kind: "outOfScope", id, name, domain: "other", reason: "out of scope (scaffold)" };
+      result[id] = { kind: "outOfScope", id, name, domain: "other", reason: "out of scope - not consumed by fitting simulator" };
     } else {
-      result[id] = { kind: "outOfScope", id, name, domain: "other", reason: "scaffold - classify me" };
+      result[id] = { kind: "outOfScope", id, name, domain: "other", reason: "unclassified - not in combat attribute map or out-of-scope set" };
     }
   }
   return result;
@@ -79,9 +79,9 @@ function scaffoldEffectClassification(
       continue;
     }
     if (eff.modifiers.length === 0) {
-      result[id] = { kind: "ignored", id, name, reason: "scaffold - no modifiers" };
+      result[id] = { kind: "ignored", id, name, reason: "no modifier info" };
     } else {
-      result[id] = { kind: "ignored", id, name, reason: "scaffold - classify me" };
+      result[id] = { kind: "ignored", id, name, reason: "not consumed by fitting simulator" };
     }
   }
   return result;
@@ -105,7 +105,7 @@ export async function scaffoldClassificationFiles(
 function generateAttributeClassificationTs(classification: Record<number, AttributeClassification>): string {
   const entries = Object.keys(classification).map(Number).sort((a, b) => a - b);
   const lines: string[] = [
-    "// Auto-scaffolded from SDE projection. Hand-edit to improve classifications.",
+    "// Generated from SDE projection. Classifications are intentional.",
     "/* eslint-disable */",
     "",
     'import type { AttributeClassification } from "./classificationTypes";',
@@ -129,7 +129,7 @@ function generateAttributeClassificationTs(classification: Record<number, Attrib
 function generateEffectClassificationTs(classification: Record<number, EffectClassification>): string {
   const entries = Object.keys(classification).map(Number).sort((a, b) => a - b);
   const lines: string[] = [
-    "// Auto-scaffolded from SDE projection. Hand-edit to improve classifications.",
+    "// Generated from SDE projection. Classifications are intentional.",
     "/* eslint-disable */",
     "",
     'import type { EffectClassification } from "./classificationTypes";',

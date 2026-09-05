@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { buildProjection } from "./fittingDb/projection";
 import { scaffoldClassificationFiles } from "./fittingDb/classification/scaffold";
 import type { RigDrawbackKind } from "./fittingDb/classification/classificationTypes";
-import { COMBAT_ATTRIBUTE_MAP, OUT_OF_SCOPE_ATTRIBUTE_IDS, NON_SCALING_EFFECT_IDS } from "./fittingDb/classification/knownMaps";
+import { COMBAT_ATTRIBUTE_MAP, OUT_OF_SCOPE_ATTRIBUTE_IDS, NON_SCALING_EFFECT_IDS } from "./fittingDb/classification/scaffoldSeed";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const OUT_DIR = join(import.meta.dir, "fittingDb", "classification");
@@ -28,6 +28,9 @@ async function main(): Promise<void> {
     [5268, "repairPowerGrid"],
   ]);
   const knownModifierEffectIds = new Map<number, "hullBonus" | "skillBonus" | "moduleStat" | "none">();
+  for (const eid of NON_SCALING_EFFECT_IDS) {
+    knownModifierEffectIds.set(eid, "none");
+  }
   const knownActionEffectIds = new Map<number, "defense" | "none">();
 
   await scaffoldClassificationFiles(projection, {

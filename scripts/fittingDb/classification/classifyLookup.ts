@@ -1,6 +1,5 @@
 import { ATTRIBUTE_CLASSIFICATION } from "./attributeClassification";
 import { EFFECT_CLASSIFICATION } from "./effectClassification";
-import { NON_SCALING_EFFECT_IDS } from "./knownMaps";
 import type { RigDrawbackKind } from "./classificationTypes";
 import type { HullBonusAttribute } from "../../../src/gamedata/fittingDb/types";
 
@@ -31,7 +30,7 @@ export function isOutOfScopeAttribute(id: number): boolean {
 export function isNonScalingEffect(id: number): boolean {
   const c = EFFECT_CLASSIFICATION[id];
   if (c?.kind === "modifier") return !c.scalesWithHullSkill;
-  return NON_SCALING_EFFECT_IDS.has(id);
+  return false;
 }
 
 export function effectDrawbackKind(id: number): RigDrawbackKind | undefined {

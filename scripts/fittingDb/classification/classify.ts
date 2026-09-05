@@ -8,6 +8,8 @@ export interface ClassificationAssertResult {
   readonly extraEffectIds: readonly number[];
   readonly attributeNameMismatches: readonly { readonly id: number; readonly classificationName: string; readonly projectionName: string }[];
   readonly effectNameMismatches: readonly { readonly id: number; readonly classificationName: string; readonly projectionName: string }[];
+  readonly scaffoldAttributeReasons: readonly number[];
+  readonly scaffoldEffectReasons: readonly number[];
 }
 
 export function assertClassificationComplete(
@@ -41,7 +43,16 @@ export function assertClassificationComplete(
     }
   }
 
-  return { missingAttributeIds, extraAttributeIds, missingEffectIds, extraEffectIds, attributeNameMismatches, effectNameMismatches };
+  const scaffoldAttributeReasons = Object.values(attributeClassification)
+    .filter((c) => c.kind === "outOfScope" && c.reason.includes("scaffold"))
+    .map((c) => c.id)
+    .sort((a, b) => a - b);
+  const scaffoldEffectReasons = Object.values(effectClassification)
+    .filter((c) => c.kind === "ignored" && c.reason.includes("scaffold"))
+    .map((c) => c.id)
+    .sort((a, b) => a - b);
+
+  return { missingAttributeIds, extraAttributeIds, missingEffectIds, extraEffectIds, attributeNameMismatches, effectNameMismatches, scaffoldAttributeReasons, scaffoldEffectReasons };
 }
 
 export function failOnClassificationErrors(result: ClassificationAssertResult): void {
@@ -63,6 +74,12 @@ export function failOnClassificationErrors(result: ClassificationAssertResult): 
   }
   if (result.effectNameMismatches.length > 0) {
     errors.push(`Effect name mismatches (${result.effectNameMismatches.length}): ${result.effectNameMismatches.slice(0, 10).map((m) => `${m.id}="${m.classificationName}" vs "${m.projectionName}"`).join(", ")}`);
+  }
+  if (result.scaffoldAttributeReasons.length > 0) {
+    errors.push(`Scaffold placeholder attribute reasons (${result.scaffoldAttributeReasons.length}): ${result.scaffoldAttributeReasons.slice(0, 20).join(", ")}${result.scaffoldAttributeReasons.length > 20 ? " ..." : ""}`);
+  }
+  if (result.scaffoldEffectReasons.length > 0) {
+    errors.push(`Scaffold placeholder effect reasons (${result.scaffoldEffectReasons.length}): ${result.scaffoldEffectReasons.slice(0, 20).join(", ")}${result.scaffoldEffectReasons.length > 20 ? " ..." : ""}`);
   }
   if (errors.length > 0) {
     throw new Error(`Classification audit failed:\n${errors.join("\n")}`);

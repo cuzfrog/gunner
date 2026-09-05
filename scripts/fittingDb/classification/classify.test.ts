@@ -34,6 +34,8 @@ describe("assertClassificationComplete", () => {
     expect(result.extraEffectIds).toEqual([]);
     expect(result.attributeNameMismatches).toEqual([]);
     expect(result.effectNameMismatches).toEqual([]);
+    expect(result.scaffoldAttributeReasons).toEqual([]);
+    expect(result.scaffoldEffectReasons).toEqual([]);
   });
 
   test("reports missing attribute classifications", () => {
@@ -94,7 +96,22 @@ describe("assertClassificationComplete", () => {
       extraEffectIds: [],
       attributeNameMismatches: [],
       effectNameMismatches: [],
+      scaffoldAttributeReasons: [],
+      scaffoldEffectReasons: [],
     })).toThrow(/Missing attribute classifications/);
+  });
+
+  test("failOnClassificationErrors throws on scaffold placeholder reasons", () => {
+    expect(() => failOnClassificationErrors({
+      missingAttributeIds: [],
+      extraAttributeIds: [],
+      missingEffectIds: [],
+      extraEffectIds: [],
+      attributeNameMismatches: [],
+      effectNameMismatches: [],
+      scaffoldAttributeReasons: [100],
+      scaffoldEffectReasons: [200],
+    })).toThrow(/Scaffold placeholder/);
   });
 
   test("failOnClassificationErrors does not throw when complete", () => {
@@ -105,6 +122,8 @@ describe("assertClassificationComplete", () => {
       extraEffectIds: [],
       attributeNameMismatches: [],
       effectNameMismatches: [],
+      scaffoldAttributeReasons: [],
+      scaffoldEffectReasons: [],
     })).not.toThrow();
   });
 });
