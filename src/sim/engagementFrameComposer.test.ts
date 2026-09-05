@@ -4,8 +4,11 @@ import type { EngagementEvaluator } from "./fireControl";
 import type { Kinematics } from "./kinematics";
 import type { AttackAssessment } from "./fireControl";
 import type { DefenseAssessor } from "./defenseAssessment";
+import type { EwarResolver } from "./ewarResolver";
+import { EwarResolverImpl } from "./ewarResolver";
+import { StackingPenaltyImpl } from "./stackingPenalty";
 import { DefenseAssessorImpl } from "./defenseAssessment";
-import { type DefenseSpec, type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec, EMPTY_DEFENSE_SPEC, EMPTY_PROJECTION, ZERO_DAMAGE, damageVectorAdd } from "./types";
+import { type DefenseSpec, type DroneSpec, type EngagementFrame, type MissileSpec, type ShipState, type SimSnapshot, type TurretSpec, EMPTY_DEFENSE_SPEC, EMPTY_PROJECTION, ZERO_DAMAGE, damageVectorAdd } from "./types";
 
 const shipATurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const shipBTurret: TurretSpec = { kind: "turret", tracking: 0.28, sigResolution: 125, optimal: 8000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
@@ -78,7 +81,8 @@ function makeComposer() {
     evaluate: vi.fn(() => ({ shipA: shipAAssessment, shipB: shipBAssessment })),
   });
   const defenseAssessor: DefenseAssessor = new DefenseAssessorImpl();
-  const composer = new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor });
+  const ewarResolver: EwarResolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });
+  const composer = new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor, ewarResolver });
   return { kinematics, engagementEvaluator, composer };
 }
 
@@ -214,5 +218,73 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.defenses.shipB.layers.shield.ehp).toBeCloseTo(1000, 2);
     expect(view.defenses.shipA.repairPerSecond.shield).toBeCloseTo((100 * 1.15) / (5 * 0.85), 5);
     expect(view.defenses.shipB.repairPerSecond.shield).toBe(0);
+  });
+
+  test("readouts produce turret values with boosted fields and disruption breakdown", () => {
+    const { composer } = makeComposer();
+    const view = composer.compose(snapshot, input);
+    expect(view.readouts.shipA.kind).toBe("turret");
+    expect(view.readouts.shipA.speed).toBe(250);
+    expect(view.readouts.shipA.tracking).toBe(effectiveTurret.tracking);
+    expect(view.readouts.shipA.optimal).toBe(effectiveTurret.optimal);
+    expect(view.readouts.shipA.falloff).toBe(effectiveTurret.falloff);
+    expect(view.readouts.shipA.boostedTracking).toBe(boostedTurret.tracking);
+    expect(view.readouts.shipA.boostedOptimal).toBe(boostedTurret.optimal);
+    expect(view.readouts.shipA.boostedFalloff).toBe(boostedTurret.falloff);
+    expect(view.readouts.shipA.sigResolution).toBe(effectiveTurret.sigResolution);
+    expect(view.readouts.shipA.speedBreakdown).toBeDefined();
+    expect(view.readouts.shipA.trackingBreakdown).toBeDefined();
+    expect(view.readouts.shipB.kind).toBe("turret");
+    expect(view.readouts.shipB.speed).toBe(120);
+  });
+
+  test("readouts fall back to effectiveWeapons when no attack exists", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: undefined, shipB: undefined });
+    const view = composer.compose(snapshot, input);
+    expect(view.readouts.shipA.kind).toBe("turret");
+    expect(view.readouts.shipA.tracking).toBe(shipATurret.tracking);
+    expect(view.readouts.shipA.boostedTracking).toBe(shipATurret.tracking);
+    expect(view.readouts.shipB.kind).toBe("turret");
+    expect(view.readouts.shipB.tracking).toBe(shipBTurret.tracking);
+  });
+
+  test("readouts produce none when no weapons are equipped", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: undefined, shipB: undefined });
+    const view = composer.compose(snapshot, { weapons: { shipA: [], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    expect(view.readouts.shipA.kind).toBe("none");
+    expect(view.readouts.shipA.speed).toBe(250);
+    expect(view.readouts.shipB.kind).toBe("none");
+    expect(view.readouts.shipB.speed).toBe(120);
+  });
+
+  test("readouts produce missile values when the effective weapon is a missile", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    const missile: MissileSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 3, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 0.5, maxVelocity: 5000, flightTime: 5, flightRange: 25000 };
+    const missileAssessment: AttackAssessment = { boostedWeapon: missile, effectiveWeapon: missile, damage: { nominalDps: 30, appliedDps: 24, application: 0.8, volley: 300, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE }, missile: { application: 0.8, signatureTerm: 1, velocityTerm: 0.8, inRange: true, timeToImpact: 1 } };
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: missileAssessment, shipB: undefined });
+    const view = composer.compose(snapshot, { weapons: { shipA: [missile], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    expect(view.readouts.shipA.kind).toBe("missile");
+    expect(view.readouts.shipA.explosionRadius).toBe(40);
+    expect(view.readouts.shipA.explosionVelocity).toBe(170);
+    expect(view.readouts.shipA.maxVelocity).toBe(5000);
+    expect(view.readouts.shipA.flightTime).toBe(5);
+    expect(view.readouts.shipA.flightRange).toBe(25000);
+    expect(view.readouts.shipB.kind).toBe("none");
+  });
+
+  test("readouts produce drone values when the effective weapon is a drone", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    const drone: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+    const droneAssessment: AttackAssessment = { boostedWeapon: drone, effectiveWeapon: drone, damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE }, drone: { hit, expectedMultiplier: 1, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true } };
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: droneAssessment, shipB: undefined });
+    const view = composer.compose(snapshot, { weapons: { shipA: [drone], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    expect(view.readouts.shipA.kind).toBe("drone");
+    expect(view.readouts.shipA.tracking).toBe(0.15);
+    expect(view.readouts.shipA.optimal).toBe(1000);
+    expect(view.readouts.shipA.falloff).toBe(500);
+    expect(view.readouts.shipA.sigResolution).toBe(40);
+    expect(view.readouts.shipB.kind).toBe("none");
   });
 });

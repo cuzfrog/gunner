@@ -30,6 +30,7 @@ function makeView(shipAAttacks: readonly WeaponAttack[], shipBAttacks: readonly 
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
     projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
     locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+    readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } },
   };
 }
 

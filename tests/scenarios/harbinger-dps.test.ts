@@ -88,7 +88,7 @@ function makeComposer() {
   const missileApplication = new MissileApplicationImpl();
   const droneApplication = new DroneApplicationImpl({ hitChance, weaponDamageAssessor });
   const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver: noEwarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: stacking }), weaponDamageAssessor, missileApplication, droneApplication });
-  return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor: new DefenseAssessorImpl() });
+  return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor: new DefenseAssessorImpl(), ewarResolver: noEwarResolver });
 }
 
 function stationaryShip(id: "shipA" | "shipB"): ShipState {

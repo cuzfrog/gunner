@@ -16,7 +16,6 @@ import {
   type EngagementFrame,
   type EngagementFrameComposer,
   type EngagementView,
-  type EwarProjection,
   type EwarResolver,
   type HitChanceBreakdown,
   type MissileLaunchSpec,
@@ -28,6 +27,7 @@ import {
   type Simulation,
   type SimSnapshot,
   type SpeedBreakdown,
+  type TurretReadoutValues,
   type TurretSpec,
   type WeaponClock,
   type LockClock,
@@ -155,7 +155,7 @@ function baseView(): EngagementView {
     damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
     turret: { hit, expectedMultiplier: 1 },
   };
-  return { frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } };
+  return { frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, readouts: { shipA: sideReadoutValues(), shipB: sideReadoutValues() } };
 }
 
 function sideReadoutValues(
@@ -170,7 +170,7 @@ function sideReadoutValues(
   trackingBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
   optimalBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
   falloffBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
-) {
+): TurretReadoutValues {
   return { kind: "turret", speed, tracking, optimal, falloff, boostedTracking, boostedOptimal, boostedFalloff, sigResolution: 40, speedBreakdown, trackingBreakdown, optimalBreakdown, falloffBreakdown };
 }
 
@@ -232,28 +232,23 @@ describe("AppImpl", () => {
       defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
       projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
       locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+      readouts: { shipA: sideReadoutValues(250, 0.5, 6000, 4000, 0.45, 5800, 3800), shipB: sideReadoutValues(120, 0.5, 6000, 4000, 0.45, 5800, 3800) },
     };
     simulation.snapshot.mockReturnValue(boostedSnapshot);
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, sensorBoosterResolver, weaponClock, lockClock, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, { shipA: { kind: "turret", optimal: 6000, falloff: 4000 }, shipB: { kind: "turret", optimal: 6000, falloff: 4000 } }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, emptyDefenseView);
-    expect(controls.update).toHaveBeenCalledWith(view, {
-      shipA: sideReadoutValues(250, 0.5, 6000, 4000, 0.45, 5800, 3800),
-      shipB: sideReadoutValues(120, 0.5, 6000, 4000, 0.45, 5800, 3800),
-    }, emptyDefenseView);
+    expect(controls.update).toHaveBeenCalledWith(view, view.readouts, emptyDefenseView);
   });
 
   test("falls back to the view's effective weapon when the composer returns no assessment", () => {
-    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } };
+    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, readouts: { shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000), shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000) } };
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, sensorBoosterResolver, weaponClock, lockClock, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, emptyDefenseView);
-    expect(controls.update).toHaveBeenCalledWith(view, {
-      shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
-      shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
-    }, emptyDefenseView);
+    expect(controls.update).toHaveBeenCalledWith(view, view.readouts, emptyDefenseView);
   });
 
   test("tick steps the simulation and renders", () => {
@@ -341,17 +336,6 @@ describe("AppImpl", () => {
   });
 
   test("passes per-side ewar breakdowns from the resolver into effective readouts", () => {
-    const shipAEwar: EwarProjection = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [] },
-    };
-    const shipBEwar: EwarProjection = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [] },
-    };
-    const shipAShip: ShipState = { ...ship, ewar: shipAEwar };
-    const shipBShip: ShipState = { ...ship, id: "shipB", ewar: shipBEwar };
-    simulation.snapshot.mockReturnValue({ ...snapshot, shipA: shipAShip, shipB: shipBShip });
     const shipASpeed: SpeedBreakdown = {
       effects: [{ family: "web" as const, moduleId: toTypeId("527"), multiplier: 0.45 }],
       propulsionSuppressed: false,
@@ -370,17 +354,14 @@ describe("AppImpl", () => {
       optimal: [{ moduleId: toTypeId("2109"), scriptId: toTypeId("29005"), multiplier: 0.7 }],
       falloff: [],
     };
-    ewarResolver.speedBreakdown.mockReturnValueOnce(shipASpeed).mockReturnValueOnce(shipBSpeed);
-    ewarResolver.disruptionBreakdown.mockReturnValueOnce(disruptionA).mockReturnValueOnce(disruptionB);
-    app.start();
-    expect(ewarResolver.speedBreakdown).toHaveBeenNthCalledWith(1, shipBEwar, 5000);
-    expect(ewarResolver.speedBreakdown).toHaveBeenNthCalledWith(2, shipAEwar, 5000);
-    expect(ewarResolver.disruptionBreakdown).toHaveBeenNthCalledWith(1, shipBEwar, 5000);
-    expect(ewarResolver.disruptionBreakdown).toHaveBeenNthCalledWith(2, shipAEwar, 5000);
-    expect(controls.update).toHaveBeenCalledWith(baseView(), {
+    const readouts = {
       shipA: { ...sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000), speedBreakdown: shipASpeed, trackingBreakdown: disruptionA, optimalBreakdown: disruptionA, falloffBreakdown: disruptionA },
       shipB: { ...sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000), speedBreakdown: shipBSpeed, trackingBreakdown: disruptionB, optimalBreakdown: disruptionB, falloffBreakdown: disruptionB },
-    }, emptyDefenseView);
+    };
+    const view = { ...baseView(), readouts };
+    engagementFrameComposer.compose.mockReturnValue(view);
+    app.start();
+    expect(controls.update).toHaveBeenCalledWith(view, readouts, emptyDefenseView);
   });
 
   test("returns drone readout values when the effective weapon is a drone", () => {
@@ -393,6 +374,10 @@ describe("AppImpl", () => {
       damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
       drone: { hit, expectedMultiplier: 1, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true },
     };
+    const droneReadouts = {
+      shipA: { kind: "drone" as const, speed: 0, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40, speedBreakdown: emptySpeedBreakdown },
+      shipB: { kind: "drone" as const, speed: 0, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40, speedBreakdown: emptySpeedBreakdown },
+    };
     const droneView: EngagementView = {
       frame,
       attacks: { shipA: droneAssessment, shipB: droneAssessment },
@@ -401,6 +386,7 @@ describe("AppImpl", () => {
       defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
       projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
       locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+      readouts: droneReadouts,
     };
     engagementFrameComposer.compose.mockReturnValue(droneView);
     controls.getWeapon.mockReturnValue(drone);
@@ -408,10 +394,7 @@ describe("AppImpl", () => {
     app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, sensorBoosterResolver, weaponClock, lockClock, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "drone", optimal: 1000, falloff: 500 }, shipB: { kind: "drone", optimal: 1000, falloff: 500 } }, [], { shipA: [{ positions: [new Vec2(0, 0)], optimal: 1000, falloff: 500, controlRange: 60000 }], shipB: [{ positions: [new Vec2(0, 0)], optimal: 1000, falloff: 500, controlRange: 60000 }] }, { shipA: [], shipB: [] }, emptyDefenseView);
-    expect(controls.update).toHaveBeenCalledWith(droneView, {
-      shipA: { kind: "drone", speed: 0, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40, speedBreakdown: emptySpeedBreakdown },
-      shipB: { kind: "drone", speed: 0, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40, speedBreakdown: emptySpeedBreakdown },
-    }, emptyDefenseView);
+    expect(controls.update).toHaveBeenCalledWith(droneView, droneReadouts, emptyDefenseView);
   });
 
   test("renderFrame overlays defense projection onto view", () => {
@@ -428,6 +411,7 @@ describe("AppImpl", () => {
       defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
       projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
       locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+      readouts: { shipA: sideReadoutValues(), shipB: sideReadoutValues() },
     };
     engagementFrameComposer.compose.mockReturnValue(viewWithDamage);
     defenseSimulator.project.mockReturnValue({
@@ -453,6 +437,7 @@ describe("AppImpl", () => {
       defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
       projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
       locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+      readouts: { shipA: sideReadoutValues(), shipB: sideReadoutValues() },
     };
     engagementFrameComposer.compose.mockReturnValue(viewNoAttack);
     defenseSimulator.project.mockReturnValue({
@@ -486,6 +471,7 @@ describe("AppImpl", () => {
       defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
       projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
       locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+      readouts: { shipA: sideReadoutValues(), shipB: sideReadoutValues() },
     };
     engagementFrameComposer.compose.mockReturnValue(viewAsymmetric);
     defenseSimulator.project.mockReturnValue({

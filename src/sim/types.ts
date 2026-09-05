@@ -547,6 +547,51 @@ export interface DampenerBreakdown {
   readonly maxTargetRange: readonly StatEffectAttribution[];
 }
 
+export interface TurretReadoutValues {
+  readonly kind: "turret";
+  readonly speed: number;
+  readonly tracking: number;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly boostedTracking: number;
+  readonly boostedOptimal: number;
+  readonly boostedFalloff: number;
+  readonly sigResolution: number;
+  readonly speedBreakdown?: SpeedBreakdown;
+  readonly trackingBreakdown?: DisruptionBreakdown;
+  readonly optimalBreakdown?: DisruptionBreakdown;
+  readonly falloffBreakdown?: DisruptionBreakdown;
+}
+
+export interface MissileReadoutValues {
+  readonly kind: "missile";
+  readonly speed: number;
+  readonly explosionRadius: number;
+  readonly explosionVelocity: number;
+  readonly maxVelocity: number;
+  readonly flightTime: number;
+  readonly flightRange: number;
+  readonly speedBreakdown?: SpeedBreakdown;
+}
+
+export interface DroneReadoutValues {
+  readonly kind: "drone";
+  readonly speed: number;
+  readonly tracking: number;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly sigResolution: number;
+  readonly speedBreakdown?: SpeedBreakdown;
+}
+
+export interface NoWeaponReadoutValues {
+  readonly kind: "none";
+  readonly speed: number;
+  readonly speedBreakdown?: SpeedBreakdown;
+}
+
+export type SideReadoutValues = TurretReadoutValues | MissileReadoutValues | DroneReadoutValues | NoWeaponReadoutValues;
+
 export interface BoosterActivation {
   readonly active: boolean;
   readonly overloaded: boolean;

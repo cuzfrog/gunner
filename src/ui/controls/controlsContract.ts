@@ -1,7 +1,9 @@
-import type { DefenseSpec, DefenseView, DisruptionBreakdown, EngagementView, SimConfig, SpeedBreakdown, WeaponSpec } from "../../sim";
+import type { DefenseSpec, DefenseView, EngagementView, SideReadoutValues, SimConfig, WeaponSpec } from "../../sim";
 import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation, WeaponRangeVisibility } from "../../appstate";
 import type { RangeOverlay } from "../renderer";
 import type { Side } from "./side";
+
+export type { TurretReadoutValues, MissileReadoutValues, DroneReadoutValues, NoWeaponReadoutValues, SideReadoutValues } from "../../sim";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -11,51 +13,6 @@ export interface ControlsCallbacks {
   readonly onStop: () => void;
   readonly onSpeedChange: (speed: number) => void;
 }
-
-export interface TurretReadoutValues {
-  readonly kind: "turret";
-  readonly speed: number;
-  readonly tracking: number;
-  readonly optimal: number;
-  readonly falloff: number;
-  readonly boostedTracking: number;
-  readonly boostedOptimal: number;
-  readonly boostedFalloff: number;
-  readonly sigResolution: number;
-  readonly speedBreakdown?: SpeedBreakdown;
-  readonly trackingBreakdown?: DisruptionBreakdown;
-  readonly optimalBreakdown?: DisruptionBreakdown;
-  readonly falloffBreakdown?: DisruptionBreakdown;
-}
-
-export interface MissileReadoutValues {
-  readonly kind: "missile";
-  readonly speed: number;
-  readonly explosionRadius: number;
-  readonly explosionVelocity: number;
-  readonly maxVelocity: number;
-  readonly flightTime: number;
-  readonly flightRange: number;
-  readonly speedBreakdown?: SpeedBreakdown;
-}
-
-export interface DroneReadoutValues {
-  readonly kind: "drone";
-  readonly speed: number;
-  readonly tracking: number;
-  readonly optimal: number;
-  readonly falloff: number;
-  readonly sigResolution: number;
-  readonly speedBreakdown?: SpeedBreakdown;
-}
-
-export interface NoWeaponReadoutValues {
-  readonly kind: "none";
-  readonly speed: number;
-  readonly speedBreakdown?: SpeedBreakdown;
-}
-
-export type SideReadoutValues = TurretReadoutValues | MissileReadoutValues | DroneReadoutValues | NoWeaponReadoutValues;
 
 export interface EffectiveReadouts {
   readonly shipA: SideReadoutValues;

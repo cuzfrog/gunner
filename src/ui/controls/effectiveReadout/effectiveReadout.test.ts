@@ -4,7 +4,7 @@ import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { TrackingInput } from "../trackingInput";
 import type { Side } from "../side";
-import type { DroneReadoutValues, MissileReadoutValues, NoWeaponReadoutValues } from "../controlsContract";
+import type { DroneReadoutValues, MissileReadoutValues, NoWeaponReadoutValues } from "../../../sim";
 import type { EffectiveReadout } from "./effectiveReadout";
 import { EffectiveReadoutImpl } from "./effectiveReadout";
 import { _formatSpeed, _isAffected as _isNegative, _readNumber } from "./effectiveReadout";

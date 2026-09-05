@@ -100,7 +100,7 @@ function makeComposer() {
   const missileApplication = new MissileApplicationImpl();
   const droneApplication = new DroneApplicationImpl({ hitChance, weaponDamageAssessor });
   const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: new StackingPenaltyImpl() }), weaponDamageAssessor, missileApplication, droneApplication });
-  return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor: new DefenseAssessorImpl() });
+  return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor: new DefenseAssessorImpl(), ewarResolver });
 }
 
 describe("symmetric mutual engagement", () => {

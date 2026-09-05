@@ -1,6 +1,6 @@
 import { Vec2, ZERO_DAMAGE } from "../sim";
 import type { DamageEvent, DamageVector, DefenseSimConfig, DefenseSimulator, DefenseView, DroneRuntimeState, DroneSimulator, DroneSimConfig, DroneSpec, EngagementFrameComposer, EngagementInput, EngagementView, EwarResolver, LockClock, LockState, MissileAttackFacts, MissileLaunchSpec, MissileSimulator, MissileSimConfig, MissileSpec, SensorBoosterResolver, SensorSpec, ShipState, Side, Simulation, WeaponClock, WeaponSpec } from "../sim";
-import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, EffectiveReadouts, Loop, MissileRenderCollection, Renderer, WeaponRange, WeaponRanges } from "../ui";
+import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, Loop, MissileRenderCollection, Renderer, WeaponRange, WeaponRanges } from "../ui";
 
 const PROJECTION_HORIZON_SECONDS = 1;
 
@@ -219,10 +219,6 @@ export class AppImpl implements App {
     const base = composed ?? this.composeView();
     const view = this.overlayProjection(base);
     const snapshot = this.simulation.snapshot();
-    const effectiveReadouts: EffectiveReadouts = {
-      shipA: this.sideReadoutValues(snapshot.shipA, snapshot.shipB, view, "shipA"),
-      shipB: this.sideReadoutValues(snapshot.shipB, snapshot.shipA, view, "shipB"),
-    };
     this.renderer.setGridBrightness(this.controls.getGridBrightness());
     this.renderer.setWeaponRangeVisibility(this.controls.getWeaponRangeVisibility());
     this.renderer.setDroneRangeVisibility(this.controls.getDroneRangeVisibility());
@@ -230,7 +226,7 @@ export class AppImpl implements App {
     this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
     this.renderer.setLockStates(view.locks);
     this.renderer.draw(snapshot, view.frame, this.rendererWeaponRanges(view), this.controls.getOverlays(), this.droneRenderInfo(), this.missileRenderInfo(), this.defenseSimulator.view());
-    this.controls.update(view, effectiveReadouts, this.defenseSimulator.view());
+    this.controls.update(view, view.readouts, this.defenseSimulator.view());
   }
 
   private composeView(): EngagementView {
@@ -272,56 +268,6 @@ export class AppImpl implements App {
     const fallback = this.controls.getWeapon(side);
     if (fallback?.kind === "missile") return { kind: "missile", range: fallback.flightRange };
     return { kind: "turret", optimal: 0, falloff: 0 };
-  }
-
-  private sideReadoutValues(ship: ShipState, opponent: ShipState, view: EngagementView, side: Side): EffectiveReadouts["shipA"] {
-    const attack = view.attacks[side];
-    const effectiveWeapon = attack?.effectiveWeapon ?? view.effectiveWeapons[side];
-    const boostedWeapon = attack?.boostedWeapon ?? effectiveWeapon;
-    const speedBreakdown = this.ewarResolver.speedBreakdown(opponent.ewar, view.frame.distance);
-    if (effectiveWeapon?.kind === "missile") {
-      return {
-        kind: "missile",
-        speed: ship.maxSpeed,
-        explosionRadius: effectiveWeapon.explosionRadius,
-        explosionVelocity: effectiveWeapon.explosionVelocity,
-        maxVelocity: effectiveWeapon.maxVelocity,
-        flightTime: effectiveWeapon.flightTime,
-        flightRange: effectiveWeapon.flightRange,
-        speedBreakdown,
-      };
-    }
-    if (effectiveWeapon?.kind === "turret") {
-      const boostedTurret = boostedWeapon?.kind === "turret" ? boostedWeapon : effectiveWeapon;
-      const disruption = this.ewarResolver.disruptionBreakdown(opponent.ewar, view.frame.distance);
-      return {
-        kind: "turret",
-        speed: ship.maxSpeed,
-        tracking: effectiveWeapon.tracking,
-        optimal: effectiveWeapon.optimal,
-        falloff: effectiveWeapon.falloff,
-        boostedTracking: boostedTurret.tracking,
-        boostedOptimal: boostedTurret.optimal,
-        boostedFalloff: boostedTurret.falloff,
-        sigResolution: effectiveWeapon.sigResolution,
-        speedBreakdown,
-        trackingBreakdown: disruption,
-        optimalBreakdown: disruption,
-        falloffBreakdown: disruption,
-      };
-    }
-    if (effectiveWeapon?.kind === "drone") {
-      return {
-        kind: "drone",
-        speed: ship.maxSpeed,
-        tracking: effectiveWeapon.tracking,
-        optimal: effectiveWeapon.optimal,
-        falloff: effectiveWeapon.falloff,
-        sigResolution: effectiveWeapon.sigResolution,
-        speedBreakdown,
-      };
-    }
-    return { kind: "none", speed: ship.maxSpeed, speedBreakdown };
   }
 }
 
