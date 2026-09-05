@@ -56,9 +56,6 @@ export interface ISkillOverloadSection {
   setSkillLevel(level: SkillLevel): void;
   setSkillActive(level: SkillLevel): void;
   renderSkillOptions(selectedValue?: SkillLevel): void;
-  openSkillPopup(): void;
-  closeSkillPopup(): void;
-  isSkillPopupOpen(): boolean;
   onSkillChoiceInput(): void;
   currentDefenseSkills(): DefenseSkills | undefined;
   setDefenseSkills(skills: DefenseSkills): void;

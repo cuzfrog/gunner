@@ -4,7 +4,7 @@ import { isHtmlButtonElement } from "../controlsDom";
 import { skillLevelFromString, skillOptionLabel } from "../controlsFormat";
 import { ChoiceGroupImpl, type ChoiceGroupOption } from "../choiceGroup";
 import type { Popup, PopupGroup } from "../popup";
-import type { Side } from "../side";
+import { PopupField } from "../shared";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISkillOverloadSection } from "./sidePanelSections";
 
@@ -14,6 +14,7 @@ export interface SkillOverloadSectionEls {
   readonly skillSummary: HTMLElement;
   readonly skillTrigger: HTMLButtonElement;
   readonly skillPopup: HTMLElement;
+  readonly skillField: HTMLElement;
   readonly overload: HTMLInputElement;
   readonly overloadButton: HTMLButtonElement;
   readonly turretWeaponOverloadButton: HTMLButtonElement;
@@ -26,21 +27,19 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   private readonly panel: SidePanel;
   private readonly els: SkillOverloadSectionEls;
   private readonly i18n: I18n;
-  private readonly popupGroup: PopupGroup;
-  private skillPopupOpen = false;
   private readonly skillChoice: ChoiceGroupImpl;
   private readonly defenseSkillChoices: ReadonlyMap<DefenseSkillKey, ChoiceGroupImpl>;
   private defenseSkillLevels: DefenseSkills | undefined;
   private readonly targetingSkillChoices: ReadonlyMap<TargetingSkillKey, ChoiceGroupImpl>;
   private targetingSkillLevels: TargetingSkills | undefined;
   private weaponOverloaded = false;
+  private readonly skillField: PopupField;
   readonly popup: Popup;
 
   constructor({ panel, els, i18n, popupGroup }: { panel: SidePanel; els: SkillOverloadSectionEls; i18n: I18n; popupGroup: PopupGroup }) {
     this.panel = panel;
     this.els = els;
     this.i18n = i18n;
-    this.popupGroup = popupGroup;
     this.skillChoice = new ChoiceGroupImpl({
       group: els.skillOptions,
       select: els.skills,
@@ -48,7 +47,12 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     });
     this.defenseSkillChoices = createDefenseSkillChoices(els.defenseSkills, (key, level) => this.onDefenseSkillChange(key, level));
     this.targetingSkillChoices = createTargetingSkillChoices(els.targetingSkills, (key, level) => this.onTargetingSkillChange(key, level));
-    this.popup = this.createSkillPopup();
+    this.skillField = new PopupField({
+      els: { field: els.skillField, trigger: els.skillTrigger, popup: els.skillPopup, summary: els.skillSummary },
+      popupGroup,
+      onOpen: () => this.focusActiveSkillChoice(),
+    });
+    this.popup = this.skillField.popup;
     this.els.skills.addEventListener("input", () => {
       this.onSkillOrOverloadChange(true);
       this.onSkillChoiceInput();
@@ -57,7 +61,6 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     this.els.overloadButton.addEventListener("click", () => this.onOverloadButtonClick());
     this.els.turretWeaponOverloadButton.addEventListener("click", () => this.onWeaponOverloadButtonClick());
     this.els.launcherWeaponOverloadButton.addEventListener("click", () => this.onWeaponOverloadButtonClick());
-    this.els.skillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popup));
   }
 
   skillConditions(): StatConditions {
@@ -153,30 +156,15 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     this.els.skillSummary.textContent = summary;
   }
 
-  openSkillPopup(): void {
-    const popup = this.els.skillPopup;
-    const trigger = this.els.skillTrigger;
-    popup.hidden = false;
-    trigger.setAttribute("aria-expanded", "true");
-    this.skillPopupOpen = true;
+  private focusActiveSkillChoice(): void {
     const active = Array.from(this.els.skillOptions.children).find((button) => button.getAttribute("aria-pressed") === "true");
     const activeButton = active && isHtmlButtonElement(active) ? active : undefined;
     activeButton?.focus();
   }
 
-  closeSkillPopup(): void {
-    this.els.skillPopup.hidden = true;
-    this.els.skillTrigger.setAttribute("aria-expanded", "false");
-    this.skillPopupOpen = false;
-  }
-
-  isSkillPopupOpen(): boolean {
-    return this.skillPopupOpen;
-  }
-
   onSkillChoiceInput(): void {
-    this.closeSkillPopup();
-    this.els.skillTrigger.focus();
+    this.skillField.close();
+    this.skillField.focusTrigger();
   }
 
   currentDefenseSkills(): DefenseSkills | undefined {
@@ -268,21 +256,6 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     this.targetingSkillLevels = { ...current, [key]: level };
     this.onSkillOrOverloadChange(false);
   }
-
-  private createSkillPopup(): Popup {
-    const id = sideId(this.panel.side);
-    return {
-      isOpen: () => this.isSkillPopupOpen(),
-      open: () => this.openSkillPopup(),
-      close: () => this.closeSkillPopup(),
-      focusTrigger: () => this.els.skillTrigger.focus(),
-      contains: (domTarget) => domTarget instanceof Element && domTarget.closest(`#${id}-skill-field`) !== null,
-    };
-  }
-}
-
-function sideId(side: Side): "ship-a" | "ship-b" {
-  return side === "shipA" ? "ship-a" : "ship-b";
 }
 
 type DefenseSkillKey = keyof DefenseSkills;

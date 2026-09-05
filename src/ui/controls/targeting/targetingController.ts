@@ -3,32 +3,35 @@ import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import { formatWithCommas } from "../controlsFormat";
 import { html } from "../markup";
-import type { Popup, PopupGroup } from "../popup";
-import { SectionBlockImpl } from "../shared";
+import type { PopupGroup } from "../popup";
+import { PopupField, SectionBlockImpl } from "../shared";
 import type { Side } from "../side";
 import type { TargetingController, TargetingEls } from "./targetingControllerContract";
 
 export class TargetingControllerImpl implements TargetingController {
   private readonly els: TargetingEls;
-  private readonly popupGroup: PopupGroup;
   private readonly i18n: I18n;
   private readonly events: UiEvents;
   private readonly specs = new Map<Side, SensorSpec>();
   private readonly boosts = new Map<Side, SensorBoostLoadout>();
   private readonly sectionBlock: SectionBlockImpl;
-  private readonly popups: Record<Side, Popup>;
+  private readonly fields: Record<Side, PopupField>;
 
   constructor(deps: { els: TargetingEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents }) {
     this.els = deps.els;
-    this.popupGroup = deps.popupGroup;
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.sectionBlock = new SectionBlockImpl();
-    this.popups = { shipA: this.buildPopup("shipA"), shipB: this.buildPopup("shipB") };
-    this.popupGroup.register(this.popups.shipA);
-    this.popupGroup.register(this.popups.shipB);
-    this.els.shipATargetingTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.shipA));
-    this.els.shipBTargetingTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.shipB));
+    this.fields = {
+      shipA: new PopupField({
+        els: { field: deps.els.shipATargetingField, trigger: deps.els.shipATargetingTrigger, popup: deps.els.shipATargetingPopup, section: deps.els.shipATargetingSection, summary: deps.els.shipATargetingSummary },
+        popupGroup: deps.popupGroup,
+      }),
+      shipB: new PopupField({
+        els: { field: deps.els.shipBTargetingField, trigger: deps.els.shipBTargetingTrigger, popup: deps.els.shipBTargetingPopup, section: deps.els.shipBTargetingSection, summary: deps.els.shipBTargetingSummary },
+        popupGroup: deps.popupGroup,
+      }),
+    };
     this.events.onFittingImported((side, imported) => this.setSensorData(side, imported.sensorSpec, imported.sensorBoosts));
     this.events.onLanguageChanged(() => this.render());
     this.render();
@@ -53,46 +56,27 @@ export class TargetingControllerImpl implements TargetingController {
     this.renderSide("shipB");
   }
 
-  private buildPopup(side: Side): Popup {
-    const trigger = side === "shipA" ? this.els.shipATargetingTrigger : this.els.shipBTargetingTrigger;
-    const popup = side === "shipA" ? this.els.shipATargetingPopup : this.els.shipBTargetingPopup;
-    const field = side === "shipA" ? this.els.shipATargetingField : this.els.shipBTargetingField;
-    return {
-      isOpen: () => !popup.hidden,
-      open: () => { popup.hidden = false; trigger.setAttribute("aria-expanded", "true"); },
-      close: () => { popup.hidden = true; trigger.setAttribute("aria-expanded", "false"); },
-      focusTrigger: () => trigger.focus(),
-      contains: (domTarget) => domTarget instanceof Element && field.contains(domTarget),
-    };
-  }
-
   private renderSide(side: Side): void {
-    const trigger = side === "shipA" ? this.els.shipATargetingTrigger : this.els.shipBTargetingTrigger;
-    const popup = side === "shipA" ? this.els.shipATargetingPopup : this.els.shipBTargetingPopup;
-    const section = side === "shipA" ? this.els.shipATargetingSection : this.els.shipBTargetingSection;
+    const field = this.fields[side];
+    const section = field.clearSection();
     const spec = this.specs.get(side);
     const targetingLabel = this.i18n.t("label.targeting");
-    const labelSpan = trigger.querySelector?.(".trigger-label");
-    if (labelSpan) labelSpan.textContent = targetingLabel;
-    trigger.setAttribute("aria-label", targetingLabel);
-    popup.setAttribute("aria-label", targetingLabel);
-    section.innerHTML = "";
+    field.applyLabel(targetingLabel);
     if (!spec) {
-      trigger.disabled = true;
-      trigger.setAttribute("data-hint", this.i18n.t("title.targeting.empty"));
+      field.setEnabled(false, this.i18n.t("title.targeting.empty"));
       this.updateSummary(side);
-      this.popups[side].close();
+      field.close();
       return;
     }
-    trigger.disabled = false;
-    trigger.setAttribute("data-hint", "");
+    field.setEnabled(true, "");
     this.updateSummary(side);
+    if (!section) return;
     const heading = html`<div class="preview-section-label">${targetingLabel}</div>`;
     section.appendChild(heading);
     this.renderSensorAttributes(section, spec);
     this.renderBoosterModules(section, side);
     this.renderAmplifierModules(section, side);
-    this.popups[side].close();
+    field.close();
   }
 
   private renderSensorAttributes(section: HTMLElement, spec: SensorSpec): void {

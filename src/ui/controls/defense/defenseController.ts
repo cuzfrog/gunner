@@ -6,8 +6,8 @@ import type { UiEvents } from "../../events";
 import { formatWithCommas } from "../controlsFormat";
 import { DAMAGE_ICON_URLS, DAMAGE_TYPE_ORDER } from "../damageTypeIcons";
 import { html } from "../markup";
-import type { Popup, PopupGroup } from "../popup";
-import { SectionBlockImpl } from "../shared";
+import type { PopupGroup } from "../popup";
+import { PopupField, SectionBlockImpl } from "../shared";
 import type { Side } from "../side";
 import type { DefenseController, DefenseEls } from "./defenseControllerContract";
 
@@ -15,7 +15,6 @@ const DEFENSE_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
 
 export class DefenseControllerImpl implements DefenseController {
   private readonly els: DefenseEls;
-  private readonly popupGroup: PopupGroup;
   private readonly i18n: I18n;
   private readonly events: UiEvents;
   private readonly specs = new Map<Side, DefenseSpec>();
@@ -25,21 +24,25 @@ export class DefenseControllerImpl implements DefenseController {
   private readonly repairerActivationState: Record<Side, StoredRepairerActivation[]> = { shipA: [], shipB: [] };
   private readonly rahActivationState: Record<Side, StoredRahActivation | undefined> = { shipA: undefined, shipB: undefined };
   private readonly damageToggleButtons: Record<Side, HTMLButtonElement | undefined> = { shipA: undefined, shipB: undefined };
-  private readonly popups: Record<Side, Popup>;
   private readonly sectionBlock: SectionBlockImpl;
+  private readonly fields: Record<Side, PopupField>;
   private defenseView: DefenseView | undefined;
 
   constructor(deps: { els: DefenseEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents }) {
     this.els = deps.els;
-    this.popupGroup = deps.popupGroup;
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.sectionBlock = new SectionBlockImpl();
-    this.popups = { shipA: this.buildPopup("shipA"), shipB: this.buildPopup("shipB") };
-    this.popupGroup.register(this.popups.shipA);
-    this.popupGroup.register(this.popups.shipB);
-    this.els.shipADefenseTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.shipA));
-    this.els.shipBDefenseTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.shipB));
+    this.fields = {
+      shipA: new PopupField({
+        els: { field: deps.els.shipADefenseField, trigger: deps.els.shipADefenseTrigger, popup: deps.els.shipADefensePopup, section: deps.els.shipADefenseSection, summary: deps.els.shipADefenseSummary },
+        popupGroup: deps.popupGroup,
+      }),
+      shipB: new PopupField({
+        els: { field: deps.els.shipBDefenseField, trigger: deps.els.shipBDefenseTrigger, popup: deps.els.shipBDefensePopup, section: deps.els.shipBDefenseSection, summary: deps.els.shipBDefenseSummary },
+        popupGroup: deps.popupGroup,
+      }),
+    };
     this.events.onFittingImported((side, imported) => this.setDefenseSpec(side, imported.defense));
     this.events.onLanguageChanged(() => this.render());
     this.render();
@@ -61,8 +64,8 @@ export class DefenseControllerImpl implements DefenseController {
   updateAssessments(view: EngagementView): void {
     this.assessments.set("shipA", view.defenses.shipA);
     this.assessments.set("shipB", view.defenses.shipB);
-    if (!this.popups.shipA.isOpen()) this.renderSide("shipA");
-    if (!this.popups.shipB.isOpen()) this.renderSide("shipB");
+    if (!this.fields.shipA.isOpen()) this.renderSide("shipA");
+    if (!this.fields.shipB.isOpen()) this.renderSide("shipB");
   }
 
   updateDefenseView(view: DefenseView): void {
@@ -164,40 +167,21 @@ export class DefenseControllerImpl implements DefenseController {
     this.renderSide("shipB");
   }
 
-  private buildPopup(side: Side): Popup {
-    const trigger = side === "shipA" ? this.els.shipADefenseTrigger : this.els.shipBDefenseTrigger;
-    const popup = side === "shipA" ? this.els.shipADefensePopup : this.els.shipBDefensePopup;
-    const field = side === "shipA" ? this.els.shipADefenseField : this.els.shipBDefenseField;
-    return {
-      isOpen: () => !popup.hidden,
-      open: () => { popup.hidden = false; trigger.setAttribute("aria-expanded", "true"); },
-      close: () => { popup.hidden = true; trigger.setAttribute("aria-expanded", "false"); },
-      focusTrigger: () => trigger.focus(),
-      contains: (domTarget) => domTarget instanceof Element && field.contains(domTarget),
-    };
-  }
-
   private renderSide(side: Side): void {
-    const trigger = side === "shipA" ? this.els.shipADefenseTrigger : this.els.shipBDefenseTrigger;
-    const popup = side === "shipA" ? this.els.shipADefensePopup : this.els.shipBDefensePopup;
-    const section = side === "shipA" ? this.els.shipADefenseSection : this.els.shipBDefenseSection;
+    const field = this.fields[side];
+    const section = field.clearSection();
     const spec = this.specs.get(side);
     const defenseLabel = this.i18n.t("label.defense");
-    const labelSpan = trigger.querySelector?.(".trigger-label");
-    if (labelSpan) labelSpan.textContent = defenseLabel;
-    trigger.setAttribute("aria-label", defenseLabel);
-    popup.setAttribute("aria-label", defenseLabel);
-    section.innerHTML = "";
+    field.applyLabel(defenseLabel);
     if (!spec) {
-      trigger.disabled = true;
-      trigger.setAttribute("data-hint", this.i18n.t("title.defense.empty"));
+      field.setEnabled(false, this.i18n.t("title.defense.empty"));
       this.updateSummary(side);
-      this.popups[side].close();
+      field.close();
       return;
     }
-    trigger.disabled = false;
-    trigger.setAttribute("data-hint", "");
+    field.setEnabled(true, "");
     this.updateSummary(side);
+    if (!section) return;
     const heading = html`<div class="preview-section-label">${defenseLabel}</div>`;
     section.appendChild(heading);
     this.renderResistsSection(section, spec);
@@ -209,7 +193,7 @@ export class DefenseControllerImpl implements DefenseController {
     this.renderRepairModeSection(section, side);
     this.renderRepairerActivationSection(section, side, spec);
     this.renderRahActivationSection(section, side, spec);
-    this.popups[side].close();
+    field.close();
   }
 
   private renderResistsSection(section: HTMLElement, spec: DefenseSpec): void {

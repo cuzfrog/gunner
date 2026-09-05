@@ -22,6 +22,7 @@ export interface SidePanelElements {
   readonly skillSummary: HTMLElement;
   readonly skillTrigger: HTMLButtonElement;
   readonly skillPopup: HTMLElement;
+  readonly skillField: HTMLElement;
   readonly defenseSkills: HTMLElement;
   readonly targetingSkills: HTMLElement;
   readonly overload: HTMLInputElement;
@@ -58,6 +59,7 @@ export function collectSideEls(els: ControlsElements, side: Side): SidePanelElem
     skillSummary: combatant.skillSummary,
     skillTrigger: combatant.skillTrigger,
     skillPopup: combatant.skillPopup,
+    skillField: combatant.skillField,
     defenseSkills: combatant.defenseSkills,
     targetingSkills: combatant.targetingSkills,
     overload: combatant.overload,
