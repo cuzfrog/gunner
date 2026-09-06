@@ -879,8 +879,8 @@ describe("DefenseSimulatorImpl", () => {
     const projectionHullPhase = sim.project(incoming, 1);
     expect(projectionHullPhase.shipA.byLayer.shield).toBe(0);
     expect(projectionHullPhase.shipA.byLayer.armor).toBe(0);
-    expect(projectionHullPhase.shipA.byLayer.hull).toBeCloseTo(15, 6);
-    expect(projectionHullPhase.shipA.totalInflicted).toBeCloseTo(15, 6);
+    expect(projectionHullPhase.shipA.byLayer.hull).toBeCloseTo(30, 6);
+    expect(projectionHullPhase.shipA.totalInflicted).toBeCloseTo(30, 6);
   });
 
   test("project: inflicted DPS drops when armor resist is higher than shield resist", () => {
@@ -894,5 +894,66 @@ describe("DefenseSimulatorImpl", () => {
     const whileArmorTakingDamage = sim.project(incoming, 1);
     expect(whileArmorTakingDamage.shipA.totalInflicted).toBeCloseTo(30, 6);
     expect(whileArmorTakingDamage.shipA.totalInflicted).toBeLessThan(whileShieldUp.shipA.totalInflicted);
+  });
+
+  test("project: depleted shield with non-zero shield resist does not reduce inflicted damage", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0.6 } })));
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.byLayer.shield).toBe(0);
+    expect(projection.shipA.byLayer.armor).toBeCloseTo(40, 6);
+    expect(projection.shipA.totalInflicted).toBeCloseTo(40, 6);
+  });
+
+  test("project: depleted shield with non-zero uniformity still bypasses shield resist entirely", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.byLayer.shield).toBe(0);
+    expect(projection.shipA.byLayer.armor).toBe(100);
+    expect(projection.shipA.totalInflicted).toBe(100);
+  });
+
+  test("project: depleted shield and armor with non-zero resists only applies hull resist", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 0, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0.5 }, hullResists: { em: 0.7 } })));
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.byLayer.shield).toBe(0);
+    expect(projection.shipA.byLayer.armor).toBe(0);
+    expect(projection.shipA.byLayer.hull).toBeCloseTo(30, 6);
+    expect(projection.shipA.totalInflicted).toBeCloseTo(30, 6);
+  });
+
+  test("project: shield bleed-through damage is computed from raw damage, not shield-resisted", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
+    sim.step(1, events({ em: 1600, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(200);
+    const fraction = 1 - 200 / (0.25 * 1000);
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    const expectedShield = (1 - fraction) * 100 * (1 - 0.5);
+    const expectedArmor = fraction * 100;
+    expect(projection.shipA.byLayer.shield).toBeCloseTo(expectedShield, 6);
+    expect(projection.shipA.byLayer.armor).toBeCloseTo(expectedArmor, 6);
+    expect(projection.shipA.totalInflicted).toBeCloseTo(expectedShield + expectedArmor, 6);
+  });
+
+  test("project: mid-hit shield break keeps overflow shield-resisted, no double resist on armor", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 10, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0 }, shieldUniformity: 0 })));
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.byLayer.shield).toBe(10);
+    expect(projection.shipA.byLayer.armor).toBeCloseTo(40, 6);
+    expect(projection.shipA.totalInflicted).toBeCloseTo(50, 6);
+  });
+
+  test("project: mid-hit armor break keeps overflow armor-resisted, no double resist on hull", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 10, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0.5 }, hullResists: { em: 0 } })));
+    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    expect(projection.shipA.byLayer.shield).toBe(0);
+    expect(projection.shipA.byLayer.armor).toBe(10);
+    expect(projection.shipA.byLayer.hull).toBeCloseTo(40, 6);
+    expect(projection.shipA.totalInflicted).toBeCloseTo(50, 6);
   });
 });
