@@ -200,28 +200,28 @@ describe("SimConfigSourceImpl", () => {
     expect(config.shipA.baseMaxSpeed).toBe(400);
   });
 
-  test("getConfig sets suppressedMaxSpeed to speed for an afterburner fitted hull", () => {
+  test("getConfig passes propulsionKind for an afterburner fitted hull", () => {
     const deps = build();
     deps.shipASide.capture = vi.fn(() => ({ ...baseShipAState(), fittedHull: fittedHull("afterburner") }));
     const source = makeSource(deps);
     const config = source.getConfig();
-    expect(config.shipA.suppressedMaxSpeed).toBe(400);
+    expect(config.shipA.propulsionKind).toBe("afterburner");
   });
 
-  test("getConfig sets suppressedMaxSpeed to baseMaxSpeed for a microwarpdrive fitted hull", () => {
+  test("getConfig passes propulsionKind for a microwarpdrive fitted hull", () => {
     const deps = build();
     deps.shipASide.capture = vi.fn(() => ({ ...baseShipAState(), fittedHull: fittedHull("microwarpdrive") }));
     const source = makeSource(deps);
     const config = source.getConfig();
-    expect(config.shipA.suppressedMaxSpeed).toBe(300);
+    expect(config.shipA.propulsionKind).toBe("microwarpdrive");
   });
 
-  test("getConfig leaves suppressedMaxSpeed undefined when fittedHull is missing", () => {
+  test("getConfig leaves propulsionKind undefined when fittedHull is missing", () => {
     const deps = build();
     const source = makeSource(deps);
     const config = source.getConfig();
-    expect(config.shipA.suppressedMaxSpeed).toBeUndefined();
-    expect(config.shipB.suppressedMaxSpeed).toBeUndefined();
+    expect(config.shipA.propulsionKind).toBeUndefined();
+    expect(config.shipB.propulsionKind).toBeUndefined();
   });
 
   test("getEngineConfig assembles sim, weapons, defense, and overloaded", () => {

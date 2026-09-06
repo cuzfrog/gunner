@@ -84,7 +84,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
       id: side,
       maxSpeed: state.speed,
       baseMaxSpeed: state.baseMaxSpeed ?? state.speed,
-      suppressedMaxSpeed: suppressedMaxSpeed(state),
+      propulsionKind: state.fittedHull?.propulsionKind,
       mass: state.mass,
       inertiaModifier: state.inertia,
       mode: state.mode,
@@ -149,11 +149,4 @@ export class SimConfigSourceImpl implements SimConfigSource {
 interface SidePanelConfigSource {
   capture(): SidePanelState;
   skillConditions(): StatConditions;
-}
-
-function suppressedMaxSpeed(state: SidePanelState): number | undefined {
-  const kind = state.fittedHull?.propulsionKind;
-  if (kind === undefined) return undefined;
-  if (kind === "microwarpdrive") return state.baseMaxSpeed ?? state.speed;
-  return state.speed;
 }

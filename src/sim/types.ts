@@ -53,14 +53,12 @@ export type OrbitDirection = "cw" | "ccw";
 export interface ShipConfig {
   readonly id: "shipA" | "shipB";
   readonly maxSpeed: number;
-  // New configurations should carry the naked-hull (propulsion-independent) speed.
-  // Older saved profiles and URLs may not have the field; `DomControls` and state
-  // restoration use `maxSpeed` as a fallback so they still simulate identically.
+  // Naked-hull (propulsion-independent) speed. `effectiveState` uses this when
+  // a scrambler suppresses an MWD. Absent = legacy fallback to `maxSpeed`.
   readonly baseMaxSpeed?: number;
-  // Max speed while warp-scrambled: the producer strips boosts only from modules
-  // a scrambler actually shuts down (MWD). Absent = legacy fallback
-  // (baseMaxSpeed ?? maxSpeed).
-  readonly suppressedMaxSpeed?: number;
+  // Propulsion kind. When a scrambler suppresses propulsion, only MWD is shut
+  // down (AB is unaffected). Absent = legacy, treated as no MWD.
+  readonly propulsionKind?: "afterburner" | "microwarpdrive";
   readonly mass: number;
   readonly inertiaModifier: number;
   readonly mode: AutopilotMode;
