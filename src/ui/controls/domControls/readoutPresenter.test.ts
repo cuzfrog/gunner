@@ -121,4 +121,29 @@ describe("ReadoutPresenterImpl", () => {
     expect(defenseProxy.spec).toBeUndefined();
     expect(defenseProxy.signaturePenalty).toBeUndefined();
   });
+
+  test("poisoned-config: output is invariant under config mutation with the same view", () => {
+    const d = buildDeps();
+    const presenter: ReadoutPresenter = new ReadoutPresenterImpl(d);
+    const view = makeEngineView({ shipA: 200, shipB: 1200 });
+    d.viewStream.emit(view);
+    const sigMock = d.defenseReadout.updateEffectiveSig as ReturnType<typeof vi.fn>;
+    const assessMock = d.defenseReadout.updateAssessments as ReturnType<typeof vi.fn>;
+    const effMock = d.effectiveReadout.update as ReturnType<typeof vi.fn>;
+    const firstSigArgs = sigMock.mock.calls.map((c) => [...c]);
+    const firstAssessArgs = assessMock.mock.calls.map((c) => [...c]);
+    const firstEffArgs = effMock.mock.calls.map((c) => [...c]);
+    const mutatedDefenseReadout: DefenseReadout = {
+      updateAssessments: vi.fn(),
+      updateDefenseView: vi.fn(),
+      updateEffectiveSig: vi.fn(),
+    };
+    Object.assign(d.defenseReadout, mutatedDefenseReadout);
+    d.viewStream.emit(view);
+    const newSigMock = d.defenseReadout.updateEffectiveSig as ReturnType<typeof vi.fn>;
+    const newAssessMock = d.defenseReadout.updateAssessments as ReturnType<typeof vi.fn>;
+    expect(newSigMock.mock.calls.map((c) => [...c])).toEqual(firstSigArgs);
+    expect(newAssessMock.mock.calls.map((c) => [...c])).toEqual(firstAssessArgs);
+    expect(effMock.mock.calls.slice(firstEffArgs.length).map((c) => [...c])).toEqual(firstEffArgs);
+  });
 });
