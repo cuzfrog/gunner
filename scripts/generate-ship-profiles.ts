@@ -1,6 +1,5 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { homedir } from "node:os";
 import type { ShipProfile } from "../src/ships";
 import type { FactionId, HullTypeId, ShipId } from "../src/gamedata/ids";
 
@@ -45,7 +44,7 @@ export interface SdeTypeDogma {
 }
 
 const DATA_PATH = "data/ship-profiles.json";
-const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
+const SDE_DIR = process.argv[2] ?? join(import.meta.dir, "..", "sde");
 const OUTPUT_PATH = "src/gamedata/shipProfiles/profiles.ts";
 const SHIP_CATEGORY_ID = 6;
 const LEGACY_PREFIX = "legacy";

@@ -1,4 +1,3 @@
-import { homedir } from "node:os";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { ShipId, TypeId } from "../src/gamedata/ids";
@@ -16,7 +15,7 @@ import { ATTRIBUTE_CLASSIFICATION } from "./fittingDb/classification/attributeCl
 import { EFFECT_CLASSIFICATION } from "./fittingDb/classification/effectClassification";
 import { semanticAttributeToHullBonus, isOutOfScopeAttribute, isNonScalingEffect, effectDrawbackKind } from "./fittingDb/classification/classifyLookup";
 
-const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
+const SDE_DIR = process.argv[2] ?? join(import.meta.dir, "..", "sde");
 const PROJECTION_FILE = join(import.meta.dir, "..", "generated", "sde", "projection.json");
 const OUT_FILE = join(import.meta.dir, "..", "src", "gamedata", "fittingDb", "generated", "fittingDb.data.ts");
 const I18N_EN_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-names-en.ts");

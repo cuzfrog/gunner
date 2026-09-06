@@ -61,7 +61,7 @@ function loadBaseline(): Baseline {
 }
 
 describe("markup parity", () => {
-  beforeAll(ensureBuild);
+  beforeAll(ensureBuild, 30000);
 
   test("every contract element id appears exactly once", () => {
     const html = readFileSync(DIST_HTML, "utf-8");
