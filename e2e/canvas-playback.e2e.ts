@@ -178,10 +178,10 @@ test.describe("canvas settings and playback", () => {
     await loadBothSides(page);
     const portraitA = page.locator("#ship-a-portrait");
     await expect(portraitA).toBeVisible();
-    await expect(portraitA.locator("img")).toBeVisible();
+    await expect(portraitA.locator(".portrait-image")).toBeVisible();
     const portraitB = page.locator("#ship-b-portrait");
     await expect(portraitB).toBeVisible();
-    await expect(portraitB.locator("img")).toBeVisible();
+    await expect(portraitB.locator(".portrait-image")).toBeVisible();
   });
 
   test("portrait hp bars drain under sustained fire", async ({ cleanPage: page }) => {
