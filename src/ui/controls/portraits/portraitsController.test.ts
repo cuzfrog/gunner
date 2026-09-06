@@ -592,19 +592,6 @@ describe("PortraitsController", () => {
       expect(els.shipAHpValues.hull.textContent).toBe("0 / 10,000");
     });
 
-    test("is-values-visible class toggles with mode", () => {
-      const { controller, els, profiles, defenseController } = buildController();
-      profiles.shipA = SHIP_A_PROFILE;
-      defenseController.hpPercentages.mockReturnValue({ shield: 0.5, armor: 0.5, hull: 0.5 });
-      defenseController.hpValues.mockReturnValue({ current: { shield: 500, armor: 500, hull: 500 }, max: { shield: 1000, armor: 1000, hull: 1000 } });
-      controller.setHpValueDisplay("none");
-      expect(els.shipAHpBars.classList.remove).toHaveBeenCalledWith("is-values-visible");
-      controller.setHpValueDisplay("percentage");
-      expect(els.shipAHpBars.classList.add).toHaveBeenCalledWith("is-values-visible");
-      controller.setHpValueDisplay("none");
-      expect(els.shipAHpBars.classList.remove).toHaveBeenCalledWith("is-values-visible");
-    });
-
     test("undefined hpValues hides value spans even in percentage mode", () => {
       const { controller, els, profiles, defenseController } = buildController();
       profiles.shipA = SHIP_A_PROFILE;

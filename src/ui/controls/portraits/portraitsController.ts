@@ -94,8 +94,6 @@ export class PortraitsControllerImpl implements PortraitsController {
     hpBars.hidden = hpPercentages === undefined;
     const hpValueEls = side === "shipA" ? this.els.shipAHpValues : this.els.shipBHpValues;
     updateHpValues(hpValueEls, this.hpValueDisplay, this.defenseController.hpValues(side), hpPercentages);
-    if (this.hpValueDisplay !== "none" && hpPercentages !== undefined) hpBars.classList.add("is-values-visible");
-    else hpBars.classList.remove("is-values-visible");
     const lock = this.viewStream.currentView()?.locks[side];
     const lockBadgeVisible = lock !== undefined && lock.status === "locked" && lock.lockTime > 0;
     if (lockBadge.hidden !== !lockBadgeVisible) lockBadge.hidden = !lockBadgeVisible;
