@@ -1,32 +1,32 @@
 [Scorpion, Ewar Shield Scorpion]
 
 Damage Control II
-[Empty Low slot]
+Signal Amplifier II
 [Empty Low slot]
 [Empty Low slot]
 [Empty Low slot]
 
 500MN Cold-Gas Enduring Microwarpdrive
-Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 3200
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Radar ECM II
+Magnetometric ECM II
+Gravimetric ECM II
+Ladar ECM II
+Large Shield Extender II
+Large Shield Extender II
 [Empty Med slot]
 
-Heavy Energy Neutralizer I
-Heavy Energy Neutralizer I
 Heavy Energy Neutralizer I
 Heavy Energy Neutralizer I
 [Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
-Large Core Defense Charge Economizer I
+Large Anti-EM Screen Reinforcer II
 Large Particle Dispersion Projector II
 Large Particle Dispersion Projector II
 
 
-Berserker SW-900 x3
+Hornet EC-300 x5
 
 
 Navy Cap Booster 3200 x5

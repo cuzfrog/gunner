@@ -1,0 +1,28 @@
+[Thunderchild, Vorton Shield Thunderchild]
+
+Damage Control II
+Vorton Tuning System II
+Vorton Tuning System II
+[Empty Low slot]
+[Empty Low slot]
+
+500MN Cold-Gas Enduring Microwarpdrive
+Adaptive Invulnerability Field II
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Sensor Booster II, Scan Resolution Script
+[Empty Med slot]
+
+Large Vorton Projector II
+[Empty High slot]
+
+Large Core Defense Field Extender I
+Large Core Defense Field Extender I
+Large Anti-EM Screen Reinforcer II
+
+
+Hornet II x5
+
+
+ElectroPunch Ultra L x2000

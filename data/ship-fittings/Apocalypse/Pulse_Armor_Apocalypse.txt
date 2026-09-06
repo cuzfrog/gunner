@@ -1,33 +1,35 @@
 [Apocalypse, Pulse Armor Apocalypse]
 
 Damage Control II
-Reinforced Bulkheads II
-Reinforced Bulkheads II
-Reinforced Bulkheads II
-Reinforced Bulkheads II
-Reinforced Bulkheads II
+Heat Sink II
+Heat Sink II
+Reactive Armor Hardener
+Multispectrum Energized Membrane II
+1600mm Steel Plates II
 1600mm Steel Plates II
 
 500MN Y-T8 Compact Microwarpdrive
-Eutectic Compact Cap Recharger
-[Empty Med slot]
-[Empty Med slot]
+Warp Scrambler II
+Tracking Computer II, Tracking Speed Script
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 800
 
-Mega Pulse Laser I, Xray L
-'Notos' Compact Large Proton Smartbomb
-Mega Pulse Laser I, Xray L
-'Notos' Compact Large Proton Smartbomb
-Mega Pulse Laser I, Xray L
-Mega Pulse Laser I, Xray L
-[Empty High slot]
-[Empty High slot]
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
-
-
-Hammerhead II x2
+Large Trimark Armor Pump I
+Large Trimark Armor Pump I
+Large Trimark Armor Pump I
 
 
-Mobile Depot x1
+Hammerhead II x5
+
+
+Navy Cap Booster 800 x20
+Scorch L x8
+Conflagration L x8

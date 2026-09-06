@@ -1,34 +1,34 @@
 [Typhoon Fleet Issue, Kitetackle Torp Armor Typhoon Fleet Issue]
 
-Shadow Serpentis Damage Control
-Federation Navy 1600mm Steel Plates
-Dark Blood Multispectrum Energized Membrane
-Federation Navy 1600mm Steel Plates
-[Empty Low slot]
-[Empty Low slot]
-[Empty Low slot]
+Damage Control II
+Ballistic Control System II
+Ballistic Control System II
+Ballistic Control System II
+1600mm Steel Plates II
+Multispectrum Energized Membrane II
+Reactive Armor Hardener
 
 Domination Stasis Webifier
-Dark Blood Warp Disruptor
-Gist X-Type 500MN Microwarpdrive
+Warp Disruptor II
+500MN Y-T8 Compact Microwarpdrive
 [Empty Med slot]
 [Empty Med slot]
 
-Torpedo Launcher II
-Torpedo Launcher II
-Torpedo Launcher II
-Torpedo Launcher II
-Torpedo Launcher II
-Torpedo Launcher II
+Torpedo Launcher II, Scourge Rage Torpedo
+Torpedo Launcher II, Scourge Rage Torpedo
+Torpedo Launcher II, Scourge Rage Torpedo
+Torpedo Launcher II, Scourge Rage Torpedo
+Torpedo Launcher II, Scourge Rage Torpedo
+Torpedo Launcher II, Scourge Rage Torpedo
 [Empty High slot]
 [Empty High slot]
 
-Large Trimark Armor Pump II
-Large Trimark Armor Pump II
-Large Trimark Armor Pump II
+Large Trimark Armor Pump I
+Large Trimark Armor Pump I
+Large Trimark Armor Pump I
 
 
 Caldari Navy Wasp x3
 
 
-Navy Cap Booster 800 x11
+Scourge Rage Torpedo x2000

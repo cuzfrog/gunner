@@ -1,18 +1,18 @@
-[Vindicator, Blaster Shield Vindicator]
+[Megathron Navy Issue, Blaster Shield Megathron Navy Issue]
 
-Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Damage Control II
 Tracking Enhancer II
 Tracking Enhancer II
+Power Diagnostic System II
+[Empty Low slot]
 
 500MN Y-T8 Compact Microwarpdrive
 Warp Scrambler II
-Stasis Webifier II
-X-Large Ancillary Shield Booster, Navy Cap Booster 800
-[Empty Med slot]
+Heavy Stasis Grappler II
+Large Shield Extender II
 
 Neutron Blaster Cannon II, Void L
 Neutron Blaster Cannon II, Void L
@@ -21,7 +21,7 @@ Neutron Blaster Cannon II, Void L
 Neutron Blaster Cannon II, Void L
 Neutron Blaster Cannon II, Void L
 Neutron Blaster Cannon II, Void L
-Neutron Blaster Cannon II, Void L
+Heavy Energy Neutralizer II
 
 Large Anti-EM Screen Reinforcer II
 Large Core Defense Field Extender II
@@ -32,6 +32,5 @@ Hammerhead II x5
 Warrior II x5
 
 
-Navy Cap Booster 800 x20
 Void L x1000
 Caldari Navy Antimatter Charge L x2000
