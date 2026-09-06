@@ -1,18 +1,20 @@
 [Hubris, Ewar Blaster Shield Hubris]
 
-ORE Reinforced Bulkheads
-ORE Reinforced Bulkheads
-ORE Reinforced Bulkheads
-ORE Reinforced Bulkheads
-ORE Reinforced Bulkheads
-Syndicate Damage Control
-ORE Reinforced Bulkheads
-ORE Reinforced Bulkheads
+Damage Control II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+[Empty Low slot]
 
 Tracking Computer II, Tracking Speed Script
 Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
-Tracking Computer II, Tracking Speed Script
+CONCORD Capital Shield Booster
+Multispectrum Shield Hardener II
 Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+[Empty Med slot]
 
 Ion Siege Blaster II, Void XL
 Ion Siege Blaster II, Void XL
@@ -21,8 +23,9 @@ Ion Siege Blaster II, Void XL
 [Empty High slot]
 [Empty High slot]
 
-[Empty Rig slot]
-[Empty Rig slot]
+Capital Hybrid Metastasis Adjuster I
+Capital Core Defense Field Extender I
+Capital Core Defense Field Extender I
 
 
 Strontium Clathrates x1875
@@ -33,4 +36,3 @@ Guristas Antimatter Charge XL x2497
 Void XL x2994
 Optimal Range Script x2
 Guristas Thorium Charge XL x1500
-Navy Cap Booster 3200 x2

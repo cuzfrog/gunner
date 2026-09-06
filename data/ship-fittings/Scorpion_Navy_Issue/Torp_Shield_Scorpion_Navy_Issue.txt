@@ -1,27 +1,27 @@
 [Scorpion Navy Issue, Torp Shield Scorpion Navy Issue]
 
-Estamel's Modified Ballistic Control System
-Estamel's Modified Ballistic Control System
-Estamel's Modified Ballistic Control System
-Unit W-634's Modified Drone Damage Amplifier
-Estamel's Modified Ballistic Control System
+Ballistic Control System II
+Ballistic Control System II
+Ballistic Control System II
+Ballistic Control System II
+Damage Control II
 
-Estamel's Modified X-Large Shield Booster
-Draclira's Modified Cap Recharger
-Draclira's Modified Cap Recharger
-Draclira's Modified Cap Recharger
-Draclira's Modified Cap Recharger
-Cormack's Modified Sensor Booster, Scan Resolution Script
-Cormack's Modified Sensor Booster, Scan Resolution Script
-Cormack's Modified Sensor Booster, Scan Resolution Script
+500MN Cold-Gas Enduring Microwarpdrive
+Adaptive Invulnerability Field II
+Adaptive Invulnerability Field II
+X-Large Ancillary Shield Booster, Navy Cap Booster 800
+Target Painter II
+Sensor Booster II, Scan Resolution Script
+[Empty Med slot]
+[Empty Med slot]
 
-Polarized Torpedo Launcher, Scourge Rage Torpedo
-Polarized Torpedo Launcher, Scourge Rage Torpedo
-Polarized Torpedo Launcher, Scourge Rage Torpedo
-Polarized Torpedo Launcher, Scourge Rage Torpedo
-Polarized Torpedo Launcher, Scourge Rage Torpedo
-Polarized Torpedo Launcher, Scourge Rage Torpedo
-Polarized Neutron Blaster Cannon, Void L
+Torpedo Launcher II, Scourge Rage Torpedo
+Torpedo Launcher II, Scourge Rage Torpedo
+Torpedo Launcher II, Scourge Rage Torpedo
+Torpedo Launcher II, Scourge Rage Torpedo
+Torpedo Launcher II, Scourge Rage Torpedo
+Torpedo Launcher II, Scourge Rage Torpedo
+[Empty High slot]
 
 Large Bay Loading Accelerator II
 Large Hydraulic Bay Thrusters I
@@ -31,3 +31,7 @@ Large Hydraulic Bay Thrusters I
 'Augmented' Ogre x2
 'Augmented' Hammerhead x2
 'Augmented' Hobgoblin x1
+
+
+Navy Cap Booster 800 x20
+Scourge Rage Torpedo x2000

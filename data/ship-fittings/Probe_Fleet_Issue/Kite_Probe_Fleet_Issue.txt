@@ -1,0 +1,26 @@
+[Probe Fleet Issue, Kitetackle Missile Shield Probe Fleet Issue]
+Nanofiber Internal Structure II
+Ballistic Control System II
+Ballistic Control System II
+
+5MN Microwarpdrive II
+Medium Ancillary Shield Booster, Nanite Repair Paste
+Warp Disruptor II
+Small Capacitor Booster II, Navy Cap Booster 400
+
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+[Empty high slot]
+[Empty high slot]
+
+Small EM Shield Reinforcer I
+Small Thermal Shield Reinforcer I
+[Empty rig slot]
+
+
+Warrior II x3
+
+
+Nanite Repair Paste x32
+Navy Cap Booster 400 x8
+Caldari Navy Scourge Light Missile x4000

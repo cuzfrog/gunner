@@ -10,7 +10,7 @@ Heat Sink II
 
 50MN Y-T8 Compact Microwarpdrive
 Federation Navy Stasis Webifier
-Medium F-RX Compact Capacitor Booster
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
 Dread Guristas Warp Disruptor
 
 Heavy Pulse Laser II, Conflagration M
@@ -22,7 +22,7 @@ Heavy Pulse Laser II, Conflagration M
 
 Medium Energy Locus Coordinator II
 Medium Energy Locus Coordinator II
-[Empty Rig slot]
+Medium Trimark Armor Pump I
 
 
 Imperial Navy Microwave M x10

@@ -11,7 +11,7 @@ X5 Enduring Stasis Webifier
 Warp Scrambler II
 Medium Capacitor Booster II, Navy Cap Booster 800
 50MN Cold-Gas Enduring Microwarpdrive
-[Empty Med slot]
+Tracking Computer II, Optimal Range Script
 
 Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
 Focused Medium Pulse Laser II, Imperial Navy Multifrequency M

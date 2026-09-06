@@ -12,14 +12,14 @@ Reactive Armor Hardener
 Capital Capacitor Booster II, Navy Cap Booster 3200
 Capital Capacitor Booster II, Navy Cap Booster 3200
 Republic Fleet Small Cap Battery
-[Empty Med slot]
+Sensor Booster II, Scan Resolution Script
 
 Rapid Torpedo Launcher II, Mjolnir Rage Torpedo
 Imperial Navy Large EMP Smartbomb
 Rapid Torpedo Launcher II, Mjolnir Rage Torpedo
 Rapid Torpedo Launcher II, Mjolnir Rage Torpedo
-[Empty High slot]
-[Empty High slot]
+Caldari Navy Large Graviton Smartbomb
+Small Energy Neutralizer II
 
 Capital Auxiliary Nano Pump II
 Capital Ancillary Current Router II

@@ -4,11 +4,11 @@ import { readFileSync } from "node:fs";
 const PORT = 4321;
 export const BASE_URL = `http://localhost:${PORT}`;
 
-export const FITTING_THRASHER = "data/ship-fittings/Thrasher/Kitetackle_Art_Shield_Thrasher.txt";
-export const FITTING_MERLIN = "data/ship-fittings/Merlin/Tackle_Blaster_Shield_Merlin.txt";
+export const FITTING_THRASHER = "data/ship-fittings/Thrasher/Brawl_(artillery)_Thrasher.txt";
+export const FITTING_MERLIN = "data/ship-fittings/Merlin/Brawl_-_1_web_Merlin.txt";
 export const FITTING_ABADDON = "data/ship-fittings/Abaddon/Pulse_Armor_Abaddon.txt";
 export const FITTING_CERBERUS = "data/ship-fittings/Cerberus/Missile_Shield_Cerberus.txt";
-export const FITTING_VIGIL_ROCKET = "data/ship-fittings/Vigil_Fleet_Issue/Kitetackle_Rocket_Shield_Vigil_Fleet_Issue.txt";
+export const FITTING_VIGIL_ROCKET = "data/ship-fittings/Vigil_Fleet_Issue/Scram_kite_Vigil_Fleet_Issue.txt";
 export const FITTING_CURSE_EWAR = "data/ship-fittings/Curse/Ewar_Armor_Curse.txt";
 
 const fittingCache = new Map<string, string>();

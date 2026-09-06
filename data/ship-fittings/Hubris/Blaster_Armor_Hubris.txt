@@ -4,22 +4,22 @@ Abyssal Damage Control
 Capital Abyssal Armor Repairer
 Capital Abyssal Armor Repairer
 Inertial Stabilizers II
-[Empty Low slot]
-[Empty Low slot]
-[Empty Low slot]
-[Empty Low slot]
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
 
-Dark Blood Heavy Capacitor Booster, Navy Cap Booster 3200
+Dark Blood Heavy Capacitor Booster, Navy Cap Booster 800
 Capital Capacitor Booster II, Navy Cap Booster 3200
-Dark Blood Heavy Capacitor Booster
-Dark Blood Heavy Capacitor Booster
+Dark Blood Heavy Capacitor Booster, Navy Cap Booster 800
+Dark Blood Heavy Capacitor Booster, Navy Cap Booster 800
 
 Ion Siege Blaster II, Null XL
 Large Abyssal Plasma Smartbomb
 Ion Siege Blaster II, Null XL
 Ion Siege Blaster II, Null XL
-[Empty High slot]
-[Empty High slot]
+Large Abyssal Plasma Smartbomb
+Small Energy Neutralizer II
 
 Capital Nanobot Accelerator I
 Capital Auxiliary Nano Pump I

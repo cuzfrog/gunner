@@ -3,26 +3,26 @@
 Nanofiber Internal Structure II
 Damage Control II
 25000mm Crystalline Carbonide Restrained Plates
-[Empty Low slot]
+Drone Damage Amplifier II
 
 10000MN Afterburner I
 Thermal Shield Hardener II
-Capital Capacitor Booster I, Cap Booster 800
+Capital Capacitor Booster I, Navy Cap Booster 3200
 Capital C-5L Compact Shield Booster
 50000MN Microwarpdrive I
 EM Shield Hardener II
-[Empty Med slot]
+EM Shield Hardener II
 
 Skirmish Command Burst I, Rapid Deployment Charge
 Skirmish Command Burst I, Evasive Maneuvers Charge
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Shield Command Burst I, Active Shielding Charge
+Shield Command Burst I, Shield Harmonizing Charge
+Information Command Burst I, Sensor Optimization Charge
 
 Capital Polycarbon Engine Housing I
 Capital Polycarbon Engine Housing I
 Capital Polycarbon Engine Housing I
 
 
-Cap Booster 800 x19
+Navy Cap Booster 3200 x19
 Nitrogen Isotopes x20534

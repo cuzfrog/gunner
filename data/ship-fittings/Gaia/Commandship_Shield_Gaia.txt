@@ -15,11 +15,11 @@ Ammatar Navy Cap Recharger
 CONCORD Capital Shield Booster
 
 Shield Command Burst II, Shield Harmonizing Charge
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Shield Command Burst II, Active Shielding Charge
+Shield Command Burst II, Shield Extension Charge
+Skirmish Command Burst II, Rapid Deployment Charge
+Information Command Burst II, Sensor Optimization Charge
+Drone Link Augmentor II
 
 Capital Core Defense Field Extender II
 Capital Core Defense Capacitor Safeguard II

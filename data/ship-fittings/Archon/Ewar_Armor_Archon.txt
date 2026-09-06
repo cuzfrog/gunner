@@ -10,14 +10,14 @@ CONCORD Capital Armor Repairer
 
 Capital Capacitor Booster II, Navy Cap Booster 3200
 50000MN Microwarpdrive II
-[Empty Med slot]
-[Empty Med slot]
+Sensor Booster II, Scan Resolution Script
+Sensor Booster II, Targeting Range Script
 
 Dark Blood Heavy Energy Neutralizer
 Armor Command Burst II, Armor Energizing Charge
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Armor Command Burst II, Armor Reinforcement Charge
+Armor Command Burst II, Rapid Repair Charge
+Drone Link Augmentor II
 
 Capital Explosive Armor Reinforcer I
 Capital Auxiliary Nano Pump I

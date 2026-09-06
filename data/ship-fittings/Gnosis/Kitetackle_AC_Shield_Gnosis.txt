@@ -21,9 +21,9 @@ Skirmish Command Burst I, Interdiction Maneuvers Charge
 425mm AutoCannon II, Republic Fleet EMP M
 425mm AutoCannon II, Republic Fleet EMP M
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
 Hornet EC-300 x2

@@ -1,0 +1,24 @@
+[Federation Navy Comet, Tackle Blaster Armor Federation Navy Comet]
+Damage Control II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+
+1MN Afterburner II
+Warp Scrambler II
+Stasis Webifier II
+
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Small Energy Nosferatu II
+
+Small Transverse Bulkhead I
+Small Transverse Bulkhead I
+Small Transverse Bulkhead I
+
+
+Hobgoblin II x3
+
+
+Nanite Repair Paste x32
+Void S x4000

@@ -1,0 +1,21 @@
+[Republic Fleet Firetail, Tackle AC Shield Republic Fleet Firetail]
+Damage Control II
+Gyrostabilizer II
+Overdrive Injector System II
+
+1MN Afterburner II
+Medium Ancillary Shield Booster, Nanite Repair Paste
+Warp Scrambler II
+Stasis Webifier II
+
+200mm AutoCannon II, Hail S
+200mm AutoCannon II, Hail S
+Small Energy Neutralizer II
+
+Small EM Shield Reinforcer I
+Small Thermal Shield Reinforcer I
+[Empty rig slot]
+
+
+Nanite Repair Paste x32
+Hail S x4000

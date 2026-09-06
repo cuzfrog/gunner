@@ -6,7 +6,7 @@ Heat Sink II
 Nanofiber Internal Structure II
 Nanofiber Internal Structure II
 Heat Sink II
-[Empty Low slot]
+Tracking Enhancer II
 
 Tracking Computer II, Tracking Speed Script
 Small Capacitor Booster II, Navy Cap Booster 400
@@ -16,11 +16,11 @@ Heavy Beam Laser II, Imperial Navy Multifrequency M
 Heavy Beam Laser II, Imperial Navy Multifrequency M
 Heavy Beam Laser II, Imperial Navy Multifrequency M
 Heavy Beam Laser II, Imperial Navy Multifrequency M
-[Empty High slot]
+Small Energy Neutralizer II
 
 Medium Energy Locus Coordinator II
 Medium Energy Locus Coordinator II
-[Empty Rig slot]
+Medium Energy Locus Coordinator II
 
 
 Warrior II x5

@@ -9,7 +9,7 @@ Reactive Armor Hardener
 10MN Monopropellant Enduring Afterburner
 Dread Guristas Warp Disruptor
 50MN Quad LiF Restrained Microwarpdrive
-Medium Capacitor Booster II
+Medium Capacitor Booster II, Navy Cap Booster 800
 Warp Scrambler II
 
 220mm Vulcan AutoCannon II, Hail M

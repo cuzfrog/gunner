@@ -4,12 +4,12 @@ Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
-[Empty Low slot]
+Nanofiber Internal Structure II
 
-Medium Shield Extender II
+Large Shield Extender II
+Large Shield Extender II
 50MN Y-T8 Compact Microwarpdrive
-[Empty Med slot]
-[Empty Med slot]
+Warp Scrambler II
 
 Polarized Neutron Blaster Cannon, Void L
 Polarized Neutron Blaster Cannon, Void L
@@ -20,12 +20,13 @@ Polarized Neutron Blaster Cannon, Void L
 Polarized Neutron Blaster Cannon, Void L
 Polarized Neutron Blaster Cannon, Void L
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Ancillary Current Router I
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
 Hobgoblin II x5
 
 
-Void L x11968
+Void L x5000
+Nanite Repair Paste x50

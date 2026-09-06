@@ -1,0 +1,21 @@
+[Imperial Navy Slicer, Kitetackle Pulse Armor Imperial Navy Slicer]
+Small Ancillary Armor Repairer, Nanite Repair Paste
+Heat Sink II
+Heat Sink II
+Nanofiber Internal Structure II
+Nanofiber Internal Structure II
+
+5MN Microwarpdrive II
+Warp Disruptor II
+
+Small Focused Pulse Laser II, Aurora S
+Small Focused Pulse Laser II, Aurora S
+[Empty high slot]
+
+Small Energy Locus Coordinator II
+Small Energy Locus Coordinator II
+Small Energy Locus Coordinator II
+
+
+Nanite Repair Paste x32
+Aurora S x4000

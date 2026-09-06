@@ -1,0 +1,21 @@
+[Enyo, Kitetackle Armor Enyo]
+Magnetic Field Stabilizer II
+Centii A-Type Explosive Coating
+Nanofiber Internal Structure II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+
+5MN Microwarpdrive II
+Tracking Disruptor II
+Warp Disruptor II
+
+150mm 'Scout' Accelerator Cannon
+150mm 'Scout' Accelerator Cannon
+150mm 'Scout' Accelerator Cannon
+150mm 'Scout' Accelerator Cannon
+[Empty high slot]
+
+Small Hybrid Burst Aerator II
+Small Hybrid Locus Coordinator II
+
+
+Nanite Repair Paste x32

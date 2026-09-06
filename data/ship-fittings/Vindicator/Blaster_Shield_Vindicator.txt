@@ -1,31 +1,37 @@
 [Vindicator, Blaster Shield Vindicator]
 
-Cormack's Modified Magnetic Field Stabilizer
-Cormack's Modified Magnetic Field Stabilizer
-Cormack's Modified Magnetic Field Stabilizer
-Unit W-634's Modified Drone Damage Amplifier
-Unit W-634's Modified Drone Damage Amplifier
-Unit W-634's Modified Drone Damage Amplifier
-Cormack's Modified Magnetic Field Stabilizer
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Damage Control II
+Tracking Enhancer II
+Tracking Enhancer II
 
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+500MN Y-T8 Compact Microwarpdrive
+Warp Scrambler II
+Stasis Webifier II
+X-Large Ancillary Shield Booster, Navy Cap Booster 800
 [Empty Med slot]
 
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
 
-Large Hybrid Burst Aerator II
-[Empty Rig slot]
-[Empty Rig slot]
+Large Anti-EM Screen Reinforcer II
+Large Core Defense Field Extender II
+Large Core Defense Field Extender I
 
 
-'Augmented' Ogre x5
+Hammerhead II x5
+Warrior II x5
+
+
+Navy Cap Booster 800 x20
+Void L x1000
+Caldari Navy Antimatter Charge L x2000

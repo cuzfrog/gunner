@@ -3,14 +3,14 @@
 ML-EKP 'Polybolos' Ballistic Control System
 Domination Ballistic Control System
 Domination Ballistic Control System
-[Empty Low slot]
+Damage Control II
 [Empty Low slot]
 
 Multispectrum Shield Hardener II
 Capital Clarity Ward Enduring Shield Booster
 Multispectrum Shield Hardener II
 Multispectrum Shield Hardener II
-[Empty Med slot]
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
 [Empty Med slot]
 [Empty Med slot]
 [Empty Med slot]
@@ -21,6 +21,13 @@ Federation Navy Large Plasma Smartbomb
 XL Torpedo Launcher II, Scourge Rage XL Torpedo
 [Empty High slot]
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Capital Core Defense Field Extender I
+Capital Core Defense Field Extender I
+Capital EM Shield Reinforcer I
+
+
+Scourge Rage XL Torpedo x2000
+Scourge Javelin XL Torpedo x1000
+Navy Cap Booster 3200 x50
+Strontium Clathrates x1000
+Nitrogen Isotopes x50000

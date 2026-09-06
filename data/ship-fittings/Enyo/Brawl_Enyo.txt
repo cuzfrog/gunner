@@ -1,0 +1,23 @@
+[Enyo, Kitetackle Blaster Armor Enyo]
+Assault Damage Control II
+Magnetic Field Stabilizer II
+Centii A-Type Explosive Coating
+Small Ancillary Armor Repairer, Nanite Repair Paste
+
+5MN Microwarpdrive II
+Stasis Webifier II
+Warp Scrambler II
+
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+'Arbalest' Rocket Launcher I, Scourge Rage Rocket
+
+Small Hybrid Burst Aerator II
+Small Auxiliary Nano Pump II
+
+
+Nanite Repair Paste x32
+Void S x8000
+Scourge Rage Rocket x2000

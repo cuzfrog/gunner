@@ -1,0 +1,20 @@
+[Condor, Kitetackle Missile Shield Condor]
+Micro Auxiliary Power Core I
+Nanofiber Internal Structure II
+
+5MN Microwarpdrive II
+Medium Shield Extender II
+Tracking Disruptor II
+Warp Disruptor II
+
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+[Empty high slot]
+
+Small Polycarbon Engine Housing II
+Small EM Shield Reinforcer I
+Small Core Defense Field Extender II
+
+
+Caldari Navy Scourge Light Missile x6000

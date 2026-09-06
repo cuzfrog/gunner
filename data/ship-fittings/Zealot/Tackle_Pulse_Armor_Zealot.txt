@@ -6,7 +6,7 @@ Medium Ancillary Armor Repairer, Nanite Repair Paste
 Heat Sink II
 Multispectrum Energized Membrane II
 Heat Sink II
-[Empty Low slot]
+Heat Sink II
 
 Medium F-RX Compact Capacitor Booster, Navy Cap Booster 400
 Abyssal Warp Scrambler

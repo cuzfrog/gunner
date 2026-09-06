@@ -18,11 +18,11 @@ Faint Epsilon Scoped Warp Scrambler
 425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
 425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
 425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
-[Empty High slot]
+Small Energy Neutralizer II
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
 Hobgoblin II x2

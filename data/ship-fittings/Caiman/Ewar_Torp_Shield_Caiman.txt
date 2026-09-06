@@ -4,13 +4,13 @@ Damage Control II
 Caldari Navy Power Diagnostic System
 Ballistic Control System II
 Caldari Navy Power Diagnostic System
-[Empty Low slot]
+Ballistic Control System II
 
 Capital Azeotropic Restrained Shield Extender
-Capital Capacitor Booster II, Cap Booster 3200
+Capital Capacitor Booster II, Navy Cap Booster 3200
 Enduring Multispectrum Shield Hardener
 CONCORD Capital Shield Booster
-Capital Capacitor Booster II
+Capital Capacitor Booster II, Navy Cap Booster 3200
 Multispectrum Shield Hardener II
 EM Shield Hardener II
 
@@ -18,7 +18,7 @@ Medium Energy Nosferatu II
 Rapid Torpedo Launcher II, Nova Rage Torpedo
 Rapid Torpedo Launcher II, Nova Rage Torpedo
 Rapid Torpedo Launcher II, Nova Rage Torpedo
-[Empty High slot]
+Caldari Navy Large Graviton Smartbomb
 
 Capital Core Defense Field Extender I
 Capital Core Defense Field Extender I
@@ -27,7 +27,7 @@ Capital EM Shield Reinforcer II
 
 Strontium Clathrates x1416
 Nitrogen Isotopes x89229
-Cap Booster 3200 x57
-Cap Booster 3200 x11
+Navy Cap Booster 3200 x57
+Navy Cap Booster 3200 x11
 Nova Rage Torpedo x820
 Mjolnir Torpedo x240

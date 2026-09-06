@@ -1,17 +1,17 @@
 [Brutix Navy Issue, Kitetackle Blaster Shield Brutix Navy Issue]
 
 Damage Control II
-Reinforced Bulkheads II
 Magnetic Field Stabilizer II
-Reinforced Bulkheads II
 Magnetic Field Stabilizer II
-Reinforced Bulkheads II
 Magnetic Field Stabilizer II
+Nanofiber Internal Structure II
+Magnetic Field Stabilizer II
+Nanofiber Internal Structure II
 
 50MN Cold-Gas Enduring Microwarpdrive
 Fleeting Compact Stasis Webifier
 Warp Scrambler II
-[Empty Med slot]
+Medium Capacitor Booster II, Navy Cap Booster 800
 
 Heavy Neutron Blaster II, Null M
 Heavy Neutron Blaster II, Null M
@@ -21,16 +21,16 @@ Heavy Neutron Blaster II, Null M
 Heavy Neutron Blaster II, Null M
 Medium Ghoul Compact Energy Nosferatu
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Ancillary Current Router I
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
-Acolyte II x2
-Acolyte II x3
+Acolyte II x5
 
 
-Nanite Repair Paste x54
-Federation Navy Antimatter Charge M x2500
-Null M x4304
-Void M x5299
+Null M x2000
+Void M x2000
+Federation Navy Antimatter Charge M x2000
+Navy Cap Booster 800 x20
+Nanite Repair Paste x50

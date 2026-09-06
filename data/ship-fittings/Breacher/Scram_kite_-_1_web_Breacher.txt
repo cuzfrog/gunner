@@ -1,0 +1,24 @@
+[Breacher, Tackle Rocket Armor Breacher]
+Damage Control II
+Ballistic Control System II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+
+1MN Afterburner II
+Warp Scrambler II
+Stasis Webifier II
+Medium Ancillary Shield Booster, Nanite Repair Paste
+
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
+
+Small EM Shield Reinforcer I
+Small Thermal Shield Reinforcer I
+[Empty rig slot]
+
+
+Hobgoblin II x2
+
+
+Nanite Repair Paste x64
+Scourge Rage Rocket x6000

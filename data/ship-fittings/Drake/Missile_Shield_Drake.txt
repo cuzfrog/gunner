@@ -3,7 +3,7 @@
 Damage Control II
 Shield Power Relay II
 Ballistic Control System II
-[Empty Low slot]
+Ballistic Control System II
 
 Large Shield Extender II
 Large Shield Extender II
@@ -18,7 +18,7 @@ Heavy Missile Launcher II, Scourge Fury Heavy Missile
 Heavy Missile Launcher II, Scourge Fury Heavy Missile
 Heavy Missile Launcher II, Scourge Fury Heavy Missile
 Heavy Missile Launcher II, Scourge Fury Heavy Missile
-[Empty High slot]
+Core Probe Launcher I, Sisters Core Scanner Probe
 
 Medium Thermal Shield Reinforcer I
 Medium Core Defense Field Extender I

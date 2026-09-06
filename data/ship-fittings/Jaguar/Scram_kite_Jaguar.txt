@@ -1,0 +1,23 @@
+[Jaguar, Tackle Rocket Shield Jaguar]
+Assault Damage Control II
+Nanofiber Internal Structure II
+Co-Processor II
+
+1MN Afterburner II
+Medium Ancillary Shield Booster, Nanite Repair Paste
+Medium Ancillary Shield Booster, Nanite Repair Paste
+Warp Scrambler II
+Stasis Webifier II
+
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
+125mm Gatling AutoCannon II, Barrage S
+
+Small Kinetic Shield Reinforcer I
+Small Bay Loading Accelerator II
+
+
+Nanite Repair Paste x64
+Scourge Rage Rocket x6000
+Barrage S x2000

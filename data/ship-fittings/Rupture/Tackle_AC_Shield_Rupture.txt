@@ -3,23 +3,28 @@
 Gyrostabilizer II
 Gyrostabilizer II
 Damage Control II
-Co-Processor II
-Reactor Control Unit II
+Tracking Enhancer II
 
 Fleeting Compact Stasis Webifier
 X-Large Ancillary Shield Booster, Navy Cap Booster 400
 10MN Y-S8 Compact Afterburner
 Warp Scrambler II
 
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
 Medium Gremlin Compact Energy Neutralizer
-425mm AutoCannon II, Hail M
-425mm AutoCannon II, Hail M
-425mm AutoCannon II, Hail M
-425mm AutoCannon II, Hail M
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Anti-EM Screen Reinforcer I
+Medium Anti-Thermal Screen Reinforcer I
+Medium Core Defense Charge Economizer I
 
 
 Acolyte II x5
+
+
+Hail M x2000
+Republic Fleet EMP M x1000
+Navy Cap Booster 400 x20
+Nanite Repair Paste x50

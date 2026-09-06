@@ -5,23 +5,23 @@ Magnetic Field Stabilizer II
 Tracking Enhancer II
 Magnetic Field Stabilizer II
 
+Large Shield Extender II
+50MN Microwarpdrive II
+Multispectrum Shield Hardener II
 Sensor Booster II, Scan Resolution Script
-Sensor Booster II, Scan Resolution Script
-Sensor Booster II
 Tracking Computer II, Optimal Range Script
-Sensor Booster II, Scan Resolution Script
-Tracking Computer II, Optimal Range Script
+Tracking Computer II, Tracking Speed Script
 
-250mm Railgun II, Federation Navy Antimatter Charge M
-250mm Railgun II, Federation Navy Antimatter Charge M
-250mm Railgun II, Federation Navy Antimatter Charge M
-250mm Railgun II, Federation Navy Antimatter Charge M
-250mm Railgun II, Federation Navy Antimatter Charge M
+250mm Railgun II, Spike M
+250mm Railgun II, Spike M
+250mm Railgun II, Spike M
+250mm Railgun II, Spike M
+250mm Railgun II, Spike M
 
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
-Spike M x1869
-Nanite Repair Paste x28
-Federation Navy Antimatter Charge M x1585
+Spike M x2000
+Federation Navy Antimatter Charge M x1000
+Nanite Repair Paste x50

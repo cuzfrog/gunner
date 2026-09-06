@@ -5,13 +5,13 @@ Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Reactor Control Unit II
 
-X-Large Ancillary Shield Booster
+X-Large Ancillary Shield Booster, Navy Cap Booster 400
 Multispectrum Shield Hardener II
 X-Large Ancillary Shield Booster, Navy Cap Booster 400
 50MN Microwarpdrive II
 Fleeting Compact Stasis Webifier
 Warp Scrambler II
-[Empty Med slot]
+Tracking Computer II, Tracking Speed Script
 
 Heavy Ion Blaster II, Void M
 Heavy Ion Blaster II, Void M

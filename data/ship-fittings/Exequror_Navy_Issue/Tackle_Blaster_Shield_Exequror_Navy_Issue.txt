@@ -1,28 +1,31 @@
 [Exequror Navy Issue, Tackle Blaster Shield Exequror Navy Issue]
 
-Reinforced Bulkheads II
-Magnetic Field Stabilizer II
 Damage Control II
-Reinforced Bulkheads II
-Reinforced Bulkheads II
 Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Nanofiber Internal Structure II
 
-10MN Afterburner II
-Fleeting Compact Stasis Webifier
-Initiated Compact Warp Scrambler
-Fleeting Compact Stasis Webifier
+Large Shield Extender II
+50MN Microwarpdrive II
+Warp Scrambler II
+Stasis Webifier II
+Multispectrum Shield Hardener II
 
 Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
-Medium Ghoul Compact Energy Nosferatu
+Small Energy Nosferatu II
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+Medium EM Shield Reinforcer I
 
 
-Null M x3048
-Nanite Repair Paste x23
-Void M x1636
+Warrior II x5
+
+
+Void M x2000
+Null M x2000
+Caldari Navy Antimatter Charge M x1000
+Nanite Repair Paste x50

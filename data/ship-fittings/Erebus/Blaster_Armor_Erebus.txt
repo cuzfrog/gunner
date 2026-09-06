@@ -6,7 +6,7 @@ Centum A-Type Multispectrum Energized Membrane
 Corelum A-Type Multispectrum Energized Membrane
 Tuvan's Modified Damage Control
 CONCORD 25000mm Steel Plates
-[Empty Low slot]
+Corpum A-Type Multispectrum Energized Membrane
 
 Shadow Serpentis Sensor Booster
 Shadow Serpentis Tracking Computer
@@ -21,8 +21,8 @@ Ion Siege Blaster II
 Ion Siege Blaster II
 Ion Siege Blaster II
 Ion Siege Blaster II
-[Empty High slot]
-[Empty High slot]
+Imperial Navy Large EMP Smartbomb
+Small Energy Neutralizer II
 
 Capital Trimark Armor Pump II
 Capital Trimark Armor Pump II

@@ -6,8 +6,8 @@ Reactor Control Unit II
 Co-Processor II
 Nanofiber Internal Structure II
 
-X-Large Ancillary Shield Booster, Cap Booster 400
-X-Large Ancillary Shield Booster, Cap Booster 400
+X-Large Ancillary Shield Booster, Navy Cap Booster 400
+X-Large Ancillary Shield Booster, Navy Cap Booster 400
 Multispectrum Shield Hardener II
 Large Compact Pb-Acid Cap Battery
 Compact Multispectrum Shield Hardener
@@ -17,13 +17,13 @@ Compact Multispectrum Shield Hardener
 'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
 'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
 'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
-[Empty High slot]
-[Empty High slot]
+Heavy Missile Launcher II, Nova Heavy Missile
+Heavy Missile Launcher II, Nova Heavy Missile
 
 Medium EM Shield Reinforcer II
 Medium EM Shield Reinforcer II
-[Empty Rig slot]
+Medium Core Defense Field Extender I
 
 
-Cap Booster 400 x6
+Navy Cap Booster 400 x6
 Nova Heavy Missile x2000

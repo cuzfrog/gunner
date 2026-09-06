@@ -21,9 +21,9 @@ XL Torpedo Launcher II, Scourge Rage XL Torpedo
 XL Torpedo Launcher II, Scourge Rage XL Torpedo
 [Empty High slot]
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Capital Core Defense Field Extender I
+Capital Core Defense Field Extender I
+Capital EM Shield Reinforcer I
 
 
 Strontium Clathrates x212
@@ -36,7 +36,6 @@ Guristas Mjolnir XL Torpedo x1000
 Nanite Repair Paste x1000
 Scourge Javelin XL Torpedo x1000
 Strontium Clathrates x2425
-Strontium Clathrates x53
 Nitrogen Isotopes x3638
 Nitrogen Isotopes x15226
 Nitrogen Isotopes x31833

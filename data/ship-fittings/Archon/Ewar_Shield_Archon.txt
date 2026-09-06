@@ -3,21 +3,21 @@
 Nanofiber Internal Structure II
 Nanofiber Internal Structure II
 Damage Control II
-[Empty Low slot]
-[Empty Low slot]
-[Empty Low slot]
-[Empty Low slot]
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
 
 10000MN Monopropellant Enduring Afterburner
-Capital F-RX Compact Capacitor Booster
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
 50000MN Quad LiF Restrained Microwarpdrive
-[Empty Med slot]
+Sensor Booster II, Scan Resolution Script
 
 Heavy Infectious Scoped Energy Neutralizer
 Heavy Infectious Scoped Energy Neutralizer
 Heavy Infectious Scoped Energy Neutralizer
 Heavy Infectious Scoped Energy Neutralizer
-[Empty High slot]
+Shield Command Burst II, Shield Harmonizing Charge
 
 Capital Polycarbon Engine Housing I
 Capital Polycarbon Engine Housing I

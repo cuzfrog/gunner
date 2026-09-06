@@ -1,37 +1,34 @@
 [Apocalypse, Armor Apocalypse]
 
-Prototype Compact Thermal Armor Hardener I
+Damage Control II
 Heat Sink II
-Prototype Compact EM Armor Hardener I
+Heat Sink II
+Heat Sink II
 Reactive Armor Hardener
-Heat Sink II
-Heat Sink II
-Medium Armor Repairer II
+Multispectrum Energized Membrane II
+Large Armor Repairer II
 
+Tracking Computer II, Optimal Range Script
+Tracking Computer II, Optimal Range Script
 Cap Recharger II
-Sensor Booster II
-Tracking Computer II
-Tracking Computer II
+Cap Recharger II
 
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Large Capacitor Control Circuit II
+Large Auxiliary Nano Pump I
+Large Trimark Armor Pump I
 
 
-Optimal Range Script x2
-Imperial Navy Standard L x2
-Imperial Navy Standard L x6
-Imperial Navy Radio L x4
-Imperial Navy Radio L x3
-Scan Resolution Script x1
-Sanshas Radio L x1
-Targeting Range Script x1
+Hammerhead II x5
+
+
+Aurora L x20
+Imperial Navy Multifrequency L x10

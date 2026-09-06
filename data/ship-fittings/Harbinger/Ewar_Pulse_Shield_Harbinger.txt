@@ -7,7 +7,7 @@ Nanofiber Internal Structure II
 Nanofiber Internal Structure II
 Heat Sink II
 
-Medium F-RX Compact Capacitor Booster, Cap Booster 800
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
 Multispectrum Shield Hardener II
 50MN Quad LiF Restrained Microwarpdrive
 EM Shield Amplifier II
@@ -26,7 +26,7 @@ Medium Energy Metastasis Adjuster I
 
 
 Imperial Navy Microwave M x12
-Cap Booster 800 x5
+Navy Cap Booster 800 x5
 Imperial Navy Multifrequency M x12
 Conflagration M x9
 Conflagration M x3

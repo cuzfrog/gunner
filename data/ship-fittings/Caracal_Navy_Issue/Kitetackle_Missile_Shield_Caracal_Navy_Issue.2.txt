@@ -20,7 +20,7 @@ Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
 
 Medium EM Shield Reinforcer II
 Medium Core Defense Field Extender I
-[Empty Rig slot]
+Medium Core Defense Field Extender I
 
 
 Mjolnir Rage Heavy Assault Missile x3104

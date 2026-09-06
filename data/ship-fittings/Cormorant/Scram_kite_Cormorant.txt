@@ -1,0 +1,23 @@
+[Cormorant, Kitetackle Shield Cormorant]
+Damage Control II
+Magnetic Field Stabilizer II
+
+5MN Microwarpdrive II
+Small Capacitor Booster II, Navy Cap Booster 400
+Warp Disruptor II
+
+150mm 'Scout' Accelerator Cannon
+150mm 'Scout' Accelerator Cannon
+150mm 'Scout' Accelerator Cannon
+150mm 'Scout' Accelerator Cannon
+150mm 'Scout' Accelerator Cannon
+150mm 'Scout' Accelerator Cannon
+150mm 'Scout' Accelerator Cannon
+[Empty high slot]
+
+Small Hybrid Locus Coordinator II
+Small Hybrid Locus Coordinator II
+Small Polycarbon Engine Housing II
+
+
+Navy Cap Booster 400 x8

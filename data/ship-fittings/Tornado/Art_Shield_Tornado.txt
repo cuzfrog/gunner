@@ -9,7 +9,7 @@ Tracking Computer II, Optimal Range Script
 Sensor Booster II, Targeting Range Script
 Tracking Computer II, Optimal Range Script
 Sensor Booster II, Targeting Range Script
-[Empty Med slot]
+50MN Microwarpdrive II
 
 1400mm 'Scout' Artillery I, Republic Fleet Fusion L
 1400mm 'Scout' Artillery I, Republic Fleet Fusion L
@@ -21,8 +21,8 @@ Sensor Booster II, Targeting Range Script
 1400mm 'Scout' Artillery I, Republic Fleet Fusion L
 
 Medium Hyperspatial Velocity Optimizer II
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
 Tracking Speed Script x2

@@ -2,24 +2,26 @@
 
 Damage Control II
 Fourier Compact Tracking Enhancer
-Co-Processor II
 Gyrostabilizer II
 Gyrostabilizer II
 Gyrostabilizer II
+Tracking Enhancer II
 
 Multispectrum Shield Hardener II
 Stasis Webifier II
 X-Large Ancillary Shield Booster, Navy Cap Booster 400
 10MN Afterburner II
+Warp Scrambler II
+Tracking Computer II, Tracking Speed Script
 
-Rocket Launcher II, Mjolnir Rage Rocket
 425mm AutoCannon II, Hail M
 425mm AutoCannon II, Hail M
 425mm AutoCannon II, Hail M
-Rocket Launcher II, Mjolnir Rage Rocket
 425mm AutoCannon II, Hail M
 425mm AutoCannon II, Hail M
 425mm AutoCannon II, Hail M
+Small Energy Neutralizer II
+Small Energy Neutralizer II
 
 Medium Thermal Shield Reinforcer II
 Medium EM Shield Reinforcer II
@@ -32,4 +34,3 @@ Barrage M x1800
 Navy Cap Booster 400 x8
 Republic Fleet EMP M x1800
 Hail M x1800
-Mjolnir Rage Rocket x100

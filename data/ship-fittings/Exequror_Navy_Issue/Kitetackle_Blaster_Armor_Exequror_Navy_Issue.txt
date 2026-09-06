@@ -20,7 +20,7 @@ Heavy Neutron Blaster II, Void M
 
 Medium Ancillary Current Router I
 Medium Trimark Armor Pump II
-[Empty Rig slot]
+Medium Trimark Armor Pump I
 
 
 Acolyte II x5

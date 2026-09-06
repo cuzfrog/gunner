@@ -3,31 +3,27 @@
 Damage Control II
 Ballistic Control System II
 Ballistic Control System II
-[Empty Low slot]
 
 Large Shield Extender II
+Large Shield Extender II
 50MN Y-T8 Compact Microwarpdrive
-Large Compact Pb-Acid Cap Battery
-Sensor Booster II, Targeting Range Script
-[Empty Med slot]
-[Empty Med slot]
+Warp Scrambler II
+Stasis Webifier II
+Multispectrum Shield Hardener II
 
-Small Energy Nosferatu II
-Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
-Small Energy Neutralizer II
-Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
-Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+Medium EM Shield Reinforcer I
 
 
-Caldari Navy Nova Heavy Missile x850
-Mjolnir Fury Heavy Missile x1000
-Caldari Navy Scourge Heavy Missile x1120
-Caldari Navy Mjolnir Heavy Missile x1000
-Inferno Fury Heavy Missile x1000
-Scourge Fury Heavy Missile x1000
-Nova Fury Heavy Missile x1000
-Caldari Navy Inferno Heavy Missile x1000
+Hobgoblin II x5
+
+
+Caldari Navy Scourge Light Missile x2000
+Nanite Repair Paste x50

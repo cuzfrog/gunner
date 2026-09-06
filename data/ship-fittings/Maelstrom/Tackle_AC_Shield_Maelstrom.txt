@@ -1,37 +1,34 @@
 [Maelstrom, Tackle AC Shield Maelstrom]
 
-Co-Processor II
 Damage Control II
-Co-Processor II
 Gyrostabilizer II
 Gyrostabilizer II
+Gyrostabilizer II
+[Empty Low slot]
 
-X-Large Ancillary Shield Booster
+500MN Y-T8 Compact Microwarpdrive
 Warp Scrambler II
 Heavy Stasis Grappler II
-X-Large Ancillary Shield Booster
+X-Large Ancillary Shield Booster, Navy Cap Booster 800
+Adaptive Invulnerability Field II
 Multispectrum Shield Hardener II
-X-Large Ancillary Shield Booster
 [Empty Med slot]
 
-Dual 425mm AutoCannon II, Republic Fleet EMP L
-Dual 425mm AutoCannon II, Republic Fleet EMP L
-Dual 425mm AutoCannon II, Republic Fleet EMP L
-Medium Energy Neutralizer II
-Dual 425mm AutoCannon II, Republic Fleet EMP L
-Dual 425mm AutoCannon II, Republic Fleet EMP L
-Dual 425mm AutoCannon II, Republic Fleet EMP L
+800mm Repeating Cannon II, Republic Fleet EMP L
+800mm Repeating Cannon II, Republic Fleet EMP L
+800mm Repeating Cannon II, Republic Fleet EMP L
+800mm Repeating Cannon II, Republic Fleet EMP L
+800mm Repeating Cannon II, Republic Fleet EMP L
+800mm Repeating Cannon II, Republic Fleet EMP L
+Heavy Energy Neutralizer II
 
-Large Processor Overclocking Unit I
-Large EM Shield Reinforcer I
-[Empty Rig slot]
+Large Anti-EM Screen Reinforcer II
+Large Core Defense Field Extender II
+Large Core Defense Field Extender I
 
 
 Hornet EC-300 x5
-Republic Fleet Berserker x1
-Republic Fleet Berserker x1
 
 
-Republic Fleet Fusion L x2400
-Republic Fleet EMP L x1200
-Hail L x7432
+Republic Fleet EMP L x2000
+Navy Cap Booster 800 x20

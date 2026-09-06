@@ -4,13 +4,13 @@ Damage Control II
 1600mm Rolled Tungsten Compact Plates
 Heat Sink II
 Reactive Armor Hardener
-[Empty Low slot]
-[Empty Low slot]
+Heat Sink II
+Heat Sink II
 
 10MN Y-S8 Compact Afterburner
 Faint Epsilon Scoped Warp Scrambler
 Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
-[Empty Med slot]
+Stasis Webifier II
 
 Heavy Pulse Laser II, Scorch M
 Armor Command Burst II, Armor Energizing Charge

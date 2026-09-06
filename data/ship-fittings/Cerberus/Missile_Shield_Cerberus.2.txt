@@ -3,13 +3,13 @@
 Ballistic Control System II
 Ballistic Control System II
 Ballistic Control System II
-[Empty Low slot]
+Damage Control II
 
 Large Shield Extender II
 Large Shield Extender II
 10MN Afterburner II
-[Empty Med slot]
-[Empty Med slot]
+Multispectrum Shield Hardener II
+Warp Disruptor II
 
 Polarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile
 Polarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile
@@ -19,12 +19,12 @@ Polarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Mis
 Polarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile
 
 Medium Core Defense Field Extender II
-[Empty Rig slot]
+Medium Core Defense Field Extender II
 
 
 Hornet EC-300 x3
 
 
-Caldari Navy Scourge Heavy Assault Missile x1928
-Scourge Rage Heavy Assault Missile x3153
-Scourge Javelin Heavy Assault Missile x3658
+Caldari Navy Scourge Heavy Assault Missile x2000
+Scourge Rage Heavy Assault Missile x2000
+Scourge Javelin Heavy Assault Missile x2000

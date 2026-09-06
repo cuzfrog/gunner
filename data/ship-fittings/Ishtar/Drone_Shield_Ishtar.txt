@@ -1,10 +1,10 @@
 [Ishtar, Drone Shield Ishtar]
 
 Drone Damage Amplifier II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
 EFFA Compact Assault Damage Control
-Drone Damage Amplifier II
 Power Diagnostic System II
-Drone Damage Amplifier II
 Power Diagnostic System II
 
 100MN Y-S8 Compact Afterburner
@@ -12,7 +12,7 @@ Large Clarity Ward Enduring Shield Booster
 Multispectrum Shield Hardener II
 Large Compact Pb-Acid Cap Battery
 
-[Empty High slot]
+Drone Link Augmentor II
 [Empty High slot]
 [Empty High slot]
 [Empty High slot]
@@ -21,5 +21,9 @@ Medium EM Shield Reinforcer II
 Medium EM Shield Reinforcer II
 
 
-Acolyte II x6
-Wasp II x2
+Acolyte II x5
+Wasp II x3
+Hammerhead II x5
+
+
+Nanite Repair Paste x50

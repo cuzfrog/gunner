@@ -1,0 +1,25 @@
+[Talwar, Kitetackle Missile Armor Talwar]
+Ballistic Control System II
+Nanofiber Internal Structure II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+
+5MN Microwarpdrive II
+Small Capacitor Booster II, Navy Cap Booster 400
+Warp Disruptor II
+
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+
+Small Ancillary Current Router II
+Small Polycarbon Engine Housing II
+Small Polycarbon Engine Housing II
+
+
+Nanite Repair Paste x32
+Navy Cap Booster 400 x8
+Caldari Navy Scourge Light Missile x14000

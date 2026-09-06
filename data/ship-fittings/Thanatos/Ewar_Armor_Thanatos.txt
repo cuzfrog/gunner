@@ -5,19 +5,19 @@ CONCORD 25000mm Steel Plates
 Federation Navy Drone Damage Amplifier
 CONCORD 25000mm Steel Plates
 Federation Navy Omnidirectional Tracking Link
-[Empty Low slot]
+Drone Damage Amplifier II
 
 Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
 50000MN Microwarpdrive II
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Sensor Booster II, Scan Resolution Script
+Sensor Booster II, Targeting Range Script
+Stasis Webifier II
 
 Dark Blood Capital Energy Neutralizer
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Armor Command Burst II, Armor Reinforcement Charge
+Armor Command Burst II, Rapid Repair Charge
+Fighter Support Unit I
+Drone Link Augmentor II
 
 Capital Trimark Armor Pump I
 Capital Trimark Armor Pump I

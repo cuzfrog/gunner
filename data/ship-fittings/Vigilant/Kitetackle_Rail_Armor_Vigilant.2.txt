@@ -5,7 +5,7 @@ Magnetic Field Stabilizer II
 Damage Control II
 1600mm Steel Plates II
 Multispectrum Energized Membrane II
-[Empty Low slot]
+Tracking Enhancer II
 
 Caldari Navy Warp Disruptor
 50MN Cold-Gas Enduring Microwarpdrive

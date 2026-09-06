@@ -18,7 +18,7 @@ Multispectrum Shield Hardener I
 'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
 'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
 'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
-[Empty High slot]
+Core Probe Launcher I, Sisters Core Scanner Probe
 
 Medium Core Defense Field Purger I
 Medium Core Defense Field Purger I

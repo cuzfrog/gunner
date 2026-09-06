@@ -8,8 +8,8 @@ Tracking Enhancer II
 Heat Sink II
 
 Optical Compact Tracking Computer, Optimal Range Script
-Alumel-Wired Enduring Sensor Booster, Targeting Range Script
-10MN Y-S8 Compact Afterburner
+50MN Quad LiF Restrained Microwarpdrive
+Warp Disruptor II
 
 Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
 Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
@@ -20,10 +20,12 @@ Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
 Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
 Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Energy Locus Coordinator II
+Medium Energy Locus Coordinator II
+Medium Energy Metastasis Adjuster I
 
 
-Imperial Navy Standard L x16
-Imperial Navy Ultraviolet L x16
+Imperial Navy Standard L x500
+Imperial Navy Ultraviolet L x500
+Scorch L x200
+Nanite Repair Paste x50

@@ -11,14 +11,14 @@ True Sansha Multispectrum Energized Membrane
 
 Capital Capacitor Booster I, Navy Cap Booster 3200
 Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
-[Empty Med slot]
-[Empty Med slot]
+Sensor Booster II, Scan Resolution Script
+Tracking Computer II, Tracking Speed Script
 
 Ion Siege Blaster II, Guristas Antimatter Charge XL
 Ion Siege Blaster II, Guristas Antimatter Charge XL
 Ion Siege Blaster II, Guristas Antimatter Charge XL
-[Empty High slot]
-[Empty High slot]
+Imperial Navy Large EMP Smartbomb
+Small Energy Neutralizer II
 
 Capital Ancillary Current Router I
 Capital Explosive Armor Reinforcer I
@@ -28,12 +28,12 @@ Capital Auxiliary Nano Pump I
 Strontium Clathrates x1625
 Oxygen Isotopes x32046
 Oxygen Isotopes x41356
-Cap Booster 3200 x5
-Cap Booster 3200 x24
+Navy Cap Booster 3200 x5
+Navy Cap Booster 3200 x24
 Navy Cap Booster 3200 x19
 Oxygen Isotopes x40115
 Null XL x1996
-Cap Booster 3200 x1
+Navy Cap Booster 3200 x1
 Guristas Antimatter Charge XL x1760
 Void XL x1925
 Guristas Thorium Charge XL x2000

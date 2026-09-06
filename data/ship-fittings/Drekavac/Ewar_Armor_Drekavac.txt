@@ -5,8 +5,8 @@ Multispectrum Energized Membrane II
 Multispectrum Energized Membrane II
 1600mm Steel Plates II
 Reactive Armor Hardener
-[Empty Low slot]
-[Empty Low slot]
+Energized Adaptive Nano Membrane II
+Energized Adaptive Nano Membrane II
 
 Tracking Computer II, Optimal Range Script
 50MN Quad LiF Restrained Microwarpdrive
@@ -16,7 +16,7 @@ Medium Cap Battery II
 Small Energy Neutralizer II
 Small Energy Neutralizer II
 Small Energy Neutralizer II
-[Empty High slot]
+Drone Link Augmentor II
 
 Medium Trimark Armor Pump II
 Medium Trimark Armor Pump II

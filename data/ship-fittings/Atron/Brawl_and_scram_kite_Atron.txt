@@ -1,0 +1,21 @@
+[Atron, Tackle Blaster Armor Atron]
+Damage Control II
+Magnetic Field Stabilizer II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+
+1MN Afterburner II
+Warp Scrambler II
+Stasis Webifier II
+
+Light Neutron Blaster II, Null S
+Light Neutron Blaster II, Null S
+Light Neutron Blaster II, Null S
+[Empty high slot]
+
+Small Hybrid Burst Aerator II
+Small Transverse Bulkhead I
+Small Transverse Bulkhead I
+
+
+Nanite Repair Paste x32
+Null S x6000
