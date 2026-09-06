@@ -129,6 +129,36 @@ describe("StatsSection", () => {
     expect(section.isOverridden("shipAMass")).toBe(false);
   });
 
+  describe("currentSigBloomFactor", () => {
+    test("MWD fitting input shows base signature, not bloomed", () => {
+      const ships = realShips();
+      const { document, panel, section } = buildStatsSection(ships);
+      const rifter = ships.findHull("Rifter")!;
+      const mwd5 = ships.fittingOption(rifter, "mwd-5mn")!;
+      panel.profile = rifter;
+      panel.sections.propulsion.currentPropulsionModule = vi.fn(() => mwd5);
+      getFake(document, "ship-a-speed").value = "0";
+      section.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
+
+      const sigInput = Number(getFake(document, "ship-a-sig").value);
+      const baseSig = ships.fittedStats(rifter, undefined, mwd5, { skillLevel: 5, overloaded: true, weaponOverloaded: false }).sigRadius;
+      expect(sigInput).toBeCloseTo(baseSig, 6);
+      expect(section.currentSigBloomFactor()).toBeGreaterThan(0);
+      expect(sigInput).toBeLessThan(baseSig * (1 + section.currentSigBloomFactor()));
+    });
+
+    test("signature override preserves user value", () => {
+      const ships = realShips();
+      const { document, panel, section, overrides } = buildStatsSection(ships);
+      const rifter = ships.findHull("Rifter")!;
+      panel.profile = rifter;
+      overrides.shipASig = 42;
+      getFake(document, "ship-a-sig").value = "42";
+      section.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
+      expect(getFake(document, "ship-a-sig").value).toBe("42");
+    });
+  });
+
   describe("currentBaseMaxSpeed", () => {
     test("manual hull plus MWD yields the naked-hull base, below the displayed speed", () => {
       const ships = realShips();
