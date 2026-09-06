@@ -79,8 +79,11 @@ function mockDefenseView(): DefenseView {
   };
 }
 
-function makeEngineView(view: EngagementView, effective: EffectiveReadouts, defenseView: DefenseView): EngineView {
-  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView } as unknown as EngineView;
+function makeEngineView(view: EngagementView, effective: EffectiveReadouts, defenseView: DefenseView, sigs?: { shipA: number; shipB: number }): EngineView {
+  const shipAState = { ...view.frame.shipA, sig: sigs?.shipA ?? 1 };
+  const shipBState = { ...view.frame.shipB, sig: sigs?.shipB ?? 1 };
+  const snapshot = { time: view.frame.time, shipA: shipAState, shipB: shipBState, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
+  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView, snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
 }
 
 function baseSettings(): UserSettings {
@@ -379,6 +382,17 @@ describe("DomControls", () => {
     expect(getFake(document, "effective-ship-a-speed").classList.remove).toHaveBeenCalledWith("is-negative");
     expect(getFake(document, "effective-ship-a-optimal").classList.add).toHaveBeenCalledWith("is-negative");
     expect(getFake(document, "effective-ship-a-falloff").classList.remove).toHaveBeenCalledWith("is-negative");
+  });
+
+  test("effective sig suffix follows snapshot signature, not captured config signature", () => {
+    const { document, controls, viewStream } = buildDomControls();
+    const view = makeView(0);
+    const sideA = sideReadoutValues(300, 0.32, 1000, 3000, 0.32, 2000, 3000);
+    const sideB = sideReadoutValues(150, 0.32, 1000, 3000, 0.32, 1000, 3000);
+    const effective: EffectiveReadouts = { shipA: sideA, shipB: sideB };
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView(), { shipA: 200, shipB: 1200 }));
+    expect(getFake(document, "effective-ship-a-sig").textContent).toBe("200m");
+    expect(getFake(document, "effective-ship-b-sig").textContent).toBe("1,200m");
   });
 
   test("sessionRestored preserves playing state and resets the simulation", () => {

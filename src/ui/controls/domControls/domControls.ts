@@ -249,7 +249,6 @@ export class DomControls implements Controls, DomControlsHost {
     if (turret) return turret;
     return this.launcherControllers[side].currentMissileSpec();
   }
-  private getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
   getEngineConfig(): EngineConfig { return this.simConfigSource.getEngineConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
@@ -289,8 +288,8 @@ export class DomControls implements Controls, DomControlsHost {
     this.engagementReadout.update(view, (key) => this.deps.i18n.t(key));
     this.effectiveReadout.update(view.readouts);
     this.defenseController.updateAssessments(view);
-    this.defenseController.updateEffectiveSig("shipA", this.getSig("shipA"));
-    this.defenseController.updateEffectiveSig("shipB", this.getSig("shipB"));
+    this.defenseController.updateEffectiveSig("shipA", view.snapshot.shipA.sig ?? 1);
+    this.defenseController.updateEffectiveSig("shipB", view.snapshot.shipB.sig ?? 1);
   }
 
   private onDocumentPointerDown(event: PointerEvent): void {

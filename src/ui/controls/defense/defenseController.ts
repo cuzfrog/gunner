@@ -80,13 +80,13 @@ export class DefenseControllerImpl implements DefenseController {
   updateEffectiveSig(side: Side, sig: number): void {
     const el = this.els[side].effectiveSig;
     const penalty = this.signaturePenalty(side);
+    el.textContent = `${formatWithCommas(sig)}m`;
     if (penalty > 0) {
-      el.textContent = `${formatWithCommas(sig)}m`;
       el.classList.add("is-negative");
       el.setAttribute("data-hint", this.i18n.t("hint.effectiveSigPenalty").replace("{penalty}", formatWithCommas(penalty)));
     } else {
-      el.textContent = "";
       el.classList.remove("is-negative");
+      el.setAttribute("data-hint", "");
     }
   }
 

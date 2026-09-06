@@ -91,13 +91,14 @@ describe("DefenseControllerImpl.updateEffectiveSig", () => {
     expect(els.shipA.effectiveSig.textContent).not.toContain("49");
   });
 
-  test("clears the suffix when no shield extender penalty is present", () => {
+  test("always renders the suffix; removes negative class and hint when no shield extender penalty is present", () => {
     const els = buildEls();
     const controller = new DefenseControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildUiEvents(), defenseAssessor: defaultAssessor() });
     controller.setDefenseSpec("shipA", defenseSpecWithPenalty(0));
     controller.updateEffectiveSig("shipA", 35);
-    expect(els.shipA.effectiveSig.textContent).toBe("");
+    expect(els.shipA.effectiveSig.textContent).toBe("35m");
     expect(els.shipA.effectiveSig.classList.remove).toHaveBeenCalledWith("is-negative");
+    expect(els.shipA.effectiveSig.getAttribute("data-hint")).toBe("");
   });
 
   test("applies to shipB side independently", () => {
