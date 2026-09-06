@@ -2,22 +2,22 @@ import type { DefenseLayer, EngagementView } from "../../../sim";
 import { DEFENSE_LAYERS } from "../../../sim";
 import type { ViewStream } from "../../viewStream";
 import type { HintContentProvider } from "../hoverHint";
-import type { ActualDpsHintLayerRow, ActualDpsHintModel, ActualDpsHintRenderer } from "./actualDpsHintRenderer";
+import type { InflictedDpsHintLayerRow, InflictedDpsHintModel, InflictedDpsHintRenderer } from "./inflictedDpsHintRenderer";
 
-export type ActualDpsHintProvider = HintContentProvider;
+export type InflictedDpsHintProvider = HintContentProvider;
 
-export interface ActualDpsHintProviderDeps {
+export interface InflictedDpsHintProviderDeps {
   readonly viewStream: ViewStream;
-  readonly actualDpsHintRenderer: ActualDpsHintRenderer;
+  readonly inflictedDpsHintRenderer: InflictedDpsHintRenderer;
 }
 
-export class ActualDpsHintProviderImpl implements HintContentProvider {
+export class InflictedDpsHintProviderImpl implements HintContentProvider {
   private readonly viewStream: ViewStream;
-  private readonly renderer: ActualDpsHintRenderer;
+  private readonly renderer: InflictedDpsHintRenderer;
 
-  constructor(deps: ActualDpsHintProviderDeps) {
+  constructor(deps: InflictedDpsHintProviderDeps) {
     this.viewStream = deps.viewStream;
-    this.renderer = deps.actualDpsHintRenderer;
+    this.renderer = deps.inflictedDpsHintRenderer;
   }
 
   render(anchor: HTMLElement, container: HTMLElement): void {
@@ -30,21 +30,21 @@ export class ActualDpsHintProviderImpl implements HintContentProvider {
     this.renderer.render(model, container);
   }
 
-  private buildModel(side: "shipA" | "shipB", view: EngagementView): ActualDpsHintModel {
+  private buildModel(side: "shipA" | "shipB", view: EngagementView): InflictedDpsHintModel {
     const opponent = side === "shipA" ? "shipB" : "shipA";
     const attack = view.attacks[side];
-    if (attack === undefined) return { layers: [], totalAppliedDps: 0, totalActualDps: 0 };
+    if (attack === undefined) return { layers: [], totalAppliedDps: 0, totalInflictedDps: 0 };
     const projection = view.projection[opponent];
     const totalAppliedDps = attack.damage.appliedDps;
-    const totalActualDps = projection.totalHpLost;
+    const totalInflictedDps = projection.totalInflicted;
     const byLayer = projection.byLayer;
-    const layers: ActualDpsHintLayerRow[] = [];
+    const layers: InflictedDpsHintLayerRow[] = [];
     for (const layer of DEFENSE_LAYERS) {
-      const hpLost = byLayer[layer];
-      if (hpLost <= 0) continue;
-      layers.push({ layer, hpLost });
+      const inflicted = byLayer[layer];
+      if (inflicted <= 0) continue;
+      layers.push({ layer, inflicted });
     }
-    return { layers, totalAppliedDps, totalActualDps };
+    return { layers, totalAppliedDps, totalInflictedDps };
   }
 }
 

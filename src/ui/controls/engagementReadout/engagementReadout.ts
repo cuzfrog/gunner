@@ -15,13 +15,13 @@ interface SideDpsEls {
   readonly resNominalDps: HTMLElement;
   readonly resAppliedDps: HTMLElement;
   readonly resAppliedDpsApplication: HTMLElement;
-  readonly resActualDps: HTMLElement;
+  readonly resInflictedDps: HTMLElement;
   readonly resTimeToImpact: HTMLElement;
   readonly resSigFactor: HTMLElement;
   readonly resVelocityFactor: HTMLElement;
   readonly resNominalDpsLabel: HTMLElement;
   readonly resAppliedDpsLabel: HTMLElement;
-  readonly resActualDpsLabel: HTMLElement;
+  readonly resInflictedDpsLabel: HTMLElement;
   readonly resTimeToImpactLabel: HTMLElement;
   readonly resSigFactorLabel: HTMLElement;
   readonly resVelocityFactorLabel: HTMLElement;
@@ -70,7 +70,7 @@ export class EngagementReadoutImpl implements EngagementReadout {
     els.resRangePen.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resAppliedDps.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resAppliedDpsApplication.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
-    els.resActualDps.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
+    els.resInflictedDps.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resNominalDps.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resSigFactor.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resVelocityFactor.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
@@ -117,7 +117,7 @@ export class EngagementReadoutImpl implements EngagementReadout {
     setText(els.resNominalDps, "-");
     setText(els.resAppliedDps, "-");
     setText(els.resAppliedDpsApplication, "-");
-    setText(els.resActualDps, "-");
+    setText(els.resInflictedDps, "-");
     setText(els.resTimeToImpact, "-");
     setText(els.resSigFactor, "-");
     setText(els.resVelocityFactor, "-");
@@ -127,7 +127,7 @@ export class EngagementReadoutImpl implements EngagementReadout {
     els.resNominalDps.classList.add("is-dim");
     els.resAppliedDps.classList.add("is-dim");
     els.resAppliedDpsApplication.classList.add("is-dim");
-    els.resActualDps.classList.add("is-dim");
+    els.resInflictedDps.classList.add("is-dim");
     els.resSigFactor.classList.add("is-dim");
     els.resVelocityFactor.classList.add("is-dim");
     els.resTimeToImpact.classList.add("is-dim");
@@ -144,10 +144,10 @@ function setWeaponMode(els: SideDpsEls, mode: WeaponMode): void {
 function writeDpsFields(els: SideDpsEls, attack: AttackAssessment, opponentProjection: DamageProjection, t: (key: string) => string): void {
   setText(els.resNominalDpsLabel, t("result.nominalDps"));
   setText(els.resAppliedDpsLabel, t("result.appliedDps"));
-  setText(els.resActualDpsLabel, t("result.actualDps"));
+  setText(els.resInflictedDpsLabel, t("result.inflictedDps"));
   setText(els.resNominalDps, formatWithCommas(attack.damage.nominalDps, 1));
   setText(els.resAppliedDps, formatWithCommas(attack.damage.appliedDps, 1));
   setText(els.resAppliedDpsApplication, `(${formatWithCommas(attack.damage.application * 100, 1)}%)`);
   els.resAppliedDpsApplication.classList.add(hitChanceClass(attack.damage.application));
-  setText(els.resActualDps, formatWithCommas(opponentProjection.totalHpLost, 1));
+  setText(els.resInflictedDps, formatWithCommas(opponentProjection.totalInflicted, 1));
 }

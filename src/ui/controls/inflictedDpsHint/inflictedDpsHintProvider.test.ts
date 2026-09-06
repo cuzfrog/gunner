@@ -1,8 +1,8 @@
 import { type FakeElement, fakeDocument } from "../../testing";
 import { ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, type AttackAssessment, type DamageProjection, type EngagementView, type TurretSpec } from "../../../sim";
 import type { ViewStream } from "../../viewStream";
-import type { ActualDpsHintModel, ActualDpsHintRenderer } from "./actualDpsHintRenderer";
-import { type ActualDpsHintProviderDeps, ActualDpsHintProviderImpl } from "./actualDpsHintProvider";
+import type { InflictedDpsHintModel, InflictedDpsHintRenderer } from "./inflictedDpsHintRenderer";
+import { type InflictedDpsHintProviderDeps, InflictedDpsHintProviderImpl } from "./inflictedDpsHintProvider";
 
 const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
 
@@ -14,8 +14,8 @@ function makeAttack(appliedByType: { em: number; thermal: number; kinetic: numbe
   };
 }
 
-function makeProjection(totalHpLost: number, byLayer: { shield: number; armor: number; hull: number }): DamageProjection {
-  return { totalHpLost, byLayer };
+function makeProjection(totalInflicted: number, byLayer: { shield: number; armor: number; hull: number }): DamageProjection {
+  return { totalInflicted, byLayer };
 }
 
 function makeView(shipAAttack: AttackAssessment | undefined, shipBProjection: DamageProjection): EngagementView {
@@ -34,19 +34,19 @@ function makeViewStream(view: EngagementView | undefined): ViewStream {
   return { connect: vi.fn(), onViewUpdated: vi.fn(), offViewUpdated: vi.fn(), currentView: vi.fn(() => view) } as unknown as ViewStream;
 }
 
-function makeMockRenderer(): { renderer: ActualDpsHintRenderer; renderMock: ReturnType<typeof vi.fn> } {
+function makeMockRenderer(): { renderer: InflictedDpsHintRenderer; renderMock: ReturnType<typeof vi.fn> } {
   const renderMock = vi.fn();
-  const renderer = { render: renderMock } as unknown as ActualDpsHintRenderer;
+  const renderer = { render: renderMock } as unknown as InflictedDpsHintRenderer;
   return { renderer, renderMock };
 }
 
-function makeDeps(overrides: Partial<ActualDpsHintProviderDeps> = {}): ActualDpsHintProviderDeps & { renderMock: ReturnType<typeof vi.fn> } {
+function makeDeps(overrides: Partial<InflictedDpsHintProviderDeps> = {}): InflictedDpsHintProviderDeps & { renderMock: ReturnType<typeof vi.fn> } {
   const { renderer, renderMock } = makeMockRenderer();
   const attack = makeAttack({ em: 100, thermal: 50, kinetic: 0, explosive: 0 }, 150);
   const projection = makeProjection(110, { shield: 80, armor: 30, hull: 0 });
   return {
     viewStream: makeViewStream(makeView(attack, projection)),
-    actualDpsHintRenderer: renderer,
+    inflictedDpsHintRenderer: renderer,
     ...overrides,
     renderMock,
   };
@@ -58,7 +58,7 @@ function makeAnchor(side?: string): HTMLElement {
   return anchor;
 }
 
-describe("ActualDpsHintProviderImpl", () => {
+describe("InflictedDpsHintProviderImpl", () => {
   let originalDocument: Document | undefined;
   let originalElement: typeof Element | undefined;
 
@@ -83,7 +83,7 @@ describe("ActualDpsHintProviderImpl", () => {
 
   test("renders nothing when anchor has no data-side", () => {
     const deps = makeDeps();
-    const provider = new ActualDpsHintProviderImpl(deps);
+    const provider = new InflictedDpsHintProviderImpl(deps);
     const anchor = makeAnchor();
     const container = globalThis.document.createElement("div");
     provider.render(anchor, container);
@@ -92,7 +92,7 @@ describe("ActualDpsHintProviderImpl", () => {
 
   test("renders nothing when view store has no current view", () => {
     const deps = makeDeps({ viewStream: makeViewStream(undefined) });
-    const provider = new ActualDpsHintProviderImpl(deps);
+    const provider = new InflictedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
     provider.render(anchor, container);
@@ -102,7 +102,7 @@ describe("ActualDpsHintProviderImpl", () => {
   test("renders nothing when side has no attack", () => {
     const projection = makeProjection(0, { shield: 0, armor: 0, hull: 0 });
     const deps = makeDeps({ viewStream: makeViewStream(makeView(undefined, projection)) });
-    const provider = new ActualDpsHintProviderImpl(deps);
+    const provider = new InflictedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
     provider.render(anchor, container);
@@ -111,47 +111,47 @@ describe("ActualDpsHintProviderImpl", () => {
 
   test("builds model with per-layer rows from opponent projection", () => {
     const deps = makeDeps();
-    const provider = new ActualDpsHintProviderImpl(deps);
+    const provider = new InflictedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("shipA");
     const container = globalThis.document.createElement("div");
     provider.render(anchor, container);
     expect(deps.renderMock).toHaveBeenCalledTimes(1);
-    const model = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
+    const model = deps.renderMock.mock.calls[0][0] as InflictedDpsHintModel;
     expect(model.layers).toHaveLength(2);
     expect(model.layers[0].layer).toBe("shield");
-    expect(model.layers[0].hpLost).toBe(80);
+    expect(model.layers[0].inflicted).toBe(80);
     expect(model.layers[1].layer).toBe("armor");
-    expect(model.layers[1].hpLost).toBe(30);
+    expect(model.layers[1].inflicted).toBe(30);
     expect(model.totalAppliedDps).toBe(150);
-    expect(model.totalActualDps).toBe(110);
+    expect(model.totalInflictedDps).toBe(110);
   });
 
-  test("skips layers with zero HP lost", () => {
+  test("skips layers with zero inflicted damage", () => {
     const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
     const projection = makeProjection(50, { shield: 50, armor: 0, hull: 0 });
     const deps = makeDeps({ viewStream: makeViewStream(makeView(attack, projection)) });
-    const provider = new ActualDpsHintProviderImpl(deps);
+    const provider = new InflictedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
     provider.render(anchor, container);
-    const model = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
+    const model = deps.renderMock.mock.calls[0][0] as InflictedDpsHintModel;
     expect(model.layers).toHaveLength(1);
     expect(model.layers[0].layer).toBe("shield");
   });
 
-  test("renders summary even when all layers have zero HP lost", () => {
+  test("renders summary even when all layers have zero inflicted damage", () => {
     const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
     const projection = makeProjection(0, { shield: 0, armor: 0, hull: 0 });
     const deps = makeDeps({ viewStream: makeViewStream(makeView(attack, projection)) });
-    const provider = new ActualDpsHintProviderImpl(deps);
+    const provider = new InflictedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
     provider.render(anchor, container);
     expect(deps.renderMock).toHaveBeenCalledTimes(1);
-    const model = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
+    const model = deps.renderMock.mock.calls[0][0] as InflictedDpsHintModel;
     expect(model.layers).toHaveLength(0);
     expect(model.totalAppliedDps).toBe(100);
-    expect(model.totalActualDps).toBe(0);
+    expect(model.totalInflictedDps).toBe(0);
   });
 
   test("uses shipB projection for shipA side and shipA projection for shipB side", () => {
@@ -168,38 +168,38 @@ describe("ActualDpsHintProviderImpl", () => {
       locks: { shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true }, shipB: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true } },
     } as unknown as EngagementView;
     const deps = makeDeps({ viewStream: makeViewStream(view) });
-    const provider = new ActualDpsHintProviderImpl(deps);
+    const provider = new InflictedDpsHintProviderImpl(deps);
     const container = globalThis.document.createElement("div");
     provider.render(makeAnchor("shipA"), container);
-    const modelA = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
-    expect(modelA.totalActualDps).toBe(70);
+    const modelA = deps.renderMock.mock.calls[0][0] as InflictedDpsHintModel;
+    expect(modelA.totalInflictedDps).toBe(70);
     deps.renderMock.mockClear();
     provider.render(makeAnchor("shipB"), container);
-    const modelB = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
-    expect(modelB.totalActualDps).toBe(30);
+    const modelB = deps.renderMock.mock.calls[0][0] as InflictedDpsHintModel;
+    expect(modelB.totalInflictedDps).toBe(30);
   });
 
-  test("totalActualDps changes when target transitions from shield to armor with different resists", () => {
+  test("totalInflictedDps changes when target transitions from shield to armor with different resists", () => {
     const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
     const shieldPhaseProjection = makeProjection(100, { shield: 100, armor: 0, hull: 0 });
     const shieldView = makeView(attack, shieldPhaseProjection);
     const depsShield = makeDeps({ viewStream: makeViewStream(shieldView) });
-    const provider = new ActualDpsHintProviderImpl(depsShield);
+    const provider = new InflictedDpsHintProviderImpl(depsShield);
     const container = globalThis.document.createElement("div");
     provider.render(makeAnchor("shipA"), container);
-    const shieldModel = depsShield.renderMock.mock.calls[0][0] as ActualDpsHintModel;
-    expect(shieldModel.totalActualDps).toBe(100);
+    const shieldModel = depsShield.renderMock.mock.calls[0][0] as InflictedDpsHintModel;
+    expect(shieldModel.totalInflictedDps).toBe(100);
     expect(shieldModel.layers).toHaveLength(1);
     expect(shieldModel.layers[0].layer).toBe("shield");
 
     const armorPhaseProjection = makeProjection(50, { shield: 0, armor: 50, hull: 0 });
     const armorView = makeView(attack, armorPhaseProjection);
     const depsArmor = makeDeps({ viewStream: makeViewStream(armorView) });
-    const providerArmor = new ActualDpsHintProviderImpl(depsArmor);
+    const providerArmor = new InflictedDpsHintProviderImpl(depsArmor);
     providerArmor.render(makeAnchor("shipA"), container);
-    const armorModel = depsArmor.renderMock.mock.calls[0][0] as ActualDpsHintModel;
-    expect(armorModel.totalActualDps).toBe(50);
-    expect(armorModel.totalActualDps).toBeLessThan(shieldModel.totalActualDps);
+    const armorModel = depsArmor.renderMock.mock.calls[0][0] as InflictedDpsHintModel;
+    expect(armorModel.totalInflictedDps).toBe(50);
+    expect(armorModel.totalInflictedDps).toBeLessThan(shieldModel.totalInflictedDps);
     expect(armorModel.layers).toHaveLength(1);
     expect(armorModel.layers[0].layer).toBe("armor");
   });

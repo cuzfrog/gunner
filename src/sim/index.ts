@@ -39,7 +39,7 @@ export type {
   DamageVector,
   DefenseLayer,
   DefenseLayerSpec,
-  LayerHpLoss,
+  LayerDamage,
   DefenseSpec,
   RahSpec,
   RepairerSpec,

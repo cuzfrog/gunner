@@ -270,7 +270,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "result.rangePenalty": { zh: "射程惩罚" },
   "result.hitChance": { zh: "命中率" },
   "result.appliedDps": { zh: "输出 DPS" },
-  "result.actualDps": { zh: "实际 DPS" },
+  "result.inflictedDps": { zh: "造成 DPS" },
   "result.nominalDps": { zh: "纸面 DPS" },
   "result.timeToImpact": { zh: "命中时间" },
   "result.signatureFactor": { zh: "信号系数" },
@@ -331,6 +331,6 @@ export const ZH: LanguageSlice<"zh"> = {
   "appliedDpsHint.totalNominal": { zh: "总标称 DPS" },
   "appliedDpsHint.totalApplied": { zh: "总输出 DPS" },
   "appliedDpsHint.totalApplication": { zh: "总命中率" },
-  "actualDpsHint.totalApplied": { zh: "总输出 DPS" },
-  "actualDpsHint.totalActual": { zh: "总实际 DPS" },
+  "inflictedDpsHint.totalApplied": { zh: "总输出 DPS" },
+  "inflictedDpsHint.totalInflicted": { zh: "总造成 DPS" },
 } as const;

@@ -270,7 +270,7 @@ export const EN: LanguageSlice<"en"> = {
   "result.rangePenalty": { en: "Range penalty" },
   "result.hitChance": { en: "Hit chance" },
   "result.appliedDps": { en: "Applied DPS" },
-  "result.actualDps": { en: "Actual DPS" },
+  "result.inflictedDps": { en: "Inflicted DPS" },
   "result.nominalDps": { en: "Nominal DPS" },
   "result.timeToImpact": { en: "Time to impact" },
   "result.signatureFactor": { en: "Sig. factor" },
@@ -329,6 +329,6 @@ export const EN: LanguageSlice<"en"> = {
   "appliedDpsHint.totalNominal": { en: "Total Nominal DPS" },
   "appliedDpsHint.totalApplied": { en: "Total Applied DPS" },
   "appliedDpsHint.totalApplication": { en: "Total Application" },
-  "actualDpsHint.totalApplied": { en: "Total Applied DPS" },
-  "actualDpsHint.totalActual": { en: "Total Actual DPS" },
+  "inflictedDpsHint.totalApplied": { en: "Total Applied DPS" },
+  "inflictedDpsHint.totalInflicted": { en: "Total Inflicted DPS" },
 } as const;

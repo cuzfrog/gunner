@@ -23,9 +23,9 @@ function fakeSideEls(): ReadoutEls["shipA"] {
   return {
     resTrackPen: make(), resRangePen: make(), resHit: make(),
     resTrackPenLabel: make(), resRangePenLabel: make(), resHitLabel: make(),
-    resNominalDps: make(), resAppliedDps: make(), resAppliedDpsApplication: make(), resActualDps: make(), resTimeToImpact: make(),
+    resNominalDps: make(), resAppliedDps: make(), resAppliedDpsApplication: make(), resInflictedDps: make(), resTimeToImpact: make(),
     resSigFactor: make(), resVelocityFactor: make(),
-    resNominalDpsLabel: make(), resAppliedDpsLabel: make(), resActualDpsLabel: make(),
+    resNominalDpsLabel: make(), resAppliedDpsLabel: make(), resInflictedDpsLabel: make(),
     resTimeToImpactLabel: make(),
     resSigFactorLabel: make(), resVelocityFactorLabel: make(),
     resSide: make(),
@@ -77,11 +77,11 @@ const DUMMY_TURRET: TurretSpec = { kind: "turret", tracking: 0, sigResolution: 4
 const DUMMY_MISSILE: MissileSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 2, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 3, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
 const DUMMY_DRONE: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
 
-function makeProjection(totalHpLost: number): DamageProjection {
-  return { totalHpLost, byLayer: { shield: 0, armor: 0, hull: 0 } };
+function makeProjection(totalInflicted: number): DamageProjection {
+  return { totalInflicted, byLayer: { shield: 0, armor: 0, hull: 0 } };
 }
 
-function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipALock?: LockState; shipBActualDps?: number }) {
+function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipALock?: LockState; shipBInflictedDps?: number }) {
   const ship = fakeShipState();
   const frame = {
     time: 0, shipA: ship, shipB: ship,
@@ -105,11 +105,11 @@ function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: num
   };
   const shipALock = overrides.shipALock ?? IDLE_LOCK;
   const defenses = { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT };
-  const projection = { shipA: EMPTY_PROJECTION, shipB: makeProjection(overrides.shipBActualDps ?? 1.5) };
+  const projection = { shipA: EMPTY_PROJECTION, shipB: makeProjection(overrides.shipBInflictedDps ?? 1.5) };
   return { frame, attacks: { shipA: shipAAttack, shipB: shipBAttack }, effectiveWeapons: { shipA: DUMMY_TURRET, shipB: DUMMY_TURRET }, defenses, projection, locks: { shipA: shipALock, shipB: IDLE_LOCK } } as unknown as EngagementView;
 }
 
-function makeMissileView(overrides: { distance?: number; shipADamage?: DamageAssessment; shipAMissile?: { application: number; signatureTerm: number; velocityTerm: number; inRange: boolean; timeToImpact: number }; shipBActualDps?: number }) {
+function makeMissileView(overrides: { distance?: number; shipADamage?: DamageAssessment; shipAMissile?: { application: number; signatureTerm: number; velocityTerm: number; inRange: boolean; timeToImpact: number }; shipBInflictedDps?: number }) {
   const ship = fakeShipState();
   const frame = {
     time: 0, shipA: ship, shipB: ship,
@@ -126,11 +126,11 @@ function makeMissileView(overrides: { distance?: number; shipADamage?: DamageAss
     missile: shipAMissile,
   };
   const defenses = { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT };
-  const projection = { shipA: EMPTY_PROJECTION, shipB: makeProjection(overrides.shipBActualDps ?? 24) };
+  const projection = { shipA: EMPTY_PROJECTION, shipB: makeProjection(overrides.shipBInflictedDps ?? 24) };
   return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_MISSILE, shipB: undefined }, defenses, projection, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK } } as unknown as EngagementView;
 }
 
-function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipBActualDps?: number }) {
+function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipBInflictedDps?: number }) {
   const ship = fakeShipState();
   const frame = {
     time: 0, shipA: ship, shipB: ship,
@@ -147,7 +147,7 @@ function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: numb
     drone: { hit: shipAHit, expectedMultiplier: 0.8, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true },
   };
   const defenses = { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT };
-  const projection = { shipA: EMPTY_PROJECTION, shipB: makeProjection(overrides.shipBActualDps ?? 15) };
+  const projection = { shipA: EMPTY_PROJECTION, shipB: makeProjection(overrides.shipBInflictedDps ?? 15) };
   return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_DRONE, shipB: undefined }, defenses, projection, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK } } as unknown as EngagementView;
 }
 
@@ -222,14 +222,14 @@ describe("EngagementReadout", () => {
   test("turret side shows DPS and application percentage in separate grid cells", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
-    readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 50, appliedDps: 40, application: 0.8, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE }, shipBActualDps: 30 }), T);
+    readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 50, appliedDps: 40, application: 0.8, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE }, shipBInflictedDps: 30 }), T);
     expect(els.shipA.resSide.classList.contains("is-turret")).toBe(true);
     expect(els.shipA.resSide.classList.contains("is-missile")).toBe(false);
     expect(els.shipA.resNominalDps.textContent).toBe("50.0");
     expect(els.shipA.resAppliedDps.textContent).toBe("40.0");
     expect(els.shipA.resAppliedDpsApplication.textContent).toBe("(80.0%)");
     expect(els.shipA.resAppliedDpsApplication.classList.contains("is-good")).toBe(true);
-    expect(els.shipA.resActualDps.textContent).toBe("30.0");
+    expect(els.shipA.resInflictedDps.textContent).toBe("30.0");
   });
 
   test("turret side with zero applied DPS shows is-danger", () => {
@@ -286,7 +286,7 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resNominalDps.textContent).toBe("-");
     expect(els.shipA.resAppliedDps.textContent).toBe("-");
     expect(els.shipA.resAppliedDpsApplication.textContent).toBe("-");
-    expect(els.shipA.resActualDps.textContent).toBe("-");
+    expect(els.shipA.resInflictedDps.textContent).toBe("-");
     expect(els.shipA.resHit.textContent).toBe("-");
     expect(els.shipA.resTrackPen.textContent).toBe("-");
     expect(els.shipA.resRangePen.textContent).toBe("-");
@@ -299,7 +299,7 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resNominalDps.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resAppliedDps.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resAppliedDpsApplication.classList.contains("is-dim")).toBe(true);
-    expect(els.shipA.resActualDps.classList.contains("is-dim")).toBe(true);
+    expect(els.shipA.resInflictedDps.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resSigFactor.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resVelocityFactor.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resTimeToImpact.classList.contains("is-dim")).toBe(true);

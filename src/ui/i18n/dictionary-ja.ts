@@ -270,7 +270,7 @@ export const JA: LanguageSlice<"ja"> = {
   "result.rangePenalty": { ja: "射程ペナルティ" },
   "result.hitChance": { ja: "命中確率" },
   "result.appliedDps": { ja: "出力 DPS" },
-  "result.actualDps": { ja: "実効 DPS" },
+  "result.inflictedDps": { ja: "与ダメージ DPS" },
   "result.nominalDps": { ja: "理論 DPS" },
   "result.timeToImpact": { ja: "着弾時間" },
   "result.signatureFactor": { ja: "シグネチャ係数" },
@@ -329,6 +329,6 @@ export const JA: LanguageSlice<"ja"> = {
   "appliedDpsHint.totalNominal": { ja: "合計公称 DPS" },
   "appliedDpsHint.totalApplied": { ja: "合計出力 DPS" },
   "appliedDpsHint.totalApplication": { ja: "合計適用率" },
-  "actualDpsHint.totalApplied": { ja: "合計出力 DPS" },
-  "actualDpsHint.totalActual": { ja: "合計実効 DPS" },
+  "inflictedDpsHint.totalApplied": { ja: "合計出力 DPS" },
+  "inflictedDpsHint.totalInflicted": { ja: "合計与ダメージ DPS" },
 } as const;

@@ -35,7 +35,7 @@ test.describe("page load", () => {
   test("result grid shows initial placeholders", async ({ cleanPage: page }) => {
     await expect(page.locator("#res-distance")).toHaveText("20.0 km");
     await expect(page.locator("#res-applied-dps-a")).toHaveText("-");
-    await expect(page.locator("#res-actual-dps-a")).toHaveText("-");
+    await expect(page.locator("#res-inflicted-dps-a")).toHaveText("-");
     await expect(page.locator("#res-nominal-dps-a")).toHaveText("-");
     await expect(page.locator("#res-side-a")).toHaveClass(/is-turret/);
     await expect(page.locator("#res-hit-a")).toBeVisible();

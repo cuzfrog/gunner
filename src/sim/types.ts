@@ -11,19 +11,19 @@ export type DamageVector = Readonly<Record<DamageType, number>>;
 export type DamageResists = Readonly<Record<DamageType, number>>;
 export type DefenseLayer = "shield" | "armor" | "hull";
 
-export interface LayerHpLoss {
+export interface LayerDamage {
   readonly shield: number;
   readonly armor: number;
   readonly hull: number;
 }
 
 export interface DamageProjection {
-  readonly totalHpLost: number;
-  readonly byLayer: LayerHpLoss;
+  readonly totalInflicted: number;
+  readonly byLayer: LayerDamage;
 }
 
 export const ZERO_DAMAGE: DamageVector = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
-export const EMPTY_PROJECTION: DamageProjection = { totalHpLost: 0, byLayer: { shield: 0, armor: 0, hull: 0 } };
+export const EMPTY_PROJECTION: DamageProjection = { totalInflicted: 0, byLayer: { shield: 0, armor: 0, hull: 0 } };
 export const DAMAGE_TYPES: readonly DamageType[] = ["em", "thermal", "kinetic", "explosive"];
 export const DEFENSE_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
 

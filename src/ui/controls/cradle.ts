@@ -10,7 +10,7 @@ import type { UiEvents } from "../events";
 import type { createControlsEls } from "./elements";
 import type { Controls } from "./controlsContract";
 import type { ViewStream } from "../viewStream";
-import type { ReadoutPresenter } from "./domControls/readoutPresenter";
+import type { ReadoutPresenter } from "./domControls";
 import type { DomControlsHost } from "./domControls";
 import type { EffectiveReadout } from "./effectiveReadout";
 import type { EngagementReadout } from "./engagementReadout";
@@ -44,7 +44,7 @@ import type { DpsHintRenderer } from "./dpsHint";
 import type { AmmoHintProvider } from "./ammoHint";
 import type { AmmoHintRenderer } from "./ammoHint";
 import type { AppliedDpsHintProvider, AppliedDpsHintRenderer } from "./appliedDpsHint";
-import type { ActualDpsHintProvider, ActualDpsHintRenderer } from "./actualDpsHint";
+import type { InflictedDpsHintProvider, InflictedDpsHintRenderer } from "./inflictedDpsHint";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -139,6 +139,6 @@ export interface ControlsCradle {
   readonly readoutPresenter: ReadoutPresenter;
   readonly appliedDpsHintRenderer: AppliedDpsHintRenderer;
   readonly appliedDpsHintProvider: AppliedDpsHintProvider;
-  readonly actualDpsHintRenderer: ActualDpsHintRenderer;
-  readonly actualDpsHintProvider: ActualDpsHintProvider;
+  readonly inflictedDpsHintRenderer: InflictedDpsHintRenderer;
+  readonly inflictedDpsHintProvider: InflictedDpsHintProvider;
 }
