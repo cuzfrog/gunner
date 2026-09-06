@@ -1,12 +1,11 @@
 #!/usr/bin/env bun
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
 import { extname, join } from "node:path";
 import * as process from "node:process";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 import type { ShipProfile } from "../src/ships";
 
-const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
+const SDE_DIR = process.argv[2] ?? join(import.meta.dir, "..", "sde");
 const TYPE_ICON_OUTPUT_PATH = "src/ui/icons/typeIconFiles.ts";
 const SHIP_IMAGE_OUTPUT_PATH = "src/ui/icons/shipImageIds.ts";
 const SHIP_IMAGES_SOURCE = "data/ship-images";

@@ -1,10 +1,9 @@
 #!/usr/bin/env bun
 import { existsSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
 import * as process from "node:process";
 
-const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
+const SDE_DIR = process.argv[2] ?? join(import.meta.dir, "..", "sde");
 const ICONS_SOURCE_DIRECTORY = "data/ship-modules";
 const TYPE_ICONS_DIR = join(ICONS_SOURCE_DIRECTORY, "type-icons");
 const IN_SCOPE_CATEGORY_IDS = new Set([7, 8, 18, 32, 66, 87, 4, 22]);

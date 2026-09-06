@@ -1,11 +1,10 @@
-import { homedir } from "node:os";
 import { join } from "node:path";
 import { buildProjection } from "./fittingDb/projection";
 import { scaffoldClassificationFiles } from "./fittingDb/classification/scaffold";
 import type { RigDrawbackKind } from "./fittingDb/classification/classificationTypes";
 import { COMBAT_ATTRIBUTE_MAP, OUT_OF_SCOPE_ATTRIBUTE_IDS, NON_SCALING_EFFECT_IDS } from "./fittingDb/classification/scaffoldSeed";
 
-const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
+const SDE_DIR = process.argv[2] ?? join(import.meta.dir, "..", "sde");
 const OUT_DIR = join(import.meta.dir, "fittingDb", "classification");
 
 async function main(): Promise<void> {
