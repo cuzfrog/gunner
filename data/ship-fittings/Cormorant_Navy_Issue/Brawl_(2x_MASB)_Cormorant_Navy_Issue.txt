@@ -1,0 +1,24 @@
+[Cormorant Navy Issue, Tackle Blaster Shield Cormorant Navy Issue]
+Damage Control II
+Magnetic Field Stabilizer II
+
+1MN Afterburner II
+Medium Ancillary Shield Booster, Nanite Repair Paste
+Medium Ancillary Shield Booster, Nanite Repair Paste
+Warp Scrambler II
+
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+[Empty high slot]
+
+Small EM Shield Reinforcer I
+Small Thermal Shield Reinforcer I
+[Empty rig slot]
+
+
+Nanite Repair Paste x64
+Void S x12000

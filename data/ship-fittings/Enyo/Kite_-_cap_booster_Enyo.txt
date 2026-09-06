@@ -1,0 +1,22 @@
+[Enyo, Kitetackle Rail Armor Enyo]
+Assault Damage Control II
+Centii A-Type Explosive Coating
+Nanofiber Internal Structure II
+Centii A-Type Small Armor Repairer
+
+5MN Microwarpdrive II
+Small Capacitor Booster II, Navy Cap Booster 400
+Warp Disruptor II
+
+150mm Railgun II, Spike S
+150mm Railgun II, Spike S
+150mm Railgun II, Spike S
+150mm Railgun II, Spike S
+[Empty high slot]
+
+Small Hybrid Burst Aerator II
+Small Ancillary Current Router II
+
+
+Navy Cap Booster 400 x8
+Spike S x8000

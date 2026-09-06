@@ -1,0 +1,22 @@
+[Republic Fleet Firetail, Tackle Art Armor Republic Fleet Firetail]
+Damage Control II
+Gyrostabilizer II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+
+1MN Afterburner II
+Warp Scrambler II
+Stasis Webifier II
+Stasis Webifier II
+
+280mm Howitzer Artillery II, EMP S
+280mm Howitzer Artillery II, EMP S
+Rocket Launcher II, Scourge Rage Rocket
+
+Small Projectile Collision Accelerator II
+Small Transverse Bulkhead I
+Small Transverse Bulkhead I
+
+
+Nanite Repair Paste x32
+EMP S x4000
+Scourge Rage Rocket x2000

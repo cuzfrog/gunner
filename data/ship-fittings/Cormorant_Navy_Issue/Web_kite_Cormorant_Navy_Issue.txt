@@ -1,0 +1,24 @@
+[Cormorant Navy Issue, Tackle Rail Shield Cormorant Navy Issue]
+Damage Control II
+Magnetic Field Stabilizer II
+
+10MN Afterburner II
+Medium Ancillary Shield Booster, Nanite Repair Paste
+Warp Disruptor II
+Stasis Webifier II
+
+125mm Railgun II, Javelin S
+125mm Railgun II, Javelin S
+125mm Railgun II, Javelin S
+125mm Railgun II, Javelin S
+125mm Railgun II, Javelin S
+125mm Railgun II, Javelin S
+[Empty high slot]
+
+Small EM Shield Reinforcer I
+Small Thermal Shield Reinforcer I
+[Empty rig slot]
+
+
+Nanite Repair Paste x32
+Javelin S x12000

@@ -1,0 +1,23 @@
+[Astero, Kitetackle Drone Armor Astero]
+Damage Control II
+Centii A-Type Small Armor Repairer
+Multispectrum Energized Membrane II
+Nanofiber Internal Structure II
+
+5MN Microwarpdrive II
+Small Capacitor Booster II, Navy Cap Booster 400
+Warp Disruptor II
+Tracking Disruptor II
+
+Covert Ops Cloaking Device II
+[Empty high slot]
+
+Small Auxiliary Nano Pump II
+Small Auxiliary Nano Pump II
+Small Nanobot Accelerator II
+
+
+Warrior II x5
+
+
+Navy Cap Booster 400 x8

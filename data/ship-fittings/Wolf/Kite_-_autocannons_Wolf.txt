@@ -1,0 +1,22 @@
+[Wolf, Kitetackle AC Armor Wolf]
+200mm Steel Plates II
+Gyrostabilizer II
+Gyrostabilizer II
+Tracking Enhancer II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+
+5MN Microwarpdrive II
+Warp Disruptor II
+
+200mm AutoCannon II, Barrage S
+200mm AutoCannon II, Barrage S
+200mm AutoCannon II, Barrage S
+200mm AutoCannon II, Barrage S
+Small Energy Nosferatu II
+
+Small Projectile Ambit Extension II
+Small Projectile Ambit Extension II
+
+
+Nanite Repair Paste x32
+Barrage S x8000

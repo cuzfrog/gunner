@@ -1,0 +1,22 @@
+[Wolf, Kitetackle AC Armor Wolf]
+Assault Damage Control II
+200mm Steel Plates II
+Gyrostabilizer II
+Multispectrum Coating II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+
+5MN Microwarpdrive II
+Warp Scrambler II
+
+200mm AutoCannon II, Hail S
+200mm AutoCannon II, Hail S
+200mm AutoCannon II, Hail S
+200mm AutoCannon II, Hail S
+Small Energy Nosferatu II
+
+Small Explosive Armor Reinforcer I
+Small Projectile Burst Aerator II
+
+
+Nanite Repair Paste x32
+Hail S x8000

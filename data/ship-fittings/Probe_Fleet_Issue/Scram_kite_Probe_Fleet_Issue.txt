@@ -1,0 +1,25 @@
+[Probe Fleet Issue, Tackle Rocket Shield Probe Fleet Issue]
+Damage Control II
+Ballistic Control System II
+Ballistic Control System II
+
+1MN Afterburner II
+Medium Ancillary Shield Booster, Nanite Repair Paste
+Warp Scrambler II
+Stasis Webifier II
+
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
+Small Energy Neutralizer II
+Small Energy Neutralizer II
+
+Small EM Shield Reinforcer I
+Small Thermal Shield Reinforcer I
+[Empty rig slot]
+
+
+Hobgoblin II x3
+
+
+Nanite Repair Paste x32
+Scourge Rage Rocket x4000

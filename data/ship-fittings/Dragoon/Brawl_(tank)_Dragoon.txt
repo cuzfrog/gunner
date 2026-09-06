@@ -1,0 +1,26 @@
+[Dragoon, Kitetackle AC Armor Dragoon]
+Damage Control II
+400mm Steel Plates II
+Multispectrum Coating II
+Drone Damage Amplifier II
+
+5MN Microwarpdrive II
+Small Capacitor Booster II, Navy Cap Booster 400
+Warp Scrambler II
+
+Small Energy Neutralizer II
+Small Energy Neutralizer II
+Small Energy Neutralizer II
+125mm Gatling AutoCannon II, Hail S
+125mm Gatling AutoCannon II, Hail S
+
+Small Ancillary Current Router II
+Small Trimark Armor Pump II
+Small Trimark Armor Pump II
+
+
+Hobgoblin II x5
+
+
+Navy Cap Booster 400 x8
+Hail S x4000

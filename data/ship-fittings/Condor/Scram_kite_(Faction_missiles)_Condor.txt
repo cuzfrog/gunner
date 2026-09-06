@@ -1,0 +1,21 @@
+[Condor, Tackle Rocket Armor Condor]
+Damage Control II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+
+1MN Afterburner II
+Warp Scrambler II
+Stasis Webifier II
+Medium Ancillary Shield Booster, Nanite Repair Paste
+
+Rocket Launcher II, Caldari Navy Scourge Rocket
+Rocket Launcher II, Caldari Navy Scourge Rocket
+Rocket Launcher II, Caldari Navy Scourge Rocket
+[Empty high slot]
+
+Small EM Shield Reinforcer I
+Small Thermal Shield Reinforcer I
+[Empty rig slot]
+
+
+Nanite Repair Paste x64
+Caldari Navy Scourge Rocket x6000
