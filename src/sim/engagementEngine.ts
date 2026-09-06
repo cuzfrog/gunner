@@ -206,7 +206,7 @@ export class EngagementEngineImpl implements EngagementEngine {
   private engagementInput(snapshot: SimSnapshot, locks: Record<Side, LockState>, config: EngineConfig): EngagementInput {
     return {
       weapons: config.weapons,
-      sigRadii: config.sigRadii,
+      sigRadii: { shipA: snapshot.shipA.sig ?? config.sigRadii.shipA, shipB: snapshot.shipB.sig ?? config.sigRadii.shipB },
       droneStates: { shipA: this.droneSimulator.states("shipA"), shipB: this.droneSimulator.states("shipB") },
       missileFacts: { shipA: this.missileFactsFor("shipA", config), shipB: this.missileFactsFor("shipB", config) },
       defenses: { shipA: config.defense.shipA, shipB: config.defense.shipB },

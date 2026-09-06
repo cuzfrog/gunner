@@ -67,6 +67,11 @@ export interface ShipConfig {
   readonly desiredRange: number;
   readonly aggressivity: number;
   readonly sig?: number;
+  // Signature radius without propulsion-module bloom (e.g. MWD sig bloom).
+  // When a scrambler suppresses propulsion, `effectiveState` reverts `sig`
+  // to this base value, mirroring how `suppressedMaxSpeed` reverts speed.
+  // Absent = legacy fallback (sig stays unchanged when suppressed).
+  readonly baseSig?: number;
   readonly orbitDirection?: OrbitDirection;
 }
 

@@ -123,4 +123,13 @@ export class StatsSection implements IStatsSection {
     const speedOverride = this.isOverridden(speedKey) ? num(this.els.speed) : undefined;
     return this.ships.fittedStats(this.panel.profile, fitted?.fitted, propulsion, this.panel.sections.skill.skillConditions(), speedOverride).baseMaxSpeed;
   }
+
+  currentBaseSig(): number {
+    if (!this.panel.profile) return Math.max(num(this.els.shipSig), 1);
+    const fitted = this.panel.fittedHull;
+    const propulsion = fitted ? this.currentFittedPropulsion(fitted) : this.panel.sections.propulsion.currentPropulsionModule();
+    const speedKey: keyof ProfileParamOverrides = this.panel.side === "shipA" ? "shipASpeed" : "shipBSpeed";
+    const speedOverride = this.isOverridden(speedKey) ? num(this.els.speed) : undefined;
+    return this.ships.fittedStats(this.panel.profile, fitted?.fitted, propulsion, this.panel.sections.skill.skillConditions(), speedOverride).baseSigRadius;
+  }
 }

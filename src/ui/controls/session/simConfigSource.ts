@@ -92,6 +92,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
       desiredRange: state.range,
       aggressivity: state.aggressivity,
       sig: state.sig ?? 1,
+      baseSig: state.baseSig ?? state.sig ?? 1,
       orbitDirection: "cw",
       ewar: this.ewarController.projection(side),
       boosts: this.boosterController.projection(side),

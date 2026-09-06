@@ -229,6 +229,7 @@ describe("fittedStats", () => {
     expect(stats.baseMaxSpeed).toBeCloseTo(550, 6);
     expect(stats.inertiaModifier).toBeCloseTo(1.8225, 6);
     expect(stats.sigRadius).toBe(50);
+    expect(stats.baseSigRadius).toBe(50);
     expect(stats.alignTime).toBeCloseTo(1.8225 * 1_250_000 * Math.log(4) * 1e-6, 6);
   });
 
@@ -236,23 +237,27 @@ describe("fittedStats", () => {
     const fittedWithSigMultiplier: FittedHull = { ...fitted, sigMultiplier: 1.1 };
     const stats = fittedStats(frigate, fittedWithSigMultiplier, undefined, conditions(5));
     expect(stats.sigRadius).toBeCloseTo(55, 6);
+    expect(stats.baseSigRadius).toBeCloseTo(55, 6);
   });
 
   test("combines flat addition, percentage multiplier and MWD bloom in EVE order: (base + flat) * percent * (1 + bloom)", () => {
     const fittedWithSig: FittedHull = { ...fitted, sigMultiplier: 1.1 };
     const stats = fittedStats(frigate, fittedWithSig, mwd5, conditions(0));
     expect(stats.sigRadius).toBeCloseTo((35 + 15) * 1.1 * (1 + 5), 6);
+    expect(stats.baseSigRadius).toBeCloseTo((35 + 15) * 1.1, 6);
   });
 
   test("MWD sig bloom multiplier reduces the bloom factor: (base + flat) * percent * (1 + bloom * multiplier)", () => {
     const fittedWithReduction: FittedHull = { ...fitted, mwdSigBloomMultiplier: 0.25 };
     const stats = fittedStats(frigate, fittedWithReduction, mwd5, conditions(0));
     expect(stats.sigRadius).toBeCloseTo((35 + 15) * 1 * (1 + 5 * 0.25), 6);
+    expect(stats.baseSigRadius).toBeCloseTo((35 + 15) * 1, 6);
   });
 
   test("MWD sig bloom multiplier of 1 leaves bloom unchanged", () => {
     const stats = fittedStats(frigate, fitted, mwd5, conditions(0));
     expect(stats.sigRadius).toBeCloseTo((35 + 15) * 1 * (1 + 5 * 1), 6);
+    expect(stats.baseSigRadius).toBeCloseTo((35 + 15) * 1, 6);
   });
 
   test("with propulsion adds active mass and applies the speed and align time", () => {

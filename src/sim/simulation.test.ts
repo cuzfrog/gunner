@@ -436,6 +436,87 @@ describe("SimulationImpl", () => {
     expect(sim.snapshot().shipB.velocity.x).toBeCloseTo(200, 6);
   });
 
+  test("an active scrambler reverts MWD sig bloom to baseSig", () => {
+    const resolver: EwarResolver = {
+      speedMultiplier: () => 1,
+      speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret,
+      disruptedTurretIgnoringRange: (turret) => turret,
+      propulsionSuppressed: () => true,
+      propulsionSuppressedIgnoringRange: () => true,
+      appliedEffects: () => [],
+      speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
+      disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+      dampenedSensorSpec: (spec) => spec,
+      dampenedSensorSpecIgnoringRange: (spec) => spec,
+      dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+      reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+      potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
+    };
+    const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
+    const config: SimConfig = {
+      shipA: shipConfig("shipA", "midships"),
+      shipB: { ...shipConfig("shipB", "midships", 1, 1e-6, 200, 200), maxSpeed: 1800, sig: 1200, baseSig: 200 },
+      initialDistance: 5000,
+    };
+    const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver: resolver, simConfig: config });
+    sim.step(1);
+    expect(sim.snapshot().shipB.sig).toBeCloseTo(200, 6);
+  });
+
+  test("without scrambler suppression, MWD sig bloom stays active", () => {
+    const resolver: EwarResolver = {
+      speedMultiplier: () => 1,
+      speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret,
+      disruptedTurretIgnoringRange: (turret) => turret,
+      propulsionSuppressed: () => false,
+      propulsionSuppressedIgnoringRange: () => false,
+      appliedEffects: () => [],
+      speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
+      disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+      dampenedSensorSpec: (spec) => spec,
+      dampenedSensorSpecIgnoringRange: (spec) => spec,
+      dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+      reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+      potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
+    };
+    const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
+    const config: SimConfig = {
+      shipA: shipConfig("shipA", "midships"),
+      shipB: { ...shipConfig("shipB", "midships", 1, 1e-6, 200, 200), maxSpeed: 1800, sig: 1200, baseSig: 200 },
+      initialDistance: 5000,
+    };
+    const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver: resolver, simConfig: config });
+    sim.step(1);
+    expect(sim.snapshot().shipB.sig).toBeCloseTo(1200, 6);
+  });
+
+  test("an active scrambler leaves sig unchanged when baseSig is absent", () => {
+    const resolver: EwarResolver = {
+      speedMultiplier: () => 1,
+      speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret,
+      disruptedTurretIgnoringRange: (turret) => turret,
+      propulsionSuppressed: () => true,
+      propulsionSuppressedIgnoringRange: () => true,
+      appliedEffects: () => [],
+      speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
+      disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+      dampenedSensorSpec: (spec) => spec,
+      dampenedSensorSpecIgnoringRange: (spec) => spec,
+      dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+      reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+      potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
+    };
+    const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
+    const config: SimConfig = {
+      shipA: shipConfig("shipA", "midships"),
+      shipB: { ...shipConfig("shipB", "midships", 1, 1e-6, 200, 200), maxSpeed: 1800, sig: 1200 },
+      initialDistance: 5000,
+    };
+    const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver: resolver, simConfig: config });
+    sim.step(1);
+    expect(sim.snapshot().shipB.sig).toBeCloseTo(1200, 6);
+  });
+
   test("computes shipA command before shipB command and passes the current time", () => {
     const order: string[] = [];
     shipASteering.computeVelocity.mockImplementation((ship) => {

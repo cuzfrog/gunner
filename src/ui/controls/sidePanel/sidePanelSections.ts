@@ -41,6 +41,7 @@ export interface IStatsSection {
   currentFittedPropulsion(fitted: FittedHullSummary): PropulsionStats | undefined;
   currentFittedPropulsionModule(fitted: FittedHullSummary | undefined): PropulsionModule | undefined;
   currentBaseMaxSpeed(): number;
+  currentBaseSig(): number;
 }
 
 export interface ISkillOverloadSection {

@@ -6,6 +6,7 @@ export interface ShipStats {
   readonly maxSpeed: number;
   readonly baseMaxSpeed: number;
   readonly sigRadius: number;
+  readonly baseSigRadius: number;
   readonly alignTime: number;
 }
 
@@ -34,7 +35,8 @@ export function fittedStats(
   const maxSpeed = baseMaxSpeed * (propulsion ? 1 + (moduleSpeed * propulsion.thrust) / mass : 1);
   const effectiveBase = maxSpeedOverride !== undefined && maxSpeed > 0 ? baseMaxSpeed * (maxSpeedOverride / maxSpeed) : baseMaxSpeed;
   const inertiaModifier = profile.inertiaModifier * hull.inertiaMultiplier * inertiaFactor;
-  const sigRadius = (profile.sigRadius + hull.sigRadiusAdd) * hull.sigMultiplier * (1 + (propulsion ? propulsion.sigBloom * hull.mwdSigBloomMultiplier : 0));
+  const baseSigRadius = (profile.sigRadius + hull.sigRadiusAdd) * hull.sigMultiplier;
+  const sigRadius = baseSigRadius * (1 + (propulsion ? propulsion.sigBloom * hull.mwdSigBloomMultiplier : 0));
   const alignTime = mass * inertiaModifier * ALIGN_TIME_FACTOR;
 
   return {
@@ -43,6 +45,7 @@ export function fittedStats(
     maxSpeed,
     baseMaxSpeed: effectiveBase,
     sigRadius,
+    baseSigRadius,
     alignTime,
   };
 }

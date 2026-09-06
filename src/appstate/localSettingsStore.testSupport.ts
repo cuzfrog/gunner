@@ -239,6 +239,7 @@ export const RIFTER_BASE_STATS: ShipStats = {
   maxSpeed: 456.25,
   baseMaxSpeed: 456.25,
   sigRadius: 36,
+  baseSigRadius: 36,
   alignTime: Math.log(4) * 2,
 };
 export const RIFTER_MWD_STATS: ShipStats = {
@@ -247,6 +248,7 @@ export const RIFTER_MWD_STATS: ShipStats = {
   maxSpeed: 4_649.72,
   baseMaxSpeed: 456.25,
   sigRadius: 210,
+  baseSigRadius: 36,
   alignTime: Math.log(4) * 3,
 };
 const EMPTY_FITTING_STATE: FittingState = {

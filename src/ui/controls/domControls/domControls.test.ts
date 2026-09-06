@@ -346,7 +346,7 @@ describe("DomControls", () => {
       parsePropulsionId: vi.fn((value: unknown) => (value === "mwd-5mn" ? "mwd-5mn" : undefined)),
       fittingOptions: vi.fn(() => [mwd5]),
       fittingOption: vi.fn(() => mwd5),
-      fittedStats: vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 3, sigRadius: 35, maxSpeed: 1800, baseMaxSpeed: 300, alignTime: 2.5 })),
+      fittedStats: vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 3, sigRadius: 35, baseSigRadius: 35, maxSpeed: 1800, baseMaxSpeed: 300, alignTime: 2.5 })),
       maxSpeedForFittedMass: vi.fn(() => 1800),
     });
     const { document, controls, cradle } = buildDomControls({ ships });

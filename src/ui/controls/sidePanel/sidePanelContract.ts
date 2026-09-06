@@ -81,6 +81,7 @@ export interface SidePanelState {
   readonly overrides: Partial<ProfileParamOverrides>;
   readonly fittedHull: FittedHullSummary | undefined;
   readonly sig?: number;
+  readonly baseSig?: number;
   readonly sensorSpec?: SensorSpec;
 }
 

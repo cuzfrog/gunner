@@ -38,7 +38,7 @@ export function mockShips(): Ships {
     fittingOption: vi.fn(() => undefined),
     turretSizeOptions: vi.fn(() => [] as const),
     shipTier: vi.fn(() => undefined),
-    fittedStats: vi.fn(() => ({ mass: 0, inertiaModifier: 0, sigRadius: 0, maxSpeed: 0, baseMaxSpeed: 0, alignTime: 0 })),
+    fittedStats: vi.fn(() => ({ mass: 0, inertiaModifier: 0, sigRadius: 0, baseSigRadius: 0, maxSpeed: 0, baseMaxSpeed: 0, alignTime: 0 })),
     maxSpeedForFittedMass: vi.fn(() => 0),
     alignTime: vi.fn(() => 0),
   };

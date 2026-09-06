@@ -95,6 +95,7 @@ function fakeShips(): Ships {
         mass: 0,
         inertiaModifier: 0,
         sigRadius: 0,
+        baseSigRadius: 0,
         maxSpeed: 0,
         baseMaxSpeed: 0,
         alignTime: 0,
