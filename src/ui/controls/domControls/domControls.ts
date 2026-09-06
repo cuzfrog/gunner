@@ -1,19 +1,16 @@
 import {
   type EngineConfig,
-  type EngineView,
   type SimConfig,
   type WeaponSpec,
 } from "../../../sim";
 import { isEventTargetWithClosest } from "../controlsDom";
 import type { Controls, ControlsCallbacks } from "../controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
-import type { EffectiveReadout } from "../effectiveReadout";
 import type { FittingPreviewManager, PopupGroup } from "../popup";
 import type { HintRotator } from "../hints";
 import type { HullDatalist, SimConfigSource } from "../session";
 import type { PreferencesController } from "../preferences";
 import type { ProfileController } from "../profile";
-import type { EngagementReadout } from "../engagementReadout";
 import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
 import type { Side } from "../side";
 import type { TurretController } from "../turret";
@@ -30,7 +27,7 @@ import type { WeaponRangeVisibility } from "../../../appstate";
 import type { RangeOverlayController } from "../rangeOverlay";
 import type { PortraitsController } from "../portraits";
 import type { HoverHintController } from "../hoverHint";
-import type { ViewStream } from "../../viewStream";
+import type { ReadoutPresenter } from "./readoutPresenter";
 
 export type { Controls, ControlsCallbacks } from "../controlsContract";
 
@@ -48,8 +45,6 @@ interface DomControlsAllDeps extends DomControlsDeps {
   hullDatalist: HullDatalist;
   preferencesController: PreferencesController;
   profileController: ProfileController;
-  engagementReadout: EngagementReadout;
-  effectiveReadout: EffectiveReadout;
   shipASide: SidePanel;
   shipBSide: SidePanel;
   turretControllers: Record<Side, TurretController>;
@@ -67,10 +62,8 @@ interface DomControlsAllDeps extends DomControlsDeps {
   hoverHintController: HoverHintController;
   previewManager: FittingPreviewManager;
   simConfigSource: SimConfigSource;
-  viewStream: ViewStream;
+  readoutPresenter: ReadoutPresenter;
 }
-
-const READOUT_INTERVAL_MS = 50;
 
 export class DomControls implements Controls, DomControlsHost {
   private readonly deps: DomControlsDeps;
@@ -80,8 +73,6 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly hullDatalist: HullDatalist;
   private readonly preferencesController: PreferencesController;
   private readonly profileController: ProfileController;
-  private readonly engagementReadout: EngagementReadout;
-  private readonly effectiveReadout: EffectiveReadout;
   private readonly shipASide: SidePanel;
   private readonly shipBSide: SidePanel;
   private readonly turretControllers: Record<Side, TurretController>;
@@ -99,10 +90,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly hoverHintController: HoverHintController;
   private readonly previewManager: FittingPreviewManager;
   private readonly simConfigSource: SimConfigSource;
-  private readonly viewStream: ViewStream;
-  private readonly now: () => number;
-  private lastReadoutApplyMs = -Infinity;
-  private cachedView?: EngineView;
+  private readonly readoutPresenter: ReadoutPresenter;
 
   private callbacks?: ControlsCallbacks;
   private playing = false;
@@ -115,8 +103,6 @@ export class DomControls implements Controls, DomControlsHost {
     this.hullDatalist = all.hullDatalist;
     this.preferencesController = all.preferencesController;
     this.profileController = all.profileController;
-    this.engagementReadout = all.engagementReadout;
-    this.effectiveReadout = all.effectiveReadout;
     this.shipASide = all.shipASide;
     this.shipBSide = all.shipBSide;
     this.turretControllers = all.turretControllers;
@@ -134,15 +120,13 @@ export class DomControls implements Controls, DomControlsHost {
     this.hoverHintController = all.hoverHintController;
     this.previewManager = all.previewManager;
     this.simConfigSource = all.simConfigSource;
-    this.viewStream = all.viewStream;
-    this.now = all.now;
+    this.readoutPresenter = all.readoutPresenter;
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated(() => this.onConfigInvalidated());
     this.deps.events.onDisplayInvalidated(() => this.onDisplayChange());
     this.deps.events.onSessionRestored(() => this.onSessionRestored());
     this.deps.events.onSessionReset(() => this.onSessionReset());
     this.deps.events.onStartupDefaultsApplied(() => this.onStartupDefaultsApplied());
-    this.viewStream.onViewUpdated((view) => this.onReadouts(view));
   }
 
   wireControls(): void {
@@ -260,37 +244,11 @@ export class DomControls implements Controls, DomControlsHost {
   getDroneRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneRangeVisibility(); }
   getDroneControlRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneControlRangeVisibility(); }
   setPlaying(playing: boolean): void {
-    if (!playing && this.playing && this.cachedView) {
-      this.applyReadouts(this.cachedView);
-      this.lastReadoutApplyMs = this.now();
-    }
     this.playing = playing;
     this.els.play.textContent = this.deps.i18n.t(playing ? "button.pause" : "button.play");
-    if (playing) this.lastReadoutApplyMs = this.now() - READOUT_INTERVAL_MS;
+    this.readoutPresenter.setPlaying(playing);
   }
   setCallbacks(callbacks: ControlsCallbacks): void { this.callbacks = callbacks; }
-
-  private onReadouts(view: EngineView): void {
-    this.cachedView = view;
-    this.defenseController.updateDefenseView(view.defenseRuntime);
-    this.applyReadoutsIfReady();
-  }
-
-  private applyReadoutsIfReady(): void {
-    const now = this.now();
-    if (this.playing && now - this.lastReadoutApplyMs < READOUT_INTERVAL_MS) return;
-    if (!this.cachedView) return;
-    this.applyReadouts(this.cachedView);
-    this.lastReadoutApplyMs = now;
-  }
-
-  private applyReadouts(view: EngineView): void {
-    this.engagementReadout.update(view, (key) => this.deps.i18n.t(key));
-    this.effectiveReadout.update(view.readouts);
-    this.defenseController.updateAssessments(view);
-    this.defenseController.updateEffectiveSig("shipA", view.snapshot.shipA.sig ?? 1);
-    this.defenseController.updateEffectiveSig("shipB", view.snapshot.shipB.sig ?? 1);
-  }
 
   private onDocumentPointerDown(event: PointerEvent): void {
     const previewOpen = this.previewManager.openSide();

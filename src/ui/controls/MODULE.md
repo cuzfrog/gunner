@@ -4,6 +4,7 @@ no-new-exports:
   - controlsDom.ts
   - domControls/domControls.ts
   - domControls/domControlsContract.ts
+  - domControls/readoutPresenter.ts
   - effectiveReadout/effectiveReadout.ts
   - elements.ts
   - engagementReadout/engagementReadout.ts

@@ -2,23 +2,29 @@ import { asFunction, type AwilixContainer } from "awilix";
 import type { createControlsEls } from "../elements";
 import type { ControlsCradle } from "../cradle";
 import { DomControls } from "./domControls";
+import { ReadoutPresenterImpl } from "./readoutPresenter";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export function registerDomControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
+    readoutPresenter: asFunction((proxy: ControlsCradle) => new ReadoutPresenterImpl({
+      viewStream: proxy.viewStream,
+      engagementReadout: proxy.engagementReadout,
+      effectiveReadout: proxy.effectiveReadout,
+      defenseReadout: proxy.defenseController,
+      i18n: proxy.i18n,
+      now: proxy.now,
+    })).singleton(),
     controls: asFunction((proxy: ControlsCradle) => new DomControls({
       i18n: proxy.i18n,
       events: proxy.uiEvents,
-      now: proxy.now,
       els: collectDomControlsEls(proxy.els),
       popupGroup: proxy.popupGroup,
       hintRotator: proxy.hintRotator,
       hullDatalist: proxy.hullDatalist,
       preferencesController: proxy.preferencesController,
       profileController: proxy.profileController,
-      engagementReadout: proxy.engagementReadout,
-      effectiveReadout: proxy.effectiveReadout,
       shipASide: proxy.shipASide,
       shipBSide: proxy.shipBSide,
       turretControllers: proxy.turretControllers,
@@ -36,7 +42,7 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
       hoverHintController: proxy.hoverHintController,
       previewManager: proxy.previewManager,
       simConfigSource: proxy.simConfigSource,
-      viewStream: proxy.viewStream,
+      readoutPresenter: proxy.readoutPresenter,
     })).singleton(),
   });
 }
