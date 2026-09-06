@@ -19,6 +19,7 @@
 - New controllers self-subscribe to `onLanguageChanged` and render synchronously.
 - CSS lives in `src/styles/**/*.css`, imported via `src/styles/styles.css`; `@layer` order in `tokens.css` is the cascade authority.
 - Lazy-loaded game data uses placeholder-then-rerender: synchronous lookup returns a placeholder on cache miss, `ensureLoaded` triggers async import, `onItemNamesLoaded` fires `emitLanguageChanged` when data arrives.
+- Runtime/config display invariant: a runtime value (changes during simulation) must be produced by the sim and displayed only from the view. Per-frame presenters must not depend on config-capable types.
 
 ## Conversation style
 - Be concise, but must explain the reason and provide context information.
