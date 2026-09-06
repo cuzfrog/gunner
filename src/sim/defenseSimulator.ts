@@ -467,7 +467,7 @@ function computeLiveArmorResists(baseResists: DamageResists, rahResists: DamageR
 
 function applyShieldRegen(pools: SidePools, dt: number): void {
   if (pools.shieldRechargeTime <= 0 || pools.shieldMax <= 0) return;
-  if (pools.shield >= pools.shieldMax) return;
+  if (pools.shield >= pools.shieldMax || pools.shield <= 0) return;
   pools.shield = shieldCapacityAfter(pools.shield, pools.shieldMax, pools.shieldRechargeTime, dt);
   if (pools.shield > pools.shieldMax) pools.shield = pools.shieldMax;
 }
@@ -501,30 +501,39 @@ function applyEvents(pools: SidePools, events: readonly DamageEvent[], inflicted
 function applyDamageType(pools: SidePools, type: DamageType, rawDamage: number, inflicted: MutableLayerDamage): number {
   let remaining = rawDamage;
   if (pools.shield > 0) {
-    const bleedFraction = shieldBleedFraction(pools);
-    const bleedDamage = remaining * bleedFraction;
-    const towardShield = remaining - bleedDamage;
-    const shieldDamage = towardShield * (1 - pools.resists.shield[type]);
-    const shieldAbsorbed = Math.min(pools.shield, shieldDamage);
-    pools.shield -= shieldAbsorbed;
-    accumulateInflicted(inflicted, "shield", shieldAbsorbed);
-    remaining = bleedDamage + (shieldDamage - shieldAbsorbed);
+    const bleedRaw = remaining * shieldBleedFraction(pools);
+    const towardShield = remaining - bleedRaw;
+    const shield = applyLayer(pools.shield, towardShield, pools.resists.shield[type]);
+    pools.shield -= shield.absorbed;
+    accumulateInflicted(inflicted, "shield", shield.absorbed);
+    remaining = bleedRaw + shield.outgoingRaw;
   }
   if (remaining <= 0) return 0;
-  let armorDamage = 0;
+  let armorAbsorbed = 0;
   if (pools.armor > 0) {
-    armorDamage = remaining * (1 - pools.resists.armor[type]);
-    const armorAbsorbed = Math.min(pools.armor, armorDamage);
-    pools.armor -= armorAbsorbed;
-    accumulateInflicted(inflicted, "armor", armorAbsorbed);
-    const armorOverflow = armorDamage - armorAbsorbed;
-    if (armorOverflow <= 0) return armorDamage;
-    remaining = armorOverflow;
+    const armor = applyLayer(pools.armor, remaining, pools.resists.armor[type]);
+    pools.armor -= armor.absorbed;
+    accumulateInflicted(inflicted, "armor", armor.absorbed);
+    armorAbsorbed = armor.absorbed;
+    remaining = armor.outgoingRaw;
   }
-  const hullDamage = remaining * (1 - pools.resists.hull[type]);
-  pools.hull -= hullDamage;
-  accumulateInflicted(inflicted, "hull", hullDamage);
-  return armorDamage;
+  if (remaining <= 0) return armorAbsorbed;
+  const hull = applyLayer(Number.POSITIVE_INFINITY, remaining, pools.resists.hull[type]);
+  pools.hull -= hull.absorbed;
+  accumulateInflicted(inflicted, "hull", hull.absorbed);
+  return armorAbsorbed;
+}
+
+interface LayerAbsorption {
+  readonly absorbed: number;
+  readonly outgoingRaw: number;
+}
+
+function applyLayer(pool: number, incomingRaw: number, resist: number): LayerAbsorption {
+  const multiplier = 1 - resist;
+  if (multiplier <= 0) return { absorbed: 0, outgoingRaw: incomingRaw };
+  const absorbed = Math.min(pool, incomingRaw * multiplier);
+  return { absorbed, outgoingRaw: incomingRaw - absorbed / multiplier };
 }
 
 function accumulateInflicted(inflicted: MutableLayerDamage, layer: DefenseLayer, amount: number): void {
