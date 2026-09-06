@@ -1,5 +1,6 @@
 import { type FakeElement, fakeDocument } from "../../testing";
 import type { DamageBreakdown, ImportedDrone, ImportedLauncher, ImportedTurret } from "../../../fitting";
+import { toTypeId } from "../../../gamedata/ids";
 import type { ItemNameCatalog } from "../../../gamedata";
 import type { DamageAssessment, DroneSpec, MissileSpec, TurretSpec, WeaponDamageAssessor, WeaponSpec } from "../../../sim";
 import { SIG_RESOLUTIONS, ZERO_DAMAGE } from "../../../sim";
@@ -92,6 +93,7 @@ function makeItemNameCatalog(): ItemNameCatalog {
 function makeTurretSpec(turret: ImportedTurret): TurretSpec {
   return {
     kind: "turret",
+    moduleId: toTypeId("1"),
     tracking: turret.base.tracking,
     sigResolution: SIG_RESOLUTIONS[turret.sigResolutionClass],
     optimal: turret.base.optimal,
@@ -105,6 +107,7 @@ function makeTurretSpec(turret: ImportedTurret): TurretSpec {
 function makeMissileSpec(launcher: ImportedLauncher): MissileSpec {
   return {
     kind: "missile",
+    moduleId: toTypeId("2"),
     damagePerMissile: launcher.damagePerMissile,
     cycleTime: launcher.cycleTime,
     launcherCount: launcher.count,
@@ -120,6 +123,7 @@ function makeMissileSpec(launcher: ImportedLauncher): MissileSpec {
 function makeDroneSpec(drone: ImportedDrone): DroneSpec {
   return {
     kind: "drone",
+    moduleId: toTypeId("3"),
     tracking: drone.tracking,
     sigResolution: drone.sigResolution,
     optimal: drone.optimal,

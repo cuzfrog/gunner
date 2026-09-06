@@ -1,6 +1,5 @@
 import type { EwarResolver } from "../../../sim";
-import type { DisruptionScriptSpec, EwarEffectPotentials, EwarProjection, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TurretSpec, TrackingDisruptorSpec } from "../../../sim";
-import { ZERO_DAMAGE } from "../../../sim";
+import type { DisruptionScriptSpec, EwarEffectPotentials, EwarProjection, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 import { formatDistance, percentFromMultiplier, signedPercentFromMultiplier } from "../../format";
 
@@ -26,7 +25,6 @@ export interface EwarEffectDescriber {
 export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   private readonly resolver: EwarResolver;
   private readonly i18n: I18n;
-  private readonly unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 
   constructor(deps: { ewarResolver: EwarResolver; i18n: I18n }) {
     this.resolver = deps.ewarResolver;
@@ -54,8 +52,8 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   }
 
   disruptorDescription(projection: EwarProjection, distance: number): string {
-    const turret = this.resolver.disruptedTurret(this.unitTurret, projection, distance);
-    return this.turretDescription(turret);
+    const multipliers = this.resolver.disruptionMultipliers(projection, distance);
+    return this.turretFromValues(multipliers.tracking, multipliers.optimal, multipliers.falloff);
   }
 
   disruptorHint(projection: EwarProjection): string {
@@ -81,15 +79,15 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
     return `${this.i18n.t("ewar.hover.web")} ${percentFromMultiplier(multiplier)}%`;
   }
 
-  private turretDescription(turret: TurretSpec): string {
-    const tracking = percentFromMultiplier(turret.tracking);
-    const optimal = percentFromMultiplier(turret.optimal);
-    const falloff = percentFromMultiplier(turret.falloff);
-    if (tracking === 0 && optimal === 0 && falloff === 0) return this.i18n.t("ewar.hover.outOfRange");
+  private turretFromValues(tracking: number, optimal: number, falloff: number): string {
+    const trackingPct = percentFromMultiplier(tracking);
+    const optimalPct = percentFromMultiplier(optimal);
+    const falloffPct = percentFromMultiplier(falloff);
+    if (trackingPct === 0 && optimalPct === 0 && falloffPct === 0) return this.i18n.t("ewar.hover.outOfRange");
     const trackingLabel = this.i18n.t("ewar.hover.tracking");
     const optimalLabel = this.i18n.t("ewar.hover.optimal");
     const falloffLabel = this.i18n.t("ewar.hover.falloff");
-    return `${trackingLabel} -${tracking}% · ${optimalLabel} -${optimal}% · ${falloffLabel} -${falloff}%`;
+    return `${trackingLabel} -${trackingPct}% · ${optimalLabel} -${optimalPct}% · ${falloffLabel} -${falloffPct}%`;
   }
 
   private turretFromPotentials(potentials: EwarEffectPotentials): string {

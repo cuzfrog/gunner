@@ -1,11 +1,13 @@
 import { Vec2 } from "./vec2";
 import { HitChanceImpl } from "./hitChance";
+import { toTypeId } from "../gamedata/ids";
 import { type EngagementFrame, type ShipState, type TurretSpec, ZERO_DAMAGE } from "./types";
 
 const hitChance = new HitChanceImpl();
 
 const defaultTurret: TurretSpec = {
   kind: "turret",
+  moduleId: toTypeId("1"),
   tracking: 0.32,
   sigResolution: 40,
   optimal: 5000,

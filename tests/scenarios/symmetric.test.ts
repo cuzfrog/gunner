@@ -16,7 +16,7 @@ import type { EwarProjection, ShipState, SimSnapshot, TurretSpec } from "../../s
 import type { EwarResolver } from "../../src/sim/ewarResolver";
 import type { TurretBoosterResolver } from "../../src/sim/turretBoosterResolver";
 
-const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 10_000, falloff: 5_000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.1, sigResolution: 40, optimal: 10_000, falloff: 5_000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };
 
 function shipState(id: "shipA" | "shipB", ewar?: EwarProjection): ShipState {
@@ -84,6 +84,7 @@ function fakeEwarResolver(): EwarResolver {
     appliedEffects: () => [],
     speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
     disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+    disruptionMultipliers: () => ({ tracking: 1, optimal: 1, falloff: 1 }),
     dampenedSensorSpec: (spec) => spec,
     dampenedSensorSpecIgnoringRange: (spec) => spec,
     dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),

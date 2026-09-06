@@ -2,6 +2,7 @@ import { DroneApplicationImpl } from "./droneApplication";
 import { HitChanceImpl } from "./hitChance";
 import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
 import { Vec2 } from "./vec2";
+import { toTypeId } from "../gamedata/ids";
 import { type DroneRuntimeState, type DroneSpec, type EngagementFrame, type ShipState, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 const shipA: ShipState = { id: "shipA", maxSpeed: 0, mass: 1_000_000, inertiaModifier: 1, mode: "orbit", desiredRange: 1000, aggressivity: 1, position: new Vec2(0, 0), velocity: new Vec2(0, 0) };
@@ -12,11 +13,11 @@ function frame(distance: number, angularVelocity: number): EngagementFrame {
 }
 
 function lightDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
-  return { kind: "drone" as const, tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 38.4, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000, ...overrides };
+  return { kind: "drone" as const, moduleId: toTypeId("1"), tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 38.4, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000, ...overrides };
 }
 
 function sentryDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
-  return { kind: "drone" as const, tracking: 0.0336, sigResolution: 400, optimal: 18000, falloff: 30000, damagePerShot: { em: 0, thermal: 0, kinetic: 105.6, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 0, orbitSpeed: 0, orbitRange: 0, isSentry: true, controlRange: 60000, ...overrides };
+  return { kind: "drone" as const, moduleId: toTypeId("2"), tracking: 0.0336, sigResolution: 400, optimal: 18000, falloff: 30000, damagePerShot: { em: 0, thermal: 0, kinetic: 105.6, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 0, orbitSpeed: 0, orbitRange: 0, isSentry: true, controlRange: 60000, ...overrides };
 }
 
 const hitChance = new HitChanceImpl();

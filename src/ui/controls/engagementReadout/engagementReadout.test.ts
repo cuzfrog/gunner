@@ -1,4 +1,5 @@
 import { IDLE_LOCK, Vec2, ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, type AttackAssessment, type DamageAssessment, type DamageProjection, type DroneSpec, type EngagementView, type LockState, type MissileSpec, type ShipState, type TurretSpec } from "../../../sim";
+import { toTypeId } from "../../../gamedata/ids";
 import { EngagementReadoutImpl, type EngagementReadout, type ReadoutEls } from "./engagementReadout";
 
 function fakeSideEls(): ReadoutEls["shipA"] {
@@ -73,9 +74,9 @@ function fakeShipState(): ShipState {
   };
 }
 
-const DUMMY_TURRET: TurretSpec = { kind: "turret", tracking: 0, sigResolution: 40, optimal: 0, falloff: 0, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 };
-const DUMMY_MISSILE: MissileSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 2, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 3, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
-const DUMMY_DRONE: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+const DUMMY_TURRET: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0, sigResolution: 40, optimal: 0, falloff: 0, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const DUMMY_MISSILE: MissileSpec = { kind: "missile", moduleId: toTypeId("2"), damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 2, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 3, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
+const DUMMY_DRONE: DroneSpec = { kind: "drone", moduleId: toTypeId("3"), tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
 
 function makeProjection(totalInflicted: number): DamageProjection {
   return { totalInflicted, byLayer: { shield: 0, armor: 0, hull: 0 } };

@@ -1,4 +1,5 @@
 import { Vec2, ZERO_DAMAGE, type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec } from "../sim";
+import { toTypeId } from "../gamedata/ids";
 import type { WeaponRangeVisibility } from "../appstate";
 import type { I18n } from "./i18n";
 import { CanvasRenderer, type RangeOverlay } from "./renderer";
@@ -114,7 +115,7 @@ const frame: EngagementFrame = {
   angularVelocity: 0,
 };
 
-const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 
 function gridColorOf(renderer: CanvasRenderer, canvas: HTMLCanvasElement): string {
   renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, undefined);
@@ -314,8 +315,8 @@ describe("CanvasRenderer", () => {
       shipB: { ...ship, id: "shipB", position: shipBPos },
       commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
     };
-    const shipATurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
-    const shipBTurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 8000, falloff: 3000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+    const shipATurret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+    const shipBTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("2"), tracking: 0.32, sigResolution: 40, optimal: 8000, falloff: 3000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 
     function rendererWithVisibility(visibility: "shipA" | "shipB" | "both" | "none"): { renderer: CanvasRenderer; arcs: number[][] } {
       const canvas = fakeCanvas();

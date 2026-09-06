@@ -1,11 +1,13 @@
 import { Vec2 } from "./vec2";
 import { MissileSimulatorImpl } from "./missileSimulator";
 import { MissileApplicationImpl } from "./missileApplication";
+import { toTypeId } from "../gamedata/ids";
 import type { EngagementFrame, MissileLaunchSpec, MissileSpec, ShipState } from "./types";
 import { damageVectorScale } from "./types";
 
 const lightMissile: MissileSpec = {
   kind: "missile",
+  moduleId: toTypeId("1"),
   damagePerMissile: { em: 0, thermal: 0, kinetic: 83, explosive: 0 },
   cycleTime: 4,
   launcherCount: 1,
@@ -19,6 +21,7 @@ const lightMissile: MissileSpec = {
 
 const heavyMissile: MissileSpec = {
   kind: "missile",
+  moduleId: toTypeId("2"),
   damagePerMissile: { em: 0, thermal: 0, kinetic: 149, explosive: 0 },
   cycleTime: 8,
   launcherCount: 2,

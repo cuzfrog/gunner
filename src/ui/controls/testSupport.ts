@@ -1,6 +1,6 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
 import type { ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingImport, PresetFittings } from "../../fitting";
-import type { TypeId } from "../../gamedata/ids";
+import { toTypeId, type TypeId } from "../../gamedata/ids";
 import type { Ships } from "../../ships";
 import { registerSimModule, type EwarResolver, type HitChance, type SimCradle, type EngineView } from "../../sim";
 import type { I18n, Language } from "../i18n";
@@ -224,6 +224,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
       dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
       reach: vi.fn(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 })),
       potentials: vi.fn(() => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 })),
+      disruptionMultipliers: vi.fn(() => ({ tracking: 1, optimal: 1, falloff: 1 })),
     })),
     hitChance: asValue(vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance })),
     ships: asValue(vi.mocked<Ships>({ ...mockShips(), ...options.ships })),
@@ -313,8 +314,8 @@ class StubTurretController implements TurretController {
   restore(fittingText?: string, conditions?: StatConditions, ammo?: string, tracking?: number, sigRes?: SigResolutionClass, optimal?: number, falloff?: number): void;
   restore(..._args: unknown[]): void {}
   clear = vi.fn();
-  currentTurretSpec = vi.fn((): TurretSpec | undefined => ({ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 }));
-  currentTurretSpecs = vi.fn((): readonly TurretSpec[] => [{ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 }]);
+  currentTurretSpec = vi.fn((): TurretSpec | undefined => ({ kind: "turret" as const, moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 }));
+  currentTurretSpecs = vi.fn((): readonly TurretSpec[] => [{ kind: "turret" as const, moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 }]);
   currentSigResClass = vi.fn((): SigResolutionClass => "S");
   capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "12608" as TypeId }));
   isAmmoPopupOpen = vi.fn();

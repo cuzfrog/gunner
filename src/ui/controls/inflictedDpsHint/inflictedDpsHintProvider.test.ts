@@ -1,10 +1,11 @@
 import { type FakeElement, fakeDocument } from "../../testing";
+import { toTypeId } from "../../../gamedata/ids";
 import { ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, type AttackAssessment, type DamageProjection, type EngagementView, type TurretSpec } from "../../../sim";
 import type { ViewStream } from "../../viewStream";
 import type { InflictedDpsHintModel, InflictedDpsHintRenderer } from "./inflictedDpsHintRenderer";
 import { type InflictedDpsHintProviderDeps, InflictedDpsHintProviderImpl } from "./inflictedDpsHintProvider";
 
-const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
+const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
 
 function makeAttack(appliedByType: { em: number; thermal: number; kinetic: number; explosive: number }, appliedDps: number): AttackAssessment {
   return {

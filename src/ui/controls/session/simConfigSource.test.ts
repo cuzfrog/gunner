@@ -1,4 +1,5 @@
 import { EMPTY_DEFENSE_SPEC, type EwarProjection, type MissileBoosterProjection, type MissileSpec, type SensorBoostProjection, type TurretBoostProjection, type TurretSpec, type WeaponSpec } from "../../../sim";
+import { toTypeId } from "../../../gamedata/ids";
 import type { FittedHullSummary } from "../../../appstate";
 import type { SidePanelState } from "../sidePanel";
 import type { EwarController } from "../ewar";
@@ -115,8 +116,8 @@ function build() {
   const shipASide = { capture: vi.fn(() => shipAState), skillConditions: vi.fn(() => ({ overloaded: true, skillLevel: 5 as const, weaponOverloaded: false, defenseSkills: undefined, targetingSkills: undefined })) };
   const shipBSide = { capture: vi.fn(() => shipBState), skillConditions: vi.fn(() => ({ overloaded: true, skillLevel: 5 as const, weaponOverloaded: false, defenseSkills: undefined, targetingSkills: undefined })) };
   const distanceSource = { getInitialDistance: vi.fn(() => 6000) };
-  const turretSpec: TurretSpec = { kind: "turret", tracking: 0.3, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
-  const missileSpec: MissileSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 1, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 0.5, maxVelocity: 5000, flightTime: 5, flightRange: 25000 };
+  const turretSpec: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.3, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+  const missileSpec: MissileSpec = { kind: "missile", moduleId: toTypeId("2"), damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 1, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 0.5, maxVelocity: 5000, flightTime: 5, flightRange: 25000 };
   const weaponSystemSwitches = {
     shipA: { activeKind: vi.fn(() => "turret" as const) } as unknown as WeaponSystemSwitch,
     shipB: { activeKind: vi.fn(() => "turret" as const) } as unknown as WeaponSystemSwitch,

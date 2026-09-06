@@ -51,6 +51,7 @@ const MGE_II: MissileEnhancerSpec = {
 
 const BASE_MISSILE: MissileSpec = {
   kind: "missile",
+  moduleId: toTypeId("1"),
   damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 },
   cycleTime: 10,
   launcherCount: 1,

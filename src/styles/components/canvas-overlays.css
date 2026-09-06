@@ -132,7 +132,7 @@
 .portrait-effect-icon {
   width: 18px;
   height: 18px;
-  background: var(--bg-panel);
+  object-fit: contain;
   border-radius: 2px;
   pointer-events: auto;
   cursor: help;

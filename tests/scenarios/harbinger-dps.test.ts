@@ -24,6 +24,7 @@ import { MissileBoosterResolverImpl } from "../../src/sim/missileBoosterResolver
 import { DroneApplicationImpl } from "../../src/sim/droneApplication";
 import { WeaponDamageAssessorImpl } from "../../src/sim/weaponDamageAssessor";
 import { Vec2 } from "../../src/sim/vec2";
+import { toTypeId } from "../../src/gamedata/ids";
 import { SIG_RESOLUTIONS, damageVectorSum, type ShipState, type SimSnapshot, type TurretSpec, type MissileSpec } from "../../src/sim/types";
 import type { EwarResolver } from "../../src/sim/ewarResolver";
 import type { TurretBoosterResolver } from "../../src/sim/turretBoosterResolver";
@@ -72,6 +73,7 @@ const noEwarResolver: EwarResolver = {
   propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false,
   appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
   disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+  disruptionMultipliers: () => ({ tracking: 1, optimal: 1, falloff: 1 }),
   dampenedSensorSpec: (spec) => spec,
   dampenedSensorSpecIgnoringRange: (spec) => spec,
   dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
@@ -100,7 +102,7 @@ function snapshot(): SimSnapshot {
 }
 
 function turretSpecFromImported(t: NonNullable<NonNullable<ReturnType<typeof importer.importFitting>>["turret"]>): TurretSpec {
-  return { kind: "turret", tracking: t.tracking, sigResolution: SIG_RESOLUTIONS[t.sigResolutionClass], optimal: t.optimal, falloff: t.falloff, damagePerShot: t.damagePerShot, cycleTime: t.cycleTime, turretCount: t.turretCount };
+  return { kind: "turret", moduleId: toTypeId("1"), tracking: t.tracking, sigResolution: SIG_RESOLUTIONS[t.sigResolutionClass], optimal: t.optimal, falloff: t.falloff, damagePerShot: t.damagePerShot, cycleTime: t.cycleTime, turretCount: t.turretCount };
 }
 
 describe("Harbinger DPS cross-check (all skills 5, no overload)", () => {
@@ -141,8 +143,8 @@ describe("Harbinger DPS cross-check (all skills 5, no overload)", () => {
 
 describe("mixed turret + launcher DPS summation through sim", () => {
   test("sums nominalDps across a turret group and a missile group", () => {
-    const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 125, optimal: 10_000, falloff: 5_000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
-    const missile: MissileSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 150, explosive: 0 }, cycleTime: 10, launcherCount: 2, explosionRadius: 50, explosionVelocity: 100, damageReductionFactor: 4.5, maxVelocity: 5000, flightTime: 10, flightRange: 50_000 };
+    const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("2"), tracking: 0.1, sigResolution: 125, optimal: 10_000, falloff: 5_000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
+    const missile: MissileSpec = { kind: "missile", moduleId: toTypeId("3"), damagePerMissile: { em: 0, thermal: 0, kinetic: 150, explosive: 0 }, cycleTime: 10, launcherCount: 2, explosionRadius: 50, explosionVelocity: 100, damageReductionFactor: 4.5, maxVelocity: 5000, flightTime: 10, flightRange: 50_000 };
     const composer = makeComposer();
     const view = composer.compose(snapshot(), { weapons: { shipA: [turret, missile], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
     expect(view.attacks.shipA).toBeDefined();

@@ -379,6 +379,7 @@ export class LauncherControllerImpl implements LauncherController {
 function importedLauncherToMissileSpec(launcher: ImportedLauncher): MissileSpec {
   return {
     kind: "missile",
+    moduleId: launcher.moduleId,
     damagePerMissile: launcher.damagePerMissile,
     cycleTime: launcher.cycleTime,
     launcherCount: launcher.count,

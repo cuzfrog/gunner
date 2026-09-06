@@ -13,8 +13,6 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
     portraitsController: asFunction(({
       els,
       imageCatalog,
-      ewarController,
-      ewarResolver,
       defenseController,
       uiEvents,
       i18n,
@@ -24,8 +22,6 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
     }) => new PortraitsControllerImpl({
       els: collectPortraitsEls(els),
       imageCatalog,
-      ewarController,
-      ewarResolver,
       defenseController,
       combatantProfiles: { profile: (side: Side) => (side === "shipA" ? shipASide.profile : shipBSide.profile) },
       events: uiEvents,

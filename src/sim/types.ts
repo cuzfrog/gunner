@@ -110,6 +110,7 @@ export interface TrackingApplicationSpec {
 
 export interface TurretSpec extends TrackingApplicationSpec {
   readonly kind: "turret";
+  readonly moduleId: TypeId;
   readonly damagePerShot: DamageVector;
   readonly cycleTime: number; // seconds
   readonly turretCount: number;
@@ -117,6 +118,7 @@ export interface TurretSpec extends TrackingApplicationSpec {
 
 export interface MissileSpec {
   readonly kind: "missile";
+  readonly moduleId: TypeId;
   readonly damagePerMissile: DamageVector;
   readonly cycleTime: number; // seconds
   readonly launcherCount: number;
@@ -130,6 +132,7 @@ export interface MissileSpec {
 
 export interface DroneSpec extends TrackingApplicationSpec {
   readonly kind: "drone";
+  readonly moduleId: TypeId;
   readonly damagePerShot: DamageVector; // base damage of one drone per cycle
   readonly cycleTime: number; // seconds
   readonly droneCount: number;
@@ -518,12 +521,19 @@ export interface EwarEffectPotentials {
   readonly targetingRangeMultiplier: number;
 }
 
-export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener";
+export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener" | "painter";
 
-export interface AppliedEwarEffect {
-  readonly family: EwarEffectFamily;
-  readonly moduleId: TypeId;
-}
+export type AppliedEwarEffect =
+  | { readonly family: "web"; readonly moduleId: TypeId; readonly speedMultiplier: number }
+  | { readonly family: "grappler"; readonly moduleId: TypeId; readonly speedMultiplier: number }
+  | { readonly family: "scrambler"; readonly moduleId: TypeId }
+  | { readonly family: "disruptor"; readonly moduleId: TypeId; readonly trackingMultiplier: number; readonly optimalMultiplier: number; readonly falloffMultiplier: number }
+  | { readonly family: "dampener"; readonly moduleId: TypeId; readonly scanResolutionMultiplier: number; readonly maxTargetRangeMultiplier: number }
+  | { readonly family: "painter"; readonly moduleId: TypeId; readonly signatureMultiplier: number };
+
+export type ActiveOffensiveModule =
+  | { readonly category: "weapon"; readonly weaponKind: WeaponKind; readonly moduleId: TypeId }
+  | ({ readonly category: "ewar" } & AppliedEwarEffect);
 
 export interface SpeedEffectAttribution {
   readonly family: EwarEffectFamily;

@@ -13,6 +13,7 @@ const ewarResolver: EwarResolver = {
   appliedEffects: () => [],
   speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
   disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+  disruptionMultipliers: () => ({ tracking: 1, optimal: 1, falloff: 1 }),
   dampenedSensorSpec: (spec) => spec,
   dampenedSensorSpecIgnoringRange: (spec) => spec,
   dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),

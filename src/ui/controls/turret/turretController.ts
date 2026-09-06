@@ -256,6 +256,7 @@ export class TurretControllerImpl implements TurretController {
     if (!this.selectedTurret) return undefined;
     return {
       kind: "turret",
+      moduleId: this.selectedTurret.moduleId,
       tracking: trackingOverride ?? this.trackingInput.rad,
       sigResolution: SIG_RESOLUTIONS[this.currentSigResClass()],
       optimal: num(this.els.optimal), falloff: num(this.els.falloff),
@@ -275,6 +276,7 @@ export class TurretControllerImpl implements TurretController {
     const falloff = num(this.els.falloff);
     return this.importedTurrets.map((turret) => ({
       kind: "turret" as const,
+      moduleId: turret.moduleId,
       tracking,
       sigResolution,
       optimal,

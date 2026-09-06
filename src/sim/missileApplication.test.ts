@@ -1,8 +1,10 @@
 import { MissileApplicationImpl } from "./missileApplication";
+import { toTypeId } from "../gamedata/ids";
 import type { MissileSpec } from "./types";
 
 const missile: MissileSpec = {
   kind: "missile",
+  moduleId: toTypeId("1"),
   damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 },
   cycleTime: 10,
   launcherCount: 1,

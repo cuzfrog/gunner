@@ -25,6 +25,7 @@ export { StackingPenaltyImpl } from "./stackingPenalty";
 export { EwarResolverImpl } from "./ewarResolver";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
+  ActiveOffensiveModule,
   AppliedEwarEffect,
   AutopilotMode,
   BoosterActivation,

@@ -2,7 +2,7 @@ import type { AttackAssessment, AttackState, EngagementEvaluator } from "./fireC
 import type { Kinematics } from "./kinematics";
 import type { DefenseAssessor, DefenseAssessment } from "./defenseAssessment";
 import type { EwarResolver } from "./ewarResolver";
-import { type DamageAssessment, type DamageProjection, type DefenseSpec, type DroneRuntimeState, type EngagementFrame, type LockState, type MissileAttackFacts, type Side, type ShipState, type SideReadoutValues, type SimSnapshot, type WeaponSpec, EMPTY_PROJECTION, ZERO_DAMAGE, damageVectorAdd, IDLE_LOCK } from "./types";
+import { type ActiveOffensiveModule, type DamageAssessment, type DamageProjection, type DefenseSpec, type DroneRuntimeState, type EngagementFrame, type EwarProjection, type LockState, type MissileAttackFacts, type Side, type ShipState, type SideReadoutValues, type SimSnapshot, type WeaponSpec, EMPTY_PROJECTION, ZERO_DAMAGE, damageVectorAdd, IDLE_LOCK } from "./types";
 export interface EngagementInput {
   readonly weapons: Record<Side, readonly WeaponSpec[]>;
   readonly sigRadii: Record<Side, number>;
@@ -27,6 +27,7 @@ export interface EngagementView {
   readonly projection: Record<Side, DamageProjection>;
   readonly locks: Record<Side, LockState>;
   readonly readouts: Record<Side, SideReadoutValues>;
+  readonly incomingOffensiveModules: Record<Side, readonly ActiveOffensiveModule[]>;
 }
 
 export interface EngagementFrameComposer {
@@ -71,7 +72,8 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
       };
       const defenses = this.assessDefenses(input, attacks);
       const readouts = this.computeReadouts(snapshot, frame, attacks, effectiveWeapons);
-      return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks, readouts };
+      const incomingOffensiveModules = this.composeIncomingOffensiveModules(frame, weaponAttacks);
+      return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks, readouts, incomingOffensiveModules };
     }
     const shipAResult = this.assessSide(frame, "shipA", shipAWeapons, input.sigRadii.shipB, input.droneStates.shipA, input.missileFacts.shipA, locks.shipA.status === "locked");
     const shipBResult = this.assessSide(frame, "shipB", shipBWeapons, input.sigRadii.shipA, input.droneStates.shipB, input.missileFacts.shipB, locks.shipB.status === "locked");
@@ -83,7 +85,26 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
     };
     const defenses = this.assessDefenses(input, attacks);
     const readouts = this.computeReadouts(snapshot, frame, attacks, effectiveWeapons);
-    return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks, readouts };
+    const incomingOffensiveModules = this.composeIncomingOffensiveModules(frame, weaponAttacks);
+    return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks, readouts, incomingOffensiveModules };
+  }
+
+  private composeIncomingOffensiveModules(frame: EngagementFrame, weaponAttacks: Record<Side, readonly WeaponAttack[]>): Record<Side, readonly ActiveOffensiveModule[]> {
+    return {
+      shipA: this.incomingForTarget(frame.shipB.ewar, frame.distance, weaponAttacks.shipB),
+      shipB: this.incomingForTarget(frame.shipA.ewar, frame.distance, weaponAttacks.shipA),
+    };
+  }
+
+  private incomingForTarget(sourceEwar: EwarProjection | undefined, distance: number, sourceWeaponAttacks: readonly WeaponAttack[]): readonly ActiveOffensiveModule[] {
+    const weaponModules: ActiveOffensiveModule[] = [];
+    for (const attack of sourceWeaponAttacks) {
+      if (attack.assessment.damage.appliedDps <= 0) continue;
+      weaponModules.push({ category: "weapon", weaponKind: attack.weapon.kind, moduleId: attack.weapon.moduleId });
+    }
+    const ewarEffects = this.ewarResolver.appliedEffects(sourceEwar, distance);
+    const ewarModules: ActiveOffensiveModule[] = ewarEffects.map((effect) => ({ category: "ewar", ...effect }));
+    return [...weaponModules, ...ewarModules];
   }
 
   private assessDefenses(input: EngagementInput, attacks: Record<Side, AttackAssessment | undefined>): Record<Side, DefenseAssessment> {

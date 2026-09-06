@@ -321,6 +321,7 @@ function filterKnownGroups(groups: readonly DroneGroup[], catalog: DroneCatalog)
 function importedDroneToDroneSpec(drone: ImportedDrone): DroneSpec {
   return {
     kind: "drone",
+    moduleId: drone.typeId,
     tracking: drone.tracking,
     sigResolution: drone.sigResolution,
     optimal: drone.optimal,

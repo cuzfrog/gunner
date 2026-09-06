@@ -266,6 +266,7 @@ class FakeTurretController implements TurretController {
   clear = vi.fn();
   currentTurretSpec = vi.fn((): TurretSpec | undefined => ({
     kind: "turret",
+    moduleId: toTypeId("1"),
     tracking: this.trackingInput.rad,
     sigResolution: 40,
     optimal: 1000,

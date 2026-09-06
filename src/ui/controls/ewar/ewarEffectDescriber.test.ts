@@ -1,10 +1,7 @@
 import { toTypeId } from "../../../gamedata/ids";
-import { ZERO_DAMAGE, type DisruptionScriptSpec, type EwarEffectPotentials, type EwarProjection, type EwarReach, type EwarResolver, type SensorDampenerScriptSpec, type SensorDampenerSpec, type SensorSpec, type StasisGrapplerSpec, type StasisWebSpec, type TargetPainterSpec, type TrackingDisruptorSpec, type TurretSpec } from "../../../sim";
+import { type DisruptionScriptSpec, type EwarEffectPotentials, type EwarProjection, type EwarReach, type EwarResolver, type SensorDampenerScriptSpec, type SensorDampenerSpec, type StasisGrapplerSpec, type StasisWebSpec, type TargetPainterSpec, type TrackingDisruptorSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 import { EwarEffectDescriberImpl } from "./ewarEffectDescriber";
-
-const unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
-const unitSensor: SensorSpec = { scanResolution: 1, maxTargetingRange: 1, maxLockedTargets: 1 };
 
 const IDENTITY_POTENTIALS: EwarEffectPotentials = {
   speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false,
@@ -31,6 +28,7 @@ const resolver = vi.mocked<EwarResolver>({
   dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
   reach: vi.fn(() => ZERO_REACH),
   potentials: vi.fn(() => IDENTITY_POTENTIALS),
+  disruptionMultipliers: vi.fn().mockReturnValue({ tracking: 1, optimal: 1, falloff: 1 }),
 });
 
 const LABELS: Record<string, string> = {
@@ -62,12 +60,11 @@ const distance = 5000;
 beforeEach(() => {
   resolver.speedMultiplier.mockReturnValue(1);
   resolver.speedMultiplierIgnoringRange.mockReturnValue(1);
-  resolver.disruptedTurret.mockReturnValue(unitTurret);
-  resolver.disruptedTurretIgnoringRange.mockReturnValue(unitTurret);
   resolver.propulsionSuppressed.mockReturnValue(false);
   resolver.propulsionSuppressedIgnoringRange.mockReturnValue(false);
   resolver.reach.mockReturnValue(ZERO_REACH);
   resolver.potentials.mockReturnValue(IDENTITY_POTENTIALS);
+  resolver.disruptionMultipliers.mockReturnValue({ tracking: 1, optimal: 1, falloff: 1 });
   i18n.t.mockImplementation((key) => LABELS[key] ?? key);
 });
 
@@ -95,13 +92,13 @@ describe("EwarEffectDescriber", () => {
   });
 
   test("disruptorDescription composes per-channel percentages for a disrupted unit turret", () => {
-    resolver.disruptedTurret.mockReturnValue({ ...unitTurret, tracking: 0.7, optimal: 0.55, falloff: 0.55 });
+    resolver.disruptionMultipliers.mockReturnValue({ tracking: 0.7, optimal: 0.55, falloff: 0.55 });
     expect(describer.disruptorDescription(projection, distance)).toBe("Tracking -30% · Optimal -45% · Falloff -45%");
-    expect(resolver.disruptedTurret).toHaveBeenCalledWith(unitTurret, projection, distance);
+    expect(resolver.disruptionMultipliers).toHaveBeenCalledWith(projection, distance);
   });
 
   test("disruptorDescription reports out-of-range text when all channels round to 0", () => {
-    resolver.disruptedTurret.mockReturnValue({ ...unitTurret, tracking: 0.999, optimal: 0.999, falloff: 0.999 });
+    resolver.disruptionMultipliers.mockReturnValue({ tracking: 0.999, optimal: 0.999, falloff: 0.999 });
     expect(describer.disruptorDescription(projection, distance)).toBe("No effect at this range");
   });
 

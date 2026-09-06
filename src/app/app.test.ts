@@ -1,4 +1,5 @@
 import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, EMPTY_PROJECTION, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineEvents, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type MissileRuntimeState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "../sim";
+import { toTypeId } from "../gamedata/ids";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
 import type { EngagementEngine } from "../sim";
 import type { Side } from "../sim";
@@ -13,7 +14,7 @@ const snapshot: SimSnapshot = { time: 0, shipA: ship, shipB: { ...ship, id: "shi
 const frame: EngagementFrame = {
   time: 0, shipA: ship, shipB: { ...ship, id: "shipB" }, relPosition: new Vec2(0, 5000), distance: 5000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
 };
-const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 };
 const shipConfig: SimConfig = {
   shipA: { id: "shipA", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1 },
@@ -59,6 +60,7 @@ function baseView(): EngineView {
     projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
     locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
     readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } },
+    incomingOffensiveModules: { shipA: [], shipB: [] },
   };
   return {
     ...engagementView,
@@ -222,7 +224,7 @@ describe("AppImpl", () => {
   });
 
   test("renderFrame passes drone render info from engine view drone states and specs", () => {
-    const drone: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: ZERO_DAMAGE, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+    const drone: DroneSpec = { kind: "drone", moduleId: toTypeId("2"), tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: ZERO_DAMAGE, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
     const droneState: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(100, 200)], distanceToTarget: 1000, distanceToSlot: 100, inControlRange: true };
     const droneView: EngineView = {
       ...baseView(),

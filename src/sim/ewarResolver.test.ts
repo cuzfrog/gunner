@@ -39,6 +39,7 @@ const PAINTER_II_ID = toTypeId("19806");
 
 const defaultTurret: TurretSpec = {
   kind: "turret",
+  moduleId: toTypeId("1"),
   tracking: 0.32,
   sigResolution: 40,
   optimal: 5000,
@@ -432,7 +433,7 @@ describe("EwarResolverImpl", () => {
     test("web applies at and within max range and not beyond", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
       const projection = webProjection([web]);
-      expect(resolver.appliedEffects(projection, 10000)).toEqual([{ family: "web", moduleId: WEB_II_ID }]);
+      expect(resolver.appliedEffects(projection, 10000)).toEqual([expect.objectContaining({ family: "web", moduleId: WEB_II_ID })]);
       expect(resolver.appliedEffects(projection, 10001)).toEqual([]);
     });
 
@@ -448,7 +449,7 @@ describe("EwarResolverImpl", () => {
     test("overloaded web extends range by bonus percent", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
       const projection = webProjection([web], true);
-      expect(resolver.appliedEffects(projection, 13000)).toEqual([{ family: "web", moduleId: WEB_II_ID }]);
+      expect(resolver.appliedEffects(projection, 13000)).toEqual([expect.objectContaining({ family: "web", moduleId: WEB_II_ID })]);
       expect(resolver.appliedEffects(projection, 13001)).toEqual([]);
     });
 
@@ -475,7 +476,7 @@ describe("EwarResolverImpl", () => {
     test("grappler applies while falloff effectiveness is at least 0.01", () => {
       const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: GRAPPLER_I_ID, optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
       const projection = grapplerProjection([GRAPPLER]);
-      expect(resolver.appliedEffects(projection, 21000)).toEqual([{ family: "grappler", moduleId: GRAPPLER_I_ID }]);
+      expect(resolver.appliedEffects(projection, 21000)).toEqual([expect.objectContaining({ family: "grappler", moduleId: GRAPPLER_I_ID })]);
       expect(resolver.appliedEffects(projection, 22000)).toEqual([]);
     });
 
@@ -491,7 +492,7 @@ describe("EwarResolverImpl", () => {
     test("overloaded grappler scales optimal before evaluating effectiveness", () => {
       const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: GRAPPLER_I_ID, optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
       const projection = grapplerProjection([GRAPPLER], true);
-      expect(resolver.appliedEffects(projection, 22000)).toEqual([{ family: "grappler", moduleId: GRAPPLER_I_ID }]);
+      expect(resolver.appliedEffects(projection, 22000)).toEqual([expect.objectContaining({ family: "grappler", moduleId: GRAPPLER_I_ID })]);
     });
 
     test("disruptor applies while falloff effectiveness is at least 0.01 and ignores script", () => {
@@ -511,7 +512,7 @@ describe("EwarResolverImpl", () => {
         overloadStrengthBonusPercent: 20,
       };
       const projection = disruptorProjection([disruptor]);
-      expect(resolver.appliedEffects(projection, 109800)).toEqual([{ family: "disruptor", moduleId: TD_II_ID }]);
+      expect(resolver.appliedEffects(projection, 109800)).toEqual([expect.objectContaining({ family: "disruptor", moduleId: TD_II_ID })]);
       expect(resolver.appliedEffects(projection, 110000)).toEqual([]);
     });
 
@@ -527,7 +528,7 @@ describe("EwarResolverImpl", () => {
       const first: StasisWebSpec = { moduleName: "Stasis Webifier I", moduleId: WEB_I_ID, maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 };
       const second: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 15000, speedFactor: 0.55, overloadRangeBonusPercent: 15 };
       const projection = webProjection([first, second]);
-      const expected: AppliedEwarEffect[] = [{ family: "web", moduleId: WEB_I_ID }];
+      const expected: AppliedEwarEffect[] = [expect.objectContaining({ family: "web", moduleId: WEB_I_ID })];
       expect(resolver.appliedEffects(projection, 9000)).toEqual(expected);
     });
 
@@ -547,10 +548,10 @@ describe("EwarResolverImpl", () => {
       };
       const projection: EwarProjection = { loadout, activation };
       expect(resolver.appliedEffects(projection, 1000)).toEqual([
-        { family: "web", moduleId: WEB_II_ID },
-        { family: "grappler", moduleId: GRAPPLER_I_ID },
-        { family: "scrambler", moduleId: SCRAM_II_ID },
-        { family: "disruptor", moduleId: TD_II_ID },
+        expect.objectContaining({ family: "web", moduleId: WEB_II_ID }),
+        expect.objectContaining({ family: "grappler", moduleId: GRAPPLER_I_ID }),
+        expect.objectContaining({ family: "scrambler", moduleId: SCRAM_II_ID }),
+        expect.objectContaining({ family: "disruptor", moduleId: TD_II_ID }),
       ]);
     });
   });
@@ -942,13 +943,33 @@ describe("EwarResolverImpl", () => {
     test("appliedEffects includes dampener when in range", () => {
       const projection = dampenerProjection([DAMP_II], [{ active: true, overloaded: false, script: undefined }]);
       const effects = resolver.appliedEffects(projection, 10000);
-      expect(effects).toContainEqual({ family: "dampener", moduleId: DAMP_II_ID });
+      expect(effects).toContainEqual(expect.objectContaining({ family: "dampener", moduleId: DAMP_II_ID }));
     });
 
     test("appliedEffects excludes dampener when out of range", () => {
       const projection = dampenerProjection([DAMP_NO_FALLOFF], [{ active: true, overloaded: false, script: undefined }]);
       const effects = resolver.appliedEffects(projection, 40000);
       expect(effects.find((e) => e.family === "dampener")).toBeUndefined();
+    });
+  });
+
+  describe("appliedEffects painter", () => {
+    test("painter applies within optimal range", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
+      const effects = resolver.appliedEffects(projection, 5000);
+      expect(effects).toContainEqual(expect.objectContaining({ family: "painter", moduleId: PAINTER_II_ID }));
+    });
+
+    test("inactive painter is skipped", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: false, overloaded: false }]);
+      const effects = resolver.appliedEffects(projection, 5000);
+      expect(effects.find((e) => e.family === "painter")).toBeUndefined();
+    });
+
+    test("painter beyond falloff is excluded", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
+      const effects = resolver.appliedEffects(projection, 300000);
+      expect(effects.find((e) => e.family === "painter")).toBeUndefined();
     });
   });
 
@@ -1046,7 +1067,7 @@ describe("EwarResolverImpl", () => {
     test("trackingMultiplier matches disruptedTurretIgnoringRange on unit turret", () => {
       const td: TrackingDisruptorSpec = { moduleName: "Tracking Disruptor II", moduleId: TD_II_ID, optimal: 48000, falloff: 24000, disruption: 0.1719, defaultScript: undefined, overloadStrengthBonusPercent: 20 };
       const projection = disruptorProjection([td]);
-      const unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+      const unitTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("2"), tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
       const disrupted = resolver.disruptedTurretIgnoringRange(unitTurret, projection);
       expect(resolver.potentials(projection).trackingMultiplier).toBeCloseTo(disrupted.tracking, 10);
       expect(resolver.potentials(projection).optimalMultiplier).toBeCloseTo(disrupted.optimal, 10);

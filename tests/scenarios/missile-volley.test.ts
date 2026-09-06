@@ -1,3 +1,4 @@
+import { toTypeId } from "../../src/gamedata/ids";
 import { MissileApplicationImpl } from "../../src/sim/missileApplication";
 import { MissileSimulatorImpl } from "../../src/sim/missileSimulator";
 import { DefenseSimulatorImpl } from "../../src/sim/defenseSimulator";
@@ -13,6 +14,7 @@ function frame(): EngagementFrame {
 
 const missile: MissileSpec = {
   kind: "missile",
+  moduleId: toTypeId("1"),
   damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 },
   cycleTime: 4,
   launcherCount: 3,

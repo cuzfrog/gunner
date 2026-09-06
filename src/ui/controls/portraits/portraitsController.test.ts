@@ -1,7 +1,7 @@
 import { fakeDocument, getFake, FakeElement } from "../../testing";
 import { UiEventsImpl } from "../../events";
-import type { EngagementView, EngineView, EwarProjection, EwarResolver, LockState, SpeedBreakdown, DisruptionBreakdown } from "../../../sim";
-import type { EwarController } from "../ewar";
+import type { ActiveOffensiveModule, EngagementView, EngineView, LockState } from "../../../sim";
+import { IDLE_LOCK } from "../../../sim";
 import type { DefenseController } from "../defense";
 import type { ViewStream } from "../../viewStream";
 import type { ImageCatalog } from "../../icons";
@@ -117,9 +117,12 @@ function createFakePortraitEls(document: Document): PortraitsEls {
   };
 }
 
-function emitView(listeners: Set<(view: EngagementView) => void>, distance: number): void {
-  const view = { frame: { distance } } as unknown as EngagementView;
-  for (const listener of Array.from(listeners)) listener(view);
+function makeView(offensive: { shipA: readonly ActiveOffensiveModule[]; shipB: readonly ActiveOffensiveModule[] }, locks?: { shipA: LockState; shipB: LockState }): EngineView {
+  return { incomingOffensiveModules: offensive, locks: locks ?? { shipA: IDLE_LOCK, shipB: IDLE_LOCK }, frame: {} as unknown as EngagementView["frame"], attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: {} as unknown, shipB: {} as unknown } } as unknown as EngineView;
+}
+
+function emitView(listeners: Set<(view: EngineView) => void>): void {
+  for (const listener of Array.from(listeners)) listener({} as unknown as EngineView);
 }
 
 function buildController() {
@@ -128,31 +131,6 @@ function buildController() {
   const els = createFakePortraitEls(document);
   const profiles: Record<"shipA" | "shipB", ShipProfile | undefined> = { shipA: undefined, shipB: undefined };
   const combatantProfiles: CombatantProfiles = { profile: (side) => profiles[side] };
-  const projections: Record<"shipA" | "shipB", EwarProjection | undefined> = { shipA: undefined, shipB: undefined };
-  const ewarController = vi.mocked<EwarController>({
-    setLoadout: vi.fn(),
-    restore: vi.fn(),
-    projection: vi.fn((side: "shipA" | "shipB") => projections[side]),
-    capture: vi.fn(),
-    render: vi.fn(),
-    updateSummaries: vi.fn(),
-  });
-  const ewarResolver = vi.mocked<EwarResolver>({
-    speedMultiplier: vi.fn(() => 1),
-    speedMultiplierIgnoringRange: vi.fn(() => 1), sigMultiplier: vi.fn(() => 1), sigMultiplierIgnoringRange: vi.fn(() => 1),
-    disruptedTurret: vi.fn((turret) => turret),
-    disruptedTurretIgnoringRange: vi.fn((turret) => turret),
-    propulsionSuppressed: vi.fn(() => false),
-    propulsionSuppressedIgnoringRange: vi.fn(() => false),
-    appliedEffects: vi.fn(() => []),
-    speedBreakdown: vi.fn((): SpeedBreakdown => ({ effects: [], propulsionSuppressed: false })),
-    disruptionBreakdown: vi.fn((): DisruptionBreakdown => ({ tracking: [], optimal: [], falloff: [] })),
-    dampenedSensorSpec: vi.fn((spec) => spec),
-    dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
-    dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
-    reach: vi.fn(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 })),
-    potentials: vi.fn(() => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 })),
-  });
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((_shipId) => "images/ships/Rifter.webp"),
     itemIconUrl: vi.fn((name) => (name === toTypeId("527") ? "images/icons/1234@1x.png" : undefined)),
@@ -186,25 +164,23 @@ function buildController() {
     cyclingEffects: vi.fn(() => []),
     hpPercentages: vi.fn(() => undefined),
   });
-  const viewStreamListeners = new Set<(view: EngagementView) => void>();
+  const viewStreamListeners = new Set<(view: EngineView) => void>();
   const viewStream = vi.mocked<ViewStream>({
     connect: vi.fn(),
-    onViewUpdated: vi.fn((l: (view: EngagementView) => void) => viewStreamListeners.add(l)),
-    offViewUpdated: vi.fn((l: (view: EngagementView) => void) => viewStreamListeners.delete(l)),
+    onViewUpdated: vi.fn((l: (view: EngineView) => void) => viewStreamListeners.add(l)),
+    offViewUpdated: vi.fn((l: (view: EngineView) => void) => viewStreamListeners.delete(l)),
     currentView: vi.fn(() => undefined),
   });
   const controller = new PortraitsControllerImpl({
     els,
     imageCatalog,
-    ewarController,
-    ewarResolver,
     defenseController,
     combatantProfiles,
     events,
     i18n,
     viewStream,
   });
-  return { controller, els, profiles, projections, ewarController, ewarResolver, defenseController, imageCatalog, events, createElementSpy, i18n, viewStream, viewStreamListeners };
+  return { controller, els, profiles, defenseController, imageCatalog, events, createElementSpy, i18n, viewStream, viewStreamListeners };
 }
 
 describe("PortraitsController", () => {
@@ -236,23 +212,20 @@ describe("PortraitsController", () => {
     expect(els.shipAImage.src).toBe("");
   });
 
-  test("applied empty hides the effects row", () => {
-    const { controller, els, profiles, ewarResolver } = buildController();
+  test("empty offensive modules hides the effects row", () => {
+    const { controller, els, profiles, viewStream } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
-    ewarResolver.speedBreakdown.mockReturnValue({ effects: [], propulsionSuppressed: false });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [], shipB: [] }));
     controller.update();
     expect(els.shipA.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(0);
     expect(els.shipAEffects.hidden).toBe(true);
   });
 
-  test("one web in range shows a visible icon with a localized tooltip", () => {
-    const { controller, els, profiles, ewarResolver } = buildController();
+  test("one web ewar module shows a visible icon with a localized tooltip", () => {
+    const { controller, els, profiles, viewStream } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [{ family: "web", moduleId: toTypeId("527"), multiplier: 0.4 }],
-      propulsionSuppressed: false,
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
     controller.update();
     expect(els.shipA.hidden).toBe(false);
     expect(els.shipAEffects.hidden).toBe(false);
@@ -263,13 +236,10 @@ describe("PortraitsController", () => {
     expect(icon.getAttribute("data-hint")).toBe("ewar.hover.web 60%");
   });
 
-  test("shipB projection web at current distance shows icon under shipA portrait", () => {
-    const { controller, els, profiles, ewarResolver } = buildController();
+  test("shipB web module shows icon under shipA portrait", () => {
+    const { controller, els, profiles, viewStream } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [{ family: "web", moduleId: toTypeId("527"), multiplier: 0.4 }],
-      propulsionSuppressed: false,
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
     controller.update();
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
@@ -279,14 +249,11 @@ describe("PortraitsController", () => {
     expect(els.shipBEffects.hidden).toBe(true);
   });
 
-  test("shipA projection scrambler at current distance shows icon under shipB portrait", () => {
-    const { controller, els, profiles, projections, ewarResolver, imageCatalog } = buildController();
+  test("shipA scrambler module shows icon under shipB portrait", () => {
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
     profiles.shipB = SHIP_B_PROFILE;
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("448") ? "images/icons/5678@1x.png" : undefined));
-    ewarResolver.speedBreakdown.mockImplementation((projection) => {
-      if (projection === projections.shipA) return { effects: [{ family: "scrambler", moduleId: toTypeId("448"), multiplier: 1 }], propulsionSuppressed: true };
-      return { effects: [], propulsionSuppressed: false };
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [], shipB: [{ category: "ewar", family: "scrambler", moduleId: toTypeId("448") }] }));
     controller.update();
     expect(els.shipB.hidden).toBe(false);
     expect(els.shipBEffects.hidden).toBe(false);
@@ -296,55 +263,31 @@ describe("PortraitsController", () => {
     expect(icon.getAttribute("data-hint")).toBe("ewar.hover.scrambler");
   });
 
-  test("out-of-range projection leaves effect rows empty while portraits stay visible", () => {
-    const { controller, els, profiles, ewarResolver } = buildController();
+  test("no offensive modules leaves effect rows empty while portraits stay visible", () => {
+    const { controller, els, profiles, viewStream } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
-    ewarResolver.speedBreakdown.mockReturnValue({ effects: [], propulsionSuppressed: false });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [], shipB: [] }));
     controller.update();
     expect(els.shipA.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(0);
     expect(els.shipAEffects.hidden).toBe(true);
   });
 
-  test("all applied families resolving to undefined icon urls hide the effects row", () => {
-    const { controller, els, profiles, ewarResolver, imageCatalog } = buildController();
+  test("all modules resolving to undefined icon urls hide the effects row", () => {
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     imageCatalog.itemIconUrl.mockReturnValue(undefined);
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [
-        { family: "web", moduleId: toTypeId("527"), multiplier: 0.4 },
-        { family: "scrambler", moduleId: toTypeId("448"), multiplier: 1 },
-      ],
-      propulsionSuppressed: true,
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }, { category: "ewar", family: "scrambler", moduleId: toTypeId("448") }], shipB: [] }));
     controller.update();
     expect(els.shipAEffects.children.length).toBe(0);
     expect(els.shipAEffects.hidden).toBe(true);
   });
 
-  test("resolver returning a single web for a loadout with two webs appends one icon", () => {
-    const { controller, els, profiles, ewarResolver } = buildController();
-    profiles.shipA = SHIP_A_PROFILE;
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [{ family: "web", moduleId: toTypeId("527"), multiplier: 0.4 }],
-      propulsionSuppressed: false,
-    });
-    controller.update();
-    expect(els.shipAEffects.hidden).toBe(false);
-    expect(els.shipAEffects.children.length).toBe(1);
-  });
-
   test("itemIconUrl returning undefined skips that icon but appends the rest", () => {
-    const { controller, els, profiles, ewarResolver, imageCatalog } = buildController();
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("527") ? undefined : "images/icons/2@1x.png"));
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [
-        { family: "web", moduleId: toTypeId("527"), multiplier: 0.4 },
-        { family: "scrambler", moduleId: toTypeId("448"), multiplier: 1 },
-      ],
-      propulsionSuppressed: true,
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }, { category: "ewar", family: "scrambler", moduleId: toTypeId("448") }], shipB: [] }));
     controller.update();
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
@@ -363,12 +306,9 @@ describe("PortraitsController", () => {
   });
 
   test("re-adding the same profile after removal shows the portrait and effects again", () => {
-    const { controller, els, profiles, ewarResolver } = buildController();
+    const { controller, els, profiles, viewStream } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [{ family: "web", moduleId: toTypeId("527"), multiplier: 0.4 }],
-      propulsionSuppressed: false,
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
     controller.update();
     expect(els.shipA.hidden).toBe(false);
     expect(els.shipAImage.src).toBe("images/ships/Rifter.webp");
@@ -385,30 +325,16 @@ describe("PortraitsController", () => {
     expect(els.shipAEffects.children.length).toBe(1);
   });
 
-  test("distance change crossing into range flips the effects row from hidden to visible", () => {
-    const { els, profiles, projections, ewarResolver, imageCatalog, viewStreamListeners } = buildController();
+  test("view change from empty to populated flips the effects row from hidden to visible", () => {
+    const { els, profiles, viewStream, imageCatalog, viewStreamListeners } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
-    projections.shipB = {
-      loadout: {
-        webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
-        grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [],
-        dampenerScripts: [],
-      },
-      activation: {
-        webs: [{ active: true, overloaded: false }],
-        grapplers: [], disruptors: [], scramblers: [],
-      painters: [],
-      dampeners: [],
-      },
-    };
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("527") ? "images/icons/1234@1x.png" : undefined));
-    ewarResolver.speedBreakdown.mockImplementation((_projection, distance) =>
-      distance <= 10000 ? { effects: [{ family: "web", moduleId: toTypeId("527"), multiplier: 0.4 }], propulsionSuppressed: false } : { effects: [], propulsionSuppressed: false }
-    );
-    emitView(viewStreamListeners, 15000);
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [], shipB: [] }));
+    emitView(viewStreamListeners);
     expect(els.shipAEffects.children.length).toBe(0);
     expect(els.shipAEffects.hidden).toBe(true);
-    emitView(viewStreamListeners, 10000);
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
+    emitView(viewStreamListeners);
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
@@ -416,67 +342,49 @@ describe("PortraitsController", () => {
     expect(icon.getAttribute("data-hint")).toBe("ewar.hover.web 60%");
   });
 
-  test("distance changes that do not change the applied set do not create new img elements", () => {
-    const { els, profiles, ewarResolver, createElementSpy, viewStreamListeners } = buildController();
+  test("view changes that do not change the module set do not create new img elements", () => {
+    const { els, profiles, viewStream, createElementSpy, viewStreamListeners } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [{ family: "web", moduleId: toTypeId("527"), multiplier: 0.4 }],
-      propulsionSuppressed: false,
-    });
-    emitView(viewStreamListeners, 5000);
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
+    emitView(viewStreamListeners);
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
     const imageCount = createElementSpy.mock.calls.filter(([tag]) => tag === "img").length;
-    emitView(viewStreamListeners, 6000);
+    emitView(viewStreamListeners);
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
     expect(createElementSpy.mock.calls.filter(([tag]) => tag === "img").length).toBe(imageCount);
   });
 
   test("same family with a different representative module rewrites the icon", () => {
-    const { controller, els, profiles, ewarResolver, imageCatalog } = buildController();
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     imageCatalog.itemIconUrl.mockImplementation((name) =>
       name === toTypeId("527") ? "images/icons/1234@1x.png" : "images/icons/fallback@1x.png"
     );
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [{ family: "web", moduleId: toTypeId("527"), multiplier: 0.4 }],
-      propulsionSuppressed: false,
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
     controller.update();
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
     expect((els.shipAEffects.children[0] as unknown as HTMLImageElement).src).toBe("images/icons/1234@1x.png");
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [{ family: "web", moduleId: toTypeId("14270"), multiplier: 0.4 }],
-      propulsionSuppressed: false,
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("14270"), speedMultiplier: 0.4 }], shipB: [] }));
     controller.update();
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
     expect((els.shipAEffects.children[0] as unknown as HTMLImageElement).src).toBe("images/icons/fallback@1x.png");
   });
 
-  test("name unchanged but families changed rebuilds effects without rewriting image src", () => {
-    const { controller, els, profiles, ewarResolver, imageCatalog } = buildController();
+  test("name unchanged but modules changed rebuilds effects without rewriting image src", () => {
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     imageCatalog.shipImageUrl.mockClear();
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [{ family: "web", moduleId: toTypeId("527"), multiplier: 0.4 }],
-      propulsionSuppressed: false,
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
     controller.update();
     expect(els.shipAImage.src).toBe("images/ships/Rifter.webp");
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
     imageCatalog.shipImageUrl.mockClear();
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [
-        { family: "web", moduleId: toTypeId("527"), multiplier: 0.4 },
-        { family: "scrambler", moduleId: toTypeId("448"), multiplier: 1 },
-      ],
-      propulsionSuppressed: true,
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }, { category: "ewar", family: "scrambler", moduleId: toTypeId("448") }], shipB: [] }));
     controller.update();
     expect(imageCatalog.shipImageUrl).not.toHaveBeenCalled();
     expect(els.shipAImage.src).toBe("images/ships/Rifter.webp");
@@ -485,12 +393,9 @@ describe("PortraitsController", () => {
   });
 
   test("web effect title shows speed reduction percentage instead of module name", () => {
-    const { controller, els, profiles, ewarResolver } = buildController();
+    const { controller, els, profiles, viewStream } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [{ family: "web", moduleId: toTypeId("527"), multiplier: 0.4 }],
-      propulsionSuppressed: false,
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
     controller.update();
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
@@ -498,13 +403,10 @@ describe("PortraitsController", () => {
   });
 
   test("scrambler effect title shows scrambler hover label", () => {
-    const { controller, els, profiles, ewarResolver, imageCatalog } = buildController();
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
     profiles.shipB = SHIP_B_PROFILE;
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("448") ? "images/icons/5678@1x.png" : undefined));
-    ewarResolver.speedBreakdown.mockReturnValue({
-      effects: [{ family: "scrambler", moduleId: toTypeId("448"), multiplier: 1 }],
-      propulsionSuppressed: true,
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [], shipB: [{ category: "ewar", family: "scrambler", moduleId: toTypeId("448") }] }));
     controller.update();
     expect(els.shipBEffects.children.length).toBe(1);
     const icon = els.shipBEffects.children[0] as unknown as HTMLImageElement;
@@ -512,19 +414,60 @@ describe("PortraitsController", () => {
   });
 
   test("disruptor effect title shows tracking and optimal range reductions", () => {
-    const { controller, els, profiles, ewarResolver, imageCatalog } = buildController();
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     const disruptorId = toTypeId("3456");
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === disruptorId ? "images/icons/disruptor@1x.png" : undefined));
-    ewarResolver.disruptionBreakdown.mockReturnValue({
-      tracking: [{ moduleId: disruptorId, scriptId: undefined, multiplier: 0.55 }],
-      optimal: [{ moduleId: disruptorId, scriptId: undefined, multiplier: 0.83 }],
-      falloff: [],
-    });
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "disruptor", moduleId: disruptorId, trackingMultiplier: 0.55, optimalMultiplier: 0.83, falloffMultiplier: 1 }], shipB: [] }));
     controller.update();
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
     expect(icon.getAttribute("data-hint")).toBe("ewar.hover.tracking -45% · ewar.hover.optimal -17%");
+  });
+
+  test("weapon module from the view is rendered as an icon", () => {
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    const weaponModuleId = toTypeId("100");
+    imageCatalog.itemIconUrl.mockImplementation((name) => (name === weaponModuleId ? "images/icons/weapon@1x.png" : undefined));
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "weapon", weaponKind: "turret", moduleId: weaponModuleId }], shipB: [] }));
+    controller.update();
+    expect(els.shipAEffects.hidden).toBe(false);
+    expect(els.shipAEffects.children.length).toBe(1);
+    const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
+    expect(icon.src).toBe("images/icons/weapon@1x.png");
+    expect(icon.getAttribute("data-hint")).toBe("portrait.weapon.turret");
+  });
+
+  test("defense cycling effects appear after offensive modules", () => {
+    const { controller, els, profiles, viewStream, defenseController, imageCatalog } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    const weaponModuleId = toTypeId("100");
+    const defenseModuleId = toTypeId("200");
+    imageCatalog.itemIconUrl.mockImplementation((name) => (name === weaponModuleId ? "images/icons/weapon@1x.png" : name === defenseModuleId ? "images/icons/defense@1x.png" : undefined));
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "weapon", weaponKind: "turret", moduleId: weaponModuleId }], shipB: [] }));
+    defenseController.cyclingEffects.mockReturnValue([{ moduleId: defenseModuleId, hint: "defense.cycling" }]);
+    controller.update();
+    expect(els.shipAEffects.hidden).toBe(false);
+    expect(els.shipAEffects.children.length).toBe(2);
+    const weaponIcon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
+    expect(weaponIcon.src).toBe("images/icons/weapon@1x.png");
+    expect(weaponIcon.getAttribute("data-hint")).toBe("portrait.weapon.turret");
+    const defenseIcon = els.shipAEffects.children[1] as unknown as HTMLImageElement;
+    expect(defenseIcon.src).toBe("images/icons/defense@1x.png");
+    expect(defenseIcon.getAttribute("data-hint")).toBe("defense.cycling");
+  });
+
+  test("onLanguageChanged subscription triggers update and re-renders effects", () => {
+    const { els, profiles, viewStream, events, viewStreamListeners } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
+    emitView(viewStreamListeners);
+    expect(els.shipAEffects.children.length).toBe(1);
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [], shipB: [] }));
+    events.emitLanguageChanged();
+    expect(els.shipAEffects.children.length).toBe(0);
+    expect(els.shipAEffects.hidden).toBe(true);
   });
 
   describe("HP bars", () => {
@@ -615,10 +558,6 @@ describe("PortraitsController", () => {
     const LOCKING: LockState = { status: "locking", progress: 0.5, remaining: 5, lockTime: 10, inRange: true };
     const IDLE: LockState = { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: false };
 
-    function makeView(locks: { shipA: LockState; shipB: LockState }): EngineView {
-      return { locks, frame: {} as unknown as EngagementView["frame"], attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: {} as unknown, shipB: {} as unknown } } as unknown as EngineView;
-    }
-
     test("hidden when no view is available", () => {
       const { controller, els, profiles } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
@@ -629,7 +568,7 @@ describe("PortraitsController", () => {
     test("hidden when lock status is idle", () => {
       const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      viewStream.currentView.mockReturnValue(makeView({ shipA: IDLE, shipB: IDLE }));
+      viewStream.currentView.mockReturnValue(makeView({ shipA: [], shipB: [] }, { shipA: IDLE, shipB: IDLE }));
       controller.update();
       expect(els.shipALockBadge.hidden).toBe(true);
     });
@@ -637,7 +576,7 @@ describe("PortraitsController", () => {
     test("hidden when lock status is locking", () => {
       const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      viewStream.currentView.mockReturnValue(makeView({ shipA: LOCKING, shipB: IDLE }));
+      viewStream.currentView.mockReturnValue(makeView({ shipA: [], shipB: [] }, { shipA: LOCKING, shipB: IDLE }));
       controller.update();
       expect(els.shipALockBadge.hidden).toBe(true);
     });
@@ -645,7 +584,7 @@ describe("PortraitsController", () => {
     test("visible when lock status is locked with non-zero lockTime", () => {
       const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      viewStream.currentView.mockReturnValue(makeView({ shipA: LOCKED, shipB: IDLE }));
+      viewStream.currentView.mockReturnValue(makeView({ shipA: [], shipB: [] }, { shipA: LOCKED, shipB: IDLE }));
       controller.update();
       expect(els.shipALockBadge.hidden).toBe(false);
     });
@@ -653,14 +592,14 @@ describe("PortraitsController", () => {
     test("hidden when locked but lockTime is zero (backward-compatible)", () => {
       const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      viewStream.currentView.mockReturnValue(makeView({ shipA: { ...LOCKED, lockTime: 0 }, shipB: IDLE }));
+      viewStream.currentView.mockReturnValue(makeView({ shipA: [], shipB: [] }, { shipA: { ...LOCKED, lockTime: 0 }, shipB: IDLE }));
       controller.update();
       expect(els.shipALockBadge.hidden).toBe(true);
     });
 
     test("hidden when profile is undefined even if locked", () => {
       const { controller, els, viewStream } = buildController();
-      viewStream.currentView.mockReturnValue(makeView({ shipA: LOCKED, shipB: IDLE }));
+      viewStream.currentView.mockReturnValue(makeView({ shipA: [], shipB: [] }, { shipA: LOCKED, shipB: IDLE }));
       controller.update();
       expect(els.shipALockBadge.hidden).toBe(true);
     });

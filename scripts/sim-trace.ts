@@ -16,6 +16,7 @@ import { DAMAGE_TYPES, DEFENSE_LAYERS, EMPTY_DEFENSE_SPEC, SIG_RESOLUTIONS, dama
 import { registerShipsModule, type Ships, type ShipsCradle, type StatConditions } from "../src/ships";
 import { registerFittingModule, type FittingCradle, type FittingImport, type ImportedDrone, type ImportedFitting, type ImportedLauncher, type ImportedTurret } from "../src/fitting";
 import { registerGameDataModule } from "../src/gamedata";
+import { toTypeId } from "../src/gamedata/ids";
 import { readFileSync } from "node:fs";
 
 const FIXED_DT = 1 / 60;
@@ -458,6 +459,7 @@ function weaponSpecsFromImport(imported: ImportedFitting): readonly WeaponSpec[]
 function turretSpecFrom(turret: ImportedTurret): TurretSpec {
   return {
     kind: "turret",
+    moduleId: toTypeId("1"),
     tracking: turret.tracking,
     sigResolution: SIG_RESOLUTIONS[turret.sigResolutionClass],
     optimal: turret.optimal,
@@ -471,6 +473,7 @@ function turretSpecFrom(turret: ImportedTurret): TurretSpec {
 function missileSpecFrom(launcher: ImportedLauncher): MissileSpec {
   return {
     kind: "missile",
+    moduleId: toTypeId("2"),
     damagePerMissile: launcher.damagePerMissile,
     cycleTime: launcher.cycleTime,
     launcherCount: launcher.count,
@@ -486,6 +489,7 @@ function missileSpecFrom(launcher: ImportedLauncher): MissileSpec {
 function droneSpecFrom(drone: ImportedDrone): DroneSpec {
   return {
     kind: "drone",
+    moduleId: toTypeId("3"),
     tracking: drone.tracking,
     sigResolution: drone.sigResolution,
     optimal: drone.optimal,

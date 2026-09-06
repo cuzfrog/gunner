@@ -1,10 +1,11 @@
 import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
+import { toTypeId } from "../gamedata/ids";
 import type { DroneSpec, MissileSpec, TurretSpec } from "./types";
 import { ZERO_DAMAGE, damageVectorSum } from "./types";
 
-const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
-const missile: MissileSpec = { kind: "missile", damagePerMissile: { em: 50, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime: 10, launcherCount: 3, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 0.604, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
-const drone: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
+const missile: MissileSpec = { kind: "missile", moduleId: toTypeId("2"), damagePerMissile: { em: 50, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime: 10, launcherCount: 3, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 0.604, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
+const drone: DroneSpec = { kind: "drone", moduleId: toTypeId("3"), tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
 
 const assessor = new WeaponDamageAssessorImpl();
 

@@ -1,5 +1,6 @@
 import { EngagementEngineImpl } from "./engagementEngine";
 import { Vec2 } from "./vec2";
+import { toTypeId } from "../gamedata/ids";
 import { EMPTY_DEFENSE_SPEC, EMPTY_PROJECTION, ZERO_DAMAGE, type EngagementFrame, type HitChanceBreakdown, type LockState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "./types";
 import { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
 import type { AttackAssessment } from "./fireControl";
@@ -23,7 +24,7 @@ const snapshot: SimSnapshot = { time: 0, shipA: ship, shipB: { ...ship, id: "shi
 const frame: EngagementFrame = {
   time: 0, shipA: ship, shipB: { ...ship, id: "shipB" }, relPosition: new Vec2(0, 5000), distance: 5000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
 };
-const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 };
 const shipConfig: SimConfig = {
   shipA: { id: "shipA", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1 },
@@ -44,6 +45,7 @@ function baseView(): EngagementView {
     projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
     locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
     readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } },
+    incomingOffensiveModules: { shipA: [], shipB: [] },
   };
 }
 
@@ -75,6 +77,7 @@ function makeEngine() {
     appliedEffects: vi.fn(() => []),
     speedBreakdown: vi.fn(() => ({ effects: [], propulsionSuppressed: false })),
     disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
+    disruptionMultipliers: vi.fn(() => ({ tracking: 1, optimal: 1, falloff: 1 })),
     dampenedSensorSpec: vi.fn((s) => s), dampenedSensorSpecIgnoringRange: vi.fn((s) => s),
     dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
     reach: vi.fn(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 })),
@@ -225,7 +228,7 @@ describe("EngagementEngineImpl", () => {
     const snapshotWithSig: SimSnapshot = { ...snapshot, shipA: shipWithSig, shipB: opponentWithSig };
     deps.simulation.snapshot.mockReturnValue(snapshotWithSig);
     const frameWithSig: EngagementFrame = { ...frame, shipA: shipWithSig, shipB: opponentWithSig };
-    const missile: import("./types").MissileSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 1, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 0.5, maxVelocity: 5000, flightTime: 5, flightRange: 25000 };
+    const missile: import("./types").MissileSpec = { kind: "missile", moduleId: toTypeId("2"), damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 1, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 0.5, maxVelocity: 5000, flightTime: 5, flightRange: 25000 };
     const missileAssessment: AttackAssessment = {
       boostedWeapon: missile, effectiveWeapon: missile,
       damage: { nominalDps: 10, appliedDps: 8, application: 0.8, volley: 100, baseVolleyByType: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, appliedByType: { em: 0, thermal: 0, kinetic: 80, explosive: 0 }, appliedVolleyByType: { em: 0, thermal: 0, kinetic: 80, explosive: 0 } },
