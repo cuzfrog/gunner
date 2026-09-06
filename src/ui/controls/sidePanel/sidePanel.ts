@@ -219,7 +219,7 @@ export class SidePanelImpl implements SidePanel {
     this.sections.skill.setOverloadDisabled();
     if (state.fittedHull) this.sections.hull.restoreFittingSummary(state.fittedHull);
     if (state.sig !== undefined) this.els.shipSig.value = String(state.sig);
-    this.sections.stats.updateShipStats({ updateInertia: true, updateMass: false, updateSig: false });
+    this.sections.stats.updateShipStats({ updateInertia: true, updateMass: false, updateSig: true });
     this.sections.stats.updateAlignTime();
   }
 
