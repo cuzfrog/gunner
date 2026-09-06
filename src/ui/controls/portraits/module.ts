@@ -59,7 +59,19 @@ function collectPortraitsEls(els: ControlsElements): PortraitsEls {
     shipBEffects,
     shipAHpBars,
     shipBHpBars,
+    shipAHpValues: collectHpValueEls(els.shipA.portrait),
+    shipBHpValues: collectHpValueEls(els.shipB.portrait),
     shipALockBadge,
     shipBLockBadge,
   };
+}
+
+function collectHpValueEls(portrait: HTMLElement): { readonly shield: HTMLElement; readonly armor: HTMLElement; readonly hull: HTMLElement } {
+  const shield = portrait.querySelector<HTMLElement>('.portrait-hp-value[data-defense-layer="shield"]');
+  if (!shield) throw new Error('Missing .portrait-hp-value[data-defense-layer="shield"]');
+  const armor = portrait.querySelector<HTMLElement>('.portrait-hp-value[data-defense-layer="armor"]');
+  if (!armor) throw new Error('Missing .portrait-hp-value[data-defense-layer="armor"]');
+  const hull = portrait.querySelector<HTMLElement>('.portrait-hp-value[data-defense-layer="hull"]');
+  if (!hull) throw new Error('Missing .portrait-hp-value[data-defense-layer="hull"]');
+  return { shield, armor, hull };
 }

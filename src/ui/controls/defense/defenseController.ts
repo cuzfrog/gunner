@@ -158,6 +158,14 @@ export class DefenseControllerImpl implements DefenseController {
     return this.defenseView?.poolPercentages[side];
   }
 
+  hpValues(side: Side): { readonly current: Readonly<Record<DefenseLayer, number>>; readonly max: Readonly<Record<DefenseLayer, number>> } | undefined {
+    const spec = this.specs.get(side);
+    const view = this.defenseView;
+    if (!spec || !view) return undefined;
+    const pools = view.pools[side];
+    return { current: { shield: pools.shield, armor: pools.armor, hull: pools.hull }, max: { shield: spec.layers.shield.hp, armor: spec.layers.armor.hp, hull: spec.layers.hull.hp } };
+  }
+
   render(): void {
     this.renderSide("shipA");
     this.renderSide("shipB");

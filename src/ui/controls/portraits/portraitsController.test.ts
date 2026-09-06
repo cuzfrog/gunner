@@ -114,6 +114,8 @@ function createFakePortraitEls(document: Document): PortraitsEls {
     shipBHpBars,
     shipALockBadge,
     shipBLockBadge,
+    shipAHpValues: { shield: document.createElement("span"), armor: document.createElement("span"), hull: document.createElement("span") },
+    shipBHpValues: { shield: document.createElement("span"), armor: document.createElement("span"), hull: document.createElement("span") },
   };
 }
 
@@ -163,6 +165,7 @@ function buildController() {
     restore: vi.fn(),
     cyclingEffects: vi.fn(() => []),
     hpPercentages: vi.fn(() => undefined),
+    hpValues: vi.fn(() => undefined),
   });
   const viewStreamListeners = new Set<(view: EngineView) => void>();
   const viewStream = vi.mocked<ViewStream>({
@@ -550,6 +553,65 @@ describe("PortraitsController", () => {
       const after = hpFillWidth(els, "shipA", 0);
       expect(after).toContain("0.1000");
       expect(after).not.toBe(before);
+    });
+  });
+
+  describe("HP value display", () => {
+    test("none mode hides all HP value spans", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 0.5, armor: 0.5, hull: 0.5 });
+      defenseController.hpValues.mockReturnValue({ current: { shield: 500, armor: 500, hull: 500 }, max: { shield: 1000, armor: 1000, hull: 1000 } });
+      controller.setHpValueDisplay("none");
+      expect(els.shipAHpValues.shield.hidden).toBe(true);
+      expect(els.shipAHpValues.armor.hidden).toBe(true);
+      expect(els.shipAHpValues.hull.hidden).toBe(true);
+    });
+
+    test("percentage mode shows rounded percentages", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 0.875, armor: 0.5, hull: 0.0 });
+      defenseController.hpValues.mockReturnValue({ current: { shield: 875, armor: 500, hull: 0 }, max: { shield: 1000, armor: 1000, hull: 1000 } });
+      controller.setHpValueDisplay("percentage");
+      expect(els.shipAHpValues.shield.hidden).toBe(false);
+      expect(els.shipAHpValues.shield.textContent).toBe("88%");
+      expect(els.shipAHpValues.armor.textContent).toBe("50%");
+      expect(els.shipAHpValues.hull.textContent).toBe("0%");
+    });
+
+    test("absolute mode shows current / max", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 0.875, armor: 0.5, hull: 0.0 });
+      defenseController.hpValues.mockReturnValue({ current: { shield: 8750, armor: 5000, hull: 0 }, max: { shield: 10000, armor: 10000, hull: 10000 } });
+      controller.setHpValueDisplay("absolute");
+      expect(els.shipAHpValues.shield.hidden).toBe(false);
+      expect(els.shipAHpValues.shield.textContent).toBe("8,750 / 10,000");
+      expect(els.shipAHpValues.armor.textContent).toBe("5,000 / 10,000");
+      expect(els.shipAHpValues.hull.textContent).toBe("0 / 10,000");
+    });
+
+    test("is-values-visible class toggles with mode", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue({ shield: 0.5, armor: 0.5, hull: 0.5 });
+      defenseController.hpValues.mockReturnValue({ current: { shield: 500, armor: 500, hull: 500 }, max: { shield: 1000, armor: 1000, hull: 1000 } });
+      controller.setHpValueDisplay("none");
+      expect(els.shipAHpBars.classList.remove).toHaveBeenCalledWith("is-values-visible");
+      controller.setHpValueDisplay("percentage");
+      expect(els.shipAHpBars.classList.add).toHaveBeenCalledWith("is-values-visible");
+      controller.setHpValueDisplay("none");
+      expect(els.shipAHpBars.classList.remove).toHaveBeenCalledWith("is-values-visible");
+    });
+
+    test("undefined hpValues hides value spans even in percentage mode", () => {
+      const { controller, els, profiles, defenseController } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      defenseController.hpPercentages.mockReturnValue(undefined);
+      defenseController.hpValues.mockReturnValue(undefined);
+      controller.setHpValueDisplay("percentage");
+      expect(els.shipAHpValues.shield.hidden).toBe(true);
     });
   });
 

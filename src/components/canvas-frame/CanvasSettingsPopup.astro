@@ -27,4 +27,12 @@ const { id, triggerId } = Astro.props;
            min="0" max="1" step="0.01" value="0.5" fill="50%"
            i18nAriaLabel="label.gridBrightness" ariaLabel="Grid brightness" />
   </div>
+  <div class="control-bar-field">
+    <span class="field-label" data-i18n="label.hpValueDisplay">HP values</span>
+    <div class="hp-value-display-toggle" role="group" aria-label="HP values">
+      <button type="button" id="hp-value-none" class="btn" aria-pressed="true" data-i18n="label.hpValueNone">None</button>
+      <button type="button" id="hp-value-percentage" class="btn" aria-pressed="false" data-i18n="label.hpValuePercentage">Percentage</button>
+      <button type="button" id="hp-value-absolute" class="btn" aria-pressed="false" data-i18n="label.hpValueAbsolute">Absolute</button>
+    </div>
+  </div>
 </PopupBox>

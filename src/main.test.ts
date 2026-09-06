@@ -86,6 +86,10 @@ class FakeElement {
   querySelector(selector: string): FakeElement | null {
     if (selector.startsWith(".")) {
       const className = selector.slice(1).split(/[.:\s>+~\[]/)[0];
+      const attrMatch = selector.match(/\[([^\]=]+)(?:="([^"]*)")?\]/);
+      if (attrMatch) {
+        return findWithClassAndAttr(this, className, attrMatch[1], attrMatch[2]) ?? null;
+      }
       return this.children.find((c) => c.className.split(" ").includes(className)) ?? null;
     }
     return this.children[0] ?? null;
@@ -192,6 +196,9 @@ function fakeDocument(): Document {
           hpBars.tagName = "DIV";
           hpBars.className = "portrait-hp-bars";
           for (const layer of ["shield", "armor", "hull"]) {
+            const row = new FakeElement();
+            row.tagName = "DIV";
+            row.className = "portrait-hp-row";
             const bar = new FakeElement();
             bar.tagName = "DIV";
             bar.className = `portrait-hp-bar portrait-hp-bar-${layer}`;
@@ -199,7 +206,14 @@ function fakeDocument(): Document {
             fill.tagName = "SPAN";
             fill.className = "portrait-hp-fill";
             bar.appendChild(fill);
-            hpBars.appendChild(bar);
+            row.appendChild(bar);
+            const value = new FakeElement();
+            value.tagName = "SPAN";
+            value.className = "portrait-hp-value mono";
+            value.setAttribute("data-defense-layer", layer);
+            value.hidden = true;
+            row.appendChild(value);
+            hpBars.appendChild(row);
           }
           el.appendChild(hpBars);
           const effects = new FakeElement();
@@ -333,4 +347,16 @@ function collectByClassName(root: FakeElement, className: string): FakeElement[]
     results.push(...collectByClassName(child, className));
   }
   return results;
+}
+
+function findWithClassAndAttr(root: FakeElement, className: string, attrName: string, attrValue: string | undefined): FakeElement | undefined {
+  for (const child of root.children) {
+    if (child.className.split(" ").includes(className)) {
+      const actual = child.getAttribute(attrName);
+      if (actual !== null && (attrValue === undefined || actual === attrValue)) return child;
+    }
+    const found = findWithClassAndAttr(child, className, attrName, attrValue);
+    if (found) return found;
+  }
+  return undefined;
 }

@@ -1,3 +1,4 @@
+import type { HpValueDisplay } from "../../../appstate";
 import type { ShipProfile } from "../../../ships";
 import type { Side } from "../side";
 
@@ -14,10 +15,13 @@ export interface PortraitsEls {
   readonly shipBEffects: HTMLElement;
   readonly shipAHpBars: HTMLElement;
   readonly shipBHpBars: HTMLElement;
+  readonly shipAHpValues: { readonly shield: HTMLElement; readonly armor: HTMLElement; readonly hull: HTMLElement };
+  readonly shipBHpValues: { readonly shield: HTMLElement; readonly armor: HTMLElement; readonly hull: HTMLElement };
   readonly shipALockBadge: HTMLElement;
   readonly shipBLockBadge: HTMLElement;
 }
 
 export interface PortraitsController {
   update(): void;
+  setHpValueDisplay(mode: HpValueDisplay): void;
 }

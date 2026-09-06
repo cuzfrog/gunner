@@ -32,4 +32,5 @@ export interface DefenseController {
   restore(side: Side, enabled: boolean, repMode?: StoredRepairMode, repairerActivation?: readonly StoredRepairerActivation[], rahActivation?: StoredRahActivation): void;
   cyclingEffects(side: Side): readonly { readonly moduleId: TypeId; readonly hint: string }[];
   hpPercentages(side: Side): Readonly<Record<DefenseLayer, number>> | undefined;
+  hpValues(side: Side): { readonly current: Readonly<Record<DefenseLayer, number>>; readonly max: Readonly<Record<DefenseLayer, number>> } | undefined;
 }

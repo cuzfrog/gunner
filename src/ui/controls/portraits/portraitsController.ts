@@ -1,5 +1,6 @@
 import type { ShipId, TypeId } from "../../../gamedata/ids";
 import type { ActiveOffensiveModule, DefenseLayer, LockState } from "../../../sim";
+import type { HpValueDisplay } from "../../../appstate";
 import type { ImageCatalog } from "../../icons";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
@@ -9,6 +10,8 @@ import type { Side } from "../side";
 import type { CombatantProfiles, PortraitsEls, PortraitsController } from "./portraitsControllerContract";
 import { html } from "../markup";
 import { percentFromMultiplier, signedPercentFromMultiplier } from "../../format";
+import { formatWithCommas } from "../controlsFormat";
+import { setText } from "../controlsDom";
 
 interface SideState {
   lastKey: string;
@@ -32,6 +35,7 @@ export class PortraitsControllerImpl implements PortraitsController {
   private readonly viewStream: ViewStream;
   private readonly shipAState: SideState = { lastKey: "", lastId: "" };
   private readonly shipBState: SideState = { lastKey: "", lastId: "" };
+  private hpValueDisplay: HpValueDisplay = "none";
 
   constructor(deps: {
     els: PortraitsEls;
@@ -59,6 +63,11 @@ export class PortraitsControllerImpl implements PortraitsController {
     this.updateSide("shipB");
   }
 
+  setHpValueDisplay(mode: HpValueDisplay): void {
+    this.hpValueDisplay = mode;
+    this.update();
+  }
+
   private updateSide(side: Side): void {
     const state = sideStateFor(side, this.shipAState, this.shipBState);
     const root = side === "shipA" ? this.els.shipA : this.els.shipB;
@@ -83,6 +92,10 @@ export class PortraitsControllerImpl implements PortraitsController {
     const hpPercentages = this.defenseController.hpPercentages(side);
     updateHpBars(hpBars, hpPercentages);
     hpBars.hidden = hpPercentages === undefined;
+    const hpValueEls = side === "shipA" ? this.els.shipAHpValues : this.els.shipBHpValues;
+    updateHpValues(hpValueEls, this.hpValueDisplay, this.defenseController.hpValues(side), hpPercentages);
+    if (this.hpValueDisplay !== "none" && hpPercentages !== undefined) hpBars.classList.add("is-values-visible");
+    else hpBars.classList.remove("is-values-visible");
     const lock = this.viewStream.currentView()?.locks[side];
     const lockBadgeVisible = lock !== undefined && lock.status === "locked" && lock.lockTime > 0;
     if (lockBadge.hidden !== !lockBadgeVisible) lockBadge.hidden = !lockBadgeVisible;
@@ -156,5 +169,24 @@ function updateHpBars(container: HTMLElement, percentages: Readonly<Record<Defen
     const pct = percentages ? percentages[HP_BAR_LAYERS[i]] : 1;
     const lost = Math.max(0, Math.min(1, 1 - pct));
     fill.style.width = `${lost * 100}%`;
+  }
+}
+
+function updateHpValues(els: { readonly shield: HTMLElement; readonly armor: HTMLElement; readonly hull: HTMLElement }, mode: HpValueDisplay, values: { readonly current: Readonly<Record<DefenseLayer, number>>; readonly max: Readonly<Record<DefenseLayer, number>> } | undefined, percentages: Readonly<Record<DefenseLayer, number>> | undefined): void {
+  if (mode === "none" || percentages === undefined || values === undefined) {
+    els.shield.hidden = true;
+    els.armor.hidden = true;
+    els.hull.hidden = true;
+    return;
+  }
+  for (const layer of HP_BAR_LAYERS) {
+    const el = els[layer];
+    if (mode === "percentage") {
+      const pct = Math.round(Math.max(0, Math.min(1, percentages[layer])) * 100);
+      setText(el, `${pct}%`);
+    } else {
+      setText(el, `${formatWithCommas(Math.round(values.current[layer]))} / ${formatWithCommas(values.max[layer])}`);
+    }
+    el.hidden = false;
   }
 }

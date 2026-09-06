@@ -8,6 +8,7 @@ export const USER_SETTINGS_VERSION = 15 as const;
 export const PROPULSION_NONE = "none" as const;
 export type TrackingUnit = "rad" | "score";
 export type WeaponRangeVisibility = "shipA" | "shipB" | "both" | "none";
+export type HpValueDisplay = "none" | "percentage" | "absolute";
 export type PropulsionSelection = PropulsionId | typeof PROPULSION_NONE;
 export type StoredDisruptionScript = TypeId | "none";
 
@@ -196,4 +197,5 @@ export interface DisplayPreferences {
   readonly rangeOverlayVisibility?: Record<string, WeaponRangeVisibility>;
   readonly autoZoom?: boolean;
   readonly zoomFactor?: number;
+  readonly hpValueDisplay?: HpValueDisplay;
 }

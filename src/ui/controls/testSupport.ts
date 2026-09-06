@@ -107,6 +107,9 @@ function addPortraitChildren(document: Document): void {
     hpBars.tagName = "DIV";
     hpBars.className = "portrait-hp-bars";
     for (const layer of ["shield", "armor", "hull"]) {
+      const row = new FakeElement();
+      row.tagName = "DIV";
+      row.className = "portrait-hp-row";
       const bar = new FakeElement();
       bar.tagName = "DIV";
       bar.className = `portrait-hp-bar portrait-hp-bar-${layer}`;
@@ -114,7 +117,14 @@ function addPortraitChildren(document: Document): void {
       fill.tagName = "SPAN";
       fill.className = "portrait-hp-fill";
       bar.appendChild(fill);
-      hpBars.appendChild(bar);
+      row.appendChild(bar);
+      const value = new FakeElement();
+      value.tagName = "SPAN";
+      value.className = "portrait-hp-value mono";
+      value.setAttribute("data-defense-layer", layer);
+      value.hidden = true;
+      row.appendChild(value);
+      hpBars.appendChild(row);
     }
     root.appendChild(hpBars);
     const effects = new FakeElement();

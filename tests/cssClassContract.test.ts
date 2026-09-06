@@ -54,6 +54,7 @@ const APPROVED_PREFIXES = [
   "speed-control",
   "grid-brightness",
   "auto-zoom",
+  "hp-value-display-toggle",
   "weapon-range",
   "form-slider",
   "form-field",

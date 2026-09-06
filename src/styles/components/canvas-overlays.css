@@ -99,11 +99,26 @@
   gap: 1px;
   width: 55px;
   margin-top: 2px;
+  overflow: visible;
+}
+
+.portrait-hp-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 55px;
+  min-height: 3px;
+}
+
+.portrait-hp-bars.is-values-visible > .portrait-hp-row {
+  min-height: 10px;
 }
 
 .portrait-hp-bar {
   position: relative;
+  width: 100%;
   height: 3px;
+  flex: none;
   background: var(--text-primary);
   opacity: 0.7;
   border-radius: 1px;
@@ -116,6 +131,27 @@
   margin-left: auto;
   background: var(--danger-red);
   opacity: 0.8;
+}
+
+.portrait-hp-value {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-primary);
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.portrait-hp-bars-ship-a .portrait-hp-value {
+  left: calc(100% + 4px);
+  text-align: left;
+}
+
+.portrait-hp-bars-ship-b .portrait-hp-value {
+  right: calc(100% + 4px);
+  text-align: right;
 }
 
 .portrait-effects {

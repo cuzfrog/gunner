@@ -80,4 +80,19 @@
 
 .zoom-auto-option .zoom-auto-checkbox { margin: 0; }
 
+.hp-value-display-toggle {
+  display: flex;
+  gap: 2px;
+}
+
+.hp-value-display-toggle > .btn {
+  padding: 2px 9px;
+  font-size: 11px;
+}
+
+.hp-value-display-toggle [aria-pressed="true"] {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+
 }
