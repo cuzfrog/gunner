@@ -5,8 +5,6 @@ const CSS_GLOB = "src/styles/**/*.css";
 // Classes used in HTML/TS that have no matching CSS rule yet.
 // Each entry must name the phase that removes it.
 const ALLOWED_UNDEFINED = new Set<string>([
-  "portrait-hp-bars-ship-a",
-  "portrait-hp-bars-ship-b",
   "portrait-hp-bar-shield",
   "portrait-hp-bar-armor",
   "portrait-hp-bar-hull",
@@ -29,6 +27,8 @@ const ALLOWED_ORPHAN = new Set<string>([
   "combatant-portrait-ship-b",
   "portrait-image-ship-a",
   "portrait-image-ship-b",
+  "portrait-hp-bars-ship-a",
+  "portrait-hp-bars-ship-b",
   "result-side-a",
   "result-side-b",
   "side-panel-ship-a",
