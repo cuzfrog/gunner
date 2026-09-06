@@ -178,4 +178,29 @@ describe("ActualDpsHintProviderImpl", () => {
     const modelB = deps.renderMock.mock.calls[0][0] as ActualDpsHintModel;
     expect(modelB.totalActualDps).toBe(30);
   });
+
+  test("totalActualDps changes when target transitions from shield to armor with different resists", () => {
+    const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
+    const shieldPhaseProjection = makeProjection(100, { shield: 100, armor: 0, hull: 0 });
+    const shieldView = makeView(attack, shieldPhaseProjection);
+    const depsShield = makeDeps({ viewStream: makeViewStream(shieldView) });
+    const provider = new ActualDpsHintProviderImpl(depsShield);
+    const container = globalThis.document.createElement("div");
+    provider.render(makeAnchor("shipA"), container);
+    const shieldModel = depsShield.renderMock.mock.calls[0][0] as ActualDpsHintModel;
+    expect(shieldModel.totalActualDps).toBe(100);
+    expect(shieldModel.layers).toHaveLength(1);
+    expect(shieldModel.layers[0].layer).toBe("shield");
+
+    const armorPhaseProjection = makeProjection(50, { shield: 0, armor: 50, hull: 0 });
+    const armorView = makeView(attack, armorPhaseProjection);
+    const depsArmor = makeDeps({ viewStream: makeViewStream(armorView) });
+    const providerArmor = new ActualDpsHintProviderImpl(depsArmor);
+    providerArmor.render(makeAnchor("shipA"), container);
+    const armorModel = depsArmor.renderMock.mock.calls[0][0] as ActualDpsHintModel;
+    expect(armorModel.totalActualDps).toBe(50);
+    expect(armorModel.totalActualDps).toBeLessThan(shieldModel.totalActualDps);
+    expect(armorModel.layers).toHaveLength(1);
+    expect(armorModel.layers[0].layer).toBe("armor");
+  });
 });
