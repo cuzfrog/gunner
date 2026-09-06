@@ -3,6 +3,7 @@ export type { ProfileEquality } from "./profileEquality";
 export type {
   DisplayPreferences,
   FittedHullSummary,
+  HpValueDisplay,
   ProfileParamOverrides,
   ProfileSettings,
   PropulsionSelection,
@@ -11,6 +12,7 @@ export type {
   StoredEwarActivation,
   StoredMissileBoosterActivation,
   StoredRahActivation,
+  StoredSensorBoosterActivation,
   StoredRepairMode,
   StoredRepairerActivation,
   TrackingUnit,

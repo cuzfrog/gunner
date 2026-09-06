@@ -12,7 +12,7 @@ import { FITTING_DB } from "../../src/gamedata/fittingDb";
 import { StaticShipProfileCatalog } from "../../src/gamedata/shipProfiles";
 import { StaticNameI18nCatalog } from "../../src/gamedata/nameI18n";
 import { ShipsImpl } from "../../src/ships/ships";
-import { StackingPenaltyImpl } from "../../src/sim/stackingPenalty";
+import { StackingPenaltyImpl } from "../../src/sim";
 import { EngagementEvaluatorImpl } from "../../src/sim/fireControl";
 import { EngagementFrameComposerImpl } from "../../src/sim/engagementFrameComposer";
 import { DefenseAssessorImpl } from "../../src/sim/defenseAssessment";
@@ -22,8 +22,9 @@ import { KinematicsImpl } from "../../src/sim/kinematics";
 import { MissileApplicationImpl } from "../../src/sim/missileApplication";
 import { MissileBoosterResolverImpl } from "../../src/sim/missileBoosterResolver";
 import { DroneApplicationImpl } from "../../src/sim/droneApplication";
-import { TurretDamageImpl } from "../../src/sim/turretDamage";
+import { WeaponDamageAssessorImpl } from "../../src/sim/weaponDamageAssessor";
 import { Vec2 } from "../../src/sim/vec2";
+import { toTypeId } from "../../src/gamedata/ids";
 import { SIG_RESOLUTIONS, damageVectorSum, type ShipState, type SimSnapshot, type TurretSpec, type MissileSpec } from "../../src/sim/types";
 import type { EwarResolver } from "../../src/sim/ewarResolver";
 import type { TurretBoosterResolver } from "../../src/sim/turretBoosterResolver";
@@ -72,9 +73,12 @@ const noEwarResolver: EwarResolver = {
   propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false,
   appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
   disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+  disruptionMultipliers: () => ({ tracking: 1, optimal: 1, falloff: 1 }),
   dampenedSensorSpec: (spec) => spec,
   dampenedSensorSpecIgnoringRange: (spec) => spec,
   dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+  reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+  potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
 };
 
 const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };
@@ -82,11 +86,11 @@ const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, loc
 function makeComposer() {
   const hitChance = new HitChanceImpl();
   const kinematics = new KinematicsImpl();
-  const turretDamage = new TurretDamageImpl();
+  const weaponDamageAssessor = new WeaponDamageAssessorImpl();
   const missileApplication = new MissileApplicationImpl();
-  const droneApplication = new DroneApplicationImpl({ hitChance });
-  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver: noEwarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: stacking }), turretDamage, missileApplication, droneApplication });
-  return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor: new DefenseAssessorImpl() });
+  const droneApplication = new DroneApplicationImpl({ hitChance, weaponDamageAssessor });
+  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver: noEwarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: stacking }), weaponDamageAssessor, missileApplication, droneApplication });
+  return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor: new DefenseAssessorImpl(), ewarResolver: noEwarResolver });
 }
 
 function stationaryShip(id: "shipA" | "shipB"): ShipState {
@@ -98,7 +102,7 @@ function snapshot(): SimSnapshot {
 }
 
 function turretSpecFromImported(t: NonNullable<NonNullable<ReturnType<typeof importer.importFitting>>["turret"]>): TurretSpec {
-  return { kind: "turret", tracking: t.tracking, sigResolution: SIG_RESOLUTIONS[t.sigResolutionClass], optimal: t.optimal, falloff: t.falloff, damagePerShot: t.damagePerShot, cycleTime: t.cycleTime, turretCount: t.turretCount };
+  return { kind: "turret", moduleId: toTypeId("1"), tracking: t.tracking, sigResolution: SIG_RESOLUTIONS[t.sigResolutionClass], optimal: t.optimal, falloff: t.falloff, damagePerShot: t.damagePerShot, cycleTime: t.cycleTime, turretCount: t.turretCount };
 }
 
 describe("Harbinger DPS cross-check (all skills 5, no overload)", () => {
@@ -139,8 +143,8 @@ describe("Harbinger DPS cross-check (all skills 5, no overload)", () => {
 
 describe("mixed turret + launcher DPS summation through sim", () => {
   test("sums nominalDps across a turret group and a missile group", () => {
-    const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 125, optimal: 10_000, falloff: 5_000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
-    const missile: MissileSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 150, explosive: 0 }, cycleTime: 10, launcherCount: 2, explosionRadius: 50, explosionVelocity: 100, damageReductionFactor: 4.5, maxVelocity: 5000, flightTime: 10, flightRange: 50_000 };
+    const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("2"), tracking: 0.1, sigResolution: 125, optimal: 10_000, falloff: 5_000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 4 };
+    const missile: MissileSpec = { kind: "missile", moduleId: toTypeId("3"), damagePerMissile: { em: 0, thermal: 0, kinetic: 150, explosive: 0 }, cycleTime: 10, launcherCount: 2, explosionRadius: 50, explosionVelocity: 100, damageReductionFactor: 4.5, maxVelocity: 5000, flightTime: 10, flightRange: 50_000 };
     const composer = makeComposer();
     const view = composer.compose(snapshot(), { weapons: { shipA: [turret, missile], shipB: [] }, sigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
     expect(view.attacks.shipA).toBeDefined();

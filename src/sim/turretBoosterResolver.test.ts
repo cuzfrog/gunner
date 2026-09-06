@@ -17,7 +17,7 @@ function spec(bonus: { tracking?: number; optimal?: number; falloff?: number }, 
 const optimalRangeScript: TurretScriptSpec = { name: "Optimal Range Script", moduleId: toTypeId("28999"), trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 };
 const trackingSpeedScript: TurretScriptSpec = { name: "Tracking Speed Script", moduleId: toTypeId("29001"), trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 };
 
-const baseTurret: TurretSpec = { kind: "turret", tracking: 0.315, sigResolution: 40, optimal: 6000, falloff: 3000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+const baseTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.315, sigResolution: 40, optimal: 6000, falloff: 3000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 
 function resolver() {
   return new TurretBoosterResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });

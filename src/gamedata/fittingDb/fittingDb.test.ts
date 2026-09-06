@@ -1,6 +1,7 @@
 import type { ShipId, TypeId } from "../ids";
 import { toTypeId } from "../ids";
-import { CHARGES, COMBAT_DRONES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, SCRIPTS, SENSOR_BOOSTERS, SENSOR_BOOSTER_SCRIPTS, SENSOR_DAMPENERS, SENSOR_DAMPENER_SCRIPTS, SIGNAL_AMPLIFIERS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
+import { CHARGES, COMBAT_DRONES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, RIG_DRAWBACK_REDUCTIONS, SCRIPTS, SENSOR_BOOSTERS, SENSOR_BOOSTER_SCRIPTS, SENSOR_DAMPENERS, SENSOR_DAMPENER_SCRIPTS, SIGNAL_AMPLIFIERS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS } from "./generated/fittingDb.data";
+import type { FittingModuleStats } from "./types";
 
 function moduleByName(name: string): FittingModuleStats | undefined {
   return Object.values(FITTING_MODULES).find((m) => m.name === name);
@@ -88,11 +89,17 @@ describe("fittingDb", () => {
   });
 
   test("includes armor rig agility drawback", () => {
-    expect(moduleByName("Medium Trimark Armor Pump II")).toMatchObject({ agilityDrawbackPercent: 10 });
+    expect(moduleByName("Medium Trimark Armor Pump II")).toMatchObject({ rigDrawback: { kind: "agility", percent: 10, groupId: 773 } });
   });
 
   test("includes shield rig signature drawback", () => {
-    expect(moduleByName("Medium Core Defense Field Extender I")).toMatchObject({ sigDrawbackPercent: 10 });
+    expect(moduleByName("Medium Core Defense Field Extender I")).toMatchObject({ rigDrawback: { kind: "signature", percent: 10, groupId: 774 } });
+  });
+
+  test("includes rig drawback reductions for all rigging skills", () => {
+    expect(RIG_DRAWBACK_REDUCTIONS).toContainEqual({ skillId: toTypeId("26261"), groupId: 774, magnitudePerLevel: -10 });
+    expect(RIG_DRAWBACK_REDUCTIONS).toContainEqual({ skillId: toTypeId("26253"), groupId: 773, magnitudePerLevel: -10 });
+    expect(RIG_DRAWBACK_REDUCTIONS).toContainEqual({ skillId: toTypeId("26254"), groupId: 782, magnitudePerLevel: -10 });
   });
 
   test("includes turret base stats with charge size, turret skill and no sig resolution", () => {

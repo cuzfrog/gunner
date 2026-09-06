@@ -76,16 +76,18 @@ export class PropulsionVariantSection {
     if (!profile || !propulsion || !propulsionId) return;
     const enName = this.fittingImport.itemNameForId(id, "en") ?? "";
     const fitted = this.panel.fittedHull;
+    const kind = this.panel.sections.propulsion.currentPropulsionModule()?.kind;
     const updated: FittedHullSummary = {
       fittingName: fitted?.fittingName ?? "",
       fitted: fitted?.fitted ?? this.panel.sections.propulsion.nakedFitted(profile),
       propulsionId,
       propulsionModuleId: id,
       propulsionName: enName,
-      propulsionKind: this.panel.sections.propulsion.currentPropulsionModule()?.kind,
+      propulsionKind: kind,
       propulsion,
     };
     this.panel.fittedHull = updated;
+    if (kind) this.panel.sections.propulsion.notePropulsionVariant(kind, id);
     this.panel.sections.stats.updateShipStats({ updateInertia: false, updateMass: true, updateSig: true });
     this.panel.sections.skill.setOverloadDisabled();
     this.section.renderVariants();

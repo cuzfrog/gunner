@@ -1,10 +1,10 @@
 import type { DroneGroup } from "../../fitting";
 import type { DefenseSkills, TargetingSkills } from "../../ships";
-import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation, StoredRahActivation, StoredRepairMode, StoredRepairerActivation } from "../userSettings";
+import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation, StoredRahActivation, StoredRepairMode, StoredRepairerActivation, StoredSensorBoosterActivation } from "../userSettings";
 
 export type Side = "shipA" | "shipB";
 export type ScalarField = keyof Omit<ProfileSettings, "shipAFitting" | "shipBFitting" | "shipAOverrides" | "shipBOverrides">;
-export type ScalarValue = string | number | boolean | FittedHullSummary | StoredEwarActivation | readonly StoredBoosterActivation[] | readonly StoredMissileBoosterActivation[] | readonly StoredRepairerActivation[] | StoredRahActivation | StoredRepairMode | readonly DroneGroup[] | DefenseSkills | TargetingSkills;
+export type ScalarValue = string | number | boolean | FittedHullSummary | StoredEwarActivation | readonly StoredBoosterActivation[] | readonly StoredMissileBoosterActivation[] | readonly StoredSensorBoosterActivation[] | readonly StoredRepairerActivation[] | StoredRahActivation | StoredRepairMode | readonly DroneGroup[] | DefenseSkills | TargetingSkills;
 
 export const GLOBAL_FIELDS: readonly ScalarField[] = [
   "version",
@@ -31,6 +31,7 @@ export const SHIP_A_FIELDS: readonly ScalarField[] = [
   "shipAEwarActivation",
   "shipABoosterActivation",
   "shipAMissileBoosterActivation",
+  "shipASensorBoosterActivation",
   "shipARepMode",
   "shipARepairerActivation",
   "shipARahActivation",
@@ -64,6 +65,7 @@ export const SHIP_B_FIELDS: readonly ScalarField[] = [
   "shipBEwarActivation",
   "shipBBoosterActivation",
   "shipBMissileBoosterActivation",
+  "shipBSensorBoosterActivation",
   "shipBRepMode",
   "shipBRepairerActivation",
   "shipBRahActivation",

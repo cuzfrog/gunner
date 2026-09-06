@@ -1,12 +1,13 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
 import type { ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingImport, PresetFittings } from "../../fitting";
-import type { TypeId } from "../../gamedata/ids";
+import { toTypeId, type TypeId } from "../../gamedata/ids";
 import type { Ships } from "../../ships";
-import { registerSimModule, type EwarResolver, type HitChance, type SimCradle } from "../../sim";
+import { registerSimModule, type EwarResolver, type HitChance, type SimCradle, type EngineView } from "../../sim";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { ProfileEquality, ProfileParamOverrides, ProfileTextCodec, SavedFittings, SettingsStore, TrackingUnit } from "../../appstate";
 import { UiEventsImpl, type UiEvents } from "../events";
+import type { ViewStream } from "../viewStream";
 import {
   FakeElement,
   fakeDocument,
@@ -37,12 +38,27 @@ import { registerControlsModule } from "./module";
 import type { Popup, PopupGroup } from "./popup";
 import type { Side } from "./side";
 import { registerSidePanelModule, type SidePanel, type SidePanelHost } from "./sidePanel";
+import { registerSelectionSessionModule } from "../selectionSession";
 import type { TurretController, TurretOverrides } from "./turret";
 import type { LauncherController } from "./launcher";
 import type { DroneController } from "./drone";
 
 export { createControlsEls } from "./elements";
 export * from "../testing";
+
+type TestViewStream = ViewStream & { emit(view: EngineView): void };
+
+function createTestViewStream(): TestViewStream {
+  const listeners = new Set<(view: EngineView) => void>();
+  let latest: EngineView | undefined;
+  return {
+    connect: () => {},
+    onViewUpdated: (l) => listeners.add(l),
+    offViewUpdated: (l) => listeners.delete(l),
+    currentView: () => latest,
+    emit: (view) => { latest = view; for (const l of Array.from(listeners)) l(view); },
+  };
+}
 
 export function mockTrackingInput(): TrackingInput {
   return new TrackingInputImpl();
@@ -91,6 +107,9 @@ function addPortraitChildren(document: Document): void {
     hpBars.tagName = "DIV";
     hpBars.className = "portrait-hp-bars";
     for (const layer of ["shield", "armor", "hull"]) {
+      const row = new FakeElement();
+      row.tagName = "DIV";
+      row.className = "portrait-hp-row";
       const bar = new FakeElement();
       bar.tagName = "DIV";
       bar.className = `portrait-hp-bar portrait-hp-bar-${layer}`;
@@ -98,7 +117,14 @@ function addPortraitChildren(document: Document): void {
       fill.tagName = "SPAN";
       fill.className = "portrait-hp-fill";
       bar.appendChild(fill);
-      hpBars.appendChild(bar);
+      row.appendChild(bar);
+      const value = new FakeElement();
+      value.tagName = "SPAN";
+      value.className = "portrait-hp-value mono";
+      value.setAttribute("data-defense-layer", layer);
+      value.hidden = true;
+      row.appendChild(value);
+      hpBars.appendChild(row);
     }
     root.appendChild(hpBars);
     const effects = new FakeElement();
@@ -187,6 +213,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
   globalThis.Element = FakeElement as unknown as typeof Element;
   const cradle = createContainer<TestControlsCradle>({ injectionMode: InjectionMode.PROXY });
   cradle.register({ uiEvents: asClass(UiEventsImpl).singleton() });
+  cradle.register({ viewStream: asValue(createTestViewStream()) });
   registerSimModule(cradle);
   cradle.register({
     now: asValue(options.now ?? (() => Date.now())),
@@ -205,6 +232,9 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
       dampenedSensorSpec: vi.fn((spec) => spec),
       dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
       dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
+      reach: vi.fn(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 })),
+      potentials: vi.fn(() => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 })),
+      disruptionMultipliers: vi.fn(() => ({ tracking: 1, optimal: 1, falloff: 1 })),
     })),
     hitChance: asValue(vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance })),
     ships: asValue(vi.mocked<Ships>({ ...mockShips(), ...options.ships })),
@@ -227,7 +257,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     fittingCalculator: asValue(vi.mocked<FittingCalculator>({
       resolveTurrets: vi.fn(() => []),
       resolveLauncher: vi.fn(() => undefined),
-      resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
+      resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } })),
       resolvePropulsion: vi.fn(() => undefined),
       resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], })),
       resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
@@ -261,6 +291,7 @@ export function buildDomControls(options: BuildDomControlsOptions = {}) {
     hitChance: cradle.cradle.hitChance,
     i18n: cradle.cradle.i18n,
     clipboard: cradle.cradle.clipboard,
+    viewStream: cradle.cradle.viewStream as TestViewStream,
   };
 }
 
@@ -293,8 +324,8 @@ class StubTurretController implements TurretController {
   restore(fittingText?: string, conditions?: StatConditions, ammo?: string, tracking?: number, sigRes?: SigResolutionClass, optimal?: number, falloff?: number): void;
   restore(..._args: unknown[]): void {}
   clear = vi.fn();
-  currentTurretSpec = vi.fn((): TurretSpec | undefined => ({ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 }));
-  currentTurretSpecs = vi.fn((): readonly TurretSpec[] => [{ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 }]);
+  currentTurretSpec = vi.fn((): TurretSpec | undefined => ({ kind: "turret" as const, moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 }));
+  currentTurretSpecs = vi.fn((): readonly TurretSpec[] => [{ kind: "turret" as const, moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 }]);
   currentSigResClass = vi.fn((): SigResolutionClass => "S");
   capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "12608" as TypeId }));
   isAmmoPopupOpen = vi.fn();
@@ -418,6 +449,7 @@ export function buildSidePanel(
     dpsHintRenderer: asValue({ render: vi.fn() }),
     dpsHintProvider: asValue({ render: vi.fn() }),
   });
+  registerSelectionSessionModule(cradle);
   registerSidePanelModule(cradle);
 
   const panel = side === "shipA" ? cradle.cradle.shipASide : cradle.cradle.shipBSide;

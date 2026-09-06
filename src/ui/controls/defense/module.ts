@@ -8,25 +8,15 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export function registerDefenseModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    defenseController: asFunction(({ els, popupGroup, i18n, uiEvents }) => new DefenseControllerImpl({
-      els: collectDefenseEls(els), popupGroup, i18n, events: uiEvents,
+    defenseController: asFunction(({ els, popupGroup, i18n, uiEvents, defenseAssessor }) => new DefenseControllerImpl({
+      els: defenseEls(els), popupGroup, i18n, events: uiEvents, defenseAssessor,
     })).singleton(),
   });
 }
 
-function collectDefenseEls(els: ControlsElements): DefenseEls {
+function defenseEls(els: ControlsElements): DefenseEls {
   return {
-    shipADefenseField: els.shipA.defenseField,
-    shipADefenseTrigger: els.shipA.defenseTrigger,
-    shipADefensePopup: els.shipA.defensePopup,
-    shipADefenseSection: els.shipA.defenseSection,
-    shipADefenseSummary: els.shipA.defenseSummary,
-    shipAEffectiveSig: els.shipA.effectiveSig,
-    shipBDefenseField: els.shipB.defenseField,
-    shipBDefenseTrigger: els.shipB.defenseTrigger,
-    shipBDefensePopup: els.shipB.defensePopup,
-    shipBDefenseSection: els.shipB.defenseSection,
-    shipBDefenseSummary: els.shipB.defenseSummary,
-    shipBEffectiveSig: els.shipB.effectiveSig,
+    shipA: els.shipA.defense,
+    shipB: els.shipB.defense,
   };
 }

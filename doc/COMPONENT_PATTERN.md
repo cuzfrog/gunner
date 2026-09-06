@@ -62,6 +62,8 @@ export class FooControllerImpl implements FooController {
 ```
 
 - Controllers self-subscribe to `onLanguageChanged` and re-render.
+- For per-frame simulation data, subscribe to `ViewStream.onViewUpdated`; use `ViewStream.currentView()` for on-demand reads; use direct sim read-model calls only for out-of-band queries (e.g. config changes before the first view). Never compute domain quantities in the UI.
+- Runtime/config display invariant: every number the UI displays is either a config value (changes only on user edit) or a runtime value (changes during simulation). A runtime value must be produced by the sim and displayed only from the view. Per-frame rendering lives in presenter classes whose constructor deps contain zero config-capable types — no `SidePanel`, `SimConfigSource`, or config getters. This makes a config read in a per-frame path a compile error.
 - Render methods are synchronous; for lazy-loaded data, use placeholder-then-rerender (see `LazyItemNameCatalog`).
 - Register in the module's `module.ts` via `asFunction(...).singleton()`.
 - Implementation types are visible only to unit tests and `module.ts`.

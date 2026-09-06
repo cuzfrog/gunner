@@ -1,7 +1,7 @@
 import type { EwarResolver } from "../../../sim";
-import type { DisruptionScriptSpec, EwarProjection, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TurretSpec, TrackingDisruptorSpec } from "../../../sim";
-import { ZERO_DAMAGE } from "../../../sim";
+import type { DisruptionScriptSpec, EwarEffectPotentials, EwarProjection, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
+import { formatDistance, percentFromMultiplier, signedPercentFromMultiplier } from "../../format";
 
 export interface EwarEffectDescriber {
   webDescription(projection: EwarProjection, distance: number): string;
@@ -25,8 +25,6 @@ export interface EwarEffectDescriber {
 export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   private readonly resolver: EwarResolver;
   private readonly i18n: I18n;
-  private readonly unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
-  private readonly unitSensor: SensorSpec = { scanResolution: 1, maxTargetingRange: 1, maxLockedTargets: 1 };
 
   constructor(deps: { ewarResolver: EwarResolver; i18n: I18n }) {
     this.resolver = deps.ewarResolver;
@@ -38,9 +36,9 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   }
 
   webHint(projection: EwarProjection): string {
-    const multiplier = this.resolver.speedMultiplierIgnoringRange(projection);
-    const range = this.webRange(projection);
-    return `${this.speedDescription(multiplier)} · ${this.formatRange(range)}`;
+    const potentials = this.resolver.potentials(projection);
+    const reach = this.resolver.reach(projection);
+    return `${this.speedDescription(potentials.speedMultiplier)} · ${this.formatRange(reach.web)}`;
   }
 
   grapplerDescription(projection: EwarProjection, distance: number): string {
@@ -48,19 +46,20 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   }
 
   grapplerHint(projection: EwarProjection): string {
-    const multiplier = this.resolver.speedMultiplierIgnoringRange(projection);
-    const reach = this.grapplerReach(projection);
-    return `${this.speedDescription(multiplier)} · ${this.formatRange(reach)}`;
+    const potentials = this.resolver.potentials(projection);
+    const reach = this.resolver.reach(projection);
+    return `${this.speedDescription(potentials.speedMultiplier)} · ${this.formatRange(reach.grappler)}`;
   }
 
   disruptorDescription(projection: EwarProjection, distance: number): string {
-    return this.turretDescription(this.resolver.disruptedTurret(this.unitTurret, projection, distance));
+    const multipliers = this.resolver.disruptionMultipliers(projection, distance);
+    return this.turretFromValues(multipliers.tracking, multipliers.optimal, multipliers.falloff);
   }
 
   disruptorHint(projection: EwarProjection): string {
-    const turret = this.resolver.disruptedTurretIgnoringRange(this.unitTurret, projection);
-    const reach = this.disruptorReach(projection);
-    return `${this.turretDescription(turret)} · ${this.formatRange(reach)}`;
+    const potentials = this.resolver.potentials(projection);
+    const reach = this.resolver.reach(projection);
+    return `${this.turretFromPotentials(potentials)} · ${this.formatRange(reach.disruptor)}`;
   }
 
   scramblerDescription(projection: EwarProjection, distance: number): string {
@@ -70,20 +69,31 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   }
 
   scramblerHint(projection: EwarProjection): string {
-    const suppressed = this.resolver.propulsionSuppressedIgnoringRange(projection);
-    const range = this.scramblerRange(projection);
-    return `${suppressed ? this.i18n.t("ewar.hover.scrambler") : this.i18n.t("ewar.hover.outOfRange")} · ${this.formatRange(range)}`;
+    const potentials = this.resolver.potentials(projection);
+    const reach = this.resolver.reach(projection);
+    return `${potentials.propulsionSuppressed ? this.i18n.t("ewar.hover.scrambler") : this.i18n.t("ewar.hover.outOfRange")} · ${this.formatRange(reach.scrambler)}`;
   }
 
   private speedDescription(multiplier: number): string {
     if (multiplier === 1) return this.i18n.t("ewar.hover.outOfRange");
-    return `${this.i18n.t("ewar.hover.web")} ${Math.round((1 - multiplier) * 100)}%`;
+    return `${this.i18n.t("ewar.hover.web")} ${percentFromMultiplier(multiplier)}%`;
   }
 
-  private turretDescription(turret: TurretSpec): string {
-    const tracking = Math.round((1 - turret.tracking) * 100);
-    const optimal = Math.round((1 - turret.optimal) * 100);
-    const falloff = Math.round((1 - turret.falloff) * 100);
+  private turretFromValues(tracking: number, optimal: number, falloff: number): string {
+    const trackingPct = percentFromMultiplier(tracking);
+    const optimalPct = percentFromMultiplier(optimal);
+    const falloffPct = percentFromMultiplier(falloff);
+    if (trackingPct === 0 && optimalPct === 0 && falloffPct === 0) return this.i18n.t("ewar.hover.outOfRange");
+    const trackingLabel = this.i18n.t("ewar.hover.tracking");
+    const optimalLabel = this.i18n.t("ewar.hover.optimal");
+    const falloffLabel = this.i18n.t("ewar.hover.falloff");
+    return `${trackingLabel} -${trackingPct}% · ${optimalLabel} -${optimalPct}% · ${falloffLabel} -${falloffPct}%`;
+  }
+
+  private turretFromPotentials(potentials: EwarEffectPotentials): string {
+    const tracking = percentFromMultiplier(potentials.trackingMultiplier);
+    const optimal = percentFromMultiplier(potentials.optimalMultiplier);
+    const falloff = percentFromMultiplier(potentials.falloffMultiplier);
     if (tracking === 0 && optimal === 0 && falloff === 0) return this.i18n.t("ewar.hover.outOfRange");
     const trackingLabel = this.i18n.t("ewar.hover.tracking");
     const optimalLabel = this.i18n.t("ewar.hover.optimal");
@@ -91,57 +101,8 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
     return `${trackingLabel} -${tracking}% · ${optimalLabel} -${optimal}% · ${falloffLabel} -${falloff}%`;
   }
 
-  private webRange(projection: EwarProjection): number {
-    let maxRange = 0;
-    for (let i = 0; i < projection.loadout.webs.length; i++) {
-      const activation = projection.activation?.webs[i];
-      if (activation && !activation.active) continue;
-      const spec = projection.loadout.webs[i];
-      const scale = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
-      maxRange = Math.max(maxRange, spec.maxRange * scale);
-    }
-    return maxRange;
-  }
-
-  private grapplerReach(projection: EwarProjection): number {
-    let reach = 0;
-    for (let i = 0; i < projection.loadout.grapplers.length; i++) {
-      const activation = projection.activation?.grapplers[i];
-      if (activation && !activation.active) continue;
-      const spec = projection.loadout.grapplers[i];
-      const scale = activation?.overloaded ? 1 + spec.overloadOptimalBonusPercent / 100 : 1;
-      reach = Math.max(reach, spec.optimal * scale + spec.falloff);
-    }
-    return reach;
-  }
-
-  private disruptorReach(projection: EwarProjection): number {
-    let reach = 0;
-    for (let i = 0; i < projection.loadout.disruptors.length; i++) {
-      const activation = projection.activation?.disruptors[i];
-      if (activation && !activation.active) continue;
-      const spec = projection.loadout.disruptors[i];
-      reach = Math.max(reach, spec.optimal + spec.falloff);
-    }
-    return reach;
-  }
-
-  private scramblerRange(projection: EwarProjection): number {
-    let maxRange = 0;
-    for (let i = 0; i < projection.loadout.scramblers.length; i++) {
-      const activation = projection.activation?.scramblers[i];
-      if (activation && !activation.active) continue;
-      const spec = projection.loadout.scramblers[i];
-      const scale = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
-      maxRange = Math.max(maxRange, spec.maxRange * scale);
-    }
-    return maxRange;
-  }
-
   private formatRange(meters: number): string {
-    const value = meters >= 10_000
-      ? `${(meters / 1000).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${this.i18n.t("unit.kilometer")}`
-      : `${Math.round(meters)} ${this.i18n.t("unit.meter")}`;
+    const value = formatDistance(meters, (key) => this.i18n.t(key));
     return this.i18n.t("ewar.hint.range").replace("{0}", value);
   }
 
@@ -169,9 +130,9 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   }
 
   painterHint(projection: EwarProjection): string {
-    const multiplier = this.resolver.sigMultiplierIgnoringRange(projection);
-    const reach = this.painterReach(projection);
-    return `${this.sigDescription(multiplier)} · ${this.formatRange(reach)}`;
+    const potentials = this.resolver.potentials(projection);
+    const reach = this.resolver.reach(projection);
+    return `${this.sigDescription(potentials.sigMultiplier)} · ${this.formatRange(reach.painter)}`;
   }
 
   painterModuleEffect(spec: TargetPainterSpec): string {
@@ -179,9 +140,9 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   }
 
   dampenerHint(projection: EwarProjection): string {
-    const sensor = this.resolver.dampenedSensorSpecIgnoringRange(this.unitSensor, projection);
-    const reach = this.dampenerReach(projection);
-    return `${this.dampenerDescription(sensor)} · ${this.formatRange(reach)}`;
+    const potentials = this.resolver.potentials(projection);
+    const reach = this.resolver.reach(projection);
+    return `${this.dampenerFromPotentials(potentials)} · ${this.formatRange(reach.dampener)}`;
   }
 
   dampenerModuleEffect(spec: SensorDampenerSpec, script: SensorDampenerScriptSpec | undefined): string {
@@ -191,8 +152,8 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   }
 
   private dampenerDescription(sensor: SensorSpec): string {
-    const scanRes = Math.round((1 - sensor.scanResolution) * 100);
-    const range = Math.round((1 - sensor.maxTargetingRange) * 100);
+    const scanRes = percentFromMultiplier(sensor.scanResolution);
+    const range = percentFromMultiplier(sensor.maxTargetingRange);
     if (scanRes === 0 && range === 0) return this.i18n.t("ewar.hover.outOfRange");
     const scanResLabel = this.i18n.t("ewar.hover.scanResolution");
     const rangeLabel = this.i18n.t("ewar.hover.targetingRange");
@@ -201,29 +162,16 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
 
   private sigDescription(multiplier: number): string {
     if (multiplier === 1) return this.i18n.t("ewar.hover.outOfRange");
-    const percent = Math.round((multiplier - 1) * 100);
+    const percent = signedPercentFromMultiplier(multiplier);
     return `${this.i18n.t("ewar.hover.sigRadius")} ${percent > 0 ? "+" : ""}${percent}%`;
   }
 
-  private painterReach(projection: EwarProjection): number {
-    let reach = 0;
-    for (let i = 0; i < projection.loadout.painters.length; i++) {
-      const activation = projection.activation?.painters[i];
-      if (activation && !activation.active) continue;
-      const spec = projection.loadout.painters[i];
-      reach = Math.max(reach, spec.maxRange + spec.falloff);
-    }
-    return reach;
-  }
-
-  private dampenerReach(projection: EwarProjection): number {
-    let reach = 0;
-    for (let i = 0; i < projection.loadout.dampeners.length; i++) {
-      const activation = projection.activation?.dampeners[i];
-      if (activation && !activation.active) continue;
-      const spec = projection.loadout.dampeners[i];
-      reach = Math.max(reach, spec.optimal + spec.falloff);
-    }
-    return reach;
+  private dampenerFromPotentials(potentials: EwarEffectPotentials): string {
+    const scanRes = percentFromMultiplier(potentials.scanResolutionMultiplier);
+    const range = percentFromMultiplier(potentials.targetingRangeMultiplier);
+    if (scanRes === 0 && range === 0) return this.i18n.t("ewar.hover.outOfRange");
+    const scanResLabel = this.i18n.t("ewar.hover.scanResolution");
+    const rangeLabel = this.i18n.t("ewar.hover.targetingRange");
+    return `${scanResLabel} -${scanRes}% · ${rangeLabel} -${range}%`;
   }
 }

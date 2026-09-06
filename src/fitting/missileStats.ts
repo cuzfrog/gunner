@@ -1,4 +1,4 @@
-import type { HullBonus, LauncherStats, MissileStats, SkillBonus } from "../gamedata/fittingDb";
+import type { HullBonus, LauncherStats, MissileBonusAttribute, MissileStats, SkillBonus } from "../gamedata/fittingDb";
 import { type TypeId } from "../gamedata/ids";
 import { type DamageVector, type StackingPenalty, damageVectorFromPartial, damageVectorScale } from "../sim";
 import type { SkillLevel } from "../ships";
@@ -50,13 +50,15 @@ export class MissileSkillModelImpl implements MissileSkillModel {
     const hullRofMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileRoF", skillLevel);
     const hullVelocityMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileVelocity", skillLevel);
     const hullFlightTimeMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileFlightTime", skillLevel);
+    const hullExplosionRadiusMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileExplosionRadius", skillLevel);
+    const hullExplosionVelocityMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileExplosionVelocity", skillLevel);
 
     const damageMultiplier = skillDamageMultiplier * hullDamageMultiplier;
     return {
       damagePerMissile: damageVectorScale(damageVectorFromPartial(missileDamageByType(missile)), damageMultiplier),
       cycleTime: launcher.rateOfFire * skillRofMultiplier * hullRofMultiplier,
-      explosionRadius: missile.explosionRadius * skillExplosionRadiusMultiplier,
-      explosionVelocity: missile.explosionVelocity * skillExplosionVelocityMultiplier,
+      explosionRadius: missile.explosionRadius * skillExplosionRadiusMultiplier * hullExplosionRadiusMultiplier,
+      explosionVelocity: missile.explosionVelocity * skillExplosionVelocityMultiplier * hullExplosionVelocityMultiplier,
       damageReductionFactor: missile.damageReductionFactor,
       maxVelocity: missile.maxVelocity * skillVelocityMultiplier * hullVelocityMultiplier,
       flightTime: missile.flightTime * skillFlightTimeMultiplier * hullFlightTimeMultiplier,
@@ -86,7 +88,7 @@ function multiplySkillBonuses(bonuses: readonly SkillBonus[], bonusType: SkillBo
   return multiplier;
 }
 
-function hullStackingMultiplier(stacking: StackingPenalty, bonuses: readonly HullBonus[], attribute: HullBonus["attribute"], skillLevel: SkillLevel): number {
+function hullStackingMultiplier(stacking: StackingPenalty, bonuses: readonly HullBonus[], attribute: MissileBonusAttribute, skillLevel: SkillLevel): number {
   const percents = bonuses.filter((b) => b.attribute === attribute).map((b) => b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1) / 100);
   return percents.length > 0 ? stacking.apply(percents.map((p) => 1 + p)) : 1;
 }

@@ -148,7 +148,7 @@ describe("profileTextCodec", () => {
 
   test("a profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
-version=14
+version=15
 shipA.tracking=0.32
 shipA.sigRes=S
 shipA.optimal=5000
@@ -191,6 +191,15 @@ shipB.sig=40`;
       ...MINIMAL_PROFILE,
       shipAMissileBoosterActivation: [{ active: true, overloaded: true, script: toTypeId("35795") }, { active: false, overloaded: false, script: "none" }],
       shipBMissileBoosterActivation: [{ active: true, overloaded: false, script: toTypeId("35794") }],
+    };
+    expect(codec.parse(codec.serialize(profile))).toEqual(profile);
+  });
+
+  test("round-trips sensor booster activations with overload and script", () => {
+    const profile: ProfileSettings = {
+      ...MINIMAL_PROFILE,
+      shipASensorBoosterActivation: [{ active: true, overloaded: true, script: toTypeId("29011") }, { active: false, overloaded: false, script: "none" }],
+      shipBSensorBoosterActivation: [{ active: true, overloaded: false, script: toTypeId("29009") }],
     };
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });

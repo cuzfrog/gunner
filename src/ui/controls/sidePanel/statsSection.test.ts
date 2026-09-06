@@ -13,7 +13,7 @@ import { StatsSection, type StatsSectionEls } from "./statsSection";
 function shipsWithStats(): Ships {
   const ships = vi.mocked<Ships>(mockShips());
   ships.hullView = vi.fn((profile) => ({ name: profile.name, hullType: "Frigate", faction: "Minmatar Republic" }));
-  ships.fittedStats = vi.fn(() => ({ mass: 1_000_000, inertiaModifier: 2, sigRadius: 30, maxSpeed: 0, baseMaxSpeed: 0, alignTime: 0 }));
+  ships.fittedStats = vi.fn(() => ({ mass: 1_000_000, inertiaModifier: 2, sigRadius: 30, sigBloomFactor: 0, maxSpeed: 0, baseMaxSpeed: 0, alignTime: 0 }));
   ships.maxSpeedForFittedMass = vi.fn(() => 450);
   ships.alignTime = vi.fn(() => 2.5);
   return ships;
@@ -127,6 +127,36 @@ describe("StatsSection", () => {
     overrides.shipASpeed = 300;
     expect(section.isOverridden("shipASpeed")).toBe(true);
     expect(section.isOverridden("shipAMass")).toBe(false);
+  });
+
+  describe("currentSigBloomFactor", () => {
+    test("MWD fitting input shows base signature, not bloomed", () => {
+      const ships = realShips();
+      const { document, panel, section } = buildStatsSection(ships);
+      const rifter = ships.findHull("Rifter")!;
+      const mwd5 = ships.fittingOption(rifter, "mwd-5mn")!;
+      panel.profile = rifter;
+      panel.sections.propulsion.currentPropulsionModule = vi.fn(() => mwd5);
+      getFake(document, "ship-a-speed").value = "0";
+      section.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
+
+      const sigInput = Number(getFake(document, "ship-a-sig").value);
+      const baseSig = ships.fittedStats(rifter, undefined, mwd5, { skillLevel: 5, overloaded: true, weaponOverloaded: false }).sigRadius;
+      expect(sigInput).toBeCloseTo(baseSig, 6);
+      expect(section.currentSigBloomFactor()).toBeGreaterThan(0);
+      expect(sigInput).toBeLessThan(baseSig * (1 + section.currentSigBloomFactor()));
+    });
+
+    test("signature override preserves user value", () => {
+      const ships = realShips();
+      const { document, panel, section, overrides } = buildStatsSection(ships);
+      const rifter = ships.findHull("Rifter")!;
+      panel.profile = rifter;
+      overrides.shipASig = 42;
+      getFake(document, "ship-a-sig").value = "42";
+      section.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
+      expect(getFake(document, "ship-a-sig").value).toBe("42");
+    });
   });
 
   describe("currentBaseMaxSpeed", () => {

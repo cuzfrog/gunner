@@ -2,6 +2,7 @@ import { Vec2 } from "./vec2";
 import type { MissileApplication } from "./missileApplication";
 import type {
   DamageEvent,
+  DamageVector,
   EngagementFrame,
   MissileApplicationResult,
   MissileAttackFacts,
@@ -34,6 +35,7 @@ interface MissileBody {
   weaponIndex: number;
   spec: MissileSpec;
   paintedSig: number;
+  baseVolleyByType: DamageVector;
 }
 
 interface SideState {
@@ -159,7 +161,7 @@ export class MissileSimulatorImpl implements MissileSimulator {
   private impactEvent(source: Side, target: Side, missile: MissileBody, targetVel: Vec2): DamageEvent | undefined {
     const result = this.application.compute(missile.spec, targetVel.len(), missile.paintedSig);
     if (result.application <= 0) return undefined;
-    const rawByType = damageVectorScale(missile.spec.damagePerMissile, result.application);
+    const rawByType = damageVectorScale(missile.baseVolleyByType, result.application);
     if (damageVectorSum(rawByType) <= 0) return undefined;
     return { target, source, weaponIndex: missile.weaponIndex, kind: "missile", rawByType };
   }
@@ -188,7 +190,7 @@ function emptySide(): SideState {
 }
 
 function createMissile(shipPos: Vec2, launch: MissileLaunchSpec): MissileBody {
-  return { position: shipPos, launchPos: shipPos, velocity: new Vec2(0, 0), fuel: launch.boosted.flightTime, trail: [], weaponIndex: launch.weaponIndex, spec: launch.boosted, paintedSig: launch.paintedTargetSig };
+  return { position: shipPos, launchPos: shipPos, velocity: new Vec2(0, 0), fuel: launch.boosted.flightTime, trail: [], weaponIndex: launch.weaponIndex, spec: launch.boosted, paintedSig: launch.paintedTargetSig, baseVolleyByType: launch.baseVolleyByType };
 }
 
 function accelerateToward(current: Vec2, desired: Vec2, dt: number): Vec2 {

@@ -2,7 +2,6 @@ import { asFunction, type AwilixContainer } from "awilix";
 import { isHtmlImageElement } from "../controlsDom";
 import type { createControlsEls } from "../elements";
 import type { ControlsCradle } from "../cradle";
-import type { ViewStore } from "../controlsContract";
 import type { Side } from "../side";
 import { PortraitsControllerImpl } from "./portraitsController";
 import type { PortraitsEls } from "./portraitsControllerContract";
@@ -14,29 +13,22 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
     portraitsController: asFunction(({
       els,
       imageCatalog,
-      ewarController,
-      ewarResolver,
       defenseController,
       uiEvents,
       i18n,
       shipASide,
       shipBSide,
+      viewStream,
     }) => new PortraitsControllerImpl({
       els: collectPortraitsEls(els),
       imageCatalog,
-      ewarController,
-      ewarResolver,
       defenseController,
       combatantProfiles: { profile: (side: Side) => (side === "shipA" ? shipASide.profile : shipBSide.profile) },
       events: uiEvents,
       i18n,
-      viewStore: lazyViewStore(cradle.cradle),
+      viewStream,
     })).singleton(),
   });
-}
-
-function lazyViewStore(cradle: ControlsCradle): ViewStore {
-  return { currentView: () => cradle.viewStore.currentView() };
 }
 
 function collectPortraitsEls(els: ControlsElements): PortraitsEls {
@@ -67,7 +59,19 @@ function collectPortraitsEls(els: ControlsElements): PortraitsEls {
     shipBEffects,
     shipAHpBars,
     shipBHpBars,
+    shipAHpValues: collectHpValueEls(els.shipA.portrait),
+    shipBHpValues: collectHpValueEls(els.shipB.portrait),
     shipALockBadge,
     shipBLockBadge,
   };
+}
+
+function collectHpValueEls(portrait: HTMLElement): { readonly shield: HTMLElement; readonly armor: HTMLElement; readonly hull: HTMLElement } {
+  const shield = portrait.querySelector<HTMLElement>('.portrait-hp-value[data-defense-layer="shield"]');
+  if (!shield) throw new Error('Missing .portrait-hp-value[data-defense-layer="shield"]');
+  const armor = portrait.querySelector<HTMLElement>('.portrait-hp-value[data-defense-layer="armor"]');
+  if (!armor) throw new Error('Missing .portrait-hp-value[data-defense-layer="armor"]');
+  const hull = portrait.querySelector<HTMLElement>('.portrait-hp-value[data-defense-layer="hull"]');
+  if (!hull) throw new Error('Missing .portrait-hp-value[data-defense-layer="hull"]');
+  return { shield, armor, hull };
 }

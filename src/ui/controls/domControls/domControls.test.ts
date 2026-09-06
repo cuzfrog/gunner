@@ -1,7 +1,7 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import { EMPTY_DEFENSE_ASSESSMENT, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type EngineView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
 import type { Ships } from "../../../ships";
 import type { EffectiveReadouts } from "../controlsContract";
 import { USER_SETTINGS_VERSION } from "../../../appstate";
@@ -60,7 +60,7 @@ function makeView(distance: number): EngagementView {
     relPosition: new Vec2(0, distance), distance, relVelocity: new Vec2(0, 0),
     radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
   };
-  return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } };
+  return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } }, incomingOffensiveModules: { shipA: [], shipB: [] } };
 }
 
 function mockDefenseView(): DefenseView {
@@ -77,6 +77,13 @@ function mockDefenseView(): DefenseView {
     repairMode: { shipA: "auto", shipB: "auto" },
     rah: { shipA: undefined, shipB: undefined },
   };
+}
+
+function makeEngineView(view: EngagementView, effective: EffectiveReadouts, defenseView: DefenseView, sigs?: { shipA: number; shipB: number }): EngineView {
+  const shipAState = { ...view.frame.shipA, sig: sigs?.shipA ?? 1 };
+  const shipBState = { ...view.frame.shipB, sig: sigs?.shipB ?? 1 };
+  const snapshot = { time: view.frame.time, shipA: shipAState, shipB: shipBState, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
+  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView, snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
 }
 
 function baseSettings(): UserSettings {
@@ -139,7 +146,6 @@ describe("DomControls", () => {
     if (shipAWeapon?.kind !== "turret") throw new Error("expected turret weapon for shipA");
     expect(shipAWeapon.optimal).toBe(600);
     expect(shipAWeapon.falloff).toBe(3000);
-    expect(controls.getSig("shipB")).toBe(36);
     expect(controls.getSpeed()).toBe(4);
     expect(controls.getGridBrightness()).toBe(0.2);
     const config = controls.getConfig();
@@ -163,49 +169,6 @@ describe("DomControls", () => {
     cradle.cradle.shipASide.profile = undefined;
     controls.onConfigChange();
     expect(getFake(document, "play").disabled).toBe(true);
-  });
-
-  test("hasWeapon reflects whether the ship has a fitted turret or launcher on each side", () => {
-    const { controls, cradle } = buildDomControls();
-    expect(controls.hasWeapon("shipA")).toBe(false);
-    expect(controls.hasWeapon("shipB")).toBe(false);
-    cradle.cradle.shipATurretController.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
-    expect(controls.hasWeapon("shipA")).toBe(true);
-    expect(controls.hasWeapon("shipB")).toBe(false);
-  });
-
-  test("getWeapons returns all equipped weapons with active kind first", () => {
-    const { controls, cradle } = buildDomControls();
-    const turretSpec: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 }, cycleTime: 5, turretCount: 1 };
-    const missileSpec: MissileSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 50, explosive: 0 }, cycleTime: 10, launcherCount: 1, explosionRadius: 50, explosionVelocity: 100, damageReductionFactor: 0.5, maxVelocity: 5000, flightTime: 5, flightRange: 25000 };
-    const droneSpec: DroneSpec = { kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
-    cradle.cradle.turretControllers.shipA.currentTurretSpecs = vi.fn(() => [turretSpec]);
-    cradle.cradle.launcherControllers.shipA.currentMissileSpec = vi.fn(() => missileSpec);
-    cradle.cradle.droneControllers.shipA.currentDroneSpecs = vi.fn(() => [droneSpec]);
-    cradle.cradle.weaponSystemSwitches.shipA.setActiveKind("turret");
-    const turretActive = controls.getWeapons("shipA");
-    expect(turretActive[0]).toBe(turretSpec);
-    expect(turretActive).toContain(missileSpec);
-    expect(turretActive).toContain(droneSpec);
-    expect(turretActive.length).toBe(3);
-    cradle.cradle.weaponSystemSwitches.shipA.setActiveKind("missile");
-    const missileActive = controls.getWeapons("shipA");
-    expect(missileActive[0]).toBe(missileSpec);
-    expect(missileActive).toContain(turretSpec);
-    expect(missileActive).toContain(droneSpec);
-    cradle.cradle.weaponSystemSwitches.shipA.setActiveKind("drone");
-    const droneActive = controls.getWeapons("shipA");
-    expect(droneActive[0]).toBe(droneSpec);
-    expect(droneActive).toContain(turretSpec);
-    expect(droneActive).toContain(missileSpec);
-  });
-
-  test("getWeapons returns empty array when no weapons are equipped", () => {
-    const { controls, cradle } = buildDomControls();
-    cradle.cradle.turretControllers.shipA.currentTurretSpecs = vi.fn(() => []);
-    cradle.cradle.launcherControllers.shipA.currentMissileSpec = vi.fn(() => undefined);
-    cradle.cradle.droneControllers.shipA.currentDroneSpecs = vi.fn(() => []);
-    expect(controls.getWeapons("shipA")).toHaveLength(0);
   });
 
   test("config invalidation refreshes the profile action bar dirty state", () => {
@@ -386,7 +349,7 @@ describe("DomControls", () => {
       parsePropulsionId: vi.fn((value: unknown) => (value === "mwd-5mn" ? "mwd-5mn" : undefined)),
       fittingOptions: vi.fn(() => [mwd5]),
       fittingOption: vi.fn(() => mwd5),
-      fittedStats: vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 3, sigRadius: 35, maxSpeed: 1800, baseMaxSpeed: 300, alignTime: 2.5 })),
+      fittedStats: vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 3, sigRadius: 35, sigBloomFactor: 5, maxSpeed: 1800, baseMaxSpeed: 300, alignTime: 2.5 })),
       maxSpeedForFittedMass: vi.fn(() => 1800),
     });
     const { document, controls, cradle } = buildDomControls({ ships });
@@ -404,12 +367,12 @@ describe("DomControls", () => {
   });
 
   test("update displays effective attributes and highlights affected values", () => {
-    const { document, controls } = buildDomControls();
+    const { document, controls, viewStream } = buildDomControls();
     const view = makeView(0);
     const sideA = sideReadoutValues(300, 0.32, 1000, 3000, 0.32, 2000, 3000);
     const sideB = sideReadoutValues(150, 0.32, 1000, 3000, 0.32, 1000, 3000);
     const effective: EffectiveReadouts = { shipA: sideA, shipB: sideB };
-    controls.update(view, effective, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
     expect(getFake(document, "effective-ship-a-speed").textContent).toBe("300 m/s");
     expect(getFake(document, "effective-ship-b-speed").textContent).toBe("150 m/s");
     expect(getFake(document, "effective-ship-a-tracking").textContent).toBe("0.32 rad/s");
@@ -419,6 +382,17 @@ describe("DomControls", () => {
     expect(getFake(document, "effective-ship-a-speed").classList.remove).toHaveBeenCalledWith("is-negative");
     expect(getFake(document, "effective-ship-a-optimal").classList.add).toHaveBeenCalledWith("is-negative");
     expect(getFake(document, "effective-ship-a-falloff").classList.remove).toHaveBeenCalledWith("is-negative");
+  });
+
+  test("effective sig suffix follows snapshot signature, not captured config signature", () => {
+    const { document, controls, viewStream } = buildDomControls();
+    const view = makeView(0);
+    const sideA = sideReadoutValues(300, 0.32, 1000, 3000, 0.32, 2000, 3000);
+    const sideB = sideReadoutValues(150, 0.32, 1000, 3000, 0.32, 1000, 3000);
+    const effective: EffectiveReadouts = { shipA: sideA, shipB: sideB };
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView(), { shipA: 200, shipB: 1200 }));
+    expect(getFake(document, "effective-ship-a-sig").textContent).toBe("200m");
+    expect(getFake(document, "effective-ship-b-sig").textContent).toBe("1,200m");
   });
 
   test("sessionRestored preserves playing state and resets the simulation", () => {
@@ -459,42 +433,42 @@ describe("DomControls", () => {
   }
 
   test("readouts update immediately when not playing", () => {
-    const { controls, cradle } = buildDomControls({ now: () => 0 });
+    const { controls, cradle, viewStream } = buildDomControls({ now: () => 0 });
     const engagementUpdate = vi.spyOn(cradle.cradle.engagementReadout, "update");
     const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
     const { view, effective } = readoutFixtures();
-    controls.update(view, effective, mockDefenseView());
-    controls.update(view, effective, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
     expect(engagementUpdate).toHaveBeenCalledTimes(2);
     expect(effectiveUpdate).toHaveBeenCalledTimes(2);
   });
 
   test("readouts throttle while playing and resume after 50 ms", () => {
     let fakeNow = 0;
-    const { controls, cradle } = buildDomControls({ now: () => fakeNow });
+    const { controls, cradle, viewStream } = buildDomControls({ now: () => fakeNow });
     const engagementUpdate = vi.spyOn(cradle.cradle.engagementReadout, "update");
     const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
     const { view, effective } = readoutFixtures();
     controls.setPlaying(true);
-    controls.update(view, effective, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
     fakeNow = 10;
-    controls.update(view, effective, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
     fakeNow = 60;
-    controls.update(view, effective, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
     expect(engagementUpdate).toHaveBeenCalledTimes(2);
     expect(effectiveUpdate).toHaveBeenCalledTimes(2);
   });
 
   test("pause flushes the latest cached readouts even when the last tick was skipped", () => {
     let fakeNow = 0;
-    const { controls, cradle } = buildDomControls({ now: () => fakeNow });
+    const { controls, cradle, viewStream } = buildDomControls({ now: () => fakeNow });
     const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
     const { view, effective } = readoutFixtures();
     const effective2: EffectiveReadouts = { ...effective, shipB: { ...effective.shipB, speed: 50 } };
     controls.setPlaying(true);
-    controls.update(view, effective, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective, mockDefenseView()));
     fakeNow = 10;
-    controls.update(view, effective2, mockDefenseView());
+    viewStream.emit(makeEngineView(view, effective2, mockDefenseView()));
     controls.setPlaying(false);
     expect(effectiveUpdate).toHaveBeenLastCalledWith(effective2);
     expect(effectiveUpdate).toHaveBeenCalledTimes(2);

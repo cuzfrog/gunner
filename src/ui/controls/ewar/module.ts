@@ -10,29 +10,22 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 export function registerEwarModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     ewarEffectDescriber: asClass(EwarEffectDescriberImpl).singleton(),
-    ewarController: asFunction(({ els, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber, uiEvents }) => new EwarControllerImpl({
-      els: collectEwarEls(els),
+    ewarController: asFunction(({ els, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber, uiEvents, modulesPopup }) => new EwarControllerImpl({
+      els: ewarEls(els),
       popupGroup,
       imageCatalog,
       fittingImport,
       i18n,
       ewarEffectDescriber,
       events: uiEvents,
+      modulesPopup,
     })).singleton(),
   });
 }
 
-function collectEwarEls(els: ControlsElements): EwarEls {
+function ewarEls(els: ControlsElements): EwarEls {
   return {
-    shipAEwarField: els.shipA.ewarField,
-    shipAEwarTrigger: els.shipA.ewarTrigger,
-    shipAEwarPopup: els.shipA.ewarPopup,
-    shipAEwarSection: els.shipA.ewarSection,
-    shipAEwarSummary: els.shipA.ewarSummary,
-    shipBEwarField: els.shipB.ewarField,
-    shipBEwarTrigger: els.shipB.ewarTrigger,
-    shipBEwarPopup: els.shipB.ewarPopup,
-    shipBEwarSection: els.shipB.ewarSection,
-    shipBEwarSummary: els.shipB.ewarSummary,
+    shipA: { field: els.shipA.ewar.field, section: els.shipA.ewar.section, summary: els.shipA.ewar.summary },
+    shipB: { field: els.shipB.ewar.field, section: els.shipB.ewar.section, summary: els.shipB.ewar.summary },
   };
 }

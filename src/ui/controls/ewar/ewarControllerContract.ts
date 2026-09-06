@@ -1,18 +1,14 @@
 import type { EwarLoadout, EwarProjection } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
+import type { Sided } from "../side";
 
-export interface EwarEls {
-  readonly shipAEwarField: HTMLElement;
-  readonly shipAEwarTrigger: HTMLButtonElement;
-  readonly shipAEwarPopup: HTMLElement;
-  readonly shipAEwarSection: HTMLElement;
-  readonly shipAEwarSummary: HTMLElement;
-  readonly shipBEwarField: HTMLElement;
-  readonly shipBEwarTrigger: HTMLButtonElement;
-  readonly shipBEwarPopup: HTMLElement;
-  readonly shipBEwarSection: HTMLElement;
-  readonly shipBEwarSummary: HTMLElement;
+export interface EwarFieldEls {
+  readonly field: HTMLElement;
+  readonly section: HTMLElement;
+  readonly summary: HTMLElement;
 }
+
+export type EwarEls = Sided<EwarFieldEls>;
 
 export interface EwarController {
   setLoadout(side: "shipA" | "shipB", loadout: EwarLoadout): void;

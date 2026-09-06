@@ -1,5 +1,4 @@
 ---
-import Chevron from "../controls/Chevron.astro";
 import PopupBox from "../popup/PopupBox.astro";
 import TriggerButton from "../popup/TriggerButton.astro";
 
@@ -9,21 +8,22 @@ interface Props {
 const { idPrefix } = Astro.props;
 ---
 
-<div class="form-field-group ewar-group" id={`${idPrefix}-ewar-field`}>
+<div class="form-field-group" id={`${idPrefix}-ewar-field`}>
   <TriggerButton id={`${idPrefix}-ewar-trigger`} popupId={`${idPrefix}-ewar-popup`}
-          labelClass="ewar-label truncate" labelI18n="label.modules" labelText="Modules"
+          labelI18n="label.modules" labelText="Modules"
           ariaLabelI18n="label.modules" ariaHaspopup="dialog" disabled
           ariaDescribedby={`${idPrefix}-ewar-summary-row`}>
-    <span class="ewar-summary-row" id={`${idPrefix}-ewar-summary-row`}>
+    <span class="trigger-summary" id={`${idPrefix}-ewar-summary-row`}>
       <span id={`${idPrefix}-ewar-summary`}></span>
       <span id={`${idPrefix}-booster-summary`}></span>
       <span id={`${idPrefix}-missile-booster-summary`}></span>
+      <span id={`${idPrefix}-sensor-booster-summary`}></span>
     </span>
-    <Chevron />
   </TriggerButton>
-  <PopupBox id={`${idPrefix}-ewar-popup`} extraClass="ewar-popup" position="below" align="both" scroll role="dialog" ariaModal={false} i18nAriaLabel="label.modules">
+  <PopupBox id={`${idPrefix}-ewar-popup`} extraClass="ewar-popup popup-stretch" position="below" align="both" scroll role="dialog" ariaModal={false} i18nAriaLabel="label.modules">
     <div class="preview-section" id={`${idPrefix}-ewar-section`}></div>
     <div class="preview-section" id={`${idPrefix}-booster-section`} hidden></div>
     <div class="preview-section" id={`${idPrefix}-missile-booster-section`} hidden></div>
+    <div class="preview-section" id={`${idPrefix}-sensor-booster-section`} hidden></div>
   </PopupBox>
 </div>

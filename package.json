@@ -1,6 +1,6 @@
 {
   "name": "gunner",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,7 +15,8 @@
     "trace": "bun run scripts/sim-trace.ts",
     "generate:icons": "bun run scripts/generate-icon-assets.ts",
     "generate:slots": "bun run scripts/generate-module-slots.ts",
-    "generate:name-i18n": "bun run scripts/generate-name-i18n.ts"
+    "generate:name-i18n": "bun run scripts/generate-name-i18n.ts",
+    "generate:fitting-db": "bun run scripts/generate-fitting-db.ts"
   },
   "dependencies": {
     "awilix": "13.0.5"

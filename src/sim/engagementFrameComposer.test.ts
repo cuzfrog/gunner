@@ -4,18 +4,22 @@ import type { EngagementEvaluator } from "./fireControl";
 import type { Kinematics } from "./kinematics";
 import type { AttackAssessment } from "./fireControl";
 import type { DefenseAssessor } from "./defenseAssessment";
+import type { EwarResolver } from "./ewarResolver";
+import { EwarResolverImpl } from "./ewarResolver";
+import { StackingPenaltyImpl } from "./stackingPenalty";
 import { DefenseAssessorImpl } from "./defenseAssessment";
-import { type DefenseSpec, type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec, EMPTY_DEFENSE_SPEC, ZERO_DAMAGE, damageVectorAdd } from "./types";
+import { toTypeId } from "../gamedata/ids";
+import { type DefenseSpec, type DroneSpec, type EngagementFrame, type MissileSpec, type ShipState, type SimSnapshot, type TurretSpec, EMPTY_DEFENSE_SPEC, EMPTY_PROJECTION, ZERO_DAMAGE, damageVectorAdd } from "./types";
 
-const shipATurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
-const shipBTurret: TurretSpec = { kind: "turret", tracking: 0.28, sigResolution: 125, optimal: 8000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
-const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
-const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
-const shipBEffectiveTurret: TurretSpec = { kind: "turret", tracking: 0.3, sigResolution: 125, optimal: 8500, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
-const hit = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
-const shipBHit = { chance: 0.7, trackingTerm: 0.2, rangeTerm: 0.3 };
-const shipADamage = { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
-const shipBDamage = { nominalDps: 20, appliedDps: 14, application: 0.7, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+const shipATurret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const shipBTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("2"), tracking: 0.28, sigResolution: 125, optimal: 8000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const boostedTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("3"), tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const effectiveTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("4"), tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const shipBEffectiveTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("5"), tracking: 0.3, sigResolution: 125, optimal: 8500, falloff: 4000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const hit = { chance: 1, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 };
+const shipBHit = { chance: 0.7, trackingTerm: 0.2, rangeTerm: 0.3, trackingPenalty: 0.5 ** 0.2, rangePenalty: 0.5 ** 0.3 };
+const shipADamage = { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+const shipBDamage = { nominalDps: 20, appliedDps: 14, application: 0.7, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
 const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };
 
 const shipA: ShipState = {
@@ -78,7 +82,8 @@ function makeComposer() {
     evaluate: vi.fn(() => ({ shipA: shipAAssessment, shipB: shipBAssessment })),
   });
   const defenseAssessor: DefenseAssessor = new DefenseAssessorImpl();
-  const composer = new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor });
+  const ewarResolver: EwarResolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });
+  const composer = new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor, ewarResolver });
   return { kinematics, engagementEvaluator, composer };
 }
 
@@ -89,6 +94,7 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.frame).toBe(frame);
     expect(view.attacks.shipA).toEqual(shipAAssessment);
     expect(view.attacks.shipB).toEqual(shipBAssessment);
+    expect(view.projection).toEqual({ shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION });
     expect(view.effectiveWeapons.shipA).toBe(effectiveTurret);
     expect(view.effectiveWeapons.shipB).toBe(shipBEffectiveTurret);
     expect(view.weaponAttacks.shipA).toHaveLength(1);
@@ -127,13 +133,13 @@ describe("EngagementFrameComposerImpl", () => {
 
   test("multiple weapons on one side sum DPS while keeping primary weapon details", () => {
     const { engagementEvaluator, composer } = makeComposer();
-    const secondTurret: TurretSpec = { kind: "turret", tracking: 0.2, sigResolution: 125, optimal: 7000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 50, explosive: 0 }, cycleTime: 4, turretCount: 2 };
-    const secondDamage = { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+    const secondTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("6"), tracking: 0.2, sigResolution: 125, optimal: 7000, falloff: 3000, damagePerShot: { em: 0, thermal: 0, kinetic: 50, explosive: 0 }, cycleTime: 4, turretCount: 2 };
+    const secondDamage = { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
     const secondAssessment: AttackAssessment = {
       boostedWeapon: secondTurret,
       effectiveWeapon: secondTurret,
       damage: secondDamage,
-      turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8 },
+      turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1, trackingPenalty: 0.5 ** 0.1, rangePenalty: 0.5 ** 0.1 }, expectedMultiplier: 0.8 },
     };
     engagementEvaluator.evaluate.mockImplementation((_frame, attacks) => {
       if (attacks.shipA?.weapon === shipATurret) return { shipA: shipAAssessment, shipB: undefined };
@@ -154,14 +160,15 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.weaponAttacks.shipA[1].weapon).toBe(secondTurret);
     expect(view.weaponAttacks.shipA[1].assessment).toEqual(secondAssessment);
     expect(view.weaponAttacks.shipB).toHaveLength(0);
+    expect(view.projection).toEqual({ shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION });
   });
 
   test("combined damage.appliedByType is the component-wise sum of the two input vectors", () => {
     const { engagementEvaluator, composer } = makeComposer();
     const firstByType = { em: 12, thermal: 8, kinetic: 0, explosive: 4 };
     const secondByType = { em: 3, thermal: 0, kinetic: 20, explosive: 7 };
-    const firstDamage = { nominalDps: 24, appliedDps: 24, application: 1, volley: 100, appliedByType: firstByType, appliedVolleyByType: firstByType };
-    const secondDamage = { nominalDps: 30, appliedDps: 30, application: 1, volley: 100, appliedByType: secondByType, appliedVolleyByType: secondByType };
+    const firstDamage = { nominalDps: 24, appliedDps: 24, application: 1, volley: 100, baseVolleyByType: firstByType, appliedByType: firstByType, appliedVolleyByType: firstByType };
+    const secondDamage = { nominalDps: 30, appliedDps: 30, application: 1, volley: 100, baseVolleyByType: secondByType, appliedByType: secondByType, appliedVolleyByType: secondByType };
     const firstAssessment: AttackAssessment = { boostedWeapon: boostedTurret, effectiveWeapon: effectiveTurret, damage: firstDamage, turret: { hit, expectedMultiplier: 1 } };
     const secondAssessment: AttackAssessment = { boostedWeapon: boostedTurret, effectiveWeapon: effectiveTurret, damage: secondDamage, turret: { hit, expectedMultiplier: 1 } };
     engagementEvaluator.evaluate.mockImplementation((_frame, attacks) => {
@@ -181,8 +188,8 @@ describe("EngagementFrameComposerImpl", () => {
     const shipAAttackByType = { em: 100, thermal: 0, kinetic: 0, explosive: 0 };
     const shipBAttackByType = { em: 0, thermal: 100, kinetic: 0, explosive: 0 };
     engagementEvaluator.evaluate.mockReturnValue({
-      shipA: { ...shipAAssessment, damage: { ...shipADamage, appliedByType: shipAAttackByType, appliedVolleyByType: shipAAttackByType } },
-      shipB: { ...shipBAssessment, damage: { ...shipBDamage, appliedByType: shipBAttackByType, appliedVolleyByType: shipBAttackByType } },
+      shipA: { ...shipAAssessment, damage: { ...shipADamage, baseVolleyByType: shipAAttackByType, appliedByType: shipAAttackByType, appliedVolleyByType: shipAAttackByType } },
+      shipB: { ...shipBAssessment, damage: { ...shipBDamage, baseVolleyByType: shipBAttackByType, appliedByType: shipBAttackByType, appliedVolleyByType: shipBAttackByType } },
     });
     const shipADefense: DefenseSpec = {
       layers: {
@@ -212,5 +219,116 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.defenses.shipB.layers.shield.ehp).toBeCloseTo(1000, 2);
     expect(view.defenses.shipA.repairPerSecond.shield).toBeCloseTo((100 * 1.15) / (5 * 0.85), 5);
     expect(view.defenses.shipB.repairPerSecond.shield).toBe(0);
+  });
+
+  test("readouts produce turret values with boosted fields and disruption breakdown", () => {
+    const { composer } = makeComposer();
+    const view = composer.compose(snapshot, input);
+    expect(view.readouts.shipA.kind).toBe("turret");
+    const shipA = view.readouts.shipA;
+    if (shipA.kind !== "turret") throw new Error("expected turret");
+    expect(shipA.speed).toBe(250);
+    expect(shipA.tracking).toBe(effectiveTurret.tracking);
+    expect(shipA.optimal).toBe(effectiveTurret.optimal);
+    expect(shipA.falloff).toBe(effectiveTurret.falloff);
+    expect(shipA.boostedTracking).toBe(boostedTurret.tracking);
+    expect(shipA.boostedOptimal).toBe(boostedTurret.optimal);
+    expect(shipA.boostedFalloff).toBe(boostedTurret.falloff);
+    expect(shipA.sigResolution).toBe(effectiveTurret.sigResolution);
+    expect(shipA.speedBreakdown).toBeDefined();
+    expect(shipA.trackingBreakdown).toBeDefined();
+    expect(view.readouts.shipB.kind).toBe("turret");
+    expect(view.readouts.shipB.speed).toBe(120);
+  });
+
+  test("readouts fall back to effectiveWeapons when no attack exists", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: undefined, shipB: undefined });
+    const view = composer.compose(snapshot, input);
+    expect(view.readouts.shipA.kind).toBe("turret");
+    const shipA = view.readouts.shipA;
+    if (shipA.kind !== "turret") throw new Error("expected turret");
+    expect(shipA.tracking).toBe(shipATurret.tracking);
+    expect(shipA.boostedTracking).toBe(shipATurret.tracking);
+    expect(view.readouts.shipB.kind).toBe("turret");
+    const shipB = view.readouts.shipB;
+    if (shipB.kind !== "turret") throw new Error("expected turret");
+    expect(shipB.tracking).toBe(shipBTurret.tracking);
+  });
+
+  test("readouts produce none when no weapons are equipped", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: undefined, shipB: undefined });
+    const view = composer.compose(snapshot, { weapons: { shipA: [], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    expect(view.readouts.shipA.kind).toBe("none");
+    expect(view.readouts.shipA.speed).toBe(250);
+    expect(view.readouts.shipB.kind).toBe("none");
+    expect(view.readouts.shipB.speed).toBe(120);
+  });
+
+  test("readouts produce missile values when the effective weapon is a missile", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    const missile: MissileSpec = { kind: "missile", moduleId: toTypeId("7"), damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 3, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 0.5, maxVelocity: 5000, flightTime: 5, flightRange: 25000 };
+    const missileAssessment: AttackAssessment = { boostedWeapon: missile, effectiveWeapon: missile, damage: { nominalDps: 30, appliedDps: 24, application: 0.8, volley: 300, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE }, missile: { application: 0.8, signatureTerm: 1, velocityTerm: 0.8, inRange: true, timeToImpact: 1 } };
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: missileAssessment, shipB: undefined });
+    const view = composer.compose(snapshot, { weapons: { shipA: [missile], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    expect(view.readouts.shipA.kind).toBe("missile");
+    const shipA = view.readouts.shipA;
+    if (shipA.kind !== "missile") throw new Error("expected missile");
+    expect(shipA.explosionRadius).toBe(40);
+    expect(shipA.explosionVelocity).toBe(170);
+    expect(shipA.maxVelocity).toBe(5000);
+    expect(shipA.flightTime).toBe(5);
+    expect(shipA.flightRange).toBe(25000);
+    expect(view.readouts.shipB.kind).toBe("none");
+  });
+
+  test("readouts produce drone values when the effective weapon is a drone", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    const drone: DroneSpec = { kind: "drone", moduleId: toTypeId("8"), tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+    const droneAssessment: AttackAssessment = { boostedWeapon: drone, effectiveWeapon: drone, damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE }, drone: { hit, expectedMultiplier: 1, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true } };
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: droneAssessment, shipB: undefined });
+    const view = composer.compose(snapshot, { weapons: { shipA: [drone], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    expect(view.readouts.shipA.kind).toBe("drone");
+    const shipA = view.readouts.shipA;
+    if (shipA.kind !== "drone") throw new Error("expected drone");
+    expect(shipA.tracking).toBe(0.15);
+    expect(shipA.optimal).toBe(1000);
+    expect(shipA.falloff).toBe(500);
+    expect(shipA.sigResolution).toBe(40);
+    expect(view.readouts.shipB.kind).toBe("none");
+  });
+});
+
+describe("EngagementFrameComposerImpl incomingOffensiveModules", () => {
+  test("active weapon from shipA appears under shipB target", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: shipAAssessment, shipB: undefined });
+    const view = composer.compose(snapshot, { weapons: { shipA: [shipATurret], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    expect(view.incomingOffensiveModules.shipB).toContainEqual({ category: "weapon", weaponKind: "turret", moduleId: toTypeId("1") });
+  });
+
+  test("active weapon from shipB appears under shipA target", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: undefined, shipB: shipBAssessment });
+    const view = composer.compose(snapshot, { weapons: { shipA: [], shipB: [shipBTurret] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    expect(view.incomingOffensiveModules.shipA).toContainEqual({ category: "weapon", weaponKind: "turret", moduleId: toTypeId("2") });
+  });
+
+  test("weapon with zero appliedDps is absent", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    const zeroDamageAssessment: AttackAssessment = { ...shipAAssessment, damage: { ...shipADamage, appliedDps: 0 } };
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: zeroDamageAssessment, shipB: undefined });
+    const view = composer.compose(snapshot, { weapons: { shipA: [shipATurret], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    expect(view.incomingOffensiveModules.shipB).toEqual([]);
+  });
+
+  test("weapons precede ewar in the target list", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: shipAAssessment, shipB: undefined });
+    const view = composer.compose(snapshot, { weapons: { shipA: [shipATurret], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    const modules = view.incomingOffensiveModules.shipB;
+    expect(modules.length).toBeGreaterThanOrEqual(1);
+    expect(modules[0].category).toBe("weapon");
   });
 });

@@ -35,9 +35,6 @@ export interface UiEvents {
   onStartupDefaultsApplied(listener: () => void): void;
   offStartupDefaultsApplied(listener: () => void): void;
   emitStartupDefaultsApplied(): void;
-  onDistanceChanged(listener: (distance: number) => void): void;
-  offDistanceChanged(listener: (distance: number) => void): void;
-  emitDistanceChanged(distance: number): void;
 }
 
 export class UiEventsImpl implements UiEvents {
@@ -52,7 +49,6 @@ export class UiEventsImpl implements UiEvents {
   private readonly sessionRestored = new Set<() => void>();
   private readonly sessionReset = new Set<() => void>();
   private readonly startupDefaultsApplied = new Set<() => void>();
-  private readonly distanceChanged = new Set<(distance: number) => void>();
 
   onLanguageChanged(listener: () => void): void { this.languageChanged.add(listener); }
   offLanguageChanged(listener: () => void): void { this.languageChanged.delete(listener); }
@@ -105,12 +101,6 @@ export class UiEventsImpl implements UiEvents {
   onStartupDefaultsApplied(listener: () => void): void { this.startupDefaultsApplied.add(listener); }
   offStartupDefaultsApplied(listener: () => void): void { this.startupDefaultsApplied.delete(listener); }
   emitStartupDefaultsApplied(): void { this.emit(this.startupDefaultsApplied); }
-
-  onDistanceChanged(listener: (distance: number) => void): void { this.distanceChanged.add(listener); }
-  offDistanceChanged(listener: (distance: number) => void): void { this.distanceChanged.delete(listener); }
-  emitDistanceChanged(distance: number): void {
-    for (const listener of Array.from(this.distanceChanged)) listener(distance);
-  }
 
   private emit(listeners: ReadonlySet<() => void>): void {
     for (const listener of Array.from(listeners)) listener();

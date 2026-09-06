@@ -1,5 +1,5 @@
 import type { TypeId } from "../gamedata/ids";
-import type { FittingDb, FittingModuleStats, HullBonus, LauncherStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, SensorBoosterStats, SensorDampenerStats, SensorBoosterScriptStats, SensorDampenerScriptStats, SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, TurretWeaponGroup, WarpScramblerStats, DisruptionScriptStats } from "../gamedata/fittingDb";
+import type { FittingDb, FittingModuleStats, HullBonus, LauncherStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, PropulsionBonusAttribute, RigDrawback, RigDrawbackReduction, SensorBoosterStats, SensorDampenerStats, SensorBoosterScriptStats, SensorDampenerScriptStats, SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, TurretBonusAttribute, TurretScriptStats, TurretStats, TurretWeaponGroup, WarpScramblerStats, DisruptionScriptStats } from "../gamedata/fittingDb";
 import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../ships";
 import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec } from "../sim";
 import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, ZERO_DAMAGE, damageVectorFromPartial, damageVectorScale } from "../sim";
@@ -9,7 +9,7 @@ import type { MissileCatalog } from "./missileCatalog";
 import type { MissileSkillModel } from "./missileStats";
 import type { DroneCatalog, ImportedDrone } from "./droneCatalog";
 import type { DroneSkillModel } from "./droneStats";
-import { STANDARD_SIGNATURE_RESOLUTION, sigResolutionClassFromChargeSize } from "./turretStats";
+import { sigResolutionClassFromChargeSize, toTrackingRadPerSecond } from "./turretStats";
 import type { FittingState, FittedModule } from "./fittingState";
 import type { ItemNameCatalog } from "../gamedata/itemNames";
 import { type DamageBreakdown, type DamageFactor, chargeDamageByType, droneDamageByType, missileDamageByType } from "./damageBreakdown";
@@ -112,12 +112,15 @@ export class FittingCalculatorImpl implements FittingCalculator {
 
       for (const bonus of fitting.hullBonuses) {
         if (bonus.moduleSkillId && !turret.requiredSkillIds.includes(bonus.moduleSkillId)) continue;
+        if (!isTurretBonusAttribute(bonus.attribute)) continue;
         const percent = hullBonusPercent(bonus, skillLevel);
-        if (bonus.attribute === "turretTracking") hullTrackingPercents.push(percent);
-        if (bonus.attribute === "turretOptimal") hullOptimalPercents.push(percent);
-        if (bonus.attribute === "turretFalloff") hullFalloffPercents.push(percent);
-        if (bonus.attribute === "turretDamage") hullDamagePercents.push(percent);
-        if (bonus.attribute === "turretRoF") hullRoFPercents.push(percent);
+        switch (bonus.attribute) {
+          case "turretTracking": hullTrackingPercents.push(percent); break;
+          case "turretOptimal": hullOptimalPercents.push(percent); break;
+          case "turretFalloff": hullFalloffPercents.push(percent); break;
+          case "turretDamage": hullDamagePercents.push(percent); break;
+          case "turretRoF": hullRoFPercents.push(percent); break;
+        }
       }
 
       const trackingBonus = this.stacking.apply([...sharedTrackingPercents, ...hullTrackingPercents].map((p) => 1 + p / 100));
@@ -155,7 +158,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const falloffScore = turret.falloff * skillFalloffMultiplier * falloffBonus;
 
       const base: ImportedTurretBase = {
-        tracking: (trackingScore * sigRes) / STANDARD_SIGNATURE_RESOLUTION,
+        tracking: toTrackingRadPerSecond(trackingScore, sigRes),
         optimal: optimalScore,
         falloff: falloffScore,
       };
@@ -266,17 +269,36 @@ export class FittingCalculatorImpl implements FittingCalculator {
       if (stats.massBonusPercentage) massPercentages.push(stats.massBonusPercentage / 100);
       if (stats.speedBonusPercent) speedPercents.push(stats.speedBonusPercent / 100);
       if (stats.agilityMultiplier) agilityMultipliers.push(stats.agilityMultiplier);
-      if (stats.agilityDrawbackPercent) agilityMultipliers.push(1 + stats.agilityDrawbackPercent / 100);
-      const extenderSigInDefense = stats.defense?.kind === "shieldExtender" && stats.defense.sigRadiusPenalty !== undefined;
-      if (stats.sigRadiusAdd && !extenderSigInDefense) sigRadiusAdd += stats.sigRadiusAdd;
+      if (stats.sigRadiusAdd) sigRadiusAdd += stats.sigRadiusAdd;
       if (stats.sigBonusPercent) sigPercents.push(stats.sigBonusPercent / 100);
-      if (stats.sigDrawbackPercent) sigPercents.push(stats.sigDrawbackPercent / 100);
+      if (stats.rigDrawback) {
+        const reducedPercent = applyRigDrawbackReduction(stats.rigDrawback, this.db.rigDrawbackReductions, conditions.skillLevel);
+        switch (stats.rigDrawback.kind) {
+          case "agility": agilityMultipliers.push(1 + reducedPercent / 100); break;
+          case "signature": sigPercents.push(reducedPercent / 100); break;
+          case "armorHp": break;
+          case "shieldHp": break;
+          case "cpu": break;
+          case "cpuNeed": break;
+          case "powerNeed": break;
+          case "capacitorRecharge": break;
+          case "cargoCapacity": break;
+          case "warpSpeed": break;
+          case "repairPowerGrid": break;
+          default: { const _exhaustive: never = stats.rigDrawback.kind; void _exhaustive; }
+        }
+      }
     }
 
+    let mwdSigBloomMultiplier = 1;
     for (const bonus of fitting.hullBonuses) {
+      if (!isPropulsionBonusAttribute(bonus.attribute)) continue;
       const percent = hullBonusPercent(bonus, conditions.skillLevel);
-      if (bonus.attribute === "maxVelocity") speedPercents.push(percent / 100);
-      if (bonus.attribute === "agility") agilityMultipliers.push(1 + percent / 100);
+      switch (bonus.attribute) {
+        case "maxVelocity": speedPercents.push(percent / 100); break;
+        case "agility": agilityMultipliers.push(1 + percent / 100); break;
+        case "mwdSigBloom": mwdSigBloomMultiplier *= 1 + percent / 100; break;
+      }
     }
 
     const massMultiplier = this.stacking.apply(massPercentages.map((p) => 1 + p));
@@ -292,6 +314,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
         inertiaMultiplier,
         sigMultiplier,
         sigRadiusAdd,
+        mwdSigBloomMultiplier,
       },
       propulsionId: fitting.propulsionModule?.moduleId,
     };
@@ -673,6 +696,17 @@ function hullBonusPercent(bonus: HullBonus, skillLevel: number): number {
   return bonus.magnitude * (bonus.scalesWithHullSkill ? skillLevel : 1);
 }
 
+const PROPULSION_BONUS_ATTRIBUTES: Record<PropulsionBonusAttribute, true> = { maxVelocity: true, agility: true, mwdSigBloom: true };
+const TURRET_BONUS_ATTRIBUTES: Record<TurretBonusAttribute, true> = { turretTracking: true, turretOptimal: true, turretFalloff: true, turretDamage: true, turretRoF: true };
+
+function isPropulsionBonusAttribute(attr: HullBonus["attribute"]): attr is PropulsionBonusAttribute {
+  return attr in PROPULSION_BONUS_ATTRIBUTES;
+}
+
+function isTurretBonusAttribute(attr: HullBonus["attribute"]): attr is TurretBonusAttribute {
+  return attr in TURRET_BONUS_ATTRIBUTES;
+}
+
 const WEAPON_OVERLOAD_DAMAGE_MULTIPLIER = 1.15;
 const WEAPON_OVERLOAD_ROF_MULTIPLIER = 0.85;
 const SHORT_RANGE_GUN_FAMILIES: ReadonlySet<GunFamily> = new Set(["pulseLaser", "blaster", "autocannon"]);
@@ -728,6 +762,18 @@ function buildDroneDamageFactors(baseMultiplier: number, moduleDamageBonus: numb
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
   return factors;
 }
+
+function applyRigDrawbackReduction(drawback: RigDrawback, reductions: readonly RigDrawbackReduction[], skillLevel: SkillLevel): number {
+  let reductionPercent = 0;
+  for (const r of reductions) {
+    if (r.groupId === drawback.groupId) {
+      reductionPercent += r.magnitudePerLevel * skillLevel;
+    }
+  }
+  return drawback.percent * (1 + reductionPercent / 100);
+}
+
+export { applyRigDrawbackReduction as _applyRigDrawbackReduction };
 
 const DRONE_CONTROL_RANGE_BASE = 20000;
 const DRONE_CONTROL_RANGE_PER_SKILL_LEVEL = 8000;

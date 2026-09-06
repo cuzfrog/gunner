@@ -1,64 +1,27 @@
-import {
-  EMPTY_DEFENSE_ASSESSMENT,
-  EMPTY_DEFENSE_SPEC,
-  Vec2,
-  ZERO_DAMAGE,
-  type AttackAssessment,
-  type DisruptionBreakdown,
-  type DefenseSimulator,
-  type DefenseView,
-  type DroneSimulator,
-  type DroneSpec,
-  type EngagementFrame,
-  type EngagementFrameComposer,
-  type EngagementView,
-  type EwarProjection,
-  type EwarResolver,
-  type HitChanceBreakdown,
-  type MissileBoosterResolver,
-  type MissileSimulator,
-  type ShipConfig,
-  type ShipState,
-  type SimConfig,
-  type Simulation,
-  type SimSnapshot,
-  type SpeedBreakdown,
-  type TurretSpec,
-  type WeaponClock,
-  type LockClock,
-  type SensorBoosterResolver,
-} from "../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, EMPTY_PROJECTION, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineEvents, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type MissileRuntimeState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "../sim";
 import { toTypeId } from "../gamedata/ids";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
+import type { EngagementEngine } from "../sim";
+import type { Side } from "../sim";
 import { AppImpl } from "./app";
 
-const controls = vi.mocked<Controls>({
-  getWeapon: vi.fn(),
-  getWeapons: vi.fn(),
-  getSig: vi.fn(),
-  getDefense: vi.fn(() => EMPTY_DEFENSE_SPEC),
-  getDamageEnabled: vi.fn(() => true),
-  getRepairMode: vi.fn(() => "auto" as const),
-  getRepairerActivation: vi.fn(() => []),
-  getRahActivation: vi.fn(() => undefined),
-  getConfig: vi.fn(),
-  getSpeed: vi.fn(),
-  getGridBrightness: vi.fn(),
-  getAutoZoom: vi.fn(),
-  getZoomFactor: vi.fn(),
-  getOverloaded: vi.fn(() => false),
-  getWeaponRangeVisibility: vi.fn(() => "both" as const),
-  getDroneRangeVisibility: vi.fn(() => "none" as const),
-  getDroneControlRangeVisibility: vi.fn(() => "none" as const),
-  getOverlays: vi.fn(() => []),
-  hasWeapon: vi.fn(),
-  update: vi.fn(),
-  setPlaying: vi.fn(),
-  setCallbacks: vi.fn(),
-});
-const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
-const droneSimulator = vi.mocked<DroneSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), states: vi.fn(() => []) });
-const missileSimulator = vi.mocked<MissileSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(() => []), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })) });
+const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };
+
+const ship: ShipState = {
+  id: "shipA", position: new Vec2(0, 0), velocity: new Vec2(0, 0), maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1,
+};
+const snapshot: SimSnapshot = { time: 0, shipA: ship, shipB: { ...ship, id: "shipB", position: new Vec2(0, 5000) }, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
+const frame: EngagementFrame = {
+  time: 0, shipA: ship, shipB: { ...ship, id: "shipB" }, relPosition: new Vec2(0, 5000), distance: 5000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
+};
+const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 };
+const shipConfig: SimConfig = {
+  shipA: { id: "shipA", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1 },
+  shipB: { id: "shipB", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1 },
+  initialDistance: 5000,
+};
+
 const emptyDefenseView: DefenseView = {
   pools: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
   poolPercentages: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
@@ -70,12 +33,84 @@ const emptyDefenseView: DefenseView = {
   repairMode: { shipA: "auto", shipB: "auto" },
   rah: { shipA: undefined, shipB: undefined },
 };
-const defenseSimulator = vi.mocked<DefenseSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(() => emptyDefenseView), setDamageEnabled: vi.fn(), setRepairMode: vi.fn(), setRepairerActivation: vi.fn(), setRahActivation: vi.fn() });
-const missileBoosterResolver = vi.mocked<MissileBoosterResolver>({ boostedMissile: vi.fn((m) => m) });
-const weaponClock = vi.mocked<WeaponClock>({ reset: vi.fn(), step: vi.fn(() => []) });
-const sensorBoosterResolver = vi.mocked<SensorBoosterResolver>({ boostedSensorSpec: vi.fn((spec) => spec) });
-const lockClock = vi.mocked<LockClock>({ reset: vi.fn(), step: vi.fn(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), states: vi.fn(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })) });
-const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn() });
+
+const engineConfig: EngineConfig = {
+  sim: shipConfig,
+  weapons: { shipA: [turret], shipB: [turret] },
+  defense: {
+    shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC,
+    damageEnabled: { shipA: true, shipB: true },
+    repairMode: { shipA: "auto", shipB: "auto" },
+    repairerActivation: { shipA: [], shipB: [] },
+    rahActivation: { shipA: undefined, shipB: undefined },
+  },
+  overloaded: { shipA: false, shipB: false },
+};
+
+function baseView(): EngineView {
+  const assessment: AttackAssessment = {
+    boostedWeapon: turret, effectiveWeapon: turret,
+    damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
+    turret: { hit, expectedMultiplier: 1 },
+  };
+  const engagementView: EngagementView = {
+    frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] },
+    effectiveWeapons: { shipA: turret, shipB: turret },
+    defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+    projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
+    locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+    readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } },
+    incomingOffensiveModules: { shipA: [], shipB: [] },
+  };
+  return {
+    ...engagementView,
+    snapshot,
+    defenseRuntime: emptyDefenseView,
+    drones: { shipA: [], shipB: [] },
+    droneSpecs: { shipA: [], shipB: [] },
+    missiles: { shipA: [], shipB: [] },
+  };
+}
+
+const controls = vi.mocked<Controls>({
+  getWeapon: vi.fn(),
+  getConfig: vi.fn(),
+  getEngineConfig: vi.fn(() => engineConfig),
+  getSpeed: vi.fn(() => 1),
+  getGridBrightness: vi.fn(() => 0.2),
+  getAutoZoom: vi.fn(),
+  getZoomFactor: vi.fn(),
+  getWeaponRangeVisibility: vi.fn(() => "both" as const),
+  getDroneRangeVisibility: vi.fn(() => "none" as const),
+  getDroneControlRangeVisibility: vi.fn(() => "none" as const),
+  getOverlays: vi.fn(() => []),
+  setPlaying: vi.fn(),
+  setCallbacks: vi.fn(),
+});
+
+const viewListeners = new Set<(view: EngineView) => void>();
+const destroyListeners = new Set<(side: Side) => void>();
+const engineEvents: EngineEvents = {
+  onViewUpdated: (l) => viewListeners.add(l),
+  offViewUpdated: (l) => viewListeners.delete(l),
+  onShipDestroyed: (l) => destroyListeners.add(l),
+  offShipDestroyed: (l) => destroyListeners.delete(l),
+};
+function emitView(view: EngineView): void { for (const l of Array.from(viewListeners)) l(view); }
+function emitDestroy(side: Side): void { for (const l of Array.from(destroyListeners)) l(side); }
+
+const engine = vi.mocked<EngagementEngine>({
+  reset: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
+  update: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
+  step: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
+  view: vi.fn(() => baseView()),
+  events: vi.fn(() => engineEvents),
+  setDamageEnabled: vi.fn(),
+  setRepairMode: vi.fn(),
+  setRepairerActivation: vi.fn(),
+  setRahActivation: vi.fn(),
+});
+
 const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setDroneRangeVisibility: vi.fn(), setDroneControlRangeVisibility: vi.fn(), setManualZoom: vi.fn(), setLockStates: vi.fn() });
 const loop = vi.mocked<Loop>({
   setTickHandler: vi.fn(),
@@ -86,206 +121,80 @@ const loop = vi.mocked<Loop>({
   setSpeed: vi.fn(),
   reset: vi.fn(),
 });
-const ewarResolver = vi.mocked<Required<EwarResolver>>({
-  speedMultiplier: vi.fn(() => 1),
-  speedMultiplierIgnoringRange: vi.fn(() => 1), sigMultiplier: vi.fn(() => 1), sigMultiplierIgnoringRange: vi.fn(() => 1),
-  disruptedTurret: vi.fn((turret) => turret),
-  disruptedTurretIgnoringRange: vi.fn((turret) => turret),
-  propulsionSuppressed: vi.fn(() => false),
-  propulsionSuppressedIgnoringRange: vi.fn(() => false),
-  appliedEffects: vi.fn(() => []),
-  speedBreakdown: vi.fn(),
-  disruptionBreakdown: vi.fn(),
-  dampenedSensorSpec: vi.fn((spec) => spec),
-  dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
-  dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
-});
-
-const emptySpeedBreakdown: SpeedBreakdown = { effects: [], propulsionSuppressed: false };
-const emptyDisruptionBreakdown: DisruptionBreakdown = { tracking: [], optimal: [], falloff: [] };
-const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };
-
-const ship: ShipState = {
-  id: "shipA",
-  position: new Vec2(0, 0),
-  velocity: new Vec2(0, 0),
-  maxSpeed: 0,
-  mass: 1_200_000,
-  inertiaModifier: 3,
-  mode: "orbit",
-  desiredRange: 5000,
-  aggressivity: 1,
-};
-const snapshot: SimSnapshot = { time: 0, shipA: ship, shipB: ship, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
-const frame: EngagementFrame = {
-  time: 0,
-  shipA: ship,
-  shipB: ship,
-  relPosition: new Vec2(0, 5000),
-  distance: 5000,
-  relVelocity: new Vec2(0, 0),
-  radialVelocity: 0,
-  transversalVelocity: new Vec2(0, 0),
-  transversalSpeed: 0,
-  angularVelocity: 0,
-};
-const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
-const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
-const shipConfig: ShipConfig = { id: "shipA", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1 };
-const config: SimConfig = {
-  shipA: shipConfig,
-  shipB: { ...shipConfig, id: "shipB" },
-  initialDistance: 5000,
-};
-
-function baseView(): EngagementView {
-  const assessment: AttackAssessment = {
-    boostedWeapon: turret,
-    effectiveWeapon: turret,
-    damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
-    turret: { hit, expectedMultiplier: 1 },
-  };
-  return { frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } };
-}
-
-function sideReadoutValues(
-  speed = 0,
-  tracking = 0.32,
-  optimal = 5000,
-  falloff = 5000,
-  boostedTracking = 0.32,
-  boostedOptimal = 5000,
-  boostedFalloff = 5000,
-  speedBreakdown: SpeedBreakdown | undefined = emptySpeedBreakdown,
-  trackingBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
-  optimalBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
-  falloffBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
-) {
-  return { kind: "turret", speed, tracking, optimal, falloff, boostedTracking, boostedOptimal, boostedFalloff, sigResolution: 40, speedBreakdown, trackingBreakdown, optimalBreakdown, falloffBreakdown };
-}
 
 describe("AppImpl", () => {
   let app: AppImpl;
 
   beforeEach(() => {
-    simulation.snapshot.mockReturnValue(snapshot);
-    engagementFrameComposer.compose.mockReturnValue(baseView());
     controls.getWeapon.mockReturnValue(turret);
-    controls.getWeapons.mockReturnValue([turret]);
-    controls.getSig.mockReturnValue(40);
-    controls.getSpeed.mockReturnValue(1);
-    controls.getGridBrightness.mockReturnValue(0.2);
-    controls.getConfig.mockReturnValue(config);
-    controls.hasWeapon.mockReturnValue(true);
-    ewarResolver.speedBreakdown.mockReturnValue(emptySpeedBreakdown);
-    ewarResolver.disruptionBreakdown.mockReturnValue(emptyDisruptionBreakdown);
-    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, sensorBoosterResolver, weaponClock, lockClock, renderer, loop });
+    viewListeners.clear();
+    destroyListeners.clear();
+    engine.reset.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
+    engine.update.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
+    engine.step.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
+    engine.view.mockReturnValue(baseView());
+    app = new AppImpl({ controls, engine, renderer, loop });
   });
 
   function callbacks(): ControlsCallbacks {
     return controls.setCallbacks.mock.calls.at(-1)![0];
   }
 
-  test("start wires the loop, controls callbacks, and renders the initial frame", () => {
+  test("start wires the loop, controls callbacks, resets the engine, and renders the initial frame via view event", () => {
     app.start();
     expect(loop.setTickHandler).toHaveBeenCalled();
     expect(loop.setSpeed).toHaveBeenCalledWith(1);
     expect(controls.setCallbacks).toHaveBeenCalled();
-    expect(controls.getGridBrightness).toHaveBeenCalled();
+    expect(engine.reset).toHaveBeenCalledWith(engineConfig);
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
-    expect(renderer.setWeaponRangeVisibility).toHaveBeenCalledWith("both");
-    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, emptyDefenseView);
-    expect(controls.update).toHaveBeenCalledWith(baseView(), {
-      shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
-      shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
-    }, emptyDefenseView);
+    expect(renderer.draw).toHaveBeenCalledTimes(1);
   });
 
-  test("renderFrame passes per-side effective attribute values and boosted baselines from view", () => {
-    const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
-    const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
-    const boostedShipA = { ...ship, maxSpeed: 250 };
-    const boostedShipB = { ...ship, id: "shipB" as const, maxSpeed: 120 };
-    const boostedSnapshot = { ...snapshot, shipA: boostedShipA, shipB: boostedShipB };
-    const assessment: AttackAssessment = {
-      boostedWeapon: boostedTurret,
-      effectiveWeapon: effectiveTurret,
-      damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
-      turret: { hit, expectedMultiplier: 1 },
-    };
-    const view: EngagementView = {
-      frame,
-      attacks: { shipA: assessment, shipB: assessment },
-      weaponAttacks: { shipA: [], shipB: [] },
-      effectiveWeapons: { shipA: effectiveTurret, shipB: effectiveTurret },
-      defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
-      locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
-    };
-    simulation.snapshot.mockReturnValue(boostedSnapshot);
-    engagementFrameComposer.compose.mockReturnValue(view);
-    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, sensorBoosterResolver, weaponClock, lockClock, renderer, loop });
+  test("tick delegates only to engine.step; no direct death check in tick", () => {
     app.start();
-    expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, { shipA: { kind: "turret", optimal: 6000, falloff: 4000 }, shipB: { kind: "turret", optimal: 6000, falloff: 4000 } }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, emptyDefenseView);
-    expect(controls.update).toHaveBeenCalledWith(view, {
-      shipA: sideReadoutValues(250, 0.5, 6000, 4000, 0.45, 5800, 3800),
-      shipB: sideReadoutValues(120, 0.5, 6000, 4000, 0.45, 5800, 3800),
-    }, emptyDefenseView);
-  });
-
-  test("falls back to the view's effective weapon when the composer returns no assessment", () => {
-    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: turret, shipB: turret }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } };
-    engagementFrameComposer.compose.mockReturnValue(view);
-    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, sensorBoosterResolver, weaponClock, lockClock, renderer, loop });
-    app.start();
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, emptyDefenseView);
-    expect(controls.update).toHaveBeenCalledWith(view, {
-      shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
-      shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
-    }, emptyDefenseView);
-  });
-
-  test("tick steps the simulation and renders", () => {
-    app.start();
+    renderer.draw.mockClear();
+    engine.step.mockClear();
     app.tick(0.1);
-    expect(simulation.step).toHaveBeenCalledWith(0.1);
-    expect(droneSimulator.step).toHaveBeenCalledWith(0.1, frame);
-    expect(missileSimulator.step).toHaveBeenCalledWith(0.1, frame, { shipA: [], shipB: [] });
-    expect(engagementFrameComposer.compose).toHaveBeenCalledTimes(3);
-    expect(renderer.draw).toHaveBeenCalledTimes(2);
+    expect(engine.step).toHaveBeenCalledWith(0.1);
   });
 
-  test("reset callback re-initializes the simulation and loop, then renders", () => {
+  test("shipDestroyed event stops the loop and sets playing false", () => {
     app.start();
+    loop.stop.mockClear();
+    controls.setPlaying.mockClear();
+    emitDestroy("shipA");
+    expect(loop.stop).toHaveBeenCalled();
+    expect(controls.setPlaying).toHaveBeenCalledWith(false);
+  });
+
+  test("reset callback re-initializes the engine and loop; rendering is driven by view event", () => {
+    app.start();
+    engine.reset.mockClear();
+    renderer.draw.mockClear();
     callbacks().onReset();
-    expect(simulation.reset).toHaveBeenCalledWith(config);
-    expect(missileSimulator.reset).toHaveBeenCalled();
+    expect(engine.reset).toHaveBeenCalledWith(engineConfig);
     expect(loop.reset).toHaveBeenCalled();
-    expect(renderer.draw).toHaveBeenCalledTimes(2);
+    expect(renderer.draw).toHaveBeenCalledTimes(1);
   });
 
-  test("config change updates the simulation and renders without restarting the loop", () => {
+  test("config change updates the engine without restarting the loop; rendering is driven by view event", () => {
     app.start();
-    droneSimulator.reset.mockClear();
-    missileSimulator.reset.mockClear();
+    engine.update.mockClear();
+    loop.reset.mockClear();
+    renderer.draw.mockClear();
     callbacks().onConfigChange();
-    expect(simulation.update).toHaveBeenCalledWith(config);
-    expect(droneSimulator.update).toHaveBeenCalled();
-    expect(missileSimulator.update).toHaveBeenCalled();
-    expect(droneSimulator.reset).not.toHaveBeenCalled();
-    expect(missileSimulator.reset).not.toHaveBeenCalled();
+    expect(engine.update).toHaveBeenCalledWith(engineConfig);
     expect(loop.reset).not.toHaveBeenCalled();
-    expect(renderer.draw).toHaveBeenCalledTimes(2);
+    expect(renderer.draw).toHaveBeenCalledTimes(1);
   });
 
-  test("display change sets grid brightness and re-renders without stepping the simulation", () => {
-    controls.getGridBrightness.mockReturnValue(0.63);
+  test("display change re-renders from engine.view() without stepping the engine", () => {
     app.start();
+    engine.step.mockClear();
     const before = renderer.draw.mock.calls.length;
     callbacks().onDisplayChange();
-    expect(renderer.setGridBrightness).toHaveBeenLastCalledWith(0.63);
     expect(renderer.draw).toHaveBeenCalledTimes(before + 1);
-    expect(simulation.step).not.toHaveBeenCalled();
+    expect(engine.step).not.toHaveBeenCalled();
   });
 
   test("play/pause toggles the loop and reflects its state in the controls", () => {
@@ -309,76 +218,37 @@ describe("AppImpl", () => {
     expect(loop.setSpeed).toHaveBeenCalledWith(4);
   });
 
-  test("passes per-side ewar breakdowns from the resolver into effective readouts", () => {
-    const shipAEwar: EwarProjection = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [] },
-    };
-    const shipBEwar: EwarProjection = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [] },
-    };
-    const shipAShip: ShipState = { ...ship, ewar: shipAEwar };
-    const shipBShip: ShipState = { ...ship, id: "shipB", ewar: shipBEwar };
-    simulation.snapshot.mockReturnValue({ ...snapshot, shipA: shipAShip, shipB: shipBShip });
-    const shipASpeed: SpeedBreakdown = {
-      effects: [{ family: "web" as const, moduleId: toTypeId("527"), multiplier: 0.45 }],
-      propulsionSuppressed: false,
-    };
-    const shipBSpeed: SpeedBreakdown = {
-      effects: [{ family: "scrambler" as const, moduleId: toTypeId("448"), multiplier: 1 }],
-      propulsionSuppressed: true,
-    };
-    const disruptionA: DisruptionBreakdown = {
-      tracking: [{ moduleId: toTypeId("2109"), scriptId: undefined, multiplier: 0.8281 }],
-      optimal: [],
-      falloff: [],
-    };
-    const disruptionB: DisruptionBreakdown = {
-      tracking: [],
-      optimal: [{ moduleId: toTypeId("2109"), scriptId: toTypeId("29005"), multiplier: 0.7 }],
-      falloff: [],
-    };
-    ewarResolver.speedBreakdown.mockReturnValueOnce(shipASpeed).mockReturnValueOnce(shipBSpeed);
-    ewarResolver.disruptionBreakdown.mockReturnValueOnce(disruptionA).mockReturnValueOnce(disruptionB);
+  test("renderFrame passes engine view snapshot, frame, weapon ranges, and defense runtime to renderer", () => {
     app.start();
-    expect(ewarResolver.speedBreakdown).toHaveBeenNthCalledWith(1, shipBEwar, 5000);
-    expect(ewarResolver.speedBreakdown).toHaveBeenNthCalledWith(2, shipAEwar, 5000);
-    expect(ewarResolver.disruptionBreakdown).toHaveBeenNthCalledWith(1, shipBEwar, 5000);
-    expect(ewarResolver.disruptionBreakdown).toHaveBeenNthCalledWith(2, shipAEwar, 5000);
-    expect(controls.update).toHaveBeenCalledWith(baseView(), {
-      shipA: { ...sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000), speedBreakdown: shipASpeed, trackingBreakdown: disruptionA, optimalBreakdown: disruptionA, falloffBreakdown: disruptionA },
-      shipB: { ...sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000), speedBreakdown: shipBSpeed, trackingBreakdown: disruptionB, optimalBreakdown: disruptionB, falloffBreakdown: disruptionB },
-    }, emptyDefenseView);
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, emptyDefenseView);
   });
 
-  test("returns drone readout values when the effective weapon is a drone", () => {
-    const drone: DroneSpec = {
-      kind: "drone", tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500,
-      damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000,
-    };
-    const droneAssessment: AttackAssessment = {
-      boostedWeapon: drone, effectiveWeapon: drone,
-      damage: { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
-      drone: { hit, expectedMultiplier: 1, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true },
-    };
-    const droneView: EngagementView = {
-      frame,
-      attacks: { shipA: droneAssessment, shipB: droneAssessment },
-      weaponAttacks: { shipA: [], shipB: [] },
+  test("renderFrame passes drone render info from engine view drone states and specs", () => {
+    const drone: DroneSpec = { kind: "drone", moduleId: toTypeId("2"), tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: ZERO_DAMAGE, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+    const droneState: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(100, 200)], distanceToTarget: 1000, distanceToSlot: 100, inControlRange: true };
+    const droneView: EngineView = {
+      ...baseView(),
       effectiveWeapons: { shipA: drone, shipB: drone },
-      defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
-      locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+      drones: { shipA: [droneState], shipB: [droneState] },
+      droneSpecs: { shipA: [drone], shipB: [drone] },
     };
-    engagementFrameComposer.compose.mockReturnValue(droneView);
-    controls.getWeapon.mockReturnValue(drone);
-    controls.getWeapons.mockReturnValue([drone]);
-    app = new AppImpl({ controls, simulation, droneSimulator, missileSimulator, defenseSimulator, engagementFrameComposer, ewarResolver, missileBoosterResolver, sensorBoosterResolver, weaponClock, lockClock, renderer, loop });
+    engine.reset.mockImplementation(() => { emitView(droneView); return droneView; });
+    engine.view.mockReturnValue(droneView);
     app.start();
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "drone", optimal: 1000, falloff: 500 }, shipB: { kind: "drone", optimal: 1000, falloff: 500 } }, [], { shipA: [{ positions: [new Vec2(0, 0)], optimal: 1000, falloff: 500, controlRange: 60000 }], shipB: [{ positions: [new Vec2(0, 0)], optimal: 1000, falloff: 500, controlRange: 60000 }] }, { shipA: [], shipB: [] }, emptyDefenseView);
-    expect(controls.update).toHaveBeenCalledWith(droneView, {
-      shipA: { kind: "drone", speed: 0, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40, speedBreakdown: emptySpeedBreakdown },
-      shipB: { kind: "drone", speed: 0, tracking: 0.15, optimal: 1000, falloff: 500, sigResolution: 40, speedBreakdown: emptySpeedBreakdown },
-    }, emptyDefenseView);
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "drone", optimal: 1000, falloff: 500 }, shipB: { kind: "drone", optimal: 1000, falloff: 500 } }, [], { shipA: [{ positions: [new Vec2(100, 200)], optimal: 1000, falloff: 500, controlRange: 60000 }], shipB: [{ positions: [new Vec2(100, 200)], optimal: 1000, falloff: 500, controlRange: 60000 }] }, { shipA: [], shipB: [] }, emptyDefenseView);
+  });
+
+  test("renderFrame passes missile render info from engine view missile states", () => {
+    const missileState: MissileRuntimeState = { position: new Vec2(50, 60), velocity: new Vec2(1, 0), trail: [new Vec2(0, 0)], side: "shipA", weaponIndex: 0 };
+    const missileView: EngineView = {
+      ...baseView(),
+      missiles: { shipA: [missileState], shipB: [] },
+    };
+    engine.reset.mockImplementation(() => { emitView(missileView); return missileView; });
+    engine.view.mockReturnValue(missileView);
+    app.start();
+    const drawCall = renderer.draw.mock.calls[0];
+    const missileInfo = drawCall[5];
+    expect(missileInfo).toEqual({ shipA: [{ position: new Vec2(50, 60), velocity: new Vec2(1, 0), trail: [new Vec2(0, 0)] }], shipB: [] });
   });
 });

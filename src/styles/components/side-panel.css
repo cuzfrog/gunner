@@ -59,7 +59,7 @@
   gap: 9px;
   position: relative;
   margin: 0;
-  padding-bottom: 7px;
+  padding-bottom: 4px;
   border-bottom: 1px solid var(--border-dim);
 }
 
@@ -75,6 +75,7 @@
   margin: 0;
   font-family: "Chakra Petch", sans-serif;
   font-size: 13px;
+  line-height: 1;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.08em;

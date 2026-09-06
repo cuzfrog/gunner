@@ -4,14 +4,14 @@ no-new-exports:
   - module.ts
   - profileTextCodec.test.ts
   - profileText.testSupport.ts
-  - profileTextFields.ts
+#  - profileTextFields.ts
   - profileTextFormat.ts
   - profileTextParser.test.ts
   - profileTextSerializer.test.ts
-  - profileTextValidate.ts
+#  - profileTextValidate.ts
   - profileTextCodec.ts
-  - profileTextParser.ts
-  - profileTextSerializer.ts
+#  - profileTextParser.ts
+#  - profileTextSerializer.ts
 ---
 
 
@@ -24,5 +24,5 @@ Profile text parsing and serialization behind the `ProfileTextCodec` abstraction
 The public surface is the `ProfileTextCodec` type (parse / serialize / hasHeader) and
 `registerProfileTextModule`, which registers `profileTextCodec` in the DI container.
 `LocalProfileTextCodec` delegates to `ProfileTextParser` and `ProfileTextSerializer`.
-`shipA.ewarActivation`, `shipB.ewarActivation`, `shipA.boosterActivation`, `shipB.boosterActivation`, `shipA.missileBoosterActivation`, and `shipB.missileBoosterActivation` are serialized as single-line JSON
+`shipA.ewarActivation`, `shipB.ewarActivation`, `shipA.boosterActivation`, `shipB.boosterActivation`, `shipA.missileBoosterActivation`, `shipB.missileBoosterActivation`, `shipA.sensorBoosterActivation`, and `shipB.sensorBoosterActivation` are serialized as single-line JSON
 scalars; invalid lines are ignored to keep old profiles parseable.

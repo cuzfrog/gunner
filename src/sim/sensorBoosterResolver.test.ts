@@ -83,12 +83,19 @@ describe("SensorBoosterResolverImpl", () => {
     expect(result.maxLockedTargets).toBe(6);
   });
 
-  test("falls back to booster defaultScript when activation has no script", () => {
+  test("applies unscripted bonus when activation has no script even if defaultScript exists", () => {
     const script = makeScript();
     const loadout = { boosters: [makeBoosterSpec({ defaultScript: script })], amplifiers: [], boosterScripts: [] };
     const activation: SensorBoosterActivation[] = [{ active: true, overloaded: false, script: undefined }];
     const result = resolver.boostedSensorSpec(baseSpec, projection(loadout, activation));
-    expect(result.scanResolution).toBe(Math.round(200 * (1 + (30 * 2) / 100)));
-    expect(result.maxTargetingRange).toBe(30000);
+    expect(result.scanResolution).toBe(260);
+    expect(result.maxTargetingRange).toBe(39000);
+  });
+
+  test("skips boosters when activation array is missing entirely", () => {
+    const script = makeScript();
+    const loadout = { boosters: [makeBoosterSpec({ defaultScript: script })], amplifiers: [], boosterScripts: [] };
+    const result = resolver.boostedSensorSpec(baseSpec, projection(loadout));
+    expect(result).toEqual(baseSpec);
   });
 });

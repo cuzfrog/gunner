@@ -83,7 +83,8 @@ describe("naked hull", () => {
     expect(stats.maxSpeed).toBeCloseTo(2400, 0);
     expect(stats.mass).toBe(1_500_000);
     expect(stats.inertiaModifier).toBe(3);
-    expect(stats.sigRadius).toBe(210);
+    expect(stats.sigRadius).toBe(35);
+    expect(stats.sigBloomFactor).toBe(5);
   });
 
   test("frigate with 1MN AB adds only module mass and a modest speed bonus", () => {
@@ -137,7 +138,8 @@ describe("naked hull", () => {
     expect(stats.maxSpeed).toBeCloseTo(600, 0);
     expect(stats.mass).toBe(150_000_000);
     expect(stats.inertiaModifier).toBe(0.14);
-    expect(stats.sigRadius).toBe(2820);
+    expect(stats.sigRadius).toBe(470);
+    expect(stats.sigBloomFactor).toBe(5);
   });
 
   test.each([[0, 400, 3], [1, 420, 2.793], [2, 440, 2.592], [3, 460, 2.397], [4, 480, 2.208], [5, 500, 2.025]] as const)(
@@ -220,7 +222,7 @@ describe("naked hull", () => {
 });
 
 describe("fittedStats", () => {
-  const fitted: FittedHull = { mass: 1_250_000, massMultiplier: 1, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 15 };
+  const fitted: FittedHull = { mass: 1_250_000, massMultiplier: 1, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 15, mwdSigBloomMultiplier: 1 };
 
   test("without propulsion applies multipliers to speed, inertia, signature and align time", () => {
     const stats = fittedStats(frigate, fitted, undefined, conditions(5));
@@ -229,6 +231,7 @@ describe("fittedStats", () => {
     expect(stats.baseMaxSpeed).toBeCloseTo(550, 6);
     expect(stats.inertiaModifier).toBeCloseTo(1.8225, 6);
     expect(stats.sigRadius).toBe(50);
+    expect(stats.sigBloomFactor).toBe(0);
     expect(stats.alignTime).toBeCloseTo(1.8225 * 1_250_000 * Math.log(4) * 1e-6, 6);
   });
 
@@ -236,6 +239,27 @@ describe("fittedStats", () => {
     const fittedWithSigMultiplier: FittedHull = { ...fitted, sigMultiplier: 1.1 };
     const stats = fittedStats(frigate, fittedWithSigMultiplier, undefined, conditions(5));
     expect(stats.sigRadius).toBeCloseTo(55, 6);
+    expect(stats.sigBloomFactor).toBe(0);
+  });
+
+  test("sigRadius is base sig without bloom; sigBloomFactor carries the MWD bloom factor", () => {
+    const fittedWithSig: FittedHull = { ...fitted, sigMultiplier: 1.1 };
+    const stats = fittedStats(frigate, fittedWithSig, mwd5, conditions(0));
+    expect(stats.sigRadius).toBeCloseTo((35 + 15) * 1.1, 6);
+    expect(stats.sigBloomFactor).toBeCloseTo(5, 6);
+  });
+
+  test("MWD sig bloom multiplier reduces the bloom factor: sigBloomFactor = sigBloom * multiplier", () => {
+    const fittedWithReduction: FittedHull = { ...fitted, mwdSigBloomMultiplier: 0.25 };
+    const stats = fittedStats(frigate, fittedWithReduction, mwd5, conditions(0));
+    expect(stats.sigRadius).toBeCloseTo((35 + 15) * 1, 6);
+    expect(stats.sigBloomFactor).toBeCloseTo(5 * 0.25, 6);
+  });
+
+  test("MWD sig bloom multiplier of 1 leaves bloom unchanged", () => {
+    const stats = fittedStats(frigate, fitted, mwd5, conditions(0));
+    expect(stats.sigRadius).toBeCloseTo((35 + 15) * 1, 6);
+    expect(stats.sigBloomFactor).toBeCloseTo(5, 6);
   });
 
   test("with propulsion adds active mass and applies the speed and align time", () => {
@@ -251,7 +275,8 @@ describe("fittedStats", () => {
   test("with MWD multiplies signature, active mass and align time", () => {
     const stats = fittedStats(frigate, fitted, mwd5, conditions(0));
     expect(stats.mass).toBe(1_750_000);
-    expect(stats.sigRadius).toBe(300);
+    expect(stats.sigRadius).toBe(50);
+    expect(stats.sigBloomFactor).toBe(5);
     expect(stats.alignTime).toBeCloseTo(2.7 * 1_750_000 * Math.log(4) * 1e-6, 6);
   });
 
@@ -293,7 +318,7 @@ describe("alignTime", () => {
 });
 
 describe("maxSpeedForFittedMass", () => {
-  const fitted: FittedHull = { mass: 1_250_000, massMultiplier: 1, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 0 };
+  const fitted: FittedHull = { mass: 1_250_000, massMultiplier: 1, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 };
 
   test("without propulsion ignores the provided mass", () => {
     expect(maxSpeedForFittedMass(frigate, fitted, 0)).toBeCloseTo(440, 6);

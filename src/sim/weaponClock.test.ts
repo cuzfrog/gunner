@@ -1,13 +1,14 @@
 import { WeaponClockImpl } from "./weaponClock";
 import { Mulberry32RngFactory } from "./rng";
-import { EMPTY_DEFENSE_ASSESSMENT, Vec2 } from "./index";
+import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, Vec2 } from "./index";
+import { toTypeId } from "../gamedata/ids";
 import type { AttackAssessment } from "./fireControl";
 import type { EngagementView, WeaponAttack } from "./engagementFrameComposer";
 import type { EngagementFrame, HitChanceBreakdown, ShipState, TurretSpec, WeaponSpec } from "./types";
 import { ZERO_DAMAGE } from "./types";
 
-const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
-const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
+const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
+const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 };
 const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };
 
 function shipState(id: "shipA" | "shipB"): ShipState {
@@ -28,7 +29,10 @@ function makeView(shipAAttacks: readonly WeaponAttack[], shipBAttacks: readonly 
     weaponAttacks: { shipA: shipAAttacks, shipB: shipBAttacks },
     effectiveWeapons: { shipA: turret, shipB: turret },
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
+    projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
     locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+    readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } },
+    incomingOffensiveModules: { shipA: [], shipB: [] },
   };
 }
 
@@ -36,7 +40,7 @@ function makeAssessment(expectedMultiplier: number, appliedVolleyByType: { em: n
   return {
     boostedWeapon: turret,
     effectiveWeapon: turret,
-    damage: { nominalDps: 20, appliedDps: 20 * expectedMultiplier, application: expectedMultiplier, volley: 100, appliedByType: ZERO_DAMAGE, appliedVolleyByType },
+    damage: { nominalDps: 20, appliedDps: 20 * expectedMultiplier, application: expectedMultiplier, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType },
     turret: { hit, expectedMultiplier },
   };
 }
@@ -88,7 +92,7 @@ describe("WeaponClockImpl", () => {
 
   test("missile weapons are skipped", () => {
     const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
-    const missileWeapon: WeaponSpec = { kind: "missile", damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 1, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 3, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
+    const missileWeapon: WeaponSpec = { kind: "missile", moduleId: toTypeId("2"), damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 1, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 3, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
     const view = makeView([{ weapon: missileWeapon, assessment: makeAssessment(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 }) }]);
     let totalEvents = 0;
     for (let i = 0; i < 20; i++) {

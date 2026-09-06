@@ -76,9 +76,22 @@ export class SimulationImpl implements Simulation {
 function effectiveState(resolver: EwarResolver, ship: ShipState, opponent: ShipState, distance: number): ShipState {
   const multiplier = resolver.speedMultiplier(opponent.ewar, distance);
   const suppressed = resolver.propulsionSuppressed(opponent.ewar, distance);
-  if (multiplier === 1 && !suppressed) return ship;
-  const baseSpeed = suppressed ? ship.suppressedMaxSpeed ?? ship.baseMaxSpeed ?? ship.maxSpeed : ship.maxSpeed;
-  return { ...ship, maxSpeed: baseSpeed * multiplier };
+  const baseSpeed = suppressed ? suppressedSpeed(ship) : ship.maxSpeed;
+  const sig = effectiveSig(ship, suppressed);
+  if (multiplier === 1 && baseSpeed === ship.maxSpeed && sig === ship.sig) return ship;
+  return { ...ship, maxSpeed: baseSpeed * multiplier, sig };
+}
+
+function effectiveSig(ship: ShipState, suppressed: boolean): number | undefined {
+  const base = ship.sig;
+  if (base === undefined) return undefined;
+  if (suppressed) return base + (ship.sigPenalty ?? 0);
+  return (base + (ship.sigPenalty ?? 0)) * (1 + (ship.sigBloom ?? 0));
+}
+
+function suppressedSpeed(ship: ShipState): number {
+  if (ship.propulsionKind === "microwarpdrive") return ship.baseMaxSpeed ?? ship.maxSpeed;
+  return ship.maxSpeed;
 }
 
 function asState(config: CombatantConfig, position: Vec2): ShipState {

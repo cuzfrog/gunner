@@ -8,9 +8,10 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export function registerBoosterModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    boosterController: asFunction(({ els, popupGroup, imageCatalog, fittingImport, i18n, uiEvents }) => new BoosterControllerImpl({
+    boosterController: asFunction(({ els, popupGroup, modulesPopup, imageCatalog, fittingImport, i18n, uiEvents }) => new BoosterControllerImpl({
       els: collectBoosterEls(els),
       popupGroup,
+      modulesPopup,
       imageCatalog,
       fittingImport,
       i18n,
@@ -28,6 +29,10 @@ function collectBoosterEls(els: ControlsElements): BoosterEls {
     summaries: {
       shipA: els.shipA.boosterSummary,
       shipB: els.shipB.boosterSummary,
+    },
+    modulesFields: {
+      shipA: els.shipA.ewar.field,
+      shipB: els.shipB.ewar.field,
     },
   };
 }

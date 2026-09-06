@@ -14,9 +14,18 @@ const imageClass = `portrait-image portrait-image-${side}`;
     <div class={`portrait-lock-badge portrait-lock-badge-${side}`} hidden></div>
   </div>
   <div class={`portrait-hp-bars portrait-hp-bars-${side}`}>
-    <div class="portrait-hp-bar portrait-hp-bar-shield"><span class="portrait-hp-fill"></span></div>
-    <div class="portrait-hp-bar portrait-hp-bar-armor"><span class="portrait-hp-fill"></span></div>
-    <div class="portrait-hp-bar portrait-hp-bar-hull"><span class="portrait-hp-fill"></span></div>
+    <div class="portrait-hp-row">
+      <div class="portrait-hp-bar portrait-hp-bar-shield"><span class="portrait-hp-fill"></span></div>
+      <span class="portrait-hp-value portrait-hp-value-shield mono" data-defense-layer="shield" hidden></span>
+    </div>
+    <div class="portrait-hp-row">
+      <div class="portrait-hp-bar portrait-hp-bar-armor"><span class="portrait-hp-fill"></span></div>
+      <span class="portrait-hp-value portrait-hp-value-armor mono" data-defense-layer="armor" hidden></span>
+    </div>
+    <div class="portrait-hp-row">
+      <div class="portrait-hp-bar portrait-hp-bar-hull"><span class="portrait-hp-fill"></span></div>
+      <span class="portrait-hp-value portrait-hp-value-hull mono" data-defense-layer="hull" hidden></span>
+    </div>
   </div>
   <div class="portrait-effects"></div>
 </div>

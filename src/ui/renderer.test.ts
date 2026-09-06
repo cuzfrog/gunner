@@ -1,4 +1,5 @@
 import { Vec2, ZERO_DAMAGE, type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec } from "../sim";
+import { toTypeId } from "../gamedata/ids";
 import type { WeaponRangeVisibility } from "../appstate";
 import type { I18n } from "./i18n";
 import { CanvasRenderer, type RangeOverlay } from "./renderer";
@@ -114,7 +115,7 @@ const frame: EngagementFrame = {
   angularVelocity: 0,
 };
 
-const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 
 function gridColorOf(renderer: CanvasRenderer, canvas: HTMLCanvasElement): string {
   renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, undefined);
@@ -314,8 +315,8 @@ describe("CanvasRenderer", () => {
       shipB: { ...ship, id: "shipB", position: shipBPos },
       commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
     };
-    const shipATurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
-    const shipBTurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 8000, falloff: 3000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+    const shipATurret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+    const shipBTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("2"), tracking: 0.32, sigResolution: 40, optimal: 8000, falloff: 3000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 
     function rendererWithVisibility(visibility: "shipA" | "shipB" | "both" | "none"): { renderer: CanvasRenderer; arcs: number[][] } {
       const canvas = fakeCanvas();
@@ -416,10 +417,12 @@ describe("CanvasRenderer", () => {
 
     test("draws no drone range rings when visibility is none", () => {
       const positions = [new Vec2(1000, 0)];
-      const { arcs } = rendererWithDrones("none", { shipA: [{ positions, optimal: 1500, falloff: 500, controlRange: 60000 }], shipB: [] });
-      // No drone range rings should be drawn (only grid/ship rings may appear)
-      // The drone range rings use optimal=1500 and falloff=2000, check none match
-      expect(arcs.some((a) => Math.abs(a[2] - 1500) < 50)).toBe(false);
+      const { renderer, arcs } = rendererWithDrones("none", { shipA: [{ positions, optimal: 1500, falloff: 500, controlRange: 60000 }], shipB: [] });
+      const scale = scaleOf(renderer);
+      const optimalRadius = 1500 * scale;
+      const falloffRadius = (1500 + 500) * scale;
+      expect(arcs.some((a) => Math.abs(a[2] - optimalRadius) < 0.5)).toBe(false);
+      expect(arcs.some((a) => Math.abs(a[2] - falloffRadius) < 0.5)).toBe(false);
     });
 
     test("draws drone control range rings from ship position", () => {

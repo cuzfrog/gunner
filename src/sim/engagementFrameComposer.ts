@@ -1,7 +1,8 @@
 import type { AttackAssessment, AttackState, EngagementEvaluator } from "./fireControl";
 import type { Kinematics } from "./kinematics";
 import type { DefenseAssessor, DefenseAssessment } from "./defenseAssessment";
-import { type DamageAssessment, type DefenseSpec, type DroneRuntimeState, type EngagementFrame, type LockState, type MissileAttackFacts, type Side, type SimSnapshot, type WeaponSpec, ZERO_DAMAGE, damageVectorAdd, IDLE_LOCK } from "./types";
+import type { EwarResolver } from "./ewarResolver";
+import { type ActiveOffensiveModule, type DamageAssessment, type DamageProjection, type DefenseSpec, type DroneRuntimeState, type EngagementFrame, type EwarProjection, type LockState, type MissileAttackFacts, type Side, type ShipState, type SideReadoutValues, type SimSnapshot, type WeaponSpec, EMPTY_PROJECTION, ZERO_DAMAGE, damageVectorAdd, IDLE_LOCK } from "./types";
 export interface EngagementInput {
   readonly weapons: Record<Side, readonly WeaponSpec[]>;
   readonly sigRadii: Record<Side, number>;
@@ -23,7 +24,10 @@ export interface EngagementView {
   readonly weaponAttacks: Record<Side, readonly WeaponAttack[]>;
   readonly effectiveWeapons: Record<Side, WeaponSpec | undefined>;
   readonly defenses: Record<Side, DefenseAssessment>;
+  readonly projection: Record<Side, DamageProjection>;
   readonly locks: Record<Side, LockState>;
+  readonly readouts: Record<Side, SideReadoutValues>;
+  readonly incomingOffensiveModules: Record<Side, readonly ActiveOffensiveModule[]>;
 }
 
 export interface EngagementFrameComposer {
@@ -34,15 +38,18 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
   private readonly kinematics: Kinematics;
   private readonly engagementEvaluator: EngagementEvaluator;
   private readonly defenseAssessor: DefenseAssessor;
+  private readonly ewarResolver: EwarResolver;
 
-  constructor({ kinematics, engagementEvaluator, defenseAssessor }: {
+  constructor({ kinematics, engagementEvaluator, defenseAssessor, ewarResolver }: {
     kinematics: Kinematics;
     engagementEvaluator: EngagementEvaluator;
     defenseAssessor: DefenseAssessor;
+    ewarResolver: EwarResolver;
   }) {
     this.kinematics = kinematics;
     this.engagementEvaluator = engagementEvaluator;
     this.defenseAssessor = defenseAssessor;
+    this.ewarResolver = ewarResolver;
   }
 
   compose(snapshot: SimSnapshot, input: EngagementInput): EngagementView {
@@ -64,7 +71,9 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
         shipB: attacks.shipB?.effectiveWeapon ?? shipBWeapons[0],
       };
       const defenses = this.assessDefenses(input, attacks);
-      return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, locks };
+      const readouts = this.computeReadouts(snapshot, frame, attacks, effectiveWeapons);
+      const incomingOffensiveModules = this.composeIncomingOffensiveModules(frame, weaponAttacks);
+      return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks, readouts, incomingOffensiveModules };
     }
     const shipAResult = this.assessSide(frame, "shipA", shipAWeapons, input.sigRadii.shipB, input.droneStates.shipA, input.missileFacts.shipA, locks.shipA.status === "locked");
     const shipBResult = this.assessSide(frame, "shipB", shipBWeapons, input.sigRadii.shipA, input.droneStates.shipB, input.missileFacts.shipB, locks.shipB.status === "locked");
@@ -75,7 +84,27 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
       shipB: attacks.shipB?.effectiveWeapon ?? shipBWeapons[0],
     };
     const defenses = this.assessDefenses(input, attacks);
-    return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, locks };
+    const readouts = this.computeReadouts(snapshot, frame, attacks, effectiveWeapons);
+    const incomingOffensiveModules = this.composeIncomingOffensiveModules(frame, weaponAttacks);
+    return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks, readouts, incomingOffensiveModules };
+  }
+
+  private composeIncomingOffensiveModules(frame: EngagementFrame, weaponAttacks: Record<Side, readonly WeaponAttack[]>): Record<Side, readonly ActiveOffensiveModule[]> {
+    return {
+      shipA: this.incomingForTarget(frame.shipB.ewar, frame.distance, weaponAttacks.shipB),
+      shipB: this.incomingForTarget(frame.shipA.ewar, frame.distance, weaponAttacks.shipA),
+    };
+  }
+
+  private incomingForTarget(sourceEwar: EwarProjection | undefined, distance: number, sourceWeaponAttacks: readonly WeaponAttack[]): readonly ActiveOffensiveModule[] {
+    const weaponModules: ActiveOffensiveModule[] = [];
+    for (const attack of sourceWeaponAttacks) {
+      if (attack.assessment.damage.appliedDps <= 0) continue;
+      weaponModules.push({ category: "weapon", weaponKind: attack.weapon.kind, moduleId: attack.weapon.moduleId });
+    }
+    const ewarEffects = this.ewarResolver.appliedEffects(sourceEwar, distance);
+    const ewarModules: ActiveOffensiveModule[] = ewarEffects.map((effect) => ({ category: "ewar", ...effect }));
+    return [...weaponModules, ...ewarModules];
   }
 
   private assessDefenses(input: EngagementInput, attacks: Record<Side, AttackAssessment | undefined>): Record<Side, DefenseAssessment> {
@@ -85,6 +114,32 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
       shipA: this.defenseAssessor.assess(input.defenses.shipA, shipAIncoming, input.overloaded.shipA),
       shipB: this.defenseAssessor.assess(input.defenses.shipB, shipBIncoming, input.overloaded.shipB),
     };
+  }
+
+  private computeReadouts(snapshot: SimSnapshot, frame: EngagementFrame, attacks: Record<Side, AttackAssessment | undefined>, effectiveWeapons: Record<Side, WeaponSpec | undefined>): Record<Side, SideReadoutValues> {
+    return {
+      shipA: this.sideReadoutValues(snapshot.shipA, snapshot.shipB, frame, attacks, effectiveWeapons, "shipA"),
+      shipB: this.sideReadoutValues(snapshot.shipB, snapshot.shipA, frame, attacks, effectiveWeapons, "shipB"),
+    };
+  }
+
+  private sideReadoutValues(ship: ShipState, opponent: ShipState, frame: EngagementFrame, attacks: Record<Side, AttackAssessment | undefined>, effectiveWeapons: Record<Side, WeaponSpec | undefined>, side: Side): SideReadoutValues {
+    const attack = attacks[side];
+    const effectiveWeapon = attack?.effectiveWeapon ?? effectiveWeapons[side];
+    const boostedWeapon = attack?.boostedWeapon ?? effectiveWeapon;
+    const speedBreakdown = this.ewarResolver.speedBreakdown(opponent.ewar, frame.distance);
+    if (effectiveWeapon?.kind === "missile") {
+      return { kind: "missile", speed: ship.maxSpeed, explosionRadius: effectiveWeapon.explosionRadius, explosionVelocity: effectiveWeapon.explosionVelocity, maxVelocity: effectiveWeapon.maxVelocity, flightTime: effectiveWeapon.flightTime, flightRange: effectiveWeapon.flightRange, speedBreakdown };
+    }
+    if (effectiveWeapon?.kind === "turret") {
+      const boostedTurret = boostedWeapon?.kind === "turret" ? boostedWeapon : effectiveWeapon;
+      const disruption = this.ewarResolver.disruptionBreakdown(opponent.ewar, frame.distance);
+      return { kind: "turret", speed: ship.maxSpeed, tracking: effectiveWeapon.tracking, optimal: effectiveWeapon.optimal, falloff: effectiveWeapon.falloff, boostedTracking: boostedTurret.tracking, boostedOptimal: boostedTurret.optimal, boostedFalloff: boostedTurret.falloff, sigResolution: effectiveWeapon.sigResolution, speedBreakdown, trackingBreakdown: disruption, optimalBreakdown: disruption, falloffBreakdown: disruption };
+    }
+    if (effectiveWeapon?.kind === "drone") {
+      return { kind: "drone", speed: ship.maxSpeed, tracking: effectiveWeapon.tracking, optimal: effectiveWeapon.optimal, falloff: effectiveWeapon.falloff, sigResolution: effectiveWeapon.sigResolution, speedBreakdown };
+    }
+    return { kind: "none", speed: ship.maxSpeed, speedBreakdown };
   }
 
   private assessSide(frame: EngagementFrame, side: Side, weapons: readonly WeaponSpec[], opponentSigRadius: number, droneStates: readonly DroneRuntimeState[], missileFacts: readonly MissileAttackFacts[], locked: boolean): { combined: AttackAssessment | undefined; weaponAttacks: readonly WeaponAttack[] } {
@@ -102,7 +157,7 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
     if (weaponAttacks.length === 0) return { combined: undefined, weaponAttacks: [] };
     if (weaponAttacks.length === 1) return { combined: weaponAttacks[0].assessment, weaponAttacks };
     const primary = weaponAttacks[0].assessment;
-    const initialDamage: DamageAssessment = { nominalDps: 0, appliedDps: 0, application: 0, volley: 0, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
+    const initialDamage: DamageAssessment = { nominalDps: 0, appliedDps: 0, application: 0, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE };
     const totalDamage = weaponAttacks.reduce<DamageAssessment>(sumDamage, initialDamage);
     return { combined: { ...primary, damage: totalDamage }, weaponAttacks };
   }
@@ -125,6 +180,7 @@ function sumDamage(acc: DamageAssessment, weaponAttack: WeaponAttack): DamageAss
     appliedDps,
     application: nominalDps > 0 ? appliedDps / nominalDps : 0,
     volley: acc.volley + weaponAttack.assessment.damage.volley,
+    baseVolleyByType: damageVectorAdd(acc.baseVolleyByType, weaponAttack.assessment.damage.baseVolleyByType),
     appliedByType: damageVectorAdd(acc.appliedByType, weaponAttack.assessment.damage.appliedByType),
     appliedVolleyByType: damageVectorAdd(acc.appliedVolleyByType, weaponAttack.assessment.damage.appliedVolleyByType),
   };

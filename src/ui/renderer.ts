@@ -2,6 +2,7 @@ import { Vec2, type DefenseView, type EngagementFrame, type LockState, type Ship
 import type { WeaponRangeVisibility } from "../appstate";
 import type { I18n } from "./i18n";
 import { PALETTE, withAlpha } from "./palette";
+import { formatDistance, formatWithCommas } from "./format";
 
 export type RangeOverlayKind = "web" | "grappler" | "scrambler" | "disruptor";
 
@@ -391,7 +392,7 @@ export class CanvasRenderer implements Renderer {
     this.ctx.setLineDash([]);
 
     const mid = sa.add(sb).scale(0.5);
-    this.drawTextAt(mid.x, mid.y, this.formatDistance(distance), COLORS.text, true);
+    this.drawTextAt(mid.x, mid.y, formatDistance(distance, (key) => this.i18n.t(key)), COLORS.text, true);
   }
 
   private drawWorldVector(position: Vec2, vector: Vec2, color: string, dash: number[] = []): void {
@@ -500,7 +501,7 @@ export class CanvasRenderer implements Renderer {
   private drawReadouts(frame: EngagementFrame): void {
     const lines = [
       `${this.i18n.t("readout.time")}${formatTime(frame.time)}`,
-      `${this.i18n.t("readout.range")}${this.formatDistance(frame.distance)}`,
+      `${this.i18n.t("readout.range")}${formatDistance(frame.distance, (key) => this.i18n.t(key))}`,
       `${this.i18n.t("readout.angular")}${formatWithCommas(frame.angularVelocity, 4)} rad/s`,
       `${this.i18n.t("readout.transversal")}${formatWithCommas(frame.transversalSpeed, 1)} m/s`,
       `${this.i18n.t("readout.radial")}${formatWithCommas(frame.radialVelocity, 1)} m/s`,
@@ -528,10 +529,6 @@ export class CanvasRenderer implements Renderer {
     this.ctx.fillText(text, x, y);
   }
 
-  private formatDistance(m: number): string {
-    if (m >= 10000) return `${formatWithCommas(m / 1000, 1)} ${this.i18n.t("unit.kilometer")}`;
-    return `${formatWithCommas(Math.round(m))} ${this.i18n.t("unit.meter")}`;
-  }
 }
 
 function weaponRangeMax(range: WeaponRange): number {
@@ -555,8 +552,4 @@ function formatTime(s: number): string {
   const m = Math.floor(s / 60);
   const sec = s % 60;
   return `${m}:${sec.toFixed(1).padStart(4, "0")}`;
-}
-
-function formatWithCommas(value: number, decimals = 0): string {
-  return value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }

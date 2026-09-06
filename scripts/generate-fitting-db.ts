@@ -1,13 +1,24 @@
 import { homedir } from "node:os";
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { ShipId, TypeId } from "../src/gamedata/ids";
+import type { HullBonusAttribute, SkillBonusType, RigDrawback, RigDrawbackReduction } from "../src/gamedata/fittingDb/types";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 import type { ShipNameLanguage } from "../src/ships";
 import type { DamageResists } from "../src/sim";
+import { buildDefenseStatsFromIntents, type DefenseModuleStats } from "./fittingDb/buildDefenseStats";
+import { buildCombatModuleStats } from "./fittingDb/buildModuleStats";
+import { auditCoverage, type AuditModuleEntry } from "./fittingDb/coverageAudit";
+import type { SdeDogmaAttribute, SdeDogmaEffect, SdeDogmaEffectModifier, SdeGroup, SdeTypeDogma } from "./fittingDb/dogmaTypes";
+import { buildProjection, writeProjection, loadMerged } from "./fittingDb/projection";
+import { assertClassificationComplete, failOnClassificationErrors } from "./fittingDb/classification/classify";
+import { ATTRIBUTE_CLASSIFICATION } from "./fittingDb/classification/attributeClassification";
+import { EFFECT_CLASSIFICATION } from "./fittingDb/classification/effectClassification";
+import { semanticAttributeToHullBonus, isOutOfScopeAttribute, isNonScalingEffect, effectDrawbackKind } from "./fittingDb/classification/classifyLookup";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
-const OUT_FILE = join(import.meta.dir, "..", "src", "gamedata", "fittingDb", "fittingDb.ts");
+const PROJECTION_FILE = join(import.meta.dir, "..", "generated", "sde", "projection.json");
+const OUT_FILE = join(import.meta.dir, "..", "src", "gamedata", "fittingDb", "generated", "fittingDb.data.ts");
 const I18N_EN_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-names-en.ts");
 const I18N_ZH_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-names-zh.ts");
 const I18N_JA_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-names-ja.ts");
@@ -49,46 +60,24 @@ interface DroneEntry {
   readonly name: string;
 }
 
-interface SdeDogmaAttribute {
-  attributeID: number;
-  name: string;
-}
+type HullBonusResolution =
+  | { kind: "mapped"; attribute: HullBonusAttribute }
+  | { kind: "skip"; reason: string }
+  | { kind: "unmapped"; attributeId: number };
 
-interface SdeDogmaEffectModifier {
-  readonly domain: string;
+type SkillBonusResolution =
+  | { kind: "mapped"; bonusType: SkillBonusType }
+  | { kind: "skip"; reason: string }
+  | { kind: "unmapped"; attributeId: number };
+
+export interface UnmappedAttribute {
+  readonly shipTypeId: number;
+  readonly shipName: string;
+  readonly effectId: number;
+  readonly attributeId: number;
+  readonly attributeName: string;
   readonly func: string;
-  readonly modifiedAttributeID: number;
-  readonly modifyingAttributeID: number;
-  readonly operation: number;
-  readonly skillTypeID?: number;
-  readonly groupID?: number;
 }
-
-interface SdeDogmaEffect {
-  effectID: number;
-  effectName?: string;
-  modifierInfo?: readonly SdeDogmaEffectModifier[];
-}
-
-interface SdeGroup {
-  groupID: number;
-  categoryID: number;
-}
-
-interface SdeTypeDogma {
-  dogmaAttributes: readonly { attributeID: number; value: number }[];
-  dogmaEffects: readonly SdeDogmaEffect[];
-}
-
-type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity" | "turretDamage" | "turretRoF" | "droneDamage" | "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
-type SkillBonusType = "turretDamage" | "turretRoF" | "turretTracking" | "turretOptimal" | "turretFalloff" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity";
-
-// The NON_SCALING_EFFECT_IDS set below preserves the only information that cannot be derived
-// from the SDE: whether a given effect's magnitude scales with the hull skill level or is a
-// flat role/rookie/AT/Pirate/NavyDestroyer bonus.
-const NON_SCALING_EFFECT_IDS = new Set([
-  1218, 1232, 1233, 1239, 1240, 2130, 2131, 2132, 2215, 3415, 3416, 3417, 3478, 3483, 3487, 4464, 4473, 4474, 4475, 4476, 4477, 4622, 4623, 4624, 4625, 4782, 4789, 4991, 4999, 5013, 5014, 5018, 5020, 5205, 5206, 5215, 5216, 5217, 5218, 5219, 5220, 5468, 5721, 5726, 5803, 5804, 5821, 6172, 6173, 6174, 6709, 6711, 6851, 6992, 7018, 7055, 8225, 11393, 11394, 11396, 11397, 11401, 11402, 11410, 11450, 12567,
-]);
 
 // Effects with constant magnitudes that cannot be read from the ship's modifying attribute.
 const SPECIAL_MAGNITUDES: Readonly<Record<number, number>> = {
@@ -96,7 +85,7 @@ const SPECIAL_MAGNITUDES: Readonly<Record<number, number>> = {
 };
 
 interface HullBonus {
-  readonly attribute: BonusAttribute;
+  readonly attribute: HullBonusAttribute;
   readonly magnitude: number;
   readonly scalesWithHullSkill: boolean;
   readonly chargeSkillId?: TypeId;
@@ -165,34 +154,8 @@ const SENSOR_BOOSTER_GROUP = 212;
 const SIGNAL_AMPLIFIER_GROUP = 210;
 const SENSOR_BOOSTER_SCRIPT_GROUP = 910;
 const SENSOR_DAMPENER_SCRIPT_GROUP = 911;
-const MISSILE_DAMAGE_EFFECT = 763;
-const MISSILE_ROF_EFFECT = 889;
 
 const TURRET_GROUPS = new Set([53, 55, 74, 1986]);
-
-// Maps SDE dogma attribute IDs to internal combat bonus categories. Used by
-// buildHullBonuses to derive bonuses from modifierInfo. Context-dependent
-// attributes (64, 51, 37, 54) are disambiguated by resolveHullBonusAttribute.
-const COMBAT_ATTRIBUTE_MAP: Readonly<Record<number, BonusAttribute>> = {
-  114: "missileDamage", 116: "missileDamage", 117: "missileDamage", 118: "missileDamage",
-  64: "turretDamage",
-  51: "turretRoF",
-  160: "turretTracking", 204: "turretTracking",
-  54: "turretOptimal",
-  158: "turretFalloff",
-  37: "maxVelocity",
-  281: "missileFlightTime",
-  654: "missileExplosionRadius",
-  653: "missileExplosionVelocity",
-  265: "armorHpPercent",
-  263: "shieldHpPercent",
-  9: "hullHpPercent",
-  267: "armorResist", 268: "armorResist", 269: "armorResist", 270: "armorResist",
-  271: "shieldResist", 272: "shieldResist", 273: "shieldResist", 274: "shieldResist",
-  72: "extenderHpPercent",
-  1159: "plateHpPercent",
-  70: "agility",
-};
 
 const MISSILE_HULL_SKILL_IDS = new Set([3319, 3320, 3321, 3322, 3323, 3324, 3325, 3326, 25719, 20209, 20210, 20211, 20212, 20213, 25718, 41409, 41410, 21071, 20315, 12441, 12442, 20314]);
 const DRONE_HULL_SKILL_IDS = new Set([3436, 3442, 24241, 33699, 23594, 23069]);
@@ -219,48 +182,8 @@ const OMNIDIRECTIONAL_TRACKING_LINK_GROUP = 646;
 const OMNIDIRECTIONAL_TRACKING_ENHANCER_GROUP = 1292;
 const DRONE_CONTROL_RANGE_MODULE_GROUP = 647;
 
-const RIG_SIG_DRAWBACK_EFFECT = 2716;
-const RIG_AGILITY_DRAWBACK_EFFECT = 2717;
 const SHIP_CATEGORY_ID = 6;
-
-// Defense module effect IDs (from RESEARCH.md pyfa effect anchors)
-const DEFENSE_EFFECTS = {
-  damageControl: 2302,
-  armorResonancePassive: 2041,
-  shieldResonancePassive: 2052,
-  shieldHardener: 5230,
-  armorHardener: 5231,
-  shieldBoost: 4,
-  armorRepair: 27,
-  structureRepair: 26,
-  fueledShieldBoost: 4936,
-  fueledArmorRepair: 5275,
-  shieldBoostAmplifier: 1720,
-  rah: 4928,
-  shieldExtender: 21,
-  armorPlate: 1959,
-  shieldRecharge: 50,
-  structureHpMultiply: 60,
-  hullHpBonus: 392,
-} as const;
-
-// Maps module dogma effectIDs to the weapon group they modify. These are damage/RoF
-// multiplier effects from Heat Sinks, Gyrostabilizers, Magnetic Field Stabilizers, and
-// their rig/booster variants. The module's damageMultiplier and speedMultiplier attributes
-// are applied to turret modules of the matching weapon group with stacking penalties.
-const DAMAGE_MODULE_EFFECTS: Readonly<Record<number, TurretWeaponGroup>> = {
-  89: "Projectile Weapon",
-  91: "Energy Weapon",
-  92: "Projectile Weapon",
-  93: "Hybrid Weapon",
-  95: "Energy Weapon",
-  96: "Hybrid Weapon",
-  2798: "Projectile Weapon",
-  2799: "Projectile Weapon",
-  2802: "Hybrid Weapon",
-  2803: "Energy Weapon",
-  2804: "Hybrid Weapon",
-};
+const TARGET_PAINTING_SKILL_ID = 19921;
 
 // Skill typeIDs that provide turret damage or rate-of-fire bonuses. The bonus attribute
 // on the skill item is a percentage per level; it is applied as an unpenalized boost.
@@ -307,6 +230,14 @@ function stringifySkillBonuses(bonuses: readonly RawSkillBonus[]): string {
   return `[${entries.join(",")}]`;
 }
 
+function stringifyRigDrawbackReductions(reductions: readonly RigDrawbackReduction[]): string {
+  const entries = reductions.map((r) => {
+    const obj = { skillId: String(r.skillId), groupId: r.groupId, magnitudePerLevel: r.magnitudePerLevel };
+    return JSON.stringify(obj).replace(/"skillId":"(\d+)"/, '"skillId":"$1" as TypeId');
+  });
+  return `[${entries.join(",")}]`;
+}
+
 function buildShipNameToId(): ReadonlyMap<string, ShipId> {
   const map = new Map<string, ShipId>();
   for (const profile of SHIP_PROFILES) map.set(profile.name, profile.id);
@@ -318,19 +249,6 @@ function resolveShipId(name: string, sdeType: SdeType | undefined, shipNameToId:
   if (legacy) return legacy;
   if (sdeType) return String(sdeType.typeID) as ShipId;
   throw new Error(`Unknown ship hull name: ${name}`);
-}
-
-async function loadMerged<T>(prefix: string): Promise<Record<string, T>> {
-  const files = (await readdir(SDE_DIR))
-    .filter((file) => file.startsWith(prefix) && file.endsWith(".json"))
-    .sort();
-  const all: Record<string, T> = {};
-  for (const file of files) {
-    const text = await readFile(join(SDE_DIR, file), "utf8");
-    const parsed: Record<string, T> = JSON.parse(text);
-    Object.assign(all, parsed);
-  }
-  return all;
 }
 
 function buildAttributeNameMap(attributes: Record<string, SdeDogmaAttribute>): Map<number, string> {
@@ -374,6 +292,7 @@ function buildSkillBonuses(
   types: Record<string, SdeType>,
   groups: Record<string, SdeGroup>,
   dogmaEffects: Record<string, SdeDogmaEffect>,
+  unmappedCollector: UnmappedAttribute[],
 ): readonly RawSkillBonus[] {
   const skillGroupIds = new Set<number>();
   for (const g of Object.values(groups)) {
@@ -412,10 +331,20 @@ function buildSkillBonuses(
       }
       for (const modifier of eff.modifierInfo ?? []) {
         if (modifier.func === "ItemModifier") continue;
-        const base = COMBAT_ATTRIBUTE_MAP[modifier.modifiedAttributeID];
-        if (base === undefined) continue;
-        const resolved = resolveSkillBonusAttribute(base, modifier, attributeNames);
-        if (resolved === undefined) continue;
+        const base = semanticAttributeToHullBonus(modifier.modifiedAttributeID);
+        if (base === undefined) {
+          if (!isOutOfScopeAttribute(modifier.modifiedAttributeID)) {
+            unmappedCollector.push({ shipTypeId: skillId, shipName: type["typeName_en-us"] ?? String(skillId), effectId: eid, attributeId: modifier.modifiedAttributeID, attributeName: attributeNames.get(modifier.modifiedAttributeID) ?? "unknown", func: modifier.func });
+          }
+          continue;
+        }
+        const resolution = resolveSkillBonusAttribute(base, modifier, attributeNames);
+        if (resolution.kind === "skip") continue;
+        if (resolution.kind === "unmapped") {
+          unmappedCollector.push({ shipTypeId: skillId, shipName: type["typeName_en-us"] ?? String(skillId), effectId: eid, attributeId: resolution.attributeId, attributeName: attributeNames.get(resolution.attributeId) ?? "unknown", func: modifier.func });
+          continue;
+        }
+        const resolved = resolution.bonusType;
         const magnitude = skillAttrValues.get(modifier.modifyingAttributeID);
         if (magnitude === undefined || !Number.isFinite(magnitude) || magnitude === 0) continue;
         const filter = resolveSkillBonusFilter(modifier);
@@ -453,33 +382,65 @@ function resolveSkillBonusFilter(modifier: SdeDogmaEffectModifier): { requiredSk
 }
 
 function resolveSkillBonusAttribute(
-  base: BonusAttribute,
+  base: HullBonusAttribute,
   modifier: SdeDogmaEffectModifier,
   attributeNames: Map<number, string>,
-): SkillBonusType | undefined {
+): SkillBonusResolution {
   const skillId = modifier.skillTypeID;
   if (base === "turretRoF") {
-    if (skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return "missileRoF";
-    return "turretRoF";
+    if (skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return { kind: "mapped", bonusType: "missileRoF" };
+    return { kind: "mapped", bonusType: "turretRoF" };
   }
   if (base === "maxVelocity") {
-    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return undefined;
-    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return "missileVelocity";
-    return undefined;
+    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return { kind: "skip", reason: "maxVelocity for drone skill is not a skill bonus" };
+    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return { kind: "mapped", bonusType: "missileVelocity" };
+    return { kind: "skip", reason: "maxVelocity is not a skill bonus in this context" };
   }
   if (base === "turretOptimal") {
-    if (skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return undefined;
-    if (skillId !== undefined && !TURRET_SKILL_IDS.has(skillId) && !TURRET_SUPPORT_SKILL_IDS.has(skillId) && !MISSILE_HULL_SKILL_IDS.has(skillId)) return undefined;
-    if (modifier.groupID !== undefined && !TURRET_GROUPS.has(modifier.groupID)) return undefined;
-    return "turretOptimal";
+    if (skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return { kind: "skip", reason: "maxRange for drone skill is not a turret skill bonus" };
+    if (skillId !== undefined && !TURRET_SKILL_IDS.has(skillId) && !TURRET_SUPPORT_SKILL_IDS.has(skillId) && !MISSILE_HULL_SKILL_IDS.has(skillId)) return { kind: "skip", reason: "maxRange for non-turret skill is not a turret skill bonus" };
+    if (modifier.groupID !== undefined && !TURRET_GROUPS.has(modifier.groupID)) return { kind: "skip", reason: "maxRange for non-turret group is not a turret skill bonus" };
+    return { kind: "mapped", bonusType: "turretOptimal" };
   }
   if (base === "turretDamage") {
-    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return undefined;
-    return base;
+    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return { kind: "skip", reason: "damageMultiplier for drone skill is not a turret skill bonus" };
+    return { kind: "mapped", bonusType: base };
   }
-  if (base === "turretTracking" || base === "turretFalloff") return base;
-  if (base === "missileDamage" || base === "missileFlightTime" || base === "missileExplosionRadius" || base === "missileExplosionVelocity") return base;
-  return undefined;
+  if (base === "turretTracking" || base === "turretFalloff") return { kind: "mapped", bonusType: base };
+  if (base === "missileDamage" || base === "missileFlightTime" || base === "missileExplosionRadius" || base === "missileExplosionVelocity") return { kind: "mapped", bonusType: base };
+  return { kind: "skip", reason: "attribute not applicable as a skill bonus" };
+}
+
+const RIG_DRAWBACK_REDUCTION_EFFECT_IDS = new Set([6697, 6698, 6699, 6700, 6701, 6702, 6703, 6704, 6705]);
+
+function buildRigDrawbackReductions(
+  typedogmas: Record<string, SdeTypeDogma>,
+  types: Record<string, SdeType>,
+  dogmaEffects: Record<string, SdeDogmaEffect>,
+): readonly RigDrawbackReduction[] {
+  const reductions: RigDrawbackReduction[] = [];
+  for (const [skillIdStr, td] of Object.entries(typedogmas)) {
+    const skillType = types[skillIdStr];
+    if (skillType?.published !== 1) continue;
+    const effectIds = td.dogmaEffects.map((e) => e.effectID);
+    const reductionEffectIds = effectIds.filter((eid) => RIG_DRAWBACK_REDUCTION_EFFECT_IDS.has(eid));
+    if (reductionEffectIds.length === 0) continue;
+    const skillAttrs = new Map<number, number>();
+    for (const a of td.dogmaAttributes) skillAttrs.set(a.attributeID, a.value);
+    const magnitudePerLevel = skillAttrs.get(1139);
+    if (magnitudePerLevel === undefined || !Number.isFinite(magnitudePerLevel) || magnitudePerLevel === 0) continue;
+    const skillId = String(skillIdStr) as TypeId;
+    for (const eid of reductionEffectIds) {
+      const eff = dogmaEffects[String(eid)];
+      if (!eff?.modifierInfo) continue;
+      for (const m of eff.modifierInfo) {
+        if (m.func === "LocationGroupModifier" && m.groupID !== undefined) {
+          reductions.push({ skillId, groupId: m.groupID, magnitudePerLevel });
+        }
+      }
+    }
+  }
+  return reductions;
 }
 
 function sizeTierFromPropulsionName(name: string): "small" | "medium" | "large" | "capital" {
@@ -509,8 +470,7 @@ interface FittingModuleStats {
   readonly agilityMultiplier?: number;
   readonly sigRadiusAdd?: number;
   readonly sigBonusPercent?: number;
-  readonly sigDrawbackPercent?: number;
-  readonly agilityDrawbackPercent?: number;
+  readonly rigDrawback?: RigDrawback;
   readonly turretTrackingPercent?: number;
   readonly turretOptimalPercent?: number;
   readonly turretFalloffPercent?: number;
@@ -743,7 +703,7 @@ function buildPropulsionStats(values: Map<string, number>, type: SdeType): Fitti
   };
 }
 
-function buildModuleStats(values: Map<string, number>, effects: Set<number>): FittingModuleStats | undefined {
+function buildModuleStats(values: Map<string, number>, effects: Set<number>, groupId: number, typeDogma: SdeTypeDogma | undefined, dogmaEffects: Readonly<Record<string, SdeDogmaEffect>>): FittingModuleStats | undefined {
   const stats: { -readonly [K in keyof FittingModuleStats]?: FittingModuleStats[K] } = {};
 
   const massAddition = optionalNumber(values.get("massAddition"));
@@ -777,29 +737,23 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
   if (turretFalloffPercent !== undefined) stats.turretFalloffPercent = turretFalloffPercent;
 
   const drawback = values.get("drawback") ?? 0;
-  if (effects.has(RIG_SIG_DRAWBACK_EFFECT) && Number.isFinite(drawback) && drawback !== 0) {
-    stats.sigDrawbackPercent = drawback;
-  }
-  if (effects.has(RIG_AGILITY_DRAWBACK_EFFECT) && Number.isFinite(drawback) && drawback !== 0) {
-    stats.agilityDrawbackPercent = drawback;
-  }
-
-  const damageGroup = resolveDamageModuleGroup(effects);
-  if (damageGroup !== undefined) {
-    const damageMultiplier = optionalNumber(values.get("damageMultiplier"));
-    const speedMultiplier = optionalNumber(values.get("speedMultiplier"));
-    if ((damageMultiplier !== undefined && damageMultiplier !== 0) || (speedMultiplier !== undefined && speedMultiplier !== 0)) {
-      stats.turretWeaponGroup = damageGroup;
-      if (damageMultiplier !== undefined && damageMultiplier !== 0) stats.turretDamageMultiplier = damageMultiplier;
-      if (speedMultiplier !== undefined && speedMultiplier !== 0) stats.turretSpeedMultiplier = speedMultiplier;
+  if (Number.isFinite(drawback) && drawback !== 0) {
+    for (const effectID of effects) {
+      const kind = effectDrawbackKind(effectID);
+      if (kind !== undefined) {
+        stats.rigDrawback = { kind, percent: drawback, groupId };
+        break;
+      }
     }
   }
 
-  if (effects.has(MISSILE_DAMAGE_EFFECT) || effects.has(MISSILE_ROF_EFFECT)) {
-    const missileDamageMultiplier = optionalNumber(values.get("missileDamageMultiplierBonus"));
-    const missileCycleTimeMultiplier = optionalNumber(values.get("speedMultiplier"));
-    if (missileDamageMultiplier !== undefined) stats.missileDamageMultiplier = missileDamageMultiplier;
-    if (missileCycleTimeMultiplier !== undefined) stats.missileCycleTimeMultiplier = missileCycleTimeMultiplier;
+  const combatStats = buildCombatModuleStats({ values, effects, dogmaEffects, typeDogma });
+  if (combatStats) {
+    if (combatStats.turretWeaponGroup !== undefined) stats.turretWeaponGroup = combatStats.turretWeaponGroup;
+    if (combatStats.turretDamageMultiplier !== undefined) stats.turretDamageMultiplier = combatStats.turretDamageMultiplier;
+    if (combatStats.turretSpeedMultiplier !== undefined) stats.turretSpeedMultiplier = combatStats.turretSpeedMultiplier;
+    if (combatStats.missileDamageMultiplier !== undefined) stats.missileDamageMultiplier = combatStats.missileDamageMultiplier;
+    if (combatStats.missileCycleTimeMultiplier !== undefined) stats.missileCycleTimeMultiplier = combatStats.missileCycleTimeMultiplier;
   }
 
   const droneDamageBonus = optionalNumber(values.get("droneDamageBonus"));
@@ -812,281 +766,14 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
   return { ...stats };
 }
 
-function resolveDamageModuleGroup(effects: Set<number>): TurretWeaponGroup | undefined {
-  for (const effectId of effects) {
-    const group = DAMAGE_MODULE_EFFECTS[effectId];
-    if (group !== undefined) return group;
-  }
-  return undefined;
-}
-
-interface DefenseRepairerOverload {
-  readonly amountMultiplier: number;
-  readonly cycleTimeMultiplier: number;
-}
-
-interface DefenseAncillary {
-  readonly chargeMultiplier: number;
-  readonly shots: number;
-  readonly reloadTime: number;
-}
-
-interface DefenseModuleStats {
-  readonly kind: "damageControl" | "rah" | "repairer" | "boostAmplifier"
-    | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule" | "hullBulkhead";
-  readonly layer?: "shield" | "armor" | "hull";
-  readonly active?: boolean;
-  readonly resistBonus?: DamageResists;
-  readonly overloadBonusMultiplier?: number;
-  readonly shieldResists?: DamageResists;
-  readonly armorResists?: DamageResists;
-  readonly hullResists?: DamageResists;
-  readonly baseArmorResists?: DamageResists;
-  readonly resistanceShiftAmount?: number;
-  readonly amount?: number;
-  readonly cycleTime?: number;
-  readonly capacitorNeed?: number;
-  readonly heatDamage?: number;
-  readonly overload?: DefenseRepairerOverload;
-  readonly overloadCycleTimeMultiplier?: number;
-  readonly ancillary?: DefenseAncillary;
-  readonly multiplier?: number;
-  readonly shieldHpAdd?: number;
-  readonly armorHpAdd?: number;
-  readonly hullHpPercent?: number;
-  readonly sigRadiusPenalty?: number;
-  readonly rechargeMultiplier?: number;
-}
-
-function buildDefenseStats(values: Map<string, number>, effects: Set<number>, groupId: number): DefenseModuleStats | undefined {
-  if (effects.has(DEFENSE_EFFECTS.damageControl)) return buildDamageControlStats(values);
-  if (effects.has(DEFENSE_EFFECTS.rah)) return buildRahStats(values);
-  if (effects.has(DEFENSE_EFFECTS.shieldBoost) || effects.has(DEFENSE_EFFECTS.fueledShieldBoost)) {
-    return buildShieldBoosterStats(values, effects);
-  }
-  if (effects.has(DEFENSE_EFFECTS.armorRepair) || effects.has(DEFENSE_EFFECTS.fueledArmorRepair)) {
-    return buildArmorRepairerStats(values, effects, groupId);
-  }
-  if (effects.has(DEFENSE_EFFECTS.structureRepair)) return buildHullRepairerStats(values);
-  if (effects.has(DEFENSE_EFFECTS.shieldBoostAmplifier)) return buildShieldBoostAmplifierStats(values);
-  if (effects.has(DEFENSE_EFFECTS.shieldHardener) || effects.has(DEFENSE_EFFECTS.armorHardener)) {
-    return buildActiveHardenerStats(values, effects);
-  }
-  if (effects.has(DEFENSE_EFFECTS.armorResonancePassive) || effects.has(DEFENSE_EFFECTS.shieldResonancePassive)) {
-    return buildPassiveResistStats(values, effects);
-  }
-  if (effects.has(DEFENSE_EFFECTS.shieldExtender)) return buildShieldExtenderStats(values);
-  if (effects.has(DEFENSE_EFFECTS.armorPlate)) return buildArmorPlateStats(values);
-  if (effects.has(DEFENSE_EFFECTS.shieldRecharge)) return buildRechargeModuleStats(values);
-  if (effects.has(DEFENSE_EFFECTS.structureHpMultiply)) return buildHullBulkheadStatsFromMultiplier(values);
-  if (effects.has(DEFENSE_EFFECTS.hullHpBonus)) return buildHullBulkheadStatsFromPercent(values);
-  return undefined;
-}
-
-function buildDamageControlStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const shieldResists = extractDcResonances(values, "shield");
-  const armorResists = extractDcResonances(values, "armor");
-  const hullResists = extractDcResonances(values, "hull");
-  if (!shieldResists && !armorResists && !hullResists) return undefined;
-  return {
-    kind: "damageControl",
-    shieldResists: shieldResists ?? undefined,
-    armorResists: armorResists ?? undefined,
-    hullResists: hullResists ?? undefined,
-  };
-}
-
-function buildRahStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const armorResonances = extractDcResonances(values, "armor");
-  const resistanceShiftAmount = optionalNumber(values.get("resistanceShiftAmount"));
-  const duration = optionalNumber(values.get("duration"));
-  const capacitorNeed = optionalNumber(values.get("capacitorNeed"));
-  const overloadDurationBonus = optionalNumber(values.get("overloadSelfDurationBonus"));
-  if (!armorResonances) return undefined;
-  return {
-    kind: "rah",
-    baseArmorResists: armorResonances,
-    resistanceShiftAmount: resistanceShiftAmount ?? 6,
-    cycleTime: duration !== undefined ? duration / 1000 : undefined,
-    capacitorNeed,
-    overloadCycleTimeMultiplier: overloadDurationBonus !== undefined ? 1 + overloadDurationBonus / 100 : undefined,
-  };
-}
-
-function buildShieldBoosterStats(values: Map<string, number>, effects: Set<number>): DefenseModuleStats | undefined {
-  const shieldBonus = optionalNumber(values.get("shieldBonus"));
-  const duration = optionalNumber(values.get("duration"));
-  if (shieldBonus === undefined || duration === undefined) return undefined;
-  const capacitorNeed = optionalNumber(values.get("capacitorNeed"));
-  const heatDamage = optionalNumber(values.get("heatDamage"));
-  const overloadShieldBonus = optionalNumber(values.get("overloadShieldBonus"));
-  const overloadDurationBonus = optionalNumber(values.get("overloadSelfDurationBonus"));
-  const isAncillary = effects.has(DEFENSE_EFFECTS.fueledShieldBoost);
-  const reloadTime = optionalNumber(values.get("reloadTime"));
-  const ancillary = isAncillary ? { chargeMultiplier: 1, shots: 0, reloadTime: (reloadTime ?? 0) / 1000 } : undefined;
-  return {
-    kind: "repairer",
-    layer: "shield",
-    amount: shieldBonus,
-    cycleTime: duration / 1000,
-    capacitorNeed,
-    heatDamage,
-    overload: buildRepairerOverload(overloadShieldBonus, overloadDurationBonus),
-    ancillary,
-  };
-}
-
-function buildArmorRepairerStats(values: Map<string, number>, effects: Set<number>, groupId: number): DefenseModuleStats | undefined {
-  const armorDamageAmount = optionalNumber(values.get("armorDamageAmount"));
-  const duration = optionalNumber(values.get("duration"));
-  if (armorDamageAmount === undefined || duration === undefined) return undefined;
-  const capacitorNeed = optionalNumber(values.get("capacitorNeed"));
-  const heatDamage = optionalNumber(values.get("heatDamage"));
-  const overloadAmountBonus = optionalNumber(values.get("overloadArmorDamageAmount"));
-  const overloadDurationBonus = optionalNumber(values.get("overloadSelfDurationBonus"));
-  const isAncillary = groupId === 1199 || effects.has(DEFENSE_EFFECTS.fueledArmorRepair);
-  const chargedArmorDamageMultiplier = optionalNumber(values.get("chargedArmorDamageMultiplier"));
-  const reloadTime = optionalNumber(values.get("reloadTime"));
-  const ancillary = buildAncillary(isAncillary, chargedArmorDamageMultiplier ?? 1, reloadTime);
-  return {
-    kind: "repairer",
-    layer: "armor",
-    amount: armorDamageAmount,
-    cycleTime: duration / 1000,
-    capacitorNeed,
-    heatDamage,
-    overload: buildRepairerOverload(overloadAmountBonus, overloadDurationBonus),
-    ancillary,
-  };
-}
-
-function buildHullRepairerStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const structureDamageAmount = optionalNumber(values.get("structureDamageAmount"));
-  const duration = optionalNumber(values.get("duration"));
-  if (structureDamageAmount === undefined || duration === undefined) return undefined;
-  const capacitorNeed = optionalNumber(values.get("capacitorNeed"));
-  const heatDamage = optionalNumber(values.get("heatDamage"));
-  return {
-    kind: "repairer",
-    layer: "hull",
-    amount: structureDamageAmount,
-    cycleTime: duration / 1000,
-    capacitorNeed,
-    heatDamage,
-    overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 },
-  };
-}
-
-function buildShieldBoostAmplifierStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const shieldBoostMultiplier = optionalNumber(values.get("shieldBoostMultiplier"));
-  if (shieldBoostMultiplier === undefined) return undefined;
-  return { kind: "boostAmplifier", multiplier: round6(1 + shieldBoostMultiplier / 100) };
-}
-
-function buildActiveHardenerStats(values: Map<string, number>, effects: Set<number>): DefenseModuleStats | undefined {
-  const layer = effects.has(DEFENSE_EFFECTS.shieldHardener) ? "shield" : "armor";
-  const resistBonus = extractResistBonus(values);
-  if (!resistBonus) return undefined;
-  const duration = optionalNumber(values.get("duration"));
-  const capacitorNeed = optionalNumber(values.get("capacitorNeed"));
-  const heatDamage = optionalNumber(values.get("heatDamage"));
-  const overloadHardeningBonus = optionalNumber(values.get("overloadHardeningBonus"));
-  return {
-    kind: "resistModule",
-    layer,
-    active: true,
-    resistBonus,
-    overloadBonusMultiplier: overloadHardeningBonus !== undefined ? 1 + overloadHardeningBonus / 100 : undefined,
-    cycleTime: duration !== undefined ? duration / 1000 : undefined,
-    capacitorNeed,
-    heatDamage,
-  };
-}
-
-function buildPassiveResistStats(values: Map<string, number>, effects: Set<number>): DefenseModuleStats | undefined {
-  const layer = effects.has(DEFENSE_EFFECTS.shieldResonancePassive) ? "shield" : "armor";
-  const resistBonus = extractResistBonus(values);
-  if (!resistBonus) return undefined;
-  return { kind: "resistModule", layer, active: false, resistBonus };
-}
-
-function buildShieldExtenderStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const capacityBonus = optionalNumber(values.get("capacityBonus"));
-  if (capacityBonus === undefined) return undefined;
-  const sigRadiusAdd = optionalNumber(values.get("signatureRadiusAdd"));
-  return { kind: "shieldExtender", shieldHpAdd: capacityBonus, sigRadiusPenalty: sigRadiusAdd };
-}
-
-function buildArmorPlateStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const armorHpBonusAdd = optionalNumber(values.get("armorHPBonusAdd"));
-  if (armorHpBonusAdd === undefined) return undefined;
-  return { kind: "armorPlate", armorHpAdd: armorHpBonusAdd };
-}
-
-function buildHullBulkheadStatsFromMultiplier(values: Map<string, number>): DefenseModuleStats | undefined {
-  const multiplier = optionalNumber(values.get("structureHPMultiplier"));
-  if (multiplier === undefined) return undefined;
-  return { kind: "hullBulkhead", hullHpPercent: round6((multiplier - 1) * 100) };
-}
-
-function buildHullBulkheadStatsFromPercent(values: Map<string, number>): DefenseModuleStats | undefined {
-  const hullHpBonusPercent = optionalNumber(values.get("hullHpBonus"));
-  if (hullHpBonusPercent === undefined) return undefined;
-  return { kind: "hullBulkhead", hullHpPercent: hullHpBonusPercent };
-}
-
-function buildRechargeModuleStats(values: Map<string, number>): DefenseModuleStats | undefined {
-  const rechargeBonus = optionalNumber(values.get("rechargeratebonus")) ?? optionalNumber(values.get("shieldRechargeRateMultiplier"));
-  if (rechargeBonus === undefined) return undefined;
-  return { kind: "rechargeModule", rechargeMultiplier: 1 + rechargeBonus / 100 };
-}
-
-function buildRepairerOverload(amountBonus: number | undefined, durationBonus: number | undefined): DefenseRepairerOverload {
-  return {
-    amountMultiplier: amountBonus !== undefined ? 1 + amountBonus / 100 : 1,
-    cycleTimeMultiplier: durationBonus !== undefined ? 1 + durationBonus / 100 : 1,
-  };
-}
-
-function buildAncillary(isAncillary: boolean, chargeMultiplier: number, reloadTime: number | undefined): DefenseAncillary | undefined {
-  if (!isAncillary) return undefined;
-  return { chargeMultiplier, shots: 0, reloadTime: (reloadTime ?? 0) / 1000 };
-}
-
-function extractResistBonus(values: Map<string, number>): DamageResists | undefined {
-  const em = optionalNumber(values.get("emDamageResistanceBonus"));
-  const thermal = optionalNumber(values.get("thermalDamageResistanceBonus"));
-  const kinetic = optionalNumber(values.get("kineticDamageResistanceBonus"));
-  const explosive = optionalNumber(values.get("explosiveDamageResistanceBonus"));
-  if (em === undefined && thermal === undefined && kinetic === undefined && explosive === undefined) return undefined;
-  return {
-    em: round6(Math.abs(em ?? 0) / 100),
-    thermal: round6(Math.abs(thermal ?? 0) / 100),
-    kinetic: round6(Math.abs(kinetic ?? 0) / 100),
-    explosive: round6(Math.abs(explosive ?? 0) / 100),
-  };
-}
-
-function extractDcResonances(values: Map<string, number>, prefix: string): DamageResists | undefined {
-  const emAttr = prefix === "hull" ? "hullEmDamageResonance" : `${prefix}EmDamageResonance`;
-  const thermalAttr = prefix === "hull" ? "hullThermalDamageResonance" : `${prefix}ThermalDamageResonance`;
-  const kineticAttr = prefix === "hull" ? "hullKineticDamageResonance" : `${prefix}KineticDamageResonance`;
-  const explosiveAttr = prefix === "hull" ? "hullExplosiveDamageResonance" : `${prefix}ExplosiveDamageResonance`;
-  const em = optionalNumber(values.get(emAttr));
-  const thermal = optionalNumber(values.get(thermalAttr));
-  const kinetic = optionalNumber(values.get(kineticAttr));
-  const explosive = optionalNumber(values.get(explosiveAttr));
-  if (em === undefined && thermal === undefined && kinetic === undefined && explosive === undefined) return undefined;
-  return {
-    em: round6(1 - (em ?? 1)),
-    thermal: round6(1 - (thermal ?? 1)),
-    kinetic: round6(1 - (kinetic ?? 1)),
-    explosive: round6(1 - (explosive ?? 1)),
-  };
-}
-
-function round6(value: number): number {
-  return Math.round(value * 1e6) / 1e6;
+function buildDefenseStats(
+  values: Map<string, number>,
+  effects: Set<number>,
+  groupId: number,
+  typeDogma: SdeTypeDogma | undefined,
+  dogmaEffects: Readonly<Record<string, SdeDogmaEffect>>,
+): DefenseModuleStats | undefined {
+  return buildDefenseStatsFromIntents({ values, effects, groupId, typeDogma, dogmaEffects });
 }
 
 export function buildStasisWebStats(values: Map<string, number>): StasisWebStats | undefined {
@@ -1257,6 +944,9 @@ function buildHullBonuses(
   attributeValues: Map<number, number>,
   typeDogma: SdeTypeDogma | undefined,
   dogmaEffects: Readonly<Record<string, SdeDogmaEffect>>,
+  shipTypeId: number,
+  shipName: string,
+  unmappedCollector: UnmappedAttribute[],
 ): readonly HullBonus[] {
   if (!typeDogma) return [];
   const effects = buildEffectSet(typeDogma);
@@ -1265,11 +955,16 @@ function buildHullBonuses(
   for (const effectID of effects) {
     const effect = dogmaEffects[String(effectID)];
     if (!effect?.modifierInfo) continue;
-    const effectNonScaling = NON_SCALING_EFFECT_IDS.has(effectID);
+    const effectNonScaling = isNonScalingEffect(effectID);
     const specialMagnitude = SPECIAL_MAGNITUDES[effectID];
     for (const modifier of effect.modifierInfo) {
-      const attribute = resolveHullBonusAttribute(modifier, attributeNames);
-      if (!attribute) continue;
+      const resolution = resolveHullBonusAttribute(modifier, attributeNames);
+      if (resolution.kind === "skip") continue;
+      if (resolution.kind === "unmapped") {
+        unmappedCollector.push({ shipTypeId, shipName, effectId: effectID, attributeId: resolution.attributeId, attributeName: attributeNames.get(resolution.attributeId) ?? "unknown", func: modifier.func });
+        continue;
+      }
+      const attribute = resolution.attribute;
       const magnitude = specialMagnitude ?? attributeValues.get(modifier.modifyingAttributeID);
       if (magnitude === undefined || !Number.isFinite(magnitude) || magnitude === 0) continue;
       const filter = resolveHullBonusFilter(modifier);
@@ -1288,24 +983,30 @@ function buildHullBonuses(
 function resolveHullBonusAttribute(
   modifier: SdeDogmaEffectModifier,
   attributeNames: Map<number, string>,
-): BonusAttribute | undefined {
-  const base = COMBAT_ATTRIBUTE_MAP[modifier.modifiedAttributeID];
-  if (!base) return undefined;
+): HullBonusResolution {
+  const base = semanticAttributeToHullBonus(modifier.modifiedAttributeID);
+  if (!base) {
+    if (isOutOfScopeAttribute(modifier.modifiedAttributeID)) return { kind: "skip", reason: "out of scope" };
+    return { kind: "unmapped", attributeId: modifier.modifiedAttributeID };
+  }
   const skillId = modifier.skillTypeID;
   const func = modifier.func;
   // Disambiguate context-dependent attributes.
-  if (base === "turretRoF" && skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return "missileRoF";
-  if (base === "turretRoF" && modifier.groupID !== undefined && LAUNCHER_GROUP_IDS.has(modifier.groupID)) return "missileRoF";
-  if (base === "maxVelocity" && func === "OwnerRequiredSkillModifier" && skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return "missileVelocity";
-  if (base === "turretDamage" && func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return "droneDamage";
-  if (base === "turretOptimal" && modifier.groupID === WARP_SCRAMBLER_GROUP) return undefined;
+  if (base === "turretRoF" && skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return { kind: "mapped", attribute: "missileRoF" };
+  if (base === "turretRoF" && modifier.groupID !== undefined && LAUNCHER_GROUP_IDS.has(modifier.groupID)) return { kind: "mapped", attribute: "missileRoF" };
+  if (base === "maxVelocity" && func === "OwnerRequiredSkillModifier" && skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return { kind: "mapped", attribute: "missileVelocity" };
+  if (base === "turretDamage" && func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return { kind: "mapped", attribute: "droneDamage" };
+  if (base === "turretOptimal" && modifier.groupID === WARP_SCRAMBLER_GROUP) return { kind: "skip", reason: "warp scrambler maxRange is not a turret bonus" };
   // Skip maxRange bonuses filtered by non-turret skills (e.g. Leadership for command bursts).
-  if (base === "turretOptimal" && skillId !== undefined && !TURRET_SKILL_IDS.has(skillId)) return undefined;
+  if (base === "turretOptimal" && skillId !== undefined && !TURRET_SKILL_IDS.has(skillId)) return { kind: "skip", reason: "maxRange bonus for non-turret skill" };
   // Skip turret attribute bonuses for non-turret module groups (tractor beams, remote repairers, etc.).
-  if ((base === "turretOptimal" || base === "turretDamage" || base === "turretRoF" || base === "turretTracking" || base === "turretFalloff") && modifier.groupID !== undefined && !TURRET_GROUPS.has(modifier.groupID)) return undefined;
+  if ((base === "turretOptimal" || base === "turretDamage" || base === "turretRoF" || base === "turretTracking" || base === "turretFalloff") && modifier.groupID !== undefined && !TURRET_GROUPS.has(modifier.groupID)) return { kind: "skip", reason: "turret attribute on non-turret module group" };
   // Skip drone HP/resist bonuses (OwnerRequiredSkillModifier on ship HP attributes with drone skill).
-  if (func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId) && (base === "hullHpPercent" || base === "armorHpPercent" || base === "shieldHpPercent" || base === "armorResist" || base === "shieldResist")) return undefined;
-  return base;
+  if (func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId) && (base === "hullHpPercent" || base === "armorHpPercent" || base === "shieldHpPercent" || base === "armorResist" || base === "shieldResist")) return { kind: "skip", reason: "drone HP/resist bonus on ship attribute" };
+  // signatureRadiusBonus is shared between MWD sig bloom and target painter sig bonus; skip painter bonuses.
+  if (base === "mwdSigBloom" && skillId === TARGET_PAINTING_SKILL_ID) return { kind: "skip", reason: "target painter signature bonus is not MWD sig bloom" };
+  if (base === "mwdSigBloom" && modifier.groupID === TARGET_PAINTER_GROUP) return { kind: "skip", reason: "target painter group signature bonus is not MWD sig bloom" };
+  return { kind: "mapped", attribute: base };
 }
 
 function resolveHullBonusFilter(modifier: SdeDogmaEffectModifier): { chargeSkillId?: TypeId; moduleSkillId?: TypeId; moduleGroupId?: number } | undefined {
@@ -1477,12 +1178,17 @@ export function buildOmnidirectionalTrackingEnhancerStats(values: Map<string, nu
 }
 
 async function main() {
-  const types = await loadMerged<SdeType>("types.");
-  const typedogmas = await loadMerged<SdeTypeDogma>("typedogma.");
-  const attributes = await loadMerged<SdeDogmaAttribute>("dogmaattributes.");
-  const dogmaEffects = await loadMerged<SdeDogmaEffect>("dogmaeffects.");
-  const groups = await loadMerged<SdeGroup>("groups.");
-  const requiredSkills = await loadMerged<Record<string, number>>("requiredskillsfortypes.");
+  const projection = await buildProjection(SDE_DIR);
+  await writeProjection(projection, PROJECTION_FILE);
+  const classificationResult = assertClassificationComplete(projection, ATTRIBUTE_CLASSIFICATION, EFFECT_CLASSIFICATION);
+  failOnClassificationErrors(classificationResult);
+
+  const types = await loadMerged<SdeType>(SDE_DIR, "types.");
+  const typedogmas = await loadMerged<SdeTypeDogma>(SDE_DIR, "typedogma.");
+  const attributes = await loadMerged<SdeDogmaAttribute>(SDE_DIR, "dogmaattributes.");
+  const dogmaEffects = await loadMerged<SdeDogmaEffect>(SDE_DIR, "dogmaeffects.");
+  const groups = await loadMerged<SdeGroup>(SDE_DIR, "groups.");
+  const requiredSkills = await loadMerged<Record<string, number>>(SDE_DIR, "requiredskillsfortypes.");
   const attributeNames = buildAttributeNameMap(attributes);
   const shipGroupIds = new Set(Object.values(groups).filter((group) => group.categoryID === SHIP_CATEGORY_ID).map((group) => group.groupID));
 
@@ -1515,6 +1221,7 @@ async function main() {
   const itemNames: Record<string, LocalizedName> = {};
   const idToType = new Map<string, SdeType>();
   const shipNameToId = buildShipNameToId();
+  const unmappedHullAttributes: UnmappedAttribute[] = [];
 
   for (const type of Object.values(types)) {
     const id = String(type.typeID) as TypeId;
@@ -1526,7 +1233,7 @@ async function main() {
 
     if (shipGroupIds.has(type.groupID)) {
       const attributeValueMap = buildAttributeValueMap(typeDogma);
-      const bonuses = buildHullBonuses(attributeNames, attributeValueMap, typeDogma, dogmaEffects);
+      const bonuses = buildHullBonuses(attributeNames, attributeValueMap, typeDogma, dogmaEffects, type.typeID, enName ?? String(type.typeID), unmappedHullAttributes);
       const shipId = resolveShipId(enName, type, shipNameToId);
       if (bonuses.length > 0) hullBonuses[shipId] = bonuses;
       continue;
@@ -1788,8 +1495,8 @@ async function main() {
         fittingModules[id] = { ...buildPropulsionStats(values, type), id, name: enName };
         addItemName(itemNames, id, type);
       } else {
-        const stats = buildModuleStats(values, effects);
-        const defense = buildDefenseStats(values, effects, type.groupID);
+        const stats = buildModuleStats(values, effects, type.groupID, typeDogma, dogmaEffects);
+        const defense = buildDefenseStats(values, effects, type.groupID, typeDogma, dogmaEffects);
         if (stats || defense) {
           fittingModules[id] = { ...stats, defense, id, name: enName };
           addItemName(itemNames, id, type);
@@ -1805,352 +1512,22 @@ async function main() {
     Object.entries(combatDrones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
   );
 
-  const skillBonuses = buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects);
+  const skillBonuses = buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, unmappedHullAttributes);
+  const rigDrawbackReductions = buildRigDrawbackReductions(typedogmas, types, dogmaEffects);
 
   const date = new Date().toISOString().split("T")[0];
   const header =
     `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n` +
     `/* eslint-disable */\n\n` +
-    `import type { ShipId, TypeId } from "../ids";\n` +
-    `import type { HullTier } from "../../ships";\n` +
-    `import type { DamageResists } from "../../sim";\n\n`;
-  const typeDefinitions = `export interface FittingPropulsionStats {
-  readonly kind: "afterburner" | "microwarpdrive";
-  readonly sizeTier: HullTier;
-  readonly thrust: number;
-  readonly speedBonus: number;
-  readonly massAddition: number;
-  readonly sigBloom: number;
-}
-
-export type DefenseLayer = "shield" | "armor" | "hull";
-
-export interface DefenseRepairerOverload {
-  readonly amountMultiplier: number;
-  readonly cycleTimeMultiplier: number;
-}
-
-export interface DefenseAncillary {
-  readonly chargeMultiplier: number;
-  readonly shots: number;
-  readonly reloadTime: number;
-}
-
-export interface DefenseModuleStats {
-  readonly kind: "damageControl" | "rah" | "repairer" | "boostAmplifier" | "resistModule" | "shieldExtender" | "armorPlate" | "rechargeModule" | "hullBulkhead";
-  readonly layer?: DefenseLayer;
-  readonly active?: boolean;
-  readonly resistBonus?: DamageResists;
-  readonly overloadBonusMultiplier?: number;
-  readonly shieldResists?: DamageResists;
-  readonly armorResists?: DamageResists;
-  readonly hullResists?: DamageResists;
-  readonly baseArmorResists?: DamageResists;
-  readonly resistanceShiftAmount?: number;
-  readonly amount?: number;
-  readonly cycleTime?: number;
-  readonly capacitorNeed?: number;
-  readonly heatDamage?: number;
-  readonly overload?: DefenseRepairerOverload;
-  readonly overloadCycleTimeMultiplier?: number;
-  readonly ancillary?: DefenseAncillary;
-  readonly multiplier?: number;
-  readonly shieldHpAdd?: number;
-  readonly armorHpAdd?: number;
-  readonly hullHpPercent?: number;
-  readonly sigRadiusPenalty?: number;
-  readonly rechargeMultiplier?: number;
-}
-
-export interface FittingModuleStats {
-  readonly massAddition?: number;
-  readonly massBonusPercentage?: number;
-  readonly speedBonusPercent?: number;
-  readonly agilityMultiplier?: number;
-  readonly sigRadiusAdd?: number;
-  readonly sigBonusPercent?: number;
-  readonly sigDrawbackPercent?: number;
-  readonly agilityDrawbackPercent?: number;
-  readonly turretTrackingPercent?: number;
-  readonly turretOptimalPercent?: number;
-  readonly turretFalloffPercent?: number;
-  readonly turretDamageMultiplier?: number;
-  readonly turretSpeedMultiplier?: number;
-  readonly turretWeaponGroup?: TurretWeaponGroup;
-  readonly propulsion?: FittingPropulsionStats;
-  readonly stasisWeb?: Omit<StasisWebStats, "id" | "name">;
-  readonly stasisGrappler?: Omit<StasisGrapplerStats, "id" | "name">;
-  readonly trackingDisruptor?: Omit<TrackingDisruptorStats, "id" | "name">;
-  readonly warpScrambler?: Omit<WarpScramblerStats, "id" | "name">;
-  readonly targetPainter?: Omit<TargetPainterStats, "id" | "name">;
-  readonly sensorDampener?: Omit<SensorDampenerStats, "id" | "name">;
-  readonly sensorBooster?: Omit<SensorBoosterStats, "id" | "name">;
-  readonly signalAmplifier?: Omit<SignalAmplifierStats, "id" | "name">;
-  readonly missileDamageMultiplier?: number;
-  readonly missileCycleTimeMultiplier?: number;
-  readonly droneDamageBonus?: number;
-  readonly droneControlRangeBonus?: number;
-  readonly defense?: DefenseModuleStats;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export type TurretWeaponGroup = "Energy Weapon" | "Hybrid Weapon" | "Projectile Weapon";
-
-export interface TurretStats {
-  readonly tracking: number;
-  readonly optimal: number;
-  readonly falloff: number;
-  readonly chargeSize: number;
-  readonly damageMultiplier: number;
-  readonly cycleTime: number;
-  readonly turretSkill?: string;
-  readonly specializationSkill?: string;
-  readonly requiredSkillIds: readonly TypeId[];
-  readonly groupID: number;
-  readonly metaLevel: number;
-  readonly metaGroupID: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export type HullBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity" | "turretDamage" | "turretRoF" | "droneDamage" | "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
-
-export interface HullBonus {
-  readonly attribute: HullBonusAttribute;
-  readonly magnitude: number;
-  readonly scalesWithHullSkill: boolean;
-  readonly chargeSkillId?: TypeId;
-  readonly moduleSkillId?: TypeId;
-  readonly moduleGroupId?: number;
-}
-
-export type SkillBonusType = "turretDamage" | "turretRoF" | "turretTracking" | "turretOptimal" | "turretFalloff" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity";
-
-export interface SkillBonus {
-  readonly skillId: TypeId;
-  readonly bonusType: SkillBonusType;
-  readonly magnitudePerLevel: number;
-  readonly requiredSkillId?: TypeId;
-  readonly moduleGroupId?: number;
-  readonly appliesTo: "module" | "charge";
-}
-
-export interface ChargeStats {
-  readonly trackingMultiplier?: number;
-  readonly rangeMultiplier?: number;
-  readonly falloffMultiplier?: number;
-  readonly emDamage?: number;
-  readonly thermalDamage?: number;
-  readonly kineticDamage?: number;
-  readonly explosiveDamage?: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface LauncherStats {
-  readonly rateOfFire: number;
-  readonly launcherGroup: number;
-  readonly chargeGroups: readonly number[];
-  readonly requiredSkillIds: readonly TypeId[];
-  readonly metaLevel: number;
-  readonly metaGroupID: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface MissileStats {
-  readonly damage: number;
-  readonly damageType: "em" | "thermal" | "kinetic" | "explosive";
-  readonly explosionRadius: number;
-  readonly explosionVelocity: number;
-  readonly damageReductionFactor: number;
-  readonly maxVelocity: number;
-  readonly flightTime: number;
-  readonly launcherGroup: number;
-  readonly chargeGroup: number;
-  readonly requiredSkillIds: readonly TypeId[];
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface TurretScriptStats {
-  readonly trackingMultiplier: number;
-  readonly optimalMultiplier: number;
-  readonly falloffMultiplier: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface StasisWebStats {
-  readonly maxRange: number;
-  readonly speedFactorPercent: number;
-  readonly overloadRangeBonusPercent: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface StasisGrapplerStats {
-  readonly optimal: number;
-  readonly falloff: number;
-  readonly speedFactorPercent: number;
-  readonly overloadOptimalBonusPercent: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface TrackingDisruptorStats {
-  readonly optimal: number;
-  readonly falloff: number;
-  readonly disruptionPercent: number;
-  readonly overloadStrengthBonusPercent: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface DisruptionScriptStats {
-  readonly trackingDeltaBonus: number;
-  readonly rangeDeltaBonus: number;
-  readonly falloffDeltaBonus: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface WarpScramblerStats {
-  readonly maxRange: number;
-  readonly overloadRangeBonusPercent: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface TrackingComputerStats {
-  readonly trackingBonusPercent: number;
-  readonly optimalBonusPercent: number;
-  readonly falloffBonusPercent: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface TargetPainterStats {
-  readonly maxRange: number;
-  readonly falloff: number;
-  readonly signatureRadiusBonusPercent: number;
-  readonly overloadStrengthBonusPercent: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface MissileGuidanceComputerStats {
-  readonly explosionRadiusBonusPercent: number;
-  readonly explosionVelocityBonusPercent: number;
-  readonly missileVelocityBonusPercent: number;
-  readonly flightTimeBonusPercent: number;
-  readonly overloadStrengthBonusPercent: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface MissileGuidanceEnhancerStats {
-  readonly explosionRadiusBonusPercent: number;
-  readonly explosionVelocityBonusPercent: number;
-  readonly missileVelocityBonusPercent: number;
-  readonly flightTimeBonusPercent: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface MissileScriptStats {
-  readonly explosionRadiusMultiplier: number;
-  readonly explosionVelocityMultiplier: number;
-  readonly missileVelocityMultiplier: number;
-  readonly flightTimeMultiplier: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface OmnidirectionalTrackingLinkStats {
-  readonly trackingBonusPercent: number;
-  readonly optimalBonusPercent: number;
-  readonly falloffBonusPercent: number;
-  readonly overloadStrengthBonusPercent: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface OmnidirectionalTrackingEnhancerStats {
-  readonly trackingBonusPercent: number;
-  readonly optimalBonusPercent: number;
-  readonly falloffBonusPercent: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface SensorDampenerStats {
-  readonly optimal: number;
-  readonly falloff: number;
-  readonly scanResolutionBonusPercent: number;
-  readonly maxTargetRangeBonusPercent: number;
-  readonly overloadStrengthBonusPercent: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface SensorBoosterStats {
-  readonly scanResolutionBonusPercent: number;
-  readonly maxTargetRangeBonusPercent: number;
-  readonly overloadStrengthBonusPercent: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface SignalAmplifierStats {
-  readonly scanResolutionBonusPercent: number;
-  readonly maxTargetRangeBonusPercent: number;
-  readonly maxLockedTargetsBonus: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface SensorBoosterScriptStats {
-  readonly scanResolutionMultiplier: number;
-  readonly maxTargetRangeMultiplier: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export interface SensorDampenerScriptStats {
-  readonly scanResolutionMultiplier: number;
-  readonly maxTargetRangeMultiplier: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-export type DroneSizeClass = "light" | "medium" | "heavy" | "sentry";
-
-export interface DroneStats {
-  readonly sizeClass: DroneSizeClass;
-  readonly damageMultiplier: number;
-  readonly emDamage: number;
-  readonly thermalDamage: number;
-  readonly kineticDamage: number;
-  readonly explosiveDamage: number;
-  readonly tracking: number;
-  readonly sigResolution: number;
-  readonly optimal: number;
-  readonly falloff: number;
-  readonly maxVelocity: number;
-  readonly orbitSpeed: number;
-  readonly orbitRange: number;
-  readonly cycleTime: number;
-  readonly bandwidth: number;
-  readonly volume: number;
-  readonly metaLevel: number;
-  readonly metaGroupID: number;
-  readonly id: TypeId;
-  readonly name: string;
-}
-
-`;
+    `import type { ShipId, TypeId } from "../../ids";\n` +
+    `import type {\n` +
+    `  ChargeStats, DisruptionScriptStats, DroneStats, FittingModuleStats, HullBonus, LauncherStats,\n` +
+    `  MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats,\n` +
+    `  OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, RigDrawbackReduction,\n` +
+    `  SensorBoosterScriptStats, SensorBoosterStats, SensorDampenerScriptStats, SensorDampenerStats,\n` +
+    `  SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats,\n` +
+    `  TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, WarpScramblerStats,\n` +
+    `} from "../types";\n\n`;
 
   const scriptDefinitions = `export const SCRIPTS: Readonly<Record<string, TurretScriptStats>> = ${stringifyWithTypeIds(scripts)};
 
@@ -2192,7 +1569,6 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
 
   const lines: string[] = [
     header,
-    typeDefinitions,
     scriptDefinitions,
     `export const FITTING_MODULES: Readonly<Record<string, FittingModuleStats>> = ${stringifyWithTypeIds(fittingModules)};`,
     ``,
@@ -2207,6 +1583,8 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     `export const HULL_BONUSES: Readonly<Record<ShipId, readonly HullBonus[]>> = ${stringifyHullBonuses(hullBonuses)};`,
     ``,
     `export const SKILL_BONUSES: readonly SkillBonus[] = ${stringifySkillBonuses(skillBonuses)};`,
+    ``,
+    `export const RIG_DRAWBACK_REDUCTIONS: readonly RigDrawbackReduction[] = ${stringifyRigDrawbackReductions(rigDrawbackReductions)};`,
     ``,
     `export const DRONES: Readonly<Record<string, { readonly id: TypeId; readonly name: string }>> = ${stringifyWithTypeIds(sortedDrones)};`,
     ``,
@@ -2247,6 +1625,22 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
   );
   const filteredItemNames = filterItemNames(itemNames, idToType, groups, dbTableNames);
 
+  const auditEntries = new Map<number, AuditModuleEntry>();
+  for (const [idStr, mod] of Object.entries(fittingModules)) {
+    auditEntries.set(Number(idStr), { typeId: Number(idStr), typeName: mod.name, hasDefense: mod.defense !== undefined });
+  }
+  const auditFailures = auditCoverage({
+    types,
+    typedogmas,
+    dogmaEffects,
+    moduleGroupIds: MODULE_GROUPS,
+    generatedModules: auditEntries,
+  });
+  if (auditFailures.length > 0) {
+    const details = auditFailures.map((f) => `[${f.category}] type ${f.typeId} (${f.typeName}): ${f.detail}`).join("\n");
+    throw new Error(`Coverage audit failed with ${auditFailures.length} failure(s):\n${details}`);
+  }
+
   await mkdir(dirname(OUT_FILE), { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
   await writeI18nFiles(filteredItemNames, date);
@@ -2280,6 +1674,29 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
   ];
   console.log(`Wrote ${counts.join(", ")} to ${OUT_FILE}`);
   console.log(`Wrote ${Object.keys(filteredItemNames).length} item names to ${I18N_EN_FILE}, ${I18N_ZH_FILE}, ${I18N_JA_FILE}`);
+  reportUnmappedAttributes(unmappedHullAttributes);
+}
+
+function reportUnmappedAttributes(unmapped: readonly UnmappedAttribute[]): void {
+  if (unmapped.length === 0) return;
+  const byAttribute = new Map<number, UnmappedAttribute[]>();
+  for (const entry of unmapped) {
+    const list = byAttribute.get(entry.attributeId) ?? [];
+    list.push(entry);
+    byAttribute.set(entry.attributeId, list);
+  }
+  console.error(`\nERROR: ${unmapped.length} unmapped hull bonus modifiers across ${byAttribute.size} attributes.`);
+  console.error("Add them to ATTRIBUTE_CLASSIFICATION or add an intentional skip in resolveHullBonusAttribute.\n");
+  for (const [attrId, entries] of byAttribute) {
+    const attrName = entries[0].attributeName;
+    const sample = entries.slice(0, 3);
+    console.error(`  Attribute ${attrId} (${attrName}): ${entries.length} refs`);
+    for (const e of sample) {
+      console.error(`    ${e.shipName} (${e.shipTypeId}) effect ${e.effectId} func=${e.func}`);
+    }
+    if (entries.length > 3) console.error(`    ... and ${entries.length - 3} more`);
+  }
+  process.exit(1);
 }
 
 function addItemName(
@@ -2549,7 +1966,7 @@ async function writeI18nFiles(
   await writeFile(collisionJaFile, collisionJaContent);
 }
 
-export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats };
+export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses };
 
 if (import.meta.main) {
   main().catch((error) => {

@@ -1,7 +1,6 @@
 ---
 import { DEFAULT_VALUES } from "../../ui/controls";
 import type { Side } from "../../ui/controls";
-import Chevron from "../controls/Chevron.astro";
 import FormField from "../form/FormField.astro";
 import FormFieldRow from "../form/FormFieldRow.astro";
 import IconButton from "../controls/IconButton.astro";
@@ -75,18 +74,17 @@ const falloff = DEFAULT_VALUES[`${idPrefix}-falloff`];
   </FormField>
 </FormFieldRow>
 
-<div class="form-field-group ammo-group" id={`${idPrefix}-ammo-field`}>
+<div class="form-field-group" id={`${idPrefix}-ammo-field`}>
   <TriggerButton id={`${idPrefix}-ammo-trigger`} popupId={`${idPrefix}-ammo-popup`}
-          labelClass="ammo-label truncate" labelI18n="label.ammo" labelText="Ammo"
+          labelI18n="label.ammo" labelText="Ammo"
           hintI18n="button.selectAmmo" ariaLabelI18n="button.selectAmmo"
           data-hint="Select ammunition" ariaLabel="Select ammunition" ariaHaspopup="true">
-    <span class="ammo-summary-row">
+    <span class="trigger-summary">
       <img id={`${idPrefix}-ammo-summary-icon`} class="ammo-summary-icon" alt="" hidden>
-      <span class="ammo-summary-value mono truncate" id={`${idPrefix}-ammo-summary`}></span>
-      <Chevron />
+      <span class="trigger-summary-value mono truncate" id={`${idPrefix}-ammo-summary`}></span>
     </span>
   </TriggerButton>
-  <PopupBox id={`${idPrefix}-ammo-popup`} extraClass="ammo-popup" position="below" align="both" scroll>
+  <PopupBox id={`${idPrefix}-ammo-popup`} extraClass="ammo-popup popup-stretch" position="below" align="both" scroll>
     <span class="fitting-group-label" id={`${idPrefix}-ammo-cargo-label`} data-i18n="ammo.cargoGroup">In cargo</span>
     <ul class="ammo-list" id={`${idPrefix}-ammo-cargo-list`} role="listbox"></ul>
     <button type="button" class="ammo-expand" id={`${idPrefix}-ammo-expand`} data-i18n="ammo.showAll">Show all</button>

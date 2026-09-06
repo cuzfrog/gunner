@@ -53,7 +53,7 @@ export class EftSideImporter {
     panel.clearOverrides();
     panel.sections.hull.loadHull(imported.profile.id, imported.propulsion?.propulsionId ?? PROPULSION_NONE);
     panel.sections.hull.applyImportedFitting(this.fittedHullSummary(side, imported));
-    panel.setSensorData(imported.sensorSpec, imported.sensorBoosts);
+    panel.setSensorData(imported.sensorSpec);
     this.turrets[side].applyImported(imported, conditions);
     this.launchers[side].applyImported(imported, conditions);
     this.drones[side].applyImported(imported, conditions);

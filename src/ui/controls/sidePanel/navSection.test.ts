@@ -1,4 +1,4 @@
-import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, registerSimModule, type SimCradle, type SimValueParser } from "../../../sim";
+import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, aggressivityFraction, aggressivityFromFraction, registerSimModule, type SimCradle, type SimValueParser } from "../../../sim";
 import { createContainer, InjectionMode } from "awilix";
 import { fakeDocument, getFake, FakeElement } from "../testSupport";
 import { NavSection, type NavSectionEls } from "./navSection";
@@ -171,5 +171,28 @@ describe("NavSection", () => {
     getFake(document, "ship-a-aggressivity").value = "abc";
     const section = new NavSection({ panel, els, simValueParser });
     expect(section.capture().aggressivity).toBe(1);
+  });
+
+  test("restore positions the slider via the sim aggressivity fraction", () => {
+    const document = fakeDocument();
+    const panel = mockPanel();
+    const els = navElsFor(document, "shipA");
+    const section = new NavSection({ panel, els, simValueParser });
+    const aggressivity = 10;
+    section.restore({ mode: "maneuver", range: 5000, aggressivity });
+    expect(Number.parseFloat(els.aggressivitySlider.value)).toBeCloseTo(aggressivityFraction(aggressivity), 10);
+  });
+
+  test("moving the slider maps back to an aggressivity via the sim fraction", () => {
+    const document = fakeDocument();
+    const panel = mockPanel();
+    const els = navElsFor(document, "shipA");
+    getFake(document, "ship-a-mode").value = "maneuver";
+    const section = new NavSection({ panel, els, simValueParser });
+    const fraction = 0.25;
+    els.aggressivitySlider.value = String(fraction);
+    (els.aggressivitySlider as unknown as FakeElement).trigger("input");
+    const expected = Math.round(aggressivityFromFraction(fraction) * 100) / 100;
+    expect(Number.parseFloat(els.aggressivity.value)).toBeCloseTo(expected, 2);
   });
 });

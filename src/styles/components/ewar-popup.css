@@ -1,17 +1,5 @@
 @layer components {
-.ewar-label {
-  display: block;
-  flex: 1 1 auto;
-  text-align: left;
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.ewar-group { position: relative; }
-
-.ewar-popup { width: 100%; }
+.ewar-popup { }
 
 .ewar-row {
   display: flex;
@@ -80,23 +68,6 @@
   color: var(--accent-orange);
 }
 
-.ewar-script-popup {
-  top: 0;
-  right: 0;
-  z-index: calc(var(--z-popup) + 1);
-  min-width: 154px;
-}
-
-.ewar-script-popup-label {
-  padding: 4px 7px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border-dim);
-  margin-bottom: 4px;
-}
-
 .ewar-script-option {
   display: flex;
   align-items: center;
@@ -138,31 +109,10 @@
   cursor: not-allowed;
 }
 
-.ewar-summary-row {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex: 0 0 auto;
-}
-
-.ewar-summary-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
 .ewar-summary-icon {
   width: 15px;
   height: 15px;
   object-fit: contain;
   flex-shrink: 0;
-}
-
-.ewar-summary-count {
-  font-size: 12px;
-  color: var(--accent-teal);
-  text-transform: uppercase;
-  letter-spacing: 0;
-  white-space: nowrap;
 }
 }

@@ -8,3 +8,11 @@ export function sigResolutionClassFromChargeSize(chargeSize: number): SigResolut
   if (chargeSize === 2) return "M";
   return "S";
 }
+
+export function toTrackingScore(tracking: number, sigResolution: number): number {
+  return (tracking * STANDARD_SIGNATURE_RESOLUTION) / sigResolution;
+}
+
+export function toTrackingRadPerSecond(score: number, sigResolution: number): number {
+  return (score * sigResolution) / STANDARD_SIGNATURE_RESOLUTION;
+}

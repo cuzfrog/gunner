@@ -1,7 +1,7 @@
 import { computeExpectedMultiplier } from "./expectedHitMultiplier";
 import type { HitChance } from "./hitChance";
+import type { WeaponDamageAssessor } from "./weaponDamageAssessor";
 import type { DamageAssessment, DroneDamageBreakdown, DroneMode, DroneRuntimeState, DroneSpec, EngagementFrame } from "./types";
-import { ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 export interface DroneApplication {
   compute(frame: EngagementFrame, drone: DroneSpec, opponentSigRadius: number, state?: DroneRuntimeState): DroneDamageBreakdown & DamageAssessment;
@@ -9,33 +9,27 @@ export interface DroneApplication {
 
 interface DroneApplicationDeps {
   readonly hitChance: HitChance;
+  readonly weaponDamageAssessor: WeaponDamageAssessor;
 }
 
 export class DroneApplicationImpl implements DroneApplication {
   private readonly hitChance: HitChance;
+  private readonly weaponDamageAssessor: WeaponDamageAssessor;
 
-  constructor({ hitChance }: DroneApplicationDeps) {
+  constructor({ hitChance, weaponDamageAssessor }: DroneApplicationDeps) {
     this.hitChance = hitChance;
+    this.weaponDamageAssessor = weaponDamageAssessor;
   }
 
   compute(frame: EngagementFrame, drone: DroneSpec, opponentSigRadius: number, state?: DroneRuntimeState): DroneDamageBreakdown & DamageAssessment {
     const effective = droneEffectiveFrame(frame, drone, state);
     const hit = this.hitChance.compute(effective.frame, drone, opponentSigRadius);
     const expectedMultiplier = computeExpectedMultiplier(hit.chance);
-    const shotDamage = damageVectorSum(drone.damagePerShot);
-    const nominalDps = drone.cycleTime > 0 ? (shotDamage * drone.droneCount) / drone.cycleTime : 0;
-    const appliedDps = effective.inRange ? nominalDps * expectedMultiplier : 0;
-    const volley = shotDamage * drone.droneCount;
-    const appliedByType = effective.inRange
-      ? damageVectorScale(drone.damagePerShot, (drone.droneCount * expectedMultiplier) / Math.max(drone.cycleTime, 0))
-      : ZERO_DAMAGE;
-    const appliedVolleyByType = effective.inRange
-      ? damageVectorScale(drone.damagePerShot, drone.droneCount * expectedMultiplier)
-      : ZERO_DAMAGE;
+    const damage = this.weaponDamageAssessor.assess(drone, expectedMultiplier, effective.inRange);
     return {
       hit, expectedMultiplier, inRange: effective.inRange, inWeaponRange: effective.inWeaponRange,
       mode: effective.mode, distanceToTarget: effective.distanceToTarget, inControlRange: effective.inControlRange,
-      nominalDps, appliedDps, application: effective.inRange ? expectedMultiplier : 0, volley, appliedByType, appliedVolleyByType,
+      ...damage,
     };
   }
 }

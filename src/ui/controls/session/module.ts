@@ -32,7 +32,9 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       ewarController: proxy.ewarController,
       boosterController: proxy.boosterController,
       missileBoosterController: proxy.missileBoosterController,
+      sensorBoosterController: proxy.sensorBoosterController,
       defenseController: proxy.defenseController,
+      targetingController: proxy.targetingController,
       fittingImport: proxy.fittingImport,
       parser: proxy.parser,
     })).singleton(),
@@ -42,7 +44,13 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       ewarController: proxy.ewarController,
       boosterController: proxy.boosterController,
       missileBoosterController: proxy.missileBoosterController,
+      sensorBoosterController: proxy.sensorBoosterController,
       distanceSource: proxy.sessionCodec,
+      weaponSystemSwitches: proxy.weaponSystemSwitches,
+      turretControllers: proxy.turretControllers,
+      launcherControllers: proxy.launcherControllers,
+      droneControllers: proxy.droneControllers,
+      defenseController: proxy.defenseController,
     })).singleton(),
   });
 }

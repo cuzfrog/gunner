@@ -7,7 +7,7 @@ import { registerSimModule, type SigResolutionClass, type SimCradle, type SimVal
 import { createContainer, InjectionMode } from "awilix";
 import type { I18n, Language } from "../../i18n";
 import { UiEventsImpl } from "../../events";
-import { PanelConfigurationMemoryImpl } from "../../panelConfigurationMemory";
+import { createSelectionSession, createTurretSelection } from "../../selectionSession";
 import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
 import { TurretOverridesStore } from "./turretOverrides";
@@ -125,7 +125,8 @@ export function buildTurret(
   });
   const turretOverrides = new TurretOverridesStore();
   const fittingOverrides = new FittingOverridesStoreImpl();
-  const panelMemory = new PanelConfigurationMemoryImpl();
+  const selectionSession = createSelectionSession();
+  const turretSelection = createTurretSelection(selectionSession, gunFamilies);
   const resolver = new TurretStateResolver({ chargeCatalog, fittingImport });
   const events = new UiEventsImpl();
   const popupGroup = vi.mocked<PopupGroup>({
@@ -169,7 +170,7 @@ export function buildTurret(
       };
     })),
     resolveLauncher: vi.fn(() => undefined),
-    resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
+    resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } })),
     resolvePropulsion: vi.fn(() => undefined),
     resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], })),
     resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
@@ -192,7 +193,7 @@ export function buildTurret(
     simValueParser: simValueParserFromContainer(),
     fittingCalculator,
     fittingOverrides,
-    panelMemory,
+    turretSelection,
   });
   return {
     document,
@@ -205,7 +206,7 @@ export function buildTurret(
     trackingInput,
     turretOverrides,
     fittingOverrides,
-    panelMemory,
+    selectionSession,
     fittingCalculator,
     events,
     popupGroup,

@@ -9,7 +9,7 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 export function registerPreferencesModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     preferencesController: asFunction(({
-      els, i18n, popupGroup, settingsStore, shipATurretController, shipBTurretController, shipADroneController, shipBDroneController, uiEvents, rangeOverlayController, itemNameLoader,
+      els, i18n, popupGroup, settingsStore, shipATurretController, shipBTurretController, shipADroneController, shipBDroneController, uiEvents, rangeOverlayController, itemNameLoader, portraitsController,
     }: ControlsCradle) =>
       new PreferencesControllerImpl({
         els: collectPreferencesEls(els),
@@ -23,6 +23,7 @@ export function registerPreferencesModule<T extends ControlsCradle>(cradle: Awil
         events: uiEvents,
         rangeOverlayController,
         itemNameLoader,
+        portraitsController,
       })
     ).singleton(),
   });
@@ -45,6 +46,9 @@ function collectPreferencesEls(els: ControlsElements): PreferencesEls {
     zoomSlider: els.zoomSlider,
     zoomValue: els.zoomValue,
     autoZoomCheckbox: els.autoZoomCheckbox,
+    hpValueNone: els.hpValueNone,
+    hpValuePercentage: els.hpValuePercentage,
+    hpValueAbsolute: els.hpValueAbsolute,
     weaponRangeButton: els.weaponRangeButton,
     droneRangeButton: els.droneRangeButton,
     droneControlRangeButton: els.droneControlRangeButton,

@@ -1,19 +1,12 @@
 import { type DisruptionScriptSpec, type MissileScriptSpec, type SensorDampenerScriptSpec, type TurretScriptSpec } from "../../sim";
 import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
 import type { I18n } from "../i18n";
+import { formatDistance, formatWithCommas } from "../format";
+
+export { formatDistance, formatWithCommas };
 
 export const DEFAULT_GRID_BRIGHTNESS = 0.5;
 export const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true, weaponOverloaded: false };
-
-export function formatWithCommas(value: number, decimals = 0): string {
-  return value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-}
-
-export function formatDistance(m: number, t: (key: string) => string): string {
-  const roundedM = Math.round(m);
-  if (roundedM >= 10000) return `${formatWithCommas(m / 1000, 1)} ${t("unit.kilometer")}`;
-  return `${formatWithCommas(roundedM)} ${t("unit.meter")}`;
-}
 
 export function formatNumber(value: number, decimals = 2): string {
   return String(Number(value.toFixed(decimals)));

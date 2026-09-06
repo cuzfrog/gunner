@@ -1,21 +1,16 @@
 import {
-  type DefenseSpec,
-  type DefenseView,
-  type EngagementView,
+  type EngineConfig,
   type SimConfig,
   type WeaponSpec,
-  EMPTY_DEFENSE_SPEC,
 } from "../../../sim";
-import { isEventTargetWithClosest, num } from "../controlsDom";
-import type { Controls, ControlsCallbacks, EffectiveReadouts, ViewStore } from "../controlsContract";
+import { isEventTargetWithClosest } from "../controlsDom";
+import type { Controls, ControlsCallbacks } from "../controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
-import type { EffectiveReadout } from "../effectiveReadout";
 import type { FittingPreviewManager, PopupGroup } from "../popup";
 import type { HintRotator } from "../hints";
 import type { HullDatalist, SimConfigSource } from "../session";
 import type { PreferencesController } from "../preferences";
 import type { ProfileController } from "../profile";
-import type { EngagementReadout } from "../engagementReadout";
 import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
 import type { Side } from "../side";
 import type { TurretController } from "../turret";
@@ -28,10 +23,11 @@ import type { MissileBoosterController } from "../missileBooster";
 import type { ImportController } from "../import";
 import type { ShareController } from "../share";
 import type { RangeOverlay } from "../../renderer";
-import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation, WeaponRangeVisibility } from "../../../appstate";
+import type { WeaponRangeVisibility } from "../../../appstate";
 import type { RangeOverlayController } from "../rangeOverlay";
 import type { PortraitsController } from "../portraits";
 import type { HoverHintController } from "../hoverHint";
+import type { ReadoutPresenter } from "./readoutPresenter";
 
 export type { Controls, ControlsCallbacks } from "../controlsContract";
 
@@ -49,8 +45,6 @@ interface DomControlsAllDeps extends DomControlsDeps {
   hullDatalist: HullDatalist;
   preferencesController: PreferencesController;
   profileController: ProfileController;
-  engagementReadout: EngagementReadout;
-  effectiveReadout: EffectiveReadout;
   shipASide: SidePanel;
   shipBSide: SidePanel;
   turretControllers: Record<Side, TurretController>;
@@ -68,11 +62,10 @@ interface DomControlsAllDeps extends DomControlsDeps {
   hoverHintController: HoverHintController;
   previewManager: FittingPreviewManager;
   simConfigSource: SimConfigSource;
+  readoutPresenter: ReadoutPresenter;
 }
 
-const READOUT_INTERVAL_MS = 50;
-
-export class DomControls implements Controls, DomControlsHost, ViewStore {
+export class DomControls implements Controls, DomControlsHost {
   private readonly deps: DomControlsDeps;
   private readonly els: DomControlsEls;
   private readonly popupGroup: PopupGroup;
@@ -80,8 +73,6 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   private readonly hullDatalist: HullDatalist;
   private readonly preferencesController: PreferencesController;
   private readonly profileController: ProfileController;
-  private readonly engagementReadout: EngagementReadout;
-  private readonly effectiveReadout: EffectiveReadout;
   private readonly shipASide: SidePanel;
   private readonly shipBSide: SidePanel;
   private readonly turretControllers: Record<Side, TurretController>;
@@ -99,10 +90,7 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   private readonly hoverHintController: HoverHintController;
   private readonly previewManager: FittingPreviewManager;
   private readonly simConfigSource: SimConfigSource;
-  private readonly now: () => number;
-  private currentDistanceValue: number;
-  private lastReadoutApplyMs = -Infinity;
-  private cachedReadouts?: { view: EngagementView; effective: EffectiveReadouts };
+  private readonly readoutPresenter: ReadoutPresenter;
 
   private callbacks?: ControlsCallbacks;
   private playing = false;
@@ -115,8 +103,6 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     this.hullDatalist = all.hullDatalist;
     this.preferencesController = all.preferencesController;
     this.profileController = all.profileController;
-    this.engagementReadout = all.engagementReadout;
-    this.effectiveReadout = all.effectiveReadout;
     this.shipASide = all.shipASide;
     this.shipBSide = all.shipBSide;
     this.turretControllers = all.turretControllers;
@@ -134,9 +120,7 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     this.hoverHintController = all.hoverHintController;
     this.previewManager = all.previewManager;
     this.simConfigSource = all.simConfigSource;
-    this.now = all.now;
-    this.currentDistanceValue = num(this.els.initialDistance);
-    this.deps.events.emitDistanceChanged(this.currentDistanceValue);
+    this.readoutPresenter = all.readoutPresenter;
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated(() => this.onConfigInvalidated());
     this.deps.events.onDisplayInvalidated(() => this.onDisplayChange());
@@ -186,7 +170,6 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     this.updatePlayEnabled();
     this.callbacks?.onConfigChange();
   }
-  currentDistance(): number { return this.currentDistanceValue; }
   onDisplayChange(): void {
     this.preferencesController.savePreferences();
     this.notifyDisplayChange();
@@ -250,39 +233,8 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
     if (turret) return turret;
     return this.launcherControllers[side].currentMissileSpec();
   }
-  getWeapons(side: Side): readonly WeaponSpec[] {
-    const activeKind = this.weaponSystemSwitches[side].activeKind();
-    const weapons: WeaponSpec[] = [];
-    if (activeKind === "drone") {
-      for (const spec of this.droneControllers[side].currentDroneSpecs()) weapons.push(spec);
-    } else if (activeKind === "missile") {
-      const missile = this.launcherControllers[side].currentMissileSpec();
-      if (missile) weapons.push(missile);
-    } else {
-      for (const turret of this.turretControllers[side].currentTurretSpecs()) weapons.push(turret);
-    }
-    if (activeKind !== "turret") {
-      for (const turret of this.turretControllers[side].currentTurretSpecs()) weapons.push(turret);
-    }
-    if (activeKind !== "missile") {
-      const missile = this.launcherControllers[side].currentMissileSpec();
-      if (missile) weapons.push(missile);
-    }
-    if (activeKind !== "drone") {
-      for (const spec of this.droneControllers[side].currentDroneSpecs()) weapons.push(spec);
-    }
-    return weapons;
-  }
-  getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
-  getDefense(side: Side): DefenseSpec {
-    return this.defenseController.spec(side) ?? EMPTY_DEFENSE_SPEC;
-  }
-  getDamageEnabled(side: Side): boolean { return this.defenseController.damageEnabled(side); }
-  getRepairMode(side: Side): StoredRepairMode { return this.defenseController.repairMode(side); }
-  getRepairerActivation(side: Side): readonly StoredRepairerActivation[] { return this.defenseController.repairerActivation(side); }
-  getRahActivation(side: Side): StoredRahActivation | undefined { return this.defenseController.rahActivation(side); }
-  getOverloaded(side: Side): boolean { return this.sideFor(side).skillConditions().overloaded; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
+  getEngineConfig(): EngineConfig { return this.simConfigSource.getEngineConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
   getGridBrightness(): number { return this.preferencesController.getGridBrightness(); }
   getAutoZoom(): boolean { return this.preferencesController.getAutoZoom(); }
@@ -291,46 +243,12 @@ export class DomControls implements Controls, DomControlsHost, ViewStore {
   getWeaponRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getWeaponRangeVisibility(); }
   getDroneRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneRangeVisibility(); }
   getDroneControlRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneControlRangeVisibility(); }
-  hasWeapon(side: Side): boolean { return this.turretControllers[side].turret() !== undefined || this.launcherControllers[side].launcher() !== undefined || this.droneControllers[side].drone() !== undefined; }
-  update(view: EngagementView, effective: EffectiveReadouts, defenseView: DefenseView): void {
-    this.currentDistanceValue = view.frame.distance;
-    this.deps.events.emitDistanceChanged(this.currentDistanceValue);
-    this.cachedReadouts = { view, effective };
-    this.defenseController.updateDefenseView(defenseView);
-    this.applyReadoutsIfReady();
-    this.rangeOverlayController.update();
-    this.portraitsController.update();
-    this.hoverHintController.refresh();
-  }
-  currentView(): EngagementView | undefined {
-    return this.cachedReadouts?.view;
-  }
   setPlaying(playing: boolean): void {
-    if (!playing && this.playing && this.cachedReadouts) {
-      this.applyReadouts(this.cachedReadouts.view, this.cachedReadouts.effective);
-      this.lastReadoutApplyMs = this.now();
-    }
     this.playing = playing;
     this.els.play.textContent = this.deps.i18n.t(playing ? "button.pause" : "button.play");
-    if (playing) this.lastReadoutApplyMs = this.now() - READOUT_INTERVAL_MS;
+    this.readoutPresenter.setPlaying(playing);
   }
   setCallbacks(callbacks: ControlsCallbacks): void { this.callbacks = callbacks; }
-
-  private applyReadoutsIfReady(): void {
-    const now = this.now();
-    if (this.playing && now - this.lastReadoutApplyMs < READOUT_INTERVAL_MS) return;
-    if (!this.cachedReadouts) return;
-    this.applyReadouts(this.cachedReadouts.view, this.cachedReadouts.effective);
-    this.lastReadoutApplyMs = now;
-  }
-
-  private applyReadouts(view: EngagementView, effective: EffectiveReadouts): void {
-    this.engagementReadout.update(view, (key) => this.deps.i18n.t(key));
-    this.effectiveReadout.update(effective);
-    this.defenseController.updateAssessments(view);
-    this.defenseController.updateEffectiveSig("shipA", this.getSig("shipA"));
-    this.defenseController.updateEffectiveSig("shipB", this.getSig("shipB"));
-  }
 
   private onDocumentPointerDown(event: PointerEvent): void {
     const previewOpen = this.previewManager.openSide();

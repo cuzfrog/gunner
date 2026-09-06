@@ -1,0 +1,28 @@
+@layer components {
+.script-popup-alongside-end {
+  left: 100%;
+  right: auto;
+}
+
+.script-popup-alongside-start {
+  right: 100%;
+  left: auto;
+}
+
+.ewar-script-popup {
+  top: 0;
+  right: 0;
+  z-index: calc(var(--z-popup) + 1);
+  min-width: 154px;
+}
+
+.ewar-script-popup-label {
+  padding: 4px 7px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-dim);
+  margin-bottom: 4px;
+}
+}

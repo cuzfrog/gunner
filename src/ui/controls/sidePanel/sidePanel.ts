@@ -1,7 +1,7 @@
 import type { ShipProfile, Ships, StatConditions } from "../../../ships";
 import type { ShipId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import type { AutopilotMode, SensorBoostLoadout, SensorSpec } from "../../../sim";
+import type { AutopilotMode, SensorSpec } from "../../../sim";
 import {
   type FittedHullSummary,
   type ProfileParamOverrides,
@@ -36,6 +36,7 @@ import {
   type SidePanelState,
 } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
+import type { SelectionSession } from "../../selectionSession";
 
 const SHIP_INPUT_OVERRIDE_KEYS: Record<Side, Record<"speed" | "mass" | "inertia", keyof ProfileParamOverrides>> = {
   shipA: { speed: "shipASpeed", mass: "shipAMass", inertia: "shipAInertia" },
@@ -62,6 +63,7 @@ export class SidePanelImpl implements SidePanel {
   private readonly turretLink: PanelTurretLink;
   private readonly launcherLink: PanelLauncherLink;
   private readonly droneLink: PanelDroneLink;
+  private readonly selectionSession: SelectionSession;
   private hostValue: SidePanelHost = NOOP_HOST;
   private profileValue?: ShipProfile;
   private fittedHullValue?: FittedHullSummary;
@@ -69,13 +71,13 @@ export class SidePanelImpl implements SidePanel {
   private lastCommittedHullValue?: ShipId;
   private importerValue?: SideImporter;
   private sensorSpecValue?: SensorSpec;
-  private sensorBoostsValue?: SensorBoostLoadout;
   readonly sections: ISidePanelSections;
   private fittingPopup?: FittingPopupControl;
   private fittingPreview?: FittingPreviewControl;
 
   constructor(deps: SidePanelDeps) {
-    const { side, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events, overrides, turretLink, launcherLink, droneLink, simValueParser } = deps;
+    const { side, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events, overrides, turretLink, launcherLink, droneLink, simValueParser, propulsionSelection, selectionSession } = deps;
+    this.selectionSession = selectionSession;
     this.side = side;
     this.popupGroup = popupGroup;
     this.els = els;
@@ -92,7 +94,7 @@ export class SidePanelImpl implements SidePanel {
     const nav = new NavSection({ panel: this, els, simValueParser });
     const stats = new StatsSection({ panel: this, els, ships, i18n });
     const skill = new SkillOverloadSection({ panel: this, els, i18n, popupGroup });
-    const propulsion = new PropulsionSection({ panel: this, els, ships, fittingImport, imageCatalog, i18n, popupGroup });
+    const propulsion = new PropulsionSection({ panel: this, els, ships, fittingImport, imageCatalog, i18n, popupGroup, propulsionSelection });
     const paste = new PasteImportSection({ panel: this, els, i18n, timer });
     this.sections = { hull, nav, stats, skill, propulsion, paste };
     this.els.speed.addEventListener("input", () => this.onShipInput("speed"));
@@ -121,9 +123,8 @@ export class SidePanelImpl implements SidePanel {
   set fittingText(value: string | undefined) { this.fittingTextValue = value; }
   get lastCommittedHull(): ShipId | undefined { return this.lastCommittedHullValue; }
   set lastCommittedHull(value: ShipId | undefined) { this.lastCommittedHullValue = value; }
-  setSensorData(spec: SensorSpec | undefined, boosts: SensorBoostLoadout | undefined): void {
+  setSensorData(spec: SensorSpec | undefined): void {
     this.sensorSpecValue = spec;
-    this.sensorBoostsValue = boosts;
   }
   get importer(): SideImporter {
     if (!this.importerValue) throw new Error("SidePanel importer not set");
@@ -195,8 +196,8 @@ export class SidePanelImpl implements SidePanel {
       overrides: this.overrides.get(),
       fittedHull: this.fittedHull,
       sig: Math.max(num(this.els.shipSig), 1),
+      sigBloomFactor: this.sections.stats.currentSigBloomFactor(),
       sensorSpec: this.sensorSpecValue,
-      sensorBoosts: this.sensorBoostsValue,
     };
   }
 
@@ -218,7 +219,7 @@ export class SidePanelImpl implements SidePanel {
     this.sections.skill.setOverloadDisabled();
     if (state.fittedHull) this.sections.hull.restoreFittingSummary(state.fittedHull);
     if (state.sig !== undefined) this.els.shipSig.value = String(state.sig);
-    this.sections.stats.updateShipStats({ updateInertia: true, updateMass: false, updateSig: false });
+    this.sections.stats.updateShipStats({ updateInertia: true, updateMass: false, updateSig: true });
     this.sections.stats.updateAlignTime();
   }
 
@@ -269,6 +270,10 @@ export class SidePanelImpl implements SidePanel {
 
   restoreDrone(): void {
     this.droneLink.restore(this.fittingText, this.skillConditions());
+  }
+
+  clearSelectionSession(): void {
+    this.selectionSession.clear();
   }
 
   skillConditions(): StatConditions { return this.sections.skill.skillConditions(); }

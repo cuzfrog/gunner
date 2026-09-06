@@ -1,4 +1,4 @@
-export { ReactiveAutopilot } from "./autopilot";
+export { ReactiveAutopilot, aggressivityFraction, aggressivityFromFraction } from "./autopilot";
 export type { Autopilot } from "./autopilot";
 export type { HitChance } from "./hitChance";
 export type { Kinematics } from "./kinematics";
@@ -9,6 +9,7 @@ export type { MissileBoosterResolver } from "./missileBoosterResolver";
 export type { SensorBoosterResolver } from "./sensorBoosterResolver";
 export type { LockClock, LockStepInput } from "./lockClock";
 export type { EngagementFrameComposer, EngagementInput, EngagementView, WeaponAttack } from "./engagementFrameComposer";
+export type { EngineConfig, EngineEvents, EngineView, EngagementEngine } from "./engagementEngine";
 export type { DefenseAssessor, DefenseAssessment, LayerEhp } from "./defenseAssessment";
 export { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
 export type { DefenseSimulator, DefenseView, DefensePoolState, DefenseSimConfig, RepairerViewState, RahViewState, RepairMode } from "./defenseSimulator";
@@ -18,10 +19,13 @@ export type { DroneApplication } from "./droneApplication";
 export type { DroneSimulator, DroneSimConfig } from "./droneSimulator";
 export type { MissileSimulator } from "./missileSimulator";
 export type { Rng, RngFactory } from "./rng";
-export type { TurretDamage } from "./turretDamage";
+export type { WeaponDamageAssessor } from "./weaponDamageAssessor";
 export type { WeaponClock } from "./weaponClock";
+export { StackingPenaltyImpl } from "./stackingPenalty";
+export { EwarResolverImpl } from "./ewarResolver";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
+  ActiveOffensiveModule,
   AppliedEwarEffect,
   AutopilotMode,
   BoosterActivation,
@@ -30,11 +34,13 @@ export type {
   CombatantConfig,
   DamageAssessment,
   DamageEvent,
+  DamageProjection,
   DamageResists,
   DamageType,
   DamageVector,
   DefenseLayer,
   DefenseLayerSpec,
+  LayerDamage,
   DefenseSpec,
   RahSpec,
   RepairerSpec,
@@ -45,13 +51,16 @@ export type {
   DisruptorActivation,
   DroneDamageBreakdown,
   DroneMode,
+  DroneReadoutValues,
   DroneRuntimeState,
   DroneSpec,
   EngagementFrame,
   EwarActivation,
   EwarEffectFamily,
+  EwarEffectPotentials,
   EwarLoadout,
   EwarProjection,
+  EwarReach,
   GrapplerActivation,
   HitChanceBreakdown,
   LockState,
@@ -66,10 +75,12 @@ export type {
   MissileDamageBreakdown,
   MissileEnhancerSpec,
   MissileLaunchSpec,
+  MissileReadoutValues,
   MissileRuntimeState,
   MissileScriptSpec,
   MissileSimConfig,
   MissileSpec,
+  NoWeaponReadoutValues,
   OrbitDirection,
   PainterActivation,
   ScramblerActivation,
@@ -88,6 +99,7 @@ export type {
   SignalAmplifierSpec,
   SimConfig,
   SimSnapshot,
+  SideReadoutValues,
   SpeedBreakdown,
   SpeedEffectAttribution,
   StatEffectAttribution,
@@ -99,6 +111,7 @@ export type {
   TurretBoostProjection,
   TrackingApplicationSpec,
   TurretDamageBreakdown,
+  TurretReadoutValues,
   TurretScriptSpec,
   TurretSpec,
   WarpScramblerSpec,
@@ -106,7 +119,7 @@ export type {
   WeaponKind,
   WeaponSpec,
 } from "./types";
-export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, DAMAGE_TYPES, EMPTY_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, IDLE_LOCK, SIG_RESOLUTIONS, ZERO_DAMAGE, ZERO_RESISTS, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum } from "./types";
+export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, DAMAGE_TYPES, DEFENSE_LAYERS, EMPTY_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_PROJECTION, EMPTY_SENSOR_BOOST_LOADOUT, IDLE_LOCK, SIG_RESOLUTIONS, ZERO_DAMAGE, ZERO_RESISTS, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum } from "./types";
 export type { SimValueParser } from "./simValueParser";
 export { Vec2 } from "./vec2";
 export type { SimCradle } from "./cradle";

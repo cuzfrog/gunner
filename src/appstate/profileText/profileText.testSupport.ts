@@ -13,7 +13,7 @@ export const SHIP_A_FITTED_HULL: FittedHullSummary = {
   fittingName: "Brawler",
   propulsionId: "mwd-5mn",
   propulsionKind: "microwarpdrive",
-  fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
+  fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 },
   propulsion: { thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5 },
 };
 
@@ -21,12 +21,12 @@ export const SHIP_B_FITTED_HULL: FittedHullSummary = {
   fittingName: "Sniper",
   propulsionId: "mwd-5mn",
   propulsionKind: "microwarpdrive",
-  fitted: { mass: 1_500_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
+  fitted: { mass: 1_500_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 },
   propulsion: { thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5 },
 };
 
 export const FULL_PROFILE: ProfileSettings = {
-  version: 14,
+  version: 15,
   shipATracking: 0.315,
   shipASigRes: "S",
   shipAOptimal: 600,
@@ -79,7 +79,7 @@ export const FULL_PROFILE: ProfileSettings = {
 };
 
 export const MINIMAL_PROFILE: ProfileSettings = {
-  version: 14,
+  version: 15,
   shipATracking: 0.32,
   shipASigRes: "S",
   shipAOptimal: 5000,

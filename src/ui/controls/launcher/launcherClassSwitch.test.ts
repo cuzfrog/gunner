@@ -112,7 +112,7 @@ describe("LauncherController class switch", () => {
   test("rocket -> light -> rocket restores the original launcher module and ammo", () => {
     const rocketLauncher = rocketLauncherFixture(2);
     const lightLauncher = lightLauncherFixture(2);
-    const { document, controller, panelMemory } = buildLauncher({
+    const { document, controller, selectionSession } = buildLauncher({
       launcherClasses: classAwareLauncherClasses(),
       launchersByModuleId: { [String(ROCKET_MODULE_ID)]: rocketLauncher, [String(LIGHT_MODULE_ID)]: lightLauncher },
     });
@@ -127,14 +127,14 @@ describe("LauncherController class switch", () => {
     const spec = controller.currentMissileSpec()!;
     expect(damageVectorSum(spec.damagePerMissile)).toBe(45);
     expect(controller.ammoId()).toBe(SCOURGE_ROCKET_ID);
-    expect(panelMemory.recallLauncher("rocket")?.moduleId).toBe(ROCKET_MODULE_ID);
+    expect(selectionSession.recall("launcher:rocket")?.moduleId).toBe(ROCKET_MODULE_ID);
   });
 
   test("user-changed ammo is remembered when switching back to the original class", () => {
     const rocketLauncher = rocketLauncherFixture(2);
     const lightLauncher = lightLauncherFixture(2);
     const userRocketAmmoId = "267" as TypeId;
-    const { document, controller, panelMemory } = buildLauncher({
+    const { document, controller, selectionSession } = buildLauncher({
       launcherClasses: classAwareLauncherClasses(),
       launchersByModuleId: { [String(ROCKET_MODULE_ID)]: rocketLauncher, [String(LIGHT_MODULE_ID)]: lightLauncher },
     });
@@ -146,7 +146,7 @@ describe("LauncherController class switch", () => {
 
     controller["onAmmoSelect"](userRocketAmmoId);
     expect(controller.ammoId()).toBe(userRocketAmmoId);
-    expect(panelMemory.recallLauncher("rocket")?.ammoId).toBe(userRocketAmmoId);
+    expect(selectionSession.recall("launcher:rocket")?.ammoId).toBe(userRocketAmmoId);
 
     clickClassButton(document, "ship-a", "light");
     clickClassButton(document, "ship-a", "rocket");
@@ -157,17 +157,17 @@ describe("LauncherController class switch", () => {
     const rocketLauncher = rocketLauncherFixture(2);
     const lightLauncher = lightLauncherFixture(2);
     const userRocketAmmoId = "267" as TypeId;
-    const { document, controller, panelMemory } = buildLauncher({
+    const { document, controller, selectionSession } = buildLauncher({
       launcherClasses: classAwareLauncherClasses(),
       launchersByModuleId: { [String(ROCKET_MODULE_ID)]: rocketLauncher, [String(LIGHT_MODULE_ID)]: lightLauncher },
     });
     controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     controller["onAmmoSelect"](userRocketAmmoId);
-    expect(panelMemory.recallLauncher("rocket")?.ammoId).toBe(userRocketAmmoId);
+    expect(selectionSession.recall("launcher:rocket")?.ammoId).toBe(userRocketAmmoId);
 
     controller.clear();
-    expect(panelMemory.recallLauncher("rocket")).toBeUndefined();
+    selectionSession.clear();
     controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
-    expect(panelMemory.recallLauncher("rocket")?.ammoId).toBe(SCOURGE_ROCKET_ID);
+    expect(selectionSession.recall("launcher:rocket")?.ammoId).toBe(SCOURGE_ROCKET_ID);
   });
 });

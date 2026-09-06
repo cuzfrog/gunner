@@ -568,14 +568,14 @@ describe("LocalSettingsStore", () => {
 
   test("savePreferences and loadPreferences round-trip", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const preferences: DisplayPreferences = { language: "ja", shipATrackingUnit: "score", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 2, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "ja", shipATrackingUnit: "score", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 2, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1, hpValueDisplay: "none" };
     store.savePreferences(preferences);
     expect(store.loadPreferences()).toEqual(preferences);
   });
 
   test("savePreferences and loadPreferences round-trip weapon range visibility", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "shipA", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "shipA", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1, hpValueDisplay: "none" };
     store.savePreferences(preferences);
     expect(store.loadPreferences().weaponRangeVisibility).toBe("shipA");
   });
@@ -628,7 +628,7 @@ describe("LocalSettingsStore", () => {
 
   test("savePreferences and loadPreferences round-trip range overlay visibility", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 4, gridBrightness: 0.5, rangeOverlayVisibility: { web: "shipA", disruptor: "both" }, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 4, gridBrightness: 0.5, rangeOverlayVisibility: { web: "shipA", disruptor: "both" }, autoZoom: true, zoomFactor: 1, hpValueDisplay: "none" };
     store.savePreferences(preferences);
     expect(store.loadPreferences()).toEqual(preferences);
   });
@@ -645,7 +645,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.version).toBe(14);
+    expect(loaded!.version).toBe(15);
     expect(loaded!.shipA.fittedHull).toEqual(FITTED_HULL_SUMMARY);
     expect(loaded!.shipA.mass).toBe(DEFAULT_SETTINGS.shipAMass);
   });
@@ -655,7 +655,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.version).toBe(14);
+    expect(loaded!.version).toBe(15);
     expect(loaded!.shipA.fittedHull).toBeUndefined();
   });
 

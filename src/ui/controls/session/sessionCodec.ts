@@ -13,6 +13,7 @@ import {
   type StoredBoosterActivation,
   type StoredEwarActivation,
   type StoredMissileBoosterActivation,
+  type StoredSensorBoosterActivation,
   type StoredRahActivation,
   type StoredRepairMode,
   type StoredRepairerActivation,
@@ -21,7 +22,9 @@ import {
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
+import type { SensorBoosterController } from "../sensorBooster";
 import type { DefenseController } from "../defense";
+import type { TargetingController } from "../targeting";
 import type { LauncherController } from "../launcher";
 import type { DroneController } from "../drone";
 import type { WeaponSystemSwitch } from "../sidePanel";
@@ -67,7 +70,9 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
   private readonly missileBoosterController: MissileBoosterController;
+  private readonly sensorBoosterController: SensorBoosterController;
   private readonly defenseController: DefenseController;
+  private readonly targetingController: TargetingController;
   private readonly fittingImport: FittingImport;
   private readonly parser: SettingsParser;
   private readonly pristineSettings: SessionSettings;
@@ -91,7 +96,9 @@ export class SessionCodecImpl implements SessionCodec {
     ewarController: EwarController;
     boosterController: BoosterController;
     missileBoosterController: MissileBoosterController;
+    sensorBoosterController: SensorBoosterController;
     defenseController: DefenseController;
+    targetingController: TargetingController;
     fittingImport: FittingImport;
     parser: SettingsParser;
   }) {
@@ -113,7 +120,9 @@ export class SessionCodecImpl implements SessionCodec {
     this.ewarController = deps.ewarController;
     this.boosterController = deps.boosterController;
     this.missileBoosterController = deps.missileBoosterController;
+    this.sensorBoosterController = deps.sensorBoosterController;
     this.defenseController = deps.defenseController;
+    this.targetingController = deps.targetingController;
     this.fittingImport = deps.fittingImport;
     this.parser = deps.parser;
     this.pristineSettings = this.parser.fromWire(this.capture());
@@ -197,6 +206,8 @@ export class SessionCodecImpl implements SessionCodec {
       shipBBoosterActivation: this.boosterController.capture("shipB"),
       shipAMissileBoosterActivation: this.missileBoosterController.capture("shipA"),
       shipBMissileBoosterActivation: this.missileBoosterController.capture("shipB"),
+      shipASensorBoosterActivation: this.sensorBoosterController.capture("shipA"),
+      shipBSensorBoosterActivation: this.sensorBoosterController.capture("shipB"),
       shipARepMode: this.defenseController.repairMode("shipA"),
       shipBRepMode: this.defenseController.repairMode("shipB"),
       shipARepairerActivation: this.defenseController.repairerActivation("shipA"),
@@ -261,10 +272,17 @@ export class SessionCodecImpl implements SessionCodec {
     this.missileBoosterController.restore(side, loadout, activation);
   }
 
+  private restoreSensorBooster(side: Side, fitting: string | undefined, activation: readonly StoredSensorBoosterActivation[] | undefined): void {
+    const panel = side === "shipA" ? this.shipASide : this.shipBSide;
+    const loadout = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.sensorBoosts : undefined;
+    this.sensorBoosterController.restore(side, loadout, activation);
+  }
+
   private restoreSensorData(side: Side, fitting: string | undefined): void {
     const panel = side === "shipA" ? this.shipASide : this.shipBSide;
     const imported = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions()) : undefined;
-    panel.setSensorData(imported?.sensorSpec, imported?.sensorBoosts);
+    panel.setSensorData(imported?.sensorSpec);
+    this.targetingController.setSensorData(side, imported?.sensorSpec);
   }
 
   private restoreLauncher(side: Side, fitting: string | undefined, ammoId: TypeId | undefined): void {
@@ -285,6 +303,8 @@ export class SessionCodecImpl implements SessionCodec {
 
   private applyShipState(settings: SessionSettings): void {
     this.els.initialDistance.value = String(settings.initialDistance);
+    this.shipASide.clearSelectionSession();
+    this.shipBSide.clearSelectionSession();
     this.shipASide.restore(sidePanelStateOf(settings.shipA));
     this.shipBSide.restore(sidePanelStateOf(settings.shipB));
     this.turretOverridesBySide.shipA.set(settings.shipA.overrides);
@@ -321,6 +341,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.restoreBooster("shipB", settings.shipB.fitting, settings.shipB.boosterActivation);
     this.restoreMissileBooster("shipA", settings.shipA.fitting, settings.shipA.missileBoosterActivation);
     this.restoreMissileBooster("shipB", settings.shipB.fitting, settings.shipB.missileBoosterActivation);
+    this.restoreSensorBooster("shipA", settings.shipA.fitting, settings.shipA.sensorBoosterActivation);
+    this.restoreSensorBooster("shipB", settings.shipB.fitting, settings.shipB.sensorBoosterActivation);
     this.restoreSensorData("shipA", settings.shipA.fitting);
     this.restoreSensorData("shipB", settings.shipB.fitting);
     this.restoreDefense("shipA", settings.shipA.fitting, settings.shipA.damageEnabled, settings.shipA.repMode ?? "auto", settings.shipA.repairerActivation ?? [], settings.shipA.rahActivation);

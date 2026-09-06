@@ -8,7 +8,7 @@ import type { TrackingInput } from "../trackingInput";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
-import type { PanelConfigurationMemory } from "../../panelConfigurationMemory";
+import type { DimensionedSelection, TurretDimension } from "../../selectionSession";
 import { isHtmlButtonElement, num } from "../controlsDom";
 import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
@@ -62,7 +62,7 @@ export class TurretControllerImpl implements TurretController {
   private readonly simValueParser: SimValueParser;
   private readonly calculator: FittingCalculator;
   private readonly fittingOverrides: FittingOverridesStore;
-  private readonly panelMemory: PanelConfigurationMemory;
+  private readonly turretSelection: DimensionedSelection<TurretDimension>;
   private selectedTurret?: ImportedTurret;
   private importedTurrets: readonly ImportedTurret[] = [];
   private allowedSigResClasses: readonly SigResolutionClass[] = SIG_RESOLUTIONS_ORDER;
@@ -90,7 +90,7 @@ export class TurretControllerImpl implements TurretController {
     this.simValueParser = deps.simValueParser;
     this.calculator = deps.fittingCalculator;
     this.fittingOverrides = deps.fittingOverrides;
-    this.panelMemory = deps.panelMemory;
+    this.turretSelection = deps.turretSelection;
     this.currentAmmoId = this.chargeCatalog.usualForChargeSize(1);
     this.popupValue = this.createAmmoPopup();
     this.els.ammoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
@@ -152,7 +152,6 @@ export class TurretControllerImpl implements TurretController {
     this.conditions = conditions;
     this.fittingState = imported.fittingState;
     this.fittingOverrides.clear();
-    this.panelMemory.clear();
     const { turret, turrets, cargoCharges, ammo } = this.resolver.resolveFromImported(imported);
     this.cargoCharges = cargoCharges;
     this.selectedTurret = turret;
@@ -161,7 +160,7 @@ export class TurretControllerImpl implements TurretController {
     if (turret) {
       this.originalTurretModuleId = turret.moduleId;
       this.turretOverrides.clearTurret();
-      this.panelMemory.rememberTurret(this.gunFamilies.familyOf(turret.moduleId), turret.sigResolutionClass, { moduleId: turret.moduleId, ammoId: ammo });
+      this.turretSelection.noteApplied({ family: this.gunFamilies.familyOf(turret.moduleId), sigRes: turret.sigResolutionClass }, { moduleId: turret.moduleId, ammoId: ammo });
       this.inputSet.set(turret);
     }
     this.render();
@@ -197,7 +196,6 @@ export class TurretControllerImpl implements TurretController {
       this.conditions = settings.conditions;
       this.fittingState = imported?.fittingState;
       this.fittingOverrides.clear();
-      this.panelMemory.clear();
       const { turret, turrets, cargoCharges, ammo: resolvedAmmo } = this.resolver.resolveFromFitting(
         settings.fitting,
         settings.conditions,
@@ -210,7 +208,7 @@ export class TurretControllerImpl implements TurretController {
       if (turret) {
         this.originalTurretModuleId = turret.moduleId;
         if (settings.ammo) this.fittingOverrides.setTurretCharge(turret.moduleId, resolvedAmmo);
-        this.panelMemory.rememberTurret(this.gunFamilies.familyOf(turret.moduleId), turret.sigResolutionClass, { moduleId: turret.moduleId, ammoId: resolvedAmmo });
+        this.turretSelection.noteApplied({ family: this.gunFamilies.familyOf(turret.moduleId), sigRes: turret.sigResolutionClass }, { moduleId: turret.moduleId, ammoId: resolvedAmmo });
         this.inputSet.set(turret);
       }
     } else {
@@ -249,7 +247,6 @@ export class TurretControllerImpl implements TurretController {
     this.conditions = undefined;
     this.originalTurretModuleId = undefined;
     this.fittingOverrides.clear();
-    this.panelMemory.clear();
     this.currentAmmoId = this.chargeCatalog.usualForChargeSize(1);
     this.allExpanded = false;
     this.render();
@@ -259,6 +256,7 @@ export class TurretControllerImpl implements TurretController {
     if (!this.selectedTurret) return undefined;
     return {
       kind: "turret",
+      moduleId: this.selectedTurret.moduleId,
       tracking: trackingOverride ?? this.trackingInput.rad,
       sigResolution: SIG_RESOLUTIONS[this.currentSigResClass()],
       optimal: num(this.els.optimal), falloff: num(this.els.falloff),
@@ -278,6 +276,7 @@ export class TurretControllerImpl implements TurretController {
     const falloff = num(this.els.falloff);
     return this.importedTurrets.map((turret) => ({
       kind: "turret" as const,
+      moduleId: turret.moduleId,
       tracking,
       sigResolution,
       optimal,
@@ -307,9 +306,9 @@ export class TurretControllerImpl implements TurretController {
     const sigRes = this.currentSigResClass();
     if (this.selectedTurret && this.originalTurretModuleId) {
       const family = this.gunFamilies.familyOf(this.selectedTurret.moduleId);
-      const remembered = this.panelMemory.recallTurret(family, sigRes);
-      const targetModuleId = remembered?.moduleId ?? this.gunFamilies.representativeOf(family, sigRes);
-      const targetAmmoId = remembered?.ammoId ?? this.currentAmmoId;
+      const remembered = this.turretSelection.selectionFor({ family, sigRes });
+      const targetModuleId = remembered.moduleId;
+      const targetAmmoId = remembered.ammoId ?? this.currentAmmoId;
       this.cargoCharges = [];
       this.fittingOverrides.clearTurret();
       this.fittingOverrides.setTurretModule(this.originalTurretModuleId, targetModuleId);
@@ -485,9 +484,8 @@ export class TurretControllerImpl implements TurretController {
 
   private rememberCurrentSelection(): void {
     if (!this.selectedTurret) return;
-    this.panelMemory.rememberTurret(
-      this.gunFamilies.familyOf(this.selectedTurret.moduleId),
-      this.selectedTurret.sigResolutionClass,
+    this.turretSelection.noteApplied(
+      { family: this.gunFamilies.familyOf(this.selectedTurret.moduleId), sigRes: this.selectedTurret.sigResolutionClass },
       { moduleId: this.selectedTurret.moduleId, ammoId: this.currentAmmoId },
     );
   }

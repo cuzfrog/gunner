@@ -7,8 +7,8 @@ import { KinematicsImpl } from "../../src/sim/kinematics";
 import { MissileApplicationImpl } from "../../src/sim/missileApplication";
 import { DroneApplicationImpl } from "../../src/sim/droneApplication";
 import { MissileBoosterResolverImpl } from "../../src/sim/missileBoosterResolver";
-import { StackingPenaltyImpl } from "../../src/sim/stackingPenalty";
-import { TurretDamageImpl } from "../../src/sim/turretDamage";
+import { StackingPenaltyImpl } from "../../src/sim";
+import { WeaponDamageAssessorImpl } from "../../src/sim/weaponDamageAssessor";
 import { Vec2 } from "../../src/sim/vec2";
 import { toTypeId } from "../../src/gamedata/ids";
 import { ZERO_DAMAGE } from "../../src/sim";
@@ -16,7 +16,7 @@ import type { EwarProjection, ShipState, SimSnapshot, TurretSpec } from "../../s
 import type { EwarResolver } from "../../src/sim/ewarResolver";
 import type { TurretBoosterResolver } from "../../src/sim/turretBoosterResolver";
 
-const turret: TurretSpec = { kind: "turret", tracking: 0.1, sigResolution: 40, optimal: 10_000, falloff: 5_000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
+const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.1, sigResolution: 40, optimal: 10_000, falloff: 5_000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 const LOCKED_STATE = { status: "locked" as const, progress: 1, remaining: 0, lockTime: 0, inRange: true };
 
 function shipState(id: "shipA" | "shipB", ewar?: EwarProjection): ShipState {
@@ -84,9 +84,12 @@ function fakeEwarResolver(): EwarResolver {
     appliedEffects: () => [],
     speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
     disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
+    disruptionMultipliers: () => ({ tracking: 1, optimal: 1, falloff: 1 }),
     dampenedSensorSpec: (spec) => spec,
     dampenedSensorSpecIgnoringRange: (spec) => spec,
     dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+    reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 }),
+    potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
   };
 }
 
@@ -94,11 +97,11 @@ function makeComposer() {
   const hitChance = new HitChanceImpl();
   const kinematics = new KinematicsImpl();
   const ewarResolver = fakeEwarResolver();
-  const turretDamage = new TurretDamageImpl();
+  const weaponDamageAssessor = new WeaponDamageAssessorImpl();
   const missileApplication = new MissileApplicationImpl();
-  const droneApplication = new DroneApplicationImpl({ hitChance });
-  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: new StackingPenaltyImpl() }), turretDamage, missileApplication, droneApplication });
-  return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor: new DefenseAssessorImpl() });
+  const droneApplication = new DroneApplicationImpl({ hitChance, weaponDamageAssessor });
+  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: new StackingPenaltyImpl() }), weaponDamageAssessor, missileApplication, droneApplication });
+  return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor: new DefenseAssessorImpl(), ewarResolver });
 }
 
 describe("symmetric mutual engagement", () => {

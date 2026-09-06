@@ -5,6 +5,9 @@ import {
   type SettingsParser,
   type SettingsStore,
   type StartupState,
+  type StoredEwarActivation,
+  type StoredMissileBoosterActivation,
+  type StoredSensorBoosterActivation,
   type TrackingUnit,
   type UserSettings,
 } from "../../../appstate";
@@ -28,7 +31,9 @@ import type { TrackingInput } from "../trackingInput";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
+import type { SensorBoosterController } from "../sensorBooster";
 import type { DefenseController } from "../defense";
+import type { TargetingController } from "../targeting";
 import type { LauncherController } from "../launcher";
 import type { DroneController } from "../drone";
 import type { WeaponSystemSwitch } from "../sidePanel";
@@ -148,10 +153,11 @@ function mockSidePanel(side: "shipA" | "shipB", captured: Partial<SidePanelState
     restore: vi.fn(),
     skillConditions: vi.fn(() => ({ skillLevel: 5, overloaded: true })),
     setSensorData: vi.fn(),
+    clearSelectionSession: vi.fn(),
     sections: {
       stats: { updateAlignTime: vi.fn() },
       skill: { setSkillLevel: vi.fn(), setOverloadActive: vi.fn(), setOverloadDisabled: vi.fn() },
-      propulsion: { renderPropulsionOptions: vi.fn() },
+      propulsion: { renderPropulsionOptions: vi.fn(), seedPropulsionMemory: vi.fn() },
       hull: { refreshHullInputs: vi.fn(), updateHullHint: vi.fn() },
     },
   } as unknown as SidePanel;
@@ -192,6 +198,17 @@ function mockMissileBoosterController(): MissileBoosterController {
   } as unknown as MissileBoosterController;
 }
 
+function mockSensorBoosterController(): SensorBoosterController {
+  return {
+    setLoadout: vi.fn(),
+    restore: vi.fn(),
+    projection: vi.fn(),
+    capture: vi.fn(),
+    render: vi.fn(),
+    updateSummaries: vi.fn(),
+  } as unknown as SensorBoosterController;
+}
+
 function mockDefenseController(): DefenseController {
   return {
     setDefenseSpec: vi.fn(),
@@ -214,6 +231,10 @@ function mockDefenseController(): DefenseController {
     cyclingEffects: vi.fn(() => []),
     hpPercentages: vi.fn(() => undefined),
   } as unknown as DefenseController;
+}
+
+function mockTargetingController(): TargetingController {
+  return { setSensorData: vi.fn(), render: vi.fn() } as unknown as TargetingController;
 }
 
 function mockFittingImport(): FittingImport {
@@ -245,6 +266,7 @@ class FakeTurretController implements TurretController {
   clear = vi.fn();
   currentTurretSpec = vi.fn((): TurretSpec | undefined => ({
     kind: "turret",
+    moduleId: toTypeId("1"),
     tracking: this.trackingInput.rad,
     sigResolution: 40,
     optimal: 1000,
@@ -352,7 +374,9 @@ function buildCodec(options: {
   ewarController?: Partial<EwarController>;
   boosterController?: Partial<BoosterController>;
   missileBoosterController?: Partial<MissileBoosterController>;
+  sensorBoosterController?: Partial<SensorBoosterController>;
   defenseController?: Partial<DefenseController>;
+  targetingController?: Partial<TargetingController>;
   fittingImport?: Partial<FittingImport>;
   parser?: Partial<SettingsParser>;
   events?: UiEvents;
@@ -390,7 +414,9 @@ function buildCodec(options: {
   const ewarController = { ...mockEwarController(), ...options.ewarController } as unknown as EwarController;
   const boosterController = { ...mockBoosterController(), ...options.boosterController } as unknown as BoosterController;
   const missileBoosterController = { ...mockMissileBoosterController(), ...options.missileBoosterController } as unknown as MissileBoosterController;
+  const sensorBoosterController = { ...mockSensorBoosterController(), ...options.sensorBoosterController } as unknown as SensorBoosterController;
   const defenseController = { ...mockDefenseController(), ...options.defenseController } as unknown as DefenseController;
+  const targetingController = { ...mockTargetingController(), ...options.targetingController } as unknown as TargetingController;
   const fittingImport = { ...mockFittingImport(), ...options.fittingImport } as unknown as FittingImport;
   const parser = { ...mockParser(), ...options.parser } as unknown as SettingsParser;
   const events = options.events ?? new UiEventsImpl();
@@ -415,11 +441,13 @@ function buildCodec(options: {
     ewarController,
     boosterController,
     missileBoosterController,
+    sensorBoosterController,
     defenseController,
+    targetingController,
     fittingImport,
     parser,
   });
-  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, defenseController, fittingImport, parser };
+  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, sensorBoosterController, defenseController, targetingController, fittingImport, parser };
 }
 
 function makeProfile(): ProfileSettings {
@@ -640,11 +668,9 @@ describe("SessionCodec", () => {
     const fittingImport = mockFittingImport();
     const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nStasis Webifier I", overrides: {}, fittedHull: undefined });
     const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
-    vi.mocked(ewarController.capture).mockReturnValue({
-      webs: [{ active: true, overloaded: false }],
-      grapplers: [],
-      disruptors: [{ active: true, overloaded: false, script: "none" }],
-    });
+    const shipAEwar: StoredEwarActivation = { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [{ active: true, overloaded: false, script: "none" }] };
+    const shipBEwar: StoredEwarActivation = { webs: [], grapplers: [{ active: false, overloaded: true }], disruptors: [] };
+    vi.mocked(ewarController.capture).mockImplementation((side: Side) => side === "shipA" ? shipAEwar : shipBEwar);
     vi.mocked(fittingImport.importFitting).mockReturnValue({
       profile: {} as unknown,
       fittingName: "Brawler",
@@ -660,11 +686,10 @@ describe("SessionCodec", () => {
     const { codec } = buildCodec({ shipA, shipB, ewarController, fittingImport, events });
 
     const settings = codec.capture();
-    expect(settings.shipAEwarActivation).toEqual({
-      webs: [{ active: true, overloaded: false }],
-      grapplers: [],
-      disruptors: [{ active: true, overloaded: false, script: "none" }],
-    });
+    expect(ewarController.capture).toHaveBeenCalledWith("shipA");
+    expect(ewarController.capture).toHaveBeenCalledWith("shipB");
+    expect(settings.shipAEwarActivation).toEqual(shipAEwar);
+    expect(settings.shipBEwarActivation).toEqual(shipBEwar);
 
     codec.restore(sessionFromWire(settings));
     expect(ewarController.restore).toHaveBeenCalledWith("shipA", expect.any(Object), settings.shipAEwarActivation);
@@ -677,7 +702,9 @@ describe("SessionCodec", () => {
     const fittingImport = mockFittingImport();
     const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nMissile Guidance Computer I", overrides: {}, fittedHull: undefined });
     const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
-    vi.mocked(missileBoosterController.capture).mockReturnValue([{ active: true, overloaded: false, script: "none" }]);
+    const shipABooster: readonly StoredMissileBoosterActivation[] = [{ active: true, overloaded: false, script: "none" }];
+    const shipBBooster: readonly StoredMissileBoosterActivation[] = [{ active: false, overloaded: true, script: "none" }];
+    vi.mocked(missileBoosterController.capture).mockImplementation((side: Side) => side === "shipA" ? shipABooster : shipBBooster);
     vi.mocked(fittingImport.importFitting).mockReturnValue({
       profile: {} as unknown,
       fittingName: "Brawler",
@@ -694,11 +721,50 @@ describe("SessionCodec", () => {
     const { codec } = buildCodec({ shipA, shipB, missileBoosterController, fittingImport, events });
 
     const settings = codec.capture();
-    expect(settings.shipAMissileBoosterActivation).toEqual([{ active: true, overloaded: false, script: "none" }]);
+    expect(missileBoosterController.capture).toHaveBeenCalledWith("shipA");
+    expect(missileBoosterController.capture).toHaveBeenCalledWith("shipB");
+    expect(settings.shipAMissileBoosterActivation).toEqual(shipABooster);
+    expect(settings.shipBMissileBoosterActivation).toEqual(shipBBooster);
 
     codec.restore(sessionFromWire(settings));
     expect(missileBoosterController.restore).toHaveBeenCalledWith("shipA", expect.any(Object), settings.shipAMissileBoosterActivation);
     expect(missileBoosterController.restore).toHaveBeenCalledWith("shipB", undefined, settings.shipBMissileBoosterActivation);
+    expect(onSessionRestored).toHaveBeenCalled();
+  });
+
+  test("capture and restore include sensor booster activations", () => {
+    const sensorBoosterController = mockSensorBoosterController();
+    const fittingImport = mockFittingImport();
+    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nSensor Booster II", overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    const shipABooster: readonly StoredSensorBoosterActivation[] = [{ active: true, overloaded: false, script: "none" }];
+    const shipBBooster: readonly StoredSensorBoosterActivation[] = [{ active: false, overloaded: true, script: "none" }];
+    vi.mocked(sensorBoosterController.capture).mockImplementation((side: Side) => side === "shipA" ? shipABooster : shipBBooster);
+    vi.mocked(fittingImport.importFitting).mockReturnValue({
+      profile: {} as unknown,
+      fittingName: "Brawler",
+      ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+      boosts: { computers: [], scripts: [] },
+      missileBoosts: { computers: [], enhancers: [], scripts: [] },
+      sensorBoosts: { boosters: [{ moduleName: "Sensor Booster II", moduleId: toTypeId("1952"), scanResolutionBonusPercent: 30, maxTargetRangeBonusPercent: 30, overloadStrengthBonusPercent: 15, defaultScript: undefined }], amplifiers: [], boosterScripts: [] },
+      weapon: undefined,
+      defense: undefined,
+      modules: [],
+    } as unknown as ImportedFitting);
+    const events = new UiEventsImpl();
+    const onSessionRestored = vi.fn();
+    events.onSessionRestored(onSessionRestored);
+    const { codec } = buildCodec({ shipA, shipB, sensorBoosterController, fittingImport, events });
+
+    const settings = codec.capture();
+    expect(sensorBoosterController.capture).toHaveBeenCalledWith("shipA");
+    expect(sensorBoosterController.capture).toHaveBeenCalledWith("shipB");
+    expect(settings.shipASensorBoosterActivation).toEqual(shipABooster);
+    expect(settings.shipBSensorBoosterActivation).toEqual(shipBBooster);
+
+    codec.restore(sessionFromWire(settings));
+    expect(sensorBoosterController.restore).toHaveBeenCalledWith("shipA", expect.any(Object), settings.shipASensorBoosterActivation);
+    expect(sensorBoosterController.restore).toHaveBeenCalledWith("shipB", undefined, settings.shipBSensorBoosterActivation);
     expect(onSessionRestored).toHaveBeenCalled();
   });
 
@@ -884,20 +950,28 @@ describe("SessionCodec", () => {
 
   test("capture and restore round-trips defense repair mode and activation state", () => {
     const defenseController = mockDefenseController();
+    const shipARepairer = [{ active: false, overloaded: true }];
+    const shipBRepairer = [{ active: true, overloaded: false }];
+    const shipARah = { active: true, overloaded: false };
+    const shipBRah = { active: false, overloaded: true };
     defenseController.damageEnabled = vi.fn(() => true);
-    defenseController.repairMode = vi.fn(() => "manual" as const);
-    defenseController.repairerActivation = vi.fn(() => [{ active: false, overloaded: true }]);
-    defenseController.rahActivation = vi.fn(() => ({ active: true, overloaded: false }));
+    defenseController.repairMode = vi.fn((side: Side) => side === "shipA" ? "manual" : "auto");
+    defenseController.repairerActivation = vi.fn((side: Side) => side === "shipA" ? shipARepairer : shipBRepairer);
+    defenseController.rahActivation = vi.fn((side: Side) => side === "shipA" ? shipARah : shipBRah);
     const { codec } = buildCodec({ defenseController });
     const captured = codec.capture();
+    expect(defenseController.repairMode).toHaveBeenCalledWith("shipA");
+    expect(defenseController.repairMode).toHaveBeenCalledWith("shipB");
     expect(captured.shipARepMode).toBe("manual");
-    expect(captured.shipBRepMode).toBe("manual");
-    expect(captured.shipARepairerActivation).toEqual([{ active: false, overloaded: true }]);
-    expect(captured.shipARahActivation).toEqual({ active: true, overloaded: false });
+    expect(captured.shipBRepMode).toBe("auto");
+    expect(captured.shipARepairerActivation).toEqual(shipARepairer);
+    expect(captured.shipBRepairerActivation).toEqual(shipBRepairer);
+    expect(captured.shipARahActivation).toEqual(shipARah);
+    expect(captured.shipBRahActivation).toEqual(shipBRah);
     const session = codec.fromProfile(codec.captureProfile());
     codec.restore(session, "");
-    expect(defenseController.restore).toHaveBeenCalledWith("shipA", true, "manual", [{ active: false, overloaded: true }], { active: true, overloaded: false });
-    expect(defenseController.restore).toHaveBeenCalledWith("shipB", true, "manual", [{ active: false, overloaded: true }], { active: true, overloaded: false });
+    expect(defenseController.restore).toHaveBeenCalledWith("shipA", true, "manual", shipARepairer, shipARah);
+    expect(defenseController.restore).toHaveBeenCalledWith("shipB", true, "auto", shipBRepairer, shipBRah);
   });
 
   test("restore sets defense spec from fitting text", () => {

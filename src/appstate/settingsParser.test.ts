@@ -53,19 +53,19 @@ describe("SettingsParser", () => {
     expect(makeParser().parseUserSettings(JSON.stringify({ ...DEFAULT_SETTINGS, version: 4 }))).toBeNull();
   });
 
-  test("parseUserSettings accepts version 5 through 10 and stamps 12", () => {
+  test("parseUserSettings accepts version 5 through 10 and stamps 15", () => {
     const v5 = { ...DEFAULT_SETTINGS, version: 5 };
     const v6 = { ...DEFAULT_SETTINGS, version: 6 };
     const v7 = { ...DEFAULT_SETTINGS, version: 7 };
     const v8 = { ...DEFAULT_SETTINGS, version: 8 };
     const v9 = { ...DEFAULT_SETTINGS, version: 9 };
     const v10 = { ...DEFAULT_SETTINGS, version: 10 };
-    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(14);
-    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(14);
-    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(14);
-    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(14);
-    expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(14);
-    expect(makeParser().parseUserSettings(JSON.stringify(v10))?.version).toBe(14);
+    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(15);
+    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(15);
+    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(15);
+    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(15);
+    expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(15);
+    expect(makeParser().parseUserSettings(JSON.stringify(v10))?.version).toBe(15);
   });
 
   test("parseUserSettings defaults missing shipAAmmo", () => {
@@ -184,7 +184,7 @@ describe("SettingsParser", () => {
   test("parseUserSettings parses missile booster activation with script and overload", () => {
     const v13 = {
       ...DEFAULT_SETTINGS,
-      version: 14,
+      version: 15,
       shipAMissileBoosterActivation: [{ active: true, overloaded: true, script: "Missile Precision Script" }, { active: false, overloaded: false, script: "none" }],
       shipBMissileBoosterActivation: [{ active: true, overloaded: false, script: "Missile Range Script" }],
     };
@@ -204,7 +204,7 @@ describe("SettingsParser", () => {
   test("parseUserSettings defaults missing overloaded field to false in missile booster entries", () => {
     const v13 = {
       ...DEFAULT_SETTINGS,
-      version: 14,
+      version: 15,
       shipAMissileBoosterActivation: [{ active: true, script: "Missile Precision Script" }],
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(v13));
@@ -230,6 +230,57 @@ describe("SettingsParser", () => {
     const wire = parser.toWire(session);
     expect(wire.shipAMissileBoosterActivation).toEqual([{ active: true, overloaded: true, script: toTypeId("35795") }]);
     expect(wire.shipBMissileBoosterActivation).toEqual([{ active: false, overloaded: false, script: "none" }]);
+  });
+
+  test("parseUserSettings parses sensor booster activation with script and overload", () => {
+    const v15 = {
+      ...DEFAULT_SETTINGS,
+      version: 15,
+      shipASensorBoosterActivation: [{ active: true, overloaded: true, script: "Scan Resolution Script" }, { active: false, overloaded: false, script: "none" }],
+      shipBSensorBoosterActivation: [{ active: true, overloaded: false, script: "Targeting Range Script" }],
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(v15));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.sensorBoosterActivation).toEqual([{ active: true, overloaded: true, script: toTypeId("29011") }, { active: false, overloaded: false, script: "none" }]);
+    expect(parsed!.shipB.sensorBoosterActivation).toEqual([{ active: true, overloaded: false, script: toTypeId("29009") }]);
+  });
+
+  test("parseUserSettings leaves absent sensor booster activation undefined", () => {
+    const parsed = makeParser().parseUserSettings(JSON.stringify(DEFAULT_SETTINGS));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.sensorBoosterActivation).toBeUndefined();
+    expect(parsed!.shipB.sensorBoosterActivation).toBeUndefined();
+  });
+
+  test("parseUserSettings defaults missing overloaded field to false in sensor booster entries", () => {
+    const v15 = {
+      ...DEFAULT_SETTINGS,
+      version: 15,
+      shipASensorBoosterActivation: [{ active: true, script: "Scan Resolution Script" }],
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(v15));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.sensorBoosterActivation).toEqual([{ active: true, overloaded: false, script: toTypeId("29011") }]);
+  });
+
+  test("parseUserSettings rejects malformed sensor booster activations", () => {
+    const bad = {
+      ...DEFAULT_SETTINGS,
+      shipASensorBoosterActivation: [{ active: true, overloaded: false, script: 123 }],
+    };
+    expect(makeParser().parseUserSettings(JSON.stringify(bad))).toBeNull();
+  });
+
+  test("toWire round-trips sensor booster activation", () => {
+    const parser = makeParser();
+    const session = parser.fromWire({
+      ...DEFAULT_SETTINGS,
+      shipASensorBoosterActivation: [{ active: true, overloaded: true, script: toTypeId("29011") }],
+      shipBSensorBoosterActivation: [{ active: false, overloaded: false, script: "none" }],
+    });
+    const wire = parser.toWire(session);
+    expect(wire.shipASensorBoosterActivation).toEqual([{ active: true, overloaded: true, script: toTypeId("29011") }]);
+    expect(wire.shipBSensorBoosterActivation).toEqual([{ active: false, overloaded: false, script: "none" }]);
   });
 
   test("parseUserSettings migrates v6 enum disruptor scripts to item names and adds per-module overload", () => {
@@ -785,12 +836,12 @@ describe("SettingsParser", () => {
     expect(session.shipB.weaponKind).toBeUndefined();
   });
 
-  test("version 12 settings migrate to version 14", () => {
+  test("version 12 settings migrate to version 15", () => {
     const parser = makeParser();
     const v12 = JSON.stringify({ ...DEFAULT_SETTINGS, version: 12 });
     const parsed = parser.parseUserSettings(v12);
     expect(parsed).not.toBeNull();
-    expect(parsed!.version).toBe(14);
+    expect(parsed!.version).toBe(15);
     expect(parsed!.shipA.weaponKind).toBeUndefined();
   });
 

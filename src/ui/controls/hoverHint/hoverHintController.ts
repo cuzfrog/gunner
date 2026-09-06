@@ -1,10 +1,12 @@
 import type { TimeoutId, Timer } from "../../timer";
+import type { ViewStream } from "../../viewStream";
 import type { HintContentProvider } from "./hintContentProvider";
 import type { HoverHintController } from "./hoverHintControllerContract";
 
 export interface HoverHintDeps {
   readonly hintEl: HTMLElement;
   readonly timer: Timer;
+  readonly viewStream: ViewStream;
   readonly showDelayMs?: number;
   readonly deferredHideMs?: number;
 }
@@ -39,6 +41,7 @@ export class HoverHintControllerImpl implements HoverHintController {
     this.anchored = anchorPositioningSupported();
     this.hintEl.hidden = true;
     this.abortController = new AbortController();
+    deps.viewStream.onViewUpdated(() => this.refresh());
     const signal = this.abortController.signal;
     this.document.addEventListener("pointerover", (event: Event) => this.onPointerOver(event), { signal });
     this.document.addEventListener("pointerout", (event: Event) => this.onPointerOut(event), { signal });

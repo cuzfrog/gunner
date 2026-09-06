@@ -4,6 +4,7 @@ import type {
   DefenseSkills,
   FittedHull,
   PropulsionId,
+  PropulsionKind,
   PropulsionModule,
   PropulsionStats,
   ShipProfile,
@@ -40,6 +41,7 @@ export interface IStatsSection {
   currentFittedPropulsion(fitted: FittedHullSummary): PropulsionStats | undefined;
   currentFittedPropulsionModule(fitted: FittedHullSummary | undefined): PropulsionModule | undefined;
   currentBaseMaxSpeed(): number;
+  currentSigBloomFactor(): number;
 }
 
 export interface ISkillOverloadSection {
@@ -55,9 +57,6 @@ export interface ISkillOverloadSection {
   setSkillLevel(level: SkillLevel): void;
   setSkillActive(level: SkillLevel): void;
   renderSkillOptions(selectedValue?: SkillLevel): void;
-  openSkillPopup(): void;
-  closeSkillPopup(): void;
-  isSkillPopupOpen(): boolean;
   onSkillChoiceInput(): void;
   currentDefenseSkills(): DefenseSkills | undefined;
   setDefenseSkills(skills: DefenseSkills): void;
@@ -78,6 +77,8 @@ export interface IPropulsionSection {
   onPropulsionChange(): void;
   setPropulsionActive(propulsionId: string): void;
   resolvePropulsionVariant(module: PropulsionModule, fitted: FittedHullSummary | undefined): { readonly id: TypeId; readonly name: string } | undefined;
+  notePropulsionVariant(kind: PropulsionKind, moduleId: TypeId): void;
+  seedPropulsionMemory(): void;
   defaultPropulsionName(module: PropulsionModule): string;
   nakedFitted(profile: ShipProfile): FittedHull;
 }

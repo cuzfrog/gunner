@@ -2,10 +2,52 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { toTypeId } from "../src/gamedata/ids";
-import { buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats } from "./generate-fitting-db";
+import { buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses } from "./generate-fitting-db";
+import type { UnmappedAttribute } from "./generate-fitting-db";
+import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./fittingDb/dogmaTypes";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
+}
+
+function defenseEffect(eid: number, category: number, modifiers: readonly SdeDogmaEffectModifier[], name?: string): SdeDogmaEffect {
+  return { effectID: eid, effectName: name, effectCategory: category, modifierInfo: modifiers };
+}
+
+function itemMod(modifiedAttr: number, modifyingAttr: number, operation: number): SdeDogmaEffectModifier {
+  return { domain: "shipID", func: "ItemModifier", modifiedAttributeID: modifiedAttr, modifyingAttributeID: modifyingAttr, operation };
+}
+
+function skillMod(modifiedAttr: number, modifyingAttr: number, operation: number, skillId: number): SdeDogmaEffectModifier {
+  return { domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: modifiedAttr, modifyingAttributeID: modifyingAttr, operation, skillTypeID: skillId };
+}
+
+function dogmaEffectsMap(effects: readonly SdeDogmaEffect[]): Record<string, SdeDogmaEffect> {
+  const map: Record<string, SdeDogmaEffect> = {};
+  for (const e of effects) map[String(e.effectID)] = e;
+  return map;
+}
+
+function typeDogmaForAttrs(attrs: readonly { attributeID: number; value: number }[]): SdeTypeDogma {
+  return { dogmaAttributes: attrs, dogmaEffects: [] };
+}
+
+function callBuildDefenseStats(vals: Map<string, number>, effects: readonly SdeDogmaEffect[], groupId: number, typeDogma?: SdeTypeDogma): ReturnType<typeof _buildDefenseStats> {
+  const effectIds = new Set(effects.map((e) => e.effectID));
+  return _buildDefenseStats(vals, effectIds, groupId, typeDogma, dogmaEffectsMap(effects));
+}
+
+function groupMod(modifiedAttr: number, modifyingAttr: number, operation: number, groupId: number): SdeDogmaEffectModifier {
+  return { domain: "shipID", func: "LocationGroupModifier", modifiedAttributeID: modifiedAttr, modifyingAttributeID: modifyingAttr, operation, groupID: groupId };
+}
+
+function combatEffect(eid: number, category: number, modifiers: readonly SdeDogmaEffectModifier[], name?: string): SdeDogmaEffect {
+  return { effectID: eid, effectName: name, effectCategory: category, modifierInfo: modifiers };
+}
+
+function callBuildModuleStats(vals: Map<string, number>, effects: readonly SdeDogmaEffect[], typeDogma?: SdeTypeDogma, groupId = 0): ReturnType<typeof _buildModuleStats> {
+  const effectIds = new Set(effects.map((e) => e.effectID));
+  return _buildModuleStats(vals, effectIds, groupId, typeDogma, dogmaEffectsMap(effects));
 }
 
 function sdeType(metaLevel = 0, metaGroupID = 1, volume?: number): { typeID: number; "typeName_en-us": string; groupID: number; published: number; metaLevel: number; metaGroupID: number; volume?: number } {
@@ -192,24 +234,22 @@ describe("buildDisruptionScriptStats", () => {
 });
 
 describe("_buildModuleStats", () => {
-  function effects(...ids: number[]): Set<number> {
-    return new Set(ids);
-  }
-
   test("returns undefined when no stats are present", () => {
-    expect(_buildModuleStats(values({}), effects())).toBeUndefined();
+    expect(callBuildModuleStats(values({}), [])).toBeUndefined();
   });
 
   test("extracts mass and agility stats without damage effects", () => {
-    expect(_buildModuleStats(values({ massAddition: 500000, agilityMultiplier: -10 }), effects())).toEqual({
+    expect(callBuildModuleStats(values({ massAddition: 500000, agilityMultiplier: -10 }), [])).toEqual({
       massAddition: 500000,
       agilityMultiplier: 0.9,
     });
   });
 
   test("extracts Heat Sink damage and speed multipliers with energy weapon effect", () => {
-    // Heat Sink II: effect 91 (energyWeaponDamageMultiply), effect 95 (energyWeaponSpeedMultiply)
-    const stats = _buildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), effects(91, 95));
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), [
+      combatEffect(91, 4, [groupMod(64, 204, 4, 53)]),
+      combatEffect(95, 4, [groupMod(51, 204, 4, 53)]),
+    ]);
     expect(stats).toEqual({
       turretDamageMultiplier: 1.1,
       turretSpeedMultiplier: 0.895,
@@ -218,8 +258,10 @@ describe("_buildModuleStats", () => {
   });
 
   test("extracts Gyrostabilizer damage and speed with projectile weapon effect", () => {
-    // Gyrostabilizer II: effect 92 (projectileWeaponDamageMultiply), effect 89 (projectileWeaponSpeedMultiply)
-    const stats = _buildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.89 }), effects(92, 89));
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.89 }), [
+      combatEffect(92, 4, [groupMod(64, 204, 4, 55)]),
+      combatEffect(89, 4, [groupMod(51, 204, 4, 55)]),
+    ]);
     expect(stats).toEqual({
       turretDamageMultiplier: 1.15,
       turretSpeedMultiplier: 0.89,
@@ -228,8 +270,10 @@ describe("_buildModuleStats", () => {
   });
 
   test("extracts Magnetic Field Stabilizer with hybrid weapon effect", () => {
-    // Magnetic Field Stabilizer II: effect 93 (hybridWeaponDamageMultiply), effect 96 (hybridWeaponSpeedMultiply)
-    const stats = _buildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.905 }), effects(93, 96));
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.905 }), [
+      combatEffect(93, 4, [groupMod(64, 204, 4, 74)]),
+      combatEffect(96, 4, [groupMod(51, 204, 4, 74)]),
+    ]);
     expect(stats).toEqual({
       turretDamageMultiplier: 1.15,
       turretSpeedMultiplier: 0.905,
@@ -238,12 +282,15 @@ describe("_buildModuleStats", () => {
   });
 
   test("does not extract damage stats when no damage effect is present", () => {
-    const stats = _buildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), effects());
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), []);
     expect(stats).toBeUndefined();
   });
 
   test("preserves damage stats alongside tracking stats", () => {
-    const stats = _buildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895, trackingSpeedBonus: 10 }), effects(91, 95));
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895, trackingSpeedBonus: 10 }), [
+      combatEffect(91, 4, [groupMod(64, 204, 4, 53)]),
+      combatEffect(95, 4, [groupMod(51, 204, 4, 53)]),
+    ]);
     expect(stats).toEqual({
       turretDamageMultiplier: 1.1,
       turretSpeedMultiplier: 0.895,
@@ -252,13 +299,22 @@ describe("_buildModuleStats", () => {
     });
   });
 
-  test("extracts rig damage effects for projectile weapon", () => {
-    // Projectile rig: effect 2798 (projectileWeaponDamageMultiplyPassive), effect 2799 (projectileWeaponSpeedMultiplyPassive)
-    const stats = _buildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.93 }), effects(2798, 2799));
+  test("extracts projectile rig damage effect (passive)", () => {
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.15 }), [
+      combatEffect(2798, 0, [groupMod(64, 204, 4, 55)]),
+    ]);
     expect(stats).toEqual({
       turretDamageMultiplier: 1.15,
-      turretSpeedMultiplier: 0.93,
       turretWeaponGroup: "Projectile Weapon",
+    });
+  });
+
+  test("extracts missile rig speed effect (passive) as missile not turret", () => {
+    const stats = callBuildModuleStats(values({ speedMultiplier: 0.93 }), [
+      combatEffect(2799, 0, [skillMod(51, 204, 4, 3319)]),
+    ]);
+    expect(stats).toEqual({
+      missileCycleTimeMultiplier: 0.93,
     });
   });
 });
@@ -585,12 +641,11 @@ describe("_buildMissileScriptStats", () => {
 });
 
 describe("Ballistic Control System in _buildModuleStats", () => {
-  function effects(...ids: number[]): Set<number> {
-    return new Set(ids);
-  }
-
   test("extracts BCS damage and cycle time multipliers with missile damage effects", () => {
-    const stats = _buildModuleStats(values({ missileDamageMultiplierBonus: 1.1, speedMultiplier: 0.895 }), effects(763, 889));
+    const stats = callBuildModuleStats(values({ missileDamageMultiplierBonus: 1.1, speedMultiplier: 0.895 }), [
+      combatEffect(763, 4, [itemMod(212, 212, 0)]),
+      combatEffect(889, 4, [skillMod(51, 204, 4, 3319)]),
+    ]);
     expect(stats).toEqual({
       missileDamageMultiplier: 1.1,
       missileCycleTimeMultiplier: 0.895,
@@ -598,23 +653,19 @@ describe("Ballistic Control System in _buildModuleStats", () => {
   });
 
   test("does not extract missile damage stats when no missile effect is present", () => {
-    const stats = _buildModuleStats(values({ missileDamageMultiplierBonus: 1.1, speedMultiplier: 0.895 }), effects());
+    const stats = callBuildModuleStats(values({ missileDamageMultiplierBonus: 1.1, speedMultiplier: 0.895 }), []);
     expect(stats).toBeUndefined();
   });
 });
 
 describe("Drone Link Augmentor in _buildModuleStats", () => {
-  function effects(...ids: number[]): Set<number> {
-    return new Set(ids);
-  }
-
   test("extracts drone control range bonus from droneRangeBonus attribute", () => {
-    const stats = _buildModuleStats(values({ droneRangeBonus: 20000 }), effects());
+    const stats = callBuildModuleStats(values({ droneRangeBonus: 20000 }), []);
     expect(stats).toEqual({ droneControlRangeBonus: 20000 });
   });
 
   test("does not extract drone control range when attribute is absent", () => {
-    const stats = _buildModuleStats(values({}), effects());
+    const stats = callBuildModuleStats(values({}), []);
     expect(stats).toBeUndefined();
   });
 });
@@ -730,11 +781,11 @@ describe("_writeI18nFiles", () => {
 
 describe("_buildDefenseStats", () => {
   test("Damage Control II extracts shield, armor, and hull resists from resonances", () => {
-    expect(_buildDefenseStats(values({
+    expect(callBuildDefenseStats(values({
       armorEmDamageResonance: 0.85, armorExplosiveDamageResonance: 0.85, armorKineticDamageResonance: 0.85, armorThermalDamageResonance: 0.85,
       shieldEmDamageResonance: 0.875, shieldExplosiveDamageResonance: 0.875, shieldKineticDamageResonance: 0.875, shieldThermalDamageResonance: 0.875,
       hullEmDamageResonance: 0.6, hullExplosiveDamageResonance: 0.6, hullKineticDamageResonance: 0.6, hullThermalDamageResonance: 0.6,
-    }), new Set([2302]), 0)).toEqual({
+    }), [defenseEffect(2302, 4, [itemMod(267, 267, 0), itemMod(271, 271, 0), itemMod(113, 974, 0)])], 0)).toEqual({
       kind: "damageControl",
       shieldResists: { em: 0.125, thermal: 0.125, kinetic: 0.125, explosive: 0.125 },
       armorResists: { em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 },
@@ -743,14 +794,15 @@ describe("_buildDefenseStats", () => {
   });
 
   test("EM Shield Hardener II extracts active shield resist bonus with overload", () => {
-    expect(_buildDefenseStats(values({
+    expect(callBuildDefenseStats(values({
       emDamageResistanceBonus: -55, explosiveDamageResistanceBonus: 0, kineticDamageResistanceBonus: 0, thermalDamageResistanceBonus: 0,
       duration: 10000, capacitorNeed: 20, heatDamage: 3.4, overloadHardeningBonus: 20,
-    }), new Set([5230]), 0)).toEqual({
+    }), [defenseEffect(5230, 1, [itemMod(271, 984, 6)])], 0)).toEqual({
       kind: "resistModule",
       layer: "shield",
       active: true,
       resistBonus: { em: 0.55, thermal: 0, kinetic: 0, explosive: 0 },
+      compensationApplies: false,
       overloadBonusMultiplier: 1.2,
       cycleTime: 10,
       capacitorNeed: 20,
@@ -759,20 +811,45 @@ describe("_buildDefenseStats", () => {
   });
 
   test("Multispectrum Energized Membrane II extracts passive armor resist bonus", () => {
-    expect(_buildDefenseStats(values({
+    expect(callBuildDefenseStats(values({
       emDamageResistanceBonus: -20, thermalDamageResistanceBonus: -20, kineticDamageResistanceBonus: -20, explosiveDamageResistanceBonus: -20,
-    }), new Set([2041]), 0)).toEqual({
+    }), [defenseEffect(2041, 4, [itemMod(267, 984, 6), itemMod(268, 985, 6), itemMod(269, 986, 6), itemMod(270, 987, 6)])], 0)).toEqual({
       kind: "resistModule",
       layer: "armor",
       active: false,
       resistBonus: { em: 0.2, thermal: 0.2, kinetic: 0.2, explosive: 0.2 },
+      compensationApplies: true,
+    });
+  });
+
+  test("Small EM Shield Reinforcer I rig extracts passive shield resist bonus via rig effect", () => {
+    expect(callBuildDefenseStats(values({
+      emDamageResistanceBonus: -30,
+    }), [defenseEffect(2795, 0, [itemMod(271, 984, 6)])], 0)).toEqual({
+      kind: "resistModule",
+      layer: "shield",
+      active: false,
+      resistBonus: { em: 0.3, thermal: 0, kinetic: 0, explosive: 0 },
+      compensationApplies: false,
+    });
+  });
+
+  test("Small EM Armor Reinforcer I rig extracts passive armor resist bonus via rig effect", () => {
+    expect(callBuildDefenseStats(values({
+      emDamageResistanceBonus: -30,
+    }), [defenseEffect(2792, 0, [itemMod(267, 984, 6)])], 0)).toEqual({
+      kind: "resistModule",
+      layer: "armor",
+      active: false,
+      resistBonus: { em: 0.3, thermal: 0, kinetic: 0, explosive: 0 },
+      compensationApplies: false,
     });
   });
 
   test("Large Shield Booster II extracts shield repair amount with overload multipliers", () => {
-    expect(_buildDefenseStats(values({
+    expect(callBuildDefenseStats(values({
       shieldBonus: 276, duration: 4000, capacitorNeed: 160, heatDamage: 1.3, overloadShieldBonus: 10, overloadSelfDurationBonus: -15,
-    }), new Set([4]), 0)).toEqual({
+    }), [defenseEffect(4, 1, [], "shieldBoosting")], 0, typeDogmaForAttrs([{ attributeID: 68, value: 276 }]))).toEqual({
       kind: "repairer",
       layer: "shield",
       amount: 276,
@@ -780,13 +857,14 @@ describe("_buildDefenseStats", () => {
       capacitorNeed: 160,
       heatDamage: 1.3,
       overload: { amountMultiplier: 1.1, cycleTimeMultiplier: 0.85 },
+      ancillary: undefined,
     });
   });
 
   test("Large Armor Repairer II extracts armor repair amount with overload multipliers", () => {
-    expect(_buildDefenseStats(values({
+    expect(callBuildDefenseStats(values({
       armorDamageAmount: 920, duration: 15000, capacitorNeed: 400, heatDamage: 5.4, overloadArmorDamageAmount: 10, overloadSelfDurationBonus: -15,
-    }), new Set([27]), 62)).toEqual({
+    }), [defenseEffect(27, 1, [], "armorRepair")], 62, typeDogmaForAttrs([{ attributeID: 84, value: 920 }]))).toEqual({
       kind: "repairer",
       layer: "armor",
       amount: 920,
@@ -794,13 +872,14 @@ describe("_buildDefenseStats", () => {
       capacitorNeed: 400,
       heatDamage: 5.4,
       overload: { amountMultiplier: 1.1, cycleTimeMultiplier: 0.85 },
+      ancillary: undefined,
     });
   });
 
   test("Large Ancillary Shield Booster extracts ancillary charge multiplier and reload time", () => {
-    expect(_buildDefenseStats(values({
+    expect(callBuildDefenseStats(values({
       shieldBonus: 390, duration: 4000, capacitorNeed: 528, heatDamage: 1.3, overloadShieldBonus: 10, overloadSelfDurationBonus: -15, chargeSize: 2, reloadTime: 60000,
-    }), new Set([4936]), 1156)).toMatchObject({
+    }), [defenseEffect(4936, 1, [], "fueledShieldBoosting")], 1156, typeDogmaForAttrs([{ attributeID: 68, value: 390 }]))).toMatchObject({
       kind: "repairer",
       layer: "shield",
       amount: 390,
@@ -810,9 +889,9 @@ describe("_buildDefenseStats", () => {
   });
 
   test("Medium Ancillary Armor Repairer extracts ancillary charge multiplier and reload time", () => {
-    expect(_buildDefenseStats(values({
+    expect(callBuildDefenseStats(values({
       armorDamageAmount: 207, duration: 12000, capacitorNeed: 160, heatDamage: 5.3, overloadArmorDamageAmount: 10, overloadSelfDurationBonus: -15, chargedArmorDamageMultiplier: 3, reloadTime: 60000,
-    }), new Set([5275]), 1199)).toMatchObject({
+    }), [defenseEffect(5275, 1, [], "fueledArmorRepair")], 1199, typeDogmaForAttrs([{ attributeID: 84, value: 207 }]))).toMatchObject({
       kind: "repairer",
       layer: "armor",
       amount: 207,
@@ -822,10 +901,10 @@ describe("_buildDefenseStats", () => {
   });
 
   test("Reactive Armor Hardener extracts base armor resists and shift amount", () => {
-    expect(_buildDefenseStats(values({
+    expect(callBuildDefenseStats(values({
       armorEmDamageResonance: 0.85, armorExplosiveDamageResonance: 0.85, armorKineticDamageResonance: 0.85, armorThermalDamageResonance: 0.85,
       resistanceShiftAmount: 6, duration: 10000, capacitorNeed: 42, overloadSelfDurationBonus: -15,
-    }), new Set([4928]), 1150)).toEqual({
+    }), [defenseEffect(4928, 1, [], "adaptiveArmorHardener")], 1150, typeDogmaForAttrs([{ attributeID: 1849, value: 6 }]))).toEqual({
       kind: "rah",
       baseArmorResists: { em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 },
       resistanceShiftAmount: 6,
@@ -836,14 +915,14 @@ describe("_buildDefenseStats", () => {
   });
 
   test("1600mm Steel Plates II extracts armor HP bonus", () => {
-    expect(_buildDefenseStats(values({ armorHPBonusAdd: 4800, massAddition: 3750000 }), new Set([1959]), 0)).toEqual({
+    expect(callBuildDefenseStats(values({ armorHPBonusAdd: 4800, massAddition: 3750000 }), [defenseEffect(2837, 4, [itemMod(265, 1159, 2)])], 0)).toEqual({
       kind: "armorPlate",
       armorHpAdd: 4800,
     });
   });
 
   test("Medium Shield Extender II extracts shield HP and signature radius penalty", () => {
-    expect(_buildDefenseStats(values({ capacityBonus: 1100, signatureRadiusAdd: 7 }), new Set([21]), 0)).toEqual({
+    expect(callBuildDefenseStats(values({ capacityBonus: 1100, signatureRadiusAdd: 7 }), [defenseEffect(21, 4, [itemMod(263, 72, 2)])], 0)).toEqual({
       kind: "shieldExtender",
       shieldHpAdd: 1100,
       sigRadiusPenalty: 7,
@@ -851,14 +930,14 @@ describe("_buildDefenseStats", () => {
   });
 
   test("Shield Boost Amplifier II extracts boost multiplier", () => {
-    expect(_buildDefenseStats(values({ shieldBoostMultiplier: 36 }), new Set([1720]), 0)).toEqual({
+    expect(callBuildDefenseStats(values({ shieldBoostMultiplier: 36 }), [defenseEffect(1720, 4, [skillMod(68, 548, 6, 21802)])], 0)).toEqual({
       kind: "boostAmplifier",
       multiplier: 1.36,
     });
   });
 
   test("Hull Repairer extracts structure repair amount with no overload", () => {
-    expect(_buildDefenseStats(values({ structureDamageAmount: 500, duration: 12000, capacitorNeed: 80 }), new Set([26]), 0)).toEqual({
+    expect(callBuildDefenseStats(values({ structureDamageAmount: 500, duration: 12000, capacitorNeed: 80 }), [defenseEffect(26, 1, [], "structureRepair")], 0, typeDogmaForAttrs([{ attributeID: 83, value: 500 }]))).toEqual({
       kind: "repairer",
       layer: "hull",
       amount: 500,
@@ -870,28 +949,103 @@ describe("_buildDefenseStats", () => {
   });
 
   test("returns undefined when no defense effects are present", () => {
-    expect(_buildDefenseStats(values({}), new Set([999]), 0)).toBeUndefined();
+    expect(callBuildDefenseStats(values({}), [defenseEffect(999, 0, [itemMod(1234, 5678, 6)])], 0)).toBeUndefined();
   });
 
   test("Shield Recharger II extracts recharge multiplier", () => {
-    expect(_buildDefenseStats(values({ rechargeratebonus: -15 }), new Set([50]), 0)).toEqual({
+    expect(callBuildDefenseStats(values({ rechargeratebonus: -15 }), [defenseEffect(50, 4, [itemMod(479, 134, 4)])], 0)).toEqual({
       kind: "rechargeModule",
       rechargeMultiplier: 0.85,
     });
   });
 
   test("Damage Control resonances are rounded to 6 decimals", () => {
-    const stats = _buildDefenseStats(values({
+    const stats = callBuildDefenseStats(values({
       shieldEmDamageResonance: 0.8575, shieldThermalDamageResonance: 0.8575,
       shieldKineticDamageResonance: 0.8575, shieldExplosiveDamageResonance: 0.8575,
-    }), new Set([2302]), 0);
+    }), [defenseEffect(2302, 4, [itemMod(267, 267, 0), itemMod(271, 271, 0), itemMod(113, 974, 0)])], 0);
     expect(stats?.shieldResists).toEqual({ em: 0.1425, thermal: 0.1425, kinetic: 0.1425, explosive: 0.1425 });
   });
 
   test("dispatch prioritizes passive resist over shield extender for effect 21 + 2052", () => {
-    const stats = _buildDefenseStats(values({ emDamageResistanceBonus: -25, capacityBonus: 1000 }), new Set([21, 2052]), 0);
+    const stats = callBuildDefenseStats(values({ emDamageResistanceBonus: -25, capacityBonus: 1000 }), [
+      defenseEffect(2052, 4, [itemMod(271, 984, 6)]),
+      defenseEffect(21, 4, [itemMod(263, 72, 2)]),
+    ], 0);
     expect(stats?.kind).toBe("resistModule");
     expect(stats?.layer).toBe("shield");
     expect(stats?.active).toBe(false);
+  });
+});
+
+describe("_resolveHullBonusAttribute", () => {
+  function attrNames(ids: Record<number, string>): Map<number, string> {
+    return new Map(Object.entries(ids).map(([k, v]) => [Number(k), v]));
+  }
+
+  test("returns mapped for a known combat attribute (turretDamage)", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 4, skillTypeID: 3302 }, attrNames({ 64: "damageMultiplier" }));
+    expect(result.kind).toBe("mapped");
+    if (result.kind === "mapped") expect(result.attribute).toBe("turretDamage");
+  });
+
+  test("returns skip for target painter signatureRadiusBonus (attribute 554 with painter skill)", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 554, modifyingAttributeID: 568, operation: 4, skillTypeID: 19921 }, attrNames({ 554: "signatureRadiusBonus" }));
+    expect(result.kind).toBe("skip");
+  });
+
+  test("returns skip for out-of-scope attribute (cargo capacity, attribute 38)", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 38, modifyingAttributeID: 38, operation: 4 }, attrNames({ 38: "capacity" }));
+    expect(result.kind).toBe("skip");
+  });
+
+  test("returns unmapped for an unknown attribute not in COMBAT_ATTRIBUTE_MAP or OUT_OF_SCOPE", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 99999, modifyingAttributeID: 99999, operation: 4 }, attrNames({ 99999: "unknownNewAttr" }));
+    expect(result.kind).toBe("unmapped");
+    if (result.kind === "unmapped") expect(result.attributeId).toBe(99999);
+  });
+
+  test("returns mapped for mwdSigBloom when not from target painter context", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 554, modifyingAttributeID: 568, operation: 4, skillTypeID: 3454 }, attrNames({ 554: "signatureRadiusBonus" }));
+    expect(result.kind).toBe("mapped");
+    if (result.kind === "mapped") expect(result.attribute).toBe("mwdSigBloom");
+  });
+});
+
+describe("_buildHullBonuses audit", () => {
+  function attrNames(ids: Record<number, string>): Map<number, string> {
+    return new Map(Object.entries(ids).map(([k, v]) => [Number(k), v]));
+  }
+
+  function attrValues(ids: Record<number, number>): Map<number, number> {
+    return new Map(Object.entries(ids).map(([k, v]) => [Number(k), v]));
+  }
+
+  test("collects unmapped attributes into the collector", () => {
+    const names = attrNames({ 99999: "unknownNewAttr", 204: "trackingSpeedBonus" });
+    const vals = attrValues({ 204: 10, 99999: 5 });
+    const typeDogma: SdeTypeDogma = { dogmaAttributes: [{ attributeID: 204, value: 10 }, { attributeID: 99999, value: 5 }], dogmaEffects: [{ effectID: 9999 }] };
+    const effects = dogmaEffectsMap([combatEffect(9999, 4, [
+      { domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 160, modifyingAttributeID: 204, operation: 4, skillTypeID: 3302 },
+      { domain: "shipID", func: "ItemModifier", modifiedAttributeID: 99999, modifyingAttributeID: 99999, operation: 4 },
+    ])]);
+    const unmapped: UnmappedAttribute[] = [];
+    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 12345, "TestShip", unmapped);
+    expect(bonuses.length).toBe(1);
+    expect(bonuses[0].attribute).toBe("turretTracking");
+    expect(unmapped.length).toBe(1);
+    expect(unmapped[0].attributeId).toBe(99999);
+    expect(unmapped[0].shipName).toBe("TestShip");
+  });
+
+  test("does not collect out-of-scope attributes as unmapped", () => {
+    const names = attrNames({ 38: "capacity" });
+    const vals = attrValues({ 38: 100 });
+    const typeDogma: SdeTypeDogma = { dogmaAttributes: [{ attributeID: 38, value: 100 }], dogmaEffects: [{ effectID: 9998 }] };
+    const effects = dogmaEffectsMap([combatEffect(9998, 4, [{ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 38, modifyingAttributeID: 38, operation: 4 }])]);
+    const unmapped: UnmappedAttribute[] = [];
+    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 12345, "TestShip", unmapped);
+    expect(bonuses.length).toBe(0);
+    expect(unmapped.length).toBe(0);
   });
 });

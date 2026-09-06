@@ -11,8 +11,21 @@ export type DamageVector = Readonly<Record<DamageType, number>>;
 export type DamageResists = Readonly<Record<DamageType, number>>;
 export type DefenseLayer = "shield" | "armor" | "hull";
 
+export interface LayerDamage {
+  readonly shield: number;
+  readonly armor: number;
+  readonly hull: number;
+}
+
+export interface DamageProjection {
+  readonly totalInflicted: number;
+  readonly byLayer: LayerDamage;
+}
+
 export const ZERO_DAMAGE: DamageVector = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
+export const EMPTY_PROJECTION: DamageProjection = { totalInflicted: 0, byLayer: { shield: 0, armor: 0, hull: 0 } };
 export const DAMAGE_TYPES: readonly DamageType[] = ["em", "thermal", "kinetic", "explosive"];
+export const DEFENSE_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
 
 export function damageVectorSum(vec: DamageVector): number {
   return vec.em + vec.thermal + vec.kinetic + vec.explosive;
@@ -40,20 +53,26 @@ export type OrbitDirection = "cw" | "ccw";
 export interface ShipConfig {
   readonly id: "shipA" | "shipB";
   readonly maxSpeed: number;
-  // New configurations should carry the naked-hull (propulsion-independent) speed.
-  // Older saved profiles and URLs may not have the field; `DomControls` and state
-  // restoration use `maxSpeed` as a fallback so they still simulate identically.
+  // Naked-hull (propulsion-independent) speed. `effectiveState` uses this when
+  // a scrambler suppresses an MWD. Absent = legacy fallback to `maxSpeed`.
   readonly baseMaxSpeed?: number;
-  // Max speed while warp-scrambled: the producer strips boosts only from modules
-  // a scrambler actually shuts down (MWD). Absent = legacy fallback
-  // (baseMaxSpeed ?? maxSpeed).
-  readonly suppressedMaxSpeed?: number;
+  // Propulsion kind. When a scrambler suppresses propulsion, only MWD is shut
+  // down (AB is unaffected). Absent = legacy, treated as no MWD.
+  readonly propulsionKind?: "afterburner" | "microwarpdrive";
   readonly mass: number;
   readonly inertiaModifier: number;
   readonly mode: AutopilotMode;
   readonly desiredRange: number;
   readonly aggressivity: number;
+  // Base signature radius (without propulsion bloom or extender penalty).
+  // `effectiveState` applies bloom and penalty on top of this value.
   readonly sig?: number;
+  // Multiplicative propulsion sig bloom factor (e.g. MWD sig bloom * hull reduction).
+  // Absent/0 = no propulsion bloom. Applied as `(sig + sigPenalty) * (1 + sigBloom)`.
+  readonly sigBloom?: number;
+  // Flat signature radius penalty from shield extenders, in meters.
+  // Applied additively before bloom: `(sig + sigPenalty) * (1 + sigBloom)`.
+  readonly sigPenalty?: number;
   readonly orbitDirection?: OrbitDirection;
 }
 
@@ -91,6 +110,7 @@ export interface TrackingApplicationSpec {
 
 export interface TurretSpec extends TrackingApplicationSpec {
   readonly kind: "turret";
+  readonly moduleId: TypeId;
   readonly damagePerShot: DamageVector;
   readonly cycleTime: number; // seconds
   readonly turretCount: number;
@@ -98,6 +118,7 @@ export interface TurretSpec extends TrackingApplicationSpec {
 
 export interface MissileSpec {
   readonly kind: "missile";
+  readonly moduleId: TypeId;
   readonly damagePerMissile: DamageVector;
   readonly cycleTime: number; // seconds
   readonly launcherCount: number;
@@ -111,6 +132,7 @@ export interface MissileSpec {
 
 export interface DroneSpec extends TrackingApplicationSpec {
   readonly kind: "drone";
+  readonly moduleId: TypeId;
   readonly damagePerShot: DamageVector; // base damage of one drone per cycle
   readonly cycleTime: number; // seconds
   readonly droneCount: number;
@@ -139,6 +161,7 @@ export interface DamageAssessment {
   readonly appliedDps: number;
   readonly application: number; // 0..1, applied/nominal
   readonly volley: number; // per cycle, all launchers/turrets
+  readonly baseVolleyByType: DamageVector; // per-cycle volley per type, pre-application, count-scaled
   readonly appliedByType: DamageVector; // DPS per type
   readonly appliedVolleyByType: DamageVector; // per-cycle volley per type, post-application
 }
@@ -189,6 +212,7 @@ export interface MissileLaunchSpec {
   readonly weaponIndex: number;
   readonly boosted: MissileSpec;
   readonly paintedTargetSig: number;
+  readonly baseVolleyByType: DamageVector; // per-cycle volley per type, pre-application, count-scaled
 }
 
 export interface MissileSimConfig {
@@ -223,6 +247,8 @@ export interface HitChanceBreakdown {
   readonly chance: number; // 0..1
   readonly trackingTerm: number;
   readonly rangeTerm: number;
+  readonly trackingPenalty: number; // 0.5 ** trackingTerm, 0 when infinite
+  readonly rangePenalty: number; // 0.5 ** rangeTerm, 0 when infinite
 }
 
 export interface DisruptionScriptSpec {
@@ -475,12 +501,39 @@ export interface EwarProjection {
   readonly activation?: EwarActivation;
 }
 
-export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener";
-
-export interface AppliedEwarEffect {
-  readonly family: EwarEffectFamily;
-  readonly moduleId: TypeId;
+export interface EwarReach {
+  readonly web: number;
+  readonly grappler: number;
+  readonly scrambler: number;
+  readonly disruptor: number;
+  readonly painter: number;
+  readonly dampener: number;
 }
+
+export interface EwarEffectPotentials {
+  readonly speedMultiplier: number;
+  readonly sigMultiplier: number;
+  readonly propulsionSuppressed: boolean;
+  readonly trackingMultiplier: number;
+  readonly optimalMultiplier: number;
+  readonly falloffMultiplier: number;
+  readonly scanResolutionMultiplier: number;
+  readonly targetingRangeMultiplier: number;
+}
+
+export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener" | "painter";
+
+export type AppliedEwarEffect =
+  | { readonly family: "web"; readonly moduleId: TypeId; readonly speedMultiplier: number }
+  | { readonly family: "grappler"; readonly moduleId: TypeId; readonly speedMultiplier: number }
+  | { readonly family: "scrambler"; readonly moduleId: TypeId }
+  | { readonly family: "disruptor"; readonly moduleId: TypeId; readonly trackingMultiplier: number; readonly optimalMultiplier: number; readonly falloffMultiplier: number }
+  | { readonly family: "dampener"; readonly moduleId: TypeId; readonly scanResolutionMultiplier: number; readonly maxTargetRangeMultiplier: number }
+  | { readonly family: "painter"; readonly moduleId: TypeId; readonly signatureMultiplier: number };
+
+export type ActiveOffensiveModule =
+  | { readonly category: "weapon"; readonly weaponKind: WeaponKind; readonly moduleId: TypeId }
+  | ({ readonly category: "ewar" } & AppliedEwarEffect);
 
 export interface SpeedEffectAttribution {
   readonly family: EwarEffectFamily;
@@ -509,6 +562,51 @@ export interface DampenerBreakdown {
   readonly scanResolution: readonly StatEffectAttribution[];
   readonly maxTargetRange: readonly StatEffectAttribution[];
 }
+
+export interface TurretReadoutValues {
+  readonly kind: "turret";
+  readonly speed: number;
+  readonly tracking: number;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly boostedTracking: number;
+  readonly boostedOptimal: number;
+  readonly boostedFalloff: number;
+  readonly sigResolution: number;
+  readonly speedBreakdown?: SpeedBreakdown;
+  readonly trackingBreakdown?: DisruptionBreakdown;
+  readonly optimalBreakdown?: DisruptionBreakdown;
+  readonly falloffBreakdown?: DisruptionBreakdown;
+}
+
+export interface MissileReadoutValues {
+  readonly kind: "missile";
+  readonly speed: number;
+  readonly explosionRadius: number;
+  readonly explosionVelocity: number;
+  readonly maxVelocity: number;
+  readonly flightTime: number;
+  readonly flightRange: number;
+  readonly speedBreakdown?: SpeedBreakdown;
+}
+
+export interface DroneReadoutValues {
+  readonly kind: "drone";
+  readonly speed: number;
+  readonly tracking: number;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly sigResolution: number;
+  readonly speedBreakdown?: SpeedBreakdown;
+}
+
+export interface NoWeaponReadoutValues {
+  readonly kind: "none";
+  readonly speed: number;
+  readonly speedBreakdown?: SpeedBreakdown;
+}
+
+export type SideReadoutValues = TurretReadoutValues | MissileReadoutValues | DroneReadoutValues | NoWeaponReadoutValues;
 
 export interface BoosterActivation {
   readonly active: boolean;

@@ -7,8 +7,8 @@ import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
 import { TurretOverridesStore } from "./turretOverrides";
 import { collectTurretEls } from "./turretEls";
-import { PanelConfigurationMemoryImpl } from "../../panelConfigurationMemory";
 import { FittingOverridesStoreImpl } from "../../../fitting";
+import { createTurretSelection } from "../../selectionSession";
 
 type TurretControllerFactoryDeps = Pick<
   ControlsCradle,
@@ -25,7 +25,7 @@ type TurretControllerFactoryDeps = Pick<
   | "simValueParser"
   | "fittingCalculator"
   | "fittingOverridesBySide"
-  | "panelMemoryBySide"
+  | "selectionSessionBySide"
 >;
 
 export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
@@ -35,12 +35,6 @@ export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixCon
     turretOverridesBySide: asFunction(({ shipATurretOverrides, shipBTurretOverrides }) => ({
       shipA: shipATurretOverrides,
       shipB: shipBTurretOverrides,
-    })).singleton(),
-    shipAPanelMemory: asClass(PanelConfigurationMemoryImpl).singleton(),
-    shipBPanelMemory: asClass(PanelConfigurationMemoryImpl).singleton(),
-    panelMemoryBySide: asFunction(({ shipAPanelMemory, shipBPanelMemory }) => ({
-      shipA: shipAPanelMemory,
-      shipB: shipBPanelMemory,
     })).singleton(),
     shipAFittingOverrides: asClass(FittingOverridesStoreImpl).singleton(),
     shipBFittingOverrides: asClass(FittingOverridesStoreImpl).singleton(),
@@ -59,6 +53,7 @@ export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixCon
 
 function createTurretController(side: Side, deps: TurretControllerFactoryDeps): TurretControllerImpl {
   const resolver = new TurretStateResolver({ chargeCatalog: deps.chargeCatalog, fittingImport: deps.fittingImport });
+  const session = deps.selectionSessionBySide[side];
   return new TurretControllerImpl({
     side,
     els: collectTurretEls(deps.els, side),
@@ -76,6 +71,6 @@ function createTurretController(side: Side, deps: TurretControllerFactoryDeps): 
     simValueParser: deps.simValueParser,
     fittingCalculator: deps.fittingCalculator,
     fittingOverrides: deps.fittingOverridesBySide[side],
-    panelMemory: deps.panelMemoryBySide[side],
+    turretSelection: createTurretSelection(session, deps.gunFamilies),
   });
 }

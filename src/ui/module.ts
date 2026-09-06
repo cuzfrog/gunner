@@ -7,6 +7,7 @@ import { UiEventsImpl } from "./events";
 import { RafLoop } from "./loop";
 import { CanvasRenderer } from "./renderer";
 import { DefaultTimer } from "./timer";
+import { ViewStreamImpl } from "./viewStream";
 import type { UiCradle } from "./cradle";
 
 export function registerUiModule<T extends UiCradle>(cradle: AwilixContainer<T>): void {
@@ -18,6 +19,7 @@ export function registerUiModule<T extends UiCradle>(cradle: AwilixContainer<T>)
   registerAppstateModule(cradle);
   cradle.register({
     timer: asClass(DefaultTimer).singleton(),
+    viewStream: asClass(ViewStreamImpl).singleton(),
   });
   registerControlsModule(cradle);
   cradle.register({

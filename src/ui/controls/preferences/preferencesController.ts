@@ -1,7 +1,7 @@
 import { num, setText } from "../controlsDom";
 import { DEFAULT_GRID_BRIGHTNESS } from "../controlsFormat";
 import type { I18n, Language } from "../../i18n";
-import type { DisplayPreferences, SettingsStore, TrackingUnit, WeaponRangeVisibility } from "../../../appstate";
+import type { DisplayPreferences, HpValueDisplay, SettingsStore, TrackingUnit, WeaponRangeVisibility } from "../../../appstate";
 import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
 import type { RangeOverlayController } from "../rangeOverlay";
@@ -9,6 +9,7 @@ import type { TurretController } from "../turret";
 import type { DroneController } from "../drone";
 import type { Side } from "../side";
 import type { ItemNameLoader } from "../../../gamedata";
+import type { PortraitsController } from "../portraits";
 
 export interface PreferencesEls {
   readonly trackingUnit: Readonly<Record<Side, { readonly rad: HTMLButtonElement; readonly score: HTMLButtonElement }>>;
@@ -23,6 +24,9 @@ export interface PreferencesEls {
   readonly zoomSlider: HTMLInputElement;
   readonly zoomValue: HTMLElement;
   readonly autoZoomCheckbox: HTMLInputElement;
+  readonly hpValueNone: HTMLButtonElement;
+  readonly hpValuePercentage: HTMLButtonElement;
+  readonly hpValueAbsolute: HTMLButtonElement;
   readonly weaponRangeButton: HTMLButtonElement;
   readonly droneRangeButton: HTMLButtonElement;
   readonly droneControlRangeButton: HTMLButtonElement;
@@ -37,6 +41,7 @@ export interface PreferencesController {
   getWeaponRangeVisibility(): WeaponRangeVisibility;
   getDroneRangeVisibility(): WeaponRangeVisibility;
   getDroneControlRangeVisibility(): WeaponRangeVisibility;
+  getHpValueDisplay(): HpValueDisplay;
   setLanguage(language: Language): void;
   applyPreferences(preferences: DisplayPreferences): void;
   restore(preferences: DisplayPreferences): void;
@@ -46,6 +51,7 @@ export interface PreferencesController {
   cycleWeaponRange(): void;
   cycleDroneRange(): void;
   cycleDroneControlRange(): void;
+  setHpValueDisplay(mode: HpValueDisplay): void;
   onGridBrightnessChange(): void;
   updateGridBrightnessDisplay(value?: number): void;
   onZoomChange(): void;
@@ -70,11 +76,13 @@ export class PreferencesControllerImpl implements PreferencesController {
   private readonly rangeOverlayController: RangeOverlayController;
   private readonly popupGroup: PopupGroup;
   private readonly itemNameLoader: ItemNameLoader;
+  private readonly portraitsController: PortraitsController;
   private readonly canvasSettingsPopupValue: Popup;
   private canvasSettingsOpen = false;
   private weaponRangeVisibility: WeaponRangeVisibility = "both";
   private droneRangeVisibility: WeaponRangeVisibility = "none";
   private droneControlRangeVisibility: WeaponRangeVisibility = "none";
+  private hpValueDisplay: HpValueDisplay = "none";
 
   constructor(deps: {
     els: PreferencesEls;
@@ -88,6 +96,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     rangeOverlayController: RangeOverlayController;
     popupGroup: PopupGroup;
     itemNameLoader: ItemNameLoader;
+    portraitsController: PortraitsController;
   }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
@@ -100,6 +109,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.rangeOverlayController = deps.rangeOverlayController;
     this.popupGroup = deps.popupGroup;
     this.itemNameLoader = deps.itemNameLoader;
+    this.portraitsController = deps.portraitsController;
     this.canvasSettingsPopupValue = {
       isOpen: () => this.canvasSettingsOpen,
       open: () => this.openCanvasSettings(),
@@ -122,6 +132,9 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els.droneRangeButton.addEventListener("click", () => this.cycleDroneRange());
     this.els.droneControlRangeButton.addEventListener("click", () => this.cycleDroneControlRange());
     this.els.autoZoomCheckbox.addEventListener("change", () => this.onAutoZoomChange());
+    this.els.hpValueNone.addEventListener("click", () => this.setHpValueDisplay("none"));
+    this.els.hpValuePercentage.addEventListener("click", () => this.setHpValueDisplay("percentage"));
+    this.els.hpValueAbsolute.addEventListener("click", () => this.setHpValueDisplay("absolute"));
   }
 
   get popup(): Popup { return this.canvasSettingsPopupValue; }
@@ -167,6 +180,7 @@ export class PreferencesControllerImpl implements PreferencesController {
       rangeOverlayVisibility: this.rangeOverlayController.overlayVisibility(),
       autoZoom: this.getAutoZoom(),
       zoomFactor: this.getZoomFactor(),
+      hpValueDisplay: this.hpValueDisplay,
     };
   }
 
@@ -180,6 +194,17 @@ export class PreferencesControllerImpl implements PreferencesController {
 
   getDroneControlRangeVisibility(): WeaponRangeVisibility {
     return this.droneControlRangeVisibility;
+  }
+
+  getHpValueDisplay(): HpValueDisplay {
+    return this.hpValueDisplay;
+  }
+
+  setHpValueDisplay(mode: HpValueDisplay): void {
+    this.hpValueDisplay = mode;
+    this.updateHpValueDisplayToggle();
+    this.portraitsController.setHpValueDisplay(mode);
+    this.savePreferences();
   }
 
   cycleWeaponRange(): void {
@@ -279,6 +304,9 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els.autoZoomCheckbox.checked = preferences.autoZoom ?? true;
     this.els.zoomSlider.disabled = preferences.autoZoom ?? true;
     this.updateZoomDisplay(preferences.zoomFactor);
+    this.hpValueDisplay = preferences.hpValueDisplay ?? "none";
+    this.updateHpValueDisplayToggle();
+    this.portraitsController.setHpValueDisplay(this.hpValueDisplay);
     if (preferences.language !== "en") this.loadPackAndRefresh(preferences.language);
   }
 
@@ -311,6 +339,12 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els.langEn.setAttribute("aria-pressed", String(current === "en"));
     this.els.langZh.setAttribute("aria-pressed", String(current === "zh"));
     this.els.langJa.setAttribute("aria-pressed", String(current === "ja"));
+  }
+
+  private updateHpValueDisplayToggle(): void {
+    this.els.hpValueNone.setAttribute("aria-pressed", String(this.hpValueDisplay === "none"));
+    this.els.hpValuePercentage.setAttribute("aria-pressed", String(this.hpValueDisplay === "percentage"));
+    this.els.hpValueAbsolute.setAttribute("aria-pressed", String(this.hpValueDisplay === "absolute"));
   }
 
   private toggleCanvasSettings(): void {

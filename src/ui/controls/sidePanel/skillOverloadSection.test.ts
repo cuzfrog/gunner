@@ -26,6 +26,7 @@ function buildSkillSection() {
     skillSummary: getFake(document, "ship-a-skill-summary") as unknown as HTMLElement,
     skillTrigger: getFake(document, "ship-a-skill-trigger") as unknown as HTMLButtonElement,
     skillPopup: getFake(document, "ship-a-skill-popup") as unknown as HTMLElement,
+    skillField: getFake(document, "ship-a-skill-field") as unknown as HTMLElement,
     overload: getFake(document, "ship-a-overload") as unknown as HTMLInputElement,
     overloadButton: getFake(document, "ship-a-overload-button") as unknown as HTMLButtonElement,
     turretWeaponOverloadButton: getFake(document, "ship-a-turret-weapon-overload-button") as unknown as HTMLButtonElement,
@@ -139,6 +140,7 @@ describe("SkillOverloadSection", () => {
     const { document, section } = buildSkillSection();
     const field = getFake(document, "ship-a-skill-field");
     const trigger = getFake(document, "ship-a-skill-trigger");
+    field.children.push(trigger);
     trigger.parent = field;
     expect(section.popup.contains(trigger as unknown as EventTarget)).toBe(true);
   });

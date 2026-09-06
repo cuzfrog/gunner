@@ -97,7 +97,7 @@ export function profileFrom(settings: UserSettings): ProfileSettings {
   return rest;
 }
 export const DEFAULT_PROFILE: ProfileSettings = profileFrom(DEFAULT_SETTINGS);
-export const FITTED_HULL: FittedHull = { mass: 1_500_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
+export const FITTED_HULL: FittedHull = { mass: 1_500_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 };
 export const FITTED_PROPULSION = {
   thrust: 1_500_000,
   speedBonus: 1.15,
@@ -218,7 +218,7 @@ const HULL_BY_NAME = new Map<string, ShipProfile>();
 for (const profile of KNOWN_HULLS) HULL_BY_NAME.set(profile.name.toLowerCase(), profile);
 HULL_BY_NAME.set("裂谷级", RIFTER_PROFILE);
 HULL_BY_NAME.set("リフター", RIFTER_PROFILE);
-export const RIFTER_FITTED: FittedHull = { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
+export const RIFTER_FITTED: FittedHull = { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 };
 export const RIFTER_MODULE: PropulsionModule = {
   id: "mwd-5mn",
   kind: "microwarpdrive",
@@ -239,6 +239,7 @@ export const RIFTER_BASE_STATS: ShipStats = {
   maxSpeed: 456.25,
   baseMaxSpeed: 456.25,
   sigRadius: 36,
+  sigBloomFactor: 0,
   alignTime: Math.log(4) * 2,
 };
 export const RIFTER_MWD_STATS: ShipStats = {
@@ -246,7 +247,8 @@ export const RIFTER_MWD_STATS: ShipStats = {
   inertiaModifier: 2,
   maxSpeed: 4_649.72,
   baseMaxSpeed: 456.25,
-  sigRadius: 210,
+  sigRadius: 36,
+  sigBloomFactor: 5,
   alignTime: Math.log(4) * 3,
 };
 const EMPTY_FITTING_STATE: FittingState = {

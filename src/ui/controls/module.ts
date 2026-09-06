@@ -21,17 +21,21 @@ import { registerShareModule } from "./share";
 import type { Side } from "./side";
 import { registerSidePanelModule } from "./sidePanel";
 import { registerTurretModule } from "./turret";
+import { registerSelectionSessionModule } from "../selectionSession";
 import { registerEwarModule } from "./ewar";
+import { registerModulesPopupModule } from "./modulesPopup";
 import { registerDefenseModule } from "./defense";
+import { registerTargetingModule } from "./targeting";
 import { registerBoosterModule } from "./booster";
 import { registerMissileBoosterModule } from "./missileBooster";
+import { registerSensorBoosterModule } from "./sensorBooster";
 import { registerRangeOverlayModule } from "./rangeOverlay";
 import { registerPortraitsModule } from "./portraits";
 import { registerHoverHintModule } from "./hoverHint";
 import { registerDpsHintModule, wireDpsHintProvider } from "./dpsHint";
 import { registerAmmoHintModule, wireAmmoHintProvider } from "./ammoHint";
 import { registerAppliedDpsHintModule, wireAppliedDpsHintProvider } from "./appliedDpsHint";
-import { registerLockStateHintModule, wireLockStateHintProvider } from "./lockStateHint";
+import { registerInflictedDpsHintModule, wireInflictedDpsHintProvider } from "./inflictedDpsHint";
 
 export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   if (!cradle.hasRegistration("now")) {
@@ -41,14 +45,18 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
     els: asFunction(createControlsEls).singleton(),
   });
   registerHintsModule(cradle);
+  registerSelectionSessionModule(cradle);
   registerTurretModule(cradle);
   registerLauncherModule(cradle);
   registerDroneModule(cradle);
   registerSidePanelModule(cradle);
+  registerModulesPopupModule(cradle);
   registerEwarModule(cradle);
   registerDefenseModule(cradle);
+  registerTargetingModule(cradle);
   registerBoosterModule(cradle);
   registerMissileBoosterModule(cradle);
+  registerSensorBoosterModule(cradle);
   registerRangeOverlayModule(cradle);
   registerPortraitsModule(cradle);
   registerHoverHintModule(cradle);
@@ -65,7 +73,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerSessionModule(cradle);
   registerDomControlsModule(cradle);
   registerAppliedDpsHintModule(cradle);
-  registerLockStateHintModule(cradle);
+  registerInflictedDpsHintModule(cradle);
   wire(cradle);
 }
 
@@ -74,7 +82,7 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   wireDpsHintProvider(cradle);
   wireAmmoHintProvider(cradle);
   wireAppliedDpsHintProvider(cradle);
-  wireLockStateHintProvider(cradle);
+  wireInflictedDpsHintProvider(cradle);
   const sides = combatantSidesOf(c.shipASide, c.shipBSide);
   const fittingPopups = { shipA: c.shipAFittingPopup, shipB: c.shipBFittingPopup } as const;
   const host = {

@@ -1,4 +1,4 @@
-import { type DefenseAssessment, type DefenseLayer, type DefenseSpec, type DefenseView, type EngagementView, type RepairerSpec, EMPTY_DEFENSE_SPEC } from "../../../sim";
+import { type DefenseAssessment, type DefenseAssessor, type DefenseLayer, type DefenseSpec, type DefenseView, type EngagementView, type RepairerSpec, EMPTY_DEFENSE_SPEC, ZERO_DAMAGE } from "../../../sim";
 import type { TypeId } from "../../../gamedata/ids";
 import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation } from "../../../appstate";
 import type { I18n } from "../../i18n";
@@ -6,8 +6,8 @@ import type { UiEvents } from "../../events";
 import { formatWithCommas } from "../controlsFormat";
 import { DAMAGE_ICON_URLS, DAMAGE_TYPE_ORDER } from "../damageTypeIcons";
 import { html } from "../markup";
-import type { Popup, PopupGroup } from "../popup";
-import { SectionBlockImpl } from "../shared";
+import type { PopupGroup } from "../popup";
+import { PopupField, SectionBlockImpl } from "../shared";
 import type { Side } from "../side";
 import type { DefenseController, DefenseEls } from "./defenseControllerContract";
 
@@ -15,9 +15,9 @@ const DEFENSE_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
 
 export class DefenseControllerImpl implements DefenseController {
   private readonly els: DefenseEls;
-  private readonly popupGroup: PopupGroup;
   private readonly i18n: I18n;
   private readonly events: UiEvents;
+  private readonly defenseAssessor: DefenseAssessor;
   private readonly specs = new Map<Side, DefenseSpec>();
   private readonly assessments = new Map<Side, DefenseAssessment>();
   private readonly damageEnabledState: Record<Side, boolean> = { shipA: true, shipB: true };
@@ -25,21 +25,20 @@ export class DefenseControllerImpl implements DefenseController {
   private readonly repairerActivationState: Record<Side, StoredRepairerActivation[]> = { shipA: [], shipB: [] };
   private readonly rahActivationState: Record<Side, StoredRahActivation | undefined> = { shipA: undefined, shipB: undefined };
   private readonly damageToggleButtons: Record<Side, HTMLButtonElement | undefined> = { shipA: undefined, shipB: undefined };
-  private readonly popups: Record<Side, Popup>;
   private readonly sectionBlock: SectionBlockImpl;
+  private readonly fields: Record<Side, PopupField>;
   private defenseView: DefenseView | undefined;
 
-  constructor(deps: { els: DefenseEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents }) {
+  constructor(deps: { els: DefenseEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents; defenseAssessor: DefenseAssessor }) {
     this.els = deps.els;
-    this.popupGroup = deps.popupGroup;
     this.i18n = deps.i18n;
     this.events = deps.events;
+    this.defenseAssessor = deps.defenseAssessor;
     this.sectionBlock = new SectionBlockImpl();
-    this.popups = { shipA: this.buildPopup("shipA"), shipB: this.buildPopup("shipB") };
-    this.popupGroup.register(this.popups.shipA);
-    this.popupGroup.register(this.popups.shipB);
-    this.els.shipADefenseTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.shipA));
-    this.els.shipBDefenseTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.shipB));
+    this.fields = {
+      shipA: new PopupField({ els: deps.els.shipA, popupGroup: deps.popupGroup }),
+      shipB: new PopupField({ els: deps.els.shipB, popupGroup: deps.popupGroup }),
+    };
     this.events.onFittingImported((side, imported) => this.setDefenseSpec(side, imported.defense));
     this.events.onLanguageChanged(() => this.render());
     this.render();
@@ -61,8 +60,8 @@ export class DefenseControllerImpl implements DefenseController {
   updateAssessments(view: EngagementView): void {
     this.assessments.set("shipA", view.defenses.shipA);
     this.assessments.set("shipB", view.defenses.shipB);
-    if (!this.popups.shipA.isOpen()) this.renderSide("shipA");
-    if (!this.popups.shipB.isOpen()) this.renderSide("shipB");
+    if (!this.fields.shipA.isOpen()) this.renderSide("shipA");
+    if (!this.fields.shipB.isOpen()) this.renderSide("shipB");
   }
 
   updateDefenseView(view: DefenseView): void {
@@ -78,16 +77,16 @@ export class DefenseControllerImpl implements DefenseController {
     return this.specs.get(side)?.signaturePenalty ?? 0;
   }
 
-  updateEffectiveSig(side: Side, baseSig: number): void {
-    const el = side === "shipA" ? this.els.shipAEffectiveSig : this.els.shipBEffectiveSig;
+  updateEffectiveSig(side: Side, sig: number): void {
+    const el = this.els[side].effectiveSig;
     const penalty = this.signaturePenalty(side);
+    el.textContent = `${formatWithCommas(sig)}m`;
     if (penalty > 0) {
-      el.textContent = `${formatWithCommas(baseSig + penalty)}m`;
       el.classList.add("is-negative");
       el.setAttribute("data-hint", this.i18n.t("hint.effectiveSigPenalty").replace("{penalty}", formatWithCommas(penalty)));
     } else {
-      el.textContent = "";
       el.classList.remove("is-negative");
+      el.setAttribute("data-hint", "");
     }
   }
 
@@ -159,57 +158,46 @@ export class DefenseControllerImpl implements DefenseController {
     return this.defenseView?.poolPercentages[side];
   }
 
+  hpValues(side: Side): { readonly current: Readonly<Record<DefenseLayer, number>>; readonly max: Readonly<Record<DefenseLayer, number>> } | undefined {
+    const spec = this.specs.get(side);
+    const view = this.defenseView;
+    if (!spec || !view) return undefined;
+    const pools = view.pools[side];
+    return { current: { shield: pools.shield, armor: pools.armor, hull: pools.hull }, max: { shield: spec.layers.shield.hp, armor: spec.layers.armor.hp, hull: spec.layers.hull.hp } };
+  }
+
   render(): void {
     this.renderSide("shipA");
     this.renderSide("shipB");
   }
 
-  private buildPopup(side: Side): Popup {
-    const trigger = side === "shipA" ? this.els.shipADefenseTrigger : this.els.shipBDefenseTrigger;
-    const popup = side === "shipA" ? this.els.shipADefensePopup : this.els.shipBDefensePopup;
-    const field = side === "shipA" ? this.els.shipADefenseField : this.els.shipBDefenseField;
-    return {
-      isOpen: () => !popup.hidden,
-      open: () => { popup.hidden = false; trigger.setAttribute("aria-expanded", "true"); },
-      close: () => { popup.hidden = true; trigger.setAttribute("aria-expanded", "false"); },
-      focusTrigger: () => trigger.focus(),
-      contains: (domTarget) => domTarget instanceof Element && field.contains(domTarget),
-    };
-  }
-
   private renderSide(side: Side): void {
-    const trigger = side === "shipA" ? this.els.shipADefenseTrigger : this.els.shipBDefenseTrigger;
-    const popup = side === "shipA" ? this.els.shipADefensePopup : this.els.shipBDefensePopup;
-    const section = side === "shipA" ? this.els.shipADefenseSection : this.els.shipBDefenseSection;
+    const field = this.fields[side];
+    const section = field.clearSection();
     const spec = this.specs.get(side);
     const defenseLabel = this.i18n.t("label.defense");
-    const labelSpan = trigger.querySelector?.(".defense-label");
-    if (labelSpan) labelSpan.textContent = defenseLabel;
-    trigger.setAttribute("aria-label", defenseLabel);
-    popup.setAttribute("aria-label", defenseLabel);
-    section.innerHTML = "";
+    field.applyLabel(defenseLabel);
     if (!spec) {
-      trigger.disabled = true;
-      trigger.setAttribute("data-hint", this.i18n.t("title.defense.empty"));
+      field.setEnabled(false, this.i18n.t("title.defense.empty"));
       this.updateSummary(side);
-      this.popups[side].close();
+      field.close();
       return;
     }
-    trigger.disabled = false;
-    trigger.setAttribute("data-hint", "");
+    field.setEnabled(true, "");
     this.updateSummary(side);
+    if (!section) return;
     const heading = html`<div class="preview-section-label">${defenseLabel}</div>`;
     section.appendChild(heading);
     this.renderResistsSection(section, spec);
     this.renderHpSection(section, spec);
     this.renderEhpSection(section, side);
-    this.renderRepairerSection(section, spec);
+    this.renderRepairerSection(section, side, spec);
     this.renderShieldRegenSection(section, side);
     this.renderDamageEnabledSection(section, side);
     this.renderRepairModeSection(section, side);
     this.renderRepairerActivationSection(section, side, spec);
     this.renderRahActivationSection(section, side, spec);
-    this.popups[side].close();
+    field.close();
   }
 
   private renderResistsSection(section: HTMLElement, spec: DefenseSpec): void {
@@ -256,11 +244,14 @@ export class DefenseControllerImpl implements DefenseController {
     section.appendChild(block);
   }
 
-  private renderRepairerSection(section: HTMLElement, spec: DefenseSpec): void {
+  private renderRepairerSection(section: HTMLElement, side: Side, spec: DefenseSpec): void {
     if (spec.repairers.length === 0) return;
+    const repairerViews = this.defenseView?.repairers[side] ?? [];
     const rows: (Element | DocumentFragment)[] = [];
-    for (const repairer of spec.repairers) {
-      const hpPerSecond = repairer.amount / repairer.cycleTime;
+    for (let i = 0; i < spec.repairers.length; i++) {
+      const repairer = spec.repairers[i];
+      const view = repairerViews[i];
+      const hpPerSecond = view ? view.hpPerSecond : repairer.amount / repairer.cycleTime;
       const row = html`<div class="defense-repairer-row"><span class="defense-repairer-name">${this.i18n.t(layerLabelKey(repairer.layer))}</span><span class="defense-repairer-stats mono">${formatWithCommas(hpPerSecond, 1)} ${this.i18n.t("defense.repairPerSecond")} · ${formatWithCommas(repairer.cycleTime, 1)}s ${this.i18n.t("defense.cycleTime")}</span></div>`;
       rows.push(row);
     }
@@ -349,16 +340,16 @@ export class DefenseControllerImpl implements DefenseController {
   }
 
   private updateSummary(side: Side): void {
-    const summary = side === "shipA" ? this.els.shipADefenseSummary : this.els.shipBDefenseSummary;
+    const summary = this.els[side].summary;
     const spec = this.specs.get(side);
     summary.innerHTML = "";
     if (!spec) {
       summary.textContent = "";
       return;
     }
-    const assessment = this.assessments.get(side);
-    const totalEhp = assessment?.totalEhp ?? computeTotalEhp(spec);
-    const item = html`<span class="defense-summary-item"><span class="defense-summary-count mono">${formatWithCommas(totalEhp)} EHP</span></span>`;
+    const assessment = this.assessments.get(side) ?? this.defenseAssessor.assess(spec, ZERO_DAMAGE, true);
+    const totalEhp = assessment.totalEhp;
+    const item = html`<span class="trigger-summary-item"><span class="trigger-summary-count mono">${formatWithCommas(totalEhp)} EHP</span></span>`;
     summary.appendChild(item);
   }
 }
@@ -375,17 +366,4 @@ function layerLabelKey(layer: DefenseLayer): string {
 
 function repairerSpecHasAncillary(spec: RepairerSpec): boolean {
   return spec.ancillary !== undefined;
-}
-
-function computeTotalEhp(spec: DefenseSpec): number {
-  let total = 0;
-  for (const layer of DEFENSE_LAYERS) {
-    const layerSpec = spec.layers[layer];
-    let effectiveResonance = 0;
-    for (const type of DAMAGE_TYPE_ORDER) {
-      effectiveResonance += 0.25 * (1 - layerSpec.resists[type]);
-    }
-    total += effectiveResonance > 0 ? layerSpec.hp / effectiveResonance : 0;
-  }
-  return Math.round(total);
 }

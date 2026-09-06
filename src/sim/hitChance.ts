@@ -28,8 +28,10 @@ export class HitChanceImpl implements HitChance {
 
     const exponent = trackingTerm + rangeTerm;
     const chance = Number.isFinite(exponent) ? 0.5 ** exponent : 0;
+    const trackingPenalty = Number.isFinite(trackingTerm) ? 0.5 ** trackingTerm : 0;
+    const rangePenalty = Number.isFinite(rangeTerm) ? 0.5 ** rangeTerm : 0;
 
-    return { chance, trackingTerm, rangeTerm };
+    return { chance, trackingTerm, rangeTerm, trackingPenalty, rangePenalty };
   }
 
   /**

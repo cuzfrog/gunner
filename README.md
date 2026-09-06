@@ -20,3 +20,7 @@ bun run lint:css     # stylelint src/styles/**/*.css
 ## License
 
 MIT License. See [LICENSE](LICENSE).
+
+## Bug routing
+
+When a report says "UI disagrees with simulation," the fix's mandatory first step is: enumerate every UI surface displaying the quantity (grep the element id + the quantity name), classify each as config or runtime, and fix the runtime ones by re-sourcing from the view. The fix is not complete while any runtime display still reads config.

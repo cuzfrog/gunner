@@ -1,4 +1,4 @@
-export type { FittingDb, FittingDbData } from "./catalog";
+export type { FittingDb, FittingDbData } from "./types";
 export { FITTING_DB } from "./catalog";
 export type {
   ChargeStats,
@@ -13,6 +13,11 @@ export type {
   FittingPropulsionStats,
   HullBonus,
   HullBonusAttribute,
+  PropulsionBonusAttribute,
+  TurretBonusAttribute,
+  MissileBonusAttribute,
+  DroneBonusAttribute,
+  DefenseBonusAttribute,
   LauncherStats,
   MissileGuidanceComputerStats,
   MissileGuidanceEnhancerStats,
@@ -20,6 +25,9 @@ export type {
   MissileStats,
   OmnidirectionalTrackingEnhancerStats,
   OmnidirectionalTrackingLinkStats,
+  RigDrawback,
+  RigDrawbackKind,
+  RigDrawbackReduction,
   SensorBoosterScriptStats,
   SensorBoosterStats,
   SensorDampenerScriptStats,
@@ -36,7 +44,7 @@ export type {
   TurretStats,
   TurretWeaponGroup,
   WarpScramblerStats,
-} from "./fittingDb";
+} from "./types";
 export {
   CHARGES,
   COMBAT_DRONES,
@@ -51,6 +59,7 @@ export {
   MISSILE_SCRIPTS,
   OMNIDIRECTIONAL_TRACKING_ENHANCERS,
   OMNIDIRECTIONAL_TRACKING_LINKS,
+  RIG_DRAWBACK_REDUCTIONS,
   SCRIPTS,
   SENSOR_BOOSTER_SCRIPTS,
   SENSOR_BOOSTERS,
@@ -65,4 +74,4 @@ export {
   TRACKING_DISRUPTORS,
   TURRETS,
   WARP_SCRAMBLERS,
-} from "./fittingDb";
+} from "./generated/fittingDb.data";

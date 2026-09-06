@@ -8,6 +8,7 @@ import { MissileSimulatorImpl } from "./missileSimulator";
 import { EwarResolverImpl } from "./ewarResolver";
 import { EngagementEvaluatorImpl } from "./fireControl";
 import { EngagementFrameComposerImpl } from "./engagementFrameComposer";
+import { EngagementEngineImpl } from "./engagementEngine";
 import { MissileBoosterResolverImpl } from "./missileBoosterResolver";
 import { SensorBoosterResolverImpl } from "./sensorBoosterResolver";
 import { LockClockImpl } from "./lockClock";
@@ -20,8 +21,8 @@ import { PredictiveAutopilot } from "./predictiveAutopilot";
 import { SimulationImpl } from "./simulation";
 import { StackingPenaltyImpl } from "./stackingPenalty";
 import { SimValueParserImpl } from "./simValueParser";
-import { TurretDamageImpl } from "./turretDamage";
 import { WeaponClockImpl } from "./weaponClock";
+import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
 import type { SimCradle } from "./cradle";
 
 export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T>): void {
@@ -38,7 +39,7 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     droneApplication: asClass(DroneApplicationImpl).singleton(),
     droneSimulator: asClass(DroneSimulatorImpl).singleton(),
     missileSimulator: asClass(MissileSimulatorImpl).singleton(),
-    turretDamage: asClass(TurretDamageImpl).singleton(),
+    weaponDamageAssessor: asClass(WeaponDamageAssessorImpl).singleton(),
     reactiveSteering: asClass(ReactiveAutopilot).singleton(),
     shipBSteering: asClass(PredictiveAutopilot).singleton(),
     shipASteering: asClass(PredictiveAutopilot).singleton(),
@@ -50,5 +51,6 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     rngFactory: asClass(Mulberry32RngFactory).singleton(),
     weaponClock: asClass(WeaponClockImpl).singleton(),
     lockClock: asClass(LockClockImpl).singleton(),
+    engine: asClass(EngagementEngineImpl).singleton(),
   });
 }

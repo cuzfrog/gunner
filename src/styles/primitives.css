@@ -38,6 +38,7 @@
   color: var(--text-primary);
   font-family: "Saira", sans-serif;
   font-size: 14px;
+  line-height: 1;
   text-align: left;
   text-transform: none;
   letter-spacing: 0;
@@ -81,6 +82,7 @@
   cursor: pointer;
   color: var(--text-primary);
   font: inherit;
+  line-height: 1;
   transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -128,6 +130,7 @@
   border-radius: 2px;
   padding: 4px 11px;
   min-height: 26px;
+  line-height: 1;
   text-transform: uppercase;
   transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -173,6 +176,47 @@
 
 [aria-expanded="true"] .chevron { transform: rotate(180deg); }
 
+/* ---- trigger content (side-panel field row) ---- */
+.trigger-label {
+  display: block;
+  flex: 0 0 auto;
+  text-align: left;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trigger-summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.trigger-summary-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.trigger-summary-count,
+.trigger-summary-value {
+  font-size: 12px;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.trigger-summary-value {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.popup-stretch { width: 100%; }
+
 /* ---- field-label ---- */
 .field-label {
   display: block;
@@ -186,14 +230,15 @@
 /* ---- input-field ---- */
 .input-field {
   width: 100%;
-  padding: 6px 9px;
+  padding: 3px 9px;
   background-color: var(--bg-inset);
   border: 1px solid var(--border-dim);
   color: var(--text-primary);
   font-family: "Share Tech Mono", monospace;
   font-size: 15px;
+  line-height: 1;
   border-radius: 2px;
-  min-height: 31px;
+  min-height: 26px;
   transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -233,7 +278,7 @@ select.input-field:disabled {
 .turret-mode-select {
   text-align: left;
   text-align-last: left;
-  padding: 6px 26px 6px 9px;
+  padding: 3px 26px 3px 9px;
 }
 
 .input-with-unit { position: relative; }
@@ -285,6 +330,8 @@ select.input-field:disabled {
 
 
 .form-field { display: block; }
+
+.form-field-group { position: relative; }
 
 .form-slider-field { display: block; }
 

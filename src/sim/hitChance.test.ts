@@ -1,11 +1,13 @@
 import { Vec2 } from "./vec2";
 import { HitChanceImpl } from "./hitChance";
+import { toTypeId } from "../gamedata/ids";
 import { type EngagementFrame, type ShipState, type TurretSpec, ZERO_DAMAGE } from "./types";
 
 const hitChance = new HitChanceImpl();
 
 const defaultTurret: TurretSpec = {
   kind: "turret",
+  moduleId: toTypeId("1"),
   tracking: 0.32,
   sigResolution: 40,
   optimal: 5000,
@@ -64,6 +66,32 @@ describe("HitChanceImpl", () => {
     const h = hitChance.compute(frame(6000, 0), turret, 40);
     expect(h.chance).toBe(0);
     expect(h.rangeTerm).toBe(Number.POSITIVE_INFINITY);
+  });
+
+  test("trackingPenalty is 0.5 ** trackingTerm", () => {
+    const turret: TurretSpec = { ...defaultTurret, optimal: 100000, falloff: 0 };
+    const f = frame(5000, 1000 / 5000);
+    const h = hitChance.compute(f, turret, 40);
+    expect(h.trackingPenalty).toBeCloseTo(0.5 ** h.trackingTerm, 10);
+  });
+
+  test("rangePenalty is 0.5 ** rangeTerm", () => {
+    const turret: TurretSpec = { ...defaultTurret, tracking: 100000, optimal: 5000, falloff: 5000 };
+    const h = hitChance.compute(frame(10000, 0), turret, 40);
+    expect(h.rangePenalty).toBeCloseTo(0.5 ** h.rangeTerm, 10);
+  });
+
+  test("penalties are 1 when terms are 0", () => {
+    const h = hitChance.compute(frame(5000, 0), defaultTurret, 40);
+    expect(h.trackingPenalty).toBe(1);
+    expect(h.rangePenalty).toBe(1);
+  });
+
+  test("penalties are 0 when terms are infinite", () => {
+    const turret: TurretSpec = { ...defaultTurret, optimal: 5000, falloff: 0 };
+    const h = hitChance.compute(frame(6000, 0), turret, 40);
+    expect(h.trackingPenalty).toBe(1);
+    expect(h.rangePenalty).toBe(0);
   });
 
   test("findBestDistance returns a distance beyond optimal when useful", () => {

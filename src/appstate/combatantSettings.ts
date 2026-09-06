@@ -14,6 +14,7 @@ import {
   type StoredRahActivation,
   type StoredRepairMode,
   type StoredRepairerActivation,
+  type StoredSensorBoosterActivation,
 } from "./userSettings";
 
 export interface CombatantSettings {
@@ -37,6 +38,7 @@ export interface CombatantSettings {
   readonly ewarActivation?: StoredEwarActivation;
   readonly boosterActivation?: readonly StoredBoosterActivation[];
   readonly missileBoosterActivation?: readonly StoredMissileBoosterActivation[];
+  readonly sensorBoosterActivation?: readonly StoredSensorBoosterActivation[];
   readonly repMode?: StoredRepairMode;
   readonly repairerActivation?: readonly StoredRepairerActivation[];
   readonly rahActivation?: StoredRahActivation;

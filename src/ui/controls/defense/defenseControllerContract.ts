@@ -1,22 +1,16 @@
 import type { DefenseAssessment, DefenseLayer, DefenseSpec, DefenseView, EngagementView } from "../../../sim";
 import type { TypeId } from "../../../gamedata/ids";
 import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation } from "../../../appstate";
-import type { Side } from "../side";
+import type { Side, Sided } from "../side";
+import type { PopupFieldEls } from "../shared";
 
-export interface DefenseEls {
-  readonly shipADefenseField: HTMLElement;
-  readonly shipADefenseTrigger: HTMLButtonElement;
-  readonly shipADefensePopup: HTMLElement;
-  readonly shipADefenseSection: HTMLElement;
-  readonly shipADefenseSummary: HTMLElement;
-  readonly shipAEffectiveSig: HTMLElement;
-  readonly shipBDefenseField: HTMLElement;
-  readonly shipBDefenseTrigger: HTMLButtonElement;
-  readonly shipBDefensePopup: HTMLElement;
-  readonly shipBDefenseSection: HTMLElement;
-  readonly shipBDefenseSummary: HTMLElement;
-  readonly shipBEffectiveSig: HTMLElement;
+export interface DefenseFieldEls extends PopupFieldEls {
+  readonly section: HTMLElement;
+  readonly summary: HTMLElement;
+  readonly effectiveSig: HTMLElement;
 }
+
+export type DefenseEls = Sided<DefenseFieldEls>;
 
 export interface DefenseController {
   setDefenseSpec(side: Side, spec: DefenseSpec): void;
@@ -26,7 +20,7 @@ export interface DefenseController {
   updateSummaries(): void;
   render(): void;
   signaturePenalty(side: Side): number;
-  updateEffectiveSig(side: Side, baseSig: number): void;
+  updateEffectiveSig(side: Side, sig: number): void;
   damageEnabled(side: Side): boolean;
   setDamageEnabled(side: Side, enabled: boolean): void;
   repairMode(side: Side): StoredRepairMode;
@@ -38,4 +32,5 @@ export interface DefenseController {
   restore(side: Side, enabled: boolean, repMode?: StoredRepairMode, repairerActivation?: readonly StoredRepairerActivation[], rahActivation?: StoredRahActivation): void;
   cyclingEffects(side: Side): readonly { readonly moduleId: TypeId; readonly hint: string }[];
   hpPercentages(side: Side): Readonly<Record<DefenseLayer, number>> | undefined;
+  hpValues(side: Side): { readonly current: Readonly<Record<DefenseLayer, number>>; readonly max: Readonly<Record<DefenseLayer, number>> } | undefined;
 }

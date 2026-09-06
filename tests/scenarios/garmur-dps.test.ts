@@ -12,7 +12,7 @@ import { MODULE_SLOT_CATALOG } from "../../src/gamedata/moduleSlots";
 import { StaticNameI18nCatalog } from "../../src/gamedata/nameI18n";
 import { StaticShipProfileCatalog } from "../../src/gamedata/shipProfiles";
 import { ShipsImpl } from "../../src/ships/ships";
-import { StackingPenaltyImpl } from "../../src/sim/stackingPenalty";
+import { StackingPenaltyImpl } from "../../src/sim";
 import { damageVectorSum } from "../../src/sim/types";
 
 const ships = new ShipsImpl({ shipProfileCatalog: new StaticShipProfileCatalog(), nameI18nCatalog: new StaticNameI18nCatalog() });

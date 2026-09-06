@@ -10,8 +10,10 @@ import type { Side } from "../side";
 import type { TurretController } from "../turret";
 import type { DroneController } from "../drone";
 import { ZERO_DAMAGE, type DroneSpec } from "../../../sim";
+import { toTypeId } from "../../../gamedata/ids";
 import type { TrackingInput } from "../trackingInput";
 import { PreferencesControllerImpl, type PreferencesController, type PreferencesEls } from "./preferencesController";
+import type { PortraitsController } from "../portraits";
 
 class FakeElement {
   value = "";
@@ -70,6 +72,9 @@ function fakeEls(): PreferencesEls {
     weaponRangeButton: new FakeElement() as unknown as HTMLButtonElement,
     droneRangeButton: new FakeElement() as unknown as HTMLButtonElement,
     droneControlRangeButton: new FakeElement() as unknown as HTMLButtonElement,
+    hpValueNone: new FakeElement() as unknown as HTMLButtonElement,
+    hpValuePercentage: new FakeElement() as unknown as HTMLButtonElement,
+    hpValueAbsolute: new FakeElement() as unknown as HTMLButtonElement,
   };
 }
 
@@ -143,6 +148,7 @@ class FakeTurretController implements TurretController {
   clear = vi.fn();
   currentTurretSpec = vi.fn((): import("../../../sim").TurretSpec | undefined => ({
     kind: "turret",
+    moduleId: toTypeId("1"),
     tracking: this.trackingInput.rad,
     sigResolution: 40,
     optimal: 1000,
@@ -234,9 +240,6 @@ function build() {
     onStartupDefaultsApplied: vi.fn(),
     offStartupDefaultsApplied: vi.fn(),
     emitStartupDefaultsApplied: vi.fn(),
-    onDistanceChanged: vi.fn(),
-    offDistanceChanged: vi.fn(),
-    emitDistanceChanged: vi.fn(),
   };
   const rangeOverlayController = mockRangeOverlayController();
   const popupGroup = mockPopupGroup();
@@ -244,6 +247,7 @@ function build() {
   const shipBTurretController = new FakeTurretController("shipB");
   const shipADroneController = new FakeDroneController("shipA");
   const shipBDroneController = new FakeDroneController("shipB");
+  const portraitsController = vi.mocked<PortraitsController>({ update: vi.fn(), setHpValueDisplay: vi.fn() });
   const controller = new PreferencesControllerImpl({
     els,
     i18n,
@@ -256,8 +260,9 @@ function build() {
     events,
     rangeOverlayController,
     itemNameLoader: { ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) },
+    portraitsController,
   });
-  return { controller, els, i18n, popupGroup, settingsStore, events, rangeOverlayController, shipATurretController, shipBTurretController, shipADroneController, shipBDroneController };
+  return { controller, els, i18n, popupGroup, settingsStore, events, rangeOverlayController, shipATurretController, shipBTurretController, shipADroneController, shipBDroneController, portraitsController };
 }
 
 describe("PreferencesController", () => {
@@ -359,7 +364,7 @@ describe("PreferencesController", () => {
     const { controller, els } = build();
     els.gridBrightnessSlider.value = "0.5";
     els.simSpeed.value = "2";
-    expect(controller.capture()).toEqual({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 2, gridBrightness: 0.5, rangeOverlayVisibility: {}, autoZoom: true, zoomFactor: 1 });
+    expect(controller.capture()).toEqual({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 2, gridBrightness: 0.5, rangeOverlayVisibility: {}, autoZoom: true, zoomFactor: 1, hpValueDisplay: "none" });
   });
 
   test("getWeaponRangeVisibility defaults to both", () => {
@@ -496,10 +501,27 @@ describe("PreferencesController", () => {
     expect(next.els.zoomSlider.value).toBe("1.75");
   });
 
+  test("setHpValueDisplay updates toggle, portraits controller, and capture", () => {
+    const { controller, els, portraitsController } = build();
+    controller.setHpValueDisplay("percentage");
+    expect(els.hpValueNone.getAttribute("aria-pressed")).toBe("false");
+    expect(els.hpValuePercentage.getAttribute("aria-pressed")).toBe("true");
+    expect(els.hpValueAbsolute.getAttribute("aria-pressed")).toBe("false");
+    expect(portraitsController.setHpValueDisplay).toHaveBeenCalledWith("percentage");
+    expect(controller.capture().hpValueDisplay).toBe("percentage");
+  });
+
+  test("restore applies hpValueDisplay to toggle and portraits controller", () => {
+    const { controller, els, portraitsController } = build();
+    controller.restore({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", droneRangeVisibility: "none", droneControlRangeVisibility: "none", simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1, hpValueDisplay: "absolute" });
+    expect(els.hpValueAbsolute.getAttribute("aria-pressed")).toBe("true");
+    expect(portraitsController.setHpValueDisplay).toHaveBeenCalledWith("absolute");
+  });
+
   test("cycleDroneRange skips ships with no drones when both have drones", () => {
     const { controller, shipADroneController, shipBDroneController } = build();
-    shipADroneController.setSpecs([{ kind: "drone" as const, tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
-    shipBDroneController.setSpecs([{ kind: "drone" as const, tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
+    shipADroneController.setSpecs([{ kind: "drone" as const, moduleId: toTypeId("2"), tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
+    shipBDroneController.setSpecs([{ kind: "drone" as const, moduleId: toTypeId("2"), tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
     expect(controller.getDroneRangeVisibility()).toBe("none");
     controller.cycleDroneRange();
     expect(controller.getDroneRangeVisibility()).toBe("both");
@@ -513,7 +535,7 @@ describe("PreferencesController", () => {
 
   test("cycleDroneRange skips shipB when only shipA has drones", () => {
     const { controller, shipADroneController } = build();
-    shipADroneController.setSpecs([{ kind: "drone" as const, tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
+    shipADroneController.setSpecs([{ kind: "drone" as const, moduleId: toTypeId("2"), tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
     expect(controller.getDroneRangeVisibility()).toBe("none");
     controller.cycleDroneRange();
     expect(controller.getDroneRangeVisibility()).toBe("both");
@@ -525,7 +547,7 @@ describe("PreferencesController", () => {
 
   test("cycleDroneRange skips shipA when only shipB has drones", () => {
     const { controller, shipBDroneController } = build();
-    shipBDroneController.setSpecs([{ kind: "drone" as const, tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
+    shipBDroneController.setSpecs([{ kind: "drone" as const, moduleId: toTypeId("2"), tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
     expect(controller.getDroneRangeVisibility()).toBe("none");
     controller.cycleDroneRange();
     expect(controller.getDroneRangeVisibility()).toBe("both");
@@ -544,7 +566,7 @@ describe("PreferencesController", () => {
 
   test("cycleDroneControlRange skips ships with no drones", () => {
     const { controller, shipADroneController } = build();
-    shipADroneController.setSpecs([{ kind: "drone" as const, tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
+    shipADroneController.setSpecs([{ kind: "drone" as const, moduleId: toTypeId("2"), tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
     expect(controller.getDroneControlRangeVisibility()).toBe("none");
     controller.cycleDroneControlRange();
     expect(controller.getDroneControlRangeVisibility()).toBe("both");
@@ -556,8 +578,8 @@ describe("PreferencesController", () => {
 
   test("cycleDroneRange resets invalid visibility to first state when drones change", () => {
     const { controller, shipADroneController, shipBDroneController } = build();
-    shipADroneController.setSpecs([{ kind: "drone" as const, tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
-    shipBDroneController.setSpecs([{ kind: "drone" as const, tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
+    shipADroneController.setSpecs([{ kind: "drone" as const, moduleId: toTypeId("2"), tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
+    shipBDroneController.setSpecs([{ kind: "drone" as const, moduleId: toTypeId("2"), tracking: 0.1, sigResolution: 25, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 }]);
     controller.cycleDroneRange();
     expect(controller.getDroneRangeVisibility()).toBe("both");
     controller.cycleDroneRange();

@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import type { StackingPenalty } from "../src/sim";
+import { StackingPenaltyImpl } from "../src/sim";
 import { FittingImportImpl, type FittingRow } from "../src/fitting/fittingImport";
 import { ChargeCatalogImpl } from "../src/fitting/chargeCatalog";
 import { GunFamiliesImpl } from "../src/fitting/gunFamilies";
@@ -19,23 +19,10 @@ import { PRESET_FITTINGS } from "../src/gamedata/presets/fittingPresets";
 import { StaticImageCatalog } from "../src/ui/icons/imageCatalog";
 import { TYPE_ICON_FILES } from "../src/ui/icons/typeIconFiles";
 
-class TestStackingPenalty implements StackingPenalty {
-  apply(multipliers: readonly number[]): number {
-    const values = multipliers.filter((value) => value !== 1);
-    const positive = values.filter((value) => value > 1).sort((a, b) => Math.abs(b - 1) - Math.abs(a - 1));
-    const negative = values.filter((value) => value < 1).sort((a, b) => Math.abs(b - 1) - Math.abs(a - 1));
-    let product = 1;
-    for (const list of [positive, negative]) {
-      for (let i = 0; i < list.length; i++) product *= 1 + (list[i]! - 1) * Math.exp(-(i * i) / 7.1289);
-    }
-    return product;
-  }
-}
-
 const ships = new ShipsImpl({ shipProfileCatalog: new StaticShipProfileCatalog(), nameI18nCatalog: new StaticNameI18nCatalog() });
 const gunFamilies = new GunFamiliesImpl({ fittingDb: FITTING_DB });
 const chargeCatalog = new ChargeCatalogImpl({ fittingDb: FITTING_DB, gunFamilies });
-const stackingPenalty = new TestStackingPenalty();
+const stackingPenalty = new StackingPenaltyImpl();
 const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonuses: FITTING_DB.skillBonuses });
 const missileCatalog = new MissileCatalogImpl({ fittingDb: FITTING_DB, missileSkillModel });
 const droneSkillModel = new DroneSkillModelImpl();

@@ -1,6 +1,6 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 import type { DefenseSkills, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../../../ships";
-import type { AutopilotMode, SensorBoostLoadout, SensorSpec, SimValueParser } from "../../../sim";
+import type { AutopilotMode, SensorSpec, SimValueParser } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting } from "../../../appstate";
@@ -15,6 +15,7 @@ import type { PanelTurretLink } from "./turretLink";
 import type { PanelLauncherLink } from "./launcherLink";
 import type { PanelDroneLink } from "./droneLink";
 import type { SidePanelElements } from "./elements";
+import type { DimensionedSelection, SelectionSession, PropulsionDimension } from "../../selectionSession";
 
 export interface SidePanel {
   readonly side: Side;
@@ -50,7 +51,8 @@ export interface SidePanel {
   setLauncherProfile(profile: ShipProfile | undefined): void;
   clearDrone(): void;
   restoreDrone(): void;
-  setSensorData(spec: SensorSpec | undefined, boosts: SensorBoostLoadout | undefined): void;
+  clearSelectionSession(): void;
+  setSensorData(spec: SensorSpec | undefined): void;
   renderFittingPopupIfOpen(): void;
   closeFittingPopupIfOpen(): void;
   hideFittingPreview(): void;
@@ -79,8 +81,8 @@ export interface SidePanelState {
   readonly overrides: Partial<ProfileParamOverrides>;
   readonly fittedHull: FittedHullSummary | undefined;
   readonly sig?: number;
+  readonly sigBloomFactor?: number;
   readonly sensorSpec?: SensorSpec;
-  readonly sensorBoosts?: SensorBoostLoadout;
 }
 
 export interface FittingPopupControl {
@@ -122,4 +124,6 @@ export interface SidePanelDeps {
   launcherLink: PanelLauncherLink;
   droneLink: PanelDroneLink;
   simValueParser: SimValueParser;
+  propulsionSelection: DimensionedSelection<PropulsionDimension>;
+  selectionSession: SelectionSession;
 }

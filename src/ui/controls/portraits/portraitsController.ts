@@ -1,14 +1,17 @@
 import type { ShipId, TypeId } from "../../../gamedata/ids";
-import type { DampenerBreakdown, DefenseLayer, DisruptionBreakdown, EwarResolver, LockState, SpeedBreakdown, StatEffectAttribution } from "../../../sim";
+import type { ActiveOffensiveModule, DefenseLayer, LockState } from "../../../sim";
+import type { HpValueDisplay } from "../../../appstate";
 import type { ImageCatalog } from "../../icons";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
-import type { EwarController } from "../ewar";
 import type { DefenseController } from "../defense";
-import type { ViewStore } from "../controlsContract";
+import type { ViewStream } from "../../viewStream";
 import type { Side } from "../side";
 import type { CombatantProfiles, PortraitsEls, PortraitsController } from "./portraitsControllerContract";
 import { html } from "../markup";
+import { percentFromMultiplier, signedPercentFromMultiplier } from "../../format";
+import { formatWithCommas } from "../controlsFormat";
+import { setText } from "../controlsDom";
 
 interface SideState {
   lastKey: string;
@@ -25,44 +28,44 @@ const HP_BAR_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
 export class PortraitsControllerImpl implements PortraitsController {
   private readonly els: PortraitsEls;
   private readonly imageCatalog: ImageCatalog;
-  private readonly ewarController: EwarController;
-  private readonly ewarResolver: EwarResolver;
   private readonly defenseController: DefenseController;
   private readonly combatantProfiles: CombatantProfiles;
   private readonly events: UiEvents;
   private readonly i18n: I18n;
-  private readonly viewStore: ViewStore;
-  private distance = 0;
+  private readonly viewStream: ViewStream;
   private readonly shipAState: SideState = { lastKey: "", lastId: "" };
   private readonly shipBState: SideState = { lastKey: "", lastId: "" };
+  private hpValueDisplay: HpValueDisplay = "none";
 
   constructor(deps: {
     els: PortraitsEls;
     imageCatalog: ImageCatalog;
-    ewarController: EwarController;
-    ewarResolver: EwarResolver;
     defenseController: DefenseController;
     combatantProfiles: CombatantProfiles;
     events: UiEvents;
     i18n: I18n;
-    viewStore: ViewStore;
+    viewStream: ViewStream;
   }) {
     this.els = deps.els;
     this.imageCatalog = deps.imageCatalog;
-    this.ewarController = deps.ewarController;
-    this.ewarResolver = deps.ewarResolver;
     this.defenseController = deps.defenseController;
     this.combatantProfiles = deps.combatantProfiles;
     this.events = deps.events;
     this.i18n = deps.i18n;
-    this.viewStore = deps.viewStore;
-    this.events.onDistanceChanged((d) => { this.distance = d; });
+    this.viewStream = deps.viewStream;
+    deps.viewStream.onViewUpdated(() => this.update());
+    deps.events.onLanguageChanged(() => this.update());
     this.update();
   }
 
   update(): void {
     this.updateSide("shipA");
     this.updateSide("shipB");
+  }
+
+  setHpValueDisplay(mode: HpValueDisplay): void {
+    this.hpValueDisplay = mode;
+    this.update();
   }
 
   private updateSide(side: Side): void {
@@ -82,18 +85,16 @@ export class PortraitsControllerImpl implements PortraitsController {
       state.lastId = "";
       return;
     }
-    const enemySide: Side = side === "shipA" ? "shipB" : "shipA";
-    const projection = this.ewarController.projection(enemySide);
-    const speedBreakdown = this.ewarResolver.speedBreakdown(projection, this.distance);
-    const disruptionBreakdown = this.ewarResolver.disruptionBreakdown(projection, this.distance);
-    const dampenerBreakdown = this.ewarResolver.dampenerBreakdown(projection, this.distance);
-    const portraitEffects = buildPortraitEffects(speedBreakdown, disruptionBreakdown, dampenerBreakdown, this.i18n);
+    const offensiveModules = this.viewStream.currentView()?.incomingOffensiveModules[side] ?? [];
+    const portraitEffects = offensiveModules.map((m) => offensiveModuleEffect(m, this.i18n));
     const defenseEffects = this.defenseController.cyclingEffects(side);
     const allEffects = [...portraitEffects, ...defenseEffects];
     const hpPercentages = this.defenseController.hpPercentages(side);
     updateHpBars(hpBars, hpPercentages);
     hpBars.hidden = hpPercentages === undefined;
-    const lock = this.viewStore.currentView()?.locks[side];
+    const hpValueEls = side === "shipA" ? this.els.shipAHpValues : this.els.shipBHpValues;
+    updateHpValues(hpValueEls, this.hpValueDisplay, this.defenseController.hpValues(side), hpPercentages);
+    const lock = this.viewStream.currentView()?.locks[side];
     const lockBadgeVisible = lock !== undefined && lock.status === "locked" && lock.lockTime > 0;
     if (lockBadge.hidden !== !lockBadgeVisible) lockBadge.hidden = !lockBadgeVisible;
     const key = buildDiffKey(profile.id, allEffects, lockBadgeVisible);
@@ -125,55 +126,37 @@ function buildDiffKey(id: ShipId, effects: readonly PortraitEffect[], lockBadge:
   return `${id}|${effects.map((e) => `${e.moduleId}:${e.hint}`).join(",")}|${lockBadge}`;
 }
 
-function buildPortraitEffects(speed: SpeedBreakdown, disruption: DisruptionBreakdown, dampener: DampenerBreakdown, i18n: I18n): PortraitEffect[] {
-  const effects: PortraitEffect[] = [];
-  for (const effect of speed.effects) {
-    if (effect.family === "scrambler") {
-      effects.push({ moduleId: effect.moduleId, hint: i18n.t("ewar.hover.scrambler") });
-    } else {
-      const percent = Math.round((1 - effect.multiplier) * 100);
-      effects.push({ moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.web")} ${percent}%` });
+function offensiveModuleEffect(module: ActiveOffensiveModule, i18n: I18n): PortraitEffect {
+  if (module.category === "weapon") return { moduleId: module.moduleId, hint: i18n.t(`portrait.weapon.${module.weaponKind}`) };
+  return ewarEffectHint(module, i18n);
+}
+
+function ewarEffectHint(effect: ActiveOffensiveModule & { category: "ewar" }, i18n: I18n): PortraitEffect {
+  switch (effect.family) {
+    case "web":
+      return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.web")} ${percentFromMultiplier(effect.speedMultiplier)}%` };
+    case "grappler":
+      return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.web")} ${percentFromMultiplier(effect.speedMultiplier)}%` };
+    case "scrambler":
+      return { moduleId: effect.moduleId, hint: i18n.t("ewar.hover.scrambler") };
+    case "disruptor": {
+      const parts: string[] = [];
+      if (effect.trackingMultiplier < 1) parts.push(`${i18n.t("ewar.hover.tracking")} -${percentFromMultiplier(effect.trackingMultiplier)}%`);
+      if (effect.optimalMultiplier < 1) parts.push(`${i18n.t("ewar.hover.optimal")} -${percentFromMultiplier(effect.optimalMultiplier)}%`);
+      if (effect.falloffMultiplier < 1) parts.push(`${i18n.t("ewar.hover.falloff")} -${percentFromMultiplier(effect.falloffMultiplier)}%`);
+      return { moduleId: effect.moduleId, hint: parts.join(" · ") };
+    }
+    case "dampener": {
+      const parts: string[] = [];
+      if (effect.scanResolutionMultiplier < 1) parts.push(`${i18n.t("ewar.hover.scanResolution")} -${percentFromMultiplier(effect.scanResolutionMultiplier)}%`);
+      if (effect.maxTargetRangeMultiplier < 1) parts.push(`${i18n.t("ewar.hover.targetingRange")} -${percentFromMultiplier(effect.maxTargetRangeMultiplier)}%`);
+      return { moduleId: effect.moduleId, hint: parts.join(" · ") };
+    }
+    case "painter": {
+      const percent = signedPercentFromMultiplier(effect.signatureMultiplier);
+      return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.sigRadius")} ${percent > 0 ? "+" : ""}${percent}%` };
     }
   }
-  const disruptorMap = new Map<TypeId, { tracking: number; optimal: number; falloff: number }>();
-  for (const entry of disruption.tracking) accumulateDisruption(disruptorMap, entry, "tracking");
-  for (const entry of disruption.optimal) accumulateDisruption(disruptorMap, entry, "optimal");
-  for (const entry of disruption.falloff) accumulateDisruption(disruptorMap, entry, "falloff");
-  for (const [moduleId, channels] of disruptorMap) {
-    const parts: string[] = [];
-    if (channels.tracking < 1) parts.push(`${i18n.t("ewar.hover.tracking")} -${Math.round((1 - channels.tracking) * 100)}%`);
-    if (channels.optimal < 1) parts.push(`${i18n.t("ewar.hover.optimal")} -${Math.round((1 - channels.optimal) * 100)}%`);
-    if (channels.falloff < 1) parts.push(`${i18n.t("ewar.hover.falloff")} -${Math.round((1 - channels.falloff) * 100)}%`);
-    if (parts.length > 0) effects.push({ moduleId, hint: parts.join(" · ") });
-  }
-  const dampenerMap = new Map<TypeId, { scanResolution: number; maxTargetRange: number }>();
-  for (const entry of dampener.scanResolution) accumulateDampener(dampenerMap, entry, "scanResolution");
-  for (const entry of dampener.maxTargetRange) accumulateDampener(dampenerMap, entry, "maxTargetRange");
-  for (const [moduleId, channels] of dampenerMap) {
-    const parts: string[] = [];
-    if (channels.scanResolution < 1) parts.push(`${i18n.t("ewar.hover.scanResolution")} -${Math.round((1 - channels.scanResolution) * 100)}%`);
-    if (channels.maxTargetRange < 1) parts.push(`${i18n.t("ewar.hover.targetingRange")} -${Math.round((1 - channels.maxTargetRange) * 100)}%`);
-    if (parts.length > 0) effects.push({ moduleId, hint: parts.join(" · ") });
-  }
-  return effects;
-}
-
-function accumulateDisruption(map: Map<TypeId, { tracking: number; optimal: number; falloff: number }>, entry: StatEffectAttribution, channel: "tracking" | "optimal" | "falloff"): void {
-  let existing = map.get(entry.moduleId);
-  if (!existing) {
-    existing = { tracking: 1, optimal: 1, falloff: 1 };
-    map.set(entry.moduleId, existing);
-  }
-  existing[channel] = entry.multiplier;
-}
-
-function accumulateDampener(map: Map<TypeId, { scanResolution: number; maxTargetRange: number }>, entry: StatEffectAttribution, channel: "scanResolution" | "maxTargetRange"): void {
-  let existing = map.get(entry.moduleId);
-  if (!existing) {
-    existing = { scanResolution: 1, maxTargetRange: 1 };
-    map.set(entry.moduleId, existing);
-  }
-  existing[channel] = entry.multiplier;
 }
 
 function updateHpBars(container: HTMLElement, percentages: Readonly<Record<DefenseLayer, number>> | undefined): void {
@@ -184,5 +167,24 @@ function updateHpBars(container: HTMLElement, percentages: Readonly<Record<Defen
     const pct = percentages ? percentages[HP_BAR_LAYERS[i]] : 1;
     const lost = Math.max(0, Math.min(1, 1 - pct));
     fill.style.width = `${lost * 100}%`;
+  }
+}
+
+function updateHpValues(els: { readonly shield: HTMLElement; readonly armor: HTMLElement; readonly hull: HTMLElement }, mode: HpValueDisplay, values: { readonly current: Readonly<Record<DefenseLayer, number>>; readonly max: Readonly<Record<DefenseLayer, number>> } | undefined, percentages: Readonly<Record<DefenseLayer, number>> | undefined): void {
+  if (mode === "none" || percentages === undefined || values === undefined) {
+    els.shield.hidden = true;
+    els.armor.hidden = true;
+    els.hull.hidden = true;
+    return;
+  }
+  for (const layer of HP_BAR_LAYERS) {
+    const el = els[layer];
+    if (mode === "percentage") {
+      const pct = Math.round(Math.max(0, Math.min(1, percentages[layer])) * 100);
+      setText(el, `${pct}%`);
+    } else {
+      setText(el, `${formatWithCommas(Math.round(values.current[layer]))} / ${formatWithCommas(values.max[layer])}`);
+    }
+    el.hidden = false;
   }
 }

@@ -3,10 +3,14 @@ import { toTypeId } from "../gamedata/ids";
 import type { DroneGroup } from "../fitting";
 import type { Language } from "./language";
 import type { SimValueParser } from "../sim";
-import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation, StoredRahActivation, StoredRepairMode, StoredRepairerActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
+import type { FittedHullSummary, HpValueDisplay, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation, StoredRahActivation, StoredRepairMode, StoredRepairerActivation, StoredSensorBoosterActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
 
 export function isLanguage(value: unknown): value is Language {
   return value === "en" || value === "zh" || value === "ja";
+}
+
+export function isHpValueDisplay(value: unknown): value is HpValueDisplay {
+  return value === "none" || value === "percentage" || value === "absolute";
 }
 
 export function isOptionalEwarActivation(value: unknown): boolean {
@@ -51,6 +55,12 @@ export function isOptionalMissileBoosterActivations(value: unknown): boolean {
   return value.every(isStoredMissileBoosterActivation);
 }
 
+export function isOptionalSensorBoosterActivations(value: unknown): value is readonly StoredSensorBoosterActivation[] | undefined {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every(isStoredSensorBoosterActivation);
+}
+
 export function isOptionalRepairMode(value: unknown): value is StoredRepairMode | undefined {
   return value === undefined || value === "auto" || value === "manual";
 }
@@ -69,6 +79,12 @@ export function isOptionalRahActivation(value: unknown): value is StoredRahActiv
 }
 
 function isStoredMissileBoosterActivation(value: unknown): value is StoredMissileBoosterActivation {
+  if (!isRecord(value)) return false;
+  const item = value;
+  return typeof item.active === "boolean" && (item.overloaded === undefined || typeof item.overloaded === "boolean") && isStoredBoosterScript(item.script);
+}
+
+function isStoredSensorBoosterActivation(value: unknown): value is StoredSensorBoosterActivation {
   if (!isRecord(value)) return false;
   const item = value;
   return typeof item.active === "boolean" && (item.overloaded === undefined || typeof item.overloaded === "boolean") && isStoredBoosterScript(item.script);
@@ -183,8 +199,8 @@ export function isOptionalUnitInterval(value: unknown): value is number | undefi
   return value === undefined || (isFiniteNumber(value) && value >= 0 && value <= 1);
 }
 
-export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 {
-  return value === 5 || value === 6 || value === 7 || value === 8 || value === 9 || value === 10 || value === 11 || value === 12 || value === 13 || value === 14;
+export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 {
+  return value === 5 || value === 6 || value === 7 || value === 8 || value === 9 || value === 10 || value === 11 || value === 12 || value === 13 || value === 14 || value === 15;
 }
 
 export function isOptionalNonEmptyString(value: unknown): value is string | undefined {
@@ -242,13 +258,15 @@ export function isFittedHull(value: unknown): value is FittedHull {
   if (!isRecord(value)) return false;
   const s = value;
   if (s.massMultiplier === undefined) s.massMultiplier = 1;
+  if (s.mwdSigBloomMultiplier === undefined) s.mwdSigBloomMultiplier = 1;
   return (
     isNonNegative(s.mass) &&
     isPositive(s.massMultiplier) &&
     isPositive(s.speedMultiplier) &&
     isPositive(s.inertiaMultiplier) &&
     isPositive(s.sigMultiplier) &&
-    isNonNegative(s.sigRadiusAdd)
+    isNonNegative(s.sigRadiusAdd) &&
+    isPositive(s.mwdSigBloomMultiplier)
   );
 }
 

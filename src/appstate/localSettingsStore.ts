@@ -1,13 +1,13 @@
 import type { SettingsParser } from "./settingsParser";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 import type { SettingsStore } from "./settingsStore";
-import type { DisplayPreferences, ProfileSettings, TrackingUnit, UserSettings, WeaponRangeVisibility } from "./userSettings";
+import type { DisplayPreferences, HpValueDisplay, ProfileSettings, TrackingUnit, UserSettings, WeaponRangeVisibility } from "./userSettings";
 import type { SessionSettings, StartupState } from "./combatantSettings";
 import type { Language } from "./language";
 import type { ProfileEquality } from "./profileEquality";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { encodeBase64, URL_PARAM } from "./urlCodec";
-import { isFiniteNumber, isLanguage, isOptionalRangeOverlayVisibility, isOptionalUnitInterval, isPositive, stripDisplayPreferences } from "./validators";
+import { isFiniteNumber, isHpValueDisplay, isLanguage, isOptionalRangeOverlayVisibility, isOptionalUnitInterval, isPositive, stripDisplayPreferences } from "./validators";
 
 const PROFILES_KEY = "gunner-profiles-v6";
 const SELECTED_PROFILE_KEY = "gunner-selected-profile-v6";
@@ -125,6 +125,7 @@ export class LocalSettingsStore implements SettingsStore {
         rangeOverlayVisibility: isOptionalRangeOverlayVisibility(s.rangeOverlayVisibility) ? s.rangeOverlayVisibility : undefined,
         autoZoom: typeof s.autoZoom === "boolean" ? s.autoZoom : DEFAULT_PREFERENCES.autoZoom,
         zoomFactor: isFiniteNumber(s.zoomFactor) ? Math.max(0.25, Math.min(4, s.zoomFactor)) : DEFAULT_PREFERENCES.zoomFactor,
+        hpValueDisplay: isHpValueDisplay(s.hpValueDisplay) ? s.hpValueDisplay : DEFAULT_PREFERENCES.hpValueDisplay,
       };
     } catch {
       return { ...DEFAULT_PREFERENCES };

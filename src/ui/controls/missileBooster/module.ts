@@ -10,9 +10,10 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 export function registerMissileBoosterModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     missileBoosterEffectDescriber: asClass(MissileBoosterEffectDescriberImpl).singleton(),
-    missileBoosterController: asFunction(({ els, popupGroup, imageCatalog, fittingImport, i18n, missileBoosterEffectDescriber, uiEvents }) => new MissileBoosterControllerImpl({
+    missileBoosterController: asFunction(({ els, popupGroup, modulesPopup, imageCatalog, fittingImport, i18n, missileBoosterEffectDescriber, uiEvents }) => new MissileBoosterControllerImpl({
       els: collectMissileBoosterEls(els),
       popupGroup,
+      modulesPopup,
       imageCatalog,
       fittingImport,
       i18n,
@@ -31,6 +32,10 @@ function collectMissileBoosterEls(els: ControlsElements): MissileBoosterEls {
     summaries: {
       shipA: els.shipA.missileBoosterSummary,
       shipB: els.shipB.missileBoosterSummary,
+    },
+    modulesFields: {
+      shipA: els.shipA.ewar.field,
+      shipB: els.shipB.ewar.field,
     },
   };
 }

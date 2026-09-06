@@ -1,0 +1,24 @@
+@layer components {
+.targeting-popup { }
+
+.targeting-attr-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px;
+}
+
+.targeting-attr-label {
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.targeting-attr-value {
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: var(--text-primary);
+  text-align: right;
+  white-space: nowrap;
+}
+}

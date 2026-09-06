@@ -123,6 +123,12 @@ export class FakeElement {
     }
     if (selector.startsWith(".")) {
       const className = selector.slice(1).split(/[.:\s>+~\[]/)[0];
+      const attrMatch = selector.match(/\[([^\]=]+)(?:="([^"]*)")?\]/);
+      if (attrMatch) {
+        const attrName = attrMatch[1];
+        const attrValue = attrMatch[2];
+        return findWithClassAndAttr(this, className, attrName, attrValue) ?? null;
+      }
       return this.children.find((c) => c.className.split(" ").includes(className)) ?? null;
     }
     return this.children[0] ?? null;
@@ -143,6 +149,18 @@ function collectByClassName(root: FakeElement, className: string): FakeElement[]
     results.push(...collectByClassName(child, className));
   }
   return results;
+}
+
+function findWithClassAndAttr(root: FakeElement, className: string, attrName: string, attrValue: string | undefined): FakeElement | undefined {
+  for (const child of root.children) {
+    if (child.className.split(" ").includes(className)) {
+      const actual = child.getAttribute(attrName);
+      if (actual !== null && (attrValue === undefined || actual === attrValue)) return child;
+    }
+    const found = findWithClassAndAttr(child, className, attrName, attrValue);
+    if (found) return found;
+  }
+  return undefined;
 }
 
 function parseAttrSelector(token: string): { name: string; value: string | undefined } | undefined {

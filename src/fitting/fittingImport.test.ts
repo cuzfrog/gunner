@@ -1,7 +1,7 @@
 import { join } from "path";
 import type { PropulsionModule, ShipNameLanguage, ShipProfile, Ships, StatConditions } from "../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
-import type { DisruptionScriptSpec, StackingPenalty } from "../sim";
+import { StackingPenaltyImpl, type DisruptionScriptSpec } from "../sim";
 import { damageVectorSum } from "../sim";
 import { ChargeCatalogImpl } from "./chargeCatalog";
 import { DroneCatalogImpl } from "./droneCatalog";
@@ -25,6 +25,7 @@ import {
   MISSILE_SCRIPTS,
   OMNIDIRECTIONAL_TRACKING_ENHANCERS,
   OMNIDIRECTIONAL_TRACKING_LINKS,
+  RIG_DRAWBACK_REDUCTIONS,
   SCRIPTS,
   SENSOR_BOOSTER_SCRIPTS,
   SENSOR_BOOSTERS,
@@ -64,26 +65,7 @@ const TRACKING_SPEED_SCRIPT: DisruptionScriptSpec = {
 };
 const DISRUPTION_SCRIPT_CATALOG: readonly DisruptionScriptSpec[] = [OPTIMAL_RANGE_SCRIPT, TRACKING_SPEED_SCRIPT];
 
-class TestStackingPenalty implements StackingPenalty {
-  // Mirrors the sim StackingPenaltyImpl so fitting tests can assert expected
-  // multipliers without instantiating the full sim module. Keep in sync.
-  apply(multipliers: readonly number[]): number {
-    const values = multipliers.filter((value) => value !== 1);
-    const positive = values.filter((value) => value > 1).sort((a, b) => Math.abs(b - 1) - Math.abs(a - 1));
-    const negative = values.filter((value) => value < 1).sort((a, b) => Math.abs(b - 1) - Math.abs(a - 1));
-
-    let product = 1;
-    for (const list of [positive, negative]) {
-      for (let i = 0; i < list.length; i++) {
-        const bonus = list[i];
-        product *= 1 + (bonus - 1) * Math.exp(-(i * i) / 7.1289);
-      }
-    }
-    return product;
-  }
-}
-
-const stackingPenalty = new TestStackingPenalty();
+const stackingPenalty = new StackingPenaltyImpl();
 
 class TestItemNames implements ItemNameCatalog {
   nameForId(id: TypeId, language: ShipNameLanguage): string {
@@ -246,6 +228,30 @@ const kestrelProfile: ShipProfile = {
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
+const stilettoProfile: ShipProfile = {
+  id: "11198" as ShipId,
+  name: "Stiletto",
+  factionId: "minmatar-republic" as FactionId,
+  hullTypeId: "831" as HullTypeId,
+  mass: 1_010_000,
+  inertiaModifier: 1.6,
+  baseSpeed: 435,
+  sigRadius: 31,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
+  droneBandwidth: 0,
+  droneCapacity: 0,
+  maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+};
+
 const propulsionModules: readonly PropulsionModule[] = [
   { id: "ab-1mn", kind: "afterburner", sizeTier: "small", label: "1MN Afterburner I", iconId: toTypeId("439"), defaultModuleId: toTypeId("439"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 1.15, sigBloom: 0 },
   { id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN MWD", iconId: toTypeId("434"), defaultModuleId: toTypeId("434"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 5, sigBloom: 5 },
@@ -299,8 +305,8 @@ const db: FittingDb = {
     "Medium Shield Extender II": row("Medium Shield Extender II", "Medium Shield Extender II", { sigRadiusAdd: 7, defense: { kind: "shieldExtender", shieldHpAdd: 1100, sigRadiusPenalty: 7 } }),
     "Medium Higgs Anchor I": row("Medium Higgs Anchor I", "Medium Higgs Anchor I", { massBonusPercentage: 100, agilityMultiplier: 0.45, speedBonusPercent: -75 }),
     "Overdrive Injector System II": row("Overdrive Injector System II", "Overdrive Injector System II", { speedBonusPercent: 12.5 }),
-    "Medium Trimark Armor Pump II": row("Medium Trimark Armor Pump II", "Medium Trimark Armor Pump II", { agilityDrawbackPercent: 10 }),
-    "Medium Core Defense Field Extender I": row("Medium Core Defense Field Extender I", "Medium Core Defense Field Extender I", { sigDrawbackPercent: 10 }),
+    "Medium Trimark Armor Pump II": row("Medium Trimark Armor Pump II", "Medium Trimark Armor Pump II", { rigDrawback: { kind: "agility", percent: 10, groupId: 773 } }),
+    "Medium Core Defense Field Extender I": row("Medium Core Defense Field Extender I", "Medium Core Defense Field Extender I", { rigDrawback: { kind: "signature", percent: 10, groupId: 774 } }),
     "Tracking Enhancer II": row("Tracking Enhancer II", "Tracking Enhancer II", { turretTrackingPercent: 9.5, turretOptimalPercent: 10, turretFalloffPercent: 20 }),
     "Caldari Navy Tracking Enhancer": row("Caldari Navy Tracking Enhancer", "Caldari Navy Tracking Enhancer", { turretTrackingPercent: 12, turretOptimalPercent: 7.5, turretFalloffPercent: 15 }),
     "Medium Energy Metastasis Adjuster II": row("Medium Energy Metastasis Adjuster II", "Medium Energy Metastasis Adjuster II", { turretTrackingPercent: 20 }),
@@ -337,6 +343,7 @@ const db: FittingDb = {
     { skillId: toTypeId("3311"), bonusType: "turretOptimal", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
     { skillId: toTypeId("3317"), bonusType: "turretFalloff", magnitudePerLevel: 5, appliesTo: "module", requiredSkillId: toTypeId("3300") },
   ],
+  rigDrawbackReductions: [],
   drones: {},
   combatDrones: {},
   omnidirectionalTrackingLinks: {},
@@ -364,6 +371,9 @@ const hullBonusDb: FittingDb = {
     ],
     [profile.id]: [
       { attribute: "turretDamage", magnitude: 10, scalesWithHullSkill: true, moduleSkillId: toTypeId("3306") },
+    ],
+    [stilettoProfile.id]: [
+      { attribute: "mwdSigBloom", magnitude: -15, scalesWithHullSkill: true, moduleSkillId: toTypeId("3454") },
     ],
   },
   skillBonuses: [
@@ -417,6 +427,7 @@ const fullFittingDb: FittingDb = {
   missileScripts: MISSILE_SCRIPTS,
   hullBonuses: HULL_BONUSES,
   skillBonuses: SKILL_BONUSES,
+  rigDrawbackReductions: RIG_DRAWBACK_REDUCTIONS,
   drones: DRONES,
   combatDrones: COMBAT_DRONES,
   omnidirectionalTrackingLinks: OMNIDIRECTIONAL_TRACKING_LINKS,
@@ -437,11 +448,6 @@ const fullDroneCatalog = new DroneCatalogImpl({ fittingDb: fullFittingDb });
 const conditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: false };
 
 const skillConditions: StatConditions = { skillLevel: 4, overloaded: false, weaponOverloaded: false };
-
-function stackingPenaltyForTwo(first: number, second: number): number {
-  const penalty = Math.exp(-1 / 7.1289);
-  return first * (1 + (second - 1) * penalty);
-}
 
 describe("FittingImportImpl", () => {
   beforeEach(() => {
@@ -478,10 +484,10 @@ describe("FittingImportImpl", () => {
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(1.05, 6);
   });
 
-  test("shield extender signature radius is handled by defense calculator, not resolveHull", () => {
+  test("shield extender signature radius is included in fitted hull add and attributed by defense calculator", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Shieldy]\nMedium Shield Extender II`, conditions);
-    expect(result!.fitted.sigRadiusAdd).toBe(0);
+    expect(result!.fitted.sigRadiusAdd).toBe(7);
     expect(result!.fitted.sigMultiplier).toBe(1);
     expect(result!.defense!.signaturePenalty).toBe(7);
   });
@@ -492,9 +498,7 @@ describe("FittingImportImpl", () => {
       `[Harbinger, Agile]\nInertial Stabilizers II\nNanofiber Internal Structure II`,
       conditions,
     );
-    const first = 0.8;
-    const second = 0.8425;
-    const expected = stackingPenaltyForTwo(first, second);
+    const expected = stackingPenalty.apply([0.8, 0.8425]);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(expected, 6);
   });
 
@@ -504,9 +508,7 @@ describe("FittingImportImpl", () => {
       `[Harbinger, Siggy]\nInertial Stabilizers II\nInertial Stabilizers II`,
       conditions,
     );
-    const first = 1.11;
-    const second = 1.11;
-    const expected = stackingPenaltyForTwo(first, second);
+    const expected = stackingPenalty.apply([1.11, 1.11]);
     expect(result!.fitted.sigMultiplier).toBeCloseTo(expected, 6);
   });
 
@@ -659,7 +661,7 @@ describe("FittingImportImpl", () => {
       conditions,
     );
     expect(result!.fitted.mass).toBe(profile.mass + 3_750_000);
-    expect(result!.fitted.sigRadiusAdd).toBe(0);
+    expect(result!.fitted.sigRadiusAdd).toBe(7);
     expect(result!.defense!.signaturePenalty).toBe(7);
   });
 
@@ -825,6 +827,22 @@ Medium Energy Metastasis Adjuster II`,
     const result = importer.importFitting("[Muninn, Role]\n200mm AutoCannon II, EMP S", conditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.5, 6);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.95, 6);
+  });
+
+  test("Stiletto interceptor MWD sig bloom reduction applies at skill level 5", () => {
+    ships.findHullByName.mockReturnValue(stilettoProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting("[Stiletto, Speed]\n5MN Microwarpdrive I", { skillLevel: 5, overloaded: false, weaponOverloaded: false });
+    expect(result).toBeDefined();
+    expect(result!.fitted.mwdSigBloomMultiplier).toBeCloseTo(0.25, 6);
+  });
+
+  test("Stiletto interceptor MWD sig bloom reduction is 1 without the skill", () => {
+    ships.findHullByName.mockReturnValue(stilettoProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting("[Stiletto, Speed]\n5MN Microwarpdrive I", conditions);
+    expect(result).toBeDefined();
+    expect(result!.fitted.mwdSigBloomMultiplier).toBeCloseTo(1, 6);
   });
 
   test("hull turret bonuses match turret skill and share the module stacking chain", () => {
@@ -1180,6 +1198,45 @@ Tracking Computer I, Optimal Range Script`,
     expect(result!.boosts.scripts).toEqual([
       { name: "Optimal Range Script", moduleId: "28999" as TypeId, trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 },
       { name: "Tracking Speed Script", moduleId: "29001" as TypeId, trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 },
+    ]);
+  });
+
+  test("resolves a sensor booster with a scan resolution script", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Sb]
+200mm AutoCannon I, Hail S
+Sensor Booster II, Scan Resolution Script`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    const expectedScript = result!.sensorBoosts.boosterScripts.find((s) => s.name === "Scan Resolution Script");
+    expect(result!.sensorBoosts.boosters).toEqual([
+      expect.objectContaining({ moduleName: "Sensor Booster II", scanResolutionBonusPercent: 30, maxTargetRangeBonusPercent: 30, overloadStrengthBonusPercent: 15, defaultScript: expectedScript }),
+    ]);
+    expect(result!.sensorBoosts.boosterScripts).toEqual([
+      { name: "Targeting Range Script", moduleId: "29009" as TypeId, scanResolutionMultiplier: 0, maxTargetRangeMultiplier: 2 },
+      { name: "Scan Resolution Script", moduleId: "29011" as TypeId, scanResolutionMultiplier: 2, maxTargetRangeMultiplier: 0 },
+      { name: "ECCM Script", moduleId: "41155" as TypeId, scanResolutionMultiplier: 0, maxTargetRangeMultiplier: 0 },
+    ]);
+  });
+
+  test("resolves a sensor dampener with a scan resolution dampening script", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Sd]
+200mm AutoCannon I, Hail S
+Remote Sensor Dampener II, Scan Resolution Dampening Script`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    const expectedScript = result!.ewar.dampenerScripts.find((s) => s.name === "Scan Resolution Dampening Script");
+    expect(result!.ewar.dampeners).toEqual([
+      expect.objectContaining({ defaultScript: expectedScript }),
     ]);
   });
 
@@ -1654,7 +1711,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, skillBonuses: [], drones: DRONES, combatDrones: COMBAT_DRONES };
+  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {

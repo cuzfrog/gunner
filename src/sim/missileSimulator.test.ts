@@ -1,10 +1,13 @@
 import { Vec2 } from "./vec2";
 import { MissileSimulatorImpl } from "./missileSimulator";
 import { MissileApplicationImpl } from "./missileApplication";
+import { toTypeId } from "../gamedata/ids";
 import type { EngagementFrame, MissileLaunchSpec, MissileSpec, ShipState } from "./types";
+import { damageVectorScale } from "./types";
 
 const lightMissile: MissileSpec = {
   kind: "missile",
+  moduleId: toTypeId("1"),
   damagePerMissile: { em: 0, thermal: 0, kinetic: 83, explosive: 0 },
   cycleTime: 4,
   launcherCount: 1,
@@ -18,6 +21,7 @@ const lightMissile: MissileSpec = {
 
 const heavyMissile: MissileSpec = {
   kind: "missile",
+  moduleId: toTypeId("2"),
   damagePerMissile: { em: 0, thermal: 0, kinetic: 149, explosive: 0 },
   cycleTime: 8,
   launcherCount: 2,
@@ -51,7 +55,7 @@ function frame(shipAPos: Vec2, shipBPos: Vec2, shipAVel: Vec2 = new Vec2(0, 0), 
 }
 
 function launchSpec(weaponIndex: number, boosted: MissileSpec, paintedTargetSig: number): MissileLaunchSpec {
-  return { weaponIndex, boosted, paintedTargetSig };
+  return { weaponIndex, boosted, paintedTargetSig, baseVolleyByType: damageVectorScale(boosted.damagePerMissile, boosted.launcherCount) };
 }
 
 describe("MissileSimulatorImpl", () => {
@@ -369,6 +373,33 @@ describe("MissileSimulatorImpl", () => {
     expect(events[0].rawByType.kinetic).toBeGreaterThan(0);
   });
 
+  test("impact damage scales by launcherCount via baseVolleyByType", () => {
+    const multiLauncher: MissileSpec = { ...lightMissile, launcherCount: 3 };
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [multiLauncher], shipB: [] });
+    const launches = { shipA: [launchSpec(0, multiLauncher, 40)], shipB: [] };
+    const targetPos = new Vec2(100, 0);
+    sim.step(0.1, frame(new Vec2(0, 0), targetPos), launches);
+    let events: readonly { target: string; source: string; kind: string; weaponIndex: number; rawByType: { em: number; thermal: number; kinetic: number; explosive: number } }[] = [];
+    for (let i = 0; i < 100; i++) {
+      events = sim.step(0.1, frame(new Vec2(0, 0), targetPos), { shipA: [], shipB: [] });
+      if (events.length > 0) break;
+    }
+    expect(events.length).toBeGreaterThanOrEqual(1);
+    const singleLauncher: MissileSpec = { ...lightMissile, launcherCount: 1 };
+    const simSingle = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    simSingle.reset({ shipA: [singleLauncher], shipB: [] });
+    const singleLaunches = { shipA: [launchSpec(0, singleLauncher, 40)], shipB: [] };
+    simSingle.step(0.1, frame(new Vec2(0, 0), targetPos), singleLaunches);
+    let singleEvents: typeof events = [];
+    for (let i = 0; i < 100; i++) {
+      singleEvents = simSingle.step(0.1, frame(new Vec2(0, 0), targetPos), { shipA: [], shipB: [] });
+      if (singleEvents.length > 0) break;
+    }
+    expect(singleEvents.length).toBeGreaterThanOrEqual(1);
+    expect(events[0].rawByType.kinetic).toBeCloseTo(singleEvents[0].rawByType.kinetic * 3, 6);
+  });
+
   test("step returns no events when no missiles are in flight", () => {
     const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] });
@@ -418,9 +449,11 @@ describe("MissileSimulatorImpl", () => {
     sim.step(0.1, frame(new Vec2(0, 0), targetPos), launches);
     const overshootVelocity = new Vec2(0, 1000);
     const lowMaxSpeed = 100;
+    let impactFound = false;
     for (let i = 0; i < 100; i++) {
       const events = sim.step(0.1, frame(new Vec2(0, 0), targetPos, new Vec2(0, 0), overshootVelocity, 0, lowMaxSpeed), { shipA: [], shipB: [] });
       if (events.length > 0) {
+        impactFound = true;
         const impactCall = computeSpy.mock.calls.find((c) => c[1] === overshootVelocity.len());
         expect(impactCall).toBeDefined();
         expect(impactCall![1]).toBeCloseTo(1000, 6);
@@ -428,5 +461,6 @@ describe("MissileSimulatorImpl", () => {
         break;
       }
     }
+    expect(impactFound, "expected at least one impact event within 100 steps").toBe(true);
   });
 });

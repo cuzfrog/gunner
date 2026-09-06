@@ -32,7 +32,7 @@ export class SensorBoosterResolverImpl implements SensorBoosterResolver {
       const overloadBonus = activation.overloaded ? 1 + boosterSpec.overloadStrengthBonusPercent / 100 : 1;
       const scanResPercent = boosterSpec.scanResolutionBonusPercent * overloadBonus;
       const rangePercent = boosterSpec.maxTargetRangeBonusPercent * overloadBonus;
-      const script = activation.script ?? boosterSpec.defaultScript;
+      const script = activation.script;
 
       if (script !== undefined) {
         const scriptedScanRes = scanResPercent * script.scanResolutionMultiplier;

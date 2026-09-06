@@ -4,6 +4,7 @@ import type {
   DefenseSimulator,
   DroneApplication,
   DroneSimulator,
+  EngagementEngine,
   EwarResolver,
   EngagementEvaluator,
   EngagementFrameComposer,
@@ -19,10 +20,9 @@ import type {
   Simulation,
   StackingPenalty,
   TurretBoosterResolver,
-  TurretDamage,
   WeaponClock,
+  WeaponDamageAssessor,
 } from "./index";
-import type { SimConfig } from "./types";
 
 export interface SimCradle {
   readonly simValueParser: SimValueParser;
@@ -37,7 +37,7 @@ export interface SimCradle {
   readonly droneApplication: DroneApplication;
   readonly droneSimulator: DroneSimulator;
   readonly missileSimulator: MissileSimulator;
-  readonly turretDamage: TurretDamage;
+  readonly weaponDamageAssessor: WeaponDamageAssessor;
   readonly reactiveSteering: Autopilot;
   readonly shipBSteering: Autopilot;
   readonly shipASteering: Autopilot;
@@ -49,5 +49,5 @@ export interface SimCradle {
   readonly rngFactory: RngFactory;
   readonly weaponClock: WeaponClock;
   readonly lockClock: LockClock;
-  readonly simConfig: SimConfig;
+  readonly engine: EngagementEngine;
 }

@@ -1,7 +1,8 @@
 import { fakeDocument, getFake } from "../../testing";
 import { toTypeId } from "../../../gamedata/ids";
-import type { EwarProjection } from "../../../sim";
+import { EwarResolverImpl, StackingPenaltyImpl, type EwarProjection, type EngagementView } from "../../../sim";
 import type { I18n, Language } from "../../i18n";
+import type { ViewStream } from "../../viewStream";
 import { UiEventsImpl } from "../../events";
 import type { EwarController, EwarEffectDescriber } from "../ewar";
 import { RangeOverlayControllerImpl } from "./rangeOverlayController";
@@ -20,6 +21,7 @@ function buildController(now: () => number = () => 0): {
   emitDisplayInvalidated: ReturnType<typeof vi.spyOn>;
   ewarEffectDescriber: EwarEffectDescriber;
   legend: HTMLElement;
+  viewStreamListeners: Set<(view: EngagementView) => void>;
 } {
   const document = fakeDocument();
   globalThis.document = document;
@@ -63,16 +65,31 @@ function buildController(now: () => number = () => 0): {
   });
   const events = new UiEventsImpl();
   const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
+  const ewarResolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });
+  const viewStreamListeners = new Set<(view: EngagementView) => void>();
+  const viewStream = vi.mocked<ViewStream>({
+    connect: vi.fn(),
+    onViewUpdated: vi.fn((l: (view: EngagementView) => void) => viewStreamListeners.add(l)),
+    offViewUpdated: vi.fn((l: (view: EngagementView) => void) => viewStreamListeners.delete(l)),
+    currentView: vi.fn(() => undefined),
+  });
   const controller = new RangeOverlayControllerImpl({
     els,
     i18n,
     ewarEffectDescriber,
     ewarController,
+    ewarResolver,
     events,
+    viewStream,
     now,
   });
-  events.emitDistanceChanged(5000);
-  return { controller, ewarController, events, emitDisplayInvalidated, ewarEffectDescriber, legend };
+  emitView(viewStreamListeners, 5000);
+  return { controller, ewarController, events, emitDisplayInvalidated, ewarEffectDescriber, legend, viewStreamListeners };
+}
+
+function emitView(listeners: Set<(view: EngagementView) => void>, distance: number): void {
+  const view = { frame: { distance } } as unknown as EngagementView;
+  for (const listener of Array.from(listeners)) listener(view);
 }
 
 function projectionWithWeb(active = true, overloaded = false): EwarProjection {

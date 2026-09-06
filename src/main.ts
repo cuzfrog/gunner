@@ -33,8 +33,10 @@ function main(): void {
   // sim before ui: controls wiring resolves sessionCodec eagerly, which needs hitChance.
   registerSimModule(container);
   registerUiModule(container);
+  // SimulationImpl needs an initial SimConfig at construction time to place ships.
   container.register({ simConfig: asValue(container.cradle.controls.getConfig()) });
   registerAppModule(container);
+  container.cradle.viewStream.connect(container.cradle.engine);
 
   container.cradle.app.start();
 }
