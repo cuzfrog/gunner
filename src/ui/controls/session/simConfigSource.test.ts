@@ -224,7 +224,7 @@ describe("SimConfigSourceImpl", () => {
     expect(config.shipB.suppressedMaxSpeed).toBeUndefined();
   });
 
-  test("getEngineConfig assembles sim, weapons, sigRadii, defense, and overloaded", () => {
+  test("getEngineConfig assembles sim, weapons, defense, and overloaded", () => {
     const deps = build();
     const source = makeSource(deps);
     const engineConfig = source.getEngineConfig();
