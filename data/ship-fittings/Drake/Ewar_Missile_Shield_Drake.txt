@@ -10,7 +10,7 @@ Large Azeotropic Restrained Shield Extender
 Multispectrum Shield Hardener II
 10MN Afterburner II
 Multispectrum Shield Hardener II
-[Empty Med slot]
+Warp Disruptor II
 
 Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
 Skirmish Command Burst II, Rapid Deployment Charge
@@ -21,8 +21,8 @@ Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
 Information Command Burst II, Electronic Hardening Charge
 
 Medium EM Shield Reinforcer I
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
 Nanite Repair Paste x50

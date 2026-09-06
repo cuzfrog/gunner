@@ -10,7 +10,7 @@ Gyrostabilizer II
 10MN Monopropellant Enduring Afterburner
 Faint Epsilon Scoped Warp Scrambler
 Fleeting Compact Stasis Webifier
-[Empty Med slot]
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
 
 425mm Medium 'Scout' Autocannon I, EMP M
 425mm Medium 'Scout' Autocannon I, EMP M
@@ -18,7 +18,7 @@ Fleeting Compact Stasis Webifier
 425mm Medium 'Scout' Autocannon I, EMP M
 425mm Medium 'Scout' Autocannon I, EMP M
 425mm Medium 'Scout' Autocannon I, EMP M
-[Empty High slot]
+Small Energy Neutralizer II
 
 Medium Trimark Armor Pump I
 Medium Explosive Armor Reinforcer I

@@ -6,11 +6,11 @@ Ballistic Control System II
 Co-Processor II
 Ballistic Control System II
 
-X-Large Ancillary Shield Booster
+X-Large Ancillary Shield Booster, Navy Cap Booster 400
 Multispectrum Shield Hardener II
 50MN Quad LiF Restrained Microwarpdrive
 Warp Scrambler II
-[Empty Med slot]
+Stasis Webifier II
 
 Rapid Light Missile Launcher II, Nova Fury Light Missile
 Rapid Light Missile Launcher II, Nova Fury Light Missile

@@ -1,12 +1,12 @@
 [Brutix Navy Issue, Kitetackle Blaster Shield Brutix Navy Issue]
 
-Reinforced Bulkheads II
 Damage Control II
 Magnetic Field Stabilizer II
-Reinforced Bulkheads II
 Magnetic Field Stabilizer II
-Reinforced Bulkheads II
-Reinforced Bulkheads II
+Magnetic Field Stabilizer II
+Nanofiber Internal Structure II
+Magnetic Field Stabilizer II
+Nanofiber Internal Structure II
 
 Stasis Webifier II
 50MN Cold-Gas Enduring Microwarpdrive
@@ -21,13 +21,14 @@ Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Ancillary Current Router I
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
 Hornet EC-300 x5
 
 
-Null M x960
-Void M x960
+Void M x2000
+Null M x2000
+Caldari Navy Antimatter Charge M x1000

@@ -9,6 +9,7 @@ Heat Sink II
 
 Large F-S9 Regolith Compact Shield Extender
 50MN Cold-Gas Enduring Microwarpdrive
+Warp Disruptor II
 Large Compact Pb-Acid Cap Battery
 
 Mega Modulated Pulse Energy Beam I, Imperial Navy Multifrequency L
@@ -22,7 +23,8 @@ Mega Modulated Pulse Energy Beam I, Imperial Navy Multifrequency L
 
 Medium Low Friction Nozzle Joints I
 Medium Low Friction Nozzle Joints I
-[Empty Rig slot]
+Medium Energy Locus Coordinator I
 
 
-Imperial Navy Multifrequency L x23
+Imperial Navy Multifrequency L x500
+Scorch L x200

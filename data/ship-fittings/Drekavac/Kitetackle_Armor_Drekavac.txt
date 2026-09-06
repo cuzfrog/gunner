@@ -5,8 +5,8 @@ Damage Control II
 Nanofiber Internal Structure II
 Medium Ancillary Armor Repairer, Nanite Repair Paste
 Reactive Armor Hardener
-[Empty Low slot]
-[Empty Low slot]
+Energized Adaptive Nano Membrane II
+Energized Adaptive Nano Membrane II
 
 Medium Capacitor Booster II
 Dread Guristas Warp Disruptor
@@ -16,7 +16,7 @@ Tracking Computer II, Optimal Range Script
 Skirmish Command Burst II, Rapid Deployment Charge
 Medium Energy Neutralizer II
 Medium Energy Neutralizer II
-[Empty High slot]
+Drone Link Augmentor II
 
 Medium Polycarbon Engine Housing II
 Medium Explosive Armor Reinforcer II

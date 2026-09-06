@@ -4,7 +4,7 @@ Magnetic Field Stabilizer II
 IFFA Compact Damage Control
 Magnetic Field Stabilizer II
 
-Remote Sensor Dampener II, Scan Resolution Dampening Script
+50MN Microwarpdrive II
 Remote Sensor Dampener II, Scan Resolution Dampening Script
 Remote Sensor Dampener II, Scan Resolution Dampening Script
 Compact Kinetic Shield Hardener
@@ -26,6 +26,5 @@ Medium Kinetic Shield Reinforcer II
 
 
 Scan Resolution Dampening Script x3
-Caldari Navy Antimatter Charge L x1680
-Caldari Navy Antimatter Charge L x6381
+Caldari Navy Antimatter Charge L x3000
 Optimal Range Script x2

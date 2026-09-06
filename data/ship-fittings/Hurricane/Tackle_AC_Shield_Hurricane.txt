@@ -18,11 +18,11 @@ Faint Epsilon Scoped Warp Scrambler
 425mm AutoCannon II, Republic Fleet Phased Plasma M
 425mm AutoCannon II, Republic Fleet Phased Plasma M
 425mm AutoCannon II, Republic Fleet Phased Plasma M
-[Empty High slot]
+Small Energy Neutralizer II
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
 Republic Fleet Phased Plasma M x1280

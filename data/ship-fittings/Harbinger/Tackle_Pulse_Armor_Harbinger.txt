@@ -5,7 +5,7 @@ Multispectrum Energized Membrane II
 Damage Control II
 1600mm Steel Plates II
 Heat Sink II
-[Empty Low slot]
+Heat Sink II
 
 Fleeting Compact Stasis Webifier
 Warp Scrambler II
@@ -22,7 +22,7 @@ Heavy Pulse Laser II, Conflagration M
 
 Medium Trimark Armor Pump I
 Medium Trimark Armor Pump I
-[Empty Rig slot]
+Medium Trimark Armor Pump I
 
 
 Acolyte II x3

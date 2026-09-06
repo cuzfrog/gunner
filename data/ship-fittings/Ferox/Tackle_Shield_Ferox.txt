@@ -1,38 +1,33 @@
 [Ferox, Tackle Shield Ferox]
 
-Power Diagnostic System II
-Power Diagnostic System II
-Power Diagnostic System II
-Power Diagnostic System II
+Damage Control II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Tracking Enhancer II
 
 Large Shield Extender II
-100MN Afterburner II
+50MN Microwarpdrive II
 Multispectrum Shield Hardener II
 Warp Scrambler II
-Multispectrum Shield Hardener II
-Large Shield Booster II
+Stasis Webifier II
+Large Shield Extender II
 
-Medium Energy Nosferatu II
-Modal Light Neutron Particle Accelerator I, Caldari Navy Antimatter Charge S
-Modal Light Neutron Particle Accelerator I, Caldari Navy Antimatter Charge S
-Medium Energy Nosferatu II
-Medium Energy Nosferatu II
-Modal Light Neutron Particle Accelerator I, Caldari Navy Antimatter Charge S
-Medium Energy Nosferatu II
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+Small Energy Nosferatu II
 
-Medium Core Defense Capacitor Safeguard II
-Medium EM Shield Reinforcer II
-Medium Core Defense Field Extender II
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+Medium EM Shield Reinforcer I
 
 
-Sisters Combat Scanner Probe x8
-Nova Rage Rocket x978
-Caldari Navy Antimatter Charge S x2568
-Sisters Core Scanner Probe x8
-Mobile Small Warp Disruptor I x1
-Nanite Repair Paste x128
-Caldari Navy Mjolnir Rocket x924
-Caldari Navy Nova Rocket x1000
-Inferno Rage Rocket x360
-Mjolnir Rage Rocket x98
-Mjolnir Rage Rocket x256
+Hobgoblin II x2
+
+
+Caldari Navy Antimatter Charge M x2000
+Spike M x1000
+Nanite Repair Paste x50

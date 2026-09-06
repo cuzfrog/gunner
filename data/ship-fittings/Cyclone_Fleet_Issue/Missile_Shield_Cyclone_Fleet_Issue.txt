@@ -18,12 +18,12 @@ Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
 Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
 Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
 Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
-[Empty High slot]
-[Empty High slot]
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
 
 Medium EM Shield Reinforcer II
 Medium Ancillary Current Router I
-[Empty Rig slot]
+Medium Core Defense Field Extender I
 
 
 Imperial Navy Infiltrator x2

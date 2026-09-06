@@ -9,7 +9,7 @@ F-12 Enduring Tracking Computer, Tracking Speed Script
 Alumel-Wired Enduring Sensor Booster, Scan Resolution Script
 F-12 Enduring Tracking Computer, Tracking Speed Script
 Alumel-Wired Enduring Sensor Booster, Scan Resolution Script
-[Empty Med slot]
+50MN Microwarpdrive II
 
 1400mm 'Scout' Artillery I, Republic Fleet Fusion L
 1400mm 'Scout' Artillery I, Republic Fleet Fusion L
@@ -21,8 +21,8 @@ Alumel-Wired Enduring Sensor Booster, Scan Resolution Script
 1400mm 'Scout' Artillery I, Republic Fleet Fusion L
 
 Medium Ancillary Current Router II
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
 Republic Fleet Fusion L x1840

@@ -1,31 +1,33 @@
 [Brutix, Tackle Blaster Shield Brutix]
 
-Reinforced Bulkheads II
 Damage Control II
 Magnetic Field Stabilizer II
-Reinforced Bulkheads II
 Magnetic Field Stabilizer II
-Reinforced Bulkheads II
+Magnetic Field Stabilizer II
+Nanofiber Internal Structure II
 
-Stasis Webifier II
-Stasis Webifier II
+Large Shield Extender II
+50MN Microwarpdrive II
 Warp Scrambler II
-[Empty Med slot]
+Stasis Webifier II
 
+Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
 Medium Energy Nosferatu II
-Heavy Neutron Blaster II, Void M
 
 Medium Ancillary Current Router I
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
-Caldari Navy Antimatter Charge M x1200
-Null M x468
-Navy Cap Booster 400 x20
-Void M x46
+Hammerhead II x5
+
+
+Void M x2000
+Null M x2000
+Caldari Navy Antimatter Charge M x1000
+Nanite Repair Paste x50

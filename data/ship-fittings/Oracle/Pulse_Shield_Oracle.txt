@@ -9,6 +9,7 @@ Heat Sink II
 
 Large F-S9 Regolith Compact Shield Extender
 50MN Cold-Gas Enduring Microwarpdrive
+Warp Disruptor II
 Large Compact Pb-Acid Cap Battery
 
 Mega Pulse Laser II, Conflagration L
@@ -22,7 +23,8 @@ Mega Pulse Laser II, Conflagration L
 
 Medium Low Friction Nozzle Joints I
 Medium Low Friction Nozzle Joints I
-[Empty Rig slot]
+Medium Energy Locus Coordinator I
 
 
-Conflagration L x18
+Conflagration L x500
+Scorch L x200
