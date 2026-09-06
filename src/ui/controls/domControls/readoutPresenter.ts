@@ -48,16 +48,16 @@ export class ReadoutPresenterImpl implements ReadoutPresenter {
   }
 
   setPlaying(playing: boolean): void {
-    if (!playing && this.playing && this.cachedView) {
-      this.applyReadouts(this.cachedView);
-      this.lastApplyMs = this.now();
-    }
+    if (!playing && this.playing) this.flush();
     this.playing = playing;
     if (playing) this.lastApplyMs = this.now() - READOUT_INTERVAL_MS;
   }
 
   flush(): void {
-    if (this.cachedView) this.applyReadouts(this.cachedView);
+    if (this.cachedView) {
+      this.applyReadouts(this.cachedView);
+      this.lastApplyMs = this.now();
+    }
   }
 
   private onReadouts(view: EngineView): void {
