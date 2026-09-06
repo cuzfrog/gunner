@@ -19,8 +19,8 @@ Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
 425mm AutoCannon II, Hail M
 
 Medium Ancillary Current Router I
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
 Mjolnir Rage Heavy Assault Missile x394

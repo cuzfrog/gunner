@@ -25,6 +25,5 @@ Medium Core Defense Field Extender I
 
 Nova Fury Light Missile x250
 Nova Precision Light Missile x250
-Navy Cap Booster 400 x1
 Inferno Precision Light Missile x112
 Inferno Fury Light Missile x85

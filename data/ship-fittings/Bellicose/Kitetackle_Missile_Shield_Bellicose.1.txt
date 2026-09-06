@@ -9,7 +9,7 @@ Multispectrum Shield Hardener II
 X-Large Ancillary Shield Booster, Navy Cap Booster 800
 50MN Cold-Gas Enduring Microwarpdrive
 Initiated Compact Warp Disruptor
-[Empty Med slot]
+Warp Scrambler II
 
 Heavy Assault Missile Launcher II, Inferno Rage Heavy Assault Missile
 Heavy Assault Missile Launcher II, Inferno Rage Heavy Assault Missile
@@ -18,7 +18,7 @@ Heavy Assault Missile Launcher II, Inferno Rage Heavy Assault Missile
 
 Medium Processor Overclocking Unit I
 Medium EM Shield Reinforcer II
-[Empty Rig slot]
+Medium Core Defense Field Extender I
 
 
 Mjolnir Rage Heavy Assault Missile x1000

@@ -16,11 +16,11 @@ Rapid Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
 Rapid Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
 Rapid Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
 Rapid Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
-[Empty High slot]
+Small Energy Neutralizer II
 
 Medium Thermal Shield Reinforcer II
 Medium EM Shield Reinforcer II
-[Empty Rig slot]
+Medium Core Defense Field Extender I
 
 
 Nova Fury Light Missile x1000

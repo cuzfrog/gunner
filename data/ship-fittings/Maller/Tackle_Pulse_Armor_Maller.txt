@@ -20,3 +20,12 @@ Focused Medium Pulse Laser II, Multifrequency M
 Medium Trimark Armor Pump I
 Medium Trimark Armor Pump I
 Medium Trimark Armor Pump I
+
+
+Hammerhead II x5
+
+
+Multifrequency M x2000
+Conflagration M x1000
+Scorch M x1000
+Nanite Repair Paste x50

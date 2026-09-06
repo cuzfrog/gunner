@@ -4,17 +4,17 @@ Drone Damage Amplifier II
 Drone Damage Amplifier II
 Drone Damage Amplifier II
 Damage Control II
-Co-Processor II
+Magnetic Field Stabilizer II
 
-Adaptive Invulnerability Field II
-EM Ward Field II
-10MN Afterburner II
-Medium F-S9 Regolith Compact Shield Extender
+Large Shield Extender II
+50MN Microwarpdrive II
+Warp Disruptor II
+Multispectrum Shield Hardener II
 
-Drone Link Augmentor II
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
 
 Medium Core Defense Field Extender I
 Medium Core Defense Field Extender I
@@ -22,3 +22,7 @@ Medium Core Defense Field Extender I
 
 
 Hammerhead II x5
+Warrior II x5
+
+
+Caldari Navy Antimatter Charge M x2000

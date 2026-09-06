@@ -1,24 +1,27 @@
 [Blackbird, Missile Shield Blackbird]
 
-Mark I Compact Capacitor Flux Coil
 Damage Control II
-Mark I Compact Capacitor Flux Coil
+Signal Amplifier II
 
-Medium F-S9 Regolith Compact Shield Extender
 50MN Microwarpdrive I
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Medium F-S9 Regolith Compact Shield Extender
+Gravimetric ECM I
+Ladar ECM I
+Magnetometric ECM I
+Radar ECM I
 
-Experimental SV-2000 Rapid Light Missile Launcher, Caldari Navy Scourge Light Missile
-Experimental SV-2000 Rapid Light Missile Launcher, Caldari Navy Scourge Light Missile
-Experimental SV-2000 Rapid Light Missile Launcher, Caldari Navy Scourge Light Missile
+Rapid Light Missile Launcher I, Caldari Navy Scourge Light Missile
+Rapid Light Missile Launcher I, Caldari Navy Scourge Light Missile
+Rapid Light Missile Launcher I, Caldari Navy Scourge Light Missile
 [Empty High slot]
 
 Medium Particle Dispersion Augmentor I
+Medium Particle Dispersion Augmentor I
 Medium Core Defense Field Extender I
-Medium EM Shield Reinforcer I
 
 
-Caldari Navy Scourge Light Missile x1023
+Hornet EC-300 x5
+
+
+Caldari Navy Scourge Light Missile x1000
+Nanite Repair Paste x50

@@ -1,25 +1,30 @@
 [Vexor, Drone Armor Vexor]
 
+Damage Control II
+Energized Adaptive Nano Membrane II
 Medium Armor Repairer II
 Drone Damage Amplifier II
 Drone Damage Amplifier II
-[Empty Low slot]
-[Empty Low slot]
 
-10MN Monopropellant Enduring Afterburner
-Cap Recharger II
-Cap Recharger II
+10MN Afterburner II
+Warp Scrambler II
+Stasis Webifier II
 Medium Cap Battery II
 
-Dual 150mm Prototype Gauss Gun, Antimatter Charge M
-Dual 150mm Prototype Gauss Gun, Antimatter Charge M
-[Empty High slot]
-[Empty High slot]
+Heavy Electron Blaster II, Caldari Navy Antimatter Charge M
+Heavy Electron Blaster II, Caldari Navy Antimatter Charge M
+Heavy Electron Blaster II, Caldari Navy Antimatter Charge M
+Small Energy Neutralizer II
 
-Medium Processor Overclocking Unit I
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Auxiliary Nano Pump I
+Medium Nanobot Accelerator I
+Medium Explosive Armor Reinforcer I
 
 
-Hammerhead I x5
-Hobgoblin I x5
+Hammerhead II x5
+Warrior II x5
+Hobgoblin II x5
+
+
+Caldari Navy Antimatter Charge M x2000
+Nanite Repair Paste x100

@@ -19,7 +19,7 @@ Heavy Ion Blaster II, Caldari Navy Antimatter Charge M
 
 Medium Hybrid Burst Aerator I
 Medium Hybrid Collision Accelerator I
-[Empty Rig slot]
+Medium Hybrid Burst Aerator I
 
 
 Hammerhead II x5

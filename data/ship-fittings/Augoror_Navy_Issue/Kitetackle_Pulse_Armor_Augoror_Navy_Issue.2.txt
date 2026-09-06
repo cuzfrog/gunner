@@ -8,15 +8,15 @@ Heat Sink II
 Reactive Armor Hardener
 Multispectrum Energized Membrane II
 
-Medium F-RX Compact Capacitor Booster
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
 50MN Quad LiF Restrained Microwarpdrive
 Warp Scrambler II
 
 Heavy Pulse Laser II, Scorch M
 Heavy Pulse Laser II, Scorch M
 Heavy Pulse Laser II, Scorch M
-[Empty High slot]
-[Empty High slot]
+Small Energy Neutralizer II
+Small Energy Neutralizer II
 
 Medium Auxiliary Nano Pump I
 Medium Nanobot Accelerator I

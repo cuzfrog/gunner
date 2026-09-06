@@ -14,11 +14,11 @@ Phased Muon Scoped Sensor Dampener, Targeting Range Dampening Script
 
 250mm Railgun II, Spike M
 250mm Railgun II, Spike M
-[Empty High slot]
+Small Energy Neutralizer II
 
 Medium Particle Dispersion Projector I
 Medium Particle Dispersion Projector I
-[Empty Rig slot]
+Medium Particle Dispersion Projector I
 
 
 Hobgoblin II x6

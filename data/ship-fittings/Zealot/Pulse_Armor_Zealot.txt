@@ -6,7 +6,7 @@ Heat Sink II
 Reactor Control Unit II
 Medium Armor Repairer II
 Medium Armor Repairer II
-[Empty Low slot]
+Heat Sink II
 
 10MN Afterburner II
 Republic Fleet Medium Cap Battery

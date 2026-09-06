@@ -6,10 +6,10 @@ Ballistic Control System II
 Ballistic Control System II
 
 Large Shield Extender II
+Large Shield Extender II
 Multispectrum Shield Hardener II
 50MN Cold-Gas Enduring Microwarpdrive
-[Empty Med slot]
-[Empty Med slot]
+Warp Disruptor II
 
 Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
 Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
@@ -19,12 +19,9 @@ Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
 Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
 
 Medium EM Shield Reinforcer II
-[Empty Rig slot]
+Medium Core Defense Field Extender II
 
 
+Caldari Navy Scourge Heavy Assault Missile x3000
+Scourge Rage Heavy Assault Missile x2000
 Mjolnir Rage Heavy Assault Missile x1500
-Caldari Navy Scourge Heavy Assault Missile x2552
-Caldari Navy Nova Heavy Assault Missile x2000
-Missile Precision Script x1
-Missile Precision Script x1
-Scourge Rage Heavy Assault Missile x1880
