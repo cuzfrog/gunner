@@ -5,8 +5,11 @@ export interface ShipStats {
   readonly inertiaModifier: number;
   readonly maxSpeed: number;
   readonly baseMaxSpeed: number;
+  // Base signature radius without propulsion bloom (still includes hull sig multiplier and flat add).
   readonly sigRadius: number;
-  readonly baseSigRadius: number;
+  // Propulsion sig bloom factor: propulsion.sigBloom * hull.mwdSigBloomMultiplier.
+  // 0 without propulsion. The sim applies this as (base + penalty) * (1 + sigBloomFactor).
+  readonly sigBloomFactor: number;
   readonly alignTime: number;
 }
 
@@ -35,8 +38,8 @@ export function fittedStats(
   const maxSpeed = baseMaxSpeed * (propulsion ? 1 + (moduleSpeed * propulsion.thrust) / mass : 1);
   const effectiveBase = maxSpeedOverride !== undefined && maxSpeed > 0 ? baseMaxSpeed * (maxSpeedOverride / maxSpeed) : baseMaxSpeed;
   const inertiaModifier = profile.inertiaModifier * hull.inertiaMultiplier * inertiaFactor;
-  const baseSigRadius = (profile.sigRadius + hull.sigRadiusAdd) * hull.sigMultiplier;
-  const sigRadius = baseSigRadius * (1 + (propulsion ? propulsion.sigBloom * hull.mwdSigBloomMultiplier : 0));
+  const sigRadius = (profile.sigRadius + hull.sigRadiusAdd) * hull.sigMultiplier;
+  const sigBloomFactor = propulsion ? propulsion.sigBloom * hull.mwdSigBloomMultiplier : 0;
   const alignTime = mass * inertiaModifier * ALIGN_TIME_FACTOR;
 
   return {
@@ -45,7 +48,7 @@ export function fittedStats(
     maxSpeed,
     baseMaxSpeed: effectiveBase,
     sigRadius,
-    baseSigRadius,
+    sigBloomFactor,
     alignTime,
   };
 }

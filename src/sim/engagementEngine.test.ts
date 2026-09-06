@@ -89,7 +89,6 @@ function engineConfig(): import("./engagementEngine").EngineConfig {
   return {
     sim: shipConfig,
     weapons: { shipA: [turret], shipB: [turret] },
-    sigRadii: { shipA: 40, shipB: 40 },
     defense: {
       shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC,
       damageEnabled: { shipA: true, shipB: true },

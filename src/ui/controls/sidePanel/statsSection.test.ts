@@ -13,7 +13,7 @@ import { StatsSection, type StatsSectionEls } from "./statsSection";
 function shipsWithStats(): Ships {
   const ships = vi.mocked<Ships>(mockShips());
   ships.hullView = vi.fn((profile) => ({ name: profile.name, hullType: "Frigate", faction: "Minmatar Republic" }));
-  ships.fittedStats = vi.fn(() => ({ mass: 1_000_000, inertiaModifier: 2, sigRadius: 30, baseSigRadius: 30, maxSpeed: 0, baseMaxSpeed: 0, alignTime: 0 }));
+  ships.fittedStats = vi.fn(() => ({ mass: 1_000_000, inertiaModifier: 2, sigRadius: 30, sigBloomFactor: 0, maxSpeed: 0, baseMaxSpeed: 0, alignTime: 0 }));
   ships.maxSpeedForFittedMass = vi.fn(() => 450);
   ships.alignTime = vi.fn(() => 2.5);
   return ships;

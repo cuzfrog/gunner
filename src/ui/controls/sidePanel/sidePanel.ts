@@ -196,7 +196,7 @@ export class SidePanelImpl implements SidePanel {
       overrides: this.overrides.get(),
       fittedHull: this.fittedHull,
       sig: Math.max(num(this.els.shipSig), 1),
-      baseSig: this.sections.stats.currentBaseSig(),
+      sigBloomFactor: this.sections.stats.currentSigBloomFactor(),
       sensorSpec: this.sensorSpecValue,
     };
   }

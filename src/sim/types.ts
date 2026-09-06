@@ -66,12 +66,15 @@ export interface ShipConfig {
   readonly mode: AutopilotMode;
   readonly desiredRange: number;
   readonly aggressivity: number;
+  // Base signature radius (without propulsion bloom or extender penalty).
+  // `effectiveState` applies bloom and penalty on top of this value.
   readonly sig?: number;
-  // Signature radius without propulsion-module bloom (e.g. MWD sig bloom).
-  // When a scrambler suppresses propulsion, `effectiveState` reverts `sig`
-  // to this base value, mirroring how `suppressedMaxSpeed` reverts speed.
-  // Absent = legacy fallback (sig stays unchanged when suppressed).
-  readonly baseSig?: number;
+  // Multiplicative propulsion sig bloom factor (e.g. MWD sig bloom * hull reduction).
+  // Absent/0 = no propulsion bloom. Applied as `(sig + sigPenalty) * (1 + sigBloom)`.
+  readonly sigBloom?: number;
+  // Flat signature radius penalty from shield extenders, in meters.
+  // Applied additively before bloom: `(sig + sigPenalty) * (1 + sigBloom)`.
+  readonly sigPenalty?: number;
   readonly orbitDirection?: OrbitDirection;
 }
 

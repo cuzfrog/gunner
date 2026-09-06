@@ -74,7 +74,6 @@ export class SimConfigSourceImpl implements SimConfigSource {
     return {
       sim: this.getConfig(),
       weapons: { shipA: this.weaponsFor("shipA"), shipB: this.weaponsFor("shipB") },
-      sigRadii: { shipA: this.sigFor("shipA"), shipB: this.sigFor("shipB") },
       defense: this.defenseSimConfig(),
       overloaded: { shipA: this.overloadedFor("shipA"), shipB: this.overloadedFor("shipB") },
     };
@@ -92,7 +91,8 @@ export class SimConfigSourceImpl implements SimConfigSource {
       desiredRange: state.range,
       aggressivity: state.aggressivity,
       sig: state.sig ?? 1,
-      baseSig: state.baseSig ?? state.sig ?? 1,
+      sigBloom: state.sigBloomFactor ?? 0,
+      sigPenalty: this.defenseController.spec(side)?.signaturePenalty ?? 0,
       orbitDirection: "cw",
       ewar: this.ewarController.projection(side),
       boosts: this.boosterController.projection(side),
@@ -124,10 +124,6 @@ export class SimConfigSourceImpl implements SimConfigSource {
       for (const spec of this.droneControllers[side].currentDroneSpecs()) weapons.push(spec);
     }
     return weapons;
-  }
-
-  private sigFor(side: Side): number {
-    return this.sideFor(side).capture().sig ?? 1;
   }
 
   private overloadedFor(side: Side): boolean {

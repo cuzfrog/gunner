@@ -13,7 +13,6 @@ import type { WeaponClock } from "./weaponClock";
 export interface EngineConfig {
   readonly sim: SimConfig;
   readonly weapons: Record<Side, readonly WeaponSpec[]>;
-  readonly sigRadii: Record<Side, number>;
   readonly defense: DefenseSimConfig;
   readonly overloaded: Record<Side, boolean>;
 }
@@ -206,7 +205,7 @@ export class EngagementEngineImpl implements EngagementEngine {
   private engagementInput(snapshot: SimSnapshot, locks: Record<Side, LockState>, config: EngineConfig): EngagementInput {
     return {
       weapons: config.weapons,
-      sigRadii: { shipA: snapshot.shipA.sig ?? config.sigRadii.shipA, shipB: snapshot.shipB.sig ?? config.sigRadii.shipB },
+      sigRadii: { shipA: snapshot.shipA.sig ?? 1, shipB: snapshot.shipB.sig ?? 1 },
       droneStates: { shipA: this.droneSimulator.states("shipA"), shipB: this.droneSimulator.states("shipB") },
       missileFacts: { shipA: this.missileFactsFor("shipA", config), shipB: this.missileFactsFor("shipB", config) },
       defenses: { shipA: config.defense.shipA, shipB: config.defense.shipB },

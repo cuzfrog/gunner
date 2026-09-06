@@ -232,8 +232,6 @@ describe("SimConfigSourceImpl", () => {
     expect(engineConfig.sim.shipA.id).toBe("shipA");
     expect(engineConfig.weapons.shipA).toEqual([deps.turretSpec, deps.missileSpec]);
     expect(engineConfig.weapons.shipB).toEqual([deps.turretSpec, deps.missileSpec]);
-    expect(engineConfig.sigRadii.shipA).toBe(1);
-    expect(engineConfig.sigRadii.shipB).toBe(40);
     expect(engineConfig.defense.shipA).toBe(EMPTY_DEFENSE_SPEC);
     expect(engineConfig.defense.shipB).toBe(EMPTY_DEFENSE_SPEC);
     expect(engineConfig.defense.damageEnabled).toEqual({ shipA: true, shipB: true });
@@ -249,12 +247,15 @@ describe("SimConfigSourceImpl", () => {
     expect(engineConfig.weapons.shipA).toEqual([deps.missileSpec, deps.turretSpec]);
   });
 
-  test("getEngineConfig sigRadii fall back to 1 when sig is undefined", () => {
+  test("getConfig carries sigBloom and sigPenalty from state and defense spec", () => {
     const deps = build();
-    deps.shipBSide.capture = vi.fn(() => ({ ...baseShipBState(), sig: undefined }));
+    deps.shipASide.capture = vi.fn(() => ({ ...baseShipAState(), sig: 36, sigBloomFactor: 5 }));
+    deps.defenseController.spec = vi.fn(() => ({ ...EMPTY_DEFENSE_SPEC, signaturePenalty: 10 }));
     const source = makeSource(deps);
-    const engineConfig = source.getEngineConfig();
-    expect(engineConfig.sigRadii.shipB).toBe(1);
+    const config = source.getConfig();
+    expect(config.shipA.sig).toBe(36);
+    expect(config.shipA.sigBloom).toBe(5);
+    expect(config.shipA.sigPenalty).toBe(10);
   });
 
   test("getEngineConfig overloaded reflects skill conditions", () => {
