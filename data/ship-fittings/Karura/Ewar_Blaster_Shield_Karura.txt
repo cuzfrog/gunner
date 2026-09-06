@@ -6,20 +6,20 @@ Shadow Serpentis Magnetic Field Stabilizer
 Dark Blood Power Diagnostic System
 'Radical' Damage Control
 
-Capital F-RX Compact Capacitor Booster
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
 Tracking Computer II, Tracking Speed Script
 True Sansha Capital Shield Booster
 Gistum A-Type Multispectrum Shield Hardener
-Capital F-RX Compact Capacitor Booster
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
 Gistum A-Type Multispectrum Shield Hardener
-[Empty Med slot]
+EM Shield Hardener II
 
 Triple Neutron Blaster Cannon II, Shadow Antimatter Charge XL
 Triple Neutron Blaster Cannon II, Shadow Antimatter Charge XL
 Heavy 'Moat' Energy Neutralizer
 Triple Neutron Blaster Cannon II, Shadow Antimatter Charge XL
-[Empty High slot]
-[Empty High slot]
+Caldari Navy Large Graviton Smartbomb
+Small Energy Neutralizer II
 
 Capital EM Shield Reinforcer II
 Capital Core Defense Capacitor Safeguard II

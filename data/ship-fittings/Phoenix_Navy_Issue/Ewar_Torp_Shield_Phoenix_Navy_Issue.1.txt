@@ -4,26 +4,26 @@ Damage Control II
 Ballistic Control System II
 Ballistic Control System II
 Ballistic Control System II
-[Empty Low slot]
+Ballistic Control System II
 
 Multispectrum Shield Hardener II
 Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
 Multispectrum Shield Hardener II
 CONCORD Capital Shield Booster
-Capital F-RX Compact Capacitor Booster
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+EM Shield Hardener II
+Thermal Shield Hardener II
+Sensor Booster II, Scan Resolution Script
 
 Rapid Torpedo Launcher II, Mjolnir Rage Torpedo
 Capital Gremlin Compact Energy Neutralizer
 Rapid Torpedo Launcher II, Mjolnir Rage Torpedo
 Rapid Torpedo Launcher II, Mjolnir Rage Torpedo
-[Empty High slot]
+Caldari Navy Large Graviton Smartbomb
 
 Capital EM Shield Reinforcer I
 Capital Ancillary Current Router I
-[Empty Rig slot]
+Capital Core Defense Field Extender I
 
 
 Strontium Clathrates x1750

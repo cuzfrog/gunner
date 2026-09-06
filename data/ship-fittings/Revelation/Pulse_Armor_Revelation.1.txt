@@ -7,7 +7,7 @@ Corpum B-Type Multispectrum Energized Membrane
 Capital I-a Enduring Armor Repairer
 Capital I-a Enduring Armor Repairer
 True Sansha Heat Sink
-[Empty Low slot]
+True Sansha Heat Sink
 
 Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
 Optical Compact Tracking Computer
@@ -22,7 +22,7 @@ Dual Giga Pulse Laser II
 
 Capital Trimark Armor Pump I
 Capital Ancillary Current Router II
-[Empty Rig slot]
+Capital Energy Locus Coordinator I
 
 
 Conflagration XL x1

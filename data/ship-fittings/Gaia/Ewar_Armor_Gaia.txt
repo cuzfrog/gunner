@@ -11,15 +11,15 @@ Centum B-Type Multispectrum Energized Membrane
 10000MN Afterburner II
 Sensor Booster II, Scan Resolution Script
 Sensor Booster II, Scan Resolution Script
-Capital Capacitor Booster II
-[Empty Med slot]
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Sensor Booster II, Targeting Range Script
 
 Armor Command Burst II, Armor Energizing Charge
 Armor Command Burst II, Armor Reinforcement Charge
 Heavy Energy Neutralizer II
 Armor Command Burst II, Rapid Repair Charge
-[Empty High slot]
-[Empty High slot]
+Information Command Burst II, Electronic Hardening Charge
+Drone Link Augmentor II
 
 Capital Trimark Armor Pump II
 Capital Trimark Armor Pump II

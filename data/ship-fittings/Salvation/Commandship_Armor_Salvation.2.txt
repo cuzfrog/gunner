@@ -9,27 +9,27 @@ Core X-Type Thermal Armor Hardener
 Centum C-Type Multispectrum Energized Membrane
 25000mm Steel Plates II
 
-Capital Capacitor Booster II, Cap Booster 3200
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Sensor Booster II, Scan Resolution Script
+Sensor Booster II, Targeting Range Script
+Stasis Webifier II
 
 Information Command Burst II, Electronic Superiority Charge
 Armor Command Burst II, Rapid Repair Charge
 Information Command Burst II, Electronic Hardening Charge
 Information Command Burst II, Electronic Superiority Charge
 Armor Command Burst II, Armor Energizing Charge
-[Empty High slot]
+Drone Link Augmentor II
 
 Capital Trimark Armor Pump II
 Capital Trimark Armor Pump II
 
 
 Armor Energizing Charge x300
-Cap Booster 3200 x12
+Navy Cap Booster 3200 x12
 Armor Reinforcement Charge x300
 Sensor Optimization Charge x199
 Strontium Clathrates x1000
 Helium Isotopes x42532
 Helium Isotopes x91958
-Cap Booster 3200 x43
+Navy Cap Booster 3200 x43

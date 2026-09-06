@@ -13,13 +13,13 @@ Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
 Abyssal Stasis Webifier
 Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
 Federation Navy Tracking Computer, Tracking Speed Script
-[Empty Med slot]
+Sensor Booster II, Scan Resolution Script
 
 Ion Siege Blaster II, Shadow Antimatter Charge XL
 Ion Siege Blaster II, Shadow Antimatter Charge XL
 Corpus X-Type Heavy Energy Neutralizer
 Ion Siege Blaster II, Shadow Antimatter Charge XL
-[Empty High slot]
+Large Abyssal Plasma Smartbomb
 
 Capital Nanobot Accelerator I
 Capital Auxiliary Nano Pump I

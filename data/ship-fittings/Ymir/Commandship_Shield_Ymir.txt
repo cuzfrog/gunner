@@ -3,34 +3,34 @@
 Nanofiber Internal Structure II
 Nanofiber Internal Structure II
 Nanofiber Internal Structure II
-[Empty Low slot]
-[Empty Low slot]
+Damage Control II
+Drone Damage Amplifier II
 
-Capital Capacitor Booster II, Cap Booster 3200
+Capital Capacitor Booster II, Navy Cap Booster 3200
 Pithum A-Type Multispectrum Shield Hardener
 50000MN Microwarpdrive II
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Capital Shield Extender II
+EM Shield Hardener II
+Thermal Shield Hardener II
+Sensor Booster II, Scan Resolution Script
 
 Skirmish Command Burst II, Interdiction Maneuvers Charge
 Skirmish Command Burst II, Rapid Deployment Charge
 Skirmish Command Burst II, Evasive Maneuvers Charge
 Shield Command Burst II, Active Shielding Charge
-[Empty High slot]
-[Empty High slot]
+Information Command Burst II, Sensor Optimization Charge
+Drone Link Augmentor II
 
 Capital Hyperspatial Velocity Optimizer II
 Capital Hyperspatial Velocity Optimizer II
 
 
 Active Shielding Charge x3000
-Cap Booster 3200 x10
+Navy Cap Booster 3200 x10
 Shield Extension Charge x3000
 Shield Harmonizing Charge x3000
 Evasive Maneuvers Charge x2700
 Rapid Deployment Charge x2700
 Interdiction Maneuvers Charge x2700
-Cap Booster 3200 x70
+Navy Cap Booster 3200 x70
 Hydrogen Isotopes x212037
