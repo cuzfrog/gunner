@@ -1,5 +1,4 @@
-import { ZERO_DAMAGE } from "./types";
-import type { DamageEvent, DamageVector, DroneRuntimeState, DroneSpec, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec } from "./types";
+import type { DamageEvent, DroneRuntimeState, DroneSpec, InflictedDps, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec } from "./types";
 import type { DefenseSimConfig, DefenseSimulator, DefenseView, RepairMode } from "./defenseSimulator";
 import type { DroneSimConfig, DroneSimulator } from "./droneSimulator";
 import type { EngagementFrameComposer, EngagementInput, EngagementView } from "./engagementFrameComposer";
@@ -20,6 +19,7 @@ export interface EngineConfig {
 export interface EngineView extends EngagementView {
   readonly snapshot: SimSnapshot;
   readonly defenseRuntime: DefenseView;
+  readonly inflicted: Record<Side, InflictedDps>;
   readonly drones: Record<Side, readonly DroneRuntimeState[]>;
   readonly droneSpecs: Record<Side, readonly DroneSpec[]>;
   readonly missiles: Record<Side, readonly MissileRuntimeState[]>;
@@ -44,7 +44,8 @@ export interface EngagementEngine {
   setRahActivation(side: Side, active: boolean, overloaded: boolean): void;
 }
 
-const PROJECTION_HORIZON_SECONDS = 1;
+const INFLICTED_WINDOW_FLOOR_SECONDS = 10;
+const INFLICTED_WINDOW_CYCLE_MULTIPLIER = 2;
 
 export class EngagementEngineImpl implements EngagementEngine {
   private readonly simulation: Simulation;
@@ -93,6 +94,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     this.weaponClock.reset();
     this.lockClock.reset();
     this.defenseSimulator.reset(config.defense);
+    this.applyInflictedWindows(config);
     this.initializeLocks();
     this.lastView = this.composeView();
     this.publishView(this.lastView);
@@ -105,6 +107,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     this.droneSimulator.update(droneSimConfigFrom(config));
     this.missileSimulator.update(missileSimConfigFrom(config));
     this.defenseSimulator.update(config.defense);
+    this.applyInflictedWindows(config);
     this.lastView = this.composeView();
     this.publishView(this.lastView);
     return this.lastView;
@@ -173,17 +176,21 @@ export class EngagementEngineImpl implements EngagementEngine {
   private buildView(composed: EngagementView, snapshot: SimSnapshot): EngineView {
     const config = this.config;
     if (!config) throw new Error("buildView called before config set");
-    const incoming = incomingByTarget(composed);
-    const projection = this.defenseSimulator.project(incoming, PROJECTION_HORIZON_SECONDS);
+    const defenseRuntime = this.defenseSimulator.view();
     return {
       ...composed,
-      projection,
       snapshot,
-      defenseRuntime: this.defenseSimulator.view(),
+      defenseRuntime,
+      inflicted: defenseRuntime.inflictedDps,
       drones: { shipA: this.droneSimulator.states("shipA"), shipB: this.droneSimulator.states("shipB") },
       droneSpecs: { shipA: droneSpecsFrom(config.weapons.shipA), shipB: droneSpecsFrom(config.weapons.shipB) },
       missiles: { shipA: this.missileSimulator.states("shipA"), shipB: this.missileSimulator.states("shipB") },
     };
+  }
+
+  private applyInflictedWindows(config: EngineConfig): void {
+    this.defenseSimulator.setInflictedWindow("shipA", inflictedWindowSeconds(config.weapons.shipA));
+    this.defenseSimulator.setInflictedWindow("shipB", inflictedWindowSeconds(config.weapons.shipB));
   }
 
   private initializeLocks(): void {
@@ -277,9 +284,9 @@ function missileSpecsFrom(weapons: readonly WeaponSpec[]): readonly MissileSpec[
   return weapons.filter((w): w is MissileSpec => w.kind === "missile");
 }
 
-function incomingByTarget(view: EngagementView): Record<Side, DamageVector> {
-  return {
-    shipA: view.attacks.shipB?.damage.appliedByType ?? ZERO_DAMAGE,
-    shipB: view.attacks.shipA?.damage.appliedByType ?? ZERO_DAMAGE,
-  };
+function inflictedWindowSeconds(weapons: readonly WeaponSpec[]): number {
+  const slowestCycleTime = weapons.reduce((slowest, weapon) => Math.max(slowest, weapon.cycleTime), 0);
+  return Math.max(INFLICTED_WINDOW_FLOOR_SECONDS, INFLICTED_WINDOW_CYCLE_MULTIPLIER * slowestCycleTime);
 }
+
+export { inflictedWindowSeconds as _inflictedWindowSeconds };

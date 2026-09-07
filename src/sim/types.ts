@@ -17,13 +17,12 @@ export interface LayerDamage {
   readonly hull: number;
 }
 
-export interface DamageProjection {
-  readonly totalInflicted: number;
+export interface InflictedDps {
+  readonly total: number;
   readonly byLayer: LayerDamage;
 }
 
 export const ZERO_DAMAGE: DamageVector = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
-export const EMPTY_PROJECTION: DamageProjection = { totalInflicted: 0, byLayer: { shield: 0, armor: 0, hull: 0 } };
 export const DAMAGE_TYPES: readonly DamageType[] = ["em", "thermal", "kinetic", "explosive"];
 export const DEFENSE_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
 

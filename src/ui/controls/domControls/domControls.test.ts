@@ -1,7 +1,7 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type EngineView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type EngineView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
 import type { Ships } from "../../../ships";
 import type { EffectiveReadouts } from "../controlsContract";
 import { USER_SETTINGS_VERSION } from "../../../appstate";
@@ -60,7 +60,7 @@ function makeView(distance: number): EngagementView {
     relPosition: new Vec2(0, distance), distance, relVelocity: new Vec2(0, 0),
     radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
   };
-  return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } }, incomingOffensiveModules: { shipA: [], shipB: [] } };
+  return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } }, incomingOffensiveModules: { shipA: [], shipB: [] } };
 }
 
 function mockDefenseView(): DefenseView {
@@ -76,6 +76,7 @@ function mockDefenseView(): DefenseView {
     repairers: { shipA: [], shipB: [] },
     repairMode: { shipA: "auto", shipB: "auto" },
     rah: { shipA: undefined, shipB: undefined },
+  inflictedDps: { shipA: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } }, shipB: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } } },
   };
 }
 
@@ -83,7 +84,7 @@ function makeEngineView(view: EngagementView, effective: EffectiveReadouts, defe
   const shipAState = { ...view.frame.shipA, sig: sigs?.shipA ?? 1 };
   const shipBState = { ...view.frame.shipB, sig: sigs?.shipB ?? 1 };
   const snapshot = { time: view.frame.time, shipA: shipAState, shipB: shipBState, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
-  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView, snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
+  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView, inflicted: defenseView.inflictedDps, snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
 }
 
 function baseSettings(): UserSettings {

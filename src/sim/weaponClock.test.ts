@@ -1,6 +1,6 @@
 import { WeaponClockImpl } from "./weaponClock";
 import { Mulberry32RngFactory } from "./rng";
-import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, Vec2 } from "./index";
+import { EMPTY_DEFENSE_ASSESSMENT, Vec2 } from "./index";
 import { toTypeId } from "../gamedata/ids";
 import type { AttackAssessment } from "./fireControl";
 import type { EngagementView, WeaponAttack } from "./engagementFrameComposer";
@@ -29,7 +29,6 @@ function makeView(shipAAttacks: readonly WeaponAttack[], shipBAttacks: readonly 
     weaponAttacks: { shipA: shipAAttacks, shipB: shipBAttacks },
     effectiveWeapons: { shipA: turret, shipB: turret },
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
-    projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
     locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
     readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } },
     incomingOffensiveModules: { shipA: [], shipB: [] },

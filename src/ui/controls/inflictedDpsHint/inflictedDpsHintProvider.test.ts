@@ -1,6 +1,6 @@
 import { type FakeElement, fakeDocument } from "../../testing";
 import { toTypeId } from "../../../gamedata/ids";
-import { ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, type AttackAssessment, type DamageProjection, type EngagementView, type TurretSpec } from "../../../sim";
+import { ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, type AttackAssessment, type EngineView, type InflictedDps, type TurretSpec } from "../../../sim";
 import type { ViewStream } from "../../viewStream";
 import type { InflictedDpsHintModel, InflictedDpsHintRenderer } from "./inflictedDpsHintRenderer";
 import { type InflictedDpsHintProviderDeps, InflictedDpsHintProviderImpl } from "./inflictedDpsHintProvider";
@@ -15,23 +15,25 @@ function makeAttack(appliedByType: { em: number; thermal: number; kinetic: numbe
   };
 }
 
-function makeProjection(totalInflicted: number, byLayer: { shield: number; armor: number; hull: number }): DamageProjection {
-  return { totalInflicted, byLayer };
+const ZERO_INFLICTED: InflictedDps = { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } };
+
+function makeInflicted(total: number, byLayer: { shield: number; armor: number; hull: number }): InflictedDps {
+  return { total, byLayer };
 }
 
-function makeView(shipAAttack: AttackAssessment | undefined, shipBProjection: DamageProjection): EngagementView {
+function makeView(shipAAttack: AttackAssessment | undefined, shipBInflicted: InflictedDps): EngineView {
   return {
     frame: { time: 0, shipA: {} as never, shipB: {} as never, relPosition: {} as never, distance: 5000, relVelocity: {} as never, radialVelocity: 0, transversalVelocity: {} as never, transversalSpeed: 0, angularVelocity: 0 },
     attacks: { shipA: shipAAttack, shipB: undefined },
     weaponAttacks: { shipA: [], shipB: [] },
     effectiveWeapons: { shipA: turret, shipB: undefined },
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
-    projection: { shipA: EMPTY_PROJECTION, shipB: shipBProjection },
+    inflicted: { shipA: ZERO_INFLICTED, shipB: shipBInflicted },
     locks: { shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true }, shipB: { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: false } },
-  } as unknown as EngagementView;
+  } as unknown as EngineView;
 }
 
-function makeViewStream(view: EngagementView | undefined): ViewStream {
+function makeViewStream(view: EngineView | undefined): ViewStream {
   return { connect: vi.fn(), onViewUpdated: vi.fn(), offViewUpdated: vi.fn(), currentView: vi.fn(() => view) } as unknown as ViewStream;
 }
 
@@ -44,9 +46,9 @@ function makeMockRenderer(): { renderer: InflictedDpsHintRenderer; renderMock: R
 function makeDeps(overrides: Partial<InflictedDpsHintProviderDeps> = {}): InflictedDpsHintProviderDeps & { renderMock: ReturnType<typeof vi.fn> } {
   const { renderer, renderMock } = makeMockRenderer();
   const attack = makeAttack({ em: 100, thermal: 50, kinetic: 0, explosive: 0 }, 150);
-  const projection = makeProjection(110, { shield: 80, armor: 30, hull: 0 });
+  const inflicted = makeInflicted(110, { shield: 80, armor: 30, hull: 0 });
   return {
-    viewStream: makeViewStream(makeView(attack, projection)),
+    viewStream: makeViewStream(makeView(attack, inflicted)),
     inflictedDpsHintRenderer: renderer,
     ...overrides,
     renderMock,
@@ -101,8 +103,8 @@ describe("InflictedDpsHintProviderImpl", () => {
   });
 
   test("renders nothing when side has no attack", () => {
-    const projection = makeProjection(0, { shield: 0, armor: 0, hull: 0 });
-    const deps = makeDeps({ viewStream: makeViewStream(makeView(undefined, projection)) });
+    const inflicted = makeInflicted(0, { shield: 0, armor: 0, hull: 0 });
+    const deps = makeDeps({ viewStream: makeViewStream(makeView(undefined, inflicted)) });
     const provider = new InflictedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
@@ -110,7 +112,7 @@ describe("InflictedDpsHintProviderImpl", () => {
     expect(deps.renderMock).not.toHaveBeenCalled();
   });
 
-  test("builds model with per-layer rows from opponent projection", () => {
+  test("builds model with per-layer rows from opponent inflicted damage", () => {
     const deps = makeDeps();
     const provider = new InflictedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("shipA");
@@ -129,8 +131,8 @@ describe("InflictedDpsHintProviderImpl", () => {
 
   test("skips layers with zero inflicted damage", () => {
     const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
-    const projection = makeProjection(50, { shield: 50, armor: 0, hull: 0 });
-    const deps = makeDeps({ viewStream: makeViewStream(makeView(attack, projection)) });
+    const inflicted = makeInflicted(50, { shield: 50, armor: 0, hull: 0 });
+    const deps = makeDeps({ viewStream: makeViewStream(makeView(attack, inflicted)) });
     const provider = new InflictedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
@@ -142,8 +144,8 @@ describe("InflictedDpsHintProviderImpl", () => {
 
   test("renders summary even when all layers have zero inflicted damage", () => {
     const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
-    const projection = makeProjection(0, { shield: 0, armor: 0, hull: 0 });
-    const deps = makeDeps({ viewStream: makeViewStream(makeView(attack, projection)) });
+    const inflicted = makeInflicted(0, { shield: 0, armor: 0, hull: 0 });
+    const deps = makeDeps({ viewStream: makeViewStream(makeView(attack, inflicted)) });
     const provider = new InflictedDpsHintProviderImpl(deps);
     const anchor = makeAnchor("a");
     const container = globalThis.document.createElement("div");
@@ -155,19 +157,19 @@ describe("InflictedDpsHintProviderImpl", () => {
     expect(model.totalInflictedDps).toBe(0);
   });
 
-  test("uses shipB projection for shipA side and shipA projection for shipB side", () => {
+  test("uses shipB inflicted for shipA side and shipA inflicted for shipB side", () => {
     const shipAAttack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
-    const shipAProjection = makeProjection(30, { shield: 30, armor: 0, hull: 0 });
-    const shipBProjection = makeProjection(70, { shield: 70, armor: 0, hull: 0 });
-    const view: EngagementView = {
+    const shipAInflicted = makeInflicted(30, { shield: 30, armor: 0, hull: 0 });
+    const shipBInflicted = makeInflicted(70, { shield: 70, armor: 0, hull: 0 });
+    const view: EngineView = {
       frame: { time: 0, shipA: {} as never, shipB: {} as never, relPosition: {} as never, distance: 5000, relVelocity: {} as never, radialVelocity: 0, transversalVelocity: {} as never, transversalSpeed: 0, angularVelocity: 0 },
       attacks: { shipA: shipAAttack, shipB: shipAAttack },
       weaponAttacks: { shipA: [], shipB: [] },
       effectiveWeapons: { shipA: turret, shipB: turret },
       defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
-      projection: { shipA: shipAProjection, shipB: shipBProjection },
+      inflicted: { shipA: shipAInflicted, shipB: shipBInflicted },
       locks: { shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true }, shipB: { status: "locked", progress: 1, remaining: 0, lockTime: 5, inRange: true } },
-    } as unknown as EngagementView;
+    } as unknown as EngineView;
     const deps = makeDeps({ viewStream: makeViewStream(view) });
     const provider = new InflictedDpsHintProviderImpl(deps);
     const container = globalThis.document.createElement("div");
@@ -182,8 +184,8 @@ describe("InflictedDpsHintProviderImpl", () => {
 
   test("totalInflictedDps changes when target transitions from shield to armor with different resists", () => {
     const attack = makeAttack({ em: 100, thermal: 0, kinetic: 0, explosive: 0 }, 100);
-    const shieldPhaseProjection = makeProjection(100, { shield: 100, armor: 0, hull: 0 });
-    const shieldView = makeView(attack, shieldPhaseProjection);
+    const shieldPhaseInflicted = makeInflicted(100, { shield: 100, armor: 0, hull: 0 });
+    const shieldView = makeView(attack, shieldPhaseInflicted);
     const depsShield = makeDeps({ viewStream: makeViewStream(shieldView) });
     const provider = new InflictedDpsHintProviderImpl(depsShield);
     const container = globalThis.document.createElement("div");
@@ -193,8 +195,8 @@ describe("InflictedDpsHintProviderImpl", () => {
     expect(shieldModel.layers).toHaveLength(1);
     expect(shieldModel.layers[0].layer).toBe("shield");
 
-    const armorPhaseProjection = makeProjection(50, { shield: 0, armor: 50, hull: 0 });
-    const armorView = makeView(attack, armorPhaseProjection);
+    const armorPhaseInflicted = makeInflicted(50, { shield: 0, armor: 50, hull: 0 });
+    const armorView = makeView(attack, armorPhaseInflicted);
     const depsArmor = makeDeps({ viewStream: makeViewStream(armorView) });
     const providerArmor = new InflictedDpsHintProviderImpl(depsArmor);
     providerArmor.render(makeAnchor("shipA"), container);

@@ -4,12 +4,11 @@ import { EngagementEvaluatorImpl } from "./fireControl";
 import type { DroneApplication } from "./droneApplication";
 import type { EwarResolver } from "./ewarResolver";
 import type { HitChance } from "./hitChance";
-import type { MissileApplication } from "./missileApplication";
 import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
 import { toTypeId } from "../gamedata/ids";
-import { type DamageAssessment, type DroneDamageBreakdown, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
+import { type DamageAssessment, type DroneDamageBreakdown, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileAttackFacts, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const boostedTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("2"), tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
@@ -83,6 +82,8 @@ const missileBreakdown: MissileDamageBreakdown = {
 
 const missileApplicationResult = { application: 0.8, signatureTerm: 1, velocityTerm: 0.8 };
 
+const missileFacts: MissileAttackFacts = { inFlightCount: 2, nearestTimeToImpact: 1.6, predicted: missileApplicationResult, interceptable: true };
+
 const drone: DroneSpec = { kind: "drone", moduleId: toTypeId("5"), tracking: 2.0, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 38.4, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3360, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000 };
 
 const droneBreakdownResult: DroneDamageBreakdown & DamageAssessment = {
@@ -107,7 +108,6 @@ function makeEvaluator(): {
   ewarResolver: EwarResolver;
   turretBoosterResolver: TurretBoosterResolver;
   missileBoosterResolver: MissileBoosterResolver;
-  missileApplication: MissileApplication;
   droneApplication: DroneApplication;
   evaluator: EngagementEvaluatorImpl;
 } {
@@ -132,10 +132,9 @@ function makeEvaluator(): {
   const turretBoosterResolver = vi.mocked<TurretBoosterResolver>({ boostedTurret: vi.fn(() => boostedTurret) });
   const missileBoosterResolver = vi.mocked<MissileBoosterResolver>({ boostedMissile: vi.fn((m) => m) });
   const weaponDamageAssessor = new WeaponDamageAssessorImpl();
-  const missileApplication = vi.mocked<MissileApplication>({ compute: vi.fn(() => missileApplicationResult) });
   const droneApplication = vi.mocked<DroneApplication>({ compute: vi.fn(() => droneBreakdownResult) });
-  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, missileApplication, droneApplication });
-  return { hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, missileApplication, droneApplication, evaluator };
+  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, droneApplication });
+  return { hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, droneApplication, evaluator };
 }
 
 describe("EngagementEvaluatorImpl", () => {
@@ -177,18 +176,23 @@ describe("EngagementEvaluatorImpl", () => {
     expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boosted, shipB.ewar, 6000);
   });
 
-  test("evaluates missile attack without boost or ewar", () => {
-    const { missileApplication, ewarResolver, turretBoosterResolver, missileBoosterResolver, evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40 } });
+  test("evaluates missile attack from missile facts without boost or ewar", () => {
+    const { ewarResolver, turretBoosterResolver, missileBoosterResolver, evaluator } = makeEvaluator();
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts } });
     expect(result.shipA?.missile).toEqual(missileBreakdown);
     expect(result.shipA?.damage.nominalDps).toBeCloseTo((200 * 2) / 10, 10);
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(((200 * 2) / 10) * 0.8, 10);
     expect(result.shipA?.damage.volley).toBe(400);
     expect(result.shipA?.turret).toBeUndefined();
-    expect(missileApplication.compute).toHaveBeenCalledWith(missile, 0, 40);
     expect(ewarResolver.disruptedTurret).not.toHaveBeenCalled();
+    expect(ewarResolver.sigMultiplier).not.toHaveBeenCalled();
     expect(turretBoosterResolver.boostedTurret).not.toHaveBeenCalled();
     expect(missileBoosterResolver.boostedMissile).toHaveBeenCalledWith(missile, undefined);
+  });
+
+  test("throws when missile facts are missing", () => {
+    const { evaluator } = makeEvaluator();
+    expect(() => evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40 } })).toThrow("MissileAttackFacts are required to assess a missile weapon");
   });
 
   test("applies painter sig multiplier to opponentSigRadius for turret assessment", () => {
@@ -199,35 +203,28 @@ describe("EngagementEvaluatorImpl", () => {
     expect(ewarResolver.sigMultiplier).toHaveBeenCalledWith(frame.shipA.ewar, 6000);
   });
 
-  test("applies painter sig multiplier to opponentSigRadius for missile assessment", () => {
-    const { ewarResolver, missileApplication, evaluator } = makeEvaluator();
-    vi.mocked(ewarResolver.sigMultiplier).mockReturnValue(1.3);
-    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 100 } });
-    expect(missileApplication.compute).toHaveBeenCalledWith(missile, 0, 130);
-    expect(ewarResolver.sigMultiplier).toHaveBeenCalledWith(frame.shipA.ewar, 6000);
-  });
-
   test("passes ship missileBoosts to missileBoosterResolver", () => {
     const { missileBoosterResolver, evaluator } = makeEvaluator();
     const projection = { loadout: { computers: [], enhancers: [], scripts: [] } };
     const shipAWithMissileBoosts = { ...shipA, missileBoosts: projection };
     const frameWithBoosts = { ...frame, shipA: shipAWithMissileBoosts };
-    evaluator.evaluate(frameWithBoosts, { shipA: { weapon: missile, opponentSigRadius: 40 } });
+    evaluator.evaluate(frameWithBoosts, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts } });
     expect(missileBoosterResolver.boostedMissile).toHaveBeenCalledWith(missile, projection);
   });
 
-  test("passes boosted missile to missileApplication", () => {
-    const { missileBoosterResolver, missileApplication, evaluator } = makeEvaluator();
-    const boostedMissile: MissileSpec = { ...missile, explosionRadius: 30, explosionVelocity: 150 };
+  test("passes boosted missile to damage assessment", () => {
+    const { missileBoosterResolver, evaluator } = makeEvaluator();
+    const boostedMissile: MissileSpec = { ...missile, cycleTime: 5 };
     vi.mocked(missileBoosterResolver.boostedMissile).mockReturnValue(boostedMissile);
-    evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40 } });
-    expect(missileApplication.compute).toHaveBeenCalledWith(boostedMissile, 0, 40);
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts } });
+    expect(result.shipA?.damage.nominalDps).toBeCloseTo((200 * 2) / 5, 10);
+    expect(result.shipA?.damage.appliedDps).toBeCloseTo(((200 * 2) / 5) * 0.8, 10);
   });
 
-  test("zeros missile applied DPS when out of range", () => {
-    const { missileApplication, evaluator } = makeEvaluator();
-    const shortRangeMissile: MissileSpec = { ...missile, flightRange: 5000, maxVelocity: 1000, flightTime: 5 };
-    const result = evaluator.evaluate(frame, { shipA: { weapon: shortRangeMissile, opponentSigRadius: 40 } });
+  test("zeros missile applied DPS when not interceptable", () => {
+    const { evaluator } = makeEvaluator();
+    const outOfRangeFacts: MissileAttackFacts = { ...missileFacts, interceptable: false, predicted: { application: 0, signatureTerm: 1, velocityTerm: 0.8 } };
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: outOfRangeFacts } });
     expect(result.shipA?.damage.appliedDps).toBe(0);
     expect(result.shipA?.damage.application).toBe(0);
     expect(result.shipA?.damage.nominalDps).toBeCloseTo(40, 10);
@@ -236,16 +233,16 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("missile appliedVolleyByType carries per-cycle volley scaled by application", () => {
     const { evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts } });
     const expected = damageVectorScale(missile.damagePerMissile, missile.launcherCount * 0.8);
     expect(result.shipA?.damage.appliedVolleyByType).toEqual(expected);
     expect(damageVectorSum(result.shipA!.damage.appliedVolleyByType)).toBeCloseTo(result.shipA!.damage.volley * 0.8, 10);
   });
 
-  test("missile appliedVolleyByType is zero when out of range", () => {
+  test("missile appliedVolleyByType is zero when not interceptable", () => {
     const { evaluator } = makeEvaluator();
-    const shortRangeMissile: MissileSpec = { ...missile, flightRange: 5000, maxVelocity: 1000, flightTime: 5 };
-    const result = evaluator.evaluate(frame, { shipA: { weapon: shortRangeMissile, opponentSigRadius: 40 } });
+    const outOfRangeFacts: MissileAttackFacts = { ...missileFacts, interceptable: false, predicted: { application: 0, signatureTerm: 1, velocityTerm: 0.8 } };
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: outOfRangeFacts } });
     expect(result.shipA?.damage.appliedVolleyByType).toEqual(ZERO_DAMAGE);
   });
 
@@ -258,7 +255,7 @@ describe("EngagementEvaluatorImpl", () => {
   });
 
   test("uses missile facts for applied DPS when facts are provided", () => {
-    const { missileApplication, evaluator } = makeEvaluator();
+    const { evaluator } = makeEvaluator();
     const facts = { inFlightCount: 2, nearestTimeToImpact: 1.5, predicted: { application: 0.5, signatureTerm: 1, velocityTerm: 0.6 }, interceptable: true };
     const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: facts } });
     const nominalDps = (200 * 2) / 10;
@@ -269,7 +266,6 @@ describe("EngagementEvaluatorImpl", () => {
     expect(result.shipA?.missile?.application).toBeCloseTo(0.5, 10);
     expect(result.shipA?.missile?.signatureTerm).toBe(1);
     expect(result.shipA?.missile?.velocityTerm).toBe(0.6);
-    expect(missileApplication.compute).not.toHaveBeenCalled();
   });
 
   test("uses missile facts with zero predicted application", () => {

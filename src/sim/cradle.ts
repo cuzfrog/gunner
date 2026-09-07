@@ -11,7 +11,6 @@ import type {
   HitChance,
   Kinematics,
   LockClock,
-  MissileApplication,
   MissileBoosterResolver,
   MissileSimulator,
   RngFactory,
@@ -33,7 +32,6 @@ export interface SimCradle {
   readonly sensorBoosterResolver: SensorBoosterResolver;
   readonly kinematics: Kinematics;
   readonly hitChance: HitChance;
-  readonly missileApplication: MissileApplication;
   readonly droneApplication: DroneApplication;
   readonly droneSimulator: DroneSimulator;
   readonly missileSimulator: MissileSimulator;

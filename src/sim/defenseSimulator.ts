@@ -1,4 +1,4 @@
-import { type DamageEvent, type DamageProjection, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS, damageVectorScale } from "./types";
+import { type DamageEvent, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type InflictedDps, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS } from "./types";
 
 export type RepairMode = "auto" | "manual";
 
@@ -37,6 +37,7 @@ export interface DefenseView {
   readonly repairers: Record<Side, readonly RepairerViewState[]>;
   readonly repairMode: Record<Side, RepairMode>;
   readonly rah: Record<Side, RahViewState | undefined>;
+  readonly inflictedDps: Record<Side, InflictedDps>;
 }
 
 export interface RepairerActivationEntry {
@@ -67,10 +68,11 @@ export interface DefenseSimulator {
   setRepairMode(side: Side, mode: RepairMode): void;
   setRepairerActivation(side: Side, index: number, active: boolean, overloaded: boolean): void;
   setRahActivation(side: Side, active: boolean, overloaded: boolean): void;
-  project(incomingByTarget: Record<Side, DamageVector>, horizonSeconds: number): Record<Side, DamageProjection>;
+  setInflictedWindow(side: Side, seconds: number): void;
 }
 
 const RAH_TOTAL_BUDGET = 0.6;
+const DEFAULT_INFLICTED_WINDOW_SECONDS = 10;
 
 type MutableDamageVector = Record<DamageType, number>;
 type MutableDamageResists = Record<DamageType, number>;
@@ -122,11 +124,17 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
   private time: number;
   private eventBuffer: DamageEvent[];
   private nextTickBoundary: number;
+  private readonly inflictedBuckets: Record<Side, MutableLayerDamage[]>;
+  private readonly pendingInflicted: Record<Side, MutableLayerDamage>;
+  private readonly windowSeconds: Record<Side, number>;
 
   constructor() {
     this.time = 0;
     this.eventBuffer = [];
     this.nextTickBoundary = 1;
+    this.inflictedBuckets = { shipA: [], shipB: [] };
+    this.pendingInflicted = { shipA: emptyLayerDamage(), shipB: emptyLayerDamage() };
+    this.windowSeconds = { shipA: DEFAULT_INFLICTED_WINDOW_SECONDS, shipB: DEFAULT_INFLICTED_WINDOW_SECONDS };
   }
 
   reset(config: DefenseSimConfig): void {
@@ -137,6 +145,10 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     this.time = 0;
     this.eventBuffer = [];
     this.nextTickBoundary = 1;
+    this.inflictedBuckets.shipA = [];
+    this.inflictedBuckets.shipB = [];
+    this.pendingInflicted.shipA = emptyLayerDamage();
+    this.pendingInflicted.shipB = emptyLayerDamage();
   }
 
   update(config: DefenseSimConfig): void {
@@ -179,6 +191,7 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
       },
       repairMode: { shipA: this.sides.shipA.repairMode, shipB: this.sides.shipB.repairMode },
       rah: { shipA: rahView(this.sides.shipA), shipB: rahView(this.sides.shipB) },
+      inflictedDps: { shipA: this.inflictedReadout("shipA"), shipB: this.inflictedReadout("shipB") },
     };
   }
 
@@ -211,58 +224,66 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     rah.overloaded = overloaded;
   }
 
-  project(incomingByTarget: Record<Side, DamageVector>, horizonSeconds: number): Record<Side, DamageProjection> {
-    const cloneA = clonePools(this.sides.shipA);
-    const cloneB = clonePools(this.sides.shipB);
-    const events: DamageEvent[] = [];
-    const incomingA = incomingByTarget.shipA;
-    if (incomingA.em > 0 || incomingA.thermal > 0 || incomingA.kinetic > 0 || incomingA.explosive > 0) {
-      events.push({ target: "shipA", source: "shipB", weaponIndex: 0, kind: "turret", rawByType: damageVectorScale(incomingA, horizonSeconds) });
-    }
-    const incomingB = incomingByTarget.shipB;
-    if (incomingB.em > 0 || incomingB.thermal > 0 || incomingB.kinetic > 0 || incomingB.explosive > 0) {
-      events.push({ target: "shipB", source: "shipA", weaponIndex: 0, kind: "turret", rawByType: damageVectorScale(incomingB, horizonSeconds) });
-    }
-    const projectionSides: Record<Side, SidePools> = { shipA: cloneA, shipB: cloneB };
-    const inflicted = stepProjection(projectionSides, horizonSeconds, events, this.time);
-    return { shipA: inflicted.shipA, shipB: inflicted.shipB };
+  setInflictedWindow(side: Side, seconds: number): void {
+    if (seconds <= 0) return;
+    this.windowSeconds[side] = seconds;
   }
 
   private collectReleasedEvents(): Record<Side, readonly DamageEvent[]> {
     const shipAEvents: DamageEvent[] = [];
     const shipBEvents: DamageEvent[] = [];
     if (this.time >= this.nextTickBoundary) {
+      let boundaries = 0;
+      while (this.time >= this.nextTickBoundary) {
+        this.nextTickBoundary += 1;
+        boundaries += 1;
+      }
+      this.rotateInflictedBuckets(boundaries);
       for (const event of this.eventBuffer) {
         if (event.target === "shipA") shipAEvents.push(event);
         else shipBEvents.push(event);
       }
       this.eventBuffer = [];
-      while (this.time >= this.nextTickBoundary) {
-        this.nextTickBoundary += 1;
-      }
     }
     return { shipA: shipAEvents, shipB: shipBEvents };
   }
 
-  private stepSide(side: Side, dt: number, events: readonly DamageEvent[]): void {
-    stepSidePools(this.sides[side], dt, events, this.time, emptyLayerDamage());
+  private rotateInflictedBuckets(count: number): void {
+    for (let i = 0; i < count; i++) {
+      for (const side of ["shipA", "shipB"] as const) {
+        this.inflictedBuckets[side].push(this.pendingInflicted[side]);
+        this.pendingInflicted[side] = emptyLayerDamage();
+      }
+    }
+    for (const side of ["shipA", "shipB"] as const) {
+      const keep = Math.ceil(this.windowSeconds[side]);
+      if (this.inflictedBuckets[side].length > keep) this.inflictedBuckets[side] = this.inflictedBuckets[side].slice(-keep);
+    }
   }
-}
 
-function stepProjection(sides: Record<Side, SidePools>, dt: number, events: readonly DamageEvent[], time: number): Record<Side, DamageProjection> {
-  const shipAEvents = events.filter((e) => e.target === "shipA");
-  const shipBEvents = events.filter((e) => e.target === "shipB");
-  const inflictedA = emptyLayerDamage();
-  const inflictedB = emptyLayerDamage();
-  stepSidePools(sides.shipA, dt, shipAEvents, time, inflictedA);
-  stepSidePools(sides.shipB, dt, shipBEvents, time, inflictedB);
-  return { shipA: projectionFromInflicted(inflictedA), shipB: projectionFromInflicted(inflictedB) };
+  private stepSide(side: Side, dt: number, events: readonly DamageEvent[]): void {
+    stepSidePools(this.sides[side], dt, events, this.time, this.pendingInflicted[side]);
+  }
+
+  private inflictedReadout(side: Side): InflictedDps {
+    const window = this.windowSeconds[side];
+    const keepClosed = Math.max(0, Math.ceil(window) - 1);
+    const buckets = this.inflictedBuckets[side];
+    const byLayer = sumLayerDamage([...buckets.slice(buckets.length - keepClosed), this.pendingInflicted[side]]);
+    return { total: (byLayer.shield + byLayer.armor + byLayer.hull) / window, byLayer: { shield: byLayer.shield / window, armor: byLayer.armor / window, hull: byLayer.hull / window } };
+  }
 }
 
 function emptyLayerDamage(): MutableLayerDamage { return { shield: 0, armor: 0, hull: 0 }; }
 
-function projectionFromInflicted(byLayer: MutableLayerDamage): DamageProjection {
-  return { totalInflicted: byLayer.shield + byLayer.armor + byLayer.hull, byLayer: { shield: byLayer.shield, armor: byLayer.armor, hull: byLayer.hull } };
+function sumLayerDamage(buckets: readonly MutableLayerDamage[]): MutableLayerDamage {
+  const total = emptyLayerDamage();
+  for (const bucket of buckets) {
+    total.shield += bucket.shield;
+    total.armor += bucket.armor;
+    total.hull += bucket.hull;
+  }
+  return total;
 }
 
 function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEvent[], time: number, inflicted: MutableLayerDamage): void {
@@ -283,29 +304,6 @@ function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEven
     pools.dead = true;
     pools.deadAt = time;
   }
-}
-
-function clonePools(pools: SidePools): SidePools {
-  return {
-    shield: pools.shield,
-    armor: pools.armor,
-    hull: pools.hull,
-    shieldMax: pools.shieldMax,
-    armorMax: pools.armorMax,
-    hullMax: pools.hullMax,
-    shieldRechargeTime: pools.shieldRechargeTime,
-    shieldUniformity: pools.shieldUniformity,
-    baseArmorResists: pools.baseArmorResists,
-    resists: { shield: pools.resists.shield, armor: pools.resists.armor, hull: pools.resists.hull },
-    dead: pools.dead,
-    deadAt: pools.deadAt,
-    damageEnabled: pools.damageEnabled,
-    repairers: pools.repairers,
-    repairerStates: pools.repairerStates.map((s) => ({ ...s })),
-    repairMode: pools.repairMode,
-    rahSpec: pools.rahSpec,
-    rahState: pools.rahState ? { ...pools.rahState, resists: { ...pools.rahState.resists }, armorDamageAccumulator: { ...pools.rahState.armorDamageAccumulator } } : undefined,
-  };
 }
 
 function emptyPools(): SidePools {

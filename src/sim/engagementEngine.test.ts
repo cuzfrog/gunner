@@ -1,10 +1,11 @@
-import { EngagementEngineImpl } from "./engagementEngine";
+import { EngagementEngineImpl, _inflictedWindowSeconds } from "./engagementEngine";
 import { Vec2 } from "./vec2";
 import { toTypeId } from "../gamedata/ids";
-import { EMPTY_DEFENSE_SPEC, EMPTY_PROJECTION, ZERO_DAMAGE, type EngagementFrame, type HitChanceBreakdown, type LockState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "./types";
+import { EMPTY_DEFENSE_SPEC, ZERO_DAMAGE, type EngagementFrame, type HitChanceBreakdown, type LockState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "./types";
 import { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
 import type { AttackAssessment } from "./fireControl";
 import type { DefenseSimulator, DefenseView } from "./defenseSimulator";
+import type { InflictedDps } from "./types";
 import type { DroneSimulator } from "./droneSimulator";
 import type { EngagementFrameComposer, EngagementView } from "./engagementFrameComposer";
 import type { EwarResolver } from "./ewarResolver";
@@ -42,12 +43,13 @@ function baseView(): EngagementView {
     frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] },
     effectiveWeapons: { shipA: turret, shipB: turret },
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
-    projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
     locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
     readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } },
     incomingOffensiveModules: { shipA: [], shipB: [] },
   };
 }
+
+const ZERO_INFLICTED: InflictedDps = { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } };
 
 const emptyDefenseView: DefenseView = {
   pools: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
@@ -59,6 +61,7 @@ const emptyDefenseView: DefenseView = {
   repairers: { shipA: [], shipB: [] },
   repairMode: { shipA: "auto", shipB: "auto" },
   rah: { shipA: undefined, shipB: undefined },
+  inflictedDps: { shipA: ZERO_INFLICTED, shipB: ZERO_INFLICTED },
 };
 
 function makeEngine() {
@@ -67,7 +70,7 @@ function makeEngine() {
   const droneSimulator = vi.mocked<DroneSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), states: vi.fn(() => []) });
   const missileSimulator = vi.mocked<MissileSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(() => []), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })) });
   const weaponClock = vi.mocked<WeaponClock>({ reset: vi.fn(), step: vi.fn(() => []) });
-  const defenseSimulator = vi.mocked<DefenseSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(() => emptyDefenseView), setDamageEnabled: vi.fn(), setRepairMode: vi.fn(), setRepairerActivation: vi.fn(), setRahActivation: vi.fn(), project: vi.fn(() => ({ shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION })) });
+  const defenseSimulator = vi.mocked<DefenseSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(() => emptyDefenseView), setDamageEnabled: vi.fn(), setRepairMode: vi.fn(), setRepairerActivation: vi.fn(), setRahActivation: vi.fn(), setInflictedWindow: vi.fn() });
   const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn(() => baseView()) });
   const ewarResolver = vi.mocked<Required<EwarResolver>>({
     speedMultiplier: vi.fn(() => 1), speedMultiplierIgnoringRange: vi.fn(() => 1),
@@ -294,5 +297,40 @@ describe("EngagementEngineImpl", () => {
     deps.engagementFrameComposer.compose.mockReturnValue(deadView);
     deps.engine.step(0.1);
     expect(destroyed).toEqual(["shipA", "shipA"]);
+  });
+
+  test("reset and update push per-side inflicted windows derived from weapon fire rate", () => {
+    const deps = makeEngine();
+    const slowTurret: TurretSpec = { ...turret, cycleTime: 12 };
+    const config = engineConfig();
+    const configWithSlowWeapon: import("./engagementEngine").EngineConfig = { ...config, weapons: { shipA: [slowTurret], shipB: [turret] } };
+    deps.engine.reset(configWithSlowWeapon);
+    expect(deps.defenseSimulator.setInflictedWindow).toHaveBeenCalledWith("shipA", 24);
+    expect(deps.defenseSimulator.setInflictedWindow).toHaveBeenCalledWith("shipB", 10);
+    deps.defenseSimulator.setInflictedWindow.mockClear();
+    deps.engine.update(configWithSlowWeapon);
+    expect(deps.defenseSimulator.setInflictedWindow).toHaveBeenCalledWith("shipA", 24);
+    expect(deps.defenseSimulator.setInflictedWindow).toHaveBeenCalledWith("shipB", 10);
+  });
+
+  test("view inflicts come from the defenseSimulator read model", () => {
+    const deps = makeEngine();
+    const inflicted: InflictedDps = { total: 42, byLayer: { shield: 30, armor: 12, hull: 0 } };
+    deps.defenseSimulator.view.mockReturnValue({ ...emptyDefenseView, inflictedDps: { shipA: inflicted, shipB: ZERO_INFLICTED } });
+    const view = deps.engine.reset(engineConfig());
+    expect(view.inflicted.shipA).toBe(inflicted);
+    expect(view.inflicted.shipB).toEqual(ZERO_INFLICTED);
+  });
+});
+
+describe("_inflictedWindowSeconds", () => {
+  test("returns the floor when all weapons cycle faster than half the floor", () => {
+    expect(_inflictedWindowSeconds([])).toBe(10);
+    expect(_inflictedWindowSeconds([{ ...turret, cycleTime: 3 }])).toBe(10);
+  });
+
+  test("covers at least two cycles of the slowest weapon", () => {
+    expect(_inflictedWindowSeconds([{ ...turret, cycleTime: 8 }])).toBe(16);
+    expect(_inflictedWindowSeconds([{ ...turret, cycleTime: 1 }, { ...turret, cycleTime: 9 }])).toBe(18);
   });
 });
