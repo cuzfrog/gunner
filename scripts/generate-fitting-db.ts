@@ -1,7 +1,14 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { ShipId, TypeId } from "../src/gamedata/ids";
-import type { HullBonusAttribute, SkillBonusType, RigDrawback, RigDrawbackReduction } from "../src/gamedata/fittingDb/types";
+import {
+  TURRET_WEAPON_GROUP_BY_ID,
+  type HullBonusAttribute,
+  type SkillBonusType,
+  type RigDrawback,
+  type RigDrawbackReduction,
+  type TurretWeaponGroup,
+} from "../src/gamedata/fittingDb/types";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 import type { ShipNameLanguage } from "../src/ships";
 import type { DamageResists } from "../src/sim";
@@ -134,6 +141,7 @@ const MODULE_GROUPS = new Set([
   1150, // Armor Resistance Shift Hardener (RAH)
   1156, // Ancillary Shield Booster
   1199, // Ancillary Armor Repairer
+  1988, // Entropic Radiation Sink
 ]);
 
 const SCRIPT_GROUPS = new Set([907]);
@@ -154,11 +162,14 @@ const SIGNAL_AMPLIFIER_GROUP = 210;
 const SENSOR_BOOSTER_SCRIPT_GROUP = 910;
 const SENSOR_DAMPENER_SCRIPT_GROUP = 911;
 
-const TURRET_GROUPS = new Set([53, 55, 74, 1986]);
+const TURRET_GROUPS = new Set(Object.keys(TURRET_WEAPON_GROUP_BY_ID).map(Number));
 
 const MISSILE_HULL_SKILL_IDS = new Set([3319, 3320, 3321, 3322, 3323, 3324, 3325, 3326, 25719, 20209, 20210, 20211, 20212, 20213, 25718, 41409, 41410, 21071, 20315, 12441, 12442, 20314]);
 const DRONE_HULL_SKILL_IDS = new Set([3436, 3442, 24241, 33699, 23594, 23069]);
-const TURRET_SKILL_IDS = new Set([3301, 3302, 3303, 3304, 3305, 3306, 3307, 3308, 3309, 20327, 21666, 21667]);
+const TURRET_SKILL_IDS = new Set([
+  3301, 3302, 3303, 3304, 3305, 3306, 3307, 3308, 3309, 20327, 21666, 21667,
+  47870, 47871, 47872, 52998,
+]);
 const TURRET_SUPPORT_SKILL_IDS = new Set([3300, 3310, 3311, 3312, 3315, 3317]);
 const LAUNCHER_GROUP_IDS = new Set([506, 507, 508, 509, 510, 511, 512, 771, 1245, 1579, 1624]);
 
@@ -492,13 +503,12 @@ interface FittingModuleStats {
   readonly defense?: DefenseModuleStats;
 }
 
-type TurretWeaponGroup = "Energy Weapon" | "Hybrid Weapon" | "Projectile Weapon";
-
 interface TurretStats {
   readonly tracking: number;
   readonly optimal: number;
   readonly falloff: number;
   readonly chargeSize: number;
+  readonly chargeGroups: readonly number[];
   readonly damageMultiplier: number;
   readonly cycleTime: number;
   readonly turretSkill?: string;
@@ -517,6 +527,8 @@ interface ChargeStats {
   readonly thermalDamage?: number;
   readonly kineticDamage?: number;
   readonly explosiveDamage?: number;
+  readonly chargeGroup: number;
+  readonly chargeSize: number;
 }
 
 interface LauncherStats {
@@ -1061,14 +1073,33 @@ function buildRequiredSkillIds(requiredSkills: Record<string, Record<string, num
   return Object.keys(skills).map((id) => id as TypeId);
 }
 
-export function buildLauncherStats(values: Map<string, number>, groupID: number, type: SdeType, requiredSkillIds: readonly TypeId[]): LauncherStats | undefined {
-  const speed = values.get("speed");
-  if (speed === undefined || speed <= 0) return undefined;
+export function readChargeGroups(values: Map<string, number>): number[] {
   const chargeGroups: number[] = [];
   for (const attr of ["chargeGroup1", "chargeGroup2", "chargeGroup3", "chargeGroup4", "chargeGroup5"]) {
     const group = values.get(attr);
     if (group !== undefined && group > 0) chargeGroups.push(group);
   }
+  return chargeGroups;
+}
+
+export function assertTurretChargeCoverage(
+  turrets: Readonly<Record<string, { readonly name: string; readonly chargeGroups: readonly number[]; readonly chargeSize: number }>>,
+  charges: Readonly<Record<string, { readonly chargeGroup: number; readonly chargeSize: number }>>,
+): void {
+  const unmatched: string[] = [];
+  for (const turret of Object.values(turrets)) {
+    const match = Object.values(charges).some(
+      (charge) => turret.chargeGroups.includes(charge.chargeGroup) && charge.chargeSize === turret.chargeSize,
+    );
+    if (!match) unmatched.push(turret.name);
+  }
+  if (unmatched.length > 0) throw new Error(`Turrets with no compatible charges: ${unmatched.join(", ")}`);
+}
+
+export function buildLauncherStats(values: Map<string, number>, groupID: number, type: SdeType, requiredSkillIds: readonly TypeId[]): LauncherStats | undefined {
+  const speed = values.get("speed");
+  if (speed === undefined || speed <= 0) return undefined;
+  const chargeGroups = readChargeGroups(values);
   if (chargeGroups.length === 0) return undefined;
   return { rateOfFire: speed / 1000, launcherGroup: groupID, chargeGroups, requiredSkillIds, metaLevel: type.metaLevel ?? 0, metaGroupID: type.metaGroupID ?? 1 };
 }
@@ -1244,6 +1275,8 @@ async function main() {
       const speed = values.get("speed");
       const damageMultiplier = values.get("damageMultiplier");
       if (tracking !== undefined && optimal !== undefined && speed !== undefined && damageMultiplier !== undefined) {
+        const chargeGroups = readChargeGroups(values);
+        if (chargeGroups.length === 0) throw new Error(`Turret "${enName}" has no chargeGroups`);
         turrets[id] = {
           id,
           name: enName,
@@ -1251,6 +1284,7 @@ async function main() {
           optimal,
           falloff: values.get("falloff") ?? 0,
           chargeSize: values.get("chargeSize") ?? 1,
+          chargeGroups,
           damageMultiplier,
           cycleTime: speed / 1000,
           turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
@@ -1276,7 +1310,21 @@ async function main() {
       const hasRangeMods = trackingMultiplier !== undefined || rangeMultiplier !== undefined || falloffMultiplier !== undefined;
       const hasDamage = (emDamage ?? 0) + (thermalDamage ?? 0) + (kineticDamage ?? 0) + (explosiveDamage ?? 0) > 0;
       if (hasRangeMods || hasDamage) {
-        charges[id] = { id, name: enName, trackingMultiplier, rangeMultiplier, falloffMultiplier, emDamage, thermalDamage, kineticDamage, explosiveDamage };
+        const chargeSize = values.get("chargeSize");
+        if (chargeSize === undefined) throw new Error(`Charge "${enName}" is missing chargeSize`);
+        charges[id] = {
+          id,
+          name: enName,
+          trackingMultiplier,
+          rangeMultiplier,
+          falloffMultiplier,
+          emDamage,
+          thermalDamage,
+          kineticDamage,
+          explosiveDamage,
+          chargeGroup: type.groupID,
+          chargeSize,
+        };
         addItemName(itemNames, id, type);
       }
       continue;
@@ -1503,6 +1551,8 @@ async function main() {
       }
     }
   }
+
+  assertTurretChargeCoverage(turrets, charges);
 
   const sortedDrones = Object.fromEntries(
     Object.entries(drones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),

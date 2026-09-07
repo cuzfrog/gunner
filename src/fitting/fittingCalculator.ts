@@ -1,8 +1,40 @@
 import type { TypeId } from "../gamedata/ids";
-import type { FittingDb, FittingModuleStats, HullBonus, LauncherStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, PropulsionBonusAttribute, RigDrawback, RigDrawbackReduction, SensorBoosterStats, SensorDampenerStats, SensorBoosterScriptStats, SensorDampenerScriptStats, SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, TurretBonusAttribute, TurretScriptStats, TurretStats, TurretWeaponGroup, WarpScramblerStats, DisruptionScriptStats } from "../gamedata/fittingDb";
+import {
+  turretWeaponGroupForGroupId,
+  type FittingDb,
+  type FittingModuleStats,
+  type HullBonus,
+  type LauncherStats,
+  type MissileGuidanceComputerStats,
+  type MissileGuidanceEnhancerStats,
+  type MissileScriptStats,
+  type MissileStats,
+  type OmnidirectionalTrackingEnhancerStats,
+  type OmnidirectionalTrackingLinkStats,
+  type PropulsionBonusAttribute,
+  type RigDrawback,
+  type RigDrawbackReduction,
+  type SensorBoosterStats,
+  type SensorDampenerStats,
+  type SensorBoosterScriptStats,
+  type SensorDampenerScriptStats,
+  type SignalAmplifierStats,
+  type SkillBonus,
+  type StasisGrapplerStats,
+  type StasisWebStats,
+  type TargetPainterStats,
+  type TrackingComputerStats,
+  type TrackingDisruptorStats,
+  type TurretBonusAttribute,
+  type TurretScriptStats,
+  type TurretStats,
+  type TurretWeaponGroup,
+  type WarpScramblerStats,
+  type DisruptionScriptStats,
+} from "../gamedata/fittingDb";
 import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../ships";
 import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec } from "../sim";
-import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, ZERO_DAMAGE, damageVectorFromPartial, damageVectorScale } from "../sim";
+import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, damageVectorFromPartial, damageVectorScale } from "../sim";
 import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher } from "./chargeCatalog";
 import type { GunFamily, GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
@@ -100,7 +132,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
     for (const group of fitting.turretGroups) {
       const turret = this.db.turrets[group.moduleId];
       if (!turret) continue;
-      const weaponGroup = turretWeaponGroupFromSkill(turret.turretSkill);
+      const weaponGroup = turretWeaponGroupForGroupId(turret.groupID);
       const chargeId = group.chargeId;
       const skillRoFMultiplier = computeSkillMultiplier(this.db.skillBonuses, turret, "turretRoF", skillLevel);
 
@@ -163,22 +195,11 @@ export class FittingCalculatorImpl implements FittingCalculator {
         falloff: falloffScore,
       };
 
-      const turretForChargeSelection: ImportedTurret = {
-        tracking: base.tracking,
-        sigResolutionClass: sigResClass,
-        optimal: base.optimal,
-        falloff: base.falloff,
-        chargeSize: turret.chargeSize,
-        chargeId: chargeId ?? this.chargeCatalog.usualForChargeSize(turret.chargeSize),
-        base,
-        moduleId: group.moduleId,
-        damageMultiplier: finalDamageMultiplier,
-        damagePerShot: ZERO_DAMAGE,
-        cycleTime: finalCycleTime,
-        turretCount: group.count,
-        damageBreakdown: { damageByType: {}, factors },
-      };
-      const selectedCharge = chargeId && this.db.charges[chargeId] ? chargeId : this.chargeCatalog.usualForTurret(turretForChargeSelection);
+      const chargeKey = { moduleId: group.moduleId, chargeSize: turret.chargeSize };
+      const compatible = this.chargeCatalog.chargesForTurret(chargeKey);
+      const selectedCharge = chargeId && compatible.some((option) => option.id === chargeId)
+        ? chargeId
+        : this.chargeCatalog.usualForTurret(chargeKey);
       const charge = this.db.charges[selectedCharge] ?? {};
 
       result.push({
@@ -653,14 +674,6 @@ function collectDamageModuleModifiers(moduleId: TypeId, stats: FittingModuleStat
     list.push(stats.turretSpeedMultiplier);
     speedMultipliersByGroup.set(group, list);
   }
-}
-
-function turretWeaponGroupFromSkill(turretSkill: string | undefined): TurretWeaponGroup | undefined {
-  if (!turretSkill) return undefined;
-  if (turretSkill.includes("Energy")) return "Energy Weapon";
-  if (turretSkill.includes("Hybrid")) return "Hybrid Weapon";
-  if (turretSkill.includes("Projectile")) return "Projectile Weapon";
-  return undefined;
 }
 
 interface SkillDamageEntry {

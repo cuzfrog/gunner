@@ -444,6 +444,22 @@ describe("classifyCombatEffect - turret damage/speed effects", () => {
     expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretDamage", weaponGroup: "Hybrid Weapon" });
   });
 
+  test("precursor weapon damage multiply classifies as turretDamage/Precursor", () => {
+    const e = effect(7077, {
+      category: 4,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 64, modifyingAttributeID: 64, operation: 4, groupID: 1986 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretDamage", weaponGroup: "Precursor Weapon" });
+  });
+
+  test("precursor weapon speed multiply classifies as turretSpeed/Precursor", () => {
+    const e = effect(7078, {
+      category: 4,
+      modifiers: [mod({ func: "LocationGroupModifier", modifiedAttributeID: 51, modifyingAttributeID: 204, operation: 4, groupID: 1986 })],
+    });
+    expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "turretSpeed", weaponGroup: "Precursor Weapon" });
+  });
+
   test("energy weapon speed multiply (effect 95) classifies as turretSpeed/Energy", () => {
     const e = effect(95, {
       category: 4,

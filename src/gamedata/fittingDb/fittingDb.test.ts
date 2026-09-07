@@ -1,5 +1,6 @@
 import type { ShipId, TypeId } from "../ids";
 import { toTypeId } from "../ids";
+import { PRECURSOR_WEAPON_GROUP, turretWeaponGroupForGroupId } from "./types";
 import { CHARGES, COMBAT_DRONES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, RIG_DRAWBACK_REDUCTIONS, SCRIPTS, SENSOR_BOOSTERS, SENSOR_BOOSTER_SCRIPTS, SENSOR_DAMPENERS, SENSOR_DAMPENER_SCRIPTS, SIGNAL_AMPLIFIERS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS } from "./generated/fittingDb.data";
 import type { FittingModuleStats } from "./types";
 
@@ -15,6 +16,16 @@ function baseStats<T extends { readonly id: unknown; readonly name: unknown }>(r
   const { id: _id, name: _name, ...rest } = row;
   return rest as Omit<T, "id" | "name">;
 }
+
+describe("turretWeaponGroupForGroupId", () => {
+  test("maps every known turret group including precursor", () => {
+    expect(turretWeaponGroupForGroupId(53)).toBe("Energy Weapon");
+    expect(turretWeaponGroupForGroupId(55)).toBe("Projectile Weapon");
+    expect(turretWeaponGroupForGroupId(74)).toBe("Hybrid Weapon");
+    expect(turretWeaponGroupForGroupId(PRECURSOR_WEAPON_GROUP)).toBe("Precursor Weapon");
+    expect(turretWeaponGroupForGroupId(0)).toBeUndefined();
+  });
+});
 
 describe("fittingDb", () => {
   test("includes known plates with accurate flat mass and no item mass fallback", () => {
@@ -110,6 +121,16 @@ describe("fittingDb", () => {
       chargeSize: 2,
       turretSkill: "Medium Energy Turret",
     });
+  });
+
+  test("persists SDE charge groups on turrets and charges", () => {
+    expect(rowByName(TURRETS, "Light Entropic Disintegrator I")).toMatchObject({ chargeGroups: [1987], chargeSize: 1 });
+    expect(rowByName(TURRETS, "Light Entropic Disintegrator II")).toMatchObject({ chargeGroups: [1987, 1989], chargeSize: 1 });
+    expect(rowByName(TURRETS, "Gatling Pulse Laser I")).toMatchObject({ chargeGroups: [86] });
+    expect(rowByName(TURRETS, "Gatling Pulse Laser II")).toMatchObject({ chargeGroups: [86, 375] });
+    expect(rowByName(CHARGES, "Tetryon Exotic Plasma S")).toMatchObject({ chargeGroup: 1987, chargeSize: 1 });
+    expect(rowByName(CHARGES, "Occult S")).toMatchObject({ chargeGroup: 1989, chargeSize: 1 });
+    expect(rowByName(CHARGES, "Conflagration S")).toMatchObject({ chargeGroup: 375, chargeSize: 1 });
   });
 
   test("includes hull bonuses for turret, velocity and agility attributes", () => {
@@ -426,6 +447,14 @@ describe("fittingDb", () => {
     });
     expect(moduleByName("Magnetic Field Stabilizer II")?.turretDamageMultiplier).toBeGreaterThan(1);
     expect(moduleByName("Magnetic Field Stabilizer II")?.turretSpeedMultiplier).toBeLessThan(1);
+  });
+
+  test("includes Entropic Radiation Sink II with damage and speed multipliers for precursor weapons", () => {
+    expect(moduleByName("Entropic Radiation Sink II")).toMatchObject({
+      turretWeaponGroup: "Precursor Weapon",
+    });
+    expect(moduleByName("Entropic Radiation Sink II")?.turretDamageMultiplier).toBeGreaterThan(1);
+    expect(moduleByName("Entropic Radiation Sink II")?.turretSpeedMultiplier).toBeLessThan(1);
   });
 
   test("includes Harbinger turret damage hull bonus for medium energy turrets", () => {

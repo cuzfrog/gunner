@@ -100,13 +100,30 @@ export interface FittingModuleStats {
   readonly name: string;
 }
 
-export type TurretWeaponGroup = "Energy Weapon" | "Hybrid Weapon" | "Projectile Weapon";
+export const ENERGY_WEAPON_GROUP = 53;
+export const PROJECTILE_WEAPON_GROUP = 55;
+export const HYBRID_WEAPON_GROUP = 74;
+export const PRECURSOR_WEAPON_GROUP = 1986;
+
+export type TurretWeaponGroup = "Energy Weapon" | "Hybrid Weapon" | "Projectile Weapon" | "Precursor Weapon";
+
+export const TURRET_WEAPON_GROUP_BY_ID: Readonly<Record<number, TurretWeaponGroup>> = {
+  [ENERGY_WEAPON_GROUP]: "Energy Weapon",
+  [PROJECTILE_WEAPON_GROUP]: "Projectile Weapon",
+  [HYBRID_WEAPON_GROUP]: "Hybrid Weapon",
+  [PRECURSOR_WEAPON_GROUP]: "Precursor Weapon",
+};
+
+export function turretWeaponGroupForGroupId(groupId: number): TurretWeaponGroup | undefined {
+  return TURRET_WEAPON_GROUP_BY_ID[groupId];
+}
 
 export interface TurretStats {
   readonly tracking: number;
   readonly optimal: number;
   readonly falloff: number;
   readonly chargeSize: number;
+  readonly chargeGroups: readonly number[];
   readonly damageMultiplier: number;
   readonly cycleTime: number;
   readonly turretSkill?: string;
@@ -154,6 +171,8 @@ export interface ChargeStats {
   readonly thermalDamage?: number;
   readonly kineticDamage?: number;
   readonly explosiveDamage?: number;
+  readonly chargeGroup: number;
+  readonly chargeSize: number;
   readonly id: TypeId;
   readonly name: string;
 }

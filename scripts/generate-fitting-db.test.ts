@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { toTypeId } from "../src/gamedata/ids";
-import { buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses } from "./generate-fitting-db";
+import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses } from "./generate-fitting-db";
 import type { UnmappedAttribute } from "./generate-fitting-db";
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./fittingDb/dogmaTypes";
 
@@ -281,6 +281,18 @@ describe("_buildModuleStats", () => {
     });
   });
 
+  test("extracts Entropic Radiation Sink with precursor weapon effect", () => {
+    const stats = callBuildModuleStats(values({ damageMultiplier: 1.13, speedMultiplier: 0.92 }), [
+      combatEffect(7077, 4, [groupMod(64, 64, 4, 1986)]),
+      combatEffect(7078, 4, [groupMod(51, 204, 4, 1986)]),
+    ]);
+    expect(stats).toEqual({
+      turretDamageMultiplier: 1.13,
+      turretSpeedMultiplier: 0.92,
+      turretWeaponGroup: "Precursor Weapon",
+    });
+  });
+
   test("does not extract damage stats when no damage effect is present", () => {
     const stats = callBuildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), []);
     expect(stats).toBeUndefined();
@@ -316,6 +328,32 @@ describe("_buildModuleStats", () => {
     expect(stats).toEqual({
       missileCycleTimeMultiplier: 0.93,
     });
+  });
+});
+
+describe("readChargeGroups", () => {
+  test("collects chargeGroup1 through chargeGroup5 skipping zeros", () => {
+    expect(readChargeGroups(values({ chargeGroup1: 1987, chargeGroup2: 1989, chargeGroup3: 0 }))).toEqual([1987, 1989]);
+  });
+
+  test("returns empty when no charge groups are set", () => {
+    expect(readChargeGroups(values({ speed: 1000 }))).toEqual([]);
+  });
+});
+
+describe("assertTurretChargeCoverage", () => {
+  test("passes when every turret has a charge in one of its groups at its size", () => {
+    expect(() => assertTurretChargeCoverage(
+      { a: { name: "Light Entropic Disintegrator I", chargeGroups: [1987], chargeSize: 1 } },
+      { c: { chargeGroup: 1987, chargeSize: 1 } },
+    )).not.toThrow();
+  });
+
+  test("throws when a turret has no matching charge", () => {
+    expect(() => assertTurretChargeCoverage(
+      { a: { name: "Light Entropic Disintegrator I", chargeGroups: [1987], chargeSize: 1 } },
+      { c: { chargeGroup: 83, chargeSize: 1 } },
+    )).toThrow("Light Entropic Disintegrator I");
   });
 });
 
