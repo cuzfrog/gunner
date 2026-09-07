@@ -1,7 +1,6 @@
 import type { TypeId } from "../gamedata/ids";
 import { type DamageVector, type DamageType, type SigResolutionClass, damageVectorFromPartial, damageVectorScale } from "../sim";
-import { FITTING_DB, type ChargeStats, type FittingDb } from "../gamedata/fittingDb";
-import type { GunFamilies, GunFamily } from "./gunFamilies";
+import { FITTING_DB, type ChargeStats, type FittingDb, type TurretStats } from "../gamedata/fittingDb";
 import { type DamageBreakdown, chargeDamageByType } from "./damageBreakdown";
 
 export interface ImportedTurretBase {
@@ -56,13 +55,11 @@ export interface ChargeOption {
   readonly damageByType: Readonly<Partial<Record<DamageType, number>>>;
 }
 
-export type ChargeFamily = "projectile" | "hybrid" | "laser" | "precursor";
-
 export interface ChargeCatalog {
   usualForChargeSize(chargeSize: number): TypeId;
-  usualForTurret(turret: ImportedTurret): TypeId;
+  usualForTurret(turret: Pick<ImportedTurret, "moduleId" | "chargeSize">): TypeId;
   chargesForSize(chargeSize: number): readonly ChargeOption[];
-  chargesForTurret(turret: ImportedTurret): readonly ChargeOption[];
+  chargesForTurret(turret: Pick<ImportedTurret, "moduleId" | "chargeSize">): readonly ChargeOption[];
   withCharge(turret: ImportedTurret, charge: TypeId): ImportedTurret;
   idForName(name: string): TypeId | undefined;
   has(charge: TypeId): boolean;
@@ -71,46 +68,50 @@ export interface ChargeCatalog {
 
 interface ChargeCatalogDeps {
   readonly fittingDb: FittingDb;
-  readonly gunFamilies: GunFamilies;
 }
 
 export class ChargeCatalogImpl implements ChargeCatalog {
   private readonly charges: Readonly<Record<string, ChargeStats>>;
-  private readonly gunFamilies: GunFamilies;
+  private readonly turrets: Readonly<Record<string, TurretStats>>;
 
-  constructor({ fittingDb, gunFamilies }: ChargeCatalogDeps) {
+  constructor({ fittingDb }: ChargeCatalogDeps) {
     this.charges = fittingDb.charges;
-    this.gunFamilies = gunFamilies;
-    if (this.charges === FITTING_DB.charges) assertChargeFamilyBases(this.charges);
+    this.turrets = fittingDb.turrets;
+    if (this.charges === FITTING_DB.charges) assertTurretChargeCoverage(this.turrets, this.charges);
   }
 
   usualForChargeSize(chargeSize: number): TypeId {
     return _usualForChargeSize(this.charges, chargeSize);
   }
 
-  usualForTurret(turret: ImportedTurret): TypeId {
-    const family = _turretChargeFamily(turret.moduleId, this.gunFamilies);
-    if (family === undefined) return _usualFromOptions(this.chargesForSize(turret.chargeSize));
-    const inFamily = this.chargesForTurret(turret);
-    return _usualFromOptions(inFamily.length > 0 ? inFamily : this.chargesForSize(turret.chargeSize));
+  usualForTurret(turret: Pick<ImportedTurret, "moduleId" | "chargeSize">): TypeId {
+    const options = this.chargesForTurret(turret);
+    if (options.length === 0) throw new Error(`No compatible charges for turret ${turret.moduleId}`);
+    return _usualFromOptions(options);
   }
 
   chargesForSize(chargeSize: number): readonly ChargeOption[] {
     return _chargesForSize(this.charges, chargeSize);
   }
 
-  chargesForTurret(turret: ImportedTurret): readonly ChargeOption[] {
-    const turretFamily = _turretChargeFamily(turret.moduleId, this.gunFamilies);
-    const all = this.chargesForSize(turret.chargeSize);
-    if (turretFamily === undefined) return all;
-    return all.filter((option) => _chargeFamilyOf(option.name) === turretFamily);
+  chargesForTurret(turret: Pick<ImportedTurret, "moduleId" | "chargeSize">): readonly ChargeOption[] {
+    const stats = this.turrets[turret.moduleId];
+    if (!stats) return [];
+    const groups = new Set(stats.chargeGroups);
+    const result: ChargeOption[] = [];
+    for (const charge of Object.values(this.charges)) {
+      if (!groups.has(charge.chargeGroup)) continue;
+      if (charge.chargeSize !== turret.chargeSize) continue;
+      result.push(toOption(charge));
+    }
+    sortChargeOptions(result);
+    return result;
   }
 
   withCharge(turret: ImportedTurret, charge: TypeId): ImportedTurret {
     const stats = this.charges[charge];
     if (!stats) return turret;
-    const family = _turretChargeFamily(turret.moduleId, this.gunFamilies);
-    if (family !== undefined && _chargeFamilyOf(stats.name) !== family) return turret;
+    if (!this.chargesForTurret(turret).some((option) => option.id === charge)) return turret;
     const chargeDamageVec = damageVectorFromPartial(chargeDamageByType(stats));
     return {
       ...turret,
@@ -160,42 +161,38 @@ export function _isNavyCharge(name: string): boolean {
   return NAVY_PREFIXES.some((prefix) => name.startsWith(prefix));
 }
 
-function _chargesForSize(charges: Readonly<Record<string, ChargeStats>>, chargeSize: number): ChargeOption[] {
-  const result: ChargeOption[] = [];
-  for (const stats of Object.values(charges)) {
-    if (_chargeSizeFromName(stats.name) !== chargeSize) continue;
-    result.push({
-      id: stats.id,
-      name: stats.name,
-      trackingMultiplier: stats.trackingMultiplier ?? 1,
-      rangeMultiplier: stats.rangeMultiplier ?? 1,
-      falloffMultiplier: stats.falloffMultiplier ?? 1,
-      damageByType: chargeDamageByType(stats),
-    });
-  }
-  result.sort((a, b) => {
+function toOption(stats: ChargeStats): ChargeOption {
+  return {
+    id: stats.id,
+    name: stats.name,
+    trackingMultiplier: stats.trackingMultiplier ?? 1,
+    rangeMultiplier: stats.rangeMultiplier ?? 1,
+    falloffMultiplier: stats.falloffMultiplier ?? 1,
+    damageByType: chargeDamageByType(stats),
+  };
+}
+
+function sortChargeOptions(options: ChargeOption[]): void {
+  options.sort((a, b) => {
     if (a.rangeMultiplier !== b.rangeMultiplier) return a.rangeMultiplier - b.rangeMultiplier;
     return a.name.localeCompare(b.name);
   });
+}
+
+function _chargesForSize(charges: Readonly<Record<string, ChargeStats>>, chargeSize: number): ChargeOption[] {
+  const result: ChargeOption[] = [];
+  for (const stats of Object.values(charges)) {
+    if (stats.chargeSize !== chargeSize) continue;
+    result.push(toOption(stats));
+  }
+  sortChargeOptions(result);
   return result;
 }
 
 function _allChargeOptions(charges: Readonly<Record<string, ChargeStats>>): ChargeOption[] {
   const result: ChargeOption[] = [];
-  for (const stats of Object.values(charges)) {
-    result.push({
-      id: stats.id,
-      name: stats.name,
-      trackingMultiplier: stats.trackingMultiplier ?? 1,
-      rangeMultiplier: stats.rangeMultiplier ?? 1,
-      falloffMultiplier: stats.falloffMultiplier ?? 1,
-      damageByType: chargeDamageByType(stats),
-    });
-  }
-  result.sort((a, b) => {
-    if (a.rangeMultiplier !== b.rangeMultiplier) return a.rangeMultiplier - b.rangeMultiplier;
-    return a.name.localeCompare(b.name);
-  });
+  for (const stats of Object.values(charges)) result.push(toOption(stats));
+  sortChargeOptions(result);
   return result;
 }
 
@@ -210,76 +207,6 @@ function _usualFromOptions(options: readonly ChargeOption[]): TypeId {
   const navy = options.filter((c) => _isNavyCharge(c.name));
   const chosen = navy.length > 0 ? navy : options;
   return chosen[0].id;
-}
-
-const TURRET_CHARGE_FAMILIES: Readonly<Record<GunFamily, ChargeFamily>> = {
-  autocannon: "projectile",
-  artillery: "projectile",
-  railgun: "hybrid",
-  blaster: "hybrid",
-  pulseLaser: "laser",
-  beamLaser: "laser",
-  disintegrator: "precursor",
-} as const;
-
-const CHARGE_FAMILY_BY_BASE: Readonly<Record<string, ChargeFamily>> = {
-  "Carbonized Lead": "projectile",
-  "Depleted Uranium": "projectile",
-  "Phased Plasma": "projectile",
-  "Titanium Sabot": "projectile",
-  "Antimatter Charge": "hybrid",
-  "Iridium Charge": "hybrid",
-  "Iron Charge": "hybrid",
-  "Lead Charge": "hybrid",
-  "Plutonium Charge": "hybrid",
-  "Thorium Charge": "hybrid",
-  "Tungsten Charge": "hybrid",
-  "Uranium Charge": "hybrid",
-  Aurora: "laser",
-  Barrage: "projectile",
-  Conflagration: "laser",
-  EMP: "projectile",
-  Fusion: "projectile",
-  Gamma: "laser",
-  Gleam: "laser",
-  Hail: "projectile",
-  Infrared: "laser",
-  Javelin: "hybrid",
-  Microwave: "laser",
-  Multifrequency: "laser",
-  Nuclear: "projectile",
-  Null: "hybrid",
-  Proton: "projectile",
-  Quake: "projectile",
-  Radio: "laser",
-  Scorch: "laser",
-  Spike: "hybrid",
-  Standard: "laser",
-  Tremor: "projectile",
-  Ultraviolet: "laser",
-  Void: "hybrid",
-  Xray: "laser",
-} as const;
-
-export function _chargeFamilyOf(name: string): ChargeFamily | undefined {
-  const stem = _chargeStem(name);
-  const tokens = stem.split(/\s+/);
-  if (tokens.length >= 2) {
-    const two = tokens.slice(-2).join(" ");
-    const family = CHARGE_FAMILY_BY_BASE[two];
-    if (family !== undefined) return family;
-  }
-  const one = tokens[tokens.length - 1];
-  return CHARGE_FAMILY_BY_BASE[one];
-}
-
-function _turretChargeFamily(moduleId: TypeId, gunFamilies: GunFamilies): ChargeFamily | undefined {
-  try {
-    const family = gunFamilies.familyOf(moduleId);
-    return TURRET_CHARGE_FAMILIES[family];
-  } catch {
-    return undefined;
-  }
 }
 
 function _equivalentInSize(charges: Readonly<Record<string, ChargeStats>>, charge: TypeId, chargeSize: number): TypeId | undefined {
@@ -303,16 +230,16 @@ function _chargeStem(name: string): string {
   return name;
 }
 
-function assertChargeFamilyBases(charges: Readonly<Record<string, ChargeStats>>): void {
-  const matched = new Set<string>();
-  for (const stats of Object.values(charges)) {
-    const stem = _chargeStem(stats.name);
-    for (const base of Object.keys(CHARGE_FAMILY_BY_BASE)) {
-      if (stem === base || stem.endsWith(` ${base}`)) matched.add(base);
-    }
+function assertTurretChargeCoverage(
+  turrets: Readonly<Record<string, TurretStats>>,
+  charges: Readonly<Record<string, ChargeStats>>,
+): void {
+  const unmatched: string[] = [];
+  for (const turret of Object.values(turrets)) {
+    const match = Object.values(charges).some(
+      (charge) => turret.chargeGroups.includes(charge.chargeGroup) && charge.chargeSize === turret.chargeSize,
+    );
+    if (!match) unmatched.push(turret.name);
   }
-  const missing = Object.keys(CHARGE_FAMILY_BY_BASE).filter((base) => !matched.has(base));
-  if (missing.length > 0) throw new Error(`CHARGE_FAMILY_BY_BASE keys have no matching charge name: ${missing.join(", ")}`);
+  if (unmatched.length > 0) throw new Error(`Turrets with no compatible charges: ${unmatched.join(", ")}`);
 }
-
-export { _turretChargeFamily };

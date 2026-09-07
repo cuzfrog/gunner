@@ -1,4 +1,4 @@
-import { IDLE_LOCK, Vec2, ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, type AttackAssessment, type DamageAssessment, type DamageProjection, type DroneSpec, type EngagementView, type LockState, type MissileSpec, type ShipState, type TurretSpec } from "../../../sim";
+import { IDLE_LOCK, Vec2, ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, type AttackAssessment, type DamageAssessment, type DroneSpec, type EngineView, type InflictedDps, type LockState, type MissileSpec, type ShipState, type TurretSpec } from "../../../sim";
 import { toTypeId } from "../../../gamedata/ids";
 import { EngagementReadoutImpl, type EngagementReadout, type ReadoutEls } from "./engagementReadout";
 
@@ -78,8 +78,10 @@ const DUMMY_TURRET: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), trac
 const DUMMY_MISSILE: MissileSpec = { kind: "missile", moduleId: toTypeId("2"), damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 2, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 3, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
 const DUMMY_DRONE: DroneSpec = { kind: "drone", moduleId: toTypeId("3"), tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 20, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
 
-function makeProjection(totalInflicted: number): DamageProjection {
-  return { totalInflicted, byLayer: { shield: 0, armor: 0, hull: 0 } };
+const ZERO_INFLICTED: InflictedDps = { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } };
+
+function makeInflicted(total: number): InflictedDps {
+  return { total, byLayer: { shield: 0, armor: 0, hull: 0 } };
 }
 
 function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipALock?: LockState; shipBInflictedDps?: number }) {
@@ -106,8 +108,8 @@ function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: num
   };
   const shipALock = overrides.shipALock ?? IDLE_LOCK;
   const defenses = { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT };
-  const projection = { shipA: EMPTY_PROJECTION, shipB: makeProjection(overrides.shipBInflictedDps ?? 1.5) };
-  return { frame, attacks: { shipA: shipAAttack, shipB: shipBAttack }, effectiveWeapons: { shipA: DUMMY_TURRET, shipB: DUMMY_TURRET }, defenses, projection, locks: { shipA: shipALock, shipB: IDLE_LOCK } } as unknown as EngagementView;
+  const inflicted = { shipA: ZERO_INFLICTED, shipB: makeInflicted(overrides.shipBInflictedDps ?? 1.5) };
+  return { frame, attacks: { shipA: shipAAttack, shipB: shipBAttack }, effectiveWeapons: { shipA: DUMMY_TURRET, shipB: DUMMY_TURRET }, defenses, inflicted, locks: { shipA: shipALock, shipB: IDLE_LOCK } } as unknown as EngineView;
 }
 
 function makeMissileView(overrides: { distance?: number; shipADamage?: DamageAssessment; shipAMissile?: { application: number; signatureTerm: number; velocityTerm: number; inRange: boolean; timeToImpact: number }; shipBInflictedDps?: number }) {
@@ -127,8 +129,8 @@ function makeMissileView(overrides: { distance?: number; shipADamage?: DamageAss
     missile: shipAMissile,
   };
   const defenses = { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT };
-  const projection = { shipA: EMPTY_PROJECTION, shipB: makeProjection(overrides.shipBInflictedDps ?? 24) };
-  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_MISSILE, shipB: undefined }, defenses, projection, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK } } as unknown as EngagementView;
+  const inflicted = { shipA: ZERO_INFLICTED, shipB: makeInflicted(overrides.shipBInflictedDps ?? 24) };
+  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_MISSILE, shipB: undefined }, defenses, inflicted, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK } } as unknown as EngineView;
 }
 
 function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipBInflictedDps?: number }) {
@@ -148,11 +150,11 @@ function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: numb
     drone: { hit: shipAHit, expectedMultiplier: 0.8, inRange: true, inWeaponRange: true, mode: "engaging", distanceToTarget: 1000, inControlRange: true },
   };
   const defenses = { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT };
-  const projection = { shipA: EMPTY_PROJECTION, shipB: makeProjection(overrides.shipBInflictedDps ?? 15) };
-  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_DRONE, shipB: undefined }, defenses, projection, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK } } as unknown as EngagementView;
+  const inflicted = { shipA: ZERO_INFLICTED, shipB: makeInflicted(overrides.shipBInflictedDps ?? 15) };
+  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_DRONE, shipB: undefined }, defenses, inflicted, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK } } as unknown as EngineView;
 }
 
-function makeNoWeaponView(distance: number = 1000): EngagementView {
+function makeNoWeaponView(distance: number = 1000): EngineView {
   const ship = fakeShipState();
   return {
     frame: {
@@ -164,9 +166,9 @@ function makeNoWeaponView(distance: number = 1000): EngagementView {
     attacks: { shipA: undefined, shipB: undefined },
     effectiveWeapons: { shipA: undefined, shipB: undefined },
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
-    projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
+    inflicted: { shipA: ZERO_INFLICTED, shipB: ZERO_INFLICTED },
     locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK },
-  } as unknown as EngagementView;
+  } as unknown as EngineView;
 }
 
 describe("EngagementReadout", () => {

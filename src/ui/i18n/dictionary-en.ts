@@ -166,6 +166,7 @@ export const EN: LanguageSlice<"en"> = {
   "label.simulationSpeed": { en: "Speed" },
   "button.play": { en: "Start" },
   "button.pause": { en: "Pause" },
+  "button.restart": { en: "Restart" },
   "button.reset": { en: "Reset" },
   "button.save": { en: "Save" },
   "button.delete": { en: "Delete" },

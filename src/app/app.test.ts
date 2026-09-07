@@ -1,4 +1,4 @@
-import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, EMPTY_PROJECTION, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineEvents, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type MissileRuntimeState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineEvents, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type InflictedDps, type MissileRuntimeState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "../sim";
 import { toTypeId } from "../gamedata/ids";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
 import type { EngagementEngine } from "../sim";
@@ -22,8 +22,10 @@ const shipConfig: SimConfig = {
   initialDistance: 5000,
 };
 
+const ZERO_INFLICTED: Record<Side, InflictedDps> = { shipA: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } }, shipB: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } } };
 const emptyDefenseView: DefenseView = {
   pools: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
+  poolMaxes: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
   poolPercentages: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
   dead: { shipA: false, shipB: false },
   deadAt: { shipA: undefined, shipB: undefined },
@@ -57,7 +59,6 @@ function baseView(): EngineView {
     frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] },
     effectiveWeapons: { shipA: turret, shipB: turret },
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
-    projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
     locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
     readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } },
     incomingOffensiveModules: { shipA: [], shipB: [] },
@@ -66,6 +67,7 @@ function baseView(): EngineView {
     ...engagementView,
     snapshot,
     defenseRuntime: emptyDefenseView,
+    inflicted: ZERO_INFLICTED,
     drones: { shipA: [], shipB: [] },
     droneSpecs: { shipA: [], shipB: [] },
     missiles: { shipA: [], shipB: [] },
@@ -105,10 +107,6 @@ const engine = vi.mocked<EngagementEngine>({
   step: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
   view: vi.fn(() => baseView()),
   events: vi.fn(() => engineEvents),
-  setDamageEnabled: vi.fn(),
-  setRepairMode: vi.fn(),
-  setRepairerActivation: vi.fn(),
-  setRahActivation: vi.fn(),
 });
 
 const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setDroneRangeVisibility: vi.fn(), setDroneControlRangeVisibility: vi.fn(), setManualZoom: vi.fn(), setLockStates: vi.fn() });
@@ -164,16 +162,19 @@ describe("AppImpl", () => {
     controls.setPlaying.mockClear();
     emitDestroy("shipA");
     expect(loop.stop).toHaveBeenCalled();
-    expect(controls.setPlaying).toHaveBeenCalledWith(false);
+    expect(controls.setPlaying).toHaveBeenCalledWith(false, true);
   });
 
   test("reset callback re-initializes the engine and loop; rendering is driven by view event", () => {
     app.start();
     engine.reset.mockClear();
     renderer.draw.mockClear();
+    controls.setPlaying.mockClear();
+    loop.isRunning.mockReturnValue(false);
     callbacks().onReset();
     expect(engine.reset).toHaveBeenCalledWith(engineConfig);
     expect(loop.reset).toHaveBeenCalled();
+    expect(controls.setPlaying).toHaveBeenCalledWith(false, false);
     expect(renderer.draw).toHaveBeenCalledTimes(1);
   });
 
@@ -202,14 +203,29 @@ describe("AppImpl", () => {
     app.start();
     callbacks().onPlayPause();
     expect(loop.toggle).toHaveBeenCalled();
-    expect(controls.setPlaying).toHaveBeenCalledWith(true);
+    expect(controls.setPlaying).toHaveBeenCalledWith(true, false);
+  });
+
+  test("play after ship destruction resets the engagement and starts it again", () => {
+    app.start();
+    const endedView = { ...baseView(), defenseRuntime: { ...emptyDefenseView, dead: { shipA: true, shipB: false } } };
+    engine.view.mockReturnValue(endedView);
+    engine.reset.mockClear();
+    loop.reset.mockClear();
+    loop.start.mockClear();
+    controls.setPlaying.mockClear();
+    callbacks().onPlayPause();
+    expect(engine.reset).toHaveBeenCalledWith(engineConfig);
+    expect(loop.reset).toHaveBeenCalled();
+    expect(loop.start).toHaveBeenCalled();
+    expect(controls.setPlaying).toHaveBeenCalledWith(true, false);
   });
 
   test("stop halts the loop and sets playing to false", () => {
     app.start();
     callbacks().onStop();
     expect(loop.stop).toHaveBeenCalled();
-    expect(controls.setPlaying).toHaveBeenCalledWith(false);
+    expect(controls.setPlaying).toHaveBeenCalledWith(false, false);
   });
 
   test("speed change is forwarded to the loop", () => {

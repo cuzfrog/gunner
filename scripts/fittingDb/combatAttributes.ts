@@ -1,3 +1,23 @@
+import {
+  ENERGY_WEAPON_GROUP,
+  PROJECTILE_WEAPON_GROUP,
+  HYBRID_WEAPON_GROUP,
+  PRECURSOR_WEAPON_GROUP,
+  TURRET_WEAPON_GROUP_BY_ID,
+  turretWeaponGroupForGroupId,
+  type TurretWeaponGroup,
+} from "../../src/gamedata/fittingDb/types";
+
+export {
+  ENERGY_WEAPON_GROUP,
+  PROJECTILE_WEAPON_GROUP,
+  HYBRID_WEAPON_GROUP,
+  PRECURSOR_WEAPON_GROUP,
+  TURRET_WEAPON_GROUP_BY_ID,
+  turretWeaponGroupForGroupId,
+};
+export type TurretWeaponGroupName = TurretWeaponGroup;
+
 export const SHIELD_EM_RESONANCE = 271;
 export const SHIELD_THERMAL_RESONANCE = 272;
 export const SHIELD_KINETIC_RESONANCE = 273;
@@ -32,19 +52,7 @@ export const TURRET_SPEED = 51;
 export const MISSILE_DAMAGE_MULTIPLIER = 212;
 export const MISSILE_LAUNCHER_OPERATION_SKILL = 3319;
 
-export const ENERGY_WEAPON_GROUP = 53;
-export const PROJECTILE_WEAPON_GROUP = 55;
-export const HYBRID_WEAPON_GROUP = 74;
-
-export const TURRET_WEAPON_GROUP_IDS = new Set([ENERGY_WEAPON_GROUP, PROJECTILE_WEAPON_GROUP, HYBRID_WEAPON_GROUP]);
-
-export type TurretWeaponGroupName = "Energy Weapon" | "Hybrid Weapon" | "Projectile Weapon";
-
-export const TURRET_GROUP_ID_TO_NAME: Readonly<Record<number, TurretWeaponGroupName>> = {
-  [ENERGY_WEAPON_GROUP]: "Energy Weapon",
-  [PROJECTILE_WEAPON_GROUP]: "Projectile Weapon",
-  [HYBRID_WEAPON_GROUP]: "Hybrid Weapon",
-};
+export const TURRET_WEAPON_GROUP_IDS = new Set(Object.keys(TURRET_WEAPON_GROUP_BY_ID).map(Number));
 
 export const REPAIR_SKILL_IDS = new Set([3393, 3422, 21802, 3416, 21803]);
 
@@ -66,8 +74,4 @@ export function hpLayerForAttr(attrId: number): DefenseLayer | undefined {
   if (attrId === ARMOR_HP) return "armor";
   if (attrId === STRUCTURE_HP) return "hull";
   return undefined;
-}
-
-export function turretWeaponGroupForGroupId(groupId: number): TurretWeaponGroupName | undefined {
-  return TURRET_GROUP_ID_TO_NAME[groupId];
 }

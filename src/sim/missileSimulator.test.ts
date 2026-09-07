@@ -235,7 +235,7 @@ describe("MissileSimulatorImpl", () => {
     sim.step(0.1, frame(new Vec2(0, 0), new Vec2(100000, 0)), launches);
     expect(sim.facts("shipA", 0).inFlightCount).toBe(1);
     expect(sim.facts("shipA", 1).inFlightCount).toBe(1);
-    expect(sim.facts("shipA", 0).nearestTimeToImpact).toBeGreaterThan(0);
+    expect(sim.facts("shipA", 0).nearestTimeToImpact).toBe(0);
   });
 
   test("interceptable is true when target is within reachable range", () => {
@@ -250,6 +250,30 @@ describe("MissileSimulatorImpl", () => {
     sim.reset({ shipA: [lightMissile], shipB: [] });
     sim.step(0.1, frame(new Vec2(0, 0), new Vec2(100000, 0)), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
     expect(sim.facts("shipA", 0).interceptable).toBe(false);
+  });
+
+  test("interceptable is false when a receding target exhausts missile fuel inside flightRange", () => {
+    const slowMissile: MissileSpec = { ...lightMissile, maxVelocity: 1000, flightTime: 10, flightRange: 10000 };
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [slowMissile], shipB: [] });
+    sim.step(0.1, frame(new Vec2(0, 0), new Vec2(8000, 0), new Vec2(0, 0), new Vec2(500, 0), 0, 500), { shipA: [launchSpec(0, slowMissile, 40)], shipB: [] });
+    const facts = sim.facts("shipA", 0);
+    expect(facts.interceptable).toBe(false);
+    expect(facts.predicted.application).toBe(0);
+    expect(facts.predicted.velocityTerm).toBeLessThan(1);
+    expect(facts.nearestTimeToImpact).toBe(0);
+  });
+
+  test("interceptable is true for the same distance when the target is stationary", () => {
+    const slowMissile: MissileSpec = { ...lightMissile, maxVelocity: 1000, flightTime: 10, flightRange: 10000 };
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [slowMissile], shipB: [] });
+    sim.step(0.1, frame(new Vec2(0, 0), new Vec2(8000, 0)), { shipA: [launchSpec(0, slowMissile, 40)], shipB: [] });
+    const facts = sim.facts("shipA", 0);
+    expect(facts.interceptable).toBe(true);
+    expect(facts.predicted.application).toBeGreaterThan(0);
+    expect(facts.nearestTimeToImpact).toBeGreaterThan(0);
+    expect(facts.nearestTimeToImpact).toBeLessThan(slowMissile.flightTime);
   });
 
   test("predicted application is available immediately after first step (no impact needed)", () => {
@@ -462,5 +486,34 @@ describe("MissileSimulatorImpl", () => {
       }
     }
     expect(impactFound, "expected at least one impact event within 100 steps").toBe(true);
+  });
+
+  test("capture and restore round-trips the state into another instance", () => {
+    const first = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    first.reset({ shipA: [lightMissile], shipB: [] });
+    first.step(0.1, frame(new Vec2(0, 0), new Vec2(1000, 0), new Vec2(0, 0), new Vec2(300, 0), 0.1, 500), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
+    first.step(0.1, frame(new Vec2(0, 0), new Vec2(1030, 0), new Vec2(0, 0), new Vec2(300, 0), 0.2, 500), { shipA: [], shipB: [] });
+    const expectedStates = first.states("shipA").map((s) => ({ ...s, trail: [...s.trail] }));
+    const expectedFacts = first.facts("shipA", 0);
+    const state = first.capture();
+    first.step(0.1, frame(new Vec2(0, 0), new Vec2(1060, 0), new Vec2(0, 0), new Vec2(300, 0), 0.3, 500), { shipA: [], shipB: [] });
+    const second = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    second.restore(state);
+    expect(second.states("shipA")).toEqual(expectedStates);
+    expect(second.facts("shipA", 0)).toEqual(expectedFacts);
+  });
+
+  test("restored instance keeps stepping independently of the captured source", () => {
+    const first = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    first.reset({ shipA: [lightMissile], shipB: [] });
+    first.step(0.1, frame(new Vec2(0, 0), new Vec2(1000, 0), new Vec2(0, 0), new Vec2(300, 0), 0.1, 500), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
+    const state = first.capture();
+    const second = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    second.restore(state);
+    first.step(0.1, frame(new Vec2(0, 0), new Vec2(1030, 0), new Vec2(0, 0), new Vec2(300, 0), 0.2, 500), { shipA: [], shipB: [] });
+    second.step(0.1, frame(new Vec2(0, 0), new Vec2(1000, 500), new Vec2(0, 0), new Vec2(300, 0), 0.2, 500), { shipA: [], shipB: [] });
+    const firstPos = first.states("shipA")[0].position;
+    const secondPos = second.states("shipA")[0].position;
+    expect(firstPos.dist(secondPos)).toBeGreaterThan(0);
   });
 });

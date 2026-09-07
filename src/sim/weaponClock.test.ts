@@ -1,6 +1,7 @@
 import { WeaponClockImpl } from "./weaponClock";
+import { expectedHitRoll, sampledHitRoll } from "./hitRoll";
 import { Mulberry32RngFactory } from "./rng";
-import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_PROJECTION, Vec2 } from "./index";
+import { EMPTY_DEFENSE_ASSESSMENT, Vec2 } from "./index";
 import { toTypeId } from "../gamedata/ids";
 import type { AttackAssessment } from "./fireControl";
 import type { EngagementView, WeaponAttack } from "./engagementFrameComposer";
@@ -29,7 +30,6 @@ function makeView(shipAAttacks: readonly WeaponAttack[], shipBAttacks: readonly 
     weaponAttacks: { shipA: shipAAttacks, shipB: shipBAttacks },
     effectiveWeapons: { shipA: turret, shipB: turret },
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
-    projection: { shipA: EMPTY_PROJECTION, shipB: EMPTY_PROJECTION },
     locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
     readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } },
     incomingOffensiveModules: { shipA: [], shipB: [] },
@@ -51,14 +51,14 @@ function turretAttack(expectedMultiplier: number, volley: { em: number; thermal:
 
 describe("WeaponClockImpl", () => {
   test("no event before cycle completion", () => {
-    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const view = makeView([turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
     const events = clock.step(1, view);
     expect(events).toHaveLength(0);
   });
 
   test("one event at cycle completion", () => {
-    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const view = makeView([turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
     clock.step(1, view);
     const events = clock.step(4, view);
@@ -71,7 +71,7 @@ describe("WeaponClockImpl", () => {
   });
 
   test("repeated events across multiple cycles", () => {
-    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const view = makeView([turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
     let totalEvents = 0;
     for (let i = 0; i < 50; i++) {
@@ -81,7 +81,7 @@ describe("WeaponClockImpl", () => {
   });
 
   test("zero appliedVolleyByType produces no event", () => {
-    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const view = makeView([turretAttack(0, ZERO_DAMAGE)]);
     let totalEvents = 0;
     for (let i = 0; i < 10; i++) {
@@ -91,7 +91,7 @@ describe("WeaponClockImpl", () => {
   });
 
   test("missile weapons are skipped", () => {
-    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const missileWeapon: WeaponSpec = { kind: "missile", moduleId: toTypeId("2"), damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 1, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 3, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
     const view = makeView([{ weapon: missileWeapon, assessment: makeAssessment(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 }) }]);
     let totalEvents = 0;
@@ -102,7 +102,7 @@ describe("WeaponClockImpl", () => {
   });
 
   test("both sides emit events targeting the opposing side", () => {
-    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const view = makeView(
       [turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })],
       [turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })],
@@ -117,7 +117,7 @@ describe("WeaponClockImpl", () => {
   });
 
   test("reset clears cooldowns", () => {
-    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const view = makeView([turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
     clock.step(3, view);
     clock.reset();
@@ -126,7 +126,7 @@ describe("WeaponClockImpl", () => {
   });
 
   test("hit roll produces variable damage multipliers", () => {
-    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const view = makeView([turretAttack(0.5, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
     const damages: number[] = [];
     for (let i = 0; i < 100; i++) {
@@ -141,7 +141,7 @@ describe("WeaponClockImpl", () => {
   });
 
   test("average damage approximates appliedVolleyByType", () => {
-    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const expectedMultiplier = 1.01505;
     const view = makeView([turretAttack(expectedMultiplier, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
     let totalDamage = 0;
@@ -159,7 +159,7 @@ describe("WeaponClockImpl", () => {
   });
 
   test("weapon list change resets cooldowns", () => {
-    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const fastTurret: TurretSpec = { ...turret, cycleTime: 2 };
     const viewA = makeView([turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
     clock.step(4, viewA);
@@ -171,7 +171,7 @@ describe("WeaponClockImpl", () => {
   });
 
   test("unlocked side produces no events", () => {
-    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const attack = turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 });
     const view: EngagementView = { ...makeView([attack]), locks: { shipA: { status: "locking", progress: 0.5, remaining: 5, lockTime: 10, inRange: true }, shipB: LOCKED_STATE } };
     const events = clock.step(10, view);
@@ -179,7 +179,7 @@ describe("WeaponClockImpl", () => {
   });
 
   test("re-lock after break waits full cycle (no burst fire)", () => {
-    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory() });
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const attack = turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 });
     const lockedView = makeView([attack]);
     const unlockingView: EngagementView = { ...makeView([attack]), locks: { shipA: { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: false }, shipB: LOCKED_STATE } };
@@ -190,5 +190,65 @@ describe("WeaponClockImpl", () => {
     expect(eventsAfterRelock).toHaveLength(0);
     const eventsAfterFullCycle = clock.step(4, lockedView);
     expect(eventsAfterFullCycle).toHaveLength(1);
+  });
+
+  test("expected roll fires every cycle with the full applied volley", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const view = makeView([turretAttack(0.5, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
+    let totalEvents = 0;
+    for (let i = 0; i < 10; i++) {
+      for (const event of clock.step(5, view)) {
+        totalEvents++;
+        expect(event.rawByType.kinetic).toBe(100);
+      }
+    }
+    expect(totalEvents).toBe(10);
+  });
+
+  test("expected roll skips weapons with zero expected multiplier", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const view = makeView([turretAttack(0, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
+    let totalEvents = 0;
+    for (let i = 0; i < 10; i++) totalEvents += clock.step(5, view).length;
+    expect(totalEvents).toBe(0);
+  });
+
+  test("expected roll is deterministic across resets", () => {
+    const view = makeView([turretAttack(0.5, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
+    const damages = (clock: WeaponClockImpl): number[] => {
+      const out: number[] = [];
+      for (let i = 0; i < 4; i++) for (const event of clock.step(5, view)) out.push(event.rawByType.kinetic);
+      clock.reset();
+      return out;
+    };
+    const first = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const second = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    damages(first);
+    expect(damages(second)).toEqual(damages(first));
+  });
+
+  test("capture and restore transfers the cooldown phase into another instance", () => {
+    const view = makeView([turretAttack(0.5, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
+    const first = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    first.step(7, view);
+    const state = first.capture();
+    const second = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    second.restore(state);
+    const fresh = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    expect(first.step(4, view)).toHaveLength(1);
+    expect(second.step(4, view)).toHaveLength(1);
+    expect(fresh.step(4, view)).toHaveLength(0);
+  });
+
+  test("restored instance keeps stepping independently of the captured source", () => {
+    const view = makeView([turretAttack(0.5, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
+    const first = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    first.step(7, view);
+    const state = first.capture();
+    const second = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    second.restore(state);
+    first.step(10, view);
+    expect(second.step(2, view)).toHaveLength(0);
+    expect(second.step(2, view)).toHaveLength(1);
   });
 });

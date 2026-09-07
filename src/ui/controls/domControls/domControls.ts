@@ -28,6 +28,7 @@ import type { RangeOverlayController } from "../rangeOverlay";
 import type { PortraitsController } from "../portraits";
 import type { HoverHintController } from "../hoverHint";
 import type { ReadoutPresenter } from "./readoutPresenter";
+import type { ViewStream } from "../../viewStream";
 
 export type { Controls, ControlsCallbacks } from "../controlsContract";
 
@@ -40,6 +41,7 @@ interface DomControlsEls {
 
 interface DomControlsAllDeps extends DomControlsDeps {
   els: DomControlsEls;
+  viewStream: ViewStream;
   popupGroup: PopupGroup;
   hintRotator: HintRotator;
   hullDatalist: HullDatalist;
@@ -91,9 +93,12 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly previewManager: FittingPreviewManager;
   private readonly simConfigSource: SimConfigSource;
   private readonly readoutPresenter: ReadoutPresenter;
+  private readonly viewStream: ViewStream;
 
   private callbacks?: ControlsCallbacks;
   private playing = false;
+  private ended = false;
+  private identityChangePending = false;
 
   constructor(all: DomControlsAllDeps) {
     this.deps = all;
@@ -121,12 +126,18 @@ export class DomControls implements Controls, DomControlsHost {
     this.previewManager = all.previewManager;
     this.simConfigSource = all.simConfigSource;
     this.readoutPresenter = all.readoutPresenter;
+    this.viewStream = all.viewStream;
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated(() => this.onConfigInvalidated());
     this.deps.events.onDisplayInvalidated(() => this.onDisplayChange());
     this.deps.events.onSessionRestored(() => this.onSessionRestored());
     this.deps.events.onSessionReset(() => this.onSessionReset());
     this.deps.events.onStartupDefaultsApplied(() => this.onStartupDefaultsApplied());
+    this.deps.events.onFittingImported(() => { this.identityChangePending = true; });
+    this.viewStream.onViewUpdated((view) => {
+      this.ended = view.defenseRuntime.dead.shipA || view.defenseRuntime.dead.shipB;
+      this.updatePlayButton();
+    });
   }
 
   wireControls(): void {
@@ -152,7 +163,10 @@ export class DomControls implements Controls, DomControlsHost {
   }
 
   onPlayPause(): void { this.callbacks?.onPlayPause(); }
-  onReset(): void { this.callbacks?.onReset(); }
+  onReset(): void {
+    this.callbacks?.onReset();
+    this.portraitsController.update();
+  }
   onSpeedChange(speed: number): void { this.callbacks?.onSpeedChange(speed); }
   onConfigChange(): void {
     this.shipASide.sections.skill.setOverloadDisabled();
@@ -168,7 +182,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.preferencesController.savePreferences();
     this.profileController.updateActionBarState();
     this.updatePlayEnabled();
-    this.callbacks?.onConfigChange();
+    this.notifyConfigChange();
   }
   onDisplayChange(): void {
     this.preferencesController.savePreferences();
@@ -214,7 +228,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.preferencesController.savePreferences();
     this.profileController.updateActionBarState();
     this.updatePlayEnabled();
-    if (notify) this.callbacks?.onConfigChange();
+    if (notify) this.notifyConfigChange();
   }
 
   getWeapon(side: Side): WeaponSpec | undefined {
@@ -243,12 +257,20 @@ export class DomControls implements Controls, DomControlsHost {
   getWeaponRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getWeaponRangeVisibility(); }
   getDroneRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneRangeVisibility(); }
   getDroneControlRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getDroneControlRangeVisibility(); }
-  setPlaying(playing: boolean): void {
+  setPlaying(playing: boolean, ended?: boolean): void {
     this.playing = playing;
-    this.els.play.textContent = this.deps.i18n.t(playing ? "button.pause" : "button.play");
+    if (ended !== undefined) this.ended = ended;
+    this.updatePlayButton();
     this.readoutPresenter.setPlaying(playing);
   }
   setCallbacks(callbacks: ControlsCallbacks): void { this.callbacks = callbacks; }
+
+  private notifyConfigChange(): void {
+    const identityChanged = this.identityChangePending;
+    this.identityChangePending = false;
+    if (identityChanged) this.callbacks?.onReset();
+    else this.callbacks?.onConfigChange();
+  }
 
   private onDocumentPointerDown(event: PointerEvent): void {
     const previewOpen = this.previewManager.openSide();
@@ -267,6 +289,12 @@ export class DomControls implements Controls, DomControlsHost {
 
   private updatePlayEnabled(): void {
     this.els.play.disabled = this.shipASide.profile === undefined || this.shipBSide.profile === undefined;
+  }
+
+  private updatePlayButton(): void {
+    const key = this.playing ? "button.pause" : this.ended ? "button.restart" : "button.play";
+    this.els.play.setAttribute("data-i18n", key);
+    this.els.play.textContent = this.deps.i18n.t(key);
   }
 
   private sideFor(side: Side): SidePanel { return side === "shipA" ? this.shipASide : this.shipBSide; }

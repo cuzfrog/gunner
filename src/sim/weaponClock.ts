@@ -1,10 +1,26 @@
 import type { Rng, RngFactory } from "./rng";
-import { rollHit } from "./hitRoll";
+import { type HitRollStrategy, sampledHitRoll } from "./hitRoll";
+import type { Restorable } from "./restorable";
 import type { EngagementView, WeaponAttack } from "./engagementFrameComposer";
 import type { DamageEvent, Side, WeaponKind } from "./types";
 import { damageVectorScale, damageVectorSum } from "./types";
 
-export interface WeaponClock {
+export interface WeaponCooldownSnapshot {
+  readonly timer: number;
+  readonly cycleTime: number;
+}
+
+export interface SideClockSnapshot {
+  readonly cooldowns: ReadonlyMap<number, WeaponCooldownSnapshot>;
+  readonly weaponSignature: string;
+}
+
+export interface WeaponClockState {
+  readonly seed: number;
+  readonly sides: Record<Side, SideClockSnapshot>;
+}
+
+export interface WeaponClock extends Restorable<WeaponClockState> {
   reset(): void;
   step(dt: number, view: EngagementView): readonly DamageEvent[];
 }
@@ -22,11 +38,13 @@ interface SideClock {
 
 export class WeaponClockImpl implements WeaponClock {
   private readonly rngFactory: RngFactory;
+  private readonly hitRoll: HitRollStrategy;
   private sides: Record<Side, SideClock>;
   private seed: number;
 
-  constructor({ rngFactory }: { rngFactory: RngFactory }) {
+  constructor({ rngFactory, hitRoll = sampledHitRoll }: { rngFactory: RngFactory; hitRoll?: HitRollStrategy }) {
     this.rngFactory = rngFactory;
+    this.hitRoll = hitRoll;
     this.seed = 0;
     this.sides = { shipA: emptySide(() => this.rngFactory.create(this.seed)), shipB: emptySide(() => this.rngFactory.create(this.seed + 1)) };
   }
@@ -36,6 +54,18 @@ export class WeaponClockImpl implements WeaponClock {
     this.sides = {
       shipA: emptySide(() => this.rngFactory.create(this.seed)),
       shipB: emptySide(() => this.rngFactory.create(this.seed + 1)),
+    };
+  }
+
+  capture(): WeaponClockState {
+    return { seed: this.seed, sides: { shipA: snapshotClock(this.sides.shipA), shipB: snapshotClock(this.sides.shipB) } };
+  }
+
+  restore(state: WeaponClockState): void {
+    this.seed = state.seed;
+    this.sides = {
+      shipA: materializeClock(state.sides.shipA, () => this.rngFactory.create(this.seed)),
+      shipB: materializeClock(state.sides.shipB, () => this.rngFactory.create(this.seed + 1)),
     };
   }
 
@@ -95,7 +125,7 @@ export class WeaponClockImpl implements WeaponClock {
   private rollEvent(source: Side, target: Side, weaponIndex: number, kind: WeaponKind, attack: WeaponAttack, hitChance: number, expectedMultiplier: number, rng: Rng): DamageEvent | undefined {
     const appliedVolley = attack.assessment.damage.appliedVolleyByType;
     if (damageVectorSum(appliedVolley) <= 0) return undefined;
-    const hitMultiplier = rollHit(rng, hitChance);
+    const hitMultiplier = this.hitRoll(rng, hitChance, expectedMultiplier);
     if (hitMultiplier <= 0) return undefined;
     const scale = expectedMultiplier > 0 ? hitMultiplier / expectedMultiplier : 0;
     const rawByType = damageVectorScale(appliedVolley, scale);
@@ -106,6 +136,20 @@ export class WeaponClockImpl implements WeaponClock {
 
 function emptySide(createRng: () => Rng): SideClock {
   return { cooldowns: new Map(), weaponSignature: "", rng: createRng() };
+}
+
+function snapshotClock(clock: SideClock): SideClockSnapshot {
+  const cooldowns = [...clock.cooldowns].map(
+    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime }] as const,
+  );
+  return { cooldowns: new Map(cooldowns), weaponSignature: clock.weaponSignature };
+}
+
+function materializeClock(snapshot: SideClockSnapshot, createRng: () => Rng): SideClock {
+  const cooldowns = [...snapshot.cooldowns].map(
+    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime }] as const,
+  );
+  return { cooldowns: new Map(cooldowns), weaponSignature: snapshot.weaponSignature, rng: createRng() };
 }
 
 function weaponSignature(attacks: readonly WeaponAttack[]): string {

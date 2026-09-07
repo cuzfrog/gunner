@@ -1,6 +1,6 @@
 import type { Rng } from "./rng";
 import { Mulberry32Rng } from "./rng";
-import { rollHit } from "./hitRoll";
+import { _rollHit as rollHit } from "./hitRoll";
 
 class MockRng implements Rng {
   private values: readonly number[];

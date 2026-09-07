@@ -3,7 +3,7 @@ import type { ChargeStats, MissileStats } from "../gamedata/fittingDb";
 import { toTypeId } from "../gamedata/ids";
 
 function charge(overrides: Partial<ChargeStats> = {}): ChargeStats {
-  return { id: toTypeId("1"), name: "Test", trackingMultiplier: 1, rangeMultiplier: 1, falloffMultiplier: 1, ...overrides };
+  return { id: toTypeId("1"), name: "Test", trackingMultiplier: 1, rangeMultiplier: 1, falloffMultiplier: 1, chargeGroup: 83, chargeSize: 1, ...overrides };
 }
 
 function missile(overrides: Partial<MissileStats> = {}): MissileStats {

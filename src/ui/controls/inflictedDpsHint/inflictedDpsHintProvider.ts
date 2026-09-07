@@ -1,4 +1,4 @@
-import type { DefenseLayer, EngagementView } from "../../../sim";
+import type { DefenseLayer, EngineView } from "../../../sim";
 import { DEFENSE_LAYERS } from "../../../sim";
 import type { ViewStream } from "../../viewStream";
 import type { HintContentProvider } from "../hoverHint";
@@ -30,14 +30,14 @@ export class InflictedDpsHintProviderImpl implements HintContentProvider {
     this.renderer.render(model, container);
   }
 
-  private buildModel(side: "shipA" | "shipB", view: EngagementView): InflictedDpsHintModel {
+  private buildModel(side: "shipA" | "shipB", view: EngineView): InflictedDpsHintModel {
     const opponent = side === "shipA" ? "shipB" : "shipA";
     const attack = view.attacks[side];
     if (attack === undefined) return { layers: [], totalAppliedDps: 0, totalInflictedDps: 0 };
-    const projection = view.projection[opponent];
+    const inflicted = view.inflicted[opponent];
     const totalAppliedDps = attack.damage.appliedDps;
-    const totalInflictedDps = projection.totalInflicted;
-    const byLayer = projection.byLayer;
+    const totalInflictedDps = inflicted.total;
+    const byLayer = inflicted.byLayer;
     const layers: InflictedDpsHintLayerRow[] = [];
     for (const layer of DEFENSE_LAYERS) {
       const inflicted = byLayer[layer];

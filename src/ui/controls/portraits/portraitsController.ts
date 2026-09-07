@@ -24,6 +24,7 @@ interface PortraitEffect {
 }
 
 const HP_BAR_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
+const FULL_POOL: Readonly<Record<DefenseLayer, number>> = { shield: 1, armor: 1, hull: 1 };
 
 export class PortraitsControllerImpl implements PortraitsController {
   private readonly els: PortraitsEls;
@@ -89,11 +90,13 @@ export class PortraitsControllerImpl implements PortraitsController {
     const portraitEffects = offensiveModules.map((m) => offensiveModuleEffect(m, this.i18n));
     const defenseEffects = this.defenseController.cyclingEffects(side);
     const allEffects = [...portraitEffects, ...defenseEffects];
-    const hpPercentages = this.defenseController.hpPercentages(side);
+    const defenseRuntime = this.viewStream.currentView()?.defenseRuntime;
+    const hpPercentages = defenseRuntime?.poolPercentages[side] ?? FULL_POOL;
     updateHpBars(hpBars, hpPercentages);
-    hpBars.hidden = hpPercentages === undefined;
+    hpBars.hidden = false;
     const hpValueEls = side === "shipA" ? this.els.shipAHpValues : this.els.shipBHpValues;
-    updateHpValues(hpValueEls, this.hpValueDisplay, this.defenseController.hpValues(side), hpPercentages);
+    const hpValues = defenseRuntime ? { current: defenseRuntime.pools[side], max: defenseRuntime.poolMaxes[side] } : undefined;
+    updateHpValues(hpValueEls, this.hpValueDisplay, hpValues, hpPercentages);
     const lock = this.viewStream.currentView()?.locks[side];
     const lockBadgeVisible = lock !== undefined && lock.status === "locked" && lock.lockTime > 0;
     if (lockBadge.hidden !== !lockBadgeVisible) lockBadge.hidden = !lockBadgeVisible;

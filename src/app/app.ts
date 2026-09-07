@@ -32,30 +32,43 @@ export class AppImpl implements App {
       onReset: () => {
         this.engine.reset(this.controls.getEngineConfig());
         this.loop.reset();
+        this.controls.setPlaying(this.loop.isRunning(), false);
       },
       onConfigChange: () => {
         this.engine.update(this.controls.getEngineConfig());
       },
       onDisplayChange: () => this.renderFrame(),
       onPlayPause: () => {
+        if (this.isEnded()) {
+          this.engine.reset(this.controls.getEngineConfig());
+          this.loop.reset();
+          this.loop.start();
+          this.controls.setPlaying(true, false);
+          return;
+        }
         this.loop.toggle();
-        this.controls.setPlaying(this.loop.isRunning());
+        this.controls.setPlaying(this.loop.isRunning(), this.isEnded());
       },
       onStop: () => {
         this.loop.stop();
-        this.controls.setPlaying(false);
+        this.controls.setPlaying(false, this.isEnded());
       },
       onSpeedChange: (speed) => this.loop.setSpeed(speed),
     });
     this.engine.events().onViewUpdated((view) => this.renderFrame(view));
     this.engine.events().onShipDestroyed(() => {
       this.loop.stop();
-      this.controls.setPlaying(false);
+      this.controls.setPlaying(false, true);
     });
     this.engine.reset(this.controls.getEngineConfig());
   }
 
   tick(dt: number): void { this.engine.step(dt); }
+
+  private isEnded(): boolean {
+    const dead = this.engine.view().defenseRuntime.dead;
+    return dead.shipA || dead.shipB;
+  }
 
   private renderFrame(view?: EngineView): void {
     const v = view ?? this.engine.view();

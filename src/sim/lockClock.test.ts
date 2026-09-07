@@ -146,4 +146,27 @@ describe("LockClockImpl", () => {
     expect(states.shipA.progress).toBe(0);
     expect(states.shipA.lockTime).toBe(Infinity);
   });
+
+  test("capture and restore round-trips the state into another instance", () => {
+    const first = new LockClockImpl();
+    first.step(0.1, stepInput(10000));
+    const expected = first.states();
+    const state = first.capture();
+    first.step(30, stepInput(10000));
+    const second = new LockClockImpl();
+    second.restore(state);
+    expect(second.states()).toEqual(expected);
+  });
+
+  test("restored instance keeps stepping independently of the captured source", () => {
+    const first = new LockClockImpl();
+    first.step(0.1, stepInput(10000));
+    const state = first.capture();
+    const second = new LockClockImpl();
+    second.restore(state);
+    first.step(30, stepInput(10000));
+    second.step(0.1, stepInput(10000));
+    expect(first.states().shipA.status).toBe("locked");
+    expect(second.states().shipA.status).toBe("locking");
+  });
 });

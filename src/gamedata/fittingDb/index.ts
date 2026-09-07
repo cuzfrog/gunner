@@ -1,4 +1,12 @@
 export type { FittingDb, FittingDbData } from "./types";
+export {
+  ENERGY_WEAPON_GROUP,
+  PROJECTILE_WEAPON_GROUP,
+  HYBRID_WEAPON_GROUP,
+  PRECURSOR_WEAPON_GROUP,
+  TURRET_WEAPON_GROUP_BY_ID,
+  turretWeaponGroupForGroupId,
+} from "./types";
 export { FITTING_DB } from "./catalog";
 export type {
   ChargeStats,

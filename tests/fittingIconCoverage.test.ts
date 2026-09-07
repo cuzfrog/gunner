@@ -21,7 +21,7 @@ import { TYPE_ICON_FILES } from "../src/ui/icons/typeIconFiles";
 
 const ships = new ShipsImpl({ shipProfileCatalog: new StaticShipProfileCatalog(), nameI18nCatalog: new StaticNameI18nCatalog() });
 const gunFamilies = new GunFamiliesImpl({ fittingDb: FITTING_DB });
-const chargeCatalog = new ChargeCatalogImpl({ fittingDb: FITTING_DB, gunFamilies });
+const chargeCatalog = new ChargeCatalogImpl({ fittingDb: FITTING_DB });
 const stackingPenalty = new StackingPenaltyImpl();
 const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonuses: FITTING_DB.skillBonuses });
 const missileCatalog = new MissileCatalogImpl({ fittingDb: FITTING_DB, missileSkillModel });

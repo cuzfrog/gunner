@@ -123,7 +123,7 @@ export class FittingBasis {
       result.shipBSig = override.shipBSig ?? stats.sigRadius;
     }
     if (imported.turret) {
-      const options = this.chargeCatalog.chargesForSize(imported.turret.chargeSize);
+      const options = this.chargeCatalog.chargesForTurret(imported.turret);
       const storedAmmo = side === "shipA" ? settings.shipAAmmo : settings.shipBAmmo;
       const option = options.find((c) => c.id === storedAmmo);
       const turret = option ? this.chargeCatalog.withCharge(imported.turret, option.id) : imported.turret;

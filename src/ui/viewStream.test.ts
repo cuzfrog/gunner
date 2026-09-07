@@ -11,7 +11,6 @@ function makeEngine(): { engine: EngagementEngine; events: EngineEvents; emit: (
   };
   const engine = vi.mocked<EngagementEngine>({
     reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(), events: vi.fn(() => events),
-    setDamageEnabled: vi.fn(), setRepairMode: vi.fn(), setRepairerActivation: vi.fn(), setRahActivation: vi.fn(),
   });
   return { engine, events, emit: (view) => { for (const l of Array.from(viewUpdated)) l(view); } };
 }

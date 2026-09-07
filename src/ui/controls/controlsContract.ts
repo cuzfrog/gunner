@@ -31,6 +31,6 @@ export interface Controls {
   getDroneRangeVisibility(): WeaponRangeVisibility;
   getDroneControlRangeVisibility(): WeaponRangeVisibility;
   getOverlays(): readonly RangeOverlay[];
-  setPlaying(playing: boolean): void;
+  setPlaying(playing: boolean, ended?: boolean): void;
   setCallbacks(callbacks: ControlsCallbacks): void;
 }

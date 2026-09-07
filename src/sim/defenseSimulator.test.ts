@@ -1,7 +1,15 @@
 import { DefenseSimulatorImpl } from "./defenseSimulator";
 import type { DefenseSimConfig } from "./defenseSimulator";
-import type { DamageEvent, DamageVector, DefenseSpec, RahSpec, RepairerSpec } from "./types";
+import type { DamageEvent, DamageVector, DefenseSpec, LayerDamage, RahSpec, RepairerSpec } from "./types";
 import { ZERO_DAMAGE } from "./types";
+
+function totalOf(layer: LayerDamage): number {
+  return layer.shield + layer.armor + layer.hull;
+}
+
+function deltaTotals(after: LayerDamage, before: LayerDamage): LayerDamage {
+  return { shield: after.shield - before.shield, armor: after.armor - before.armor, hull: after.hull - before.hull };
+}
 
 function events(shipA: DamageVector, shipB: DamageVector): readonly DamageEvent[] {
   const result: DamageEvent[] = [];
@@ -180,6 +188,24 @@ describe("DefenseSimulatorImpl", () => {
     expect(view2.deadAt.shipA).toBe(1);
   });
 
+  test("reset after death restores full HP and clears dead", () => {
+    const sim = new DefenseSimulatorImpl();
+    const defense = spec({
+      shieldHp: 500,
+      armorHp: 300,
+      hullHp: 100,
+      hullResists: { em: 0 },
+    });
+    sim.reset(config(defense));
+    sim.step(1, events({ em: 2000, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().dead.shipA).toBe(true);
+    sim.reset(config(defense));
+    const view = sim.view();
+    expect(view.dead.shipA).toBe(false);
+    expect(view.pools.shipA).toEqual({ shield: 500, armor: 300, hull: 100 });
+    expect(view.poolPercentages.shipA).toEqual({ shield: 1, armor: 1, hull: 1 });
+  });
+
   test("zero-HP spec (no fitting) does not trigger death", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 0, armorHp: 0, hullHp: 0 })));
@@ -208,17 +234,6 @@ describe("DefenseSimulatorImpl", () => {
     // Even with regen time set, pools stay at max when disabled
     sim.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(1000);
-  });
-
-  test("setDamageEnabled toggles at runtime", () => {
-    const sim = new DefenseSimulatorImpl();
-    sim.reset(config(spec({ shieldHp: 200, armorHp: 200, hullHp: 200 })));
-    sim.setDamageEnabled("shipA", false);
-    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
-    expect(sim.view().pools.shipA.shield).toBe(200);
-    sim.setDamageEnabled("shipA", true);
-    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
-    expect(sim.view().pools.shipA.shield).toBe(100);
   });
 
   test("update preserves pool state while updating maxes and resists from new spec", () => {
@@ -393,28 +408,28 @@ describe("DefenseSimulatorImpl", () => {
     expect(sim.view().pools.shipA.shield).toBe(500);
     sim.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(500);
-    sim.setRepairerActivation("shipA", 0, true, true);
+    sim.update({ ...config(repairSpec), repairerActivation: { shipA: [{ active: true, overloaded: true }], shipB: [] } });
     sim.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(600);
   });
 
-  test("setRepairMode does not reset pools", () => {
+  test("update to manual repair mode does not reset pools", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000 })));
     sim.step(1, events({ em: 500, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(500);
-    sim.setRepairMode("shipA", "manual");
+    sim.update({ ...config(spec({ shieldHp: 1000 })), repairMode: { shipA: "manual", shipB: "auto" } });
     expect(sim.view().pools.shipA.shield).toBe(500);
     expect(sim.view().repairMode.shipA).toBe("manual");
   });
 
-  test("setRepairerActivation does not reset pools", () => {
+  test("update applies repairer activation without resetting pools", () => {
     const sim = new DefenseSimulatorImpl();
     const repairSpec = spec({ shieldHp: 1000, shieldRechargeTime: 0, repairers: [{ layer: "shield", amount: 100, cycleTime: 5, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }] });
     sim.reset(config(repairSpec));
     sim.step(1, events({ em: 500, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(600);
-    sim.setRepairerActivation("shipA", 0, false, false);
+    sim.update({ ...config(repairSpec), repairerActivation: { shipA: [{ active: false, overloaded: false }], shipB: [] } });
     expect(sim.view().pools.shipA.shield).toBe(600);
     expect(sim.view().repairers.shipA[0].active).toBe(false);
   });
@@ -467,9 +482,9 @@ describe("DefenseSimulatorImpl", () => {
     }
     const rahBefore = sim.view().rah.shipA;
     expect(rahBefore?.resists.em).toBeGreaterThan(0.3);
-    sim.setRahActivation("shipA", false, false);
+    sim.update({ ...config(rahSpec), rahActivation: { shipA: { active: false, overloaded: false }, shipB: undefined } });
     expect(sim.view().rah.shipA?.active).toBe(false);
-    sim.setRahActivation("shipA", true, true);
+    sim.update({ ...config(rahSpec), rahActivation: { shipA: { active: true, overloaded: true }, shipB: undefined } });
     const rahAfter = sim.view().rah.shipA;
     expect(rahAfter?.resists.em).toBeCloseTo(0.15, 5);
     expect(rahAfter?.resists.thermal).toBeCloseTo(0.15, 5);
@@ -477,7 +492,7 @@ describe("DefenseSimulatorImpl", () => {
     expect(rahAfter?.resists.explosive).toBeCloseTo(0.15, 5);
   });
 
-  test("setRahActivation does not reset pools", () => {
+  test("update deactivating rah does not reset pools", () => {
     const sim = new DefenseSimulatorImpl();
     const rahSpec = spec({ shieldHp: 1000, rah: {
       cycleTime: 1, shiftAmount: 0.06, baseResists: { em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 },
@@ -486,7 +501,7 @@ describe("DefenseSimulatorImpl", () => {
     sim.reset(config(rahSpec));
     sim.step(1, events({ em: 500, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(500);
-    sim.setRahActivation("shipA", false, false);
+    sim.update({ ...config(rahSpec), rahActivation: { shipA: { active: false, overloaded: false }, shipB: undefined } });
     expect(sim.view().pools.shipA.shield).toBe(500);
   });
 
@@ -535,6 +550,18 @@ describe("DefenseSimulatorImpl", () => {
     expect(sim.view().pools.shipA.shield).toBe(1000);
     sim.step(0.5, events(EM_DAMAGE, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(800);
+  });
+
+  test("flushPendingDamage applies buffered events immediately and drains the buffer", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 1000, shieldRechargeTime: 0 })));
+    sim.step(0.5, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(1000);
+    sim.flushPendingDamage();
+    expect(sim.view().pools.shipA.shield).toBe(900);
+    expect(sim.inflictedTotals().shipA.shield).toBe(100);
+    sim.step(0.5, events(ZERO_DAMAGE, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(900);
   });
 
   test("tick buffer: multiple events in one tick are applied together", () => {
@@ -695,303 +722,311 @@ describe("DefenseSimulatorImpl", () => {
     expect(sim.view().pools.shipA.armor).toBeLessThan(1000);
   });
 
-  test("project: full HP, 0% resists, 100 EM DPS for 1s => 100 shield lost, 0 armor, 0 hull", () => {
+  test("inflicted meter: full HP, 0% resists, 100 EM DPS for 1s => 100 shield lost, 0 armor, 0 hull", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, hullResists: { em: 0 } })));
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.totalInflicted).toBe(100);
-    expect(projection.shipA.byLayer.shield).toBe(100);
-    expect(projection.shipA.byLayer.armor).toBe(0);
-    expect(projection.shipA.byLayer.hull).toBe(0);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield).toBe(100);
+    expect(inflicted.armor).toBe(0);
+    expect(inflicted.hull).toBe(0);
+    expect(totalOf(inflicted)).toBe(100);
   });
 
-  test("project: does not mutate live state", () => {
+  test("inflicted meter: reading the view does not mutate live state", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 } })));
-    const before = sim.view().pools.shipA;
-    sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    const after = sim.view().pools.shipA;
-    expect(after).toEqual(before);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const poolsBefore = sim.view().pools.shipA;
+    const readout = sim.inflictedTotals().shipA;
+    expect(totalOf(readout)).toBe(100);
+    expect(sim.view().pools.shipA).toEqual(poolsBefore);
   });
 
-  test("project: nearly depleted shield splits damage across shield and armor", () => {
+  test("inflicted meter: nearly depleted shield splits damage across shield and armor", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
     sim.step(1, events({ em: 985, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(15);
-    const projection = sim.project({ shipA: { em: 200, thermal: 0, kinetic: 0, explosive: 0 }, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.shield).toBe(12);
-    expect(projection.shipA.byLayer.armor).toBe(188);
-    expect(projection.shipA.totalInflicted).toBe(200);
+    const before = sim.inflictedTotals().shipA;
+    sim.step(1, events({ em: 200, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield - before.shield).toBe(12);
+    expect(inflicted.armor - before.armor).toBe(188);
+    expect(totalOf(inflicted) - totalOf(before)).toBe(200);
   });
 
-  test("project: 50% shield resist halves shield damage", () => {
+  test("inflicted meter: 50% shield resist halves shield damage", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 } })));
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.shield).toBe(50);
-    expect(projection.shipA.totalInflicted).toBe(50);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield).toBe(50);
+    expect(totalOf(inflicted)).toBe(50);
   });
 
-  test("project: dead ship loses no HP", () => {
+  test("inflicted meter: dead ship takes no damage", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 0, armorHp: 0, hullHp: 100, hullResists: { em: 0 } })));
-    sim.step(1, events({ em: 200, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
     expect(sim.view().dead.shipA).toBe(true);
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.totalInflicted).toBe(0);
+    expect(totalOf(sim.inflictedTotals().shipA)).toBe(100);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(totalOf(sim.inflictedTotals().shipA)).toBe(100);
   });
 
-  test("project: damage disabled refills pools, no HP lost", () => {
+  test("inflicted meter: damage disabled refills pools, no HP lost", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000 }), spec(), { shipA: false, shipB: true }));
     sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.totalInflicted).toBe(0);
+    expect(totalOf(sim.inflictedTotals().shipA)).toBe(0);
   });
 
-  test("project: zero incoming => zero HP lost", () => {
+  test("inflicted meter: zero incoming => zero HP lost", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000 })));
-    const projection = sim.project({ shipA: ZERO_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.totalInflicted).toBe(0);
-    expect(projection.shipB.totalInflicted).toBe(0);
+    sim.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE));
+    expect(totalOf(sim.inflictedTotals().shipA)).toBe(0);
+    expect(totalOf(sim.inflictedTotals().shipB)).toBe(0);
   });
 
-  test("project: both sides receive damage independently", () => {
+  test("inflicted meter: both sides receive damage independently", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, shieldResists: { em: 0 } }), spec({ shieldHp: 500, shieldResists: { em: 0 } })));
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: { em: 200, thermal: 0, kinetic: 0, explosive: 0 } }, 1);
-    expect(projection.shipA.byLayer.shield).toBe(100);
-    expect(projection.shipB.byLayer.shield).toBe(200);
+    sim.step(1, events(EM_DAMAGE, { em: 200, thermal: 0, kinetic: 0, explosive: 0 }));
+    expect(sim.inflictedTotals().shipA.shield).toBe(100);
+    expect(sim.inflictedTotals().shipB.shield).toBe(200);
   });
 
-  test("project: shield regen does not reduce inflicted damage", () => {
-    const withRegenSim = new DefenseSimulatorImpl();
-    withRegenSim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, shieldRechargeTime: 1000 })));
-    withRegenSim.step(1, events({ em: 500, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
-    const shieldBefore = withRegenSim.view().pools.shipA.shield;
-    const withRegen = withRegenSim.project({ shipA: { em: 50, thermal: 0, kinetic: 0, explosive: 0 }, shipB: ZERO_DAMAGE }, 1);
-    const withoutRegenSim = new DefenseSimulatorImpl();
-    withoutRegenSim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, shieldRechargeTime: 0 })));
-    withoutRegenSim.step(1, events({ em: 500, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
-    const withoutRegen = withoutRegenSim.project({ shipA: { em: 50, thermal: 0, kinetic: 0, explosive: 0 }, shipB: ZERO_DAMAGE }, 1);
-    expect(withRegen.shipA.byLayer.shield).toBe(withoutRegen.shipA.byLayer.shield);
-    expect(withRegen.shipA.totalInflicted).toBe(50);
-    expect(withRegenSim.view().pools.shipA.shield).toBe(shieldBefore);
+  test("inflicted meter: shield regen does not reduce inflicted damage", () => {
+    const withRegen = new DefenseSimulatorImpl();
+    withRegen.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, shieldRechargeTime: 1000 })));
+    const withoutRegen = new DefenseSimulatorImpl();
+    withoutRegen.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, shieldRechargeTime: 0 })));
+    withRegen.step(1, events({ em: 500, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    withoutRegen.step(1, events({ em: 500, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(withRegen.inflictedTotals().shipA.shield).toBe(500);
+    expect(withoutRegen.inflictedTotals().shipA.shield).toBe(500);
   });
 
-  test("project: shield regen still runs in the clone and shifts the layer split", () => {
+  test("inflicted meter: shield regen shifts the layer split toward shield", () => {
     const withRegenSim = new DefenseSimulatorImpl();
     withRegenSim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldRechargeTime: 100, shieldUniformity: 0.25 })));
-    withRegenSim.step(1, events({ em: 760, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
-    expect(withRegenSim.view().pools.shipA.shield).toBe(240);
-    const withRegen = withRegenSim.project({ shipA: { em: 50, thermal: 0, kinetic: 0, explosive: 0 }, shipB: ZERO_DAMAGE }, 1);
     const withoutRegenSim = new DefenseSimulatorImpl();
     withoutRegenSim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldRechargeTime: 0, shieldUniformity: 0.25 })));
+    withRegenSim.step(1, events({ em: 760, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
     withoutRegenSim.step(1, events({ em: 760, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
-    const withoutRegen = withoutRegenSim.project({ shipA: { em: 50, thermal: 0, kinetic: 0, explosive: 0 }, shipB: ZERO_DAMAGE }, 1);
-    expect(withoutRegen.shipA.byLayer.armor).toBeGreaterThan(0);
-    expect(withRegen.shipA.byLayer.armor).toBe(0);
-    expect(withRegen.shipA.byLayer.shield).toBeGreaterThan(withoutRegen.shipA.byLayer.shield);
-    expect(withRegen.shipA.totalInflicted).toBe(withoutRegen.shipA.totalInflicted);
+    expect(withRegenSim.view().pools.shipA.shield).toBe(240);
+    withRegenSim.step(1, events({ em: 50, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    withoutRegenSim.step(1, events({ em: 50, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    const withRegen = withRegenSim.inflictedTotals().shipA;
+    const withoutRegen = withoutRegenSim.inflictedTotals().shipA;
+    expect(withoutRegen.armor).toBeGreaterThan(0);
+    expect(withRegen.armor).toBe(0);
+    expect(withRegen.shield).toBeGreaterThan(withoutRegen.shield);
+    expect(totalOf(withRegen)).toBe(totalOf(withoutRegen));
   });
 
-  test("project: active armor repairer does not reduce inflicted damage", () => {
+  test("inflicted meter: active armor repairer does not reduce inflicted damage", () => {
     const sim = new DefenseSimulatorImpl();
     const repairSpec = spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, armorResists: { em: 0 }, repairers: [{ layer: "armor", amount: 100, cycleTime: 2, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }] });
     sim.reset(config(repairSpec));
     sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
-    const armorBefore = sim.view().pools.shipA.armor;
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.armor).toBe(100);
-    expect(projection.shipA.totalInflicted).toBe(100);
-    expect(sim.view().pools.shipA.armor).toBe(armorBefore);
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.armor).toBe(100);
+    expect(totalOf(inflicted)).toBe(100);
   });
 
-  test("project: RAH active does not mutate live RAH state", () => {
-    const sim = new DefenseSimulatorImpl();
-    const rahSpec: RahSpec = { baseResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 }, armorResistsWithoutRah: { em: 0, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime: 1, shiftAmount: 0.1, overloadCycleTimeMultiplier: 0.5 };
-    sim.reset(config(spec({ shieldHp: 0, armorHp: 10000, hullHp: 10000, armorResists: { em: 0 }, rah: rahSpec })));
-    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
-    const rahBefore = sim.view().rah.shipA;
-    expect(rahBefore).toBeDefined();
-    sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    const rahAfter = sim.view().rah.shipA;
-    expect(rahAfter?.resists).toEqual(rahBefore?.resists);
-    expect(rahAfter?.cycleProgress).toBe(rahBefore?.cycleProgress);
-  });
-
-  test("project: multi-type damage applies per-type resists in projection", () => {
+  test("inflicted meter: multi-type damage applies per-type resists", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5, thermal: 0.25 } })));
-    const projection = sim.project({ shipA: MIXED_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.shield).toBeCloseTo(50 * 0.5 + 50 * 0.75, 6);
-    expect(projection.shipA.totalInflicted).toBeCloseTo(62.5, 6);
+    sim.step(1, events(MIXED_DAMAGE, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield).toBeCloseTo(50 * 0.5 + 50 * 0.75, 6);
+    expect(totalOf(inflicted)).toBeCloseTo(62.5, 6);
   });
 
-  test("project: damage reaches hull when shield and armor are depleted", () => {
+  test("inflicted meter: damage reaches hull when shield and armor are depleted", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 0, armorHp: 0, hullHp: 1000, hullResists: { em: 0 } })));
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.hull).toBe(100);
-    expect(projection.shipA.totalInflicted).toBe(100);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.hull).toBe(100);
+    expect(totalOf(inflicted)).toBe(100);
   });
 
-  test("project: shield bleed-through applies when shield is below uniformity threshold", () => {
+  test("inflicted meter: shield bleed-through applies when shield is below uniformity threshold", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
     sim.step(1, events({ em: 750, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(250);
     sim.step(1, events({ em: 125, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(125);
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.shield).toBeLessThan(100);
-    expect(projection.shipA.byLayer.armor).toBeGreaterThan(0);
-    expect(projection.shipA.totalInflicted).toBe(100);
+    const before = sim.inflictedTotals().shipA;
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const inflicted = deltaTotals(sim.inflictedTotals().shipA, before);
+    expect(inflicted.shield).toBeLessThan(100);
+    expect(inflicted.armor).toBeGreaterThan(0);
+    expect(totalOf(inflicted)).toBe(100);
   });
 
-  test("project: horizon of 2 seconds doubles damage and regen time", () => {
+  test("inflicted meter: totals accumulate cumulatively across steps", () => {
     const sim = new DefenseSimulatorImpl();
-    sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 } })));
-    const projection1 = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    const projection2 = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 2);
-    expect(projection2.shipA.byLayer.shield).toBeCloseTo(projection1.shipA.byLayer.shield * 2, 6);
-    expect(projection2.shipA.totalInflicted).toBeCloseTo(projection1.shipA.totalInflicted * 2, 6);
+    sim.reset(config(spec({ shieldHp: 100000, shieldResists: { em: 0 } })));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(totalOf(sim.inflictedTotals().shipA)).toBe(100);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(totalOf(sim.inflictedTotals().shipA)).toBe(200);
+    sim.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE));
+    expect(totalOf(sim.inflictedTotals().shipA)).toBe(200);
   });
 
-  test("project: same DPS yields different totalInflicted as target transitions from shield to armor with different resists", () => {
+  test("inflicted meter: same DPS yields different inflicted as target transitions from shield to armor with different resists", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0.5 }, hullResists: { em: 0.7 }, shieldUniformity: 0 })));
-    const incoming = { shipA: EM_DAMAGE, shipB: ZERO_DAMAGE };
-    const projectionShieldPhase = sim.project(incoming, 1);
-    expect(projectionShieldPhase.shipA.byLayer.shield).toBe(100);
-    expect(projectionShieldPhase.shipA.byLayer.armor).toBe(0);
-    expect(projectionShieldPhase.shipA.totalInflicted).toBe(100);
-    for (let i = 0; i < 10; i++) sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(sim.inflictedTotals().shipA.shield).toBe(100);
+    expect(totalOf(sim.inflictedTotals().shipA)).toBe(100);
+    for (let i = 0; i < 9; i++) sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(0);
-    const projectionArmorPhase = sim.project(incoming, 1);
-    expect(projectionArmorPhase.shipA.byLayer.shield).toBe(0);
-    expect(projectionArmorPhase.shipA.byLayer.armor).toBe(50);
-    expect(projectionArmorPhase.shipA.totalInflicted).toBe(50);
-    for (let i = 0; i < 20; i++) sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const beforeArmor = sim.inflictedTotals().shipA;
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const armorPhase = deltaTotals(sim.inflictedTotals().shipA, beforeArmor);
+    expect(armorPhase.shield).toBe(0);
+    expect(armorPhase.armor).toBe(50);
+    expect(totalOf(armorPhase)).toBe(50);
+    for (let i = 0; i < 19; i++) sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.armor).toBe(0);
-    const projectionHullPhase = sim.project(incoming, 1);
-    expect(projectionHullPhase.shipA.byLayer.shield).toBe(0);
-    expect(projectionHullPhase.shipA.byLayer.armor).toBe(0);
-    expect(projectionHullPhase.shipA.byLayer.hull).toBeCloseTo(30, 6);
-    expect(projectionHullPhase.shipA.totalInflicted).toBeCloseTo(30, 6);
+    const beforeHull = sim.inflictedTotals().shipA;
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const hullPhase = deltaTotals(sim.inflictedTotals().shipA, beforeHull);
+    expect(hullPhase.shield).toBe(0);
+    expect(hullPhase.armor).toBe(0);
+    expect(hullPhase.hull).toBeCloseTo(30, 6);
+    expect(totalOf(hullPhase)).toBeCloseTo(30, 6);
   });
 
-  test("project: inflicted DPS drops when armor resist is higher than shield resist", () => {
+  test("inflicted meter: inflicted DPS drops when armor resist is higher than shield resist", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 100, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0.7 } })));
-    const incoming = { shipA: EM_DAMAGE, shipB: ZERO_DAMAGE };
-    const whileShieldUp = sim.project(incoming, 1);
-    expect(whileShieldUp.shipA.totalInflicted).toBe(100);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(totalOf(sim.inflictedTotals().shipA)).toBe(100);
+    const before = sim.inflictedTotals().shipA;
     sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(0);
-    const whileArmorTakingDamage = sim.project(incoming, 1);
-    expect(whileArmorTakingDamage.shipA.totalInflicted).toBeCloseTo(30, 6);
-    expect(whileArmorTakingDamage.shipA.totalInflicted).toBeLessThan(whileShieldUp.shipA.totalInflicted);
+    expect(totalOf(deltaTotals(sim.inflictedTotals().shipA, before))).toBeCloseTo(30, 6);
   });
 
-  test("project: depleted shield with non-zero shield resist does not reduce inflicted damage", () => {
+  test("inflicted meter: depleted shield with non-zero shield resist does not reduce inflicted damage", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0.6 } })));
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.shield).toBe(0);
-    expect(projection.shipA.byLayer.armor).toBeCloseTo(40, 6);
-    expect(projection.shipA.totalInflicted).toBeCloseTo(40, 6);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield).toBe(0);
+    expect(inflicted.armor).toBeCloseTo(40, 6);
+    expect(totalOf(inflicted)).toBeCloseTo(40, 6);
   });
 
-  test("project: depleted shield with non-zero uniformity still bypasses shield resist entirely", () => {
+  test("inflicted meter: depleted shield with non-zero uniformity still bypasses shield resist entirely", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.shield).toBe(0);
-    expect(projection.shipA.byLayer.armor).toBe(100);
-    expect(projection.shipA.totalInflicted).toBe(100);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield).toBe(0);
+    expect(inflicted.armor).toBe(100);
+    expect(totalOf(inflicted)).toBe(100);
   });
 
-  test("project: depleted shield and armor with non-zero resists only applies hull resist", () => {
+  test("inflicted meter: depleted shield and armor with non-zero resists only applies hull resist", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 0, armorHp: 0, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0.5 }, hullResists: { em: 0.7 } })));
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.shield).toBe(0);
-    expect(projection.shipA.byLayer.armor).toBe(0);
-    expect(projection.shipA.byLayer.hull).toBeCloseTo(30, 6);
-    expect(projection.shipA.totalInflicted).toBeCloseTo(30, 6);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield).toBe(0);
+    expect(inflicted.armor).toBe(0);
+    expect(inflicted.hull).toBeCloseTo(30, 6);
+    expect(totalOf(inflicted)).toBeCloseTo(30, 6);
   });
 
-  test("project: shield bleed-through damage is computed from raw damage, not shield-resisted", () => {
+  test("inflicted meter: shield bleed-through damage is computed from raw damage, not shield-resisted", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0 }, shieldUniformity: 0.25 })));
     sim.step(1, events({ em: 1600, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(200);
     const fraction = 1 - 200 / (0.25 * 1000);
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
+    const before = sim.inflictedTotals().shipA;
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const inflicted = deltaTotals(sim.inflictedTotals().shipA, before);
     const expectedShield = (1 - fraction) * 100 * (1 - 0.5);
     const expectedArmor = fraction * 100;
-    expect(projection.shipA.byLayer.shield).toBeCloseTo(expectedShield, 6);
-    expect(projection.shipA.byLayer.armor).toBeCloseTo(expectedArmor, 6);
-    expect(projection.shipA.totalInflicted).toBeCloseTo(expectedShield + expectedArmor, 6);
+    expect(inflicted.shield).toBeCloseTo(expectedShield, 6);
+    expect(inflicted.armor).toBeCloseTo(expectedArmor, 6);
+    expect(totalOf(inflicted)).toBeCloseTo(expectedShield + expectedArmor, 6);
   });
 
-  test("project: mid-hit shield break carries unabsorbed raw damage to armor", () => {
+  test("inflicted meter: mid-hit shield break carries unabsorbed raw damage to armor", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 10, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0 }, shieldUniformity: 0 })));
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.shield).toBe(10);
-    expect(projection.shipA.byLayer.armor).toBeCloseTo(80, 6);
-    expect(projection.shipA.totalInflicted).toBeCloseTo(90, 6);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield).toBe(10);
+    expect(inflicted.armor).toBeCloseTo(80, 6);
+    expect(totalOf(inflicted)).toBeCloseTo(90, 6);
   });
 
-  test("project: mid-hit armor break carries unabsorbed raw damage to hull", () => {
+  test("inflicted meter: mid-hit armor break carries unabsorbed raw damage to hull", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 0, armorHp: 10, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0.5 }, hullResists: { em: 0 } })));
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.shield).toBe(0);
-    expect(projection.shipA.byLayer.armor).toBe(10);
-    expect(projection.shipA.byLayer.hull).toBeCloseTo(80, 6);
-    expect(projection.shipA.totalInflicted).toBeCloseTo(90, 6);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield).toBe(0);
+    expect(inflicted.armor).toBe(10);
+    expect(inflicted.hull).toBeCloseTo(80, 6);
+    expect(totalOf(inflicted)).toBeCloseTo(90, 6);
   });
 
-  test("project: depleted shield sustained damage applies armor resist once", () => {
+  test("inflicted meter: depleted shield sustained damage applies armor resist once", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0.5 }, shieldRechargeTime: 518, shieldUniformity: 0 })));
     sim.step(1, events({ em: 2000, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
     expect(sim.view().pools.shipA.shield).toBe(0);
+    let previous = sim.inflictedTotals().shipA;
     for (let t = 0; t < 20; t++) {
-      const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1).shipA;
-      expect(projection.totalInflicted).toBeGreaterThan(49);
-      expect(projection.totalInflicted).toBeLessThan(51);
       sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+      const inflicted = deltaTotals(sim.inflictedTotals().shipA, previous);
+      previous = sim.inflictedTotals().shipA;
+      expect(totalOf(inflicted)).toBeGreaterThan(49);
+      expect(totalOf(inflicted)).toBeLessThan(51);
     }
   });
 
-  test("project: shield continuity between zero and near-zero shield HP", () => {
+  test("inflicted meter: shield continuity between zero and near-zero shield HP", () => {
     const empty = new DefenseSimulatorImpl();
     empty.reset(config(spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0.5 }, shieldUniformity: 0 })));
     const sliver = new DefenseSimulatorImpl();
     sliver.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0.5 }, shieldUniformity: 0 })));
     sliver.step(1, events({ em: 1998, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
     expect(sliver.view().pools.shipA.shield).toBeCloseTo(1, 6);
-    const fromZero = empty.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1).shipA;
-    const fromSliver = sliver.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1).shipA;
-    expect(Math.abs(fromZero.totalInflicted - fromSliver.totalInflicted)).toBeLessThan(0.01);
+    const emptyBefore = empty.inflictedTotals().shipA;
+    const sliverBefore = sliver.inflictedTotals().shipA;
+    empty.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    sliver.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const fromZero = totalOf(deltaTotals(empty.inflictedTotals().shipA, emptyBefore));
+    const fromSliver = totalOf(deltaTotals(sliver.inflictedTotals().shipA, sliverBefore));
+    expect(Math.abs(fromZero - fromSliver)).toBeLessThan(0.01);
   });
 
-  test("project: canonical mid-hit raw consumption", () => {
+  test("inflicted meter: canonical mid-hit raw consumption", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 100, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0.5 }, shieldUniformity: 0 })));
-    const projection = sim.project({ shipA: { em: 300, thermal: 0, kinetic: 0, explosive: 0 }, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.shield).toBe(100);
-    expect(projection.shipA.byLayer.armor).toBeCloseTo(50, 6);
-    expect(projection.shipA.totalInflicted).toBeCloseTo(150, 6);
+    sim.step(1, events({ em: 300, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield).toBe(100);
+    expect(inflicted.armor).toBeCloseTo(50, 6);
+    expect(totalOf(inflicted)).toBeCloseTo(150, 6);
   });
 
-  test("project: shield does not regenerate from empty", () => {
+  test("shield does not regenerate from empty", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldRechargeTime: 518, shieldUniformity: 0 })));
     sim.step(1, events({ em: 2000, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
@@ -1000,7 +1035,7 @@ describe("DefenseSimulatorImpl", () => {
     expect(sim.view().pools.shipA.shield).toBe(0);
   });
 
-  test("project: shield regenerates when above zero", () => {
+  test("shield regenerates when above zero", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldRechargeTime: 100, shieldUniformity: 0 })));
     sim.step(1, events({ em: 900, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
@@ -1010,29 +1045,64 @@ describe("DefenseSimulatorImpl", () => {
     expect(sim.view().pools.shipA.shield).toBeGreaterThan(after);
   });
 
-  test("project: multi-type event skips shield depleted by an earlier type", () => {
+  test("inflicted meter: multi-type event skips shield depleted by an earlier type", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 10, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5, thermal: 0.5 }, armorResists: { em: 0, thermal: 0 }, shieldUniformity: 0 })));
-    const projection = sim.project({ shipA: { em: 100, thermal: 100, kinetic: 0, explosive: 0 }, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.shield).toBe(10);
-    expect(projection.shipA.byLayer.armor).toBeCloseTo(80 + 100, 6);
-    expect(projection.shipA.totalInflicted).toBeCloseTo(190, 6);
+    sim.step(1, events({ em: 100, thermal: 100, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield).toBe(10);
+    expect(inflicted.armor).toBeCloseTo(80 + 100, 6);
+    expect(totalOf(inflicted)).toBeCloseTo(190, 6);
   });
 
-  test("project: immune layer absorbs nothing and passes raw damage through", () => {
+  test("inflicted meter: immune layer absorbs nothing and passes raw damage through", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 500, armorHp: 1000, hullHp: 1000, shieldResists: { em: 1 }, armorResists: { em: 0.5 }, shieldUniformity: 0 })));
-    const projection = sim.project({ shipA: EM_DAMAGE, shipB: ZERO_DAMAGE }, 1);
-    expect(projection.shipA.byLayer.shield).toBe(0);
-    expect(projection.shipA.byLayer.armor).toBeCloseTo(50, 6);
-    expect(projection.shipA.totalInflicted).toBeCloseTo(50, 6);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield).toBe(0);
+    expect(inflicted.armor).toBeCloseTo(50, 6);
+    expect(totalOf(inflicted)).toBeCloseTo(50, 6);
     expect(sim.view().pools.shipA.shield).toBe(500);
+  });
+
+  test("inflicted meter: totals accumulate per layer independently", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 10, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0.5 }, armorResists: { em: 0.5 }, hullResists: { em: 0 }, shieldUniformity: 0 })));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const inflicted = sim.inflictedTotals().shipA;
+    expect(inflicted.shield).toBe(10);
+    expect(inflicted.armor).toBe(40);
+    expect(inflicted.hull).toBe(0);
+  });
+
+  test("inflicted meter: tracks sides independently", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 100000 }), spec({ shieldHp: 100000 })));
+    sim.step(1, events(EM_DAMAGE, { em: 40, thermal: 0, kinetic: 0, explosive: 0 }));
+    expect(totalOf(sim.inflictedTotals().shipA)).toBeCloseTo(100, 6);
+    expect(totalOf(sim.inflictedTotals().shipB)).toBeCloseTo(40, 6);
+  });
+
+  test("inflicted meter: survives config update", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 100000 })));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    sim.update(config(spec({ shieldHp: 2000 })));
+    expect(totalOf(sim.inflictedTotals().shipA)).toBeCloseTo(100, 6);
+  });
+
+  test("inflicted meter: reset clears history", () => {
+    const sim = new DefenseSimulatorImpl();
+    sim.reset(config(spec({ shieldHp: 100000 })));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    sim.reset(config(spec({ shieldHp: 100000 })));
+    expect(totalOf(sim.inflictedTotals().shipA)).toBe(0);
   });
 
   test("step: rah accumulates only armor HP actually removed when armor breaks mid-hit", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 0, armorHp: 10, hullHp: 1000, armorResists: { em: 0.5 }, hullResists: { em: 0 }, shieldUniformity: 0, rah: { cycleTime: 1, shiftAmount: 0.06, baseResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 }, armorResistsWithoutRah: { em: 0.5, thermal: 0, kinetic: 0, explosive: 0 }, overloadCycleTimeMultiplier: 1 } })));
-    sim.setRahActivation("shipA", true, false);
     for (let i = 0; i < 5; i++) {
       sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
     }
@@ -1040,5 +1110,48 @@ describe("DefenseSimulatorImpl", () => {
     expect(rah).toBeDefined();
     expect(rah?.resists.em).toBeGreaterThan(0);
     expect(rah?.resists.thermal).toBeLessThan(0.05);
+  });
+
+  test("capture and restore round-trips pools, inflicted totals, and repairer state into another instance", () => {
+    const repairers: readonly RepairerSpec[] = [{ layer: "armor", amount: 100, cycleTime: 2, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }];
+    const first = new DefenseSimulatorImpl();
+    first.reset(config(spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, shieldResists: { em: 0 }, armorResists: { em: 0 }, shieldUniformity: 0.25, repairers })));
+    first.step(0.6, events({ em: 300, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    const expectedView = first.view();
+    const expectedTotals = first.inflictedTotals();
+    const state = first.capture();
+    first.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const second = new DefenseSimulatorImpl();
+    second.restore(state);
+    expect(second.view()).toEqual(expectedView);
+    expect(second.inflictedTotals()).toEqual(expectedTotals);
+  });
+
+  test("restored instance keeps stepping independently of the captured source", () => {
+    const first = new DefenseSimulatorImpl();
+    first.reset(config(spec({ shieldHp: 1000, shieldResists: { em: 0 } })));
+    first.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const state = first.capture();
+    const second = new DefenseSimulatorImpl();
+    second.restore(state);
+    first.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(first.view().pools.shipA.shield).toBe(800);
+    expect(second.view().pools.shipA.shield).toBe(900);
+    second.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(second.view().pools.shipA.shield).toBe(800);
+  });
+
+  test("capture and restore preserves an in-flight repairer cycle", () => {
+    const repairers: readonly RepairerSpec[] = [{ layer: "armor", amount: 100, cycleTime: 2, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }];
+    const first = new DefenseSimulatorImpl();
+    first.reset(config(spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, armorResists: { em: 0 }, repairers })));
+    first.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    const state = first.capture();
+    const second = new DefenseSimulatorImpl();
+    second.restore(state);
+    second.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE));
+    expect(second.view().pools.shipA.armor).toBe(1000);
+    const repairer = second.view().repairers.shipA[0];
+    expect(repairer.cycling).toBe(false);
   });
 });

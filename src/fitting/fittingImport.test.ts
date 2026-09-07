@@ -314,12 +314,12 @@ const db: FittingDb = {
     "Gyrostabilizer II": row("Gyrostabilizer II", "Gyrostabilizer II", { turretDamageMultiplier: 1.15, turretSpeedMultiplier: 0.89, turretWeaponGroup: "Projectile Weapon" }),
   },
   turrets: {
-    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", requiredSkillIds: [toTypeId("3300"), toTypeId("3306"), toTypeId("12214")], groupID: 53, metaLevel: 5, metaGroupID: 2 }),
-    "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, damageMultiplier: 3, cycleTime: 5, turretSkill: "Small Projectile Turret", requiredSkillIds: [toTypeId("3300"), toTypeId("3302"), toTypeId("11079")], groupID: 55, metaLevel: 5, metaGroupID: 2 }),
+    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, chargeGroups: [86, 375], damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", requiredSkillIds: [toTypeId("3300"), toTypeId("3306"), toTypeId("12214")], groupID: 53, metaLevel: 5, metaGroupID: 2 }),
+    "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, chargeGroups: [83, 372], damageMultiplier: 3, cycleTime: 5, turretSkill: "Small Projectile Turret", requiredSkillIds: [toTypeId("3300"), toTypeId("3302"), toTypeId("11079")], groupID: 55, metaLevel: 5, metaGroupID: 2 }),
   },
   charges: {
-    "Conflagration M": row("Conflagration M", "Conflagration M", { trackingMultiplier: 0.7, rangeMultiplier: 0.5 }),
-    "EMP S": row("EMP S", "EMP S", { rangeMultiplier: 0.5 }),
+    "Conflagration M": row("Conflagration M", "Conflagration M", { trackingMultiplier: 0.7, rangeMultiplier: 0.5, chargeGroup: 375, chargeSize: 2 }),
+    "EMP S": row("EMP S", "EMP S", { rangeMultiplier: 0.5, chargeGroup: 83, chargeSize: 1 }),
   },
   launchers: {},
   missiles: {},
@@ -385,7 +385,7 @@ const hullBonusDb: FittingDb = {
 
 const gunFamilies = new GunFamiliesImpl({ fittingDb: db });
 
-const chargeCatalog = new ChargeCatalogImpl({ fittingDb: db, gunFamilies });
+const chargeCatalog = new ChargeCatalogImpl({ fittingDb: db });
 const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonuses: db.skillBonuses });
 const missileCatalog = new MissileCatalogImpl({ fittingDb: db, missileSkillModel });
 const droneSkillModel = new DroneSkillModelImpl();
@@ -439,7 +439,7 @@ const fullFittingDb: FittingDb = {
   sensorDampenerScripts: SENSOR_DAMPENER_SCRIPTS,
 };
 const fullGunFamilies = new GunFamiliesImpl({ fittingDb: fullFittingDb });
-const fullChargeCatalog = new ChargeCatalogImpl({ fittingDb: fullFittingDb, gunFamilies: fullGunFamilies });
+const fullChargeCatalog = new ChargeCatalogImpl({ fittingDb: fullFittingDb });
 const fullMissileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonuses: fullFittingDb.skillBonuses });
 const fullMissileCatalog = new MissileCatalogImpl({ fittingDb: fullFittingDb, missileSkillModel: fullMissileSkillModel });
 const fullDroneSkillModel = new DroneSkillModelImpl();
@@ -811,6 +811,29 @@ Medium Energy Metastasis Adjuster II`,
     );
     expect(result!.turret).toBeDefined();
     expect(importer.itemNameForId(result!.turret!.chargeId, "en")).toBe("Republic Fleet EMP S");
+  });
+
+  test("disintegrator without a charge picks exotic plasma, not navy hybrid ammo", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Damavik, Entropic]\nLight Entropic Disintegrator I`,
+      conditions,
+    );
+    expect(result!.turret).toBeDefined();
+    expect(importer.itemNameForId(result!.turret!.chargeId, "en")).toBe("Tetryon Exotic Plasma S");
+  });
+
+  test("Entropic Radiation Sink applies to a disintegrator and not to an energy turret", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    const bare = importer.importFitting(`[Damavik, Entropic]\nLight Entropic Disintegrator I, Tetryon Exotic Plasma S`, conditions);
+    const withSink = importer.importFitting(`[Damavik, Entropic]\nLight Entropic Disintegrator I, Tetryon Exotic Plasma S\nEntropic Radiation Sink II`, conditions);
+    expect(withSink!.turret!.damageMultiplier).toBeGreaterThan(bare!.turret!.damageMultiplier);
+    ships.findHullByName.mockReturnValue(profile);
+    const laserBare = importer.importFitting(`[Harbinger, Lasers]\nHeavy Pulse Laser II, Conflagration M`, conditions);
+    const laserSink = importer.importFitting(`[Harbinger, Lasers]\nHeavy Pulse Laser II, Conflagration M\nEntropic Radiation Sink II`, conditions);
+    expect(laserSink!.turret!.damageMultiplier).toBe(laserBare!.turret!.damageMultiplier);
   });
 
   test("skill-scaled hull velocity and agility bonuses apply", () => {

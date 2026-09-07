@@ -1,5 +1,6 @@
 import type { LockState, SensorSpec, Side } from "./types";
 import { IDLE_LOCK } from "./types";
+import type { Restorable } from "./restorable";
 
 export interface LockStepInput {
   readonly distance: number;
@@ -9,7 +10,12 @@ export interface LockStepInput {
   readonly sigB: number;
 }
 
-export interface LockClock {
+export interface LockClockState {
+  readonly shipA: LockState;
+  readonly shipB: LockState;
+}
+
+export interface LockClock extends Restorable<LockClockState> {
   reset(): void;
   step(dt: number, input: LockStepInput): Record<Side, LockState>;
   states(): Record<Side, LockState>;
@@ -38,6 +44,15 @@ export class LockClockImpl implements LockClock {
 
   states(): Record<Side, LockState> {
     return { shipA: this.shipA, shipB: this.shipB };
+  }
+
+  capture(): LockClockState {
+    return { shipA: this.shipA, shipB: this.shipB };
+  }
+
+  restore(state: LockClockState): void {
+    this.shipA = state.shipA;
+    this.shipB = state.shipB;
   }
 
   private stepSide(prev: LockState, sensor: SensorSpec | undefined, targetSig: number, distance: number, dt: number): LockState {

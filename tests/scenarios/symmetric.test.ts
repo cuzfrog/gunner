@@ -4,7 +4,6 @@ import { DefenseAssessorImpl } from "../../src/sim/defenseAssessment";
 import { EMPTY_DEFENSE_SPEC } from "../../src/sim";
 import { HitChanceImpl } from "../../src/sim/hitChance";
 import { KinematicsImpl } from "../../src/sim/kinematics";
-import { MissileApplicationImpl } from "../../src/sim/missileApplication";
 import { DroneApplicationImpl } from "../../src/sim/droneApplication";
 import { MissileBoosterResolverImpl } from "../../src/sim/missileBoosterResolver";
 import { StackingPenaltyImpl } from "../../src/sim";
@@ -98,9 +97,8 @@ function makeComposer() {
   const kinematics = new KinematicsImpl();
   const ewarResolver = fakeEwarResolver();
   const weaponDamageAssessor = new WeaponDamageAssessorImpl();
-  const missileApplication = new MissileApplicationImpl();
   const droneApplication = new DroneApplicationImpl({ hitChance, weaponDamageAssessor });
-  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: new StackingPenaltyImpl() }), weaponDamageAssessor, missileApplication, droneApplication });
+  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: new StackingPenaltyImpl() }), weaponDamageAssessor, droneApplication });
   return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator, defenseAssessor: new DefenseAssessorImpl(), ewarResolver });
 }
 

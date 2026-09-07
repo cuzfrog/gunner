@@ -1,7 +1,6 @@
 import type { EwarResolver } from "./ewarResolver";
 import { computeExpectedMultiplier } from "./expectedHitMultiplier";
 import type { HitChance } from "./hitChance";
-import type { MissileApplication } from "./missileApplication";
 import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import type { WeaponDamageAssessor } from "./weaponDamageAssessor";
@@ -50,16 +49,14 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   private readonly boosters: TurretBoosterResolver;
   private readonly missileBoosters: MissileBoosterResolver;
   private readonly weaponDamageAssessor: WeaponDamageAssessor;
-  private readonly missileApplication: MissileApplication;
   private readonly droneApplication: DroneApplication;
 
-  constructor({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, missileApplication, droneApplication }: {
+  constructor({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, droneApplication }: {
     hitChance: HitChance;
     ewarResolver: EwarResolver;
     turretBoosterResolver: TurretBoosterResolver;
     missileBoosterResolver: MissileBoosterResolver;
     weaponDamageAssessor: WeaponDamageAssessor;
-    missileApplication: MissileApplication;
     droneApplication: DroneApplication;
   }) {
     this.hitChance = hitChance;
@@ -67,7 +64,6 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     this.boosters = turretBoosterResolver;
     this.missileBoosters = missileBoosterResolver;
     this.weaponDamageAssessor = weaponDamageAssessor;
-    this.missileApplication = missileApplication;
     this.droneApplication = droneApplication;
   }
 
@@ -79,51 +75,45 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   }
 
   private assess(frame: EngagementFrame, ship: ShipState, opponent: ShipState, attack: AttackState): AttackAssessment {
-    const paintedSig = attack.opponentSigRadius * this.ewarResolver.sigMultiplier(ship.ewar, frame.distance);
     let assessment: AttackAssessment;
     if (attack.weapon.kind === "turret") {
-      assessment = this.assessTurret(frame, ship, opponent, attack.weapon, paintedSig);
+      assessment = this.assessTurret(frame, ship, opponent, attack.weapon, attack.opponentSigRadius);
     } else if (attack.weapon.kind === "drone") {
-      assessment = this.assessDrone(frame, ship, opponent, attack.weapon, paintedSig, attack.droneState);
+      assessment = this.assessDrone(frame, ship, opponent, attack.weapon, attack.opponentSigRadius, attack.droneState);
     } else {
-      assessment = this.assessMissile(frame, ship, opponent, attack.weapon, paintedSig, attack.missileFacts);
+      if (!attack.missileFacts) throw new Error("MissileAttackFacts are required to assess a missile weapon");
+      assessment = this.assessMissile(ship, attack.weapon, attack.missileFacts);
     }
     if (attack.locked === false) return zeroAppliedDps(assessment);
     return assessment;
   }
 
   private assessTurret(frame: EngagementFrame, ship: ShipState, opponent: ShipState, turret: TurretSpec, opponentSigRadius: number): AttackAssessment {
+    const paintedSig = opponentSigRadius * this.ewarResolver.sigMultiplier(ship.ewar, frame.distance);
     const boosted = this.boosters.boostedTurret(turret, ship.boosts);
     const effectiveTurret = this.ewarResolver.disruptedTurret(boosted, opponent.ewar, frame.distance);
-    const hit = this.hitChance.compute(frame, effectiveTurret, opponentSigRadius);
+    const hit = this.hitChance.compute(frame, effectiveTurret, paintedSig);
     const expectedMultiplier = computeExpectedMultiplier(hit.chance);
     const damage = this.weaponDamageAssessor.assess(effectiveTurret, expectedMultiplier, true);
     return { boostedWeapon: boosted, effectiveWeapon: effectiveTurret, damage, turret: { hit, expectedMultiplier: damage.application } };
   }
 
-  private assessMissile(frame: EngagementFrame, ship: ShipState, opponent: ShipState, missile: MissileSpec, opponentSigRadius: number, facts?: MissileAttackFacts): AttackAssessment {
+  private assessMissile(ship: ShipState, missile: MissileSpec, facts: MissileAttackFacts): AttackAssessment {
     const boosted = this.missileBoosters.boostedMissile(missile, ship.missileBoosts);
-    if (facts) {
-      const application = facts.predicted.application;
-      const breakdown: MissileDamageBreakdown = {
-        application,
-        signatureTerm: facts.predicted.signatureTerm,
-        velocityTerm: facts.predicted.velocityTerm,
-        inRange: facts.interceptable,
-        timeToImpact: facts.nearestTimeToImpact,
-      };
-      const damage = this.weaponDamageAssessor.assess(boosted, application, facts.interceptable);
-      return { boostedWeapon: boosted, effectiveWeapon: boosted, damage, missile: breakdown };
-    }
-    const result = this.missileApplication.compute(boosted, opponent.velocity.len(), opponentSigRadius);
-    const inRange = frame.distance <= boosted.flightRange;
-    const timeToImpact = boosted.maxVelocity > 0 ? frame.distance / boosted.maxVelocity : 0;
-    const breakdown: MissileDamageBreakdown = { ...result, inRange, timeToImpact };
-    const damage = this.weaponDamageAssessor.assess(boosted, result.application, inRange);
+    const application = facts.predicted.application;
+    const breakdown: MissileDamageBreakdown = {
+      application,
+      signatureTerm: facts.predicted.signatureTerm,
+      velocityTerm: facts.predicted.velocityTerm,
+      inRange: facts.interceptable,
+      timeToImpact: facts.nearestTimeToImpact,
+    };
+    const damage = this.weaponDamageAssessor.assess(boosted, application, facts.interceptable);
     return { boostedWeapon: boosted, effectiveWeapon: boosted, damage, missile: breakdown };
   }
 
   private assessDrone(frame: EngagementFrame, ship: ShipState, opponent: ShipState, drone: DroneSpec, opponentSigRadius: number, droneState: DroneRuntimeState | undefined): AttackAssessment {
+    const paintedSig = opponentSigRadius * this.ewarResolver.sigMultiplier(ship.ewar, frame.distance);
     const breakdown = this.droneApplication.compute(frame, drone, opponentSigRadius, droneState);
     return { boostedWeapon: drone, effectiveWeapon: drone, damage: breakdown, drone: breakdown };
   }

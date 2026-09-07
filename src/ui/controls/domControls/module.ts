@@ -18,6 +18,7 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
     })).singleton(),
     controls: asFunction((proxy: ControlsCradle) => new DomControls({
       i18n: proxy.i18n,
+      viewStream: proxy.viewStream,
       events: proxy.uiEvents,
       els: collectDomControlsEls(proxy.els),
       popupGroup: proxy.popupGroup,

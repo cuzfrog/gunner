@@ -373,4 +373,29 @@ describe("DroneSimulatorImpl", () => {
     expect(sim.states("shipA")[0].positions).toHaveLength(3);
     expect(sim.states("shipA")[0].mode).toBe("idle");
   });
+
+  test("capture and restore round-trips the state into another instance", () => {
+    const first = new DroneSimulatorImpl();
+    first.reset({ shipA: [lightDrone()], shipB: [] });
+    for (let i = 0; i < 20; i++) first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)));
+    const expected = { shipA: first.states("shipA"), shipB: first.states("shipB") };
+    const state = first.capture();
+    for (let i = 0; i < 10; i++) first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)));
+    const second = new DroneSimulatorImpl();
+    second.restore(state);
+    expect(second.states("shipA")).toEqual(expected.shipA);
+    expect(second.states("shipB")).toEqual(expected.shipB);
+  });
+
+  test("restored instance keeps stepping independently of the captured source", () => {
+    const first = new DroneSimulatorImpl();
+    first.reset({ shipA: [lightDrone()], shipB: [] });
+    first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)));
+    const state = first.capture();
+    const second = new DroneSimulatorImpl();
+    second.restore(state);
+    for (let i = 0; i < 10; i++) first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)));
+    second.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)));
+    expect(first.states("shipA")[0].positions[0].dist(second.states("shipA")[0].positions[0])).toBeGreaterThan(0);
+  });
 });

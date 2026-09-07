@@ -2,9 +2,16 @@ import { Vec2 } from "./vec2";
 import type { Autopilot } from "./autopilot";
 import { integrateShip } from "./dynamics";
 import type { EwarResolver } from "./ewarResolver";
+import type { Restorable } from "./restorable";
 import type { CombatantConfig, ShipState, SimConfig, SimSnapshot } from "./types";
 
-export interface Simulation {
+export interface SimulationState {
+  readonly time: number;
+  readonly shipA: ShipState;
+  readonly shipB: ShipState;
+}
+
+export interface Simulation extends Restorable<SimulationState> {
   step(dt: number): void;
   snapshot(): SimSnapshot;
   reset(config: SimConfig): void;
@@ -59,6 +66,16 @@ export class SimulationImpl implements Simulation {
   update(config: SimConfig): void {
     this.shipA = withConfig(this.shipA, config.shipA);
     this.shipB = withConfig(this.shipB, config.shipB);
+  }
+
+  capture(): SimulationState {
+    return { time: this.time, shipA: this.shipA, shipB: this.shipB };
+  }
+
+  restore(state: SimulationState): void {
+    this.time = state.time;
+    this.shipA = state.shipA;
+    this.shipB = state.shipB;
   }
 
   private computeFrame(): { shipA: ShipState; shipB: ShipState; commands: { shipA: Vec2; shipB: Vec2 } } {
