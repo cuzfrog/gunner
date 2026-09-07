@@ -166,6 +166,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "label.simulationSpeed": { zh: "速度" },
   "button.play": { zh: "开始" },
   "button.pause": { zh: "暂停" },
+  "button.restart": { zh: "重新开始" },
   "button.reset": { zh: "重置" },
   "button.save": { zh: "保存" },
   "button.delete": { zh: "删除" },

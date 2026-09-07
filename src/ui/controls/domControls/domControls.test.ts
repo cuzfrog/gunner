@@ -66,13 +66,14 @@ function makeView(distance: number): EngagementView {
   return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } }, incomingOffensiveModules: { shipA: [], shipB: [] } };
 }
 
-function mockDefenseView(): DefenseView {
+function mockDefenseView(deadShipA = false, deadShipB = false): DefenseView {
   const emptyPools = { shield: 0, armor: 0, hull: 0 };
   const emptyPercentages = { shield: 0, armor: 0, hull: 0 };
   return {
     pools: { shipA: emptyPools, shipB: emptyPools },
+    poolMaxes: { shipA: emptyPools, shipB: emptyPools },
     poolPercentages: { shipA: emptyPercentages, shipB: emptyPercentages },
-    dead: { shipA: false, shipB: false },
+    dead: { shipA: deadShipA, shipB: deadShipB },
     deadAt: { shipA: undefined, shipB: undefined },
     damageEnabled: { shipA: true, shipB: true },
     shieldRegenPerSecond: { shipA: 0, shipB: 0 },
@@ -159,6 +160,21 @@ describe("DomControls", () => {
     expect(getFake(document, "play").textContent).toBe("button.pause");
   });
 
+  test("ended playback labels the stopped play button Restart and a live view changes it back to Start", () => {
+    const { document, controls, viewStream } = buildDomControls();
+    const effective: EffectiveReadouts = { shipA: sideReadoutValues(0, 0, 0, 0, 0, 0, 0), shipB: sideReadoutValues(0, 0, 0, 0, 0, 0, 0) };
+    expect(getFake(document, "play").textContent).toBe("button.play");
+    controls.setPlaying(false, true);
+    expect(getFake(document, "play").textContent).toBe("button.restart");
+    expect(getFake(document, "play").getAttribute("data-i18n")).toBe("button.restart");
+    controls.setPlaying(false);
+    expect(getFake(document, "play").textContent).toBe("button.restart");
+    viewStream.emit(makeEngineView(makeView(0), effective, mockDefenseView()));
+    expect(getFake(document, "play").textContent).toBe("button.play");
+    controls.setPlaying(true);
+    expect(getFake(document, "play").textContent).toBe("button.pause");
+  });
+
   test("play button is disabled while a side is empty and re-enables when both have hulls", () => {
     const { document, controls, cradle } = buildDomControls();
     controls.wireControls();
@@ -187,6 +203,16 @@ describe("DomControls", () => {
     controls.setCallbacks(callbacks);
     cradle.cradle.uiEvents.emitConfigInvalidated();
     expect(callbacks.onConfigChange).toHaveBeenCalledTimes(1);
+  });
+
+  test("importing a fitting makes the next config application reset the engagement", () => {
+    const { controls, cradle } = buildDomControls({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
+    const callbacks = mockCallbacks();
+    controls.setCallbacks(callbacks);
+    cradle.cradle.importController.importEftFitting("shipA", "[Rifter, Brawler]", { persist: false });
+    controls.persistConfigChange();
+    expect(callbacks.onReset).toHaveBeenCalledTimes(1);
+    expect(callbacks.onConfigChange).not.toHaveBeenCalled();
   });
 
   test("callback routing", () => {

@@ -188,6 +188,24 @@ describe("DefenseSimulatorImpl", () => {
     expect(view2.deadAt.shipA).toBe(1);
   });
 
+  test("reset after death restores full HP and clears dead", () => {
+    const sim = new DefenseSimulatorImpl();
+    const defense = spec({
+      shieldHp: 500,
+      armorHp: 300,
+      hullHp: 100,
+      hullResists: { em: 0 },
+    });
+    sim.reset(config(defense));
+    sim.step(1, events({ em: 2000, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().dead.shipA).toBe(true);
+    sim.reset(config(defense));
+    const view = sim.view();
+    expect(view.dead.shipA).toBe(false);
+    expect(view.pools.shipA).toEqual({ shield: 500, armor: 300, hull: 100 });
+    expect(view.poolPercentages.shipA).toEqual({ shield: 1, armor: 1, hull: 1 });
+  });
+
   test("zero-HP spec (no fitting) does not trigger death", () => {
     const sim = new DefenseSimulatorImpl();
     sim.reset(config(spec({ shieldHp: 0, armorHp: 0, hullHp: 0 })));

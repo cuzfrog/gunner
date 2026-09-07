@@ -70,6 +70,7 @@ describe("I18nImpl", () => {
     const i18n = new I18nImpl();
     expect(i18n.t("label.trackingSpeed")).toBe("Tracking speed");
     expect(i18n.t("button.play")).toBe("Start");
+    expect(i18n.t("button.restart")).toBe("Restart");
   });
 
   test("translates the midships mode label in every language", () => {

@@ -184,7 +184,7 @@ test.describe("canvas settings and playback", () => {
     await expect(portraitB.locator(".portrait-image")).toBeVisible();
   });
 
-  test("portrait hp bars drain under sustained fire", async ({ cleanPage: page }) => {
+  test("portrait hp bars are full before start, drain under fire, and restore on reset", async ({ cleanPage: page }) => {
     test.setTimeout(90000);
     await loadBothSides(page);
     const shieldBar = page.locator(".portrait-hp-bars-ship-a .portrait-hp-bar-shield");
@@ -193,6 +193,8 @@ test.describe("canvas settings and playback", () => {
     await expect.poll(async () => portraitLossPercent(shieldFill)).toBe(0);
     await page.locator("#play").click();
     await expect.poll(async () => portraitLossPercent(shieldFill), { timeout: 45000 }).toBeGreaterThan(20);
+    await page.locator("#reset").click();
+    await expect.poll(async () => portraitLossPercent(shieldFill)).toBe(0);
   });
 });
 

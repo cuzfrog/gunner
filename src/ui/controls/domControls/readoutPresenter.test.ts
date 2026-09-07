@@ -32,6 +32,7 @@ function mockDefenseView(): DefenseView {
   const emptyPercentages = { shield: 0, armor: 0, hull: 0 };
   return {
     pools: { shipA: emptyPools, shipB: emptyPools },
+    poolMaxes: { shipA: emptyPools, shipB: emptyPools },
     poolPercentages: { shipA: emptyPercentages, shipB: emptyPercentages },
     dead: { shipA: false, shipB: false },
     deadAt: { shipA: undefined, shipB: undefined },

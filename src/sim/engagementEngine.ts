@@ -122,8 +122,8 @@ export class EngagementEngineImpl implements EngagementEngine {
   offShipDestroyed(listener: (side: Side) => void): void { this.shipDestroyedListeners.delete(listener); }
 
   private publishView(view: EngineView): void {
-    this.checkDeath(view);
     for (const listener of Array.from(this.viewUpdatedListeners)) listener(view);
+    this.checkDeath(view);
   }
 
   private checkDeath(view: EngineView): void {

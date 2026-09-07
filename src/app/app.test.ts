@@ -25,6 +25,7 @@ const shipConfig: SimConfig = {
 const ZERO_INFLICTED: Record<Side, InflictedDps> = { shipA: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } }, shipB: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } } };
 const emptyDefenseView: DefenseView = {
   pools: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
+  poolMaxes: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
   poolPercentages: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
   dead: { shipA: false, shipB: false },
   deadAt: { shipA: undefined, shipB: undefined },
@@ -161,16 +162,19 @@ describe("AppImpl", () => {
     controls.setPlaying.mockClear();
     emitDestroy("shipA");
     expect(loop.stop).toHaveBeenCalled();
-    expect(controls.setPlaying).toHaveBeenCalledWith(false);
+    expect(controls.setPlaying).toHaveBeenCalledWith(false, true);
   });
 
   test("reset callback re-initializes the engine and loop; rendering is driven by view event", () => {
     app.start();
     engine.reset.mockClear();
     renderer.draw.mockClear();
+    controls.setPlaying.mockClear();
+    loop.isRunning.mockReturnValue(false);
     callbacks().onReset();
     expect(engine.reset).toHaveBeenCalledWith(engineConfig);
     expect(loop.reset).toHaveBeenCalled();
+    expect(controls.setPlaying).toHaveBeenCalledWith(false, false);
     expect(renderer.draw).toHaveBeenCalledTimes(1);
   });
 
@@ -199,14 +203,29 @@ describe("AppImpl", () => {
     app.start();
     callbacks().onPlayPause();
     expect(loop.toggle).toHaveBeenCalled();
-    expect(controls.setPlaying).toHaveBeenCalledWith(true);
+    expect(controls.setPlaying).toHaveBeenCalledWith(true, false);
+  });
+
+  test("play after ship destruction resets the engagement and starts it again", () => {
+    app.start();
+    const endedView = { ...baseView(), defenseRuntime: { ...emptyDefenseView, dead: { shipA: true, shipB: false } } };
+    engine.view.mockReturnValue(endedView);
+    engine.reset.mockClear();
+    loop.reset.mockClear();
+    loop.start.mockClear();
+    controls.setPlaying.mockClear();
+    callbacks().onPlayPause();
+    expect(engine.reset).toHaveBeenCalledWith(engineConfig);
+    expect(loop.reset).toHaveBeenCalled();
+    expect(loop.start).toHaveBeenCalled();
+    expect(controls.setPlaying).toHaveBeenCalledWith(true, false);
   });
 
   test("stop halts the loop and sets playing to false", () => {
     app.start();
     callbacks().onStop();
     expect(loop.stop).toHaveBeenCalled();
-    expect(controls.setPlaying).toHaveBeenCalledWith(false);
+    expect(controls.setPlaying).toHaveBeenCalledWith(false, false);
   });
 
   test("speed change is forwarded to the loop", () => {

@@ -52,6 +52,7 @@ function baseView(): EngagementView {
 
 const emptyDefenseView: DefenseView = {
   pools: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
+  poolMaxes: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
   poolPercentages: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
   dead: { shipA: false, shipB: false },
   deadAt: { shipA: undefined, shipB: undefined },
@@ -363,6 +364,21 @@ describe("EngagementEngineImpl", () => {
     deps.engine.events().offViewUpdated(listener);
     deps.engine.step(0.1);
     expect(views).toHaveLength(3);
+  });
+
+  test("viewUpdated is delivered before shipDestroyed so consumers observe death in the view", () => {
+    const deps = makeEngine();
+    const deadView: import("./engagementEngine").EngineView = { ...deps.engine.reset(engineConfig()), defenseRuntime: { ...emptyDefenseView, dead: { shipA: true, shipB: false } } };
+    deps.live.defenseSimulator.view.mockReturnValue(deadView.defenseRuntime);
+    deps.engagementFrameComposer.compose.mockReturnValue(deadView);
+    const order: string[] = [];
+    deps.engine.events().onViewUpdated((view) => {
+      order.push("view");
+      expect(view.defenseRuntime.dead.shipA).toBe(true);
+    });
+    deps.engine.events().onShipDestroyed(() => order.push("destroyed"));
+    deps.engine.step(0.1);
+    expect(order).toEqual(["view", "destroyed"]);
   });
 
   test("shipDestroyed fires exactly once per side even if dead persists across steps", () => {

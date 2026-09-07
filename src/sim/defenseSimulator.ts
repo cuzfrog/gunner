@@ -30,6 +30,7 @@ export interface RahViewState {
 
 export interface DefenseView {
   readonly pools: Record<Side, DefensePoolState>;
+  readonly poolMaxes: Record<Side, DefensePoolState>;
   readonly poolPercentages: Record<Side, Readonly<Record<DefenseLayer, number>>>;
   readonly dead: Record<Side, boolean>;
   readonly deadAt: Record<Side, number | undefined>;
@@ -216,6 +217,10 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
       pools: {
         shipA: { shield: this.sides.shipA.shield, armor: this.sides.shipA.armor, hull: this.sides.shipA.hull },
         shipB: { shield: this.sides.shipB.shield, armor: this.sides.shipB.armor, hull: this.sides.shipB.hull },
+      },
+      poolMaxes: {
+        shipA: { shield: this.sides.shipA.shieldMax, armor: this.sides.shipA.armorMax, hull: this.sides.shipA.hullMax },
+        shipB: { shield: this.sides.shipB.shieldMax, armor: this.sides.shipB.armorMax, hull: this.sides.shipB.hullMax },
       },
       poolPercentages: {
         shipA: poolPercentages(this.sides.shipA),

@@ -165,6 +165,7 @@ export const JA: LanguageSlice<"ja"> = {
   "label.simulationSpeed": { ja: "速度" },
   "button.play": { ja: "開始" },
   "button.pause": { ja: "一時停止" },
+  "button.restart": { ja: "最初から" },
   "button.reset": { ja: "リセット" },
   "button.save": { ja: "保存" },
   "button.delete": { ja: "削除" },

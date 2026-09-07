@@ -1,6 +1,6 @@
 import { fakeDocument, getFake, FakeElement } from "../../testing";
 import { UiEventsImpl } from "../../events";
-import type { ActiveOffensiveModule, EngagementView, EngineView, LockState } from "../../../sim";
+import type { ActiveOffensiveModule, DefenseView, EngagementView, EngineView, LockState } from "../../../sim";
 import { IDLE_LOCK } from "../../../sim";
 import type { DefenseController } from "../defense";
 import type { ViewStream } from "../../viewStream";
@@ -125,6 +125,25 @@ function makeView(offensive: { shipA: readonly ActiveOffensiveModule[]; shipB: r
 
 function emitView(listeners: Set<(view: EngineView) => void>): void {
   for (const listener of Array.from(listeners)) listener({} as unknown as EngineView);
+}
+
+function defenseRuntime(percentages: Readonly<Record<"shield" | "armor" | "hull", number>>, current = { shield: 0, armor: 0, hull: 0 }, max = { shield: 1000, armor: 1000, hull: 1000 }): DefenseView {
+  return {
+    pools: { shipA: current, shipB: current },
+    poolMaxes: { shipA: max, shipB: max },
+    poolPercentages: { shipA: percentages, shipB: percentages },
+    dead: { shipA: false, shipB: false },
+    deadAt: { shipA: undefined, shipB: undefined },
+    damageEnabled: { shipA: true, shipB: true },
+    shieldRegenPerSecond: { shipA: 0, shipB: 0 },
+    repairers: { shipA: [], shipB: [] },
+    repairMode: { shipA: "auto", shipB: "auto" },
+    rah: { shipA: undefined, shipB: undefined },
+  };
+}
+
+function setDefenseRuntime(viewStream: { readonly currentView: { mockReturnValue(view: EngineView | undefined): void } }, percentages: Readonly<Record<"shield" | "armor" | "hull", number>>, current?: { readonly shield: number; readonly armor: number; readonly hull: number }, max?: { readonly shield: number; readonly armor: number; readonly hull: number }): void {
+  viewStream.currentView.mockReturnValue({ ...makeView({ shipA: [], shipB: [] }), defenseRuntime: defenseRuntime(percentages, current, max) });
 }
 
 function buildController() {
@@ -481,59 +500,75 @@ describe("PortraitsController", () => {
       return (fill.style as unknown as Record<string, string>).width ?? "";
     }
 
-    test("undefined hpPercentages hides HP bars", () => {
-      const { controller, els, profiles, defenseController } = buildController();
+    test("missing runtime HP still shows full bars once a ship is loaded", () => {
+      const { controller, els, profiles } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      defenseController.hpPercentages.mockReturnValue(undefined);
       controller.update();
-      expect(els.shipAHpBars.hidden).toBe(true);
+      expect(els.shipAHpBars.hidden).toBe(false);
+      expect(hpFillWidth(els, "shipA", 0)).toBe("0%");
+      expect(hpFillWidth(els, "shipA", 1)).toBe("0%");
+      expect(hpFillWidth(els, "shipA", 2)).toBe("0%");
     });
 
-    test("defined hpPercentages shows HP bars", () => {
-      const { controller, els, profiles, defenseController } = buildController();
+    test("defined runtime HP percentages show HP bars", () => {
+      const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      defenseController.hpPercentages.mockReturnValue({ shield: 1, armor: 1, hull: 1 });
+      setDefenseRuntime(viewStream, { shield: 1, armor: 1, hull: 1 });
       controller.update();
       expect(els.shipAHpBars.hidden).toBe(false);
     });
 
-    test("full HP sets all fill widths to 0%", () => {
-      const { controller, els, profiles, defenseController } = buildController();
+    test("full runtime HP sets all fill widths to 0%", () => {
+      const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      defenseController.hpPercentages.mockReturnValue({ shield: 1, armor: 1, hull: 1 });
+      setDefenseRuntime(viewStream, { shield: 1, armor: 1, hull: 1 });
       controller.update();
       expect(hpFillWidth(els, "shipA", 0)).toBe("0%");
       expect(hpFillWidth(els, "shipA", 1)).toBe("0%");
       expect(hpFillWidth(els, "shipA", 2)).toBe("0%");
     });
 
-    test("partial damage sets fill widths to lost percentage", () => {
-      const { controller, els, profiles, defenseController } = buildController();
+    test("partial runtime damage sets fill widths to lost percentage", () => {
+      const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      defenseController.hpPercentages.mockReturnValue({ shield: 0.5, armor: 1, hull: 0.25 });
+      setDefenseRuntime(viewStream, { shield: 0.5, armor: 1, hull: 0.25 });
       controller.update();
       expect(hpFillWidth(els, "shipA", 0)).toBe("50%");
       expect(hpFillWidth(els, "shipA", 1)).toBe("0%");
       expect(hpFillWidth(els, "shipA", 2)).toBe("75%");
     });
 
-    test("dead ship (all 0) sets all fill widths to 100%", () => {
-      const { controller, els, profiles, defenseController } = buildController();
+    test("dead runtime HP sets all fill widths to 100%", () => {
+      const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      defenseController.hpPercentages.mockReturnValue({ shield: 0, armor: 0, hull: 0 });
+      setDefenseRuntime(viewStream, { shield: 0, armor: 0, hull: 0 });
       controller.update();
       expect(hpFillWidth(els, "shipA", 0)).toBe("100%");
       expect(hpFillWidth(els, "shipA", 1)).toBe("100%");
       expect(hpFillWidth(els, "shipA", 2)).toBe("100%");
     });
 
-    test("transition from undefined to defined shows bars and updates fills", () => {
-      const { controller, els, profiles, defenseController } = buildController();
+    test("full runtime HP after dead runtime HP restores fill widths to 0%", () => {
+      const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      defenseController.hpPercentages.mockReturnValue(undefined);
+      setDefenseRuntime(viewStream, { shield: 0, armor: 0, hull: 0 });
       controller.update();
-      expect(els.shipAHpBars.hidden).toBe(true);
-      defenseController.hpPercentages.mockReturnValue({ shield: 0.5, armor: 0.5, hull: 0.5 });
+      expect(hpFillWidth(els, "shipA", 0)).toBe("100%");
+      setDefenseRuntime(viewStream, { shield: 1, armor: 1, hull: 1 });
+      controller.update();
+      expect(hpFillWidth(els, "shipA", 0)).toBe("0%");
+      expect(hpFillWidth(els, "shipA", 1)).toBe("0%");
+      expect(hpFillWidth(els, "shipA", 2)).toBe("0%");
+    });
+
+    test("transition from missing runtime HP to partial damage keeps bars visible and updates fills", () => {
+      const { controller, els, profiles, viewStream } = buildController();
+      profiles.shipA = SHIP_A_PROFILE;
+      viewStream.currentView.mockReturnValue(undefined);
+      controller.update();
+      expect(els.shipAHpBars.hidden).toBe(false);
+      expect(hpFillWidth(els, "shipA", 0)).toBe("0%");
+      setDefenseRuntime(viewStream, { shield: 0.5, armor: 0.5, hull: 0.5 });
       controller.update();
       expect(els.shipAHpBars.hidden).toBe(false);
       expect(hpFillWidth(els, "shipA", 0)).toBe("50%");
@@ -541,14 +576,14 @@ describe("PortraitsController", () => {
       expect(hpFillWidth(els, "shipA", 2)).toBe("50%");
     });
 
-    test("sub-percent damage updates fill widths without other state changes", () => {
-      const { controller, els, profiles, defenseController } = buildController();
+    test("sub-percent runtime damage updates fill widths without other state changes", () => {
+      const { controller, els, profiles, viewStream } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      defenseController.hpPercentages.mockReturnValue({ shield: 0.9999, armor: 1, hull: 1 });
+      setDefenseRuntime(viewStream, { shield: 0.9999, armor: 1, hull: 1 });
       controller.update();
       const before = hpFillWidth(els, "shipA", 0);
       expect(before).toContain("0.00999");
-      defenseController.hpPercentages.mockReturnValue({ shield: 0.999, armor: 1, hull: 1 });
+      setDefenseRuntime(viewStream, { shield: 0.999, armor: 1, hull: 1 });
       controller.update();
       const after = hpFillWidth(els, "shipA", 0);
       expect(after).toContain("0.1000");
@@ -558,9 +593,9 @@ describe("PortraitsController", () => {
 
   describe("HP value display", () => {
     test("none mode hides all HP value spans", () => {
-      const { controller, els, profiles, defenseController } = buildController();
+      const { controller, els, profiles, viewStream, defenseController } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      defenseController.hpPercentages.mockReturnValue({ shield: 0.5, armor: 0.5, hull: 0.5 });
+      setDefenseRuntime(viewStream, { shield: 0.5, armor: 0.5, hull: 0.5 }, { shield: 500, armor: 500, hull: 500 });
       defenseController.hpValues.mockReturnValue({ current: { shield: 500, armor: 500, hull: 500 }, max: { shield: 1000, armor: 1000, hull: 1000 } });
       controller.setHpValueDisplay("none");
       expect(els.shipAHpValues.shield.hidden).toBe(true);
@@ -569,9 +604,9 @@ describe("PortraitsController", () => {
     });
 
     test("percentage mode shows rounded percentages", () => {
-      const { controller, els, profiles, defenseController } = buildController();
+      const { controller, els, profiles, viewStream, defenseController } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      defenseController.hpPercentages.mockReturnValue({ shield: 0.875, armor: 0.5, hull: 0.0 });
+      setDefenseRuntime(viewStream, { shield: 0.875, armor: 0.5, hull: 0.0 }, { shield: 875, armor: 500, hull: 0 });
       defenseController.hpValues.mockReturnValue({ current: { shield: 875, armor: 500, hull: 0 }, max: { shield: 1000, armor: 1000, hull: 1000 } });
       controller.setHpValueDisplay("percentage");
       expect(els.shipAHpValues.shield.hidden).toBe(false);
@@ -581,10 +616,9 @@ describe("PortraitsController", () => {
     });
 
     test("absolute mode shows current / max", () => {
-      const { controller, els, profiles, defenseController } = buildController();
+      const { controller, els, profiles, viewStream, defenseController } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      defenseController.hpPercentages.mockReturnValue({ shield: 0.875, armor: 0.5, hull: 0.0 });
-      defenseController.hpValues.mockReturnValue({ current: { shield: 8750, armor: 5000, hull: 0 }, max: { shield: 10000, armor: 10000, hull: 10000 } });
+      setDefenseRuntime(viewStream, { shield: 0.875, armor: 0.5, hull: 0.0 }, { shield: 8750, armor: 5000, hull: 0 }, { shield: 10000, armor: 10000, hull: 10000 });
       controller.setHpValueDisplay("absolute");
       expect(els.shipAHpValues.shield.hidden).toBe(false);
       expect(els.shipAHpValues.shield.textContent).toBe("8,750 / 10,000");
@@ -593,9 +627,9 @@ describe("PortraitsController", () => {
     });
 
     test("undefined hpValues hides value spans even in percentage mode", () => {
-      const { controller, els, profiles, defenseController } = buildController();
+      const { controller, els, profiles, viewStream, defenseController } = buildController();
       profiles.shipA = SHIP_A_PROFILE;
-      defenseController.hpPercentages.mockReturnValue(undefined);
+      viewStream.currentView.mockReturnValue(undefined);
       defenseController.hpValues.mockReturnValue(undefined);
       controller.setHpValueDisplay("percentage");
       expect(els.shipAHpValues.shield.hidden).toBe(true);
