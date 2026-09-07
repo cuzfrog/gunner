@@ -1,4 +1,5 @@
-import { type DamageEvent, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type InflictedDps, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS } from "./types";
+import { type DamageEvent, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type LayerDamage, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS } from "./types";
+import type { Restorable } from "./restorable";
 
 export type RepairMode = "auto" | "manual";
 
@@ -37,7 +38,6 @@ export interface DefenseView {
   readonly repairers: Record<Side, readonly RepairerViewState[]>;
   readonly repairMode: Record<Side, RepairMode>;
   readonly rah: Record<Side, RahViewState | undefined>;
-  readonly inflictedDps: Record<Side, InflictedDps>;
 }
 
 export interface RepairerActivationEntry {
@@ -59,20 +59,65 @@ export interface DefenseSimConfig {
   readonly rahActivation: Record<Side, RahActivationEntry | undefined>;
 }
 
-export interface DefenseSimulator {
+export interface RepairerStateSnapshot {
+  readonly cycleTimer: number;
+  readonly inCycle: boolean;
+  readonly ancillaryCharges: number;
+  readonly reloading: boolean;
+  readonly reloadTimer: number;
+  readonly active: boolean;
+  readonly overloaded: boolean;
+  readonly hpThisCycle: number;
+}
+
+export interface RahStateSnapshot {
+  readonly resists: DamageResists;
+  readonly cycleTimer: number;
+  readonly inCycle: boolean;
+  readonly active: boolean;
+  readonly overloaded: boolean;
+  readonly armorDamageAccumulator: DamageVector;
+}
+
+export interface SidePoolsSnapshot {
+  readonly shield: number;
+  readonly armor: number;
+  readonly hull: number;
+  readonly shieldMax: number;
+  readonly armorMax: number;
+  readonly hullMax: number;
+  readonly shieldRechargeTime: number;
+  readonly shieldUniformity: number;
+  readonly baseArmorResists: DamageResists;
+  readonly resists: Readonly<Record<DefenseLayer, Readonly<Record<DamageType, number>>>>;
+  readonly dead: boolean;
+  readonly deadAt: number | undefined;
+  readonly damageEnabled: boolean;
+  readonly repairers: readonly RepairerSpec[];
+  readonly repairerStates: readonly RepairerStateSnapshot[];
+  readonly repairMode: RepairMode;
+  readonly rahSpec: RahSpec | undefined;
+  readonly rahState: RahStateSnapshot | undefined;
+  readonly inflicted: LayerDamage;
+}
+
+export interface DefenseSimulatorState {
+  readonly sides: Record<Side, SidePoolsSnapshot>;
+  readonly time: number;
+  readonly eventBuffer: readonly DamageEvent[];
+  readonly nextTickBoundary: number;
+}
+
+export interface DefenseSimulator extends Restorable<DefenseSimulatorState> {
   reset(config: DefenseSimConfig): void;
   update(config: DefenseSimConfig): void;
   step(dt: number, events: readonly DamageEvent[]): void;
+  flushPendingDamage(): void;
   view(): DefenseView;
-  setDamageEnabled(side: Side, enabled: boolean): void;
-  setRepairMode(side: Side, mode: RepairMode): void;
-  setRepairerActivation(side: Side, index: number, active: boolean, overloaded: boolean): void;
-  setRahActivation(side: Side, active: boolean, overloaded: boolean): void;
-  setInflictedWindow(side: Side, seconds: number): void;
+  inflictedTotals(): Record<Side, LayerDamage>;
 }
 
 const RAH_TOTAL_BUDGET = 0.6;
-const DEFAULT_INFLICTED_WINDOW_SECONDS = 10;
 
 type MutableDamageVector = Record<DamageType, number>;
 type MutableDamageResists = Record<DamageType, number>;
@@ -117,6 +162,7 @@ interface SidePools {
   repairMode: RepairMode;
   rahSpec: RahSpec | undefined;
   rahState: RahState | undefined;
+  inflicted: MutableLayerDamage;
 }
 
 export class DefenseSimulatorImpl implements DefenseSimulator {
@@ -124,17 +170,11 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
   private time: number;
   private eventBuffer: DamageEvent[];
   private nextTickBoundary: number;
-  private readonly inflictedBuckets: Record<Side, MutableLayerDamage[]>;
-  private readonly pendingInflicted: Record<Side, MutableLayerDamage>;
-  private readonly windowSeconds: Record<Side, number>;
 
   constructor() {
     this.time = 0;
     this.eventBuffer = [];
     this.nextTickBoundary = 1;
-    this.inflictedBuckets = { shipA: [], shipB: [] };
-    this.pendingInflicted = { shipA: emptyLayerDamage(), shipB: emptyLayerDamage() };
-    this.windowSeconds = { shipA: DEFAULT_INFLICTED_WINDOW_SECONDS, shipB: DEFAULT_INFLICTED_WINDOW_SECONDS };
   }
 
   reset(config: DefenseSimConfig): void {
@@ -145,10 +185,6 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     this.time = 0;
     this.eventBuffer = [];
     this.nextTickBoundary = 1;
-    this.inflictedBuckets.shipA = [];
-    this.inflictedBuckets.shipB = [];
-    this.pendingInflicted.shipA = emptyLayerDamage();
-    this.pendingInflicted.shipB = emptyLayerDamage();
   }
 
   update(config: DefenseSimConfig): void {
@@ -166,6 +202,13 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     const released = this.collectReleasedEvents();
     this.stepSide("shipA", dt, released.shipA);
     this.stepSide("shipB", dt, released.shipB);
+  }
+
+  flushPendingDamage(): void {
+    const buffered = this.eventBuffer;
+    this.eventBuffer = [];
+    this.stepSide("shipA", 0, buffered.filter((event) => event.target === "shipA"));
+    this.stepSide("shipB", 0, buffered.filter((event) => event.target === "shipB"));
   }
 
   view(): DefenseView {
@@ -191,54 +234,36 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
       },
       repairMode: { shipA: this.sides.shipA.repairMode, shipB: this.sides.shipB.repairMode },
       rah: { shipA: rahView(this.sides.shipA), shipB: rahView(this.sides.shipB) },
-      inflictedDps: { shipA: this.inflictedReadout("shipA"), shipB: this.inflictedReadout("shipB") },
     };
   }
 
-  setDamageEnabled(side: Side, enabled: boolean): void {
-    this.sides[side].damageEnabled = enabled;
+  inflictedTotals(): Record<Side, LayerDamage> {
+    return { shipA: { ...this.sides.shipA.inflicted }, shipB: { ...this.sides.shipB.inflicted } };
   }
 
-  setRepairMode(side: Side, mode: RepairMode): void {
-    this.sides[side].repairMode = mode;
+  capture(): DefenseSimulatorState {
+    return {
+      sides: { shipA: snapshotPools(this.sides.shipA), shipB: snapshotPools(this.sides.shipB) },
+      time: this.time,
+      eventBuffer: [...this.eventBuffer],
+      nextTickBoundary: this.nextTickBoundary,
+    };
   }
 
-  setRepairerActivation(side: Side, index: number, active: boolean, overloaded: boolean): void {
-    const state = this.sides[side].repairerStates[index];
-    if (!state) return;
-    state.active = active;
-    state.overloaded = overloaded;
-  }
-
-  setRahActivation(side: Side, active: boolean, overloaded: boolean): void {
-    const rah = this.sides[side].rahState;
-    const rahSpec = this.sides[side].rahSpec;
-    if (!rah) return;
-    if (!rah.active && active && rahSpec) {
-      rah.resists = { ...rahSpec.baseResists };
-      rah.armorDamageAccumulator = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
-      rah.cycleTimer = 0;
-      rah.inCycle = false;
-    }
-    rah.active = active;
-    rah.overloaded = overloaded;
-  }
-
-  setInflictedWindow(side: Side, seconds: number): void {
-    if (seconds <= 0) return;
-    this.windowSeconds[side] = seconds;
+  restore(state: DefenseSimulatorState): void {
+    this.sides = { shipA: materializePools(state.sides.shipA), shipB: materializePools(state.sides.shipB) };
+    this.time = state.time;
+    this.eventBuffer = [...state.eventBuffer];
+    this.nextTickBoundary = state.nextTickBoundary;
   }
 
   private collectReleasedEvents(): Record<Side, readonly DamageEvent[]> {
     const shipAEvents: DamageEvent[] = [];
     const shipBEvents: DamageEvent[] = [];
     if (this.time >= this.nextTickBoundary) {
-      let boundaries = 0;
       while (this.time >= this.nextTickBoundary) {
         this.nextTickBoundary += 1;
-        boundaries += 1;
       }
-      this.rotateInflictedBuckets(boundaries);
       for (const event of this.eventBuffer) {
         if (event.target === "shipA") shipAEvents.push(event);
         else shipBEvents.push(event);
@@ -248,45 +273,12 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     return { shipA: shipAEvents, shipB: shipBEvents };
   }
 
-  private rotateInflictedBuckets(count: number): void {
-    for (let i = 0; i < count; i++) {
-      for (const side of ["shipA", "shipB"] as const) {
-        this.inflictedBuckets[side].push(this.pendingInflicted[side]);
-        this.pendingInflicted[side] = emptyLayerDamage();
-      }
-    }
-    for (const side of ["shipA", "shipB"] as const) {
-      const keep = Math.ceil(this.windowSeconds[side]);
-      if (this.inflictedBuckets[side].length > keep) this.inflictedBuckets[side] = this.inflictedBuckets[side].slice(-keep);
-    }
-  }
-
   private stepSide(side: Side, dt: number, events: readonly DamageEvent[]): void {
-    stepSidePools(this.sides[side], dt, events, this.time, this.pendingInflicted[side]);
-  }
-
-  private inflictedReadout(side: Side): InflictedDps {
-    const window = this.windowSeconds[side];
-    const keepClosed = Math.max(0, Math.ceil(window) - 1);
-    const buckets = this.inflictedBuckets[side];
-    const byLayer = sumLayerDamage([...buckets.slice(buckets.length - keepClosed), this.pendingInflicted[side]]);
-    return { total: (byLayer.shield + byLayer.armor + byLayer.hull) / window, byLayer: { shield: byLayer.shield / window, armor: byLayer.armor / window, hull: byLayer.hull / window } };
+    stepSidePools(this.sides[side], dt, events, this.time);
   }
 }
 
-function emptyLayerDamage(): MutableLayerDamage { return { shield: 0, armor: 0, hull: 0 }; }
-
-function sumLayerDamage(buckets: readonly MutableLayerDamage[]): MutableLayerDamage {
-  const total = emptyLayerDamage();
-  for (const bucket of buckets) {
-    total.shield += bucket.shield;
-    total.armor += bucket.armor;
-    total.hull += bucket.hull;
-  }
-  return total;
-}
-
-function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEvent[], time: number, inflicted: MutableLayerDamage): void {
+function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEvent[], time: number): void {
   if (pools.dead) return;
   if (!pools.damageEnabled) {
     pools.shield = pools.shieldMax;
@@ -296,7 +288,7 @@ function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEven
   }
   updateRahResists(pools);
   applyShieldRegen(pools, dt);
-  const armorDamageByType = applyEvents(pools, events, inflicted);
+  const armorDamageByType = applyEvents(pools, events);
   stepRepairers(pools, dt);
   stepRah(pools, dt, armorDamageByType);
   if (pools.hullMax > 0 && pools.hull <= 0) {
@@ -318,6 +310,7 @@ function emptyPools(): SidePools {
     repairers: [], repairerStates: [],
     repairMode: "auto",
     rahSpec: undefined, rahState: undefined,
+    inflicted: { shield: 0, armor: 0, hull: 0 },
   };
 }
 
@@ -344,6 +337,7 @@ function poolsFromSpec(spec: DefenseSpec, damageEnabled: boolean, repairMode: Re
     repairMode,
     rahSpec,
     rahState,
+    inflicted: { shield: 0, armor: 0, hull: 0 },
   };
 }
 
@@ -375,6 +369,7 @@ function mergePools(prev: SidePools, spec: DefenseSpec, damageEnabled: boolean, 
     repairMode,
     rahSpec,
     rahState,
+    inflicted: { ...prev.inflicted },
   };
 }
 
@@ -412,12 +407,15 @@ function createRahState(rahSpec: RahSpec, activation: RahActivationEntry | undef
 
 function mergeRahState(prev: RahState | undefined, rahSpec: RahSpec, activation: RahActivationEntry | undefined): RahState {
   if (!prev) return createRahState(rahSpec, activation);
+  const active = activation?.active ?? prev.active;
+  const overloaded = activation?.overloaded ?? prev.overloaded;
+  if (!prev.active && active) return createRahState(rahSpec, { active: true, overloaded });
   return {
     resists: { ...prev.resists },
     cycleTimer: prev.cycleTimer,
     inCycle: prev.inCycle,
-    active: activation?.active ?? prev.active,
-    overloaded: activation?.overloaded ?? prev.overloaded,
+    active,
+    overloaded,
     armorDamageAccumulator: { ...prev.armorDamageAccumulator },
   };
 }
@@ -425,8 +423,8 @@ function mergeRahState(prev: RahState | undefined, rahSpec: RahSpec, activation:
 function mergeRepairerStates(prev: RepairerState[], specs: readonly RepairerSpec[], activation: readonly RepairerActivationEntry[]): RepairerState[] {
   return specs.map((spec, i) => {
     const existing = prev[i];
-    if (existing) return { ...existing };
     const saved = activation[i];
+    if (existing) return { ...existing, active: saved?.active ?? existing.active, overloaded: saved?.overloaded ?? existing.overloaded };
     return {
       cycleTimer: 0,
       inCycle: false,
@@ -484,26 +482,26 @@ function shieldRegenRate(pools: SidePools): number {
   return (10 * pools.shieldMax / pools.shieldRechargeTime) * sqrtRatio * (1 - sqrtRatio);
 }
 
-function applyEvents(pools: SidePools, events: readonly DamageEvent[], inflicted: MutableLayerDamage): MutableDamageVector {
+function applyEvents(pools: SidePools, events: readonly DamageEvent[]): MutableDamageVector {
   const armorDamageByType: MutableDamageVector = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
   for (const event of events) {
     for (const type of DAMAGE_TYPES) {
       const rawDamage = event.rawByType[type];
       if (rawDamage <= 0) continue;
-      armorDamageByType[type] += applyDamageType(pools, type, rawDamage, inflicted);
+      armorDamageByType[type] += applyDamageType(pools, type, rawDamage);
     }
   }
   return armorDamageByType;
 }
 
-function applyDamageType(pools: SidePools, type: DamageType, rawDamage: number, inflicted: MutableLayerDamage): number {
+function applyDamageType(pools: SidePools, type: DamageType, rawDamage: number): number {
   let remaining = rawDamage;
   if (pools.shield > 0) {
     const bleedRaw = remaining * shieldBleedFraction(pools);
     const towardShield = remaining - bleedRaw;
     const shield = applyLayer(pools.shield, towardShield, pools.resists.shield[type]);
     pools.shield -= shield.absorbed;
-    accumulateInflicted(inflicted, "shield", shield.absorbed);
+    accumulateInflicted(pools.inflicted, "shield", shield.absorbed);
     remaining = bleedRaw + shield.outgoingRaw;
   }
   if (remaining <= 0) return 0;
@@ -511,14 +509,14 @@ function applyDamageType(pools: SidePools, type: DamageType, rawDamage: number, 
   if (pools.armor > 0) {
     const armor = applyLayer(pools.armor, remaining, pools.resists.armor[type]);
     pools.armor -= armor.absorbed;
-    accumulateInflicted(inflicted, "armor", armor.absorbed);
+    accumulateInflicted(pools.inflicted, "armor", armor.absorbed);
     armorAbsorbed = armor.absorbed;
     remaining = armor.outgoingRaw;
   }
   if (remaining <= 0) return armorAbsorbed;
   const hull = applyLayer(Number.POSITIVE_INFINITY, remaining, pools.resists.hull[type]);
   pools.hull -= hull.absorbed;
-  accumulateInflicted(inflicted, "hull", hull.absorbed);
+  accumulateInflicted(pools.inflicted, "hull", hull.absorbed);
   return armorAbsorbed;
 }
 
@@ -736,4 +734,68 @@ function clampResist(resist: number): number {
   if (resist < 0) return 0;
   if (resist > 1) return 1;
   return resist;
+}
+
+function snapshotPools(pools: SidePools): SidePoolsSnapshot {
+  return {
+    shield: pools.shield, armor: pools.armor, hull: pools.hull,
+    shieldMax: pools.shieldMax, armorMax: pools.armorMax, hullMax: pools.hullMax,
+    shieldRechargeTime: pools.shieldRechargeTime,
+    shieldUniformity: pools.shieldUniformity,
+    baseArmorResists: pools.baseArmorResists,
+    resists: pools.resists,
+    dead: pools.dead, deadAt: pools.deadAt, damageEnabled: pools.damageEnabled,
+    repairers: pools.repairers,
+    repairerStates: pools.repairerStates.map(snapshotRepairerState),
+    repairMode: pools.repairMode,
+    rahSpec: pools.rahSpec,
+    rahState: pools.rahState ? snapshotRahState(pools.rahState) : undefined,
+    inflicted: { ...pools.inflicted },
+  };
+}
+
+function materializePools(snapshot: SidePoolsSnapshot): SidePools {
+  return {
+    shield: snapshot.shield, armor: snapshot.armor, hull: snapshot.hull,
+    shieldMax: snapshot.shieldMax, armorMax: snapshot.armorMax, hullMax: snapshot.hullMax,
+    shieldRechargeTime: snapshot.shieldRechargeTime,
+    shieldUniformity: snapshot.shieldUniformity,
+    baseArmorResists: snapshot.baseArmorResists,
+    resists: snapshot.resists,
+    dead: snapshot.dead, deadAt: snapshot.deadAt, damageEnabled: snapshot.damageEnabled,
+    repairers: snapshot.repairers,
+    repairerStates: snapshot.repairerStates.map(materializeRepairerState),
+    repairMode: snapshot.repairMode,
+    rahSpec: snapshot.rahSpec,
+    rahState: snapshot.rahState ? materializeRahState(snapshot.rahState) : undefined,
+    inflicted: { ...snapshot.inflicted },
+  };
+}
+
+function snapshotRepairerState(state: RepairerState): RepairerStateSnapshot {
+  return {
+    cycleTimer: state.cycleTimer, inCycle: state.inCycle, ancillaryCharges: state.ancillaryCharges, reloading: state.reloading,
+    reloadTimer: state.reloadTimer, active: state.active, overloaded: state.overloaded, hpThisCycle: state.hpThisCycle,
+  };
+}
+
+function materializeRepairerState(snapshot: RepairerStateSnapshot): RepairerState {
+  return {
+    cycleTimer: snapshot.cycleTimer, inCycle: snapshot.inCycle, ancillaryCharges: snapshot.ancillaryCharges, reloading: snapshot.reloading,
+    reloadTimer: snapshot.reloadTimer, active: snapshot.active, overloaded: snapshot.overloaded, hpThisCycle: snapshot.hpThisCycle,
+  };
+}
+
+function snapshotRahState(state: RahState): RahStateSnapshot {
+  return {
+    resists: { ...state.resists }, cycleTimer: state.cycleTimer, inCycle: state.inCycle,
+    active: state.active, overloaded: state.overloaded, armorDamageAccumulator: { ...state.armorDamageAccumulator },
+  };
+}
+
+function materializeRahState(snapshot: RahStateSnapshot): RahState {
+  return {
+    resists: { ...snapshot.resists }, cycleTimer: snapshot.cycleTimer, inCycle: snapshot.inCycle,
+    active: snapshot.active, overloaded: snapshot.overloaded, armorDamageAccumulator: { ...snapshot.armorDamageAccumulator },
+  };
 }

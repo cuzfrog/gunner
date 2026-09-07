@@ -4,6 +4,9 @@ import type { FittingImport } from "../../../fitting";
 import { EMPTY_DEFENSE_ASSESSMENT, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type EngineView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
 import type { Ships } from "../../../ships";
 import type { EffectiveReadouts } from "../controlsContract";
+import type { InflictedDps, Side } from "../../../sim";
+
+const ZERO_INFLICTED: Record<Side, InflictedDps> = { shipA: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } }, shipB: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } } };
 import { USER_SETTINGS_VERSION } from "../../../appstate";
 import {
   buildDomControls,
@@ -76,7 +79,6 @@ function mockDefenseView(): DefenseView {
     repairers: { shipA: [], shipB: [] },
     repairMode: { shipA: "auto", shipB: "auto" },
     rah: { shipA: undefined, shipB: undefined },
-  inflictedDps: { shipA: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } }, shipB: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } } },
   };
 }
 
@@ -84,7 +86,7 @@ function makeEngineView(view: EngagementView, effective: EffectiveReadouts, defe
   const shipAState = { ...view.frame.shipA, sig: sigs?.shipA ?? 1 };
   const shipBState = { ...view.frame.shipB, sig: sigs?.shipB ?? 1 };
   const snapshot = { time: view.frame.time, shipA: shipAState, shipB: shipBState, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
-  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView, inflicted: defenseView.inflictedDps, snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
+  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView, inflicted: ZERO_INFLICTED, snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
 }
 
 function baseSettings(): UserSettings {

@@ -40,7 +40,6 @@ function mockDefenseView(): DefenseView {
     repairers: { shipA: [], shipB: [] },
     repairMode: { shipA: "auto", shipB: "auto" },
     rah: { shipA: undefined, shipB: undefined },
-  inflictedDps: { shipA: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } }, shipB: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } } },
   };
 }
 

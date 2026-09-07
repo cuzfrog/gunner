@@ -1,27 +1,20 @@
-import { asClass, type AwilixContainer } from "awilix";
-import { ReactiveAutopilot } from "./autopilot";
+import { asClass, asFunction, type AwilixContainer } from "awilix";
 import { DefenseAssessorImpl } from "./defenseAssessment";
-import { DefenseSimulatorImpl } from "./defenseSimulator";
 import { DroneApplicationImpl } from "./droneApplication";
-import { DroneSimulatorImpl } from "./droneSimulator";
-import { MissileSimulatorImpl } from "./missileSimulator";
 import { EwarResolverImpl } from "./ewarResolver";
 import { EngagementEvaluatorImpl } from "./fireControl";
 import { EngagementFrameComposerImpl } from "./engagementFrameComposer";
 import { EngagementEngineImpl } from "./engagementEngine";
 import { MissileBoosterResolverImpl } from "./missileBoosterResolver";
 import { SensorBoosterResolverImpl } from "./sensorBoosterResolver";
-import { LockClockImpl } from "./lockClock";
-import { TurretBoosterResolverImpl } from "./turretBoosterResolver";
 import { HitChanceImpl } from "./hitChance";
 import { KinematicsImpl } from "./kinematics";
 import { MissileApplicationImpl } from "./missileApplication";
 import { Mulberry32RngFactory } from "./rng";
-import { PredictiveAutopilot } from "./predictiveAutopilot";
-import { SimulationImpl } from "./simulation";
 import { StackingPenaltyImpl } from "./stackingPenalty";
 import { SimValueParserImpl } from "./simValueParser";
-import { WeaponClockImpl } from "./weaponClock";
+import { SimWorldFactoryImpl } from "./simWorld";
+import { TurretBoosterResolverImpl } from "./turretBoosterResolver";
 import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
 import type { SimCradle } from "./cradle";
 
@@ -37,20 +30,14 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     hitChance: asClass(HitChanceImpl).singleton(),
     missileApplication: asClass(MissileApplicationImpl).singleton(),
     droneApplication: asClass(DroneApplicationImpl).singleton(),
-    droneSimulator: asClass(DroneSimulatorImpl).singleton(),
-    missileSimulator: asClass(MissileSimulatorImpl).singleton(),
     weaponDamageAssessor: asClass(WeaponDamageAssessorImpl).singleton(),
-    reactiveSteering: asClass(ReactiveAutopilot).singleton(),
-    shipBSteering: asClass(PredictiveAutopilot).singleton(),
-    shipASteering: asClass(PredictiveAutopilot).singleton(),
-    simulation: asClass(SimulationImpl).singleton(),
     engagementEvaluator: asClass(EngagementEvaluatorImpl).singleton(),
     engagementFrameComposer: asClass(EngagementFrameComposerImpl).singleton(),
     defenseAssessor: asClass(DefenseAssessorImpl).singleton(),
-    defenseSimulator: asClass(DefenseSimulatorImpl).singleton(),
     rngFactory: asClass(Mulberry32RngFactory).singleton(),
-    weaponClock: asClass(WeaponClockImpl).singleton(),
-    lockClock: asClass(LockClockImpl).singleton(),
+    simWorldFactory: asClass(SimWorldFactoryImpl).singleton(),
+    live: asFunction((cradle: SimCradle) => cradle.simWorldFactory.createSampled()).singleton(),
+    projection: asFunction((cradle: SimCradle) => cradle.simWorldFactory.createExpected()).singleton(),
     engine: asClass(EngagementEngineImpl).singleton(),
   });
 }

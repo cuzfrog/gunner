@@ -1,5 +1,6 @@
 import { Vec2 } from "./vec2";
 import type { MissileApplication } from "./missileApplication";
+import type { Restorable } from "./restorable";
 import type {
   DamageEvent,
   DamageVector,
@@ -14,7 +15,35 @@ import type {
 } from "./types";
 import { ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
-export interface MissileSimulator {
+export interface MissileBodySnapshot {
+  readonly position: Vec2;
+  readonly launchPos: Vec2;
+  readonly velocity: Vec2;
+  readonly fuel: number;
+  readonly spec: MissileSpec;
+  readonly trail: readonly Vec2[];
+  readonly weaponIndex: number;
+  readonly paintedSig: number;
+  readonly baseVolleyByType: DamageVector;
+}
+
+export interface MissileSideSnapshot {
+  readonly entities: readonly MissileBodySnapshot[];
+  readonly cooldowns: ReadonlyMap<number, number>;
+  readonly weaponSpecs: ReadonlyMap<number, MissileSpec>;
+  readonly lastPaintedSig: ReadonlyMap<number, number>;
+  readonly lastTargetVelocity: Vec2;
+  readonly lastTargetMaxSpeed: number;
+}
+
+export interface MissileSimulatorState {
+  readonly sides: Record<Side, MissileSideSnapshot>;
+  readonly time: number;
+  readonly lastFrameShipA: Vec2;
+  readonly lastFrameShipB: Vec2;
+}
+
+export interface MissileSimulator extends Restorable<MissileSimulatorState> {
   reset(config: MissileSimConfig): void;
   update(config: MissileSimConfig): void;
   step(dt: number, frame: EngagementFrame, launches: Record<Side, readonly MissileLaunchSpec[]>): readonly DamageEvent[];
@@ -108,6 +137,20 @@ export class MissileSimulatorImpl implements MissileSimulator {
     return { inFlightCount: inFlight.length, nearestTimeToImpact, predicted, interceptable };
   }
 
+  capture(): MissileSimulatorState {
+    return {
+      sides: { shipA: snapshotSide(this.sides.shipA), shipB: snapshotSide(this.sides.shipB) },
+      time: this.time, lastFrameShipA: this.lastFrameShipA, lastFrameShipB: this.lastFrameShipB,
+    };
+  }
+
+  restore(state: MissileSimulatorState): void {
+    this.sides = { shipA: materializeSide(state.sides.shipA), shipB: materializeSide(state.sides.shipB) };
+    this.time = state.time;
+    this.lastFrameShipA = state.lastFrameShipA;
+    this.lastFrameShipB = state.lastFrameShipB;
+  }
+
   private stepSide(side: Side, dt: number, shipPos: Vec2, targetPos: Vec2, targetVel: Vec2, targetMaxSpeed: number, launches: readonly MissileLaunchSpec[]): readonly DamageEvent[] {
     const state = this.sides[side];
     this.updateTargetKinematics(state, targetVel, targetMaxSpeed);
@@ -183,6 +226,37 @@ export class MissileSimulatorImpl implements MissileSimulator {
 
 function emptySide(): SideState {
   return { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), lastPaintedSig: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
+}
+
+function snapshotSide(state: SideState): MissileSideSnapshot {
+  return {
+    entities: state.entities.map(snapshotBody), cooldowns: new Map(state.cooldowns), weaponSpecs: new Map(state.weaponSpecs),
+    lastPaintedSig: new Map(state.lastPaintedSig), lastTargetVelocity: state.lastTargetVelocity,
+    lastTargetMaxSpeed: state.lastTargetMaxSpeed,
+  };
+}
+
+function materializeSide(snapshot: MissileSideSnapshot): SideState {
+  return {
+    entities: snapshot.entities.map(materializeBody), cooldowns: new Map(snapshot.cooldowns), weaponSpecs: new Map(snapshot.weaponSpecs),
+    lastPaintedSig: new Map(snapshot.lastPaintedSig), lastTargetVelocity: snapshot.lastTargetVelocity,
+    lastTargetMaxSpeed: snapshot.lastTargetMaxSpeed,
+  };
+}
+
+function snapshotBody(missile: MissileBody): MissileBodySnapshot {
+  return {
+    position: missile.position, launchPos: missile.launchPos, velocity: missile.velocity, fuel: missile.fuel, spec: missile.spec,
+    trail: [...missile.trail], weaponIndex: missile.weaponIndex, paintedSig: missile.paintedSig, baseVolleyByType: missile.baseVolleyByType,
+  };
+}
+
+function materializeBody(snapshot: MissileBodySnapshot): MissileBody {
+  return {
+    position: snapshot.position, launchPos: snapshot.launchPos, velocity: snapshot.velocity, fuel: snapshot.fuel, spec: snapshot.spec,
+    trail: [...snapshot.trail], weaponIndex: snapshot.weaponIndex,
+    paintedSig: snapshot.paintedSig, baseVolleyByType: snapshot.baseVolleyByType,
+  };
 }
 
 function createMissile(shipPos: Vec2, launch: MissileLaunchSpec): MissileBody {

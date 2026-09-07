@@ -1,19 +1,20 @@
-import { EngagementEngineImpl, _inflictedWindowSeconds } from "./engagementEngine";
+import { EngagementEngineImpl, _projectionHorizonSeconds } from "./engagementEngine";
 import { Vec2 } from "./vec2";
 import { toTypeId } from "../gamedata/ids";
-import { EMPTY_DEFENSE_SPEC, ZERO_DAMAGE, type EngagementFrame, type HitChanceBreakdown, type LockState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "./types";
+import { EMPTY_DEFENSE_SPEC, ZERO_DAMAGE, type EngagementFrame, type HitChanceBreakdown, type LayerDamage, type LockState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "./types";
 import { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
 import type { AttackAssessment } from "./fireControl";
-import type { DefenseSimulator, DefenseView } from "./defenseSimulator";
+import type { DefenseSimulator, DefenseSimulatorState, DefenseView, SidePoolsSnapshot } from "./defenseSimulator";
 import type { InflictedDps } from "./types";
-import type { DroneSimulator } from "./droneSimulator";
+import type { DroneSimulator, DroneSimulatorState } from "./droneSimulator";
 import type { EngagementFrameComposer, EngagementView } from "./engagementFrameComposer";
 import type { EwarResolver } from "./ewarResolver";
-import type { LockClock } from "./lockClock";
-import type { MissileSimulator } from "./missileSimulator";
+import type { LockClock, LockClockState } from "./lockClock";
+import type { MissileSimulator, MissileSimulatorState } from "./missileSimulator";
 import type { SensorBoosterResolver } from "./sensorBoosterResolver";
-import type { Simulation } from "./simulation";
-import type { WeaponClock } from "./weaponClock";
+import type { Simulation, SimulationState } from "./simulation";
+import type { SimWorld } from "./simWorld";
+import type { WeaponClock, WeaponClockState } from "./weaponClock";
 
 const LOCKED_STATE: LockState = { status: "locked", progress: 1, remaining: 0, lockTime: 0, inRange: true };
 const IDLE_STATE: LockState = { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: true };
@@ -49,8 +50,6 @@ function baseView(): EngagementView {
   };
 }
 
-const ZERO_INFLICTED: InflictedDps = { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } };
-
 const emptyDefenseView: DefenseView = {
   pools: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
   poolPercentages: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
@@ -61,16 +60,66 @@ const emptyDefenseView: DefenseView = {
   repairers: { shipA: [], shipB: [] },
   repairMode: { shipA: "auto", shipB: "auto" },
   rah: { shipA: undefined, shipB: undefined },
-  inflictedDps: { shipA: ZERO_INFLICTED, shipB: ZERO_INFLICTED },
 };
 
+const ZERO_LAYER: LayerDamage = { shield: 0, armor: 0, hull: 0 };
+
+function simulationState(): SimulationState {
+  return { time: 0, shipA: ship, shipB: { ...ship, id: "shipB", position: new Vec2(0, 5000) } };
+}
+
+function lockClockState(): LockClockState {
+  return { shipA: LOCKED_STATE, shipB: LOCKED_STATE };
+}
+
+function droneSimulatorState(): DroneSimulatorState {
+  return { groups: { shipA: [], shipB: [] } };
+}
+
+function missileSimulatorState(): MissileSimulatorState {
+  const side = { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), lastPaintedSig: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
+  return { sides: { shipA: side, shipB: { ...side } }, time: 0, lastFrameShipA: new Vec2(0, 0), lastFrameShipB: new Vec2(0, 0) };
+}
+
+function weaponClockState(): WeaponClockState {
+  const side = { cooldowns: new Map(), weaponSignature: "" };
+  return { seed: 0, sides: { shipA: side, shipB: { ...side } } };
+}
+
+function emptyPoolsSnapshot(): SidePoolsSnapshot {
+  return {
+    shield: 0, armor: 0, hull: 0, shieldMax: 0, armorMax: 0, hullMax: 0,
+    shieldRechargeTime: 0, shieldUniformity: 0.25, baseArmorResists: ZERO_DAMAGE,
+    resists: { shield: ZERO_DAMAGE, armor: ZERO_DAMAGE, hull: ZERO_DAMAGE },
+    dead: false, deadAt: undefined, damageEnabled: true,
+    repairers: [], repairerStates: [], repairMode: "auto", rahSpec: undefined, rahState: undefined,
+    inflicted: { ...ZERO_LAYER },
+  };
+}
+
+function defenseSimulatorState(): DefenseSimulatorState {
+  const side = emptyPoolsSnapshot();
+  return { sides: { shipA: side, shipB: { ...side } }, time: 0, eventBuffer: [], nextTickBoundary: 1 };
+}
+
+function zeroTotals(): Record<"shipA" | "shipB", LayerDamage> {
+  return { shipA: { ...ZERO_LAYER }, shipB: { ...ZERO_LAYER } };
+}
+
+function mockWorld() {
+  return {
+    simulation: vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(() => snapshot), reset: vi.fn(), update: vi.fn(), capture: vi.fn(simulationState), restore: vi.fn() }),
+    lockClock: vi.mocked<LockClock>({ reset: vi.fn(), step: vi.fn(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), states: vi.fn(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), capture: vi.fn(lockClockState), restore: vi.fn() }),
+    droneSimulator: vi.mocked<DroneSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), states: vi.fn(() => []), capture: vi.fn(droneSimulatorState), restore: vi.fn() }),
+    missileSimulator: vi.mocked<MissileSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(() => []), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })), capture: vi.fn(missileSimulatorState), restore: vi.fn() }),
+    weaponClock: vi.mocked<WeaponClock>({ reset: vi.fn(), step: vi.fn(() => []), capture: vi.fn(weaponClockState), restore: vi.fn() }),
+    defenseSimulator: vi.mocked<DefenseSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), flushPendingDamage: vi.fn(), view: vi.fn(() => emptyDefenseView), inflictedTotals: vi.fn(zeroTotals), capture: vi.fn(defenseSimulatorState), restore: vi.fn() }),
+  };
+}
+
 function makeEngine() {
-  const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(() => snapshot), reset: vi.fn(), update: vi.fn() });
-  const lockClock = vi.mocked<LockClock>({ reset: vi.fn(), step: vi.fn(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), states: vi.fn(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })) });
-  const droneSimulator = vi.mocked<DroneSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), states: vi.fn(() => []) });
-  const missileSimulator = vi.mocked<MissileSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(() => []), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })) });
-  const weaponClock = vi.mocked<WeaponClock>({ reset: vi.fn(), step: vi.fn(() => []) });
-  const defenseSimulator = vi.mocked<DefenseSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(() => emptyDefenseView), setDamageEnabled: vi.fn(), setRepairMode: vi.fn(), setRepairerActivation: vi.fn(), setRahActivation: vi.fn(), setInflictedWindow: vi.fn() });
+  const live = mockWorld();
+  const projection = mockWorld();
   const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn(() => baseView()) });
   const ewarResolver = vi.mocked<Required<EwarResolver>>({
     speedMultiplier: vi.fn(() => 1), speedMultiplierIgnoringRange: vi.fn(() => 1),
@@ -87,8 +136,8 @@ function makeEngine() {
     potentials: vi.fn(() => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 })),
   });
   const sensorBoosterResolver = vi.mocked<SensorBoosterResolver>({ boostedSensorSpec: vi.fn((s) => s) });
-  const engine = new EngagementEngineImpl({ simulation, lockClock, droneSimulator, missileSimulator, weaponClock, defenseSimulator, engagementFrameComposer, ewarResolver, sensorBoosterResolver });
-  return { engine, simulation, lockClock, droneSimulator, missileSimulator, weaponClock, defenseSimulator, engagementFrameComposer, ewarResolver, sensorBoosterResolver };
+  const engine = new EngagementEngineImpl({ live, projection, engagementFrameComposer, ewarResolver, sensorBoosterResolver });
+  return { engine, live, projection, engagementFrameComposer, ewarResolver, sensorBoosterResolver };
 }
 
 function engineConfig(): import("./engagementEngine").EngineConfig {
@@ -107,15 +156,15 @@ function engineConfig(): import("./engagementEngine").EngineConfig {
 }
 
 describe("EngagementEngineImpl", () => {
-  test("reset clears all sub-simulators and returns a view", () => {
+  test("reset clears all live sub-simulators and returns a view", () => {
     const deps = makeEngine();
     const view = deps.engine.reset(engineConfig());
-    expect(deps.simulation.reset).toHaveBeenCalledTimes(1);
-    expect(deps.lockClock.reset).toHaveBeenCalledTimes(1);
-    expect(deps.droneSimulator.reset).toHaveBeenCalledTimes(1);
-    expect(deps.missileSimulator.reset).toHaveBeenCalledTimes(1);
-    expect(deps.weaponClock.reset).toHaveBeenCalledTimes(1);
-    expect(deps.defenseSimulator.reset).toHaveBeenCalledTimes(1);
+    expect(deps.live.simulation.reset).toHaveBeenCalledTimes(1);
+    expect(deps.live.lockClock.reset).toHaveBeenCalledTimes(1);
+    expect(deps.live.droneSimulator.reset).toHaveBeenCalledTimes(1);
+    expect(deps.live.missileSimulator.reset).toHaveBeenCalledTimes(1);
+    expect(deps.live.weaponClock.reset).toHaveBeenCalledTimes(1);
+    expect(deps.live.defenseSimulator.reset).toHaveBeenCalledTimes(1);
     expect(view.snapshot).toBe(snapshot);
     expect(view.defenseRuntime).toBe(emptyDefenseView);
     expect(view.drones).toEqual({ shipA: [], shipB: [] });
@@ -125,34 +174,83 @@ describe("EngagementEngineImpl", () => {
   test("reset initializes locks with a zero-step lockClock call", () => {
     const deps = makeEngine();
     deps.engine.reset(engineConfig());
-    expect(deps.lockClock.step).toHaveBeenCalledWith(0, expect.any(Object));
+    expect(deps.live.lockClock.step).toHaveBeenCalledWith(0, expect.any(Object));
   });
 
   test("update preserves runtime by calling update instead of reset", () => {
     const deps = makeEngine();
     deps.engine.reset(engineConfig());
     deps.engine.update(engineConfig());
-    expect(deps.simulation.update).toHaveBeenCalledTimes(1);
-    expect(deps.droneSimulator.update).toHaveBeenCalledTimes(1);
-    expect(deps.missileSimulator.update).toHaveBeenCalledTimes(1);
-    expect(deps.defenseSimulator.update).toHaveBeenCalledTimes(1);
-    expect(deps.simulation.reset).toHaveBeenCalledTimes(1);
-    expect(deps.droneSimulator.reset).toHaveBeenCalledTimes(1);
+    expect(deps.live.simulation.update).toHaveBeenCalledTimes(1);
+    expect(deps.live.droneSimulator.update).toHaveBeenCalledTimes(1);
+    expect(deps.live.missileSimulator.update).toHaveBeenCalledTimes(1);
+    expect(deps.live.defenseSimulator.update).toHaveBeenCalledTimes(1);
+    expect(deps.live.simulation.reset).toHaveBeenCalledTimes(1);
+    expect(deps.live.droneSimulator.reset).toHaveBeenCalledTimes(1);
   });
 
-  test("step calls sub-simulators in the correct order: simulation, lock, compose, drone, missile, weapon, defense", () => {
+  test("step calls live sub-simulators in the correct order: simulation, lock, compose, drone, missile, weapon, defense", () => {
     const deps = makeEngine();
     deps.engine.reset(engineConfig());
     const order: string[] = [];
-    deps.simulation.step.mockImplementation(() => { order.push("simulation"); });
-    deps.lockClock.step.mockImplementation(() => { order.push("lock"); return { shipA: LOCKED_STATE, shipB: LOCKED_STATE }; });
+    deps.live.simulation.step.mockImplementation(() => { order.push("simulation"); });
+    deps.live.lockClock.step.mockImplementation(() => { order.push("lock"); return { shipA: LOCKED_STATE, shipB: LOCKED_STATE }; });
     deps.engagementFrameComposer.compose.mockImplementation(() => { order.push("compose"); return baseView(); });
-    deps.droneSimulator.step.mockImplementation(() => { order.push("drone"); });
-    deps.missileSimulator.step.mockImplementation(() => { order.push("missile"); return []; });
-    deps.weaponClock.step.mockImplementation(() => { order.push("weapon"); return []; });
-    deps.defenseSimulator.step.mockImplementation(() => { order.push("defense"); });
+    deps.live.droneSimulator.step.mockImplementation(() => { order.push("drone"); });
+    deps.live.missileSimulator.step.mockImplementation(() => { order.push("missile"); return []; });
+    deps.live.weaponClock.step.mockImplementation(() => { order.push("weapon"); return []; });
+    deps.live.defenseSimulator.step.mockImplementation(() => { order.push("defense"); });
     deps.engine.step(0.1);
     expect(order).toEqual(["simulation", "lock", "compose", "drone", "missile", "weapon", "defense"]);
+  });
+
+  test("projection restores the live state into the projection world and steps it over the horizon", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    expect(deps.projection.simulation.restore).toHaveBeenCalledWith(deps.live.simulation.capture());
+    expect(deps.projection.defenseSimulator.restore).toHaveBeenCalledWith(deps.live.defenseSimulator.capture());
+    expect(deps.projection.defenseSimulator.step).toHaveBeenCalledTimes(20);
+    expect(deps.projection.defenseSimulator.step.mock.calls.every(([dt]) => dt === 0.5)).toBe(true);
+    expect(deps.projection.simulation.capture).not.toHaveBeenCalled();
+  });
+
+  test("view inflicts are the projection-world layer deltas divided by the horizon", () => {
+    const deps = makeEngine();
+    let calls = 0;
+    const before: LayerDamage = { shield: 10, armor: 0, hull: 0 };
+    const after: LayerDamage = { shield: 110, armor: 40, hull: 0 };
+    deps.projection.defenseSimulator.inflictedTotals.mockImplementation(() => {
+      calls++;
+      return { shipA: calls <= 1 ? before : after, shipB: { ...ZERO_LAYER } };
+    });
+    const view = deps.engine.reset(engineConfig());
+    expect(view.inflicted.shipA).toEqual({ total: 14, byLayer: { shield: 10, armor: 4, hull: 0 } });
+    expect(view.inflicted.shipB).toEqual({ total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } });
+  });
+
+  test("projection is cached until sim time advances by the cadence", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    deps.projection.defenseSimulator.inflictedTotals.mockClear();
+    deps.engine.step(0.1);
+    expect(deps.projection.defenseSimulator.inflictedTotals).not.toHaveBeenCalled();
+    deps.live.simulation.snapshot.mockReturnValue({ ...snapshot, time: 0.5 });
+    deps.engine.step(0.1);
+    expect(deps.projection.defenseSimulator.inflictedTotals).toHaveBeenCalledTimes(2);
+  });
+
+  test("projection recomputes after config update marks it dirty", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    deps.projection.defenseSimulator.inflictedTotals.mockClear();
+    deps.engine.update(engineConfig());
+    expect(deps.projection.defenseSimulator.inflictedTotals).toHaveBeenCalledTimes(2);
+    deps.projection.defenseSimulator.inflictedTotals.mockClear();
+    deps.engine.step(0.1);
+    expect(deps.projection.defenseSimulator.inflictedTotals).not.toHaveBeenCalled();
+    deps.engine.update(engineConfig());
+    deps.engine.step(0.1);
+    expect(deps.projection.defenseSimulator.inflictedTotals).toHaveBeenCalledTimes(2);
   });
 
   test("step passes painted signature to lock input", () => {
@@ -160,11 +258,11 @@ describe("EngagementEngineImpl", () => {
     deps.ewarResolver.sigMultiplier.mockReturnValue(2);
     const shipWithSig: ShipState = { ...ship, sig: 40 };
     const snapshotWithSig: SimSnapshot = { ...snapshot, shipA: shipWithSig, shipB: { ...ship, id: "shipB", position: new Vec2(0, 5000), sig: 40 } };
-    deps.simulation.snapshot.mockReturnValue(snapshotWithSig);
+    deps.live.simulation.snapshot.mockReturnValue(snapshotWithSig);
     deps.engine.reset(engineConfig());
-    deps.lockClock.step.mockClear();
+    deps.live.lockClock.step.mockClear();
     deps.engine.step(0.1);
-    const input = deps.lockClock.step.mock.calls[0][1];
+    const input = deps.live.lockClock.step.mock.calls[deps.live.lockClock.step.mock.calls.length - 1][1];
     expect(input.sigA).toBe(80);
     expect(input.sigB).toBe(80);
   });
@@ -178,11 +276,11 @@ describe("EngagementEngineImpl", () => {
     const deps = makeEngine();
     deps.engine.reset(engineConfig());
     const v1 = deps.engine.view();
-    deps.simulation.step.mockClear();
-    deps.lockClock.step.mockClear();
+    deps.live.simulation.step.mockClear();
+    deps.live.lockClock.step.mockClear();
     const v2 = deps.engine.view();
     expect(v2).toBe(v1);
-    expect(deps.simulation.step).not.toHaveBeenCalled();
+    expect(deps.live.simulation.step).not.toHaveBeenCalled();
   });
 
   test("view throws if called before reset", () => {
@@ -190,24 +288,21 @@ describe("EngagementEngineImpl", () => {
     expect(() => deps.engine.view()).toThrow();
   });
 
-  test("defense setters delegate to defenseSimulator", () => {
+  test("projection flushes the pending tick buffer before reading both totals", () => {
     const deps = makeEngine();
     deps.engine.reset(engineConfig());
-    deps.engine.setDamageEnabled("shipA", false);
-    deps.engine.setRepairMode("shipB", "manual");
-    deps.engine.setRepairerActivation("shipA", 0, true, false);
-    deps.engine.setRahActivation("shipB", true, true);
-    expect(deps.defenseSimulator.setDamageEnabled).toHaveBeenCalledWith("shipA", false);
-    expect(deps.defenseSimulator.setRepairMode).toHaveBeenCalledWith("shipB", "manual");
-    expect(deps.defenseSimulator.setRepairerActivation).toHaveBeenCalledWith("shipA", 0, true, false);
-    expect(deps.defenseSimulator.setRahActivation).toHaveBeenCalledWith("shipB", true, true);
+    deps.live.simulation.snapshot.mockReturnValue({ ...snapshot, time: 0.5 });
+    deps.projection.defenseSimulator.flushPendingDamage.mockClear();
+    deps.engine.step(0.1);
+    expect(deps.projection.defenseSimulator.flushPendingDamage).toHaveBeenCalledTimes(2);
+    expect(deps.live.defenseSimulator.flushPendingDamage).not.toHaveBeenCalled();
   });
 
   test("step surfaces death state from defenseSimulator view", () => {
     const deps = makeEngine();
     deps.engine.reset(engineConfig());
     const deadView: DefenseView = { ...emptyDefenseView, dead: { shipA: true, shipB: false } };
-    deps.defenseSimulator.view.mockReturnValue(deadView);
+    deps.live.defenseSimulator.view.mockReturnValue(deadView);
     const view = deps.engine.step(0.1);
     expect(view.defenseRuntime.dead.shipA).toBe(true);
   });
@@ -215,10 +310,10 @@ describe("EngagementEngineImpl", () => {
   test("step does not launch missiles when lock is not locked", () => {
     const deps = makeEngine();
     deps.engine.reset(engineConfig());
-    deps.lockClock.step.mockReturnValue({ shipA: IDLE_STATE, shipB: IDLE_STATE });
-    deps.missileSimulator.step.mockClear();
+    deps.live.lockClock.step.mockReturnValue({ shipA: IDLE_STATE, shipB: IDLE_STATE });
+    deps.live.missileSimulator.step.mockClear();
     deps.engine.step(0.1);
-    const launches = deps.missileSimulator.step.mock.calls[0][2];
+    const launches = deps.live.missileSimulator.step.mock.calls[deps.live.missileSimulator.step.mock.calls.length - 1][2];
     expect(launches.shipA).toEqual([]);
     expect(launches.shipB).toEqual([]);
   });
@@ -229,7 +324,7 @@ describe("EngagementEngineImpl", () => {
     const shipWithSig: ShipState = { ...ship, sig: 50 };
     const opponentWithSig: ShipState = { ...ship, id: "shipB", position: new Vec2(0, 5000), sig: 60 };
     const snapshotWithSig: SimSnapshot = { ...snapshot, shipA: shipWithSig, shipB: opponentWithSig };
-    deps.simulation.snapshot.mockReturnValue(snapshotWithSig);
+    deps.live.simulation.snapshot.mockReturnValue(snapshotWithSig);
     const frameWithSig: EngagementFrame = { ...frame, shipA: shipWithSig, shipB: opponentWithSig };
     const missile: import("./types").MissileSpec = { kind: "missile", moduleId: toTypeId("2"), damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 1, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 0.5, maxVelocity: 5000, flightTime: 5, flightRange: 25000 };
     const missileAssessment: AttackAssessment = {
@@ -248,9 +343,9 @@ describe("EngagementEngineImpl", () => {
       weapons: { shipA: [missile], shipB: [turret] },
     };
     deps.engine.reset(configWithMissile);
-    deps.missileSimulator.step.mockClear();
+    deps.live.missileSimulator.step.mockClear();
     deps.engine.step(0.1);
-    const launches = deps.missileSimulator.step.mock.calls[0][2];
+    const launches = deps.live.missileSimulator.step.mock.calls[deps.live.missileSimulator.step.mock.calls.length - 1][2];
     expect(launches.shipA).toHaveLength(1);
     expect(launches.shipA[0].paintedTargetSig).toBe(120);
   });
@@ -273,7 +368,7 @@ describe("EngagementEngineImpl", () => {
   test("shipDestroyed fires exactly once per side even if dead persists across steps", () => {
     const deps = makeEngine();
     const deadView: import("./engagementEngine").EngineView = { ...deps.engine.reset(engineConfig()), defenseRuntime: { ...emptyDefenseView, dead: { shipA: true, shipB: false } } };
-    deps.defenseSimulator.view.mockReturnValue(deadView.defenseRuntime);
+    deps.live.defenseSimulator.view.mockReturnValue(deadView.defenseRuntime);
     deps.engagementFrameComposer.compose.mockReturnValue(deadView);
     const destroyed: import("./types").Side[] = [];
     deps.engine.events().onShipDestroyed((side) => destroyed.push(side));
@@ -286,51 +381,28 @@ describe("EngagementEngineImpl", () => {
   test("reset clears the destroyed-sides tracker so shipDestroyed can fire again", () => {
     const deps = makeEngine();
     const deadView: import("./engagementEngine").EngineView = { ...deps.engine.reset(engineConfig()), defenseRuntime: { ...emptyDefenseView, dead: { shipA: true, shipB: false } } };
-    deps.defenseSimulator.view.mockReturnValue(deadView.defenseRuntime);
+    deps.live.defenseSimulator.view.mockReturnValue(deadView.defenseRuntime);
     deps.engagementFrameComposer.compose.mockReturnValue(deadView);
     const destroyed: import("./types").Side[] = [];
     deps.engine.events().onShipDestroyed((side) => destroyed.push(side));
     deps.engine.step(0.1);
     expect(destroyed).toEqual(["shipA"]);
     deps.engine.reset(engineConfig());
-    deps.defenseSimulator.view.mockReturnValue(deadView.defenseRuntime);
+    deps.live.defenseSimulator.view.mockReturnValue(deadView.defenseRuntime);
     deps.engagementFrameComposer.compose.mockReturnValue(deadView);
     deps.engine.step(0.1);
     expect(destroyed).toEqual(["shipA", "shipA"]);
   });
-
-  test("reset and update push per-side inflicted windows derived from weapon fire rate", () => {
-    const deps = makeEngine();
-    const slowTurret: TurretSpec = { ...turret, cycleTime: 12 };
-    const config = engineConfig();
-    const configWithSlowWeapon: import("./engagementEngine").EngineConfig = { ...config, weapons: { shipA: [slowTurret], shipB: [turret] } };
-    deps.engine.reset(configWithSlowWeapon);
-    expect(deps.defenseSimulator.setInflictedWindow).toHaveBeenCalledWith("shipA", 24);
-    expect(deps.defenseSimulator.setInflictedWindow).toHaveBeenCalledWith("shipB", 10);
-    deps.defenseSimulator.setInflictedWindow.mockClear();
-    deps.engine.update(configWithSlowWeapon);
-    expect(deps.defenseSimulator.setInflictedWindow).toHaveBeenCalledWith("shipA", 24);
-    expect(deps.defenseSimulator.setInflictedWindow).toHaveBeenCalledWith("shipB", 10);
-  });
-
-  test("view inflicts come from the defenseSimulator read model", () => {
-    const deps = makeEngine();
-    const inflicted: InflictedDps = { total: 42, byLayer: { shield: 30, armor: 12, hull: 0 } };
-    deps.defenseSimulator.view.mockReturnValue({ ...emptyDefenseView, inflictedDps: { shipA: inflicted, shipB: ZERO_INFLICTED } });
-    const view = deps.engine.reset(engineConfig());
-    expect(view.inflicted.shipA).toBe(inflicted);
-    expect(view.inflicted.shipB).toEqual(ZERO_INFLICTED);
-  });
 });
 
-describe("_inflictedWindowSeconds", () => {
+describe("_projectionHorizonSeconds", () => {
   test("returns the floor when all weapons cycle faster than half the floor", () => {
-    expect(_inflictedWindowSeconds([])).toBe(10);
-    expect(_inflictedWindowSeconds([{ ...turret, cycleTime: 3 }])).toBe(10);
+    expect(_projectionHorizonSeconds([], [])).toBe(10);
+    expect(_projectionHorizonSeconds([{ ...turret, cycleTime: 3 }], [{ ...turret, cycleTime: 4 }])).toBe(10);
   });
 
-  test("covers at least two cycles of the slowest weapon", () => {
-    expect(_inflictedWindowSeconds([{ ...turret, cycleTime: 8 }])).toBe(16);
-    expect(_inflictedWindowSeconds([{ ...turret, cycleTime: 1 }, { ...turret, cycleTime: 9 }])).toBe(18);
+  test("covers at least two cycles of the slowest weapon on either side", () => {
+    expect(_projectionHorizonSeconds([{ ...turret, cycleTime: 8 }], [])).toBe(16);
+    expect(_projectionHorizonSeconds([{ ...turret, cycleTime: 1 }], [{ ...turret, cycleTime: 9 }])).toBe(18);
   });
 });

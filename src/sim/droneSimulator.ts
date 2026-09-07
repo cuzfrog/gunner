@@ -1,7 +1,29 @@
 import { Vec2 } from "./vec2";
+import type { Restorable } from "./restorable";
 import type { DroneMode, DroneRuntimeState, DroneSpec, EngagementFrame, Side } from "./types";
 
-export interface DroneSimulator {
+export interface DroneBodySnapshot {
+  readonly position: Vec2;
+  readonly velocity: Vec2;
+  readonly orbitPhase: number;
+}
+
+export interface DroneGroupSnapshot {
+  readonly spec: DroneSpec;
+  readonly drones: readonly DroneBodySnapshot[];
+  readonly mode: DroneMode;
+  readonly distanceToTarget: number;
+  readonly distanceToSlot: number;
+  readonly inControlRange: boolean;
+  readonly deployed: boolean;
+  readonly orbitAngle: number;
+}
+
+export interface DroneSimulatorState {
+  readonly groups: Record<Side, readonly DroneGroupSnapshot[]>;
+}
+
+export interface DroneSimulator extends Restorable<DroneSimulatorState> {
   reset(config: DroneSimConfig): void;
   update(config: DroneSimConfig): void;
   step(dt: number, frame: EngagementFrame): void;
@@ -62,6 +84,45 @@ export class DroneSimulatorImpl implements DroneSimulator {
   states(side: Side): readonly DroneRuntimeState[] {
     return this.groups[side].map((g) => ({ mode: g.mode, positions: g.drones.map((d) => d.position), distanceToTarget: g.distanceToTarget, distanceToSlot: g.distanceToSlot, inControlRange: g.inControlRange }));
   }
+
+  capture(): DroneSimulatorState {
+    return { groups: snapshotGroups(this.groups) };
+  }
+
+  restore(state: DroneSimulatorState): void {
+    this.groups = materializeGroups(state.groups);
+  }
+}
+
+function snapshotGroups(groups: Record<Side, DroneGroupState[]>): Record<Side, readonly DroneGroupSnapshot[]> {
+  return { shipA: groups.shipA.map(snapshotGroup), shipB: groups.shipB.map(snapshotGroup) };
+}
+
+function materializeGroups(snapshots: Record<Side, readonly DroneGroupSnapshot[]>): Record<Side, DroneGroupState[]> {
+  return { shipA: snapshots.shipA.map(materializeGroup), shipB: snapshots.shipB.map(materializeGroup) };
+}
+
+function snapshotGroup(group: DroneGroupState): DroneGroupSnapshot {
+  return {
+    spec: group.spec, drones: group.drones.map(snapshotBody), mode: group.mode, distanceToTarget: group.distanceToTarget,
+    distanceToSlot: group.distanceToSlot, inControlRange: group.inControlRange, deployed: group.deployed, orbitAngle: group.orbitAngle,
+  };
+}
+
+function materializeGroup(snapshot: DroneGroupSnapshot): DroneGroupState {
+  return {
+    spec: snapshot.spec, drones: snapshot.drones.map(materializeBody), mode: snapshot.mode, distanceToTarget: snapshot.distanceToTarget,
+    distanceToSlot: snapshot.distanceToSlot, inControlRange: snapshot.inControlRange,
+    deployed: snapshot.deployed, orbitAngle: snapshot.orbitAngle,
+  };
+}
+
+function snapshotBody(body: DroneBody): DroneBodySnapshot {
+  return { position: body.position, velocity: body.velocity, orbitPhase: body.orbitPhase };
+}
+
+function materializeBody(body: DroneBodySnapshot): DroneBody {
+  return { position: body.position, velocity: body.velocity, orbitPhase: body.orbitPhase };
 }
 
 function createGroupState(spec: DroneSpec): DroneGroupState {

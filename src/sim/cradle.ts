@@ -1,25 +1,20 @@
 import type {
-  Autopilot,
   DefenseAssessor,
-  DefenseSimulator,
   DroneApplication,
-  DroneSimulator,
   EngagementEngine,
   EwarResolver,
   EngagementEvaluator,
   EngagementFrameComposer,
   HitChance,
   Kinematics,
-  LockClock,
   MissileBoosterResolver,
-  MissileSimulator,
   RngFactory,
   SensorBoosterResolver,
   SimValueParser,
-  Simulation,
+  SimWorld,
+  SimWorldFactory,
   StackingPenalty,
   TurretBoosterResolver,
-  WeaponClock,
   WeaponDamageAssessor,
 } from "./index";
 
@@ -33,19 +28,13 @@ export interface SimCradle {
   readonly kinematics: Kinematics;
   readonly hitChance: HitChance;
   readonly droneApplication: DroneApplication;
-  readonly droneSimulator: DroneSimulator;
-  readonly missileSimulator: MissileSimulator;
   readonly weaponDamageAssessor: WeaponDamageAssessor;
-  readonly reactiveSteering: Autopilot;
-  readonly shipBSteering: Autopilot;
-  readonly shipASteering: Autopilot;
-  readonly simulation: Simulation;
   readonly engagementEvaluator: EngagementEvaluator;
   readonly engagementFrameComposer: EngagementFrameComposer;
   readonly defenseAssessor: DefenseAssessor;
-  readonly defenseSimulator: DefenseSimulator;
   readonly rngFactory: RngFactory;
-  readonly weaponClock: WeaponClock;
-  readonly lockClock: LockClock;
+  readonly simWorldFactory: SimWorldFactory;
+  readonly live: SimWorld;
+  readonly projection: SimWorld;
   readonly engine: EngagementEngine;
 }

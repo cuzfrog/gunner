@@ -487,4 +487,33 @@ describe("MissileSimulatorImpl", () => {
     }
     expect(impactFound, "expected at least one impact event within 100 steps").toBe(true);
   });
+
+  test("capture and restore round-trips the state into another instance", () => {
+    const first = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    first.reset({ shipA: [lightMissile], shipB: [] });
+    first.step(0.1, frame(new Vec2(0, 0), new Vec2(1000, 0), new Vec2(0, 0), new Vec2(300, 0), 0.1, 500), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
+    first.step(0.1, frame(new Vec2(0, 0), new Vec2(1030, 0), new Vec2(0, 0), new Vec2(300, 0), 0.2, 500), { shipA: [], shipB: [] });
+    const expectedStates = first.states("shipA").map((s) => ({ ...s, trail: [...s.trail] }));
+    const expectedFacts = first.facts("shipA", 0);
+    const state = first.capture();
+    first.step(0.1, frame(new Vec2(0, 0), new Vec2(1060, 0), new Vec2(0, 0), new Vec2(300, 0), 0.3, 500), { shipA: [], shipB: [] });
+    const second = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    second.restore(state);
+    expect(second.states("shipA")).toEqual(expectedStates);
+    expect(second.facts("shipA", 0)).toEqual(expectedFacts);
+  });
+
+  test("restored instance keeps stepping independently of the captured source", () => {
+    const first = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    first.reset({ shipA: [lightMissile], shipB: [] });
+    first.step(0.1, frame(new Vec2(0, 0), new Vec2(1000, 0), new Vec2(0, 0), new Vec2(300, 0), 0.1, 500), { shipA: [launchSpec(0, lightMissile, 40)], shipB: [] });
+    const state = first.capture();
+    const second = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    second.restore(state);
+    first.step(0.1, frame(new Vec2(0, 0), new Vec2(1030, 0), new Vec2(0, 0), new Vec2(300, 0), 0.2, 500), { shipA: [], shipB: [] });
+    second.step(0.1, frame(new Vec2(0, 0), new Vec2(1000, 500), new Vec2(0, 0), new Vec2(300, 0), 0.2, 500), { shipA: [], shipB: [] });
+    const firstPos = first.states("shipA")[0].position;
+    const secondPos = second.states("shipA")[0].position;
+    expect(firstPos.dist(secondPos)).toBeGreaterThan(0);
+  });
 });

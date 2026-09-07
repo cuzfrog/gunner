@@ -1,4 +1,4 @@
-import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineEvents, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type MissileRuntimeState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineEvents, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type InflictedDps, type MissileRuntimeState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "../sim";
 import { toTypeId } from "../gamedata/ids";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
 import type { EngagementEngine } from "../sim";
@@ -22,6 +22,7 @@ const shipConfig: SimConfig = {
   initialDistance: 5000,
 };
 
+const ZERO_INFLICTED: Record<Side, InflictedDps> = { shipA: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } }, shipB: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } } };
 const emptyDefenseView: DefenseView = {
   pools: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
   poolPercentages: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
@@ -32,7 +33,6 @@ const emptyDefenseView: DefenseView = {
   repairers: { shipA: [], shipB: [] },
   repairMode: { shipA: "auto", shipB: "auto" },
   rah: { shipA: undefined, shipB: undefined },
-  inflictedDps: { shipA: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } }, shipB: { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } } },
 };
 
 const engineConfig: EngineConfig = {
@@ -66,7 +66,7 @@ function baseView(): EngineView {
     ...engagementView,
     snapshot,
     defenseRuntime: emptyDefenseView,
-    inflicted: emptyDefenseView.inflictedDps,
+    inflicted: ZERO_INFLICTED,
     drones: { shipA: [], shipB: [] },
     droneSpecs: { shipA: [], shipB: [] },
     missiles: { shipA: [], shipB: [] },
@@ -106,10 +106,6 @@ const engine = vi.mocked<EngagementEngine>({
   step: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
   view: vi.fn(() => baseView()),
   events: vi.fn(() => engineEvents),
-  setDamageEnabled: vi.fn(),
-  setRepairMode: vi.fn(),
-  setRepairerActivation: vi.fn(),
-  setRahActivation: vi.fn(),
 });
 
 const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setDroneRangeVisibility: vi.fn(), setDroneControlRangeVisibility: vi.fn(), setManualZoom: vi.fn(), setLockStates: vi.fn() });

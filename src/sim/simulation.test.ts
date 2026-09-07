@@ -616,4 +616,28 @@ describe("SimulationImpl", () => {
     expect(shipASteering.computeVelocity.mock.calls[0][2]).toBe(0);
     expect(shipBSteering.computeVelocity.mock.calls[0][2]).toBe(0);
   });
+
+  test("capture and restore round-trips the state into another instance", () => {
+    const first = makeSim(simConfig("keepAtRange"));
+    first.step(1);
+    first.step(1);
+    const expected = first.snapshot();
+    const state = first.capture();
+    first.step(1);
+    const second = makeSim(simConfig("keepAtRange"));
+    second.restore(state);
+    expect(second.snapshot()).toEqual(expected);
+  });
+
+  test("restored instance keeps stepping independently of the captured source", () => {
+    const first = makeSim(simConfig("keepAtRange"));
+    first.step(1);
+    const state = first.capture();
+    const second = makeSim(simConfig("keepAtRange"));
+    second.restore(state);
+    first.step(5);
+    second.step(1);
+    expect(second.snapshot().time).toBe(2);
+    expect(first.snapshot().time).toBe(6);
+  });
 });
