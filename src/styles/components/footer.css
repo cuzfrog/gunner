@@ -16,7 +16,15 @@
   max-width: 40ch;
 }
 
+.app-footer-mechanism {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .app-footer-mechanism .footer-text { margin: 0 0 4px; }
+
+.app-footer-mechanism .app-footer-ref + .app-footer-ref { margin-top: 5px; }
 
 .app-footer-mechanism[data-accent="teal"] .footer-heading { color: var(--accent-teal); }
 .app-footer-mechanism[data-accent="blue"] .footer-heading { color: var(--accent-blue); }

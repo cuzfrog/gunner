@@ -39,6 +39,7 @@
   margin: 0;
   font-family: "Chakra Petch", sans-serif;
   font-size: 20px;
+  line-height: 1;
   color: var(--accent-teal);
   text-transform: uppercase;
   letter-spacing: 0.1em;
