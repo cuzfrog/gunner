@@ -11,7 +11,7 @@ const drone: DroneSpec = { kind: "drone", moduleId: toTypeId("2"), tracking: 0.1
 const turretAssessment: AttackAssessment = {
   boostedWeapon: turret, effectiveWeapon: turret,
   damage: { nominalDps: 80, appliedDps: 64, application: 0.8, volley: 400, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
-  turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1, trackingPenalty: 0.5 ** 0.1, rangePenalty: 0.5 ** 0.1 }, expectedMultiplier: 0.8 },
+  turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1, trackingPenalty: 0.5 ** 0.1, rangePenalty: 0.5 ** 0.1 }, expectedMultiplier: 0.8, spoolFactor: 1, inOptimal: true },
 };
 
 const droneAssessment: AttackAssessment = {

@@ -45,7 +45,7 @@ function makeView(): EngagementView {
   const assessment: AttackAssessment = {
     boostedWeapon: turret, effectiveWeapon: turret,
     damage: { nominalDps: 20, appliedDps: 10, application: 0.5, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: { em: 0, thermal: 0, kinetic: 100, explosive: 0 } },
-    turret: { hit, expectedMultiplier: 0.5 },
+    turret: { hit, expectedMultiplier: 0.5, spoolFactor: 1, inOptimal: true },
   };
   const shipA = shipState("shipA");
   const shipB = shipState("shipB");

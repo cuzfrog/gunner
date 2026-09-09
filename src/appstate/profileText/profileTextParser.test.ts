@@ -61,8 +61,14 @@ describe("profileTextParser", () => {
     expect(parser.parse(text)).toBeUndefined();
   });
 
-  test("rejects a fitted hull with zero multipliers", () => {
-    const badHull = { ...SHIP_A_FITTED_HULL, fitted: { ...SHIP_A_FITTED_HULL.fitted, massMultiplier: 0 } };
+  test("accepts a fitted hull with zero and negative multipliers", () => {
+    const hull = { ...SHIP_A_FITTED_HULL, fitted: { ...SHIP_A_FITTED_HULL.fitted, massMultiplier: 0, mwdSigBloomMultiplier: -1.5 } };
+    const text = serializer.serialize(MINIMAL_PROFILE).replace("shipA.speed=", `shipA.fittedHull=${JSON.stringify(hull)}\nshipA.speed=`);
+    expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, shipAFittedHull: hull });
+  });
+
+  test("rejects a fitted hull with a non-finite multiplier", () => {
+    const badHull = { ...SHIP_A_FITTED_HULL, fitted: { ...SHIP_A_FITTED_HULL.fitted, massMultiplier: Number.NaN } };
     const text = serializer.serialize(MINIMAL_PROFILE).replace("shipA.speed=", `shipA.fittedHull=${JSON.stringify(badHull)}\nshipA.speed=`);
     expect(parser.parse(text)).toBeUndefined();
   });

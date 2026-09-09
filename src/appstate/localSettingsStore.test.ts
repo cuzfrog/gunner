@@ -29,6 +29,7 @@ import {
   type DisplayPreferences,
   type ProfileSettings,
 } from "./localSettingsStore.testSupport";
+import type { FittedHullSummary } from "./userSettings";
 import type { SessionSettings } from "./combatantSettings";
 
 beforeEach(() => resetMocks());
@@ -270,6 +271,15 @@ describe("LocalSettingsStore", () => {
     expect(store.loadProfile("brawler")).toEqual(profile);
   });
 
+  test("saveProfile and loadProfile round-trip a negative mwdSigBloomMultiplier", () => {
+    const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const negativeBloom: FittedHullSummary = { ...FITTED_HULL_SUMMARY, fitted: { ...FITTED_HULL_SUMMARY.fitted, mwdSigBloomMultiplier: -1.5 } };
+    const profile = profileFrom({ ...DEFAULT_SETTINGS, shipAFittedHull: negativeBloom });
+    store.saveProfile("brawler", profile);
+    expect(store.listProfiles()).toEqual(["brawler"]);
+    expect(store.loadProfile("brawler")).toEqual(profile);
+  });
+
   test("saveProfile and loadProfile round-trip", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     store.saveProfile("brawler", DEFAULT_PROFILE);
@@ -284,12 +294,13 @@ describe("LocalSettingsStore", () => {
     expect(store.loadProfile("brawler")).toEqual(profile);
   });
 
-  test("saveProfile rejects a profile with an invalid ewar activation script", () => {
+  test("saveProfile keeps a current-version profile without read validation", () => {
     const storage = fakeStorage();
     const store = makeStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
-    const bad = { ...DEFAULT_PROFILE, shipAEwarActivation: { disruptors: [{ active: true, overloaded: true, script: 123 }] } } as unknown as ProfileSettings;
-    store.saveProfile("brawler", bad);
-    expect(store.listProfiles()).toEqual([]);
+    const drifted = { ...DEFAULT_PROFILE, shipAEwarActivation: { disruptors: [{ active: true, overloaded: true, script: 123 }] }, shipAOptimal: -1 } as unknown as ProfileSettings;
+    store.saveProfile("brawler", drifted);
+    expect(store.listProfiles()).toEqual(["brawler"]);
+    expect(store.loadProfile("brawler")).toEqual(drifted);
   });
 
   test("loadProfile strips legacy profiles without ewar activation fields", () => {
@@ -783,13 +794,13 @@ describe("LocalSettingsStore", () => {
     expect(loaded!.shipA.ammo).toBe(DEFAULT_SETTINGS.shipAAmmo);
   });
 
-  test("loadProfile normalizes a profile missing shipAAmmo", () => {
+  test("loadProfile passes a current-version profile through verbatim; fromProfile defaults missing ammo", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     const { shipAAmmo: _, ...missingAmmo } = DEFAULT_PROFILE;
     store.saveProfile("brawler", missingAmmo as ProfileSettings);
     const loaded = store.loadProfile("brawler");
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAAmmo).toBe(DEFAULT_SETTINGS.shipAAmmo);
+    expect(loaded!.shipAAmmo).toBeUndefined();
   });
 
   test("basis re-import applies a stored charge that matches the turret size", () => {

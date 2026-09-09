@@ -2391,7 +2391,7 @@ export const ATTRIBUTE_CLASSIFICATION: Readonly<Record<number, AttributeClassifi
   2731: { kind: "outOfScope", id: 2731, name: "eliteBonusCovertOps4", domain: "other", reason: "unclassified - not in combat attribute map or out-of-scope set" },
   2732: { kind: "outOfScope", id: 2732, name: "stealthBomberLauncherCPU", domain: "other", reason: "unclassified - not in combat attribute map or out-of-scope set" },
   2733: { kind: "outOfScope", id: 2733, name: "damageMultiplierBonusPerCycle", domain: "other", reason: "out of scope - not consumed by fitting simulator" },
-  2734: { kind: "outOfScope", id: 2734, name: "damageMultiplierBonusMax", domain: "other", reason: "out of scope - not consumed by fitting simulator" },
+  2734: { kind: "semantic", id: 2734, name: "damageMultiplierBonusMax", semantic: "turretSpoolMax" },
   2735: { kind: "outOfScope", id: 2735, name: "npcStructureStasisWebificationBonus", domain: "other", reason: "unclassified - not in combat attribute map or out-of-scope set" },
   2736: { kind: "outOfScope", id: 2736, name: "npcStructureEnergyWarfareBonus", domain: "other", reason: "unclassified - not in combat attribute map or out-of-scope set" },
   2737: { kind: "outOfScope", id: 2737, name: "fighterStandupLightSlots", domain: "other", reason: "unclassified - not in combat attribute map or out-of-scope set" },

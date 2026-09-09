@@ -58,7 +58,7 @@
   padding-left: 4px;
 }
 
-/* ---- menu-popup (composition of popup for small popup-item lists) ---- */
+/* ---- menu-popup (composition of popup for small stacked-button popups) ---- */
 .menu-popup {
   display: flex;
   flex-direction: column;
@@ -66,7 +66,6 @@
   padding: 4px;
   white-space: nowrap;
 }
-
 
 /* ---- trigger ---- */
 .trigger {
@@ -118,7 +117,7 @@
   color: var(--text-dim);
 }
 
-.icon-button[aria-pressed="true"] { color: var(--accent-teal); }
+.icon-button[aria-pressed="true"]:not(:disabled) { color: var(--accent-teal); }
 
 /* ---- btn ---- */
 .btn {
@@ -163,6 +162,15 @@
   border-color: var(--warn-yellow);
   color: var(--warn-yellow);
   box-shadow: 0 0 9px var(--warn-yellow-25);
+}
+
+/* ---- btn-toggle (btn + teal pressed state for standalone aria-pressed toggles) ---- */
+
+/* Pressed chrome is guarded with :not(:disabled) so a disabled control always renders disabled. */
+.btn-toggle[aria-pressed="true"]:not(:disabled) {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+  background: var(--accent-teal-12);
 }
 
 /* ---- chevron ---- */
@@ -470,12 +478,12 @@ select.input-field:disabled {
 .segmented-control [aria-pressed="true"] .choice-value,
 .segmented-control .btn:hover:not(:disabled) .choice-value { color: inherit; }
 
-.segmented-control [aria-pressed="true"] {
+.segmented-control [aria-pressed="true"]:not(:disabled) {
   border-color: var(--accent-orange);
   color: var(--accent-orange);
 }
 
-.overload-button[aria-pressed="true"] {
+.overload-button[aria-pressed="true"]:not(:disabled) {
   border-color: var(--accent-orange);
   color: var(--accent-orange);
   background: var(--accent-orange-12);

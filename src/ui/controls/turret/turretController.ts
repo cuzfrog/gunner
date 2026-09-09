@@ -263,6 +263,7 @@ export class TurretControllerImpl implements TurretController {
       damagePerShot: this.selectedTurret.damagePerShot,
       cycleTime: this.selectedTurret.cycleTime,
       turretCount: this.selectedTurret.turretCount,
+      spool: this.selectedTurret.spool,
     };
   }
   currentTurretSpecs(trackingOverride?: number): readonly TurretSpec[] {
@@ -284,6 +285,7 @@ export class TurretControllerImpl implements TurretController {
       damagePerShot: turret.damagePerShot,
       cycleTime: turret.cycleTime,
       turretCount: turret.turretCount,
+      spool: turret.spool,
     }));
   }
 

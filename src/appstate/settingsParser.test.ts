@@ -23,6 +23,8 @@ import {
   type UserSettings,
   type ProfileSettings,
 } from "./localSettingsStore.testSupport";
+import { USER_SETTINGS_VERSION } from "./userSettings";
+import { stripDisplayPreferences } from "./validators";
 import { toShipId, toTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { DisplayPreferences } from "./userSettings";
 import type { MissileCatalog } from "../fitting";
@@ -431,6 +433,24 @@ describe("SettingsParser", () => {
     const profiles: Record<string, unknown> = { good: DEFAULT_PROFILE, bad: { ...DEFAULT_PROFILE, version: 4 } };
     const parsed = makeParser().parseProfiles(JSON.stringify(profiles));
     expect(Object.keys(parsed)).toEqual(["good"]);
+  });
+
+  test("parseProfiles keeps a current-version profile without re-validation", () => {
+    const drifted = { ...DEFAULT_PROFILE, shipAOptimal: -1, initialDistance: 0 };
+    const parsed = makeParser().parseProfiles(JSON.stringify({ drifted }));
+    expect(parsed).toEqual({ drifted });
+  });
+
+  test("parseProfiles validates legacy-version profiles", () => {
+    const legacy = { ...DEFAULT_PROFILE, version: USER_SETTINGS_VERSION - 1, shipAOptimal: -1 };
+    const parsed = makeParser().parseProfiles(JSON.stringify({ legacy }));
+    expect(parsed).toEqual({});
+  });
+
+  test("profileFromUnknown strips display preferences on a current-version record without re-validation", () => {
+    const drifted = { ...DEFAULT_SETTINGS, shipAOptimal: -1, shipATrackingUnit: "score" };
+    const profile = makeParser().profileFromUnknown(drifted);
+    expect(profile).toEqual(stripDisplayPreferences(drifted));
   });
 
   test("profileFromUnknown strips display preferences and defaults ammo", () => {

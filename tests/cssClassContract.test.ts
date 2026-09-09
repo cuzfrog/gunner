@@ -10,6 +10,12 @@ const ALLOWED_UNDEFINED = new Set<string>([
   "portrait-hp-bar-hull",
   "portrait-lock-badge-ship-a",
   "portrait-lock-badge-ship-b",
+  // Popup root hooks on PopupBox instances; all chrome comes from the `popup` primitive.
+  "skill-popup",
+  "ewar-popup",
+  "ammo-popup",
+  "defense-popup",
+  "targeting-popup",
 ]);
 
 // CSS classes not referenced by the literal scan (built dynamically or stale rules pending removal).

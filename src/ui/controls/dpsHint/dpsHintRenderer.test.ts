@@ -24,6 +24,12 @@ function makeModel(): DpsHintModel {
   };
 }
 
+function makeSpooledModel(): DpsHintModel {
+  const model = makeModel();
+  const group = model.groups[0];
+  return { groups: [{ ...group, summary: { ...group.summary, spoolMultiplier: 1.3 } }] };
+}
+
 function elementChildren(el: FakeElement): FakeElement[] {
   return el.children.filter((c) => c.tagName !== "#text");
 }
@@ -180,6 +186,23 @@ describe("DpsHintRendererImpl", () => {
     expect(dpsRow.className).toContain("dps-hint-dps-row");
     expect(elementChildren(dpsRow)[0].textContent).toBe("dpsHint.turretDps");
     expect(elementChildren(dpsRow)[1].textContent).toBe("245.1");
+  });
+
+  test("renders a spool row and formula term when the summary carries a spool multiplier", () => {
+    const renderer = new DpsHintRendererImpl({ t: (key) => key });
+    const container = globalThis.document.createElement("div") as unknown as FakeElement;
+    renderer.render(makeSpooledModel(), container as unknown as HTMLElement);
+    const root = container.children[0] as FakeElement;
+    const group = elementChildren(root)[0];
+    const groupChildren = elementChildren(group);
+    const summaryEl = groupChildren[7];
+    const summaryChildren = elementChildren(summaryEl);
+    const spoolRow = summaryChildren[0];
+    expect(elementChildren(spoolRow)[0].textContent).toBe("dpsHint.spool");
+    expect(elementChildren(spoolRow)[1].textContent).toBe("x1.3");
+    const volleyRow = summaryChildren[1];
+    expect(elementChildren(volleyRow)[0].textContent).toBe("dpsHint.volley");
+    expect(elementChildren(volleyRow)[1].textContent).toBe("50.0 × 4.29 × 1.3 × 4 = 858.0");
   });
 
   test("renders multiple groups", () => {

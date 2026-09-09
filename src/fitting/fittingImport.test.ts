@@ -824,6 +824,29 @@ Medium Energy Metastasis Adjuster II`,
     expect(importer.itemNameForId(result!.turret!.chargeId, "en")).toBe("Tetryon Exotic Plasma S");
   });
 
+  test("disintegrator exposes resolved spool spec (per-cycle and max, unboosted by default)", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(`[Damavik, Entropic]\nLight Entropic Disintegrator I, Tetryon Exotic Plasma S`, conditions);
+    expect(result!.turret!.spool).toEqual({ perCycle: 0.07, max: 2.125 });
+  });
+
+  test("Ikitursa boosts disintegrator spool max via turretSpoolMax hull bonus", () => {
+    ships.findHullByName.mockReturnValue({ ...profile, id: "52252" as ShipId, name: "Ikitursa" });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(`[Ikitursa, Spool]\nHeavy Entropic Disintegrator II`, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
+    expect(result!.turret!.spool).toEqual({ perCycle: 0.07, max: 4.25 });
+  });
+
+  test("disintegrator overloads for damage, not rate of fire", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const normal = importer.importFitting(`[Damavik, Entropic]\nLight Entropic Disintegrator I, Tetryon Exotic Plasma S`, conditions);
+    const overloaded = importer.importFitting(`[Damavik, Entropic]\nLight Entropic Disintegrator I, Tetryon Exotic Plasma S`, { skillLevel: 0, overloaded: false, weaponOverloaded: true });
+    expect(overloaded!.turret!.damageMultiplier).toBeCloseTo(normal!.turret!.damageMultiplier * 1.15, 6);
+    expect(overloaded!.turret!.cycleTime).toBeCloseTo(normal!.turret!.cycleTime, 6);
+  });
+
   test("Entropic Radiation Sink applies to a disintegrator and not to an energy turret", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     ships.findHullByName.mockReturnValue(frigateProfile);

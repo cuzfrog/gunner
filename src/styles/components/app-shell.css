@@ -2,7 +2,7 @@
 .app-container {
   max-width: 1540px;
   margin: 0 auto;
-  padding: 13px;
+  padding: 8px 13px;
 }
 
 .app-header {
@@ -12,8 +12,8 @@
   flex-wrap: wrap;
   gap: 10px;
   border-bottom: 1px solid var(--border-dim);
-  margin-bottom: 4px;
-  padding-bottom: 8px;
+  margin-bottom: 2px;
+  padding-bottom: 5px;
 }
 
 .app-header-left {
@@ -39,6 +39,7 @@
   margin: 0;
   font-family: "Chakra Petch", sans-serif;
   font-size: 20px;
+  line-height: 1;
   color: var(--accent-teal);
   text-transform: uppercase;
   letter-spacing: 0.1em;

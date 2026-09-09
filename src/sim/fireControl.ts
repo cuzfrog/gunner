@@ -20,13 +20,14 @@ import type {
   TurretSpec,
   WeaponSpec,
 } from "./types";
-import { ZERO_DAMAGE } from "./types";
+import { ZERO_DAMAGE, spoolMultiplier } from "./types";
 
 export interface AttackState {
   readonly weapon: WeaponSpec;
   readonly opponentSigRadius: number;
   readonly droneState?: DroneRuntimeState;
   readonly missileFacts?: MissileAttackFacts;
+  readonly spoolCycles?: number;
   readonly locked?: boolean;
 }
 
@@ -77,7 +78,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   private assess(frame: EngagementFrame, ship: ShipState, opponent: ShipState, attack: AttackState): AttackAssessment {
     let assessment: AttackAssessment;
     if (attack.weapon.kind === "turret") {
-      assessment = this.assessTurret(frame, ship, opponent, attack.weapon, attack.opponentSigRadius);
+      assessment = this.assessTurret(frame, ship, opponent, attack.weapon, attack.opponentSigRadius, attack.spoolCycles);
     } else if (attack.weapon.kind === "drone") {
       assessment = this.assessDrone(frame, ship, opponent, attack.weapon, attack.opponentSigRadius, attack.droneState);
     } else {
@@ -88,14 +89,19 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     return assessment;
   }
 
-  private assessTurret(frame: EngagementFrame, ship: ShipState, opponent: ShipState, turret: TurretSpec, opponentSigRadius: number): AttackAssessment {
+  private assessTurret(frame: EngagementFrame, ship: ShipState, opponent: ShipState, turret: TurretSpec, opponentSigRadius: number, spoolCycles: number | undefined): AttackAssessment {
     const paintedSig = opponentSigRadius * this.ewarResolver.sigMultiplier(ship.ewar, frame.distance);
     const boosted = this.boosters.boostedTurret(turret, ship.boosts);
     const effectiveTurret = this.ewarResolver.disruptedTurret(boosted, opponent.ewar, frame.distance);
     const hit = this.hitChance.compute(frame, effectiveTurret, paintedSig);
     const expectedMultiplier = computeExpectedMultiplier(hit.chance);
-    const damage = this.weaponDamageAssessor.assess(effectiveTurret, expectedMultiplier, true);
-    return { boostedWeapon: boosted, effectiveWeapon: effectiveTurret, damage, turret: { hit, expectedMultiplier: damage.application } };
+    const inOptimal = frame.distance <= effectiveTurret.optimal;
+    const spoolFactor = spoolMultiplier(effectiveTurret.spool, spoolCycles ?? 0);
+    // A spooling disintegrator deactivates while its target is beyond optimal; the assessment keeps its
+    // spool-inclusive nominal DPS but zeroes application so no damage is applied. Non-spooling turrets
+    // keep firing beyond optimal (falloff application still applies).
+    const damage = this.weaponDamageAssessor.assess(effectiveTurret, expectedMultiplier, inOptimal || effectiveTurret.spool === undefined, spoolFactor);
+    return { boostedWeapon: boosted, effectiveWeapon: effectiveTurret, damage, turret: { hit, expectedMultiplier: damage.application, spoolFactor, inOptimal } };
   }
 
   private assessMissile(ship: ShipState, missile: MissileSpec, facts: MissileAttackFacts): AttackAssessment {

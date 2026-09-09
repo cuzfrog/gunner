@@ -107,12 +107,22 @@ export interface TrackingApplicationSpec {
   readonly falloff: number; // m
 }
 
+export interface TurretSpoolSpec {
+  readonly perCycle: number; // damageMultiplierBonusPerCycle, fraction added per completed cycle (e.g. 0.07)
+  readonly max: number; // damageMultiplierBonusMax, total fraction bonus cap (e.g. 2.125)
+}
+
+export function spoolMultiplier(spool: TurretSpoolSpec | undefined, cycles: number): number {
+  return spool === undefined ? 1 : 1 + Math.min(spool.max, cycles * spool.perCycle);
+}
+
 export interface TurretSpec extends TrackingApplicationSpec {
   readonly kind: "turret";
   readonly moduleId: TypeId;
   readonly damagePerShot: DamageVector;
   readonly cycleTime: number; // seconds
   readonly turretCount: number;
+  readonly spool?: TurretSpoolSpec; // absent for non-spooling turrets
 }
 
 export interface MissileSpec {
@@ -176,6 +186,8 @@ export interface DamageEvent {
 export interface TurretDamageBreakdown {
   readonly hit: HitChanceBreakdown;
   readonly expectedMultiplier: number;
+  readonly spoolFactor: number; // spool multiplier baked into nominalDps/volley; 1 for non-spooling turrets
+  readonly inOptimal: boolean; // target within effective optimal; spooling turrets deactivate beyond it
 }
 
 export interface MissileApplicationResult {

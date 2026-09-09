@@ -133,6 +133,17 @@ describe("fittingDb", () => {
     expect(rowByName(CHARGES, "Conflagration S")).toMatchObject({ chargeGroup: 375, chargeSize: 1 });
   });
 
+  test("persists spool attributes only on spooling turrets", () => {
+    expect(rowByName(TURRETS, "Light Entropic Disintegrator I")).toMatchObject({ spoolPerCycle: 0.07, spoolMax: 2.125 });
+    expect(rowByName(TURRETS, "Ultratidal Entropic Disintegrator I")).toMatchObject({ spoolPerCycle: 0.05, spoolMax: 1.5 });
+    expect(rowByName(TURRETS, "Gatling Pulse Laser I")).not.toHaveProperty("spoolPerCycle");
+  });
+
+  test("includes precursor spool-cap hull bonuses for assault hulls", () => {
+    expect(HULL_BONUSES["52252" as ShipId]).toContainEqual({ attribute: "turretSpoolMax", magnitude: 20, scalesWithHullSkill: true, moduleSkillId: toTypeId("47871") });
+    expect(HULL_BONUSES["52250" as ShipId]).toContainEqual({ attribute: "turretSpoolMax", magnitude: 20, scalesWithHullSkill: true, moduleSkillId: toTypeId("47870") });
+  });
+
   test("includes hull bonuses for turret, velocity and agility attributes", () => {
     expect(HULL_BONUSES["16242" as ShipId]).toEqual([
       { attribute: "turretOptimal", magnitude: 50, scalesWithHullSkill: false, moduleSkillId: toTypeId("3302") },

@@ -36,17 +36,31 @@ function makeView(shipAAttacks: readonly WeaponAttack[], shipBAttacks: readonly 
   };
 }
 
-function makeAssessment(expectedMultiplier: number, appliedVolleyByType: { em: number; thermal: number; kinetic: number; explosive: number }): AttackAssessment {
+function makeAssessment(expectedMultiplier: number, appliedVolleyByType: { em: number; thermal: number; kinetic: number; explosive: number }, inOptimal = true): AttackAssessment {
   return {
     boostedWeapon: turret,
     effectiveWeapon: turret,
     damage: { nominalDps: 20, appliedDps: 20 * expectedMultiplier, application: expectedMultiplier, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType },
-    turret: { hit, expectedMultiplier },
+    turret: { hit, expectedMultiplier, spoolFactor: 1, inOptimal },
   };
 }
 
-function turretAttack(expectedMultiplier: number, volley: { em: number; thermal: number; kinetic: number; explosive: number }): WeaponAttack {
-  return { weapon: turret, assessment: makeAssessment(expectedMultiplier, volley) };
+function turretAttack(expectedMultiplier: number, volley: { em: number; thermal: number; kinetic: number; explosive: number }, inOptimal = true): WeaponAttack {
+  return { weapon: turret, assessment: makeAssessment(expectedMultiplier, volley, inOptimal) };
+}
+
+const spoolingTurret: TurretSpec = { ...turret, falloff: 0, spool: { perCycle: 0.1, max: 0.5 } };
+
+function spoolingAttack(volley: { em: number; thermal: number; kinetic: number; explosive: number }, inOptimal = true): WeaponAttack {
+  return {
+    weapon: spoolingTurret,
+    assessment: {
+      boostedWeapon: spoolingTurret,
+      effectiveWeapon: spoolingTurret,
+      damage: { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: volley },
+      turret: { hit, expectedMultiplier: 1, spoolFactor: 1, inOptimal },
+    },
+  };
 }
 
 describe("WeaponClockImpl", () => {
@@ -250,5 +264,73 @@ describe("WeaponClockImpl", () => {
     first.step(10, view);
     expect(second.step(2, view)).toHaveLength(0);
     expect(second.step(2, view)).toHaveLength(1);
+  });
+
+  test("events carry the assessment's spool-inclusive volley while spoolCycles advances per cycle", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const view = makeView([spoolingAttack({ em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
+    for (let cycle = 0; cycle < 6; cycle++) {
+      const events = clock.step(5, view);
+      expect(events).toHaveLength(1);
+      // fireControl bakes the spool multiplier into the assessment; the clock only tracks cycle count.
+      expect(events[0].rawByType.kinetic).toBeCloseTo(100, 6);
+      expect(clock.spoolCycles("shipA", 0)).toBe(cycle + 1);
+    }
+  });
+
+  test("spoolCycles is zero before any completed cycle and for unknown weapons", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    expect(clock.spoolCycles("shipA", 0)).toBe(0);
+    clock.step(3, makeView([spoolingAttack({ em: 0, thermal: 0, kinetic: 100, explosive: 0 })]));
+    expect(clock.spoolCycles("shipA", 0)).toBe(0);
+    expect(clock.spoolCycles("shipA", 1)).toBe(0);
+    expect(clock.spoolCycles("shipB", 0)).toBe(0);
+  });
+
+  test("spooling turret deactivates out of optimal: no damage, restarts cycle and spool on re-entry", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const volley = { em: 0, thermal: 0, kinetic: 100, explosive: 0 };
+    const inOptimal = makeView([spoolingAttack(volley)]);
+    const outOfOptimal = makeView([spoolingAttack(volley, false)]);
+    expect(clock.step(5, inOptimal)[0].rawByType.kinetic).toBeCloseTo(100, 6);
+    expect(clock.step(5, inOptimal)[0].rawByType.kinetic).toBeCloseTo(100, 6);
+    expect(clock.spoolCycles("shipA", 0)).toBe(2);
+    expect(clock.step(5, outOfOptimal)).toHaveLength(0);
+    expect(clock.spoolCycles("shipA", 0)).toBe(0);
+    expect(clock.step(4, inOptimal)).toHaveLength(0);
+    expect(clock.step(1, inOptimal)[0].rawByType.kinetic).toBeCloseTo(100, 6);
+    expect(clock.spoolCycles("shipA", 0)).toBe(1);
+  });
+
+  test("non-spooling turret keeps firing beyond optimal", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const view = makeView([turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, false)]);
+    clock.step(5, view);
+    expect(clock.step(5, view)[0].rawByType.kinetic).toBeCloseTo(100, 6);
+    expect(clock.spoolCycles("shipA", 0)).toBe(0);
+  });
+
+  test("spool resets when the lock is lost", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const attack = spoolingAttack({ em: 0, thermal: 0, kinetic: 100, explosive: 0 });
+    const lockedView = makeView([attack]);
+    const unlockingView: EngagementView = { ...makeView([attack]), locks: { shipA: { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: false }, shipB: LOCKED_STATE } };
+    clock.step(5, lockedView);
+    clock.step(5, lockedView);
+    expect(clock.spoolCycles("shipA", 0)).toBe(2);
+    clock.step(1, unlockingView);
+    expect(clock.spoolCycles("shipA", 0)).toBe(0);
+  });
+
+  test("capture and restore preserve spoolCycles", () => {
+    const view = makeView([spoolingAttack({ em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
+    const first = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    first.step(5, view);
+    first.step(5, view);
+    const second = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    second.restore(first.capture());
+    expect(second.spoolCycles("shipA", 0)).toBe(2);
+    expect(second.step(5, view)).toHaveLength(1);
+    expect(second.spoolCycles("shipA", 0)).toBe(3);
   });
 });

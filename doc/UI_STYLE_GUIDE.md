@@ -8,7 +8,7 @@ Sources of truth:
 - `src/pages/index.astro` + `src/components/**/*.astro` — markup structure and class naming
 - `doc/CSS_RULES.md` — DOM styling conventions and class ownership rules
 - `src/ui/renderer.ts` `COLORS` — canvas palette (mirrors CSS tokens)
-- `src/styles/primitives.css` — base primitives: `btn`, `icon-button`, `input-field`, `field-label`, `form-field`, `form-field-row`, `form-slider`, `input-with-unit`, `input-suffix`, `effective-value`, `segmented-control`, `choice-selector`, `overload-button`, `mono`, `popup`, `popup-item`, `trigger`, `truncate`, `chevron`
+- `src/styles/primitives.css` — base primitives: `btn`, `btn-toggle`, `icon-button`, `input-field`, `field-label`, `form-field`, `form-field-row`, `form-slider`, `input-with-unit`, `input-suffix`, `effective-value`, `segmented-control`, `choice-selector`, `overload-button`, `mono`, `popup`, `menu-popup`, `popup-item`, `trigger`, `truncate`, `chevron`
 
 ## Design identity
 
@@ -98,6 +98,7 @@ Base recipe shared by all buttons: inset background, 1px dim border, radius 2px,
 Variants:
 
 - Toggle group buttons (`.lang-toggle`, `.segmented-control`, `.skill-tuner`, `.tracking-unit-toggle`): 10–12px uppercase; active = accent border + accent text (teal in header, orange for sim-state toggles).
+- Standalone pressed-state toggles compose `btn btn-toggle`: teal border/text on `aria-pressed="true"`. Overload toggles compose `btn overload-button` (orange pressed state). Never hand-roll pressed-state chrome in component CSS — extend the primitive instead.
 - Primary action (`.controls button.primary`): blue border/text.
 - Icon-only buttons (`.icon-button`, `.fitting-eye`, `.propulsion-gear`): transparent bg, no border until contextual, dim icon that turns teal on hover, `line-height: 0` for svg alignment.
 - Danger affordance (`.fitting-delete`): dim -> red on hover.

@@ -290,10 +290,7 @@ function createDefenseSkillChoices(container: HTMLElement, onChange: (key: Defen
     row.appendChild(options);
     container.appendChild(row);
     const choice = new ChoiceGroupImpl({ group: options, shape: { buttonClass: "btn" } });
-    options.addEventListener("input", () => {
-      const activeValue = Array.from(options.children).find((b) => b.getAttribute("aria-pressed") === "true")?.getAttribute("data-value") ?? "";
-      onChange(key, skillLevelFromString(activeValue));
-    });
+    options.addEventListener("input", () => onChange(key, skillLevelFromString(choice.value())));
     choices.set(key, choice);
   }
   return choices;
@@ -326,10 +323,7 @@ function createTargetingSkillChoices(container: HTMLElement, onChange: (key: Tar
     row.appendChild(options);
     container.appendChild(row);
     const choice = new ChoiceGroupImpl({ group: options, shape: { buttonClass: "btn" } });
-    options.addEventListener("input", () => {
-      const activeValue = Array.from(options.children).find((b) => b.getAttribute("aria-pressed") === "true")?.getAttribute("data-value") ?? "";
-      onChange(key, skillLevelFromString(activeValue));
-    });
+    options.addEventListener("input", () => onChange(key, skillLevelFromString(choice.value())));
     choices.set(key, choice);
   }
   return choices;

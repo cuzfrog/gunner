@@ -11,20 +11,25 @@ import FooterMechanism from "./FooterMechanism.astro";
   <FooterMechanism accent="teal"
     headingI18n="footer.mech.kinematics.heading" heading="Kinematics"
     textI18n="footer.mech.kinematics.text" text="Ships move with mass and inertia. Transversal, radial, and angular velocity describe ship motion. Acceleration is exponential."
-    linkI18n="footer.mech.kinematics.link" linkText="Velocity"
-    href="https://wiki.eveuniversity.org/Velocity" />
+    links={[
+      { i18n: "footer.mech.kinematics.link", text: "Velocity", href: "https://wiki.eveuniversity.org/Velocity" },
+    ]} />
 
   <FooterMechanism accent="blue"
     headingI18n="footer.mech.speed.heading" heading="Speed"
     textI18n="footer.mech.speed.text" text="Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further."
-    linkI18n="footer.mech.speed.link" linkText="Propulsion"
-    href="https://wiki.eveuniversity.org/Propulsion_equipment" />
+    links={[
+      { i18n: "footer.mech.speed.link", text: "Propulsion", href: "https://wiki.eveuniversity.org/Propulsion_equipment" },
+    ]} />
 
   <FooterMechanism accent="orange"
-    headingI18n="footer.mech.hitChance.heading" heading="Hit chance"
-    textI18n="footer.mech.hitChance.text" text="Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, and distance past optimal over falloff."
-    linkI18n="footer.mech.hitChance.link" linkText="Turret mechanics"
-    href="https://wiki.eveuniversity.org/Turret_mechanics" />
+    headingI18n="footer.mech.weapon.heading" heading="Weapon"
+    links={[
+      { i18n: "footer.mech.weapon.linkTurret", text: "Turret mechanics", href: "https://wiki.eveuniversity.org/Turret_mechanics" },
+      { i18n: "footer.mech.weapon.linkMissiles", text: "Missiles", href: "https://wiki.eveuniversity.org/Missiles" },
+      { i18n: "footer.mech.weapon.linkDrones", text: "Drones", href: "https://wiki.eveuniversity.org/Drones" },
+      { i18n: "footer.mech.weapon.linkDamageTypes", text: "Damage types", href: "https://wiki.eveuniversity.org/Damage_types" },
+    ]} />
 
   <div class="footer-author">
     <div class="footer-author-emblems">

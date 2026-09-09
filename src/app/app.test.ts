@@ -53,7 +53,7 @@ function baseView(): EngineView {
   const assessment: AttackAssessment = {
     boostedWeapon: turret, effectiveWeapon: turret,
     damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
-    turret: { hit, expectedMultiplier: 1 },
+    turret: { hit, expectedMultiplier: 1, spoolFactor: 1, inOptimal: true },
   };
   const engagementView: EngagementView = {
     frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] },

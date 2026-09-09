@@ -1,5 +1,5 @@
 import type { TypeId } from "../gamedata/ids";
-import { type DamageVector, type DamageType, type SigResolutionClass, damageVectorFromPartial, damageVectorScale } from "../sim";
+import { type DamageVector, type DamageType, type SigResolutionClass, type TurretSpoolSpec, damageVectorFromPartial, damageVectorScale } from "../sim";
 import { FITTING_DB, type ChargeStats, type FittingDb, type TurretStats } from "../gamedata/fittingDb";
 import { type DamageBreakdown, chargeDamageByType } from "./damageBreakdown";
 
@@ -22,6 +22,7 @@ export interface ImportedTurret {
   readonly damagePerShot: DamageVector;
   readonly cycleTime: number;
   readonly turretCount: number;
+  readonly spool?: TurretSpoolSpec; // resolved spool (per-cycle + hull-adjusted max), absent for non-spooling turrets
   readonly damageBreakdown: DamageBreakdown;
 }
 

@@ -27,6 +27,7 @@ export interface ChoiceGroupConfig {
 
 export interface ChoiceGroup {
   set(value: string): void;
+  value(): string;
   render(options: readonly ChoiceGroupOption[], selected: string): void;
 }
 
@@ -49,6 +50,11 @@ export class ChoiceGroupImpl implements ChoiceGroup {
       const active = button.getAttribute("data-value") === value;
       button.setAttribute("aria-pressed", String(active));
     }
+  }
+
+  value(): string {
+    if (this.select) return this.select.value;
+    return this.findActiveValue();
   }
 
   render(options: readonly ChoiceGroupOption[], selected: string): void {

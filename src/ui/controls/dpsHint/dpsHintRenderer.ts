@@ -21,6 +21,7 @@ export interface DpsHintFactorRow {
 export interface DpsHintSummary {
   readonly ammo: number;
   readonly multiplier: number;
+  readonly spoolMultiplier?: number; // runtime spool-up multiplier, present only for spooling turrets
   readonly count: number;
   readonly volley: number;
   readonly cycleTime: number;
@@ -115,9 +116,15 @@ function renderFactorSource(source: string): HTMLElement {
 }
 
 function renderSummary(summary: DpsHintSummary, weaponKind: WeaponKind, t: (key: string) => string): HTMLElement {
-  const volleyFormula = `${formatWithCommas(summary.ammo, 1)} × ${formatMultiplier(summary.multiplier)} × ${summary.count} = ${formatWithCommas(summary.volley, 1)}`;
+  const spoolTerm = summary.spoolMultiplier !== undefined ? ` × ${formatMultiplier(summary.spoolMultiplier)}` : "";
+  const volleyFormula = `${formatWithCommas(summary.ammo, 1)} × ${formatMultiplier(summary.multiplier)}${spoolTerm} × ${summary.count} = ${formatWithCommas(summary.volley, 1)}`;
   const dpsLabel = t(`dpsHint.${weaponKind}Dps`);
+  const spoolRow = summary.spoolMultiplier === undefined ? undefined : html`<div class="dps-hint-row dps-hint-summary-row">
+    <span class="dps-hint-label">${t("dpsHint.spool")}</span>
+    <span class="dps-hint-value">x${formatMultiplier(summary.spoolMultiplier)}</span>
+  </div>`;
   return html`<div class="dps-hint-summary">
+    ${spoolRow}
     <div class="dps-hint-row dps-hint-summary-row">
       <span class="dps-hint-label">${t("dpsHint.volley")}</span>
       <span class="dps-hint-value">${volleyFormula}</span>

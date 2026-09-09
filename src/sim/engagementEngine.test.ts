@@ -38,7 +38,7 @@ function baseView(): EngagementView {
   const assessment: AttackAssessment = {
     boostedWeapon: turret, effectiveWeapon: turret,
     damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
-    turret: { hit, expectedMultiplier: 1 },
+    turret: { hit, expectedMultiplier: 1, spoolFactor: 1, inOptimal: true },
   };
   return {
     frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] },
@@ -113,7 +113,7 @@ function mockWorld() {
     lockClock: vi.mocked<LockClock>({ reset: vi.fn(), step: vi.fn(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), states: vi.fn(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), capture: vi.fn(lockClockState), restore: vi.fn() }),
     droneSimulator: vi.mocked<DroneSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), states: vi.fn(() => []), capture: vi.fn(droneSimulatorState), restore: vi.fn() }),
     missileSimulator: vi.mocked<MissileSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(() => []), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })), capture: vi.fn(missileSimulatorState), restore: vi.fn() }),
-    weaponClock: vi.mocked<WeaponClock>({ reset: vi.fn(), step: vi.fn(() => []), capture: vi.fn(weaponClockState), restore: vi.fn() }),
+    weaponClock: vi.mocked<WeaponClock>({ reset: vi.fn(), step: vi.fn(() => []), capture: vi.fn(weaponClockState), restore: vi.fn(), spoolCycles: vi.fn(() => 0) }),
     defenseSimulator: vi.mocked<DefenseSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), flushPendingDamage: vi.fn(), view: vi.fn(() => emptyDefenseView), inflictedTotals: vi.fn(zeroTotals), capture: vi.fn(defenseSimulatorState), restore: vi.fn() }),
   };
 }

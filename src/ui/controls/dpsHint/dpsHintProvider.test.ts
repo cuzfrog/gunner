@@ -2,9 +2,10 @@ import { type FakeElement, fakeDocument } from "../../testing";
 import type { DamageBreakdown, ImportedDrone, ImportedLauncher, ImportedTurret } from "../../../fitting";
 import { toTypeId } from "../../../gamedata/ids";
 import type { ItemNameCatalog } from "../../../gamedata";
-import type { DamageAssessment, DroneSpec, MissileSpec, TurretSpec, WeaponDamageAssessor, WeaponSpec } from "../../../sim";
+import type { DamageAssessment, DroneSpec, MissileSpec, TurretSpec, WeaponAttack, WeaponDamageAssessor, WeaponSpec } from "../../../sim";
 import { SIG_RESOLUTIONS, ZERO_DAMAGE } from "../../../sim";
 import type { I18n } from "../../i18n";
+import type { ViewStream } from "../../viewStream";
 import type { DroneController } from "../drone";
 import type { LauncherController } from "../launcher";
 import type { TurretController } from "../turret";
@@ -90,7 +91,7 @@ function makeItemNameCatalog(): ItemNameCatalog {
   } as unknown as ItemNameCatalog;
 }
 
-function makeTurretSpec(turret: ImportedTurret): TurretSpec {
+function makeTurretSpec(turret: ImportedTurret, spool?: TurretSpec["spool"]): TurretSpec {
   return {
     kind: "turret",
     moduleId: toTypeId("1"),
@@ -101,6 +102,7 @@ function makeTurretSpec(turret: ImportedTurret): TurretSpec {
     damagePerShot: turret.damagePerShot,
     cycleTime: turret.cycleTime,
     turretCount: turret.turretCount,
+    spool,
   };
 }
 
@@ -143,8 +145,16 @@ function makeWeaponDamageAssessor(assessment: DamageAssessment): WeaponDamageAss
   return { assess: vi.fn((_spec: WeaponSpec, _factor: number, _inRange: boolean) => assessment) } as unknown as WeaponDamageAssessor;
 }
 
-function makeTurretController(turret?: ImportedTurret): TurretController {
-  return { turret: vi.fn(() => turret), currentTurretSpec: vi.fn(() => turret ? makeTurretSpec(turret) : undefined) } as unknown as TurretController;
+function makeTurretController(turret?: ImportedTurret, spool?: TurretSpec["spool"]): TurretController {
+  return { turret: vi.fn(() => turret), currentTurretSpec: vi.fn(() => turret ? makeTurretSpec(turret, spool) : undefined) } as unknown as TurretController;
+}
+
+function makeViewStream(attacks: Record<"shipA" | "shipB", readonly WeaponAttack[]> = { shipA: [], shipB: [] }): ViewStream {
+  return {
+    currentView: vi.fn(() => ({ weaponAttacks: attacks })),
+    onViewUpdated: vi.fn(),
+    offViewUpdated: vi.fn(),
+  } as unknown as ViewStream;
 }
 
 function makeLauncherController(launcher?: ImportedLauncher): LauncherController {
@@ -195,6 +205,7 @@ function makeDeps(overrides: Partial<DpsHintProviderDeps> = {}): DpsHintProvider
     itemNameCatalog: makeItemNameCatalog(),
     dpsHintRenderer: makeRenderer(),
     weaponDamageAssessor: makeWeaponDamageAssessor({ nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE }),
+    viewStream: makeViewStream(),
     ...overrides,
   };
 }
@@ -447,7 +458,7 @@ describe("DpsHintProviderImpl", () => {
     const anchor = makeAnchor("shipA");
     const container = globalThis.document.createElement("div");
     provider.render(anchor, container);
-    expect(assessor.assess).toHaveBeenCalledWith(spec, 1, true);
+    expect(assessor.assess).toHaveBeenCalledWith(spec, 1, true, 1);
     const dpsRows = (container as unknown as FakeElement).querySelectorAll(".dps-hint-dps-row");
     expect(dpsRows.length).toBe(1);
     const dpsValue = elementChildren(dpsRows[0])[1];
@@ -456,6 +467,49 @@ describe("DpsHintProviderImpl", () => {
     expect(volleyRows.length).toBe(2);
     const volleyValue = elementChildren(volleyRows[0])[1];
     expect(volleyValue.textContent).toContain(assessment.volley.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+  });
+
+  test("spooling turret reads the runtime spool factor from the view and shows it in the popup", () => {
+    const turret = makeTurret();
+    const spool = { perCycle: 0.07, max: 2.125 };
+    const spec = makeTurretSpec(turret, spool);
+    const viewAttack = {
+      weapon: spec,
+      assessment: { turret: { spoolFactor: 1.21 } },
+    } as unknown as WeaponAttack;
+    const assessor = makeWeaponDamageAssessor({ nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE });
+    const provider = new DpsHintProviderImpl(makeDeps({
+      turretControllers: { shipA: makeTurretController(turret, spool), shipB: makeTurretController() },
+      weaponDamageAssessor: assessor,
+      viewStream: makeViewStream({ shipA: [viewAttack], shipB: [] }),
+    }));
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div") as unknown as FakeElement;
+    provider.render(anchor, container as unknown as HTMLElement);
+    expect(assessor.assess).toHaveBeenCalledWith(spec, 1, true, 1.21);
+    const summaryRows = container.querySelectorAll(".dps-hint-summary-row");
+    expect(summaryRows.length).toBe(3);
+    const spoolRow = elementChildren(summaryRows[0] as FakeElement);
+    expect(spoolRow[0].textContent).toBe("dpsHint.spool");
+    expect(spoolRow[1].textContent).toBe("x1.21");
+  });
+
+  test("non-spooling turret omits the spool row even when the view carries attacks", () => {
+    const turret = makeTurret();
+    const spec = makeTurretSpec(turret);
+    const viewAttack = { weapon: spec, assessment: { turret: { spoolFactor: 1 } } } as unknown as WeaponAttack;
+    const assessor = makeWeaponDamageAssessor({ nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE });
+    const provider = new DpsHintProviderImpl(makeDeps({
+      turretControllers: { shipA: makeTurretController(turret), shipB: makeTurretController() },
+      weaponDamageAssessor: assessor,
+      viewStream: makeViewStream({ shipA: [viewAttack], shipB: [] }),
+    }));
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div") as unknown as FakeElement;
+    provider.render(anchor, container as unknown as HTMLElement);
+    expect(assessor.assess).toHaveBeenCalledWith(spec, 1, true, 1);
+    const summaryRows = container.querySelectorAll(".dps-hint-summary-row");
+    expect(summaryRows.length).toBe(2);
   });
 
   test("launcher DPS comes from WeaponDamageAssessor with the missile spec", () => {
