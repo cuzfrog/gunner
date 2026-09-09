@@ -10,6 +10,7 @@ export const FITTING_ABADDON = "data/ship-fittings/Abaddon/Pulse_Armor_Abaddon.t
 export const FITTING_CERBERUS = "data/ship-fittings/Cerberus/Missile_Shield_Cerberus.txt";
 export const FITTING_VIGIL_ROCKET = "data/ship-fittings/Vigil_Fleet_Issue/Scram_kite_Vigil_Fleet_Issue.txt";
 export const FITTING_CURSE_EWAR = "data/ship-fittings/Curse/Ewar_Armor_Curse.txt";
+export const FITTING_ISHTAR = "data/ship-fittings/Ishtar/Drone_Shield_Ishtar.txt";
 
 const fittingCache = new Map<string, string>();
 

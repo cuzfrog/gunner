@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { test, expect, importFittingViaClipboard, loadFittingText, FITTING_CURSE_EWAR, FITTING_ISHTAR } from "./fixtures";
 
 test.describe("profile management", () => {
   test("create new profile via new-profile popup", async ({ cleanPage: page }) => {
@@ -93,5 +93,19 @@ test.describe("profile management", () => {
     await page.locator("#confirm-ok").click();
     await expect(page.locator("#confirm-popup")).toBeHidden();
     await expect(page.locator("#initial-distance")).toHaveValue("20000");
+  });
+
+  test("save keeps a fitted profile listed and selected after reload", async ({ cleanPage: page }) => {
+    await page.locator("#profile-new").click();
+    await page.locator("#new-profile-name").fill("FittedSave");
+    await page.locator("#new-profile-confirm").click();
+    // Ishtar drone fit computes a negative mwdSigBloomMultiplier; regression guard
+    // for the dropped-save bug where read validation rejected freshly written profiles.
+    await importFittingViaClipboard(page, "ship-a", loadFittingText(FITTING_ISHTAR));
+    await importFittingViaClipboard(page, "ship-b", loadFittingText(FITTING_CURSE_EWAR));
+    await page.locator("#profile-save").click();
+    await expect(page.locator("#profile-select-label")).toContainText("FittedSave");
+    await page.reload();
+    await expect(page.locator("#profile-select-label")).toContainText("FittedSave");
   });
 });

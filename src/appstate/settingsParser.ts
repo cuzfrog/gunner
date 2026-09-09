@@ -134,6 +134,11 @@ export class SettingsParser {
 
   profileFromUnknown(value: unknown): ProfileSettingsWire | null {
     if (!isRecord(value)) return null;
+    // A record at the current version was written by this build from strongly typed
+    // ProfileSettings: it is trusted verbatim, so persisted data can never be dropped
+    // by read-side validators drifting from the domain model. Validation and
+    // migrations exist to carry older versions forward.
+    if (isCurrentVersionProfile(value)) return stripDisplayPreferences(value);
     const record: Record<string, unknown> = { ...value };
     normalizeLegacySettings(record);
     this.normalizeAndDefaultAggressivity(record);
@@ -436,6 +441,10 @@ function isWeaponRangeVisibilityValue(value: unknown): value is WeaponRangeVisib
 
 function isProfileStorage(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function isCurrentVersionProfile(value: Record<string, unknown>): value is ProfileSettingsWire {
+  return value.version === USER_SETTINGS_VERSION;
 }
 
 function isSessionSettings(value: UserSettingsWire | ProfileSettingsWire | SessionSettings): value is SessionSettings {
