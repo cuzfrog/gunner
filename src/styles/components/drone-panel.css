@@ -39,7 +39,7 @@
   flex-direction: column;
   gap: 4px;
   padding-bottom: 7px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-dim);
   margin-bottom: 7px;
 }
 
@@ -80,14 +80,14 @@
   padding: 0 4px;
   font-size: 13px;
   line-height: 1;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-dim);
   background: var(--bg-inset);
   color: var(--text-primary);
   cursor: pointer;
 }
 
 .drone-stepper-btn:hover {
-  background: var(--bg-hover);
+  background: var(--bg-inset);
 }
 
 .drone-stepper-minus {
@@ -110,14 +110,14 @@
   padding: 0 4px;
   font-size: 12px;
   line-height: 1;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-dim);
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
 }
 
 .drone-remove-btn:hover {
-  background: var(--bg-hover);
+  background: var(--bg-inset);
   color: var(--text-primary);
 }
 

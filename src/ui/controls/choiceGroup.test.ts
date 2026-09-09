@@ -56,6 +56,13 @@ describe("ChoiceGroup (static buttons)", () => {
     expect(buttons[1].setAttribute).toHaveBeenCalledWith("aria-pressed", "true");
   });
 
+  test("value returns the select value when select-backed", () => {
+    const { group, select } = fakeGroup(["S", "M", "L", "XL"], "M");
+    const choice = new ChoiceGroupImpl({ group, select, staticValues: ["S", "M", "L", "XL"] });
+
+    expect(choice.value()).toBe("M");
+  });
+
   test("ignores clicks on buttons whose value is not in the configured list", () => {
     const { group, select, buttons } = fakeGroup(["S", "M", "L", "XL"], "S", ["?"]);
     const choice = new ChoiceGroupImpl({ group, select, staticValues: ["S", "M", "L", "XL"] });
@@ -84,6 +91,14 @@ describe("ChoiceGroup.render", () => {
     expect(group.children[0].getAttribute("data-value")).toBe("a");
     expect(group.children[0].getAttribute("aria-pressed")).toBe("true");
     expect(group.children[1].getAttribute("aria-pressed")).toBe("false");
+  });
+
+  test("value returns the active button value for rendered groups", () => {
+    const group = document.createElement("div") as unknown as HTMLElement;
+    const choice = new ChoiceGroupImpl({ group, shape });
+    choice.render([{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }], "b");
+
+    expect(choice.value()).toBe("b");
   });
 
   test("sets button class from shape", () => {

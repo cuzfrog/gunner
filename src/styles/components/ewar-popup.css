@@ -1,11 +1,8 @@
 @layer components {
-.ewar-popup { }
-
 .ewar-row {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 2px;
 }
 
 .ewar-module-toggle {
@@ -14,12 +11,14 @@
   gap: 9px;
   flex: 1 1 auto;
   min-width: 0;
-  padding: 4px;
+  min-height: 26px;
+  padding: 2px 7px;
   background: transparent;
   border: 1px solid transparent;
   border-radius: 2px;
   color: var(--text-primary);
   font: inherit;
+  line-height: 1;
   text-align: left;
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;

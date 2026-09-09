@@ -5,6 +5,7 @@
   left: anchor(center);
   top: anchor(bottom);
   translate: -50% 4px;
+  /* stylelint-disable-next-line declaration-property-value-no-unknown -- valid CSS anchor positioning, not yet in stylelint-config-standard */
   position-try-fallbacks: --hover-hint-above, shift-inline;
   z-index: var(--z-popup);
   max-width: 308px;
@@ -27,6 +28,7 @@
 
 @position-try --hover-hint-above {
   top: anchor(top);
+  /* stylelint-disable-next-line at-rule-descriptor-no-unknown -- valid CSS anchor positioning, not yet in stylelint-config-standard */
   translate: -50% calc(-100% - 4px);
 }
 

@@ -1,6 +1,4 @@
 @layer components {
-.targeting-popup { }
-
 .targeting-attr-row {
   display: flex;
   align-items: center;

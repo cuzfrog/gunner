@@ -1,6 +1,4 @@
 @layer components {
-.defense-popup { }
-
 .defense-layer-row {
   display: flex;
   align-items: center;
@@ -100,52 +98,6 @@
   text-align: right;
 }
 
-.defense-damage-toggle {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 4px 9px;
-  font-size: 13px;
-  color: var(--text-primary);
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
-  text-align: left;
-}
-
-.defense-damage-toggle:hover {
-  border-color: var(--accent-teal);
-}
-
-.defense-damage-toggle[aria-pressed="true"] {
-  border-color: var(--accent-teal);
-  color: var(--accent-teal);
-}
-
-.defense-repair-mode-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 9px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.defense-repair-mode-toggle:hover {
-  border-color: var(--accent-teal);
-}
-
-.defense-repair-mode-toggle[aria-pressed="true"] {
-  border-color: var(--accent-teal);
-  color: var(--accent-teal);
-}
-
 .defense-module-row {
   display: flex;
   align-items: center;
@@ -162,7 +114,7 @@
 .defense-module-status {
   flex: 1 1 auto;
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-dim);
 }
 
 .defense-module-controls {
@@ -173,46 +125,6 @@
 }
 
 .defense-module-toggle {
-  padding: 3px 9px;
   font-size: 12px;
-  color: var(--text-secondary);
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.defense-module-toggle:hover {
-  border-color: var(--accent-teal);
-}
-
-.defense-module-toggle[aria-pressed="true"] {
-  border-color: var(--accent-teal);
-  color: var(--accent-teal);
-}
-
-.defense-module-overload {
-  padding: 3px 9px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.defense-module-overload:hover {
-  border-color: var(--accent-orange);
-}
-
-.defense-module-overload[aria-pressed="true"] {
-  border-color: var(--accent-orange);
-  color: var(--accent-orange);
-}
-
-.defense-module-toggle:disabled,
-.defense-module-overload:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 }

@@ -4,10 +4,11 @@ import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation } 
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import { formatWithCommas } from "../controlsFormat";
+import { ChoiceGroupImpl } from "../choiceGroup";
 import { DAMAGE_ICON_URLS, DAMAGE_TYPE_ORDER } from "../damageTypeIcons";
 import { html } from "../markup";
 import type { PopupGroup } from "../popup";
-import { PopupField, SectionBlockImpl } from "../shared";
+import { IconActionImpl, PopupField, SectionBlockImpl, spriteIcon } from "../shared";
 import type { Side } from "../side";
 import type { DefenseController, DefenseEls } from "./defenseControllerContract";
 
@@ -24,8 +25,8 @@ export class DefenseControllerImpl implements DefenseController {
   private readonly repairModeState: Record<Side, StoredRepairMode> = { shipA: "auto", shipB: "auto" };
   private readonly repairerActivationState: Record<Side, StoredRepairerActivation[]> = { shipA: [], shipB: [] };
   private readonly rahActivationState: Record<Side, StoredRahActivation | undefined> = { shipA: undefined, shipB: undefined };
-  private readonly damageToggleButtons: Record<Side, HTMLButtonElement | undefined> = { shipA: undefined, shipB: undefined };
   private readonly sectionBlock: SectionBlockImpl;
+  private readonly overloadAction: IconActionImpl;
   private readonly fields: Record<Side, PopupField>;
   private defenseView: DefenseView | undefined;
 
@@ -35,6 +36,11 @@ export class DefenseControllerImpl implements DefenseController {
     this.events = deps.events;
     this.defenseAssessor = deps.defenseAssessor;
     this.sectionBlock = new SectionBlockImpl();
+    this.overloadAction = new IconActionImpl({
+      buttonClass: "overload-button btn",
+      iconSvg: spriteIcon("overload", 16, "currentColor", "overload-button-icon"),
+      hint: "",
+    });
     this.fields = {
       shipA: new PopupField({ els: deps.els.shipA, popupGroup: deps.popupGroup }),
       shipB: new PopupField({ els: deps.els.shipB, popupGroup: deps.popupGroup }),
@@ -96,7 +102,6 @@ export class DefenseControllerImpl implements DefenseController {
 
   setDamageEnabled(side: Side, enabled: boolean): void {
     this.damageEnabledState[side] = enabled;
-    this.renderDamageEnabled(side);
     this.events.emitConfigInvalidated();
   }
 
@@ -197,7 +202,6 @@ export class DefenseControllerImpl implements DefenseController {
     this.renderRepairModeSection(section, side);
     this.renderRepairerActivationSection(section, side, spec);
     this.renderRahActivationSection(section, side, spec);
-    field.close();
   }
 
   private renderResistsSection(section: HTMLElement, spec: DefenseSpec): void {
@@ -269,32 +273,33 @@ export class DefenseControllerImpl implements DefenseController {
 
   private renderDamageEnabledSection(section: HTMLElement, side: Side): void {
     const enabled = this.damageEnabledState[side];
-    const label = this.i18n.t("label.damageEnabled");
-    const button = html`<button class="defense-damage-toggle" aria-pressed=${enabled ? "true" : "false"}>${label}: ${enabled ? this.i18n.t("defense.damageEnabled.on") : this.i18n.t("defense.damageEnabled.off")}</button>`;
-    button.addEventListener("click", () => {
-      this.setDamageEnabled(side, !this.damageEnabledState[side]);
-    });
-    this.damageToggleButtons[side] = button as unknown as HTMLButtonElement;
-    const block = this.sectionBlock.create(this.i18n.t("label.damageEnabled"), [button]);
+    const group = html`<div class="segmented-control"></div>` as unknown as HTMLElement;
+    const choice = new ChoiceGroupImpl({ group, shape: { buttonClass: "btn" } });
+    choice.render([
+      { value: "on", label: this.i18n.t("defense.damageEnabled.on") },
+      { value: "off", label: this.i18n.t("defense.damageEnabled.off") },
+    ], enabled ? "on" : "off");
+    group.addEventListener("input", () => this.setDamageEnabled(side, choice.value() !== "off"));
+    const block = this.sectionBlock.create(this.i18n.t("label.damageEnabled"), [group]);
     section.appendChild(block);
-  }
-
-  private renderDamageEnabled(side: Side): void {
-    const button = this.damageToggleButtons[side];
-    if (!button) return;
-    const enabled = this.damageEnabledState[side];
-    const label = this.i18n.t("label.damageEnabled");
-    button.setAttribute("aria-pressed", enabled ? "true" : "false");
-    button.textContent = `${label}: ${enabled ? this.i18n.t("defense.damageEnabled.on") : this.i18n.t("defense.damageEnabled.off")}`;
   }
 
   private renderRepairModeSection(section: HTMLElement, side: Side): void {
     const mode = this.repairModeState[side];
-    const autoButton = html`<button class="defense-repair-mode-toggle" aria-pressed=${mode === "auto" ? "true" : "false"}>${this.i18n.t("defense.repairMode.auto")}</button>`;
-    const manualButton = html`<button class="defense-repair-mode-toggle" aria-pressed=${mode === "manual" ? "true" : "false"}>${this.i18n.t("defense.repairMode.manual")}</button>`;
-    autoButton.addEventListener("click", () => { this.setRepairMode(side, "auto"); this.renderSide(side); });
-    manualButton.addEventListener("click", () => { this.setRepairMode(side, "manual"); this.renderSide(side); });
-    const block = this.sectionBlock.create(this.i18n.t("label.repairMode"), [autoButton, manualButton]);
+    const group = html`<div class="segmented-control"></div>` as unknown as HTMLElement;
+    const choice = new ChoiceGroupImpl({ group, shape: { buttonClass: "btn" } });
+    choice.render([
+      { value: "auto", label: this.i18n.t("defense.repairMode.auto") },
+      { value: "manual", label: this.i18n.t("defense.repairMode.manual") },
+    ], mode);
+    group.addEventListener("input", () => {
+      const activeValue = choice.value();
+      if (activeValue === "auto" || activeValue === "manual") {
+        this.setRepairMode(side, activeValue);
+        this.renderSide(side);
+      }
+    });
+    const block = this.sectionBlock.create(this.i18n.t("label.repairMode"), [group]);
     section.appendChild(block);
   }
 
@@ -307,10 +312,9 @@ export class DefenseControllerImpl implements DefenseController {
       const repairer = spec.repairers[i];
       const repairerView = repairerViews[i];
       const activation = this.repairerActivationState[side][i] ?? { active: true, overloaded: true };
-      const activeButton = html`<button class="defense-module-toggle" aria-pressed=${activation.active ? "true" : "false"} disabled=${autoMode ? "" : false}>${this.i18n.t(activation.active ? "defense.module.active" : "defense.module.inactive")}</button>`;
-      const overloadButton = html`<button class="defense-module-overload" aria-pressed=${activation.overloaded ? "true" : "false"} disabled=${autoMode ? "" : false}>${this.i18n.t("defense.module.overload")}</button>`;
+      const activeButton = html`<button class="btn btn-toggle defense-module-toggle" aria-pressed=${activation.active ? "true" : "false"} disabled=${autoMode ? "" : false}>${this.i18n.t(activation.active ? "defense.module.active" : "defense.module.inactive")}</button>`;
+      const overloadButton = this.createOverloadButton(autoMode, activation.overloaded, this.i18n.t(layerLabelKey(repairer.layer)), () => { this.setRepairerActivation(side, i, activation.active, !activation.overloaded); this.renderSide(side); });
       activeButton.addEventListener("click", () => { this.setRepairerActivation(side, i, !activation.active, activation.overloaded); this.renderSide(side); });
-      overloadButton.addEventListener("click", () => { this.setRepairerActivation(side, i, activation.active, !activation.overloaded); this.renderSide(side); });
       const statusParts: string[] = [];
       if (repairerView) {
         statusParts.push(`${this.i18n.t("defense.module.hpPerSecond")} ${repairerView.hpPerSecond.toFixed(1)}`);
@@ -330,13 +334,22 @@ export class DefenseControllerImpl implements DefenseController {
     if (!spec.rah) return;
     const autoMode = this.repairModeState[side] === "auto";
     const activation = this.rahActivationState[side] ?? { active: true, overloaded: true };
-    const activeButton = html`<button class="defense-module-toggle" aria-pressed=${activation.active ? "true" : "false"} disabled=${autoMode ? "" : false}>${this.i18n.t(activation.active ? "defense.module.active" : "defense.module.inactive")}</button>`;
-    const overloadButton = html`<button class="defense-module-overload" aria-pressed=${activation.overloaded ? "true" : "false"} disabled=${autoMode ? "" : false}>${this.i18n.t("defense.module.overload")}</button>`;
+    const activeButton = html`<button class="btn btn-toggle defense-module-toggle" aria-pressed=${activation.active ? "true" : "false"} disabled=${autoMode ? "" : false}>${this.i18n.t(activation.active ? "defense.module.active" : "defense.module.inactive")}</button>`;
+    const overloadButton = this.createOverloadButton(autoMode, activation.overloaded, this.i18n.t("defense.rah"), () => { this.setRahActivation(side, activation.active, !activation.overloaded); this.renderSide(side); });
     activeButton.addEventListener("click", () => { this.setRahActivation(side, !activation.active, activation.overloaded); this.renderSide(side); });
-    overloadButton.addEventListener("click", () => { this.setRahActivation(side, activation.active, !activation.overloaded); this.renderSide(side); });
     const row = html`<div class="defense-module-row"><span class="defense-module-name">${this.i18n.t("defense.rah")}</span><span class="defense-module-controls">${activeButton}${overloadButton}</span></div>`;
     const block = this.sectionBlock.create(this.i18n.t("defense.rah"), [row]);
     section.appendChild(block);
+  }
+
+  private createOverloadButton(disabled: boolean, overloaded: boolean, moduleName: string, onToggle: () => void): HTMLButtonElement {
+    const label = `${this.i18n.t("label.overload")} ${moduleName}`;
+    const button = this.overloadAction.create(onToggle);
+    button.setAttribute("aria-pressed", String(overloaded));
+    button.setAttribute("data-hint", label);
+    button.setAttribute("aria-label", label);
+    if (disabled) button.setAttribute("disabled", "");
+    return button;
   }
 
   private updateSummary(side: Side): void {
