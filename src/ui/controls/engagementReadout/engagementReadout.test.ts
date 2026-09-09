@@ -99,12 +99,12 @@ function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: num
   const shipAAttack: AttackAssessment = {
     boostedWeapon: DUMMY_TURRET, effectiveWeapon: DUMMY_TURRET,
     damage: shipADamage,
-    turret: { hit: shipAHit, expectedMultiplier: 0 },
+    turret: { hit: shipAHit, expectedMultiplier: 0, spoolFactor: 1, inOptimal: true },
   };
   const shipBAttack: AttackAssessment = {
     boostedWeapon: DUMMY_TURRET, effectiveWeapon: DUMMY_TURRET,
     damage: { nominalDps: 0, appliedDps: 0, application: 0, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
-    turret: { hit: shipBHit, expectedMultiplier: 0 },
+    turret: { hit: shipBHit, expectedMultiplier: 0, spoolFactor: 1, inOptimal: true },
   };
   const shipALock = overrides.shipALock ?? IDLE_LOCK;
   const defenses = { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT };

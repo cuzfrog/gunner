@@ -49,6 +49,31 @@ describe("WeaponDamageAssessorImpl", () => {
       expect(result.nominalDps).toBeCloseTo(80, 10);
       expect(result.volley).toBe(400);
     });
+
+    test("rawDamageMultiplier scales volley fields at the source, application unchanged", () => {
+      const result = assessor.assess(turret, 0.5, true, 1.3);
+      expect(result.baseVolleyByType.kinetic).toBeCloseTo(520, 10);
+      expect(result.volley).toBeCloseTo(520, 10);
+      expect(result.nominalDps).toBeCloseTo(104, 10);
+      expect(result.appliedVolleyByType.kinetic).toBeCloseTo(260, 10);
+      expect(result.appliedByType.kinetic).toBeCloseTo(52, 10);
+      expect(result.appliedDps).toBeCloseTo(52, 10);
+      expect(result.application).toBeCloseTo(0.5, 10);
+    });
+
+    test("rawDamageMultiplier defaults to 1", () => {
+      const result = assessor.assess(turret, 1, true, 1);
+      expect(result.baseVolleyByType.kinetic).toBe(400);
+      expect(result.nominalDps).toBeCloseTo(80, 10);
+    });
+
+    test("rawDamageMultiplier composes with inRange=false zeroing", () => {
+      const result = assessor.assess(turret, 0.8, false, 1.3);
+      expect(result.appliedDps).toBe(0);
+      expect(result.appliedVolleyByType).toEqual(ZERO_DAMAGE);
+      expect(result.baseVolleyByType.kinetic).toBeCloseTo(520, 10);
+      expect(result.nominalDps).toBeCloseTo(104, 10);
+    });
   });
 
   describe("missile", () => {

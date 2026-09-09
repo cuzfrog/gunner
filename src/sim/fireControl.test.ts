@@ -296,6 +296,19 @@ describe("EngagementEvaluatorImpl", () => {
     expect(result.shipA?.turret?.hit).toEqual(hit);
   });
 
+  test("turret breakdown reports out of optimal beyond the effective optimal", () => {
+    const { evaluator } = makeEvaluator();
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40 } });
+    expect(result.shipA?.turret?.inOptimal).toBe(false);
+  });
+
+  test("turret breakdown reports in optimal at the effective optimal", () => {
+    const { evaluator } = makeEvaluator();
+    const closeFrame = { ...frame, distance: 4000 };
+    const result = evaluator.evaluate(closeFrame, { shipA: { weapon: turret, opponentSigRadius: 40 } });
+    expect(result.shipA?.turret?.inOptimal).toBe(true);
+  });
+
   test("locked=false zeros appliedDps while preserving nominalDps", () => {
     const { evaluator } = makeEvaluator();
     const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40, locked: false } });
@@ -316,5 +329,57 @@ describe("EngagementEvaluatorImpl", () => {
     const { evaluator } = makeEvaluator();
     const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40 } });
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(turretDamageResult.appliedDps, 10);
+  });
+
+  test("spooling turret bakes the spool multiplier into nominalDps and reports spoolFactor", () => {
+    const { ewarResolver, evaluator } = makeEvaluator();
+    vi.mocked(ewarResolver.disruptedTurret).mockReturnValue({ ...effectiveTurret, spool: { perCycle: 0.1, max: 0.5 } });
+    const closeFrame = { ...frame, distance: 4000 };
+    const result = evaluator.evaluate(closeFrame, { shipA: { weapon: turret, opponentSigRadius: 40, spoolCycles: 3 } });
+    expect(result.shipA?.damage.nominalDps).toBeCloseTo(26, 10); // 100 * 1.3 / 5
+    expect(result.shipA?.damage.appliedDps).toBeCloseTo(26 * expectedMultiplier, 10);
+    expect(result.shipA?.turret?.spoolFactor).toBeCloseTo(1.3, 10);
+  });
+
+  test("spool multiplier caps at the spool max", () => {
+    const { ewarResolver, evaluator } = makeEvaluator();
+    vi.mocked(ewarResolver.disruptedTurret).mockReturnValue({ ...effectiveTurret, spool: { perCycle: 0.1, max: 0.5 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40, spoolCycles: 10 } });
+    expect(result.shipA?.damage.nominalDps).toBeCloseTo(30, 10); // 100 * 1.5 / 5
+    expect(result.shipA?.turret?.spoolFactor).toBeCloseTo(1.5, 10);
+  });
+
+  test("deactivated spooling turret zeroes applied DPS but keeps spool-inclusive nominalDps", () => {
+    const { ewarResolver, evaluator } = makeEvaluator();
+    vi.mocked(ewarResolver.disruptedTurret).mockReturnValue({ ...effectiveTurret, spool: { perCycle: 0.1, max: 0.5 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40, spoolCycles: 3 } });
+    expect(result.shipA?.turret?.inOptimal).toBe(false);
+    expect(result.shipA?.damage.nominalDps).toBeCloseTo(26, 10);
+    expect(result.shipA?.damage.appliedDps).toBe(0);
+    expect(result.shipA?.damage.application).toBe(0);
+  });
+
+  test("active spooling turret inside optimal applies the spool-inclusive volley", () => {
+    const { ewarResolver, evaluator } = makeEvaluator();
+    vi.mocked(ewarResolver.disruptedTurret).mockReturnValue({ ...effectiveTurret, spool: { perCycle: 0.1, max: 0.5 } });
+    const closeFrame = { ...frame, distance: 4000 };
+    const result = evaluator.evaluate(closeFrame, { shipA: { weapon: turret, opponentSigRadius: 40, spoolCycles: 2 } });
+    expect(result.shipA?.damage.appliedDps).toBeCloseTo(24 * expectedMultiplier, 10);
+    expect(result.shipA?.turret?.spoolFactor).toBeCloseTo(1.2, 10);
+  });
+
+  test("non-spooling turret ignores spoolCycles", () => {
+    const { evaluator } = makeEvaluator();
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40, spoolCycles: 5 } });
+    expect(result.shipA?.damage.nominalDps).toBe(turretDamageResult.nominalDps);
+    expect(result.shipA?.turret?.spoolFactor).toBe(1);
+  });
+
+  test("spoolCycles omitted defaults to factor 1", () => {
+    const { ewarResolver, evaluator } = makeEvaluator();
+    vi.mocked(ewarResolver.disruptedTurret).mockReturnValue({ ...effectiveTurret, spool: { perCycle: 0.1, max: 0.5 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40 } });
+    expect(result.shipA?.damage.nominalDps).toBe(turretDamageResult.nominalDps);
+    expect(result.shipA?.turret?.spoolFactor).toBe(1);
   });
 });

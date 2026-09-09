@@ -2,8 +2,9 @@ import type { DamageBreakdown, DamageFactor, DamageType, ImportedDrone, Imported
 import type { TypeId } from "../../../gamedata/ids";
 import type { ItemNameCatalog } from "../../../gamedata";
 import type { Language } from "../../../appstate";
-import type { DamageAssessment, WeaponDamageAssessor, WeaponKind, WeaponSpec } from "../../../sim";
+import type { DamageAssessment, WeaponAttack, WeaponDamageAssessor, WeaponKind, WeaponSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
+import type { ViewStream } from "../../viewStream";
 import type { HintContentProvider } from "../hoverHint";
 import { DAMAGE_ICON_URLS, DAMAGE_TYPE_ORDER } from "../damageTypeIcons";
 import type { DroneController } from "../drone";
@@ -22,6 +23,7 @@ export interface DpsHintProviderDeps {
   readonly itemNameCatalog: ItemNameCatalog;
   readonly dpsHintRenderer: DpsHintRenderer;
   readonly weaponDamageAssessor: WeaponDamageAssessor;
+  readonly viewStream: ViewStream;
 }
 
 interface DpsHintSource {
@@ -30,6 +32,7 @@ interface DpsHintSource {
   readonly count: number;
   readonly cycleTime: number;
   readonly damageBreakdown: DamageBreakdown;
+  readonly spoolMultiplier?: number;
   readonly volley: number;
   readonly dps: number;
 }
@@ -42,6 +45,7 @@ export class DpsHintProviderImpl implements HintContentProvider {
   private readonly itemNameCatalog: ItemNameCatalog;
   private readonly renderer: DpsHintRenderer;
   private readonly weaponDamageAssessor: WeaponDamageAssessor;
+  private readonly viewStream: ViewStream;
 
   constructor(deps: DpsHintProviderDeps) {
     this.i18n = deps.i18n;
@@ -51,6 +55,7 @@ export class DpsHintProviderImpl implements HintContentProvider {
     this.itemNameCatalog = deps.itemNameCatalog;
     this.renderer = deps.dpsHintRenderer;
     this.weaponDamageAssessor = deps.weaponDamageAssessor;
+    this.viewStream = deps.viewStream;
   }
 
   render(anchor: HTMLElement, container: HTMLElement): void {
@@ -66,7 +71,12 @@ export class DpsHintProviderImpl implements HintContentProvider {
     const groups: DpsHintGroup[] = [];
     const turret = this.turretControllers[side].turret();
     const turretSpec = this.turretControllers[side].currentTurretSpec();
-    if (turret && turretSpec) groups.push(buildWeaponGroup(turretHintSource(turret, this.assess(turretSpec)), this.itemNameCatalog, language));
+    if (turret && turretSpec) {
+      const spoolAttack = this.runtimeSpoolAttack(side, turretSpec.moduleId);
+      const spoolFactor = spoolAttack?.assessment.turret?.spoolFactor ?? 1;
+      const spoolMultiplier = isSpooling(spoolAttack) ? spoolFactor : undefined;
+      groups.push(buildWeaponGroup(turretHintSource(turret, this.assess(turretSpec, spoolFactor), spoolMultiplier), this.itemNameCatalog, language));
+    }
     const launcher = this.launcherControllers[side].launcher();
     const missileSpec = this.launcherControllers[side].currentMissileSpec();
     if (launcher && missileSpec) groups.push(buildWeaponGroup(launcherHintSource(launcher, this.assess(missileSpec)), this.itemNameCatalog, language));
@@ -76,9 +86,18 @@ export class DpsHintProviderImpl implements HintContentProvider {
     return { groups };
   }
 
-  private assess(spec: WeaponSpec): DamageAssessment {
-    return this.weaponDamageAssessor.assess(spec, 1, true);
+  private assess(spec: WeaponSpec, rawDamageMultiplier?: number): DamageAssessment {
+    return rawDamageMultiplier === undefined ? this.weaponDamageAssessor.assess(spec, 1, true) : this.weaponDamageAssessor.assess(spec, 1, true, rawDamageMultiplier);
   }
+
+  private runtimeSpoolAttack(side: Side, moduleId: TypeId): WeaponAttack | undefined {
+    const attacks = this.viewStream.currentView()?.weaponAttacks[side];
+    return attacks?.find((attack) => attack.weapon.kind === "turret" && attack.weapon.moduleId === moduleId && attack.assessment.turret !== undefined);
+  }
+}
+
+function isSpooling(attack: WeaponAttack | undefined): boolean {
+  return attack !== undefined && attack.weapon.kind === "turret" && attack.weapon.spool !== undefined;
 }
 
 function sideFromAnchor(anchor: HTMLElement): Side | undefined {
@@ -89,8 +108,8 @@ function sideFromAnchor(anchor: HTMLElement): Side | undefined {
   return undefined;
 }
 
-function turretHintSource(turret: ImportedTurret, assessment: DamageAssessment): DpsHintSource {
-  return { typeId: turret.moduleId, weaponKind: "turret", count: turret.turretCount, cycleTime: turret.cycleTime, damageBreakdown: turret.damageBreakdown, volley: assessment.volley, dps: assessment.nominalDps };
+function turretHintSource(turret: ImportedTurret, assessment: DamageAssessment, spoolMultiplier: number | undefined): DpsHintSource {
+  return { typeId: turret.moduleId, weaponKind: "turret", count: turret.turretCount, cycleTime: turret.cycleTime, damageBreakdown: turret.damageBreakdown, spoolMultiplier, volley: assessment.volley, dps: assessment.nominalDps };
 }
 
 function launcherHintSource(launcher: ImportedLauncher, assessment: DamageAssessment): DpsHintSource {
@@ -106,7 +125,7 @@ function buildWeaponGroup(source: DpsHintSource, itemNameCatalog: ItemNameCatalo
   const { types, ammo } = buildTypeRows(source.damageBreakdown.damageByType);
   const factors = buildFactorRows(source.damageBreakdown.factors, itemNameCatalog, language);
   const cumulative = factors.length > 0 ? factors[factors.length - 1].cumulative : 1;
-  const summary: DpsHintSummary = { ammo, multiplier: cumulative, count: source.count, volley: source.volley, cycleTime: source.cycleTime, dps: source.dps };
+  const summary: DpsHintSummary = { ammo, multiplier: cumulative, spoolMultiplier: source.spoolMultiplier, count: source.count, volley: source.volley, cycleTime: source.cycleTime, dps: source.dps };
   return { name, weaponKind: source.weaponKind, types, ammo, factors, summary };
 }
 

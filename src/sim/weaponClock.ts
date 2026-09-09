@@ -8,6 +8,7 @@ import { damageVectorScale, damageVectorSum } from "./types";
 export interface WeaponCooldownSnapshot {
   readonly timer: number;
   readonly cycleTime: number;
+  readonly spoolCycles: number;
 }
 
 export interface SideClockSnapshot {
@@ -23,11 +24,13 @@ export interface WeaponClockState {
 export interface WeaponClock extends Restorable<WeaponClockState> {
   reset(): void;
   step(dt: number, view: EngagementView): readonly DamageEvent[];
+  spoolCycles(side: Side, weaponIndex: number): number;
 }
 
 interface WeaponCooldown {
   timer: number;
   cycleTime: number;
+  spoolCycles: number;
 }
 
 interface SideClock {
@@ -55,6 +58,10 @@ export class WeaponClockImpl implements WeaponClock {
       shipA: emptySide(() => this.rngFactory.create(this.seed)),
       shipB: emptySide(() => this.rngFactory.create(this.seed + 1)),
     };
+  }
+
+  spoolCycles(side: Side, weaponIndex: number): number {
+    return this.sides[side].cooldowns.get(weaponIndex)?.spoolCycles ?? 0;
   }
 
   capture(): WeaponClockState {
@@ -109,13 +116,20 @@ export class WeaponClockImpl implements WeaponClock {
       if (attack.assessment.drone && !attack.assessment.drone.inRange) continue;
       const cycleTime = attack.weapon.cycleTime;
       if (cycleTime <= 0) continue;
-      const cooldown = clock.cooldowns.get(i) ?? { timer: cycleTime, cycleTime };
+      const spoolSpec = attack.weapon.kind === "turret" ? attack.weapon.spool : undefined;
+      if (spoolSpec !== undefined && attack.assessment.turret && !attack.assessment.turret.inOptimal) {
+        // A disintegrator deactivates while its target is beyond optimal; reactivation restarts cycle and spool.
+        clock.cooldowns.delete(i);
+        continue;
+      }
+      const cooldown = clock.cooldowns.get(i) ?? { timer: cycleTime, cycleTime, spoolCycles: 0 };
       cooldown.timer -= dt;
       if (cooldown.timer <= 0) {
         cooldown.timer += cycleTime;
         if (cooldown.timer < 0) cooldown.timer = cycleTime;
         const event = this.rollEvent(source, target, i, kind, attack, breakdown.hit.chance, breakdown.expectedMultiplier, clock.rng);
         if (event) events.push(event);
+        if (spoolSpec !== undefined) cooldown.spoolCycles += 1;
       }
       clock.cooldowns.set(i, cooldown);
     }
@@ -123,6 +137,8 @@ export class WeaponClockImpl implements WeaponClock {
   }
 
   private rollEvent(source: Side, target: Side, weaponIndex: number, kind: WeaponKind, attack: WeaponAttack, hitChance: number, expectedMultiplier: number, rng: Rng): DamageEvent | undefined {
+    // The assessment damage is already spool-inclusive (fireControl scales it via spoolMultiplier),
+    // so events only carry the hit-quality roll on top of it.
     const appliedVolley = attack.assessment.damage.appliedVolleyByType;
     if (damageVectorSum(appliedVolley) <= 0) return undefined;
     const hitMultiplier = this.hitRoll(rng, hitChance, expectedMultiplier);
@@ -140,14 +156,14 @@ function emptySide(createRng: () => Rng): SideClock {
 
 function snapshotClock(clock: SideClock): SideClockSnapshot {
   const cooldowns = [...clock.cooldowns].map(
-    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime }] as const,
+    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime, spoolCycles: cooldown.spoolCycles }] as const,
   );
   return { cooldowns: new Map(cooldowns), weaponSignature: clock.weaponSignature };
 }
 
 function materializeClock(snapshot: SideClockSnapshot, createRng: () => Rng): SideClock {
   const cooldowns = [...snapshot.cooldowns].map(
-    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime }] as const,
+    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime, spoolCycles: cooldown.spoolCycles }] as const,
   );
   return { cooldowns: new Map(cooldowns), weaponSignature: snapshot.weaponSignature, rng: createRng() };
 }
@@ -156,7 +172,8 @@ function weaponSignature(attacks: readonly WeaponAttack[]): string {
   let sig = "";
   for (const attack of attacks) {
     const w = attack.weapon;
-    sig += w.kind + ":" + w.cycleTime + ";";
+    const spool = w.kind === "turret" && w.spool ? `${w.spool.perCycle}:${w.spool.max}` : "";
+    sig += w.kind + ":" + w.cycleTime + (spool ? ":" + spool : "") + ";";
   }
   return sig;
 }

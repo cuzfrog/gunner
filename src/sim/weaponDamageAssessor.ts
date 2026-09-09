@@ -2,12 +2,12 @@ import type { DamageAssessment, DamageVector, WeaponSpec } from "./types";
 import { ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 export interface WeaponDamageAssessor {
-  assess(spec: WeaponSpec, applicationFactor: number, inRange: boolean): DamageAssessment;
+  assess(spec: WeaponSpec, applicationFactor: number, inRange: boolean, rawDamageMultiplier?: number): DamageAssessment;
 }
 
 export class WeaponDamageAssessorImpl implements WeaponDamageAssessor {
-  assess(spec: WeaponSpec, applicationFactor: number, inRange: boolean): DamageAssessment {
-    const baseVolleyByType = computeBaseVolley(spec);
+  assess(spec: WeaponSpec, applicationFactor: number, inRange: boolean, rawDamageMultiplier = 1): DamageAssessment {
+    const baseVolleyByType = damageVectorScale(computeBaseVolley(spec), rawDamageMultiplier);
     const volley = damageVectorSum(baseVolleyByType);
     const nominalDps = spec.cycleTime > 0 ? volley / spec.cycleTime : 0;
     const effectiveApplication = inRange ? applicationFactor : 0;

@@ -113,6 +113,7 @@ export type {
   TurretReadoutValues,
   TurretScriptSpec,
   TurretSpec,
+  TurretSpoolSpec,
   WarpScramblerSpec,
   WebActivation,
   WeaponKind,

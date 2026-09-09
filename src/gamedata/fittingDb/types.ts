@@ -126,6 +126,8 @@ export interface TurretStats {
   readonly chargeGroups: readonly number[];
   readonly damageMultiplier: number;
   readonly cycleTime: number;
+  readonly spoolPerCycle?: number; // damageMultiplierBonusPerCycle, fraction (e.g. 0.07)
+  readonly spoolMax?: number; // damageMultiplierBonusMax, fraction (e.g. 2.125)
   readonly turretSkill?: string;
   readonly specializationSkill?: string;
   readonly requiredSkillIds: readonly TypeId[];
@@ -137,7 +139,7 @@ export interface TurretStats {
 }
 
 export type PropulsionBonusAttribute = "maxVelocity" | "agility" | "mwdSigBloom";
-export type TurretBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "turretDamage" | "turretRoF";
+export type TurretBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "turretDamage" | "turretRoF" | "turretSpoolMax";
 export type MissileBonusAttribute = "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity";
 export type DroneBonusAttribute = "droneDamage";
 export type DefenseBonusAttribute = "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";

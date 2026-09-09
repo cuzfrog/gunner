@@ -511,6 +511,8 @@ interface TurretStats {
   readonly chargeGroups: readonly number[];
   readonly damageMultiplier: number;
   readonly cycleTime: number;
+  readonly spoolPerCycle?: number;
+  readonly spoolMax?: number;
   readonly turretSkill?: string;
   readonly specializationSkill?: string;
   readonly requiredSkillIds: readonly TypeId[];
@@ -1277,6 +1279,9 @@ async function main() {
       if (tracking !== undefined && optimal !== undefined && speed !== undefined && damageMultiplier !== undefined) {
         const chargeGroups = readChargeGroups(values);
         if (chargeGroups.length === 0) throw new Error(`Turret "${enName}" has no chargeGroups`);
+        const spoolPerCycle = values.get("damageMultiplierBonusPerCycle");
+        const spoolMax = values.get("damageMultiplierBonusMax");
+        const hasSpool = spoolPerCycle !== undefined && spoolMax !== undefined && spoolMax > 0;
         turrets[id] = {
           id,
           name: enName,
@@ -1287,6 +1292,7 @@ async function main() {
           chargeGroups,
           damageMultiplier,
           cycleTime: speed / 1000,
+          ...(hasSpool ? { spoolPerCycle, spoolMax } : {}),
           turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
           specializationSkill: specializationSkillFromRequired(types, requiredSkills, type.typeID),
           requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID),

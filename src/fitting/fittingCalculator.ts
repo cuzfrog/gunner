@@ -141,6 +141,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const hullFalloffPercents: number[] = [];
       const hullDamagePercents: number[] = [];
       const hullRoFPercents: number[] = [];
+      const hullSpoolMaxPercents: number[] = [];
 
       for (const bonus of fitting.hullBonuses) {
         if (bonus.moduleSkillId && !turret.requiredSkillIds.includes(bonus.moduleSkillId)) continue;
@@ -152,6 +153,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
           case "turretFalloff": hullFalloffPercents.push(percent); break;
           case "turretDamage": hullDamagePercents.push(percent); break;
           case "turretRoF": hullRoFPercents.push(percent); break;
+          case "turretSpoolMax": hullSpoolMaxPercents.push(percent); break;
         }
       }
 
@@ -165,6 +167,10 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const moduleSpeedBonus = this.stacking.apply(moduleSpeedMultipliers);
       const hullDamageMultiplier = hullDamagePercents.reduce((acc, p) => acc * (1 + p / 100), 1);
       const hullRoFMultiplier = hullRoFPercents.reduce((acc, p) => acc * (1 + p / 100), 1);
+      const hullSpoolMaxMultiplier = hullSpoolMaxPercents.reduce((acc, p) => acc * (1 + p / 100), 1);
+      const spool = turret.spoolPerCycle !== undefined && turret.spoolMax !== undefined
+        ? { perCycle: turret.spoolPerCycle, max: turret.spoolMax * hullSpoolMaxMultiplier }
+        : undefined;
 
       const skillEntries = computeSkillDamageEntries(this.db.skillBonuses, turret, skillLevel);
       const activeSkillEntries = skillEntries.filter((e) => e.multiplier !== 1);
@@ -215,6 +221,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
         damagePerShot: damageVectorScale(damageVectorFromPartial(chargeDamageByType(charge)), finalDamageMultiplier),
         cycleTime: finalCycleTime,
         turretCount: group.count,
+        spool,
         damageBreakdown: { damageByType: chargeDamageByType(charge), factors },
       });
     }
@@ -710,7 +717,7 @@ function hullBonusPercent(bonus: HullBonus, skillLevel: number): number {
 }
 
 const PROPULSION_BONUS_ATTRIBUTES: Record<PropulsionBonusAttribute, true> = { maxVelocity: true, agility: true, mwdSigBloom: true };
-const TURRET_BONUS_ATTRIBUTES: Record<TurretBonusAttribute, true> = { turretTracking: true, turretOptimal: true, turretFalloff: true, turretDamage: true, turretRoF: true };
+const TURRET_BONUS_ATTRIBUTES: Record<TurretBonusAttribute, true> = { turretTracking: true, turretOptimal: true, turretFalloff: true, turretDamage: true, turretRoF: true, turretSpoolMax: true };
 
 function isPropulsionBonusAttribute(attr: HullBonus["attribute"]): attr is PropulsionBonusAttribute {
   return attr in PROPULSION_BONUS_ATTRIBUTES;
@@ -722,7 +729,7 @@ function isTurretBonusAttribute(attr: HullBonus["attribute"]): attr is TurretBon
 
 const WEAPON_OVERLOAD_DAMAGE_MULTIPLIER = 1.15;
 const WEAPON_OVERLOAD_ROF_MULTIPLIER = 0.85;
-const SHORT_RANGE_GUN_FAMILIES: ReadonlySet<GunFamily> = new Set(["pulseLaser", "blaster", "autocannon"]);
+const SHORT_RANGE_GUN_FAMILIES: ReadonlySet<GunFamily> = new Set(["pulseLaser", "blaster", "autocannon", "disintegrator"]);
 
 function weaponOverloadMultipliers(family: GunFamily, weaponOverloaded: boolean): readonly [damageMultiplier: number, cycleMultiplier: number] {
   if (!weaponOverloaded) return [1, 1] as const;

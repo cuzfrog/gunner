@@ -25,3 +25,8 @@ Damage type icons are served from `images/icons/damage-{type}.png`.
 
 Registration must happen after `registerHoverHintModule` because the
 provider is registered with the hover hint controller singleton.
+For spooling turrets the provider reads the runtime spool factor from
+`ViewStream.currentView()` (matched by turret `moduleId` among
+`view.weaponAttacks[side]`), scales its nominal DPS assessment with it, and
+renders a spool row plus spool term in the volley formula. The row is
+omitted before the first simulation view and for non-spooling turrets.

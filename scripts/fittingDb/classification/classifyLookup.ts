@@ -5,7 +5,7 @@ import type { HullBonusAttribute } from "../../../src/gamedata/fittingDb/types";
 
 const HULL_BONUS_ATTRIBUTES: ReadonlySet<string> = new Set([
   "maxVelocity", "agility", "mwdSigBloom",
-  "turretTracking", "turretOptimal", "turretFalloff", "turretDamage", "turretRoF",
+  "turretTracking", "turretOptimal", "turretFalloff", "turretDamage", "turretRoF", "turretSpoolMax",
   "missileDamage", "missileRoF", "missileVelocity", "missileFlightTime", "missileExplosionRadius", "missileExplosionVelocity",
   "droneDamage",
   "armorResist", "shieldResist", "shieldHpPercent", "armorHpPercent", "hullHpPercent", "plateHpPercent", "extenderHpPercent",

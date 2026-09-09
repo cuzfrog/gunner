@@ -228,10 +228,15 @@ export class EngagementEngineImpl implements EngagementEngine {
       sigRadii: { shipA: snapshot.shipA.sig ?? 1, shipB: snapshot.shipB.sig ?? 1 },
       droneStates: { shipA: world.droneSimulator.states("shipA"), shipB: world.droneSimulator.states("shipB") },
       missileFacts: { shipA: this.missileFactsFor(world, "shipA", config), shipB: this.missileFactsFor(world, "shipB", config) },
+      spoolCycles: { shipA: this.spoolCyclesFor(world, "shipA", config), shipB: this.spoolCyclesFor(world, "shipB", config) },
       defenses: { shipA: config.defense.shipA, shipB: config.defense.shipB },
       overloaded: config.overloaded,
       locks,
     };
+  }
+
+  private spoolCyclesFor(world: SimWorld, side: Side, config: EngineConfig): readonly number[] {
+    return config.weapons[side].map((_, index) => world.weaponClock.spoolCycles(side, index));
   }
 
   private effectiveSensorSpec(ship: ShipState, opponent: ShipState, distance: number): SensorSpec | undefined {
