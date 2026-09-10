@@ -1821,6 +1821,7 @@ function summarizeDb(): FittingDb {
 describe("FittingImportImpl.summarize", () => {
   beforeEach(() => {
     ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue([]);
   });
 
   test("parses hull and fitting names", () => {
@@ -1849,6 +1850,16 @@ describe("FittingImportImpl.summarize", () => {
     expect(high!.rows[1].charge).toBe("Hail S");
     expect(high!.rows[1].chargeId).toBeDefined();
     expect(high!.rows[1].id).toBeDefined();
+  });
+
+  test("includes the capacitor block from the imported stats", () => {
+    ships.findHullByName.mockReturnValue({ ...frigateProfile, capacitorCapacity: 6375, capacitorRechargeTime: 1250 });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const summary = importer.summarize(RIFTER_BRAWLER);
+    expect(summary?.capacitor).toBeDefined();
+    expect(summary!.capacitor!.capacity).toBeCloseTo(6375 * 1.25, 3); // Energy Management V
+    expect(summary!.capacitor!.rechargeTime).toBeCloseTo(1250 * 0.75, 3); // Energy Systems Operations V
+    expect(summary!.capacitor!.usagePerSecond).toBeGreaterThan(0); // 5MN Microwarpdrive I drain
   });
 
   test("captures cargo quantities with resolved ids", () => {

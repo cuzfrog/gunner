@@ -290,6 +290,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "fitting.section.service": { zh: "服务" },
   "fitting.section.cargo": { zh: "货舱" },
   "fitting.section.drones": { zh: "无人机" },
+  "fitting.preview.capacitor": { zh: "电容" },
   "status.importInvalid": { zh: "剪贴板中没有可导入的配置或装配" },
   "status.clipboardDenied": { zh: "剪贴板访问被拒绝" },
   "status.profileSaved": { zh: "已保存" },

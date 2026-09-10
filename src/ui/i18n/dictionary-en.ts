@@ -290,6 +290,7 @@ export const EN: LanguageSlice<"en"> = {
   "fitting.section.service": { en: "Service" },
   "fitting.section.cargo": { en: "Cargo" },
   "fitting.section.drones": { en: "Drones" },
+  "fitting.preview.capacitor": { en: "Capacitor" },
   "status.importInvalid": { en: "No profile or fitting in clipboard" },
   "status.clipboardDenied": { en: "Clipboard denied" },
   "status.profileSaved": { en: "Saved" },

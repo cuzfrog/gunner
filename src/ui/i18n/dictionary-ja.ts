@@ -290,6 +290,7 @@ export const JA: LanguageSlice<"ja"> = {
   "fitting.section.service": { ja: "サービス" },
   "fitting.section.cargo": { ja: "カーゴ" },
   "fitting.section.drones": { ja: "ドローン" },
+  "fitting.preview.capacitor": { ja: "キャパシタ" },
   "status.importInvalid": { ja: "クリップボードにプロファイルまたはフィッティングがありません" },
   "status.clipboardDenied": { ja: "クリップボードへのアクセスが拒否されました" },
   "status.profileSaved": { ja: "保存しました" },

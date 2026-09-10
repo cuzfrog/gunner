@@ -1,6 +1,7 @@
 import type { FittingImport, FittingRow, FittingSection, FittingSummary } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
+import { formatWithCommas } from "../controlsFormat";
 import { html } from "../markup";
 import { IconActionImpl, SectionBlockImpl, spriteIconStroked } from "../shared";
 
@@ -38,6 +39,7 @@ export class DomFittingPreview implements FittingPreview {
     for (const section of summary.sections) {
       this.container.appendChild(renderSection(this.i18n, this.imageCatalog, this.fittingImport, section));
     }
+    if (summary.capacitor) this.container.appendChild(renderCapacitor(this.i18n, summary.capacitor));
     this.container.hidden = false;
     this.container.setAttribute("aria-hidden", "false");
     positionPreview(this.container, anchor, this.viewport());
@@ -106,6 +108,23 @@ function renderRow(
   const rowEl = html`<div class="preview-row">${icon}${main}${quantity}</div>` as unknown as HTMLElement;
   if (row.empty) rowEl.classList.add("preview-row-empty");
   return rowEl;
+}
+
+function renderCapacitor(i18n: I18n, capacitor: NonNullable<FittingSummary["capacitor"]>): HTMLElement {
+  const parts = [
+    `${formatWithCommas(Math.round(capacitor.capacity))} GJ`,
+    `${formatWithCommas(capacitor.rechargeTime, 1)}s`,
+    `${formatWithCommas(capacitor.usagePerSecond, 2)} GJ/s`,
+  ];
+  if (capacitor.stablePercent !== undefined) parts.push(i18n.t("capacitor.stable").replace("{percent}", formatWithCommas(capacitor.stablePercent, 1)));
+  if (capacitor.depletesInSeconds !== undefined) parts.push(i18n.t("capacitor.depletes").replace("{time}", formatDuration(capacitor.depletesInSeconds)));
+  const row = html`<div class="preview-capacitor"><span class="preview-capacitor-value mono">${parts.join(" \u00b7 ")}</span></div>` as unknown as HTMLElement;
+  return new SectionBlockImpl().create(i18n.t("fitting.preview.capacitor"), [row]);
+}
+
+function formatDuration(seconds: number): string {
+  const total = Math.max(0, Math.round(seconds));
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
 }
 
 function positionPreview(

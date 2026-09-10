@@ -115,3 +115,11 @@
   font-size: 11px;
 }
 }
+
+.preview-capacitor { display: flex; }
+
+.preview-capacitor-value {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-left: 4px;
+}

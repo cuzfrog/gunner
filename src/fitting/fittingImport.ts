@@ -7,6 +7,7 @@ import type {
   ShipNameLanguage,
   ShipProfile,
   Ships,
+  SkillLevel,
   StatConditions,
 } from "../ships";
 import { type BoostLoadout, type EwarLoadout, type MissileBoosterLoadout, type SensorBoostLoadout, type SensorSpec, type StackingPenalty } from "../sim";
@@ -51,6 +52,14 @@ export interface FittingSummary {
   readonly hullName: string;
   readonly fittingName: string;
   readonly sections: readonly FittingSection[];
+  // Static capacitor readout for the preview, at level-5-skill conditions.
+  readonly capacitor?: {
+    readonly capacity: number;
+    readonly rechargeTime: number;
+    readonly usagePerSecond: number;
+    readonly stablePercent?: number;
+    readonly depletesInSeconds?: number;
+  };
 }
 
 export interface ImportedFitting {
@@ -225,10 +234,13 @@ export class FittingImportImpl implements FittingImport {
     const resolved = this.resolveEftDocument(parsed);
     if (!resolved) return undefined;
 
+    const imported = this.importFitting(text, PREVIEW_CONDITIONS);
+    const capacitor = imported ? capacitorSummaryFrom(imported.capacitor) : undefined;
     return {
       hullName: resolved.profile.name,
       fittingName: resolved.fittingName,
       sections: buildSections(resolved),
+      ...(capacitor ? { capacitor } : {}),
     };
   }
 
@@ -532,4 +544,16 @@ function collectCargoEntries(items: readonly ResolvedQuantity[]): readonly Cargo
     if (item.kind === "resolved") entries.push({ id: item.id, quantity: item.quantity });
   }
   return entries;
+}
+
+const PREVIEW_CONDITIONS: StatConditions = { skillLevel: 5 as SkillLevel, overloaded: false, weaponOverloaded: false };
+
+function capacitorSummaryFrom(stats: CapacitorStats): NonNullable<FittingSummary["capacitor"]> {
+  return {
+    capacity: stats.spec.capacity,
+    rechargeTime: stats.spec.rechargeTime,
+    usagePerSecond: stats.usagePerSecond,
+    ...(stats.stablePercent !== undefined ? { stablePercent: stats.stablePercent } : {}),
+    ...(stats.depletesInSeconds !== undefined ? { depletesInSeconds: stats.depletesInSeconds } : {}),
+  };
 }
