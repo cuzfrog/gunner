@@ -141,6 +141,11 @@ function textOf(el: FakeElement): string {
   return el.textContent + el.children.map(textOf).join("");
 }
 
+function infiniteButtonPressed(section: FakeElement): string | null {
+  const buttons = findByClass(section, "segmented-control").flatMap((group) => group.children);
+  return buttons.find((button) => button.getAttribute("data-value") === "infinite")?.getAttribute("aria-pressed") ?? null;
+}
+
 function summaryText(els: CapacitorEls): string {
   return (els.shipA.summary as unknown as FakeElement).children.map(textOf).join("");
 }
@@ -318,6 +323,16 @@ describe("CapacitorControllerImpl configuration state", () => {
     controller.setCapacitorStats("shipA", statsWithBooster(undefined));
     expect(controller.capBoosterCharge("shipA", BOOSTER_MODULE)).toBeUndefined();
     expect(controller.capBoosterSpecs("shipA")).toEqual([]);
+  });
+
+  test("restore re-renders the popup section with the restored configuration state", () => {
+    const els = buildEls();
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
+    controller.setCapacitorStats("shipA", capacitorStats());
+    const section = els.shipA.section as unknown as FakeElement;
+    expect(infiniteButtonPressed(section)).toBe("false");
+    controller.restore("shipA", true);
+    expect(infiniteButtonPressed(section)).toBe("true");
   });
 
   test("capture and restore round-trip the capacitor configuration", () => {

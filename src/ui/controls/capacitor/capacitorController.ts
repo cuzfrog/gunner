@@ -167,6 +167,7 @@ export class CapacitorControllerImpl implements CapacitorController {
     this.infiniteState[side] = infinite;
     this.boosterModes[side] = new Map((modes ?? []).map((entry) => [entry.moduleId, entry.mode]));
     this.boosterCharges[side] = new Map((charges ?? []).map((entry) => [entry.moduleId, entry.chargeId]));
+    this.renderSide(side);
   }
 
   capture(side: Side): { infinite: boolean; modes: readonly StoredCapBoosterMode[]; charges: readonly StoredCapBoosterCharge[] } {
