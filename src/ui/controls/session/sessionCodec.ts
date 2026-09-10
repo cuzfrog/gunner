@@ -15,6 +15,8 @@ import {
   type StoredMissileBoosterActivation,
   type StoredSensorBoosterActivation,
   type StoredRahActivation,
+  type StoredCapBoosterMode,
+  type StoredCapBoosterCharge,
   type StoredRepairMode,
   type StoredRepairerActivation,
   type UserSettings,
@@ -24,6 +26,7 @@ import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
 import type { SensorBoosterController } from "../sensorBooster";
 import type { DefenseController } from "../defense";
+import type { CapacitorController } from "../capacitor";
 import type { TargetingController } from "../targeting";
 import type { LauncherController } from "../launcher";
 import type { DroneController } from "../drone";
@@ -71,6 +74,7 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly boosterController: BoosterController;
   private readonly missileBoosterController: MissileBoosterController;
   private readonly sensorBoosterController: SensorBoosterController;
+  private readonly capacitorController: CapacitorController;
   private readonly defenseController: DefenseController;
   private readonly targetingController: TargetingController;
   private readonly fittingImport: FittingImport;
@@ -98,6 +102,7 @@ export class SessionCodecImpl implements SessionCodec {
     missileBoosterController: MissileBoosterController;
     sensorBoosterController: SensorBoosterController;
     defenseController: DefenseController;
+    capacitorController: CapacitorController;
     targetingController: TargetingController;
     fittingImport: FittingImport;
     parser: SettingsParser;
@@ -122,6 +127,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.missileBoosterController = deps.missileBoosterController;
     this.sensorBoosterController = deps.sensorBoosterController;
     this.defenseController = deps.defenseController;
+    this.capacitorController = deps.capacitorController;
     this.targetingController = deps.targetingController;
     this.fittingImport = deps.fittingImport;
     this.parser = deps.parser;
@@ -214,6 +220,12 @@ export class SessionCodecImpl implements SessionCodec {
       shipBRepairerActivation: this.defenseController.repairerActivation("shipB"),
       shipARahActivation: this.defenseController.rahActivation("shipA"),
       shipBRahActivation: this.defenseController.rahActivation("shipB"),
+      shipAInfiniteCapacitor: this.capacitorController.capture("shipA").infinite,
+      shipBInfiniteCapacitor: this.capacitorController.capture("shipB").infinite,
+      shipACapBoosterModes: this.capacitorController.capture("shipA").modes,
+      shipBCapBoosterModes: this.capacitorController.capture("shipB").modes,
+      shipACapBoosterCharges: this.capacitorController.capture("shipA").charges,
+      shipBCapBoosterCharges: this.capacitorController.capture("shipB").charges,
     };
   }
 
@@ -258,6 +270,13 @@ export class SessionCodecImpl implements SessionCodec {
     const defense = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.defense : undefined;
     if (defense) this.defenseController.setDefenseSpec(side, defense);
     this.defenseController.restore(side, enabled, repMode, repairerActivation, rahActivation);
+  }
+
+  private restoreCapacitor(side: Side, fitting: string | undefined, infinite: boolean, modes: readonly StoredCapBoosterMode[], charges: readonly StoredCapBoosterCharge[]): void {
+    const panel = side === "shipA" ? this.shipASide : this.shipBSide;
+    const imported = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions()) : undefined;
+    if (imported) this.capacitorController.setCapacitorStats(side, imported.capacitor);
+    this.capacitorController.restore(side, infinite, modes, charges);
   }
 
   private restoreBooster(side: Side, fitting: string | undefined, activation: readonly StoredBoosterActivation[] | undefined): void {
@@ -347,6 +366,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.restoreSensorData("shipB", settings.shipB.fitting);
     this.restoreDefense("shipA", settings.shipA.fitting, settings.shipA.damageEnabled, settings.shipA.repMode ?? "auto", settings.shipA.repairerActivation ?? [], settings.shipA.rahActivation);
     this.restoreDefense("shipB", settings.shipB.fitting, settings.shipB.damageEnabled, settings.shipB.repMode ?? "auto", settings.shipB.repairerActivation ?? [], settings.shipB.rahActivation);
+    this.restoreCapacitor("shipA", settings.shipA.fitting, settings.shipA.infiniteCapacitor ?? false, settings.shipA.capBoosterModes ?? [], settings.shipA.capBoosterCharges ?? []);
+    this.restoreCapacitor("shipB", settings.shipB.fitting, settings.shipB.infiniteCapacitor ?? false, settings.shipB.capBoosterModes ?? [], settings.shipB.capBoosterCharges ?? []);
   }
 
   restoreStartup(startup: StartupState): void {

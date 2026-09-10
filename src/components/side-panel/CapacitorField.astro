@@ -1,0 +1,23 @@
+---
+import PopupBox from "../popup/PopupBox.astro";
+import TriggerButton from "../popup/TriggerButton.astro";
+
+interface Props {
+  readonly idPrefix: string;
+}
+const { idPrefix } = Astro.props;
+---
+
+<div class="form-field-group" id={`${idPrefix}-capacitor-field`}>
+  <TriggerButton id={`${idPrefix}-capacitor-trigger`} popupId={`${idPrefix}-capacitor-popup`}
+          labelI18n="label.capacitor" labelText="Capacitor"
+          ariaLabelI18n="label.capacitor" ariaHaspopup="dialog" disabled
+          ariaDescribedby={`${idPrefix}-capacitor-summary-row`}>
+    <span class="trigger-summary" id={`${idPrefix}-capacitor-summary-row`}>
+      <span id={`${idPrefix}-capacitor-summary`}></span>
+    </span>
+  </TriggerButton>
+  <PopupBox id={`${idPrefix}-capacitor-popup`} extraClass="capacitor-popup popup-stretch" position="below" align="both" scroll role="dialog" ariaModal={false} i18nAriaLabel="label.capacitor">
+    <div class="preview-section" id={`${idPrefix}-capacitor-section`}></div>
+  </PopupBox>
+</div>

@@ -16,6 +16,7 @@ import {
   type CombatantElementDefinitionMap,
 } from "./elementContract";
 import type { DefenseFieldEls } from "./defense";
+import type { CapacitorFieldEls } from "./capacitor";
 import type { TargetingFieldEls } from "./targeting";
 
 interface ModulesFieldEls {
@@ -85,6 +86,7 @@ interface CombatantEls {
   readonly overload: HTMLInputElement;
   readonly overloadButton: HTMLButtonElement;
   readonly defense: DefenseFieldEls;
+  readonly capacitor: CapacitorFieldEls;
   readonly ewar: ModulesFieldEls;
   readonly targeting: TargetingFieldEls;
   readonly boosterSection: HTMLElement;
@@ -333,6 +335,13 @@ function createCombatantEls(side: Side): CombatantEls {
       section: el(combatantElementId("defenseSection", side)),
       summary: el(combatantElementId("defenseSummary", side)),
       effectiveSig: el(combatantElementId("effectiveSig", side)),
+    },
+    capacitor: {
+      field: el(combatantElementId("capacitorField", side)),
+      trigger: elOf(combatantElementId("capacitorTrigger", side), isHtmlButtonElement),
+      popup: el(combatantElementId("capacitorPopup", side)),
+      section: el(combatantElementId("capacitorSection", side)),
+      summary: el(combatantElementId("capacitorSummary", side)),
     },
     ewar: {
       field: el(combatantElementId("ewarField", side)),

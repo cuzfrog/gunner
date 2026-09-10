@@ -1,6 +1,6 @@
 import { Vec2 } from "../sim";
 import type { DroneRuntimeState, DroneSpec, EngineView, EngagementEngine, Side, WeaponSpec } from "../sim";
-import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, Loop, MissileRenderCollection, Renderer, WeaponRange, WeaponRanges } from "../ui";
+import type { Controls, DroneGroupRenderInfo, DroneRenderInfo, Loop, MissileRenderCollection, Renderer, UiEvents, WeaponRange, WeaponRanges } from "../ui";
 
 export interface App {
   start(): void;
@@ -18,11 +18,13 @@ export class AppImpl implements App {
     engine: EngagementEngine;
     renderer: Renderer;
     loop: Loop;
+    uiEvents: UiEvents;
   }) {
     this.controls = deps.controls;
     this.engine = deps.engine;
     this.renderer = deps.renderer;
     this.loop = deps.loop;
+    deps.uiEvents.onCapBoosterInject((side, boosterIndex) => this.engine.injectCapBooster(side, boosterIndex));
   }
 
   start(): void {

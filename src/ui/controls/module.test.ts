@@ -64,6 +64,7 @@ const controlsCradleKeys = {
   ewarController: "ewarController",
   modulesPopup: "modulesPopup",
   defenseController: "defenseController",
+  capacitorController: "capacitorController",
   targetingController: "targetingController",
   boosterController: "boosterController",
   missileBoosterController: "missileBoosterController",

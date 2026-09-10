@@ -5,6 +5,7 @@ import type { MissileBoosterController } from "../missileBooster";
 import type { SensorBoosterController } from "../sensorBooster";
 import type { EwarController } from "../ewar";
 import type { DefenseController } from "../defense";
+import type { CapacitorController } from "../capacitor";
 import type { DroneController } from "../drone";
 import type { LauncherController } from "../launcher";
 import type { TurretController } from "../turret";
@@ -30,6 +31,7 @@ interface SimConfigSourceDeps {
   readonly launcherControllers: Record<Side, LauncherController>;
   readonly droneControllers: Record<Side, DroneController>;
   readonly defenseController: DefenseController;
+  readonly capacitorController: CapacitorController;
 }
 
 export class SimConfigSourceImpl implements SimConfigSource {
@@ -45,6 +47,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
   private readonly launcherControllers: Record<Side, LauncherController>;
   private readonly droneControllers: Record<Side, DroneController>;
   private readonly defenseController: DefenseController;
+  private readonly capacitorController: CapacitorController;
 
   constructor(deps: SimConfigSourceDeps) {
     this.shipASide = deps.shipASide;
@@ -59,6 +62,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
     this.launcherControllers = deps.launcherControllers;
     this.droneControllers = deps.droneControllers;
     this.defenseController = deps.defenseController;
+    this.capacitorController = deps.capacitorController;
   }
 
   getConfig(): SimConfig {
@@ -82,14 +86,14 @@ export class SimConfigSourceImpl implements SimConfigSource {
 
   private capacitorSide(side: Side): EngineConfig["capacitor"][Side] {
     return {
-      infinite: false,
+      infinite: this.capacitorController.infiniteCapacitor(side),
       drains: drainsFromProjections(
         this.ewarController.projection(side) ?? { loadout: EMPTY_EWAR_LOADOUT, activation: undefined },
         this.boosterController.projection(side) ?? { loadout: EMPTY_BOOST_LOADOUT, activation: undefined },
         this.missileBoosterController.projection(side) ?? { loadout: EMPTY_MISSILE_BOOSTER_LOADOUT, activation: undefined },
         this.sensorBoosterController.projection(side) ?? { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: undefined },
       ),
-      boosters: [],
+      boosters: this.capacitorController.capBoosterSpecs(side),
     };
   }
 

@@ -50,6 +50,16 @@ export interface StoredRahActivation {
   readonly overloaded: boolean;
 }
 
+export interface StoredCapBoosterMode {
+  readonly moduleId: TypeId;
+  readonly mode: "auto" | "manual";
+}
+
+export interface StoredCapBoosterCharge {
+  readonly moduleId: TypeId;
+  readonly chargeId: TypeId;
+}
+
 export interface FittedHullSummary {
   readonly fittingName: string;
   readonly propulsionId?: PropulsionId;
@@ -151,6 +161,12 @@ export interface UserSettings {
   shipBRepairerActivation?: readonly StoredRepairerActivation[];
   shipARahActivation?: StoredRahActivation;
   shipBRahActivation?: StoredRahActivation;
+  shipAInfiniteCapacitor?: boolean;
+  shipBInfiniteCapacitor?: boolean;
+  shipACapBoosterModes?: readonly StoredCapBoosterMode[];
+  shipBCapBoosterModes?: readonly StoredCapBoosterMode[];
+  shipACapBoosterCharges?: readonly StoredCapBoosterCharge[];
+  shipBCapBoosterCharges?: readonly StoredCapBoosterCharge[];
   shipAAmmo: TypeId;
   shipBAmmo: TypeId;
   shipAWeaponKind?: WeaponKind;

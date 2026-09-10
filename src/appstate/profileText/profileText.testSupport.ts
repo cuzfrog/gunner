@@ -76,6 +76,12 @@ export const FULL_PROFILE: ProfileSettings = {
   shipBEwarActivation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [{ active: true, overloaded: true, script: "none" }] },
   shipABoosterActivation: [{ active: true, script: toTypeId("28999") }],
   shipBBoosterActivation: [{ active: false, script: "none" }],
+  shipARepMode: "manual",
+  shipARepairerActivation: [{ active: true, overloaded: false }],
+  shipARahActivation: { active: true, overloaded: false },
+  shipAInfiniteCapacitor: true,
+  shipACapBoosterModes: [{ moduleId: toTypeId("3581"), mode: "manual" }],
+  shipACapBoosterCharges: [{ moduleId: toTypeId("3581"), chargeId: toTypeId("11269") }],
 };
 
 export const MINIMAL_PROFILE: ProfileSettings = {

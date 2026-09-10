@@ -3,7 +3,7 @@ import { toTypeId } from "../gamedata/ids";
 import type { DroneGroup } from "../fitting";
 import type { Language } from "./language";
 import type { SimValueParser } from "../sim";
-import type { FittedHullSummary, HpValueDisplay, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation, StoredRahActivation, StoredRepairMode, StoredRepairerActivation, StoredSensorBoosterActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
+import type { FittedHullSummary, HpValueDisplay, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredCapBoosterCharge, StoredCapBoosterMode, StoredEwarActivation, StoredMissileBoosterActivation, StoredRahActivation, StoredRepairMode, StoredRepairerActivation, StoredSensorBoosterActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
 
 export function isLanguage(value: unknown): value is Language {
   return value === "en" || value === "zh" || value === "ja";
@@ -78,6 +78,18 @@ export function isOptionalRahActivation(value: unknown): value is StoredRahActiv
   return typeof item.active === "boolean" && typeof item.overloaded === "boolean";
 }
 
+export function isOptionalCapBoosterModes(value: unknown): value is readonly StoredCapBoosterMode[] | undefined {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every(isStoredCapBoosterMode);
+}
+
+export function isOptionalCapBoosterCharges(value: unknown): value is readonly StoredCapBoosterCharge[] | undefined {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every(isStoredCapBoosterCharge);
+}
+
 function isStoredMissileBoosterActivation(value: unknown): value is StoredMissileBoosterActivation {
   if (!isRecord(value)) return false;
   const item = value;
@@ -94,6 +106,18 @@ function isStoredRepairerActivation(value: unknown): value is StoredRepairerActi
   if (!isRecord(value)) return false;
   const item = value;
   return typeof item.active === "boolean" && (item.overloaded === undefined || typeof item.overloaded === "boolean");
+}
+
+function isStoredCapBoosterMode(value: unknown): value is StoredCapBoosterMode {
+  if (!isRecord(value)) return false;
+  const item = value;
+  return typeof item.moduleId === "string" && (item.mode === "auto" || item.mode === "manual");
+}
+
+function isStoredCapBoosterCharge(value: unknown): value is StoredCapBoosterCharge {
+  if (!isRecord(value)) return false;
+  const item = value;
+  return typeof item.moduleId === "string" && typeof item.chargeId === "string";
 }
 
 function isTypeIdString(value: string): boolean {

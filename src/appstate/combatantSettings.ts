@@ -9,6 +9,8 @@ import {
   type ProfileParamOverrides,
   type PropulsionSelection,
   type StoredBoosterActivation,
+  type StoredCapBoosterCharge,
+  type StoredCapBoosterMode,
   type StoredEwarActivation,
   type StoredMissileBoosterActivation,
   type StoredRahActivation,
@@ -42,6 +44,9 @@ export interface CombatantSettings {
   readonly repMode?: StoredRepairMode;
   readonly repairerActivation?: readonly StoredRepairerActivation[];
   readonly rahActivation?: StoredRahActivation;
+  readonly infiniteCapacitor?: boolean;
+  readonly capBoosterModes?: readonly StoredCapBoosterMode[];
+  readonly capBoosterCharges?: readonly StoredCapBoosterCharge[];
   readonly sig?: number;
   readonly tracking: number;
   readonly sigRes: SigResolutionClass;

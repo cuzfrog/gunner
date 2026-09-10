@@ -34,6 +34,7 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       missileBoosterController: proxy.missileBoosterController,
       sensorBoosterController: proxy.sensorBoosterController,
       defenseController: proxy.defenseController,
+      capacitorController: proxy.capacitorController,
       targetingController: proxy.targetingController,
       fittingImport: proxy.fittingImport,
       parser: proxy.parser,
@@ -51,6 +52,7 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       launcherControllers: proxy.launcherControllers,
       droneControllers: proxy.droneControllers,
       defenseController: proxy.defenseController,
+      capacitorController: proxy.capacitorController,
     })).singleton(),
   });
 }

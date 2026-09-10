@@ -23,6 +23,7 @@ import { registerSidePanelModule } from "./sidePanel";
 import { registerTurretModule } from "./turret";
 import { registerSelectionSessionModule } from "../selectionSession";
 import { registerEwarModule } from "./ewar";
+import { registerCapacitorModule } from "./capacitor";
 import { registerModulesPopupModule } from "./modulesPopup";
 import { registerDefenseModule } from "./defense";
 import { registerTargetingModule } from "./targeting";
@@ -53,6 +54,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerModulesPopupModule(cradle);
   registerEwarModule(cradle);
   registerDefenseModule(cradle);
+  registerCapacitorModule(cradle);
   registerTargetingModule(cradle);
   registerBoosterModule(cradle);
   registerMissileBoosterModule(cradle);

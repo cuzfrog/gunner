@@ -21,6 +21,7 @@ import type { SensorBoosterController } from "./sensorBooster";
 import type { EwarController } from "./ewar";
 import type { ModulesPopup } from "./modulesPopup";
 import type { DefenseController } from "./defense";
+import type { CapacitorController } from "./capacitor";
 import type { TargetingController } from "./targeting";
 import type { ImportController } from "./import";
 import type { ConfirmController } from "./confirm";
@@ -112,6 +113,7 @@ export interface ControlsCradle {
   readonly ewarController: EwarController;
   readonly modulesPopup: ModulesPopup;
   readonly defenseController: DefenseController;
+  readonly capacitorController: CapacitorController;
   readonly targetingController: TargetingController;
   readonly boosterController: BoosterController;
   readonly missileBoosterController: MissileBoosterController;

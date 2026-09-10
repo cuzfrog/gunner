@@ -1,6 +1,6 @@
 import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineEvents, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type InflictedDps, type MissileRuntimeState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "../sim";
 import { toTypeId } from "../gamedata/ids";
-import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
+import type { Controls, ControlsCallbacks, Loop, Renderer, UiEvents } from "../ui";
 import type { EngagementEngine } from "../sim";
 import type { Side } from "../sim";
 import { AppImpl } from "./app";
@@ -128,6 +128,7 @@ const loop = vi.mocked<Loop>({
 
 describe("AppImpl", () => {
   let app: AppImpl;
+  let uiEvents: UiEvents;
 
   beforeEach(() => {
     controls.getWeapon.mockReturnValue(turret);
@@ -137,8 +138,26 @@ describe("AppImpl", () => {
     engine.update.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
     engine.step.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
     engine.view.mockReturnValue(baseView());
-    app = new AppImpl({ controls, engine, renderer, loop });
+    uiEvents = mockUiEvents();
+    app = new AppImpl({ controls, engine, renderer, loop, uiEvents });
   });
+
+  function mockUiEvents(): UiEvents {
+    return {
+      onLanguageChanged: vi.fn(), offLanguageChanged: vi.fn(), emitLanguageChanged: vi.fn(),
+      onConfigInvalidated: vi.fn(), offConfigInvalidated: vi.fn(), emitConfigInvalidated: vi.fn(),
+      onDisplayInvalidated: vi.fn(), offDisplayInvalidated: vi.fn(), emitDisplayInvalidated: vi.fn(),
+      onFittingImported: vi.fn(), offFittingImported: vi.fn(), emitFittingImported: vi.fn(),
+      onCapBoosterInject: vi.fn(), offCapBoosterInject: vi.fn(), emitCapBoosterInject: vi.fn(),
+      onProfileLoaded: vi.fn(), offProfileLoaded: vi.fn(), emitProfileLoaded: vi.fn(),
+      onNewProfile: vi.fn(), offNewProfile: vi.fn(), emitNewProfile: vi.fn(),
+      onProfileDeleted: vi.fn(), offProfileDeleted: vi.fn(), emitProfileDeleted: vi.fn(),
+      onProfileTextLoaded: vi.fn(), offProfileTextLoaded: vi.fn(), emitProfileTextLoaded: vi.fn(),
+      onSessionRestored: vi.fn(), offSessionRestored: vi.fn(), emitSessionRestored: vi.fn(),
+      onSessionReset: vi.fn(), offSessionReset: vi.fn(), emitSessionReset: vi.fn(),
+      onStartupDefaultsApplied: vi.fn(), offStartupDefaultsApplied: vi.fn(), emitStartupDefaultsApplied: vi.fn(),
+    };
+  }
 
   function callbacks(): ControlsCallbacks {
     return controls.setCallbacks.mock.calls.at(-1)![0];
@@ -152,6 +171,14 @@ describe("AppImpl", () => {
     expect(engine.reset).toHaveBeenCalledWith(engineConfig);
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
     expect(renderer.draw).toHaveBeenCalledTimes(1);
+  });
+
+  test("routes cap booster inject events to the engine", () => {
+    app.start();
+    const listener = vi.mocked(uiEvents.onCapBoosterInject).mock.calls.at(0)?.[0];
+    expect(listener).toBeDefined();
+    listener!("shipA", 2);
+    expect(engine.injectCapBooster).toHaveBeenCalledWith("shipA", 2);
   });
 
   test("tick delegates only to engine.step; no direct death check in tick", () => {

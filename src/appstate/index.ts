@@ -8,6 +8,8 @@ export type {
   ProfileSettings,
   PropulsionSelection,
   StoredBoosterActivation,
+  StoredCapBoosterCharge,
+  StoredCapBoosterMode,
   StoredDisruptionScript,
   StoredEwarActivation,
   StoredMissileBoosterActivation,

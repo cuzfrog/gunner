@@ -1,8 +1,9 @@
-import { Vec2, type EngineView, type DefenseView, type EngagementView, EMPTY_DEFENSE_ASSESSMENT, } from "../../../sim";
+import { Vec2, type EngineView, type DefenseView, type EngagementView, type CapacitorView, EMPTY_DEFENSE_ASSESSMENT, } from "../../../sim";
 import type { EffectiveReadouts } from "../controlsContract";
 import type { EngagementReadout } from "../engagementReadout";
 import type { EffectiveReadout } from "../effectiveReadout";
 import type { DefenseReadout, ReadoutPresenter } from "./readoutPresenter";
+import type { CapacitorReadout } from "../capacitor";
 import { ReadoutPresenterImpl } from "./readoutPresenter";
 import type { I18n } from "../../i18n";
 import type { ViewStream } from "../../viewStream";
@@ -56,7 +57,12 @@ function makeEngineView(sigs?: { shipA: number; shipB: number }): EngineView {
   const shipAState = { ...view.frame.shipA, sig: sigs?.shipA ?? 1 };
   const shipBState = { ...view.frame.shipB, sig: sigs?.shipB ?? 1 };
   const snapshot = { time: view.frame.time, shipA: shipAState, shipB: shipBState, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
-  return { ...view, readouts: { shipA: { kind: "none", speed: 0 } as unknown as EffectiveReadouts["shipA"], shipB: { kind: "none", speed: 0 } as unknown as EffectiveReadouts["shipB"] }, defenseRuntime: mockDefenseView(), snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
+  return { ...view, readouts: { shipA: { kind: "none", speed: 0 } as unknown as EffectiveReadouts["shipA"], shipB: { kind: "none", speed: 0 } as unknown as EffectiveReadouts["shipB"] }, defenseRuntime: mockDefenseView(), capacitorRuntime: emptyCapacitorView(), snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
+}
+
+function emptyCapacitorView(): Record<"shipA" | "shipB", CapacitorView> {
+  const side: CapacitorView = { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [] };
+  return { shipA: side, shipB: { ...side } };
 }
 
 function buildDeps() {
@@ -68,8 +74,12 @@ function buildDeps() {
     updateDefenseView: vi.fn(),
     updateEffectiveSig: vi.fn(),
   };
+  const capacitorReadout: CapacitorReadout = {
+    updateRuntime: vi.fn(),
+    setPlaying: vi.fn(),
+  };
   let fakeNow = 0;
-  const deps = { viewStream, engagementReadout, effectiveReadout, defenseReadout, i18n: mockI18n(), now: () => fakeNow };
+  const deps = { viewStream, engagementReadout, effectiveReadout, defenseReadout, capacitorReadout, i18n: mockI18n(), now: () => fakeNow };
   return { ...deps, setNow: (n: number) => { fakeNow = n; } };
 }
 
@@ -84,6 +94,16 @@ describe("ReadoutPresenterImpl", () => {
     expect(d.defenseReadout.updateAssessments).toHaveBeenCalledTimes(1);
     expect(d.defenseReadout.updateEffectiveSig).toHaveBeenCalledWith("shipA", 100);
     expect(d.defenseReadout.updateEffectiveSig).toHaveBeenCalledWith("shipB", 200);
+  });
+
+  test("forwards capacitor runtime and playing state to the capacitor readout", () => {
+    const d = buildDeps();
+    const presenter: ReadoutPresenter = new ReadoutPresenterImpl(d);
+    presenter.setPlaying(true);
+    const view = makeEngineView({ shipA: 100, shipB: 200 });
+    d.viewStream.emit(view);
+    expect(d.capacitorReadout.setPlaying).toHaveBeenCalledWith(true);
+    expect(d.capacitorReadout.updateRuntime).toHaveBeenCalledWith(view.capacitorRuntime);
   });
 
   test("throttles readouts while playing and resumes after interval", () => {

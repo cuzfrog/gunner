@@ -3,6 +3,7 @@ import type { I18n } from "../../i18n";
 import type { ViewStream } from "../../viewStream";
 import type { EngagementReadout } from "../engagementReadout";
 import type { EffectiveReadout } from "../effectiveReadout";
+import type { CapacitorReadout } from "../capacitor";
 
 export interface DefenseReadout {
   updateAssessments(view: EngineView): void;
@@ -20,6 +21,7 @@ interface ReadoutPresenterDeps {
   readonly engagementReadout: EngagementReadout;
   readonly effectiveReadout: EffectiveReadout;
   readonly defenseReadout: DefenseReadout;
+  readonly capacitorReadout: CapacitorReadout;
   readonly i18n: I18n;
   readonly now: () => number;
 }
@@ -31,6 +33,7 @@ export class ReadoutPresenterImpl implements ReadoutPresenter {
   private readonly engagementReadout: EngagementReadout;
   private readonly effectiveReadout: EffectiveReadout;
   private readonly defenseReadout: DefenseReadout;
+  private readonly capacitorReadout: CapacitorReadout;
   private readonly i18n: I18n;
   private readonly now: () => number;
   private cachedView?: EngineView;
@@ -42,6 +45,7 @@ export class ReadoutPresenterImpl implements ReadoutPresenter {
     this.engagementReadout = deps.engagementReadout;
     this.effectiveReadout = deps.effectiveReadout;
     this.defenseReadout = deps.defenseReadout;
+    this.capacitorReadout = deps.capacitorReadout;
     this.i18n = deps.i18n;
     this.now = deps.now;
     this.viewStream.onViewUpdated((view) => this.onReadouts(view));
@@ -50,6 +54,7 @@ export class ReadoutPresenterImpl implements ReadoutPresenter {
   setPlaying(playing: boolean): void {
     if (!playing && this.playing) this.flush();
     this.playing = playing;
+    this.capacitorReadout.setPlaying(playing);
     if (playing) this.lastApplyMs = this.now() - READOUT_INTERVAL_MS;
   }
 
@@ -80,5 +85,6 @@ export class ReadoutPresenterImpl implements ReadoutPresenter {
     this.defenseReadout.updateAssessments(view);
     this.defenseReadout.updateEffectiveSig("shipA", view.snapshot.shipA.sig ?? 1);
     this.defenseReadout.updateEffectiveSig("shipB", view.snapshot.shipB.sig ?? 1);
+    this.capacitorReadout.updateRuntime(view.capacitorRuntime);
   }
 }

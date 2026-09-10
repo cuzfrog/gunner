@@ -1,7 +1,7 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import { EMPTY_DEFENSE_ASSESSMENT, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type EngineView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, Vec2, type CapacitorView, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type EngineView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
 import type { Ships } from "../../../ships";
 import type { EffectiveReadouts } from "../controlsContract";
 import type { InflictedDps, Side } from "../../../sim";
@@ -87,7 +87,12 @@ function makeEngineView(view: EngagementView, effective: EffectiveReadouts, defe
   const shipAState = { ...view.frame.shipA, sig: sigs?.shipA ?? 1 };
   const shipBState = { ...view.frame.shipB, sig: sigs?.shipB ?? 1 };
   const snapshot = { time: view.frame.time, shipA: shipAState, shipB: shipBState, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
-  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView, inflicted: ZERO_INFLICTED, snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
+  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView, capacitorRuntime: emptyCapacitorView(), inflicted: ZERO_INFLICTED, snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
+}
+
+function emptyCapacitorView(): Record<Side, CapacitorView> {
+  const side: CapacitorView = { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [] };
+  return { shipA: side, shipB: { ...side } };
 }
 
 function baseSettings(): UserSettings {

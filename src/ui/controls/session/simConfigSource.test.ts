@@ -7,6 +7,7 @@ import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
 import type { SensorBoosterController } from "../sensorBooster";
 import type { DefenseController } from "../defense";
+import type { CapacitorController } from "../capacitor";
 import type { DroneController } from "../drone";
 import type { LauncherController } from "../launcher";
 import type { TurretController } from "../turret";
@@ -141,7 +142,11 @@ function build() {
     repairerActivation: vi.fn(() => []),
     rahActivation: vi.fn(() => undefined),
   } as unknown as DefenseController;
-  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, defenseController, turretSpec, missileSpec };
+  const capacitorController = {
+    infiniteCapacitor: vi.fn(() => false),
+    capBoosterSpecs: vi.fn(() => []),
+  } as unknown as CapacitorController;
+  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, defenseController, capacitorController, turretSpec, missileSpec };
 }
 
 function makeSource(deps: ReturnType<typeof build>) {
@@ -158,6 +163,7 @@ function makeSource(deps: ReturnType<typeof build>) {
     launcherControllers: deps.launcherControllers,
     droneControllers: deps.droneControllers,
     defenseController: deps.defenseController,
+    capacitorController: deps.capacitorController,
   });
 }
 
