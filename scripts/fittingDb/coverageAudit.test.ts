@@ -48,7 +48,7 @@ describe("auditCoverage - signatureWithoutStats", () => {
         modifiers: [{ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 265, modifyingAttributeID: 335, operation: 6 }],
       }),
     };
-    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Small Trimark Armor Pump I", hasDefense: false }]]) });
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Small Trimark Armor Pump I", hasDefense: false, hasCapacitor: false }]]) });
     const failures = auditCoverage(ctx);
     expect(failures).toHaveLength(1);
     expect(failures[0]?.category).toBe("signatureWithoutStats");
@@ -70,7 +70,7 @@ describe("auditCoverage - signatureWithoutStats", () => {
         modifiers: [{ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 265, modifyingAttributeID: 1159, operation: 2 }],
       }),
     };
-    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "1600mm Steel Plates I", hasDefense: true }]]) });
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "1600mm Steel Plates I", hasDefense: true, hasCapacitor: false }]]) });
     const failures = auditCoverage(ctx);
     expect(failures).toHaveLength(0);
   });
@@ -103,7 +103,7 @@ describe("auditCoverage - unclassifiedCombatModifier", () => {
         modifiers: [{ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 265, modifyingAttributeID: 999, operation: 99 }],
       }),
     };
-    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Unknown Defense Module", hasDefense: true }]]) });
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Unknown Defense Module", hasDefense: true, hasCapacitor: false }]]) });
     const failures = auditCoverage(ctx);
     expect(failures.some((f) => f.category === "unclassifiedCombatModifier")).toBe(true);
   });
@@ -120,7 +120,7 @@ describe("auditCoverage - unclassifiedCombatModifier", () => {
         modifiers: [{ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 84, modifyingAttributeID: 806, operation: 99, skillTypeID: 3393 }],
       }),
     };
-    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Unknown Amplifier Rig", hasDefense: true }]]) });
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Unknown Amplifier Rig", hasDefense: true, hasCapacitor: false }]]) });
     const failures = auditCoverage(ctx);
     expect(failures.some((f) => f.category === "unclassifiedCombatModifier")).toBe(true);
   });
@@ -136,7 +136,7 @@ describe("auditCoverage - defenseAttrWithoutIntent", () => {
     const dogmaEffects: Record<string, SdeDogmaEffect> = {
       "9999": makeEffect(9999, { category: 0, name: "unknownEffect" }),
     };
-    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Mystery Shield Booster", hasDefense: true }]]) });
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Mystery Shield Booster", hasDefense: true, hasCapacitor: false }]]) });
     const failures = auditCoverage(ctx);
     expect(failures.some((f) => f.category === "defenseAttrWithoutIntent")).toBe(true);
   });
@@ -150,7 +150,7 @@ describe("auditCoverage - defenseAttrWithoutIntent", () => {
     const dogmaEffects: Record<string, SdeDogmaEffect> = {
       "4": makeEffect(4, { category: 1, name: "shieldBoosting" }),
     };
-    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Shield Booster", hasDefense: true }]]) });
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, generatedModules: new Map([[typeId, { typeId, typeName: "Shield Booster", hasDefense: true, hasCapacitor: false }]]) });
     const failures = auditCoverage(ctx);
     expect(failures.some((f) => f.category === "defenseAttrWithoutIntent")).toBe(false);
   });
@@ -293,5 +293,67 @@ describe("auditCoverage - turret/missile combat modifiers", () => {
     const ctx = makeContext({ types, typedogmas, dogmaEffects, moduleGroupIds: new Set([311]) });
     const failures = auditCoverage(ctx);
     expect(failures.some((f) => f.category === "unclassifiedCombatModifier")).toBe(true);
+  });
+});
+
+describe("auditCoverage - capacitor modules", () => {
+  const CAP_RECHARGER_GROUP = 43;
+  const CAP_BATTERY_GROUP = 61;
+  const NEUTRALIZER_GROUP = 71;
+  const generated = (typeId: number, name: string, hasDefense: boolean, hasCapacitor: boolean) => new Map([[typeId, { typeId, typeName: name, hasDefense, hasCapacitor }]]);
+
+  test("fails when a capacitor module has capacitor attributes but no generated capacitor stats", () => {
+    const typeId = 2032;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, CAP_RECHARGER_GROUP, "Cap Recharger II") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([{ attributeID: 144, value: 0.8 }], [51]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "51": makeEffect(51, { category: 4, modifiers: [{ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 55, modifyingAttributeID: 144, operation: 4 }] }),
+    };
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, moduleGroupIds: new Set([CAP_RECHARGER_GROUP]), generatedModules: generated(typeId, "Cap Recharger II", false, false) });
+    const failures = auditCoverage(ctx);
+    expect(failures).toHaveLength(1);
+    expect(failures[0]?.category).toBe("signatureWithoutStats");
+  });
+
+  test("does not fail when a capacitor module has generated capacitor stats", () => {
+    const typeId = 3504;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, CAP_BATTERY_GROUP, "Large Cap Battery II") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([{ attributeID: 67, value: 1625 }], [25]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "25": makeEffect(25, { category: 4, modifiers: [{ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 482, modifyingAttributeID: 67, operation: 2 }] }),
+    };
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, moduleGroupIds: new Set([CAP_BATTERY_GROUP]), generatedModules: generated(typeId, "Large Cap Battery II", false, true) });
+    const failures = auditCoverage(ctx);
+    expect(failures).toHaveLength(0);
+  });
+
+  test("does not fail for capacitor groups without capacitor attributes", () => {
+    const typeId = 11289;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, 87, "Cap Booster 800") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([], [804]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "804": makeEffect(804, { category: 0, modifiers: [{ domain: "itemID", func: "ItemModifier", modifiedAttributeID: 6, modifyingAttributeID: 2104, operation: 6 }] }),
+    };
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, moduleGroupIds: new Set([87]) });
+    const failures = auditCoverage(ctx);
+    expect(failures).toHaveLength(0);
+  });
+
+  test("does not flag a warfare neutralizer with generated stats", () => {
+    const typeId = 12271;
+    const types: Record<string, SdeType> = { [typeId]: makeType(typeId, NEUTRALIZER_GROUP, "Heavy Energy Neutralizer II") };
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      [typeId]: makeTypeDogma([{ attributeID: 97, value: 600 }], [6187]),
+    };
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {};
+    const ctx = makeContext({ types, typedogmas, dogmaEffects, moduleGroupIds: new Set([NEUTRALIZER_GROUP]), generatedModules: generated(typeId, "Heavy Energy Neutralizer II", false, true) });
+    const failures = auditCoverage(ctx);
+    expect(failures).toHaveLength(0);
   });
 });

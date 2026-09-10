@@ -47,6 +47,19 @@ export const MASS = 4;
 export const SIGNATURE_RADIUS = 552;
 export const MAX_VELOCITY = 37;
 
+export const CAPACITOR_CAPACITY = 482;
+export const CAPACITOR_RECHARGE_RATE = 55;
+export const CAPACITOR_BONUS = 67;
+export const CAPACITOR_RECHARGE_RATE_MULTIPLIER = 144;
+export const CAPACITOR_CAPACITY_MULTIPLIER = 147;
+export const POWER_TRANSFER_AMOUNT = 90;
+export const ENERGY_NEUTRALIZER_AMOUNT = 97;
+export const ENERGY_WARFARE_RESISTANCE = 2045;
+export const ENERGY_WARFARE_RESISTANCE_BONUS = 2267;
+
+export const CAPACITOR_STATS_GROUPS = new Set([43, 61, 76, 766, 767, 768]);
+export const CAP_WARFARE_GROUPS = new Set([68, 71]);
+
 export const TURRET_DAMAGE_MULTIPLIER = 64;
 export const TURRET_SPEED = 51;
 export const MISSILE_DAMAGE_MULTIPLIER = 212;

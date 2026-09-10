@@ -103,6 +103,7 @@ export const FITTED_PROPULSION = {
   speedBonus: 1.15,
   massAddition: 500_000,
   sigBloom: 0,
+  capacitorNeed: 20,
 };
 export const FITTED_HULL_SUMMARY: FittedHullSummary = {
   fittingName: "Brawler",
@@ -133,6 +134,8 @@ export const RIFTER_PROFILE: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -157,6 +160,8 @@ const THRASHER_PROFILE: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -181,6 +186,8 @@ const BRUTIX_PROFILE: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -205,6 +212,8 @@ const WRAITH_PROFILE: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -230,9 +239,10 @@ export const RIFTER_MODULE: PropulsionModule = {
   speedBonus: 5,
   massAddition: 500_000,
   sigBloom: 5,
+  capacitorNeed: 45,
 };
 export const RIFTER_PROPULSION: PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionModuleId: TypeId } = { ...RIFTER_MODULE, propulsionId: "mwd-5mn", propulsionModuleId: toTypeId("434") };
-export const COMPACT_MWD: PropulsionStats = { thrust: 1_500_000, speedBonus: 5.05, massAddition: 500_000, sigBloom: 5 };
+export const COMPACT_MWD: PropulsionStats = { thrust: 1_500_000, speedBonus: 5.05, massAddition: 500_000, sigBloom: 5, capacitorNeed: 45 };
 export const RIFTER_BASE_STATS: ShipStats = {
   mass: 1_000_000,
   inertiaModifier: 2,

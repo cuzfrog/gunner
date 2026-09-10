@@ -29,6 +29,7 @@ const AB_MODULE: PropulsionModule = {
   speedBonus: 1.5,
   massAddition: 0,
   sigBloom: 0,
+  capacitorNeed: 20,
 };
 
 const MWD_MODULE: PropulsionModule = {
@@ -42,6 +43,7 @@ const MWD_MODULE: PropulsionModule = {
   speedBonus: 5,
   massAddition: 500_000,
   sigBloom: 5,
+  capacitorNeed: 45,
 };
 
 function fittingForPropulsion(): FittingImport {
@@ -53,9 +55,9 @@ function fittingForPropulsion(): FittingImport {
   });
   fitting.propulsionStats = vi.fn(() => AB_MODULE);
   fitting.propulsionStatsById = vi.fn((id: TypeId) => {
-    if (id === AB_VARIANT_II_ID) return { thrust: 150, speedBonus: 1.675, massAddition: 0, sigBloom: 0 };
-    if (id === AB_DEFAULT_ID) return { thrust: 150, speedBonus: 1.5, massAddition: 0, sigBloom: 0 };
-    if (id === MWD_DEFAULT_ID) return { thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5 };
+    if (id === AB_VARIANT_II_ID) return { thrust: 150, speedBonus: 1.675, massAddition: 0, sigBloom: 0, capacitorNeed: 20 };
+    if (id === AB_DEFAULT_ID) return { thrust: 150, speedBonus: 1.5, massAddition: 0, sigBloom: 0, capacitorNeed: 20 };
+    if (id === MWD_DEFAULT_ID) return { thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5, capacitorNeed: 45 };
     return undefined;
   });
   fitting.itemNameForId = vi.fn(() => "1MN加力燃烧器 I");

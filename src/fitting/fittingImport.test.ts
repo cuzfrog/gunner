@@ -103,6 +103,8 @@ const profile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -127,6 +129,8 @@ const frigateProfile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -151,6 +155,8 @@ const bonusProfile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -175,6 +181,8 @@ const roleBonusProfile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -199,6 +207,8 @@ const abaddonProfile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -223,6 +233,8 @@ const kestrelProfile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -247,16 +259,18 @@ const stilettoProfile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const propulsionModules: readonly PropulsionModule[] = [
-  { id: "ab-1mn", kind: "afterburner", sizeTier: "small", label: "1MN Afterburner I", iconId: toTypeId("439"), defaultModuleId: toTypeId("439"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 1.15, sigBloom: 0 },
-  { id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN MWD", iconId: toTypeId("434"), defaultModuleId: toTypeId("434"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 5, sigBloom: 5 },
-  { id: "ab-10mn", kind: "afterburner", sizeTier: "medium", label: "10MN AB", iconId: toTypeId("12056"), defaultModuleId: toTypeId("12056"), thrust: 15e6, massAddition: 5_000_000, speedBonus: 1.15, sigBloom: 0 },
-  { id: "ab-100mn", kind: "afterburner", sizeTier: "large", label: "100MN AB", iconId: toTypeId("12066"), defaultModuleId: toTypeId("12066"), thrust: 150e6, massAddition: 50_000_000, speedBonus: 1.15, sigBloom: 0 },
+  { id: "ab-1mn", kind: "afterburner", sizeTier: "small", label: "1MN Afterburner I", iconId: toTypeId("439"), defaultModuleId: toTypeId("439"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 1.15, sigBloom: 0, capacitorNeed: 20 },
+  { id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN MWD", iconId: toTypeId("434"), defaultModuleId: toTypeId("434"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 5, sigBloom: 5, capacitorNeed: 45 },
+  { id: "ab-10mn", kind: "afterburner", sizeTier: "medium", label: "10MN AB", iconId: toTypeId("12056"), defaultModuleId: toTypeId("12056"), thrust: 15e6, massAddition: 5_000_000, speedBonus: 1.15, sigBloom: 0, capacitorNeed: 80 },
+  { id: "ab-100mn", kind: "afterburner", sizeTier: "large", label: "100MN AB", iconId: toTypeId("12066"), defaultModuleId: toTypeId("12066"), thrust: 150e6, massAddition: 50_000_000, speedBonus: 1.15, sigBloom: 0, capacitorNeed: 320 },
 ];
 
 const ships = vi.mocked<Ships>({
@@ -288,6 +302,7 @@ const db: FittingDb = {
         speedBonus: 5,
         massAddition: 500_000,
         sigBloom: 5,
+        capacitorNeed: 45,
       },
     }),
     "100MN Y-S8 Compact Afterburner": row("100MN Y-S8 Compact Afterburner", "100MN Y-S8 Compact Afterburner", {
@@ -298,6 +313,7 @@ const db: FittingDb = {
         speedBonus: 1.25,
         massAddition: 50_000_000,
         sigBloom: 0,
+        capacitorNeed: 91,
       },
     }),
     "Inertial Stabilizers II": row("Inertial Stabilizers II", "Inertial Stabilizers II", { agilityMultiplier: 0.8, sigBonusPercent: 11 }),
@@ -314,8 +330,8 @@ const db: FittingDb = {
     "Gyrostabilizer II": row("Gyrostabilizer II", "Gyrostabilizer II", { turretDamageMultiplier: 1.15, turretSpeedMultiplier: 0.89, turretWeaponGroup: "Projectile Weapon" }),
   },
   turrets: {
-    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, chargeGroups: [86, 375], damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", requiredSkillIds: [toTypeId("3300"), toTypeId("3306"), toTypeId("12214")], groupID: 53, metaLevel: 5, metaGroupID: 2 }),
-    "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, chargeGroups: [83, 372], damageMultiplier: 3, cycleTime: 5, turretSkill: "Small Projectile Turret", requiredSkillIds: [toTypeId("3300"), toTypeId("3302"), toTypeId("11079")], groupID: 55, metaLevel: 5, metaGroupID: 2 }),
+    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, chargeGroups: [86, 375], damageMultiplier: 3, cycleTime: 5, capacitorNeed: 36, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", requiredSkillIds: [toTypeId("3300"), toTypeId("3306"), toTypeId("12214")], groupID: 53, metaLevel: 5, metaGroupID: 2 }),
+    "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, chargeGroups: [83, 372], damageMultiplier: 3, cycleTime: 5, capacitorNeed: 0, turretSkill: "Small Projectile Turret", requiredSkillIds: [toTypeId("3300"), toTypeId("3302"), toTypeId("11079")], groupID: 55, metaLevel: 5, metaGroupID: 2 }),
   },
   charges: {
     "Conflagration M": row("Conflagration M", "Conflagration M", { trackingMultiplier: 0.7, rangeMultiplier: 0.5, chargeGroup: 375, chargeSize: 2 }),
@@ -628,12 +644,14 @@ describe("FittingImportImpl", () => {
       speedBonus: 5,
       massAddition: 500_000,
       sigBloom: 5,
+      capacitorNeed: 45,
     });
     expect(importer.propulsionStats("100MN Y-S8 Compact Afterburner")).toEqual({
       thrust: 150_000_000,
       speedBonus: 1.25,
       massAddition: 50_000_000,
       sigBloom: 0,
+      capacitorNeed: 91,
     });
   });
 
@@ -650,6 +668,7 @@ describe("FittingImportImpl", () => {
       speedBonus: 1.25,
       massAddition: 50_000_000,
       sigBloom: 0,
+      capacitorNeed: 91,
     });
     expect(importer.propulsionStatsById("1600mm Steel Plates II" as TypeId)).toBeUndefined();
   });

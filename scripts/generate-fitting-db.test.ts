@@ -61,18 +61,22 @@ describe("buildStasisWebStats", () => {
   });
 
   test("builds a web from speed factor and range", () => {
-    expect(buildStasisWebStats(values({ maxRange: 10000, speedFactor: -55 }))).toEqual({
+    expect(buildStasisWebStats(values({ maxRange: 10000, speedFactor: -55, capacitorNeed: 8, duration: 5000 }))).toEqual({
       maxRange: 10000,
       speedFactorPercent: -55,
       overloadRangeBonusPercent: 0,
+      capacitorNeed: 8,
+      cycleTime: 5,
     });
   });
 
   test("preserves overload range bonus when present", () => {
-    expect(buildStasisWebStats(values({ maxRange: 10000, speedFactor: -60, overloadRangeBonus: 30 }))).toEqual({
+    expect(buildStasisWebStats(values({ maxRange: 10000, speedFactor: -60, overloadRangeBonus: 30, capacitorNeed: 8, duration: 5000 }))).toEqual({
       maxRange: 10000,
       speedFactorPercent: -60,
       overloadRangeBonusPercent: 30,
+      capacitorNeed: 8,
+      cycleTime: 5,
     });
   });
 });
@@ -88,11 +92,15 @@ describe("buildTrackingDisruptorStats", () => {
       falloffEffectiveness: 24000,
       trackingSpeedBonus: -17.19,
       overloadTrackingModuleStrengthBonus: 20,
+      capacitorNeed: 8,
+      duration: 5000,
     }))).toEqual({
       optimal: 48000,
       falloff: 24000,
       disruptionPercent: -17.19,
       overloadStrengthBonusPercent: 20,
+      capacitorNeed: 8,
+      cycleTime: 5,
     });
   });
 });
@@ -171,16 +179,20 @@ describe("buildWarpScramblerStats", () => {
   });
 
   test("builds a warp scrambler from propulsion block, range, and overload bonus", () => {
-    expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 1, maxRange: 9000, overloadRangeBonus: 20 }))).toEqual({
+    expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 1, maxRange: 9000, overloadRangeBonus: 20, capacitorNeed: 8, duration: 2000 }))).toEqual({
       maxRange: 9000,
       overloadRangeBonusPercent: 20,
+      capacitorNeed: 8,
+      cycleTime: 2,
     });
   });
 
   test("defaults missing overload range bonus to zero", () => {
-    expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 1, maxRange: 7500 }))).toEqual({
+    expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 1, maxRange: 7500, capacitorNeed: 8, duration: 2000 }))).toEqual({
       maxRange: 7500,
       overloadRangeBonusPercent: 0,
+      capacitorNeed: 8,
+      cycleTime: 2,
     });
   });
 
@@ -195,18 +207,22 @@ describe("buildTrackingComputerStats", () => {
   });
 
   test("builds a tracking computer from bonus attributes", () => {
-    expect(buildTrackingComputerStats(values({ trackingSpeedBonus: 10, maxRangeBonus: 5, falloffBonus: 10 }))).toEqual({
+    expect(buildTrackingComputerStats(values({ trackingSpeedBonus: 10, maxRangeBonus: 5, falloffBonus: 10, capacitorNeed: 8, duration: 10000 }))).toEqual({
       trackingBonusPercent: 10,
       optimalBonusPercent: 5,
       falloffBonusPercent: 10,
+      capacitorNeed: 8,
+      cycleTime: 10,
     });
   });
 
   test("defaults missing range and falloff bonuses to zero", () => {
-    expect(buildTrackingComputerStats(values({ trackingSpeedBonus: 15 }))).toEqual({
+    expect(buildTrackingComputerStats(values({ trackingSpeedBonus: 15, capacitorNeed: 8, duration: 10000 }))).toEqual({
       trackingBonusPercent: 15,
       optimalBonusPercent: 0,
       falloffBonusPercent: 0,
+      capacitorNeed: 8,
+      cycleTime: 10,
     });
   });
 });
@@ -574,20 +590,26 @@ describe("_buildTargetPainterStats", () => {
       falloffEffectiveness: 90000,
       signatureRadiusBonus: 30,
       overloadPainterStrengthBonus: 20,
+      capacitorNeed: 8,
+      duration: 5000,
     }))).toEqual({
       maxRange: 36000,
       falloff: 90000,
       signatureRadiusBonusPercent: 30,
       overloadStrengthBonusPercent: 20,
+      capacitorNeed: 8,
+      cycleTime: 5,
     });
   });
 
   test("defaults falloff and overload bonus to zero when missing", () => {
-    expect(_buildTargetPainterStats(values({ maxRange: 30000, signatureRadiusBonus: 25 }))).toEqual({
+    expect(_buildTargetPainterStats(values({ maxRange: 30000, signatureRadiusBonus: 25, capacitorNeed: 8, duration: 5000 }))).toEqual({
       maxRange: 30000,
       falloff: 0,
       signatureRadiusBonusPercent: 25,
       overloadStrengthBonusPercent: 0,
+      capacitorNeed: 8,
+      cycleTime: 5,
     });
   });
 });
@@ -604,22 +626,28 @@ describe("_buildMissileGuidanceComputerStats", () => {
       missileVelocityBonus: 5.5,
       explosionDelayBonus: 5.5,
       overloadTrackingModuleStrengthBonus: 15,
+      capacitorNeed: 8,
+      duration: 10000,
     }))).toEqual({
       explosionRadiusBonusPercent: -8.25,
       explosionVelocityBonusPercent: 8.25,
       missileVelocityBonusPercent: 5.5,
       flightTimeBonusPercent: 5.5,
       overloadStrengthBonusPercent: 15,
+      capacitorNeed: 8,
+      cycleTime: 10,
     });
   });
 
   test("defaults missing bonuses to zero", () => {
-    expect(_buildMissileGuidanceComputerStats(values({ aoeCloudSizeBonus: -5.5 }))).toEqual({
+    expect(_buildMissileGuidanceComputerStats(values({ aoeCloudSizeBonus: -5.5, capacitorNeed: 8, duration: 10000 }))).toEqual({
       explosionRadiusBonusPercent: -5.5,
       explosionVelocityBonusPercent: 0,
       missileVelocityBonusPercent: 0,
       flightTimeBonusPercent: 0,
       overloadStrengthBonusPercent: 0,
+      capacitorNeed: 8,
+      cycleTime: 10,
     });
   });
 });

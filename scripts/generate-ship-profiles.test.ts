@@ -1,4 +1,4 @@
-import { _buildAttributeNameMap, _buildShipNameToType, _extractDefenseData, _parseDroneLimits, _parseProfile, _resolveShipIds, _slugify } from "./generate-ship-profiles";
+import { _buildAttributeNameMap, _buildShipNameToType, _extractCapacitorData, _extractDefenseData, _parseDroneLimits, _parseProfile, _resolveShipIds, _slugify } from "./generate-ship-profiles";
 import type { SdeDogmaAttribute, SdeGroup, SdeType, SdeTypeDogma } from "./generate-ship-profiles";
 
 describe("_slugify", () => {
@@ -189,6 +189,24 @@ describe("_parseProfile", () => {
     expect(profile.hullResists).toEqual({ em: 0, thermal: 0, kinetic: 0, explosive: 0 });
   });
 
+  test("carries capacitor data from typedogma into the profile", () => {
+    const attributeNames = new Map<number, string>([[482, "capacitorCapacity"], [55, "rechargeRate"]]);
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      "587": { dogmaAttributes: [{ attributeID: 482, value: 450 }, { attributeID: 55, value: 250000 }] },
+    };
+    const raw = {
+      name: "Rifter",
+      faction: "Minmatar Republic",
+      hullType: "Standard Frigates",
+      navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
+      structure: { mass: "1,067,000 kg" },
+      targeting: { sigRadius: "35 m", scanResolution: "200 mm", maxTargetingRange: "30 km", maxLockedTargets: 4 },
+    };
+    const profile = _parseProfile(raw, 0, shipNameToType, typedogmas, attributeNames);
+    expect(profile.capacitorCapacity).toBe(450);
+    expect(profile.capacitorRechargeTime).toBe(250);
+  });
+
   test("throws for a non-object entry", () => {
     expect(() => _parseProfile(null, 0, shipNameToType, emptyTypedogmas, emptyAttributeNames)).toThrow("Entry 0 is not an object");
   });
@@ -256,6 +274,36 @@ describe("_buildAttributeNameMap", () => {
     const attrs: Record<string, SdeDogmaAttribute> = { "1": makeAttr(263, "shieldCapacity"), "2": makeAttr(263, "duplicate") };
     const map = _buildAttributeNameMap(attrs);
     expect(map.get(263)).toBe("shieldCapacity");
+  });
+});
+
+describe("_extractCapacitorData", () => {
+  function makeAttributeNames(): Map<number, string> {
+    return new Map<number, string>([[482, "capacitorCapacity"], [55, "rechargeRate"]]);
+  }
+
+  test("extracts capacitor capacity and recharge time in seconds", () => {
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      "24692": { dogmaAttributes: [{ attributeID: 482, value: 6375 }, { attributeID: 55, value: 1250000 }] },
+    };
+    const capacitor = _extractCapacitorData("24692", typedogmas, makeAttributeNames());
+    expect(capacitor.capacitorCapacity).toBe(6375);
+    expect(capacitor.capacitorRechargeTime).toBe(1250);
+  });
+
+  test("returns zeros when typedogma is missing", () => {
+    const capacitor = _extractCapacitorData("99999", {}, makeAttributeNames());
+    expect(capacitor.capacitorCapacity).toBe(0);
+    expect(capacitor.capacitorRechargeTime).toBe(0);
+  });
+
+  test("returns zeros when capacitor attributes are absent", () => {
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      "587": { dogmaAttributes: [{ attributeID: 9, value: 400 }] },
+    };
+    const capacitor = _extractCapacitorData("587", typedogmas, makeAttributeNames());
+    expect(capacitor.capacitorCapacity).toBe(0);
+    expect(capacitor.capacitorRechargeTime).toBe(0);
   });
 });
 

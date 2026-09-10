@@ -44,6 +44,7 @@ function turretRow(id: TypeId, name: string, chargeGroups: readonly number[], ch
     chargeGroups,
     damageMultiplier: 1,
     cycleTime: 5,
+    capacitorNeed: 0,
     requiredSkillIds: [],
     groupID: 55,
     metaLevel: 0,

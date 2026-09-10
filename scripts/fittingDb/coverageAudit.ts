@@ -1,9 +1,20 @@
 import type { SdeDogmaEffect, SdeType, SdeTypeDogma } from "./dogmaTypes";
 import { FUNC_ITEM_MODIFIER, FUNC_LOCATION_GROUP, FUNC_LOCATION_REQUIRED_SKILL } from "./dogmaTypes";
-import { classifyDefenseEffects, classifyCombatEffect } from "./effectClassifier";
+import { classifyCapacitorEffects, classifyDefenseEffects, classifyCombatEffect } from "./effectClassifier";
 import {
   ARMOR_DAMAGE_AMOUNT,
   ARMOR_HP,
+  CAPACITOR_BONUS,
+  CAPACITOR_CAPACITY,
+  CAPACITOR_CAPACITY_MULTIPLIER,
+  CAPACITOR_RECHARGE_RATE,
+  CAPACITOR_RECHARGE_RATE_MULTIPLIER,
+  CAPACITOR_STATS_GROUPS,
+  CAP_WARFARE_GROUPS,
+  ENERGY_WARFARE_RESISTANCE,
+  ENERGY_WARFARE_RESISTANCE_BONUS,
+  ENERGY_NEUTRALIZER_AMOUNT,
+  POWER_TRANSFER_AMOUNT,
   DURATION,
   RESISTANCE_SHIFT_AMOUNT,
   SHIELD_BONUS,
@@ -106,6 +117,19 @@ const BUILDER_INPUT_ATTRS = new Set<number>([
 const TURRET_COMBAT_ATTRS = new Set<number>([TURRET_DAMAGE_MULTIPLIER, TURRET_SPEED]);
 const MISSILE_COMBAT_ATTRS = new Set<number>([MISSILE_DAMAGE_MULTIPLIER, TURRET_SPEED]);
 
+const CAPACITOR_GROUPS = new Set<number>([...CAPACITOR_STATS_GROUPS, ...CAP_WARFARE_GROUPS]);
+
+const CAPACITOR_TARGET_ATTRS = new Set<number>([CAPACITOR_CAPACITY, CAPACITOR_RECHARGE_RATE, ENERGY_WARFARE_RESISTANCE]);
+
+const CAPACITOR_BUILDER_INPUT_ATTRS = new Set<number>([
+  CAPACITOR_BONUS,
+  CAPACITOR_RECHARGE_RATE_MULTIPLIER,
+  CAPACITOR_CAPACITY_MULTIPLIER,
+  ENERGY_WARFARE_RESISTANCE_BONUS,
+  ENERGY_NEUTRALIZER_AMOUNT,
+  POWER_TRANSFER_AMOUNT,
+]);
+
 const DEFENSE_INTENT_TAGS = new Set<string>([
   "resist",
   "damageControl",
@@ -124,6 +148,7 @@ export interface AuditModuleEntry {
   readonly typeId: number;
   readonly typeName: string;
   readonly hasDefense: boolean;
+  readonly hasCapacitor: boolean;
 }
 
 export interface AuditContext {
@@ -149,6 +174,8 @@ export function auditCoverage(ctx: AuditContext): readonly AuditFailure[] {
     const generated = ctx.generatedModules.get(typeId);
     const result = classifyDefenseEffects(effects, typeDogma);
     const defenseIntents = result.intents.filter((c) => DEFENSE_INTENT_TAGS.has(c.intent.tag));
+
+    if (CAPACITOR_GROUPS.has(type.groupID)) auditCapacitorModule(typeId, type, typeDogma, effects, generated, failures);
 
     if (defenseIntents.length > 0 && (!generated || !generated.hasDefense)) {
       const hasBuilderInput = typeDogma.dogmaAttributes.some((a) => BUILDER_INPUT_ATTRS.has(a.attributeID));
@@ -238,6 +265,39 @@ export function auditCoverage(ctx: AuditContext): readonly AuditFailure[] {
     }
   }
   return failures;
+}
+
+function auditCapacitorModule(
+  typeId: number,
+  type: SdeType,
+  typeDogma: SdeTypeDogma,
+  effects: readonly SdeDogmaEffect[],
+  generated: AuditModuleEntry | undefined,
+  failures: AuditFailure[],
+): void {
+  for (const effect of effects) {
+    const mods = effect.modifierInfo;
+    if (!mods || mods.length === 0) continue;
+    const capacitorTargets = mods.filter((m) => m.func === FUNC_ITEM_MODIFIER && CAPACITOR_TARGET_ATTRS.has(m.modifiedAttributeID));
+    if (capacitorTargets.length === 0) continue;
+    if (classifyCapacitorEffects([effect]).length === 0 && classifyDefenseEffects([effect], typeDogma).intents.length === 0) {
+      failures.push({
+        typeId,
+        typeName: type["typeName_en-us"],
+        category: "unclassifiedCombatModifier",
+        detail: `Effect ${effect.effectID} ItemModifier modifies capacitor attribute ${capacitorTargets[0]?.modifiedAttributeID} (op ${capacitorTargets[0]?.operation}) but was not classified`,
+      });
+    }
+  }
+  const hasCapacitorInput = typeDogma.dogmaAttributes.some((a) => CAPACITOR_BUILDER_INPUT_ATTRS.has(a.attributeID));
+  if (hasCapacitorInput && (!generated || !generated.hasCapacitor)) {
+    failures.push({
+      typeId,
+      typeName: type["typeName_en-us"],
+      category: "signatureWithoutStats",
+      detail: "Capacitor module has capacitor builder input attributes but no generated capacitor, neutralizer, or nosferatu stats",
+    });
+  }
 }
 
 function resolveEffects(typeDogma: SdeTypeDogma, dogmaEffects: Readonly<Record<string, SdeDogmaEffect>>): readonly SdeDogmaEffect[] {

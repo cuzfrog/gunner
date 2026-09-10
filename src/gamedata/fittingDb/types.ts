@@ -7,6 +7,7 @@ export interface FittingPropulsionStats {
   readonly sizeTier: HullTier;
   readonly thrust: number;
   readonly speedBonus: number;
+  readonly capacitorNeed: number; // GJ per 10 s cycle
   readonly massAddition: number;
   readonly sigBloom: number;
 }
@@ -54,6 +55,34 @@ export interface DefenseModuleStats {
   readonly repairCycleTimeMultiplier?: number;
 }
 
+export type CapacitorModuleKind = "capacitorBattery" | "capacitorRecharger" | "capacitorRelay" | "powerDiagnostic" | "capacitorFluxCoil" | "capacitorBooster";
+
+export interface CapacitorModuleStats {
+  readonly kind: CapacitorModuleKind;
+  readonly capacityAdd?: number; // GJ, batteries
+  readonly capacityMultiplier?: number; // PDS 1.05, flux coil 0.8
+  readonly rechargeMultiplier?: number; // recharger 0.8, CPL 0.76, PDS 0.915, flux coil 0.61
+  readonly energyWarfareResistanceBonus?: number; // raw SDE percent, batteries (-25)
+  readonly cycleTime?: number; // seconds, booster only
+  readonly reloadTime?: number; // seconds, booster only
+  readonly chargeCapacity?: number; // m3, booster only; clip = floor(chargeCapacity / charge volume)
+}
+
+export interface EnergyNeutralizerStats {
+  readonly amount: number; // GJ drained from the target per cycle
+  readonly cycleTime: number; // seconds
+  readonly capacitorNeed: number; // GJ consumed by the user per cycle
+  readonly maxRange: number; // m
+  readonly falloff: number; // m
+}
+
+export interface NosferatuStats {
+  readonly amount: number; // GJ transferred per cycle
+  readonly cycleTime: number; // seconds
+  readonly maxRange: number; // m
+  readonly falloff: number; // m
+}
+
 export type RigDrawbackKind = "signature" | "agility" | "armorHp" | "shieldHp" | "cpu" | "cpuNeed" | "powerNeed" | "capacitorRecharge" | "cargoCapacity" | "warpSpeed" | "repairPowerGrid";
 
 export interface RigDrawback {
@@ -96,6 +125,9 @@ export interface FittingModuleStats {
   readonly droneDamageBonus?: number;
   readonly droneControlRangeBonus?: number;
   readonly defense?: DefenseModuleStats;
+  readonly capacitor?: CapacitorModuleStats;
+  readonly neutralizer?: EnergyNeutralizerStats;
+  readonly nosferatu?: NosferatuStats;
   readonly id: TypeId;
   readonly name: string;
 }
@@ -126,6 +158,7 @@ export interface TurretStats {
   readonly chargeGroups: readonly number[];
   readonly damageMultiplier: number;
   readonly cycleTime: number;
+  readonly capacitorNeed: number; // GJ per cycle per turret
   readonly spoolPerCycle?: number; // damageMultiplierBonusPerCycle, fraction (e.g. 0.07)
   readonly spoolMax?: number; // damageMultiplierBonusMax, fraction (e.g. 2.125)
   readonly turretSkill?: string;
@@ -173,6 +206,8 @@ export interface ChargeStats {
   readonly thermalDamage?: number;
   readonly kineticDamage?: number;
   readonly explosiveDamage?: number;
+  readonly capacitorBonus?: number; // GJ injected per cycle, cap booster charges
+  readonly volume?: number; // m3, cap booster charges
   readonly chargeGroup: number;
   readonly chargeSize: number;
   readonly id: TypeId;
@@ -217,6 +252,8 @@ export interface StasisWebStats {
   readonly maxRange: number;
   readonly speedFactorPercent: number;
   readonly overloadRangeBonusPercent: number;
+  readonly capacitorNeed: number; // GJ per cycle
+  readonly cycleTime: number; // seconds
   readonly id: TypeId;
   readonly name: string;
 }
@@ -226,6 +263,8 @@ export interface StasisGrapplerStats {
   readonly falloff: number;
   readonly speedFactorPercent: number;
   readonly overloadOptimalBonusPercent: number;
+  readonly capacitorNeed: number; // GJ per cycle
+  readonly cycleTime: number; // seconds
   readonly id: TypeId;
   readonly name: string;
 }
@@ -235,6 +274,8 @@ export interface TrackingDisruptorStats {
   readonly falloff: number;
   readonly disruptionPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number; // GJ per cycle
+  readonly cycleTime: number; // seconds
   readonly id: TypeId;
   readonly name: string;
 }
@@ -250,6 +291,8 @@ export interface DisruptionScriptStats {
 export interface WarpScramblerStats {
   readonly maxRange: number;
   readonly overloadRangeBonusPercent: number;
+  readonly capacitorNeed: number; // GJ per cycle
+  readonly cycleTime: number; // seconds
   readonly id: TypeId;
   readonly name: string;
 }
@@ -258,6 +301,8 @@ export interface TrackingComputerStats {
   readonly trackingBonusPercent: number;
   readonly optimalBonusPercent: number;
   readonly falloffBonusPercent: number;
+  readonly capacitorNeed: number; // GJ per cycle
+  readonly cycleTime: number; // seconds
   readonly id: TypeId;
   readonly name: string;
 }
@@ -267,6 +312,8 @@ export interface TargetPainterStats {
   readonly falloff: number;
   readonly signatureRadiusBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number; // GJ per cycle
+  readonly cycleTime: number; // seconds
   readonly id: TypeId;
   readonly name: string;
 }
@@ -277,6 +324,8 @@ export interface MissileGuidanceComputerStats {
   readonly missileVelocityBonusPercent: number;
   readonly flightTimeBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number; // GJ per cycle
+  readonly cycleTime: number; // seconds
   readonly id: TypeId;
   readonly name: string;
 }
@@ -304,6 +353,8 @@ export interface OmnidirectionalTrackingLinkStats {
   readonly optimalBonusPercent: number;
   readonly falloffBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number; // GJ per cycle
+  readonly cycleTime: number; // seconds
   readonly id: TypeId;
   readonly name: string;
 }
@@ -322,6 +373,8 @@ export interface SensorDampenerStats {
   readonly scanResolutionBonusPercent: number;
   readonly maxTargetRangeBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number; // GJ per cycle
+  readonly cycleTime: number; // seconds
   readonly id: TypeId;
   readonly name: string;
 }
@@ -330,6 +383,8 @@ export interface SensorBoosterStats {
   readonly scanResolutionBonusPercent: number;
   readonly maxTargetRangeBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number; // GJ per cycle
+  readonly cycleTime: number; // seconds
   readonly id: TypeId;
   readonly name: string;
 }

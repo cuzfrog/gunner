@@ -165,6 +165,20 @@ function buildAttributeNameMap(attributes: Record<string, SdeDogmaAttribute>): M
   return map;
 }
 
+interface CapacitorData {
+  readonly capacitorCapacity: number;
+  readonly capacitorRechargeTime: number;
+}
+
+function extractCapacitorData(typeId: string, typedogmas: Record<string, SdeTypeDogma>, attributeNames: Map<number, string>): CapacitorData {
+  const typeDogma = typedogmas[typeId];
+  const values = buildAttributeValues(attributeNames, typeDogma);
+  return {
+    capacitorCapacity: values.get("capacitorCapacity") ?? 0,
+    capacitorRechargeTime: (values.get("rechargeRate") ?? 0) / SHIELD_RECHARGE_RATE_MS,
+  };
+}
+
 interface DefenseData {
   readonly shieldHp: number;
   readonly shieldRechargeTime: number;
@@ -282,6 +296,7 @@ function parseProfile(
 
   const droneLimits = parseDroneLimits(record["drones"], name);
   const defense = extractDefenseData(String(id), typedogmas, attributeNames);
+  const capacitor = extractCapacitorData(String(id), typedogmas, attributeNames);
 
   return {
     id,
@@ -302,6 +317,8 @@ function parseProfile(
     shieldRechargeTime: defense.shieldRechargeTime,
     armorHp: defense.armorHp,
     hullHp: defense.hullHp,
+    capacitorCapacity: capacitor.capacitorCapacity,
+    capacitorRechargeTime: capacitor.capacitorRechargeTime,
     shieldResists: defense.shieldResists,
     armorResists: defense.armorResists,
     hullResists: defense.hullResists,
@@ -336,6 +353,8 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push(`    shieldRechargeTime: ${p.shieldRechargeTime},`);
     lines.push(`    armorHp: ${p.armorHp},`);
     lines.push(`    hullHp: ${p.hullHp},`);
+    lines.push(`    capacitorCapacity: ${p.capacitorCapacity},`);
+    lines.push(`    capacitorRechargeTime: ${p.capacitorRechargeTime},`);
     lines.push(`    shieldResists: ${formatResists(p.shieldResists)},`);
     lines.push(`    armorResists: ${formatResists(p.armorResists)},`);
     lines.push(`    hullResists: ${formatResists(p.hullResists)},`);
@@ -378,6 +397,7 @@ async function main(): Promise<void> {
 export {
   buildAttributeNameMap as _buildAttributeNameMap,
   buildShipNameToType as _buildShipNameToType,
+  extractCapacitorData as _extractCapacitorData,
   extractDefenseData as _extractDefenseData,
   parseDroneLimits as _parseDroneLimits,
   parseProfile as _parseProfile,

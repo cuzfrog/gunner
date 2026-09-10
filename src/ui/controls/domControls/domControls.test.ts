@@ -371,7 +371,7 @@ describe("DomControls", () => {
     const mwd5 = {
       id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN Microwarpdrive I",
       iconId: toTypeId("434"), defaultModuleId: toTypeId("434"),
-      thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5,
+      thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5, capacitorNeed: 45,
     } as const;
     const ships = vi.mocked<Ships>({
       ...mockShips(),

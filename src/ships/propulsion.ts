@@ -13,6 +13,7 @@ export const PROPULSION_MODULES: readonly PropulsionModule[] = [
     massAddition: 500_000,
     speedBonus: 1.15,
     sigBloom: 0,
+    capacitorNeed: 20,
   },
   {
     id: "mwd-5mn",
@@ -25,6 +26,7 @@ export const PROPULSION_MODULES: readonly PropulsionModule[] = [
     massAddition: 500_000,
     speedBonus: 5,
     sigBloom: 5,
+    capacitorNeed: 45,
   },
   {
     id: "ab-10mn",
@@ -37,6 +39,7 @@ export const PROPULSION_MODULES: readonly PropulsionModule[] = [
     massAddition: 5_000_000,
     speedBonus: 1.15,
     sigBloom: 0,
+    capacitorNeed: 80,
   },
   {
     id: "mwd-50mn",
@@ -49,6 +52,7 @@ export const PROPULSION_MODULES: readonly PropulsionModule[] = [
     massAddition: 5_000_000,
     speedBonus: 5,
     sigBloom: 5,
+    capacitorNeed: 180,
   },
   {
     id: "ab-100mn",
@@ -61,6 +65,7 @@ export const PROPULSION_MODULES: readonly PropulsionModule[] = [
     massAddition: 50_000_000,
     speedBonus: 1.15,
     sigBloom: 0,
+    capacitorNeed: 320,
   },
   {
     id: "mwd-500mn",
@@ -73,6 +78,7 @@ export const PROPULSION_MODULES: readonly PropulsionModule[] = [
     massAddition: 50_000_000,
     speedBonus: 5,
     sigBloom: 5,
+    capacitorNeed: 320,
   },
   {
     id: "ab-10000mn",
@@ -85,6 +91,7 @@ export const PROPULSION_MODULES: readonly PropulsionModule[] = [
     massAddition: 500_000_000,
     speedBonus: 1.15,
     sigBloom: 0,
+    capacitorNeed: 8000,
   },
   {
     id: "mwd-50000mn",
@@ -97,6 +104,7 @@ export const PROPULSION_MODULES: readonly PropulsionModule[] = [
     massAddition: 500_000_000,
     speedBonus: 5,
     sigBloom: 5,
+    capacitorNeed: 10000,
   },
 ] as const;
 

@@ -13,6 +13,8 @@ import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 import type { ShipNameLanguage } from "../src/ships";
 import type { DamageResists } from "../src/sim";
 import { buildDefenseStatsFromIntents, type DefenseModuleStats } from "./fittingDb/buildDefenseStats";
+import { buildCapacitorStatsFromIntents, type CapacitorModuleStats } from "./fittingDb/buildCapacitorStats";
+import { buildCapWarfareStatsFromIntents, type EnergyNeutralizerStats, type NosferatuStats } from "./fittingDb/buildCapWarfareStats";
 import { buildCombatModuleStats } from "./fittingDb/buildModuleStats";
 import { auditCoverage, type AuditModuleEntry } from "./fittingDb/coverageAudit";
 import type { SdeDogmaAttribute, SdeDogmaEffect, SdeDogmaEffectModifier, SdeGroup, SdeTypeDogma } from "./fittingDb/dogmaTypes";
@@ -55,6 +57,7 @@ interface SdeType {
   metaLevel?: number;
   metaGroupID?: number;
   volume?: number;
+  capacity?: number;
 }
 
 type LocalizedName = { readonly en: string; readonly zh?: string; readonly ja?: string };
@@ -142,10 +145,21 @@ const MODULE_GROUPS = new Set([
   1156, // Ancillary Shield Booster
   1199, // Ancillary Armor Repairer
   1988, // Entropic Radiation Sink
+  // Capacitor modules
+  43, // Capacitor Recharger
+  61, // Capacitor Battery
+  76, // Capacitor Booster
+  766, // Power Diagnostic System
+  767, // Capacitor Power Relay
+  768, // Capacitor Flux Coil
+  71, // Energy Neutralizer
+  68, // Energy Nosferatu
 ]);
 
 const SCRIPT_GROUPS = new Set([907]);
 const EWAR_SCRIPT_GROUPS = new Set([909]);
+
+const CAP_BOOSTER_CHARGE_GROUP = 87;
 
 const WARP_SCRAMBLER_GROUP = 52;
 const STASIS_WEB_GROUP = 65;
@@ -471,6 +485,7 @@ interface FittingPropulsionStats {
   readonly speedBonus: number;
   readonly massAddition: number;
   readonly sigBloom: number;
+  readonly capacitorNeed: number;
 }
 
 interface FittingModuleStats {
@@ -488,6 +503,10 @@ interface FittingModuleStats {
   readonly turretSpeedMultiplier?: number;
   readonly turretWeaponGroup?: TurretWeaponGroup;
   readonly propulsion?: FittingPropulsionStats;
+  readonly defense?: DefenseModuleStats;
+  readonly capacitor?: CapacitorModuleStats;
+  readonly neutralizer?: EnergyNeutralizerStats;
+  readonly nosferatu?: NosferatuStats;
   readonly stasisWeb?: StasisWebStats;
   readonly stasisGrappler?: StasisGrapplerStats;
   readonly trackingDisruptor?: TrackingDisruptorStats;
@@ -500,7 +519,6 @@ interface FittingModuleStats {
   readonly missileCycleTimeMultiplier?: number;
   readonly droneDamageBonus?: number;
   readonly droneControlRangeBonus?: number;
-  readonly defense?: DefenseModuleStats;
 }
 
 interface TurretStats {
@@ -519,6 +537,7 @@ interface TurretStats {
   readonly groupID: number;
   readonly metaLevel: number;
   readonly metaGroupID: number;
+  readonly capacitorNeed: number;
 }
 
 interface ChargeStats {
@@ -529,6 +548,8 @@ interface ChargeStats {
   readonly thermalDamage?: number;
   readonly kineticDamage?: number;
   readonly explosiveDamage?: number;
+  readonly capacitorBonus?: number;
+  readonly volume?: number;
   readonly chargeGroup: number;
   readonly chargeSize: number;
 }
@@ -565,6 +586,8 @@ export interface StasisWebStats {
   readonly maxRange: number;
   readonly speedFactorPercent: number;
   readonly overloadRangeBonusPercent: number;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
 }
 
 export interface StasisGrapplerStats {
@@ -572,6 +595,8 @@ export interface StasisGrapplerStats {
   readonly falloff: number;
   readonly speedFactorPercent: number;
   readonly overloadOptimalBonusPercent: number;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
 }
 
 export interface TrackingDisruptorStats {
@@ -579,6 +604,8 @@ export interface TrackingDisruptorStats {
   readonly falloff: number;
   readonly disruptionPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
 }
 
 export interface DisruptionScriptStats {
@@ -590,12 +617,16 @@ export interface DisruptionScriptStats {
 export interface WarpScramblerStats {
   readonly maxRange: number;
   readonly overloadRangeBonusPercent: number;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
 }
 
 export interface TrackingComputerStats {
   readonly trackingBonusPercent: number;
   readonly optimalBonusPercent: number;
   readonly falloffBonusPercent: number;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
 }
 
 export interface TargetPainterStats {
@@ -603,6 +634,8 @@ export interface TargetPainterStats {
   readonly falloff: number;
   readonly signatureRadiusBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
 }
 
 export interface MissileGuidanceComputerStats {
@@ -611,6 +644,8 @@ export interface MissileGuidanceComputerStats {
   readonly missileVelocityBonusPercent: number;
   readonly flightTimeBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
 }
 
 export interface MissileGuidanceEnhancerStats {
@@ -632,6 +667,8 @@ interface OmnidirectionalTrackingLinkStats {
   readonly optimalBonusPercent: number;
   readonly falloffBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
 }
 
 interface OmnidirectionalTrackingEnhancerStats {
@@ -646,12 +683,16 @@ interface SensorDampenerStats {
   readonly scanResolutionBonusPercent: number;
   readonly maxTargetRangeBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
 }
 
 interface SensorBoosterStats {
   readonly scanResolutionBonusPercent: number;
   readonly maxTargetRangeBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
 }
 
 interface SignalAmplifierStats {
@@ -712,6 +753,7 @@ function buildPropulsionStats(values: Map<string, number>, type: SdeType): Fitti
       speedBonus: speedFactor / 100,
       massAddition,
       sigBloom,
+      capacitorNeed: values.get("capacitorNeed") ?? 0,
     },
   };
 }
@@ -797,6 +839,8 @@ export function buildStasisWebStats(values: Map<string, number>): StasisWebStats
     maxRange,
     speedFactorPercent: speedFactor,
     overloadRangeBonusPercent: values.get("overloadRangeBonus") ?? 0,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    cycleTime: (values.get("duration") ?? 0) / 1000,
   };
 }
 
@@ -809,6 +853,8 @@ export function buildStasisGrapplerStats(values: Map<string, number>): StasisGra
     falloff: values.get("falloffEffectiveness") ?? 0,
     speedFactorPercent: speedFactor,
     overloadOptimalBonusPercent: values.get("overloadRangeBonus") ?? 0,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    cycleTime: (values.get("duration") ?? 0) / 1000,
   };
 }
 
@@ -819,6 +865,8 @@ export function buildTrackingComputerStats(values: Map<string, number>): Trackin
     trackingBonusPercent: trackingBonus,
     optimalBonusPercent: values.get("maxRangeBonus") ?? 0,
     falloffBonusPercent: values.get("falloffBonus") ?? 0,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    cycleTime: (values.get("duration") ?? 0) / 1000,
   };
 }
 
@@ -831,6 +879,8 @@ export function buildTargetPainterStats(values: Map<string, number>): TargetPain
     falloff: values.get("falloffEffectiveness") ?? 0,
     signatureRadiusBonusPercent: signatureRadiusBonus,
     overloadStrengthBonusPercent: values.get("overloadPainterStrengthBonus") ?? 0,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    cycleTime: (values.get("duration") ?? 0) / 1000,
   };
 }
 
@@ -843,6 +893,8 @@ export function buildMissileGuidanceComputerStats(values: Map<string, number>): 
     missileVelocityBonusPercent: values.get("missileVelocityBonus") ?? 0,
     flightTimeBonusPercent: values.get("explosionDelayBonus") ?? 0,
     overloadStrengthBonusPercent: values.get("overloadTrackingModuleStrengthBonus") ?? 0,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    cycleTime: (values.get("duration") ?? 0) / 1000,
   };
 }
 
@@ -876,6 +928,8 @@ export function buildTrackingDisruptorStats(values: Map<string, number>): Tracki
     falloff: values.get("falloffEffectiveness") ?? 0,
     disruptionPercent,
     overloadStrengthBonusPercent: values.get("overloadTrackingModuleStrengthBonus") ?? 0,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    cycleTime: (values.get("duration") ?? 0) / 1000,
   };
 }
 
@@ -886,6 +940,8 @@ export function buildWarpScramblerStats(values: Map<string, number>): WarpScramb
   return {
     maxRange,
     overloadRangeBonusPercent: values.get("overloadRangeBonus") ?? 0,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    cycleTime: (values.get("duration") ?? 0) / 1000,
   };
 }
 
@@ -907,6 +963,8 @@ export function buildSensorDampenerStats(values: Map<string, number>): SensorDam
     scanResolutionBonusPercent: scanResolutionBonus ?? 0,
     maxTargetRangeBonusPercent: maxTargetRangeBonus ?? 0,
     overloadStrengthBonusPercent: values.get("overloadSensorModuleStrengthBonus") ?? 0,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    cycleTime: (values.get("duration") ?? 0) / 1000,
   };
 }
 
@@ -918,6 +976,8 @@ export function buildSensorBoosterStats(values: Map<string, number>): SensorBoos
     scanResolutionBonusPercent: scanResolutionBonus ?? 0,
     maxTargetRangeBonusPercent: maxTargetRangeBonus ?? 0,
     overloadStrengthBonusPercent: values.get("overloadSensorModuleStrengthBonus") ?? 0,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    cycleTime: (values.get("duration") ?? 0) / 1000,
   };
 }
 
@@ -1198,7 +1258,14 @@ export function buildOmnidirectionalTrackingLinkStats(values: Map<string, number
   const falloffBonusPercent = values.get("falloffBonus");
   if (trackingBonusPercent === undefined || optimalBonusPercent === undefined || falloffBonusPercent === undefined) return undefined;
   const overloadStrengthBonusPercent = values.get("overloadTrackingModuleStrengthBonus") ?? 0;
-  return { trackingBonusPercent, optimalBonusPercent, falloffBonusPercent, overloadStrengthBonusPercent };
+  return {
+    trackingBonusPercent,
+    optimalBonusPercent,
+    falloffBonusPercent,
+    overloadStrengthBonusPercent,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    cycleTime: (values.get("duration") ?? 0) / 1000,
+  };
 }
 
 export function buildOmnidirectionalTrackingEnhancerStats(values: Map<string, number>): OmnidirectionalTrackingEnhancerStats | undefined {
@@ -1292,6 +1359,7 @@ async function main() {
           chargeGroups,
           damageMultiplier,
           cycleTime: speed / 1000,
+          capacitorNeed: values.get("capacitorNeed") ?? 0,
           ...(hasSpool ? { spoolPerCycle, spoolMax } : {}),
           turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
           specializationSkill: specializationSkillFromRequired(types, requiredSkills, type.typeID),
@@ -1299,6 +1367,23 @@ async function main() {
           groupID: type.groupID,
           metaLevel: type.metaLevel ?? 0,
           metaGroupID: type.metaGroupID ?? 1,
+        };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
+    if (type.groupID === CAP_BOOSTER_CHARGE_GROUP) {
+      const capacitorBonus = values.get("capacitorBonus");
+      const chargeSize = values.get("chargeSize");
+      if (capacitorBonus !== undefined && chargeSize !== undefined) {
+        charges[id] = {
+          id,
+          name: enName,
+          capacitorBonus,
+          volume: type.volume ?? 0,
+          chargeGroup: type.groupID,
+          chargeSize,
         };
         addItemName(itemNames, id, type);
       }
@@ -1550,8 +1635,10 @@ async function main() {
       } else {
         const stats = buildModuleStats(values, effects, type.groupID, typeDogma, dogmaEffects);
         const defense = buildDefenseStats(values, effects, type.groupID, typeDogma, dogmaEffects);
-        if (stats || defense) {
-          fittingModules[id] = { ...stats, defense, id, name: enName };
+        const capacitor = buildCapacitorStatsFromIntents({ values, effects, groupId: type.groupID, dogmaEffects, chargeCapacity: type.capacity ?? 0 });
+        const warfare = buildCapWarfareStatsFromIntents({ values, effects, groupId: type.groupID, dogmaEffects });
+        if (stats || defense || capacitor || warfare) {
+          fittingModules[id] = { ...stats, defense, capacitor, neutralizer: warfare?.neutralizer, nosferatu: warfare?.nosferatu, id, name: enName };
           addItemName(itemNames, id, type);
         }
       }
@@ -1682,7 +1769,7 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
 
   const auditEntries = new Map<number, AuditModuleEntry>();
   for (const [idStr, mod] of Object.entries(fittingModules)) {
-    auditEntries.set(Number(idStr), { typeId: Number(idStr), typeName: mod.name, hasDefense: mod.defense !== undefined });
+    auditEntries.set(Number(idStr), { typeId: Number(idStr), typeName: mod.name, hasDefense: mod.defense !== undefined, hasCapacitor: mod.capacitor !== undefined || mod.neutralizer !== undefined || mod.nosferatu !== undefined });
   }
   const auditFailures = auditCoverage({
     types,

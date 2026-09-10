@@ -156,13 +156,13 @@ export class FittingImportImpl implements FittingImport {
   propulsionStats(name: string): PropulsionStats | undefined {
     const stats = moduleByName(this.db, name)?.propulsion;
     if (!stats) return undefined;
-    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom };
+    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom, capacitorNeed: stats.capacitorNeed };
   }
 
   propulsionStatsById(id: TypeId): PropulsionStats | undefined {
     const stats = this.db.modules[id]?.propulsion;
     if (!stats) return undefined;
-    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom };
+    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom, capacitorNeed: stats.capacitorNeed };
   }
 
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined {

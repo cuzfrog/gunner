@@ -34,6 +34,8 @@ export interface ShipProfile {
   readonly shieldRechargeTime: number; // seconds
   readonly armorHp: number;
   readonly hullHp: number;
+  readonly capacitorCapacity: number; // GJ
+  readonly capacitorRechargeTime: number; // seconds
   readonly shieldResists: DamageResists;
   readonly armorResists: DamageResists;
   readonly hullResists: DamageResists;
@@ -114,6 +116,7 @@ export interface PropulsionStats {
   readonly speedBonus: number;
   readonly massAddition: number;
   readonly sigBloom: number;
+  readonly capacitorNeed: number; // GJ per 10 s cycle
 }
 
 export interface PropulsionModule extends PropulsionStats {

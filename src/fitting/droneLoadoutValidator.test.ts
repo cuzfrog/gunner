@@ -48,6 +48,8 @@ function makeProfile(overrides: { droneBandwidth?: number; droneCapacity?: numbe
     shieldRechargeTime: 0,
     armorHp: 0,
     hullHp: 0,
+    capacitorCapacity: 0,
+    capacitorRechargeTime: 0,
     shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
     armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
     hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },

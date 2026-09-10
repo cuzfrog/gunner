@@ -11,6 +11,7 @@ function makePropulsionModule(defaultModuleId: string, kind: "afterburner" | "mi
     iconId: toTypeId("439"),
     defaultModuleId: toTypeId(defaultModuleId),
     thrust: 1.5e6,
+    capacitorNeed: 45,
     massAddition: 500_000,
     speedBonus: kind === "afterburner" ? 1.15 : 5,
     sigBloom: kind === "afterburner" ? 0 : 5,

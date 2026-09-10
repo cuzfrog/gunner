@@ -1,4 +1,4 @@
-import { classifyDefenseEffects, classifyCombatEffect, type DefenseIntent, type CombatIntent } from "./effectClassifier";
+import { classifyCapacitorEffects, classifyDefenseEffects, classifyCombatEffect, type DefenseIntent, type CombatIntent } from "./effectClassifier";
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./dogmaTypes";
 
 function mod(overrides: Partial<SdeDogmaEffectModifier> = {}): SdeDogmaEffectModifier {
@@ -618,5 +618,54 @@ describe("classifyCombatEffect - defense effects still classify via combat path"
       ],
     });
     expect(classifyCombatEffect(e, undefined)).toEqual({ tag: "damageControl" });
+  });
+});
+
+describe("classifyCapacitorEffects", () => {
+  function capacitorIntent(effect: SdeDogmaEffect): string | undefined {
+    const result = classifyCapacitorEffects([effect]);
+    return result[0]?.intent.tag;
+  }
+
+  test("battery capacity add effect (25) classifies as capCapacityAdd", () => {
+    const e = effect(25, { category: 4, modifiers: [mod({ modifiedAttributeID: 482, modifyingAttributeID: 67, operation: 2 })] });
+    expect(capacitorIntent(e)).toBe("capCapacityAdd");
+  });
+
+  test("capacitor capacity multiply effect (58) classifies as capCapacityMultiplier", () => {
+    const e = effect(58, { category: 4, modifiers: [mod({ modifiedAttributeID: 482, modifyingAttributeID: 147, operation: 6 })] });
+    expect(capacitorIntent(e)).toBe("capCapacityMultiplier");
+  });
+
+  test("capacitor recharge effect (51) classifies as capRecharge", () => {
+    const e = effect(51, { category: 4, modifiers: [mod({ modifiedAttributeID: 55, modifyingAttributeID: 144, operation: 4 })] });
+    expect(capacitorIntent(e)).toBe("capRecharge");
+  });
+
+  test("energy warfare resistance effect (6487) classifies as capEnergyWarfareResistance", () => {
+    const e = effect(6487, { category: 4, modifiers: [mod({ modifiedAttributeID: 2045, modifyingAttributeID: 2267, operation: 6 })] });
+    expect(capacitorIntent(e)).toBe("capEnergyWarfareResistance");
+  });
+
+  test("powerBooster effect (48) classifies as capBooster", () => {
+    expect(capacitorIntent(effect(48, { category: 1 }))).toBe("capBooster");
+  });
+
+  test("energyNeutralizerFalloff effect (6187) classifies as energyNeutralizer", () => {
+    expect(capacitorIntent(effect(6187, { category: 2 }))).toBe("energyNeutralizer");
+  });
+
+  test("energyNosferatuFalloff effect (6197) classifies as energyNosferatu", () => {
+    expect(capacitorIntent(effect(6197, { category: 2 }))).toBe("energyNosferatu");
+  });
+
+  test("unrelated modifiers produce no capacitor intent", () => {
+    const e = effect(2052, { category: 4, modifiers: [mod({ modifiedAttributeID: 271, modifyingAttributeID: 984 })] });
+    expect(classifyCapacitorEffects([e])).toHaveLength(0);
+  });
+
+  test("overload duration effect (3002) produces no capacitor intent", () => {
+    const e = effect(3002, { category: 5, modifiers: [mod({ domain: "itemID", modifiedAttributeID: 73, modifyingAttributeID: 1206, operation: 6 })] });
+    expect(classifyCapacitorEffects([e])).toHaveLength(0);
   });
 });

@@ -43,6 +43,7 @@ export interface SdeType {
   readonly metaLevel?: number;
   readonly metaGroupID?: number;
   readonly volume?: number;
+  readonly capacity?: number;
 }
 
 export interface SdeGroup {

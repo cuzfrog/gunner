@@ -9,7 +9,11 @@ export {
 } from "./types";
 export { FITTING_DB } from "./catalog";
 export type {
+  CapacitorModuleKind,
+  CapacitorModuleStats,
   ChargeStats,
+  EnergyNeutralizerStats,
+  NosferatuStats,
   DefenseAncillary,
   DefenseLayer,
   DefenseModuleStats,
