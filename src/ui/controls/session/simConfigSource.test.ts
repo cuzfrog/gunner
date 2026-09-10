@@ -87,6 +87,7 @@ function build() {
     capture: vi.fn(),
     render: vi.fn(),
     updateSummaries: vi.fn(),
+    updateStarvedModules: vi.fn(),
   });
   const boosterController = vi.mocked<BoosterController>({
     setLoadout: vi.fn(),

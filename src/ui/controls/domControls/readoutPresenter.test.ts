@@ -1,4 +1,5 @@
 import { Vec2, type EngineView, type DefenseView, type EngagementView, type CapacitorView, EMPTY_DEFENSE_ASSESSMENT, } from "../../../sim";
+import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { EffectiveReadouts } from "../controlsContract";
 import type { EngagementReadout } from "../engagementReadout";
 import type { EffectiveReadout } from "../effectiveReadout";
@@ -52,17 +53,17 @@ function makeView(): EngagementView {
   return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } }, incomingOffensiveModules: { shipA: [], shipB: [] } };
 }
 
-function makeEngineView(sigs?: { shipA: number; shipB: number }): EngineView {
+function makeEngineView(sigs?: { shipA: number; shipB: number }, shipAStarved: readonly TypeId[] = []): EngineView {
   const view = makeView();
   const shipAState = { ...view.frame.shipA, sig: sigs?.shipA ?? 1 };
   const shipBState = { ...view.frame.shipB, sig: sigs?.shipB ?? 1 };
   const snapshot = { time: view.frame.time, shipA: shipAState, shipB: shipBState, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
-  return { ...view, readouts: { shipA: { kind: "none", speed: 0 } as unknown as EffectiveReadouts["shipA"], shipB: { kind: "none", speed: 0 } as unknown as EffectiveReadouts["shipB"] }, defenseRuntime: mockDefenseView(), capacitorRuntime: emptyCapacitorView(), snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
+  return { ...view, readouts: { shipA: { kind: "none", speed: 0 } as unknown as EffectiveReadouts["shipA"], shipB: { kind: "none", speed: 0 } as unknown as EffectiveReadouts["shipB"] }, defenseRuntime: mockDefenseView(), capacitorRuntime: emptyCapacitorView(shipAStarved), snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
 }
 
-function emptyCapacitorView(): Record<"shipA" | "shipB", CapacitorView> {
+function emptyCapacitorView(shipAStarved: readonly TypeId[] = []): Record<"shipA" | "shipB", CapacitorView> {
   const side: CapacitorView = { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [], incoming: [] };
-  return { shipA: side, shipB: { ...side } };
+  return { shipA: { ...side, starvedModuleIds: [...shipAStarved] }, shipB: { ...side } };
 }
 
 function buildDeps() {
@@ -78,8 +79,9 @@ function buildDeps() {
     updateRuntime: vi.fn(),
     setPlaying: vi.fn(),
   };
+  const starvedReadout = { updateStarvedModules: vi.fn() };
   let fakeNow = 0;
-  const deps = { viewStream, engagementReadout, effectiveReadout, defenseReadout, capacitorReadout, i18n: mockI18n(), now: () => fakeNow };
+  const deps = { viewStream, engagementReadout, effectiveReadout, defenseReadout, capacitorReadout, starvedReadout, i18n: mockI18n(), now: () => fakeNow };
   return { ...deps, setNow: (n: number) => { fakeNow = n; } };
 }
 
@@ -104,6 +106,14 @@ describe("ReadoutPresenterImpl", () => {
     d.viewStream.emit(view);
     expect(d.capacitorReadout.setPlaying).toHaveBeenCalledWith(true);
     expect(d.capacitorReadout.updateRuntime).toHaveBeenCalledWith(view.capacitorRuntime);
+  });
+
+  test("forwards per-side starved module ids to the starved readout", () => {
+    const d = buildDeps();
+    const presenter: ReadoutPresenter = new ReadoutPresenterImpl(d);
+    const view = makeEngineView({ shipA: 100, shipB: 200 }, [toTypeId("3025")]);
+    d.viewStream.emit(view);
+    expect(d.starvedReadout.updateStarvedModules).toHaveBeenCalledWith({ shipA: [toTypeId("3025")], shipB: [] });
   });
 
   test("throttles readouts while playing and resumes after interval", () => {

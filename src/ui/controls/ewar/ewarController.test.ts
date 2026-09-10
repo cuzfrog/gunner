@@ -1,6 +1,6 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import { EMPTY_EWAR_LOADOUT } from "../../../sim";
-import type { DisruptionScriptSpec, EwarLoadout, SensorDampenerScriptSpec, SensorDampenerSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
+import type { DisruptionScriptSpec, EwarLoadout, EnergyNeutralizerSpec, SensorDampenerScriptSpec, SensorDampenerSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";
@@ -50,6 +50,7 @@ const DAMPENER2: SensorDampenerSpec = {
   moduleName: "Sensor Dampener II", moduleId: toTypeId("2120"), optimal: 12000, falloff: 35000,
   scanResolutionBonusPercent: -25, maxTargetRangeBonusPercent: -25, defaultScript: SCAN_RES_SCRIPT, overloadStrengthBonusPercent: 20,
 };
+const NEUTRALIZER: EnergyNeutralizerSpec = { moduleName: "Heavy Energy Neutralizer II", moduleId: toTypeId("12271"), amount: 600, cycleTime: 24, capacitorNeed: 500, maxRange: 20000, falloff: 10000 };
 
 class FakePopupGroup implements PopupGroup {
   private readonly popups: Popup[] = [];
@@ -190,6 +191,10 @@ function dampenerSection(document: Document, side: "shipA" | "shipB"): FakeEleme
 
 function scramblerSection(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
   return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.scrambler");
+}
+
+function neutralizerSection(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
+  return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.neutralizer");
 }
 
 function overloadFor(row: FakeElement): FakeElement {
@@ -1087,5 +1092,42 @@ describe("EwarController", () => {
     scriptOptionFor(scriptPopup, String(TARGET_RANGE_SCRIPT.moduleId))!.trigger("click");
     expect(button.children[1].getAttribute("data-hint")).toBe("dampener-with-target");
     expect(ewarEffectDescriber.dampenerModuleEffect).toHaveBeenCalledWith(DAMPENER2, TARGET_RANGE_SCRIPT);
+  });
+});
+
+describe("EwarController starved indication", () => {
+  test("starved neutralizer row dims with the insufficient-capacitor state and clears on recovery", () => {
+    const { controller, document } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], neutralizers: [NEUTRALIZER], nosferatu: [], };
+    controller.setLoadout("shipA", loadout);
+
+    const section = neutralizerSection(document, "shipA")!;
+    const row = section.children[1];
+    expect(row.className).toBe("ewar-row");
+    const stateLabel = row.children.find((child) => child.className === "ewar-row-state");
+    expect(stateLabel).toBeDefined();
+    expect(stateLabel!.hidden).toBe(true);
+
+    controller.updateStarvedModules({ shipA: [NEUTRALIZER.moduleId], shipB: [] });
+    expect(row.className).toBe("ewar-row ewar-row-starved");
+    expect(stateLabel!.hidden).toBe(false);
+    expect(stateLabel!.textContent).toBe("capacitor.insufficient");
+
+    controller.updateStarvedModules({ shipA: [], shipB: [] });
+    expect(row.className).toBe("ewar-row");
+    expect(stateLabel!.hidden).toBe(true);
+  });
+
+  test("toggled-off rows stay inactive and never report starvation", () => {
+    const { controller, document } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], neutralizers: [NEUTRALIZER], nosferatu: [], };
+    controller.setLoadout("shipA", loadout);
+    const section = neutralizerSection(document, "shipA")!;
+    const row = section.children[1];
+    const toggle = row.children[0];
+    toggle.trigger("click");
+    expect(row.className).toBe("ewar-row ewar-row-inactive");
+    controller.updateStarvedModules({ shipA: [NEUTRALIZER.moduleId], shipB: [] });
+    expect(row.className).toBe("ewar-row ewar-row-inactive");
   });
 });

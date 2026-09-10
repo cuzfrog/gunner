@@ -44,6 +44,7 @@ function buildController(now: () => number = () => 0): {
     capture: vi.fn(),
     render: vi.fn(),
     updateSummaries: vi.fn(),
+    updateStarvedModules: vi.fn(),
   });
   const ewarEffectDescriber = vi.mocked<EwarEffectDescriber>({
     webDescription: vi.fn(() => "web-title"),

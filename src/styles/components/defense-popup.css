@@ -128,3 +128,8 @@
   font-size: 12px;
 }
 }
+
+.defense-module-row.is-starved .defense-module-name,
+.defense-module-row.is-starved .defense-module-status {
+  color: var(--warn-yellow-85);
+}

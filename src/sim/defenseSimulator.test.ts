@@ -327,6 +327,24 @@ describe("DefenseSimulatorImpl", () => {
     expect(debits).toEqual([{ side: "shipA", amount: 42 }]);
   });
 
+  test("rah view flags starved while the activation debit is denied and clears when it succeeds", () => {
+    const sim = new DefenseSimulatorImpl();
+    const rahSpec: RahSpec = { cycleTime: 9, shiftAmount: 0.3, baseResists: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, overloadCycleTimeMultiplier: 1, armorResistsWithoutRah: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, capacitorNeed: 42 };
+    sim.reset({ ...config(spec({ armorHp: 1000, rah: rahSpec })), rahActivation: { shipA: { active: true, overloaded: false }, shipB: undefined } } as never);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE), recordingGate(false).gate);
+    expect(sim.view().rah.shipA?.starved).toBe(true);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE), recordingGate(true).gate);
+    expect(sim.view().rah.shipA?.starved).toBe(false);
+  });
+
+  test("deactivated rah is never flagged starved", () => {
+    const sim = new DefenseSimulatorImpl();
+    const rahSpec: RahSpec = { cycleTime: 9, shiftAmount: 0.3, baseResists: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, overloadCycleTimeMultiplier: 1, armorResistsWithoutRah: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, capacitorNeed: 42 };
+    sim.reset({ ...config(spec({ armorHp: 1000, rah: rahSpec })), rahActivation: { shipA: { active: false, overloaded: false }, shipB: undefined } } as never);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE), recordingGate(false).gate);
+    expect(sim.view().rah.shipA?.starved).toBe(false);
+  });
+
   test("repairers without capacitorNeed cycle without debiting", () => {
     const sim = new DefenseSimulatorImpl();
     const repairSpec = spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, armorResists: { em: 0 }, repairers: [{ layer: "armor", amount: 100, cycleTime: 4, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }] });

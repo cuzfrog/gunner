@@ -1,4 +1,5 @@
 import type { EngineView } from "../../../sim";
+import type { TypeId } from "../../../gamedata/ids";
 import type { I18n } from "../../i18n";
 import type { ViewStream } from "../../viewStream";
 import type { EngagementReadout } from "../engagementReadout";
@@ -9,6 +10,10 @@ export interface DefenseReadout {
   updateAssessments(view: EngineView): void;
   updateDefenseView(view: EngineView["defenseRuntime"]): void;
   updateEffectiveSig(side: "shipA" | "shipB", sig: number): void;
+}
+
+interface StarvedModuleReadout {
+  updateStarvedModules(starved: Record<"shipA" | "shipB", readonly TypeId[]>): void;
 }
 
 export interface ReadoutPresenter {
@@ -22,6 +27,7 @@ interface ReadoutPresenterDeps {
   readonly effectiveReadout: EffectiveReadout;
   readonly defenseReadout: DefenseReadout;
   readonly capacitorReadout: CapacitorReadout;
+  readonly starvedReadout: StarvedModuleReadout;
   readonly i18n: I18n;
   readonly now: () => number;
 }
@@ -34,6 +40,7 @@ export class ReadoutPresenterImpl implements ReadoutPresenter {
   private readonly effectiveReadout: EffectiveReadout;
   private readonly defenseReadout: DefenseReadout;
   private readonly capacitorReadout: CapacitorReadout;
+  private readonly starvedReadout: StarvedModuleReadout;
   private readonly i18n: I18n;
   private readonly now: () => number;
   private cachedView?: EngineView;
@@ -46,6 +53,7 @@ export class ReadoutPresenterImpl implements ReadoutPresenter {
     this.effectiveReadout = deps.effectiveReadout;
     this.defenseReadout = deps.defenseReadout;
     this.capacitorReadout = deps.capacitorReadout;
+    this.starvedReadout = deps.starvedReadout;
     this.i18n = deps.i18n;
     this.now = deps.now;
     this.viewStream.onViewUpdated((view) => this.onReadouts(view));
@@ -86,5 +94,6 @@ export class ReadoutPresenterImpl implements ReadoutPresenter {
     this.defenseReadout.updateEffectiveSig("shipA", view.snapshot.shipA.sig ?? 1);
     this.defenseReadout.updateEffectiveSig("shipB", view.snapshot.shipB.sig ?? 1);
     this.capacitorReadout.updateRuntime(view.capacitorRuntime);
+    this.starvedReadout.updateStarvedModules({ shipA: view.capacitorRuntime.shipA.starvedModuleIds, shipB: view.capacitorRuntime.shipB.starvedModuleIds });
   }
 }

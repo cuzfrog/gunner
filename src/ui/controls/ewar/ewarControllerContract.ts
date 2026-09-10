@@ -1,4 +1,5 @@
 import type { EwarLoadout, EwarProjection } from "../../../sim";
+import type { TypeId } from "../../../gamedata/ids";
 import type { StoredEwarActivation } from "../../../appstate";
 import type { Sided } from "../side";
 
@@ -17,4 +18,5 @@ export interface EwarController {
   capture(side: "shipA" | "shipB"): StoredEwarActivation | undefined;
   render(): void;
   updateSummaries(): void;
+  updateStarvedModules(starved: Record<"shipA" | "shipB", readonly TypeId[]>): void;
 }

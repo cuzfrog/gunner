@@ -28,6 +28,7 @@ export interface RahViewState {
   readonly cycleProgress: number;
   readonly active: boolean;
   readonly overloaded: boolean;
+  readonly starved: boolean;
 }
 
 export interface DefenseView {
@@ -144,6 +145,7 @@ interface RahState {
   inCycle: boolean;
   active: boolean;
   overloaded: boolean;
+  starved: boolean;
   armorDamageAccumulator: MutableDamageVector;
 }
 
@@ -410,6 +412,7 @@ function createRahState(rahSpec: RahSpec, activation: RahActivationEntry | undef
     inCycle: false,
     active: activation?.active ?? true,
     overloaded: activation?.overloaded ?? true,
+    starved: false,
     armorDamageAccumulator: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   };
 }
@@ -425,6 +428,7 @@ function mergeRahState(prev: RahState | undefined, rahSpec: RahSpec, activation:
     inCycle: prev.inCycle,
     active,
     overloaded,
+    starved: prev.starved,
     armorDamageAccumulator: { ...prev.armorDamageAccumulator },
   };
 }
@@ -658,10 +662,12 @@ function stepRah(pools: SidePools, dt: number, armorDamageByType: MutableDamageV
   for (const type of DAMAGE_TYPES) {
     rah.armorDamageAccumulator[type] += armorDamageByType[type];
   }
+  rah.starved = false;
   if (!rah.active) return;
   if (!rah.inCycle) {
     if (capacitor && (rahSpec.capacitorNeed ?? 0) > 0 && !capacitor.attemptDebit(side, rahSpec.capacitorNeed ?? 0, rahSpec.moduleId)) {
       // Starved: the module stays off until the capacitor recovers; retried next frame.
+      rah.starved = true;
       return;
     }
     rah.inCycle = true;
@@ -740,6 +746,7 @@ function rahView(pools: SidePools): RahViewState | undefined {
     cycleProgress: rah.inCycle && rah.active ? 1 - rah.cycleTimer / cycleTime : 0,
     active: rah.active,
     overloaded: rah.overloaded,
+    starved: rah.starved,
   };
 }
 
@@ -817,6 +824,6 @@ function snapshotRahState(state: RahState): RahStateSnapshot {
 function materializeRahState(snapshot: RahStateSnapshot): RahState {
   return {
     resists: { ...snapshot.resists }, cycleTimer: snapshot.cycleTimer, inCycle: snapshot.inCycle,
-    active: snapshot.active, overloaded: snapshot.overloaded, armorDamageAccumulator: { ...snapshot.armorDamageAccumulator },
+    active: snapshot.active, overloaded: snapshot.overloaded, starved: false, armorDamageAccumulator: { ...snapshot.armorDamageAccumulator },
   };
 }

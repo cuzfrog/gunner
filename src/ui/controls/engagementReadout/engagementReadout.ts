@@ -1,4 +1,5 @@
 import type { AttackAssessment, EngineView, HitChanceBreakdown, InflictedDps } from "../../../sim";
+import type { TypeId } from "../../../gamedata/ids";
 import { setText } from "../controlsDom";
 import { formatDistance, formatWithCommas, hitChanceClass } from "../controlsFormat";
 
@@ -48,12 +49,15 @@ export class EngagementReadoutImpl implements EngagementReadout {
   update(view: EngineView, t: (key: string) => string): void {
     const { frame, attacks, inflicted } = view;
     setText(this.els.resDistance, formatDistance(frame.distance, t));
-    this.updateSide(this.els.shipA, attacks.shipA, inflicted.shipB, t);
-    this.updateSide(this.els.shipB, attacks.shipB, inflicted.shipA, t);
+    this.updateSide(this.els.shipA, attacks.shipA, inflicted.shipB, starvedModuleIds(view, "shipA"), t);
+    this.updateSide(this.els.shipB, attacks.shipB, inflicted.shipA, starvedModuleIds(view, "shipB"), t);
   }
 
-  private updateSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment | undefined, opponentInflicted: InflictedDps, t: (key: string) => string): void {
+  private updateSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment | undefined, opponentInflicted: InflictedDps, starvedModules: readonly TypeId[], t: (key: string) => string): void {
     this.clearColorClasses(els);
+    const turretStarved = attack?.turret !== undefined && starvedModules.includes(attack.boostedWeapon.moduleId);
+    els.resAppliedDps.setAttribute("data-hint", turretStarved ? t("capacitor.insufficient") : "");
+    if (turretStarved) els.resAppliedDps.classList.add("is-dim");
     const hitChance = attack?.turret?.hit ?? attack?.drone?.hit;
     if (hitChance) {
       this.updateHitChanceSide(els, attack!, opponentInflicted, hitChance, t);
@@ -150,4 +154,8 @@ function writeDpsFields(els: SideDpsEls, attack: AttackAssessment, opponentInfli
   setText(els.resAppliedDpsApplication, `(${formatWithCommas(attack.damage.application * 100, 1)}%)`);
   els.resAppliedDpsApplication.classList.add(hitChanceClass(attack.damage.application));
   setText(els.resInflictedDps, formatWithCommas(opponentInflicted.total, 1));
+}
+
+function starvedModuleIds(view: EngineView, side: "shipA" | "shipB"): readonly TypeId[] {
+  return view.capacitorRuntime[side].starvedModuleIds;
 }

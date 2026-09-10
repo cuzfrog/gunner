@@ -242,3 +242,93 @@ function findSummaryText(root: HTMLElement): string {
   }
   return "";
 }
+
+describe("DefenseControllerImpl starved indication", () => {
+  beforeEach(() => {
+    globalThis.document = fakeDocument();
+    globalThis.Element = FakeElement as unknown as typeof Element;
+    globalThis.HTMLButtonElement = FakeElement as unknown as typeof HTMLButtonElement;
+  });
+
+  const baseLayers = {
+    shield: { hp: 1000, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
+    armor: { hp: 800, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
+    hull: { hp: 600, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
+  };
+
+  function repairerSpec(): DefenseSpec {
+    return {
+      layers: baseLayers,
+      shieldRechargeTime: 100,
+      repairers: [{ layer: "armor", amount: 100, cycleTime: 4, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1.5, cycleTimeMultiplier: 0.75 } }],
+      signaturePenalty: 0,
+      shieldUniformity: 0.25,
+    };
+  }
+
+  function rahSpec(): DefenseSpec {
+    return {
+      layers: baseLayers,
+      shieldRechargeTime: 100,
+      repairers: [],
+      signaturePenalty: 0,
+      shieldUniformity: 0.25,
+      rah: { cycleTime: 9, shiftAmount: 0.3, baseResists: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, overloadCycleTimeMultiplier: 1, armorResistsWithoutRah: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, capacitorNeed: 42 },
+    };
+  }
+
+  function buildController() {
+    const els = buildEls();
+    const assessor: DefenseAssessor = { assess: vi.fn(() => ({ layers: { shield: { layer: "shield", hp: 0, ehp: 0 }, armor: { layer: "armor", hp: 0, ehp: 0 }, hull: { layer: "hull", hp: 0, ehp: 0 } }, totalEhp: 0, repairPerSecond: { shield: 0, armor: 0, hull: 0 }, shieldRegenPerSecond: 0 })) } as unknown as DefenseAssessor;
+    const controller = new DefenseControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildUiEvents(), defenseAssessor: assessor });
+    return { els, controller };
+  }
+
+  function defenseViewWithRepairer(starved: boolean): DefenseView {
+    return {
+      pools: {} as never, poolPercentages: {} as never, dead: { shipA: false, shipB: false }, deadAt: { shipA: undefined, shipB: undefined },
+      damageEnabled: { shipA: true, shipB: true }, shieldRegenPerSecond: { shipA: 0, shipB: 0 },
+      repairers: { shipA: [{ layer: "armor", cycling: false, cycleProgress: 0, ancillaryCharges: undefined, reloading: false, active: true, overloaded: true, hpPerSecond: 25, starved }], shipB: [] },
+      repairMode: { shipA: "auto", shipB: "auto" }, rah: { shipA: undefined, shipB: undefined },
+    } as unknown as DefenseView;
+  }
+
+  function findModuleRows(root: FakeElement): FakeElement[] {
+    const out: FakeElement[] = [];
+    for (const child of root.children) {
+      if (child.className.includes("defense-module-row")) out.push(child);
+      out.push(...findModuleRows(child));
+    }
+    return out;
+  }
+
+  test("repairer activation row dims with the insufficient-capacitor status while starved and clears on recovery", () => {
+    const { els, controller } = buildController();
+    controller.setDefenseSpec("shipA", repairerSpec());
+    controller.updateDefenseView(defenseViewWithRepairer(true));
+    controller.render();
+    const row = findModuleRows(els.shipA.section as unknown as FakeElement)[0];
+    expect(row.className).toBe("defense-module-row is-starved");
+    const status = row.children.find((child) => child.className.includes("defense-module-status"));
+    expect(status?.textContent).toContain("capacitor.insufficient");
+    controller.updateDefenseView(defenseViewWithRepairer(false));
+    controller.render();
+    expect(findModuleRows(els.shipA.section as unknown as FakeElement)[0].className).toBe("defense-module-row");
+  });
+
+  test("rah activation row dims with the insufficient-capacitor status while starved", () => {
+    const { els, controller } = buildController();
+    controller.setDefenseSpec("shipA", rahSpec());
+    controller.updateDefenseView({
+      pools: {} as never, poolPercentages: {} as never, dead: { shipA: false, shipB: false }, deadAt: { shipA: undefined, shipB: undefined },
+      damageEnabled: { shipA: true, shipB: true }, shieldRegenPerSecond: { shipA: 0, shipB: 0 },
+      repairers: { shipA: [], shipB: [] }, repairMode: { shipA: "auto", shipB: "auto" },
+      rah: { shipA: { resists: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, cycling: false, cycleProgress: 0, active: true, overloaded: true, starved: true }, shipB: undefined },
+    } as unknown as DefenseView);
+    controller.render();
+    const row = findModuleRows(els.shipA.section as unknown as FakeElement)[0];
+    expect(row.className).toBe("defense-module-row is-starved");
+    const status = row.children.find((child) => child.className.includes("defense-module-status"));
+    expect(status?.textContent).toBe("capacitor.insufficient");
+  });
+});
