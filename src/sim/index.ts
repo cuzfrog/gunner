@@ -23,6 +23,7 @@ export type { Rng, RngFactory } from "./rng";
 export type { WeaponDamageAssessor } from "./weaponDamageAssessor";
 export type { WeaponClock } from "./weaponClock";
 export { StackingPenaltyImpl } from "./stackingPenalty";
+export { scheduledDrainsFromProjections } from "./scheduledDrains";
 export { EwarResolverImpl } from "./ewarResolver";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {

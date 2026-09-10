@@ -2,19 +2,18 @@ import { asClass, asValue, createContainer, InjectionMode } from "awilix";
 import {
   ReactiveAutopilot,
   registerSimModule,
-  Vec2,
+  scheduledDrainsFromProjections,
   type AutopilotMode,
+  type CapBoosterSimSpec,
   type CombatantConfig,
   type EwarProjection,
-  type Kinematics,
   type SimConfig,
   type SimCradle,
-  type Simulation,
   type SimValueParser,
 } from "../src/sim";
-import { DAMAGE_TYPES, DEFENSE_LAYERS, EMPTY_DEFENSE_SPEC, SIG_RESOLUTIONS, damageVectorSum, type BoostLoadout, type DefenseSpec, type DroneSpec, type EngagementEngine, type EngineConfig, type EngineView, type MissileBoosterLoadout, type MissileBoosterProjection, type MissileSpec, type SensorBoostLoadout, type SensorBoostProjection, type Side, type TurretBoostProjection, type TurretSpec, type WeaponSpec } from "../src/sim";
+import { DAMAGE_TYPES, DEFENSE_LAYERS, EMPTY_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, SIG_RESOLUTIONS, damageVectorSum, type BoostLoadout, type DefenseSpec, type DroneSpec, type EngagementEngine, type EngineConfig, type EngineView, type MissileBoosterLoadout, type MissileBoosterProjection, type MissileSpec, type SensorBoostLoadout, type SensorBoostProjection, type Side, type TurretBoostProjection, type TurretSpec, type WeaponSpec } from "../src/sim";
 import { registerShipsModule, type Ships, type ShipsCradle, type StatConditions } from "../src/ships";
-import { registerFittingModule, type FittingCradle, type FittingImport, type ImportedDrone, type ImportedFitting, type ImportedLauncher, type ImportedTurret } from "../src/fitting";
+import { registerFittingModule, type CapacitorBoosterStats, type FittingCradle, type FittingImport, type ImportedDrone, type ImportedFitting, type ImportedLauncher, type ImportedTurret } from "../src/fitting";
 import { registerGameDataModule } from "../src/gamedata";
 import { toTypeId } from "../src/gamedata/ids";
 import { readFileSync } from "node:fs";
@@ -28,7 +27,7 @@ interface TraceParams {
   readonly sampleSeconds: number;
   readonly shipASteering: "predictive" | "reactive";
   readonly config: SimConfig;
-  readonly engineConfig: EngineConfig | undefined;
+  readonly engineConfig: EngineConfig;
 }
 
 interface TraceCradle extends SimCradle, FittingCradle, ShipsCradle {
@@ -96,6 +95,7 @@ class TraceParamsParserImpl implements TraceParamsParser {
       shipAEwarOverload: false,
       shipBEwarFile: undefined as string | undefined,
       shipBEwarOverload: false,
+      capacitorInfinite: false,
     };
     for (let i = 0; i < args.length; i += 2) {
       const flag = args[i];
@@ -165,6 +165,9 @@ class TraceParamsParserImpl implements TraceParamsParser {
         case "--ship-b-ewar-overload":
           draft.shipBEwarOverload = parseBoolean(flag, raw);
           break;
+        case "--capacitor-infinite":
+          draft.capacitorInfinite = parseBoolean(flag, raw);
+          break;
         default:
           throw new Error(`Unknown flag ${flag}\n${USAGE}`);
       }
@@ -176,9 +179,7 @@ class TraceParamsParserImpl implements TraceParamsParser {
       ? { ...draft.shipB, ewar: this.loadEwarProjection(draft.shipBEwarFile, draft.shipBEwarOverload) }
       : draft.shipB;
     const config: SimConfig = { shipA, shipB, initialDistance: draft.initialDistance };
-    const engineConfig = draft.shipAFitFile || draft.shipBFitFile
-      ? this.buildEngineConfig(config, draft.shipAFitFile, draft.shipBFitFile)
-      : undefined;
+    const engineConfig = this.buildEngineConfig(config, draft.capacitorInfinite, draft.shipAFitFile, draft.shipBFitFile);
     return {
       durationSeconds: draft.durationSeconds,
       sampleSeconds: draft.sampleSeconds,
@@ -188,7 +189,7 @@ class TraceParamsParserImpl implements TraceParamsParser {
     };
   }
 
-  private buildEngineConfig(config: SimConfig, shipAFitFile?: string, shipBFitFile?: string): EngineConfig {
+  private buildEngineConfig(config: SimConfig, capacitorInfinite: boolean, shipAFitFile?: string, shipBFitFile?: string): EngineConfig {
     const shipAImport = shipAFitFile ? this.importFit(shipAFitFile) : undefined;
     const shipBImport = shipBFitFile ? this.importFit(shipBFitFile) : undefined;
     const sim: SimConfig = {
@@ -211,7 +212,10 @@ class TraceParamsParserImpl implements TraceParamsParser {
         rahActivation: { shipA: undefined, shipB: undefined },
       },
       overloaded: { shipA: false, shipB: false },
-      capacitor: { shipA: { infinite: false, drains: [], boosters: [] }, shipB: { infinite: false, drains: [], boosters: [] } },
+      capacitor: {
+        shipA: capacitorSideFrom(shipAImport, capacitorInfinite),
+        shipB: capacitorSideFrom(shipBImport, capacitorInfinite),
+      },
     };
   }
 
@@ -240,6 +244,10 @@ class TraceParamsParserImpl implements TraceParamsParser {
       sigBloom: stats.sigBloomFactor,
       sigPenalty: imported.defense.signaturePenalty,
       orbitDirection: overrides.orbitDirection,
+      capacitor: imported.capacitor.spec,
+      energyWarfareResistancePercent: imported.energyWarfareResistancePercent,
+      propulsionCapNeed: imported.propulsion?.capacitorNeed,
+      propulsionCapacityMultiplier: imported.propulsion?.capacitorCapacityMultiplier,
       ewar: buildEwarProjection(imported.ewar, false),
       boosts: boostProjectionFrom(imported.boosts),
       missileBoosts: missileBoostProjectionFrom(imported.missileBoosts),
@@ -266,44 +274,18 @@ class TraceParamsParserImpl implements TraceParamsParser {
 }
 
 class SimTraceImpl implements SimTrace {
-  private readonly simulation: Simulation;
-  private readonly kinematics: Kinematics;
   private readonly engine: EngagementEngine;
 
-  constructor({ simulation, kinematics, engine }: { simulation: Simulation; kinematics: Kinematics; engine: EngagementEngine }) {
-    this.simulation = simulation;
-    this.kinematics = kinematics;
+  constructor({ engine }: { engine: EngagementEngine }) {
     this.engine = engine;
   }
 
   trace(params: TraceParams): void {
-    if (params.engineConfig) {
-      this.traceCombat(params);
-      return;
-    }
-    console.error(scenarioSummary(params));
-    const columns = ["t", "dist", "radialVel", "angularVel", "aSpeed", "aCmd", "tSpeed", "tCmd", "tCmdRadial"];
+    console.error(combatScenarioSummary(params.engineConfig));
+    const columns = ["t", "dist", "aSpeed", "tSpeed", "aApplied", "aInflicted", "tApplied", "tInflicted", "aShield", "aArmor", "aHull", "tShield", "tArmor", "tHull", "aCap%", "tCap%"];
     console.log(columns.join("\t"));
 
-    const steps = Math.round(params.durationSeconds / FIXED_DT);
-    const sampleEvery = Math.max(1, Math.round(params.sampleSeconds / FIXED_DT));
-    for (let step = 0; step <= steps; step++) {
-      if (step > 0) this.simulation.step(FIXED_DT);
-      if (step % sampleEvery !== 0 && step !== steps) continue;
-      const snapshot = this.simulation.snapshot();
-      const frame = this.kinematics.computeEngagement(snapshot.shipA, snapshot.shipB, snapshot.time);
-      console.log(traceRow(snapshot, frame).join("\t"));
-    }
-  }
-
-  private traceCombat(params: TraceParams): void {
-    const engineConfig = params.engineConfig;
-    if (!engineConfig) throw new Error("combat trace requires an engine config");
-    console.error(combatScenarioSummary(engineConfig));
-    const columns = ["t", "dist", "aApplied", "aInflicted", "tApplied", "tInflicted", "aShield", "aArmor", "aHull", "tShield", "tArmor", "tHull"];
-    console.log(columns.join("\t"));
-
-    const view = this.engine.reset(engineConfig);
+    const view = this.engine.reset(params.engineConfig);
     console.log(combatRow(view).join("\t"));
     const steps = Math.round(params.durationSeconds / FIXED_DT);
     const sampleEvery = Math.max(1, Math.round(params.sampleSeconds / FIXED_DT));
@@ -341,7 +323,7 @@ function parseShipASteering(raw: string): "predictive" | "reactive" {
 }
 
 function buildEwarProjection(loadout: EwarProjection["loadout"], overloaded: boolean): EwarProjection {
-  const { webs, grapplers, disruptors, scramblers = [], painters = [] } = loadout;
+  const { webs, grapplers, disruptors, scramblers = [], painters = [], dampeners = [], neutralizers = [], nosferatu = [] } = loadout;
   return {
     loadout,
     activation: {
@@ -350,31 +332,34 @@ function buildEwarProjection(loadout: EwarProjection["loadout"], overloaded: boo
       disruptors: disruptors.map(() => ({ active: true, overloaded, script: undefined })),
       scramblers: scramblers.map(() => ({ active: true, overloaded })),
       painters: painters.map(() => ({ active: true, overloaded })),
-      dampeners: [], neutralizers: [], nosferatu: [],
+      dampeners: dampeners.map(() => ({ active: true, overloaded, script: undefined })),
+      neutralizers: neutralizers.map(() => ({ active: true })),
+      nosferatu: nosferatu.map(() => ({ active: true })),
     },
   };
 }
 
-function traceRow(
-  snapshot: { shipA: { velocity: Vec2 }; shipB: { velocity: Vec2 }; commands: { shipA: Vec2; shipB: Vec2 } },
-  frame: { time: number; distance: number; radialVelocity: number; angularVelocity: number; relPosition: Vec2 },
-): string[] {
-  return [
-    frame.time.toFixed(1),
-    frame.distance.toFixed(0),
-    frame.radialVelocity.toFixed(1),
-    frame.angularVelocity.toFixed(4),
-    snapshot.shipA.velocity.len().toFixed(1),
-    snapshot.commands.shipA.len().toFixed(1),
-    snapshot.shipB.velocity.len().toFixed(1),
-    snapshot.commands.shipB.len().toFixed(1),
-    radialComponent(snapshot.commands.shipB, frame).toFixed(1),
-  ];
+function capacitorSideFrom(imported: ImportedFitting | undefined, infinite: boolean): EngineConfig["capacitor"][Side] {
+  if (!imported) return { infinite, drains: [], boosters: [] };
+  const boosts = boostProjectionFrom(imported.boosts) ?? { loadout: EMPTY_BOOST_LOADOUT, activation: undefined };
+  const missileBoosts = missileBoostProjectionFrom(imported.missileBoosts) ?? { loadout: EMPTY_MISSILE_BOOSTER_LOADOUT, activation: undefined };
+  const sensorBoosts = sensorBoostProjectionFrom(imported.sensorBoosts) ?? { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: [] };
+  return {
+    infinite,
+    drains: scheduledDrainsFromProjections(buildEwarProjection(imported.ewar, false), boosts, missileBoosts, sensorBoosts),
+    boosters: capBoosterSpecsFrom(imported.capacitor.boosters),
+  };
 }
 
-function radialComponent(command: Vec2, frame: { relPosition: Vec2; distance: number }): number {
-  if (frame.distance === 0) return 0;
-  return (command.x * frame.relPosition.x + command.y * frame.relPosition.y) / frame.distance;
+function capBoosterSpecsFrom(boosters: readonly CapacitorBoosterStats[]): readonly CapBoosterSimSpec[] {
+  const specs: CapBoosterSimSpec[] = [];
+  for (const booster of boosters) {
+    if (booster.chargeId === undefined) continue;
+    const option = booster.chargeOptions.find((candidate) => candidate.id === booster.chargeId);
+    if (!option) continue;
+    specs.push({ moduleId: booster.moduleId, amount: option.amount, cycleTime: booster.cycleTime, clipSize: option.clipSize, reloadTime: booster.reloadTime, mode: "auto" });
+  }
+  return specs;
 }
 
 function combatRow(view: EngineView): string[] {
@@ -385,6 +370,8 @@ function combatRow(view: EngineView): string[] {
   return [
     view.frame.time.toFixed(1),
     view.frame.distance.toFixed(0),
+    view.snapshot.shipA.velocity.len().toFixed(1),
+    view.snapshot.shipB.velocity.len().toFixed(1),
     aAttack.toFixed(1),
     view.inflicted.shipB.total.toFixed(1),
     tAttack.toFixed(1),
@@ -395,6 +382,8 @@ function combatRow(view: EngineView): string[] {
     tPools.shield.toFixed(3),
     tPools.armor.toFixed(3),
     tPools.hull.toFixed(3),
+    view.capacitorRuntime.shipA.percentage.toFixed(1),
+    view.capacitorRuntime.shipB.percentage.toFixed(1),
   ];
 }
 
@@ -418,20 +407,6 @@ function combatScenarioSummary(config: EngineConfig): string {
   ].join("\n");
 }
 
-function scenarioSummary(params: TraceParams): string {
-  const { shipA, shipB } = params.config;
-  const tau = (mass: number, inertia: number) => (mass * inertia * 1e-6).toFixed(2);
-  return [
-    `shipA: mode=${shipA.mode} speed=${shipA.maxSpeed} range=${shipA.desiredRange} ` +
-      `aggressivity=${shipA.aggressivity} steering=${params.shipASteering} ` +
-      `tau=${tau(shipA.mass, shipA.inertiaModifier)}s`,
-    `shipB:   mode=${shipB.mode} speed=${shipB.maxSpeed} range=${shipB.desiredRange} ` +
-      `aggressivity=${shipB.aggressivity} ` +
-      `tau=${tau(shipB.mass, shipB.inertiaModifier)}s`,
-    `initial distance=${params.config.initialDistance} duration=${params.durationSeconds}s dt=${FIXED_DT}s`,
-  ].join("\n");
-}
-
 const USAGE = `Usage: bun run scripts/sim-trace.ts -- [flags]
   --duration <s>          simulated seconds to run (default 120)
   --sample <s>            output interval in simulated seconds (default 1)
@@ -447,6 +422,7 @@ const USAGE = `Usage: bun run scripts/sim-trace.ts -- [flags]
   --ship-b-mass <kg>      --ship-b-inertia <modifier>
   --ship-b-ewar <path>    EFT fitting to read shipB ewar from
   --ship-b-ewar-overload <true|false>
+  --capacitor-infinite <true|false>  give both sides an infinite capacitor pool (default false)
 Modes: ${AUTOPILOT_MODES.join(", ")}`;
 
 function weaponSpecsFromImport(imported: ImportedFitting): readonly WeaponSpec[] {
