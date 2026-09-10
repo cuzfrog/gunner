@@ -27,6 +27,7 @@ export const PROPULSION_MODULES: readonly PropulsionModule[] = [
     speedBonus: 5,
     sigBloom: 5,
     capacitorNeed: 45,
+    capacitorCapacityMultiplier: 0.75,
   },
   {
     id: "ab-10mn",
@@ -53,6 +54,7 @@ export const PROPULSION_MODULES: readonly PropulsionModule[] = [
     speedBonus: 5,
     sigBloom: 5,
     capacitorNeed: 180,
+    capacitorCapacityMultiplier: 0.75,
   },
   {
     id: "ab-100mn",
@@ -79,6 +81,7 @@ export const PROPULSION_MODULES: readonly PropulsionModule[] = [
     speedBonus: 5,
     sigBloom: 5,
     capacitorNeed: 320,
+    capacitorCapacityMultiplier: 0.75,
   },
   {
     id: "ab-10000mn",

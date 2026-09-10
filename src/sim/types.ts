@@ -691,6 +691,11 @@ export interface DefenseSpec {
   readonly shieldUniformity: number; // 0..0.25, bleed-through threshold from TSM skill
 }
 
+export interface CapacitorSpec {
+  readonly capacity: number; // GJ
+  readonly rechargeTime: number; // seconds, 0 -> 98.7% advertised recharge time
+}
+
 export const ZERO_RESISTS: DamageResists = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
 
 export const EMPTY_DEFENSE_SPEC: DefenseSpec = {

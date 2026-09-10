@@ -10,6 +10,7 @@ export interface FittingPropulsionStats {
   readonly capacitorNeed: number; // GJ per 10 s cycle
   readonly massAddition: number;
   readonly sigBloom: number;
+  readonly capacitorCapacityMultiplier?: number; // MWD capacitor capacity penalty, e.g. 0.75 for -25%
 }
 
 export type DefenseLayer = "shield" | "armor" | "hull";

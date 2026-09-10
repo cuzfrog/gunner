@@ -43,6 +43,7 @@ export type {
   DefenseSpec,
   RahSpec,
   RepairerSpec,
+  CapacitorSpec,
   DampenerActivation,
   DampenerBreakdown,
   DisruptionBreakdown,

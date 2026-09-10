@@ -71,12 +71,18 @@ export interface TargetingSkills {
   readonly frequencyModulation: SkillLevel;
 }
 
+export interface CapacitorSkills {
+  readonly energyManagement: SkillLevel;
+  readonly energySystemsOperations: SkillLevel;
+}
+
 export interface StatConditions {
   readonly skillLevel: SkillLevel;
   readonly overloaded: boolean;
   readonly weaponOverloaded: boolean;
   readonly defenseSkills?: DefenseSkills;
   readonly targetingSkills?: TargetingSkills;
+  readonly capacitorSkills?: CapacitorSkills;
 }
 
 export function defaultDefenseSkills(level: SkillLevel): DefenseSkills {
@@ -111,12 +117,20 @@ export function defaultTargetingSkills(level: SkillLevel): TargetingSkills {
   };
 }
 
+export function defaultCapacitorSkills(level: SkillLevel): CapacitorSkills {
+  return {
+    energyManagement: level,
+    energySystemsOperations: level,
+  };
+}
+
 export interface PropulsionStats {
   readonly thrust: number;
   readonly speedBonus: number;
   readonly massAddition: number;
   readonly sigBloom: number;
   readonly capacitorNeed: number; // GJ per 10 s cycle
+  readonly capacitorCapacityMultiplier?: number; // MWD capacitor capacity penalty, e.g. 0.75 for -25%
 }
 
 export interface PropulsionModule extends PropulsionStats {

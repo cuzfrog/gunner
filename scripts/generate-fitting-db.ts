@@ -486,6 +486,7 @@ interface FittingPropulsionStats {
   readonly massAddition: number;
   readonly sigBloom: number;
   readonly capacitorNeed: number;
+  readonly capacitorCapacityMultiplier?: number;
 }
 
 interface FittingModuleStats {
@@ -754,6 +755,7 @@ function buildPropulsionStats(values: Map<string, number>, type: SdeType): Fitti
       massAddition,
       sigBloom,
       capacitorNeed: values.get("capacitorNeed") ?? 0,
+      ...(values.get("capacitorCapacityMultiplier") !== undefined ? { capacitorCapacityMultiplier: values.get("capacitorCapacityMultiplier") } : {}),
     },
   };
 }

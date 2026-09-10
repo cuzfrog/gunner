@@ -24,6 +24,7 @@ import type { DroneSkillModel } from "./droneStats";
 import { FittingStateFactory, type FittingState, type FittingModuleEntry, type CargoEntry } from "./fittingState";
 import { FittingCalculatorImpl, type FittingCalculator } from "./fittingCalculator";
 import { DefenseCalculatorImpl, type DefenseCalculator } from "./defenseCalculator";
+import { CapacitorCalculatorImpl, type CapacitorStats } from "./capacitorCalculator";
 import type { FittingDb, FittingModuleStats, HullBonus } from "../gamedata/fittingDb";
 import type { DefenseSpec } from "../sim";
 
@@ -70,6 +71,7 @@ export interface ImportedFitting {
   readonly sensorBoosts: SensorBoostLoadout;
   readonly hullBonuses: readonly HullBonus[];
   readonly defense: DefenseSpec;
+  readonly capacitor: CapacitorStats;
 }
 
 export interface PropulsionVariant {
@@ -97,6 +99,7 @@ export class FittingImportImpl implements FittingImport {
   private readonly fittingStateFactory: FittingStateFactory;
   private readonly calculator: FittingCalculator;
   private readonly defenseCalculator: DefenseCalculator;
+  private readonly capacitorCalculator: CapacitorCalculatorImpl;
 
   constructor({
     ships,
@@ -133,6 +136,7 @@ export class FittingImportImpl implements FittingImport {
     this.fittingStateFactory = new FittingStateFactory(fittingDb);
     this.calculator = new FittingCalculatorImpl({ fittingDb, ships, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog });
     this.defenseCalculator = new DefenseCalculatorImpl({ fittingDb, stackingPenalty });
+    this.capacitorCalculator = new CapacitorCalculatorImpl({ fittingDb, stackingPenalty });
   }
 
   propulsionVariantNames(module: PropulsionModule): readonly PropulsionVariant[] {
@@ -156,13 +160,13 @@ export class FittingImportImpl implements FittingImport {
   propulsionStats(name: string): PropulsionStats | undefined {
     const stats = moduleByName(this.db, name)?.propulsion;
     if (!stats) return undefined;
-    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom, capacitorNeed: stats.capacitorNeed };
+    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom, capacitorNeed: stats.capacitorNeed, ...(stats.capacitorCapacityMultiplier !== undefined ? { capacitorCapacityMultiplier: stats.capacitorCapacityMultiplier } : {}) };
   }
 
   propulsionStatsById(id: TypeId): PropulsionStats | undefined {
     const stats = this.db.modules[id]?.propulsion;
     if (!stats) return undefined;
-    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom, capacitorNeed: stats.capacitorNeed };
+    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom, capacitorNeed: stats.capacitorNeed, ...(stats.capacitorCapacityMultiplier !== undefined ? { capacitorCapacityMultiplier: stats.capacitorCapacityMultiplier } : {}) };
   }
 
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined {
@@ -187,6 +191,7 @@ export class FittingImportImpl implements FittingImport {
     const sensorSpec = this.calculator.resolveSensorSpec(fittingState, conditions);
     const sensorBoosts = this.calculator.resolveSensorBoosts(fittingState);
     const defense = this.defenseCalculator.resolve(fittingState, conditions);
+    const capacitor = this.capacitorCalculator.resolve(fittingState, conditions, defense);
 
     return {
       profile: resolved.profile,
@@ -206,6 +211,7 @@ export class FittingImportImpl implements FittingImport {
       sensorBoosts,
       hullBonuses,
       defense,
+      capacitor,
     };
   }
 

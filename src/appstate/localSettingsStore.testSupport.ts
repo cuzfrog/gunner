@@ -306,6 +306,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
   defense: EMPTY_DEFENSE_SPEC,
+  capacitor: { spec: { capacity: 0, rechargeTime: 0 }, peakRecharge: 0, rows: [], usagePerSecond: 0, stablePercent: 100 },
   sensorSpec: { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4 },
   sensorBoosts: EMPTY_SENSOR_BOOST_LOADOUT,
 };
