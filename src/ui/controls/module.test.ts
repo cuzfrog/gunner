@@ -61,6 +61,7 @@ const controlsCradleKeys = {
   sessionCodec: "sessionCodec",
   simConfigSource: "simConfigSource",
   importController: "importController",
+  exportController: "exportController",
   ewarController: "ewarController",
   modulesPopup: "modulesPopup",
   defenseController: "defenseController",

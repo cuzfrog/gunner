@@ -9,6 +9,7 @@ import {
 } from "../../../appstate";
 import { num } from "../controlsDom";
 import { formatNumber } from "../controlsFormat";
+import type { ExportController } from "../export";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { Timer } from "../../timer";
@@ -70,6 +71,7 @@ export class SidePanelImpl implements SidePanel {
   private fittingTextValue?: string;
   private lastCommittedHullValue?: ShipId;
   private importerValue?: SideImporter;
+  private exporterValue?: ExportController;
   private sensorSpecValue?: SensorSpec;
   readonly sections: ISidePanelSections;
   private fittingPopup?: FittingPopupControl;
@@ -97,10 +99,12 @@ export class SidePanelImpl implements SidePanel {
     const propulsion = new PropulsionSection({ panel: this, els, ships, fittingImport, imageCatalog, i18n, popupGroup, propulsionSelection });
     const paste = new PasteImportSection({ panel: this, els, i18n, timer });
     this.sections = { hull, nav, stats, skill, propulsion, paste };
+    this.syncExportButton();
     this.els.speed.addEventListener("input", () => this.onShipInput("speed"));
     this.els.mass.addEventListener("input", () => this.onShipInput("mass"));
     this.els.inertia.addEventListener("input", () => this.onShipInput("inertia"));
     this.els.shipSig.addEventListener("input", () => this.onShipSigInput());
+    els.exportFitting.addEventListener("click", () => void this.exporter.copyFitting(this.side));
     popupGroup.register(skill.popup);
     popupGroup.register(paste.popup);
     popupGroup.register(propulsion.popup);
@@ -120,7 +124,10 @@ export class SidePanelImpl implements SidePanel {
   get fittedHull(): FittedHullSummary | undefined { return this.fittedHullValue; }
   set fittedHull(value: FittedHullSummary | undefined) { this.fittedHullValue = value; }
   get fittingText(): string | undefined { return this.fittingTextValue; }
-  set fittingText(value: string | undefined) { this.fittingTextValue = value; }
+  set fittingText(value: string | undefined) {
+    this.fittingTextValue = value;
+    this.syncExportButton();
+  }
   get lastCommittedHull(): ShipId | undefined { return this.lastCommittedHullValue; }
   set lastCommittedHull(value: ShipId | undefined) { this.lastCommittedHullValue = value; }
   setSensorData(spec: SensorSpec | undefined): void {
@@ -129,6 +136,11 @@ export class SidePanelImpl implements SidePanel {
   get importer(): SideImporter {
     if (!this.importerValue) throw new Error("SidePanel importer not set");
     return this.importerValue;
+  }
+
+  get exporter(): ExportController {
+    if (!this.exporterValue) throw new Error("SidePanel exporter not set");
+    return this.exporterValue;
   }
 
   getSkillPopup(): Popup { return this.sections.skill.popup; }
@@ -173,6 +185,7 @@ export class SidePanelImpl implements SidePanel {
   }
 
   setImporter(importer: SideImporter): void { this.importerValue = importer; }
+  setExporter(exporter: ExportController): void { this.exporterValue = exporter; }
   renderFittingPopupIfOpen(): void { this.fittingPopup?.renderIfOpen(); }
   closeFittingPopupIfOpen(): void { this.fittingPopup?.closeIfOpen(); }
   hideFittingPreview(): void { this.fittingPreview?.hide(this.side); }
@@ -230,6 +243,10 @@ export class SidePanelImpl implements SidePanel {
   private setButtonDisabled(button: HTMLButtonElement, enabled: boolean): void {
     button.disabled = !enabled;
     button.setAttribute("aria-disabled", String(!enabled));
+  }
+
+  private syncExportButton(): void {
+    this.setButtonDisabled(this.els.exportFitting, this.fittingTextValue !== undefined);
   }
 
   isOverridden(key: keyof ProfileParamOverrides): boolean {

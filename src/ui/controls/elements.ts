@@ -69,6 +69,7 @@ interface CombatantEls {
   readonly fittingPresetList: HTMLElement;
   readonly fittingEmpty: HTMLElement;
   readonly importFitting: HTMLButtonElement;
+  readonly exportFitting: HTMLButtonElement;
   readonly pastePopup: HTMLElement;
   readonly pasteInput: HTMLTextAreaElement;
   readonly propulsion: HTMLSelectElement;
@@ -312,6 +313,7 @@ function createCombatantEls(side: Side): CombatantEls {
     fittingPresetList: el(combatantElementId("fittingPresetList", side)),
     fittingEmpty: el(combatantElementId("fittingEmpty", side)),
     importFitting: elOf(combatantElementId("importFitting", side), isHtmlButtonElement),
+    exportFitting: elOf(combatantElementId("exportFitting", side), isHtmlButtonElement),
     pastePopup: el(combatantElementId("pastePopup", side)),
     pasteInput: elOf(combatantElementId("pasteInput", side), isHtmlTextAreaElement),
     propulsion: elOf(combatantElementId("propulsion", side), isHtmlSelectElement),

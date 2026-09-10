@@ -192,6 +192,7 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   fittingPresetList: { tag: "UL" as const, baseId: "fitting-preset-list", defaultValue: undefined },
   fittingEmpty: { tag: "P" as const, baseId: "fitting-empty", defaultValue: undefined },
   importFitting: { tag: "BUTTON" as const, baseId: "import-fitting", defaultValue: undefined },
+  exportFitting: { tag: "BUTTON" as const, baseId: "export-fitting", defaultValue: undefined },
   pastePopup: { tag: "DIV" as const, baseId: "paste-popup", defaultValue: undefined },
   pasteInput: { tag: "TEXTAREA" as const, baseId: "paste-input", defaultValue: undefined },
   propulsion: { tag: "SELECT" as const, baseId: "propulsion", defaultValue: "" },

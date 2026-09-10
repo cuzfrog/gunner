@@ -21,6 +21,9 @@ const headingText = config.label;
     <IconButton id={`${idPrefix}-import-fitting`} iconName="import"
             hintI18n="button.importFitting" ariaLabelI18n="button.importFitting"
             data-hint="Import from clipboard" ariaLabel="Import from clipboard" />
+    <IconButton id={`${idPrefix}-export-fitting`} iconName="copy" disabled
+            hintI18n="button.exportFitting" ariaLabelI18n="button.exportFitting"
+            data-hint="Copy fitting to clipboard" ariaLabel="Copy fitting to clipboard" />
     <PopupBox id={`${idPrefix}-paste-popup`} extraClass="paste-popup" position="below" align="left">
       <textarea id={`${idPrefix}-paste-input`} class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
       <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>

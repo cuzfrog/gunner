@@ -1,4 +1,5 @@
 import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "./popup";
+import type { ExportController } from "./export";
 import type { Side } from "./side";
 import type { SidePanel, SidePanelHost } from "./sidePanel";
 
@@ -20,6 +21,7 @@ interface CombatantSideWiringDeps {
   readonly popupGroup: PopupGroup;
   readonly host: SidePanelHost;
   readonly importer: SideImporter;
+  readonly exporter: ExportController;
 }
 
 export function combatantSidesOf(shipA: SidePanel, shipB: SidePanel): CombatantSides {
@@ -36,5 +38,6 @@ export function wireCombatantSide(combatant: CombatantSide, deps: CombatantSideW
   combatant.panel.setFittingPopup(deps.fittingPopup);
   combatant.panel.setFittingPreview(deps.fittingPreview);
   combatant.panel.setImporter(deps.importer);
+  combatant.panel.setExporter(deps.exporter);
   deps.popupGroup.register(deps.fittingPopup.popup);
 }

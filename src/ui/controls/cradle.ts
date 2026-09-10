@@ -24,6 +24,7 @@ import type { DefenseController } from "./defense";
 import type { CapacitorController } from "./capacitor";
 import type { TargetingController } from "./targeting";
 import type { ImportController } from "./import";
+import type { ExportController } from "./export";
 import type { ConfirmController } from "./confirm";
 import type { FittingPopupController, FittingPreview, FittingPreviewManager, PopupGroup } from "./popup";
 import type { PreferencesController } from "./preferences";
@@ -126,6 +127,7 @@ export interface ControlsCradle {
   readonly sessionCodec: SessionCodec;
   readonly simConfigSource: SimConfigSource;
   readonly importController: ImportController;
+  readonly exportController: ExportController;
   readonly shareController: ShareController;
   readonly rangeOverlayController: RangeOverlayController;
   readonly controls: Controls & DomControlsHost;

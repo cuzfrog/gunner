@@ -1,7 +1,7 @@
 import { createContainer, InjectionMode } from "awilix";
 import { registerGameDataModule } from "../../../gamedata";
 import { registerShipsModule, type DefenseSkills, type ShipsCradle, defaultDefenseSkills, defaultTargetingSkills } from "../../../ships";
-import { RIFTER, buildSidePanel, getFake, mockShips } from "../testSupport";
+import { FakeElement, RIFTER, buildSidePanel, getFake, mockShips } from "../testSupport";
 
 function realShips() {
   const cradle = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
@@ -75,6 +75,26 @@ describe("SidePanel", () => {
     expect(panel.fittingText).toBe("fit");
     expect(panel.isOverridden("shipAMass")).toBe(true);
     expect(panel.lastCommittedHull).toBe(RIFTER.id);
+  });
+
+  test("fittingText updates the export button state", () => {
+    const { document, panel } = buildSidePanel("shipA");
+    const exportButton = getFake(document, "ship-a-export-fitting");
+    expect(exportButton.disabled).toBe(true);
+    panel.fittingText = "[Rifter, tackle]";
+    expect(exportButton.disabled).toBe(false);
+    expect(exportButton.getAttribute("aria-disabled")).toBe("false");
+    panel.fittingText = undefined;
+    expect(exportButton.disabled).toBe(true);
+    expect(exportButton.getAttribute("aria-disabled")).toBe("true");
+  });
+
+  test("export button click delegates to the exporter with the panel side", () => {
+    const { document, panel } = buildSidePanel("shipA");
+    const copyFitting = vi.fn(() => Promise.resolve());
+    panel.setExporter({ copyFitting });
+    (getFake(document, "ship-a-export-fitting") as unknown as FakeElement).trigger("click");
+    expect(copyFitting).toHaveBeenCalledWith("shipA");
   });
 
   test("shipA record lands in the turret overrides store", () => {

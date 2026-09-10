@@ -277,6 +277,7 @@ export const JA: LanguageSlice<"ja"> = {
   "status.copied": { ja: "コピー済み" },
   "status.failed": { ja: "失敗" },
   "button.importFitting": { ja: "クリップボードからインポート" },
+  "button.exportFitting": { ja: "フィッティングをクリップボードにコピー" },
   "hint.pasteFitting": { ja: "クリップボードがブロックされました。" +
     "Ctrl+V でフィッティングを貼り付けてください。" },
   "status.fittingImported": { ja: "フィッティングをインポートしました" },

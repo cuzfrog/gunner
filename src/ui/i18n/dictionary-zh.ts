@@ -278,6 +278,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "status.copied": { zh: "已复制" },
   "status.failed": { zh: "失败" },
   "button.importFitting": { zh: "从剪贴板导入" },
+  "button.exportFitting": { zh: "复制装配到剪贴板" },
   "hint.pasteFitting": { zh: "剪贴板被阻止。按 Ctrl+V 粘贴装配。" },
   "status.fittingImported": { zh: "装配已导入" },
   "status.fittingInvalid": { zh: "装配无效" },

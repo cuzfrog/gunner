@@ -278,6 +278,7 @@ export const EN: LanguageSlice<"en"> = {
   "status.copied": { en: "Copied" },
   "status.failed": { en: "Failed" },
   "button.importFitting": { en: "Import from clipboard" },
+  "button.exportFitting": { en: "Copy fitting to clipboard" },
   "hint.pasteFitting": { en: "Clipboard blocked. Press Ctrl+V to paste fitting." },
   "status.fittingImported": { en: "Fitting imported" },
   "status.fittingInvalid": { en: "Invalid fitting" },
