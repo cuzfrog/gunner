@@ -48,6 +48,12 @@ function buildController(now: () => number = () => 0): {
   const ewarEffectDescriber = vi.mocked<EwarEffectDescriber>({
     webDescription: vi.fn(() => "web-title"),
     webHint: vi.fn(() => "web-hint"),
+    neutralizerDescription: vi.fn(() => "neutralizer-title"),
+    nosferatuDescription: vi.fn(() => "nosferatu-title"),
+    neutralizerModuleEffect: vi.fn(() => "neutralizer-effect"),
+    nosferatuModuleEffect: vi.fn(() => "nosferatu-effect"),
+    neutralizerHint: vi.fn(() => "neutralizer-hint"),
+    nosferatuHint: vi.fn(() => "nosferatu-hint"),
     grapplerDescription: vi.fn(() => "grappler-title"),
     grapplerHint: vi.fn(() => "grappler-hint"),
     disruptorDescription: vi.fn(() => "disruptor-title"),
@@ -94,29 +100,29 @@ function emitView(listeners: Set<(view: EngagementView) => void>, distance: numb
 
 function projectionWithWeb(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [WEB], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
-    activation: { webs: [{ active, overloaded }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [] },
+    loadout: { webs: [WEB], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
+    activation: { webs: [{ active, overloaded }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
   };
 }
 
 function projectionWithGrappler(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
-    activation: { webs: [], grapplers: [{ active, overloaded }], disruptors: [], scramblers: []  , painters: [], dampeners: [] },
+    loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
+    activation: { webs: [], grapplers: [{ active, overloaded }], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
   };
 }
 
 function projectionWithScrambler(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
-    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active, overloaded  }], painters: [], dampeners: [] },
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
+    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active, overloaded  }], painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
   };
 }
 
 function projectionWithDisruptor(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [DISRUPTOR], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
-    activation: { webs: [], grapplers: [], disruptors: [{ active, overloaded, script: undefined }], scramblers: []  , painters: [], dampeners: [] },
+    loadout: { webs: [], grapplers: [], disruptors: [DISRUPTOR], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
+    activation: { webs: [], grapplers: [], disruptors: [{ active, overloaded, script: undefined }], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
   };
 }
 

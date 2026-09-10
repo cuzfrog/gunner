@@ -69,8 +69,8 @@ function baseView(): EngineView {
     snapshot,
     defenseRuntime: emptyDefenseView,
     capacitorRuntime: {
-      shipA: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [] },
-      shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [] },
+      shipA: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [], incoming: [] },
+      shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [], incoming: [] },
     },
     inflicted: ZERO_INFLICTED,
     drones: { shipA: [], shipB: [] },

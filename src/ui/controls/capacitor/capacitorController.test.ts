@@ -1,4 +1,5 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
+import type { ItemNameCatalog } from "../../../gamedata";
 import type { CapacitorStats } from "../../../fitting";
 import type { CapacitorView } from "../../../sim";
 import { FakeElement, fakeDocument } from "../../testing";
@@ -45,6 +46,8 @@ const TEMPLATES: Record<string, string> = {
   "capacitor.reloading": "Reloading {time}s",
   "capacitor.insufficient": "Insufficient capacitor",
   "capacitor.rowOff": "Off",
+  "capacitor.incoming": "Incoming drain",
+  "capacitor.incoming.none": "No incoming drains",
   "defense.repairMode.auto": "Auto",
   "defense.repairMode.manual": "Manual",
 };
@@ -98,13 +101,19 @@ function capacitorStats(overrides: Partial<CapacitorStats> = {}): CapacitorStats
 function capacitorView(overrides: Partial<CapacitorView> = {}): CapacitorView {
   return {
     cap: 1000, capacity: 6375, percentage: 15.7, regenPerSecond: 10, netPerSecond: -5.25, incomingDrainPerSecond: 0,
-    starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [],
+    starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [], incoming: [],
     ...overrides,
   };
 }
 
 const BOOSTER_MODULE = toTypeId("3581");
 const CHARGE_NAVY = toTypeId("11269");
+const NEUTRALIZER_MODULE = toTypeId("12271");
+const NOSFERATU_MODULE = toTypeId("12259");
+
+function buildCatalog(): ItemNameCatalog {
+  return { nameForId: vi.fn((id: TypeId) => (id === NEUTRALIZER_MODULE ? "Heavy Energy Neutralizer II" : id === NOSFERATU_MODULE ? "Medium Energy Nosferatu II" : `mod-${id}`)) };
+}
 
 function statsWithBooster(chargeId: TypeId | undefined): CapacitorStats {
   return capacitorStats({
@@ -145,7 +154,7 @@ describe("CapacitorControllerImpl stats rendering", () => {
 
   test("disables the field and clears the summary when no capacitor stats exist", () => {
     const els = buildEls();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     expect(els.shipA.trigger.disabled).toBe(true);
     expect(els.shipA.trigger.getAttribute("data-hint")).toBe("No fitting imported");
     expect(summaryText(els)).toBe("");
@@ -153,7 +162,7 @@ describe("CapacitorControllerImpl stats rendering", () => {
 
   test("enables the field and shows the stable percentage in the summary", () => {
     const els = buildEls();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     controller.setCapacitorStats("shipA", capacitorStats());
     expect(els.shipA.trigger.disabled).toBe(false);
     expect(summaryText(els)).toBe("Stable @ 87.3%");
@@ -161,14 +170,14 @@ describe("CapacitorControllerImpl stats rendering", () => {
 
   test("shows the depletion countdown in the summary when the fitting is not cap-stable", () => {
     const els = buildEls();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     controller.setCapacitorStats("shipA", capacitorStats({ stablePercent: undefined, depletesInSeconds: 90.4 }));
     expect(summaryText(els)).toBe("Depletes in 1:30");
   });
 
   test("renders static stats and the runtime bar into the popup section", () => {
     const els = buildEls();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     controller.setCapacitorStats("shipA", capacitorStats());
     const section = els.shipA.section as unknown as FakeElement;
     const statRows = findByClass(section, "capacitor-stat-row").map(textOf);
@@ -178,7 +187,7 @@ describe("CapacitorControllerImpl stats rendering", () => {
 
   test("updates runtime values and colors the bar by charge thresholds", () => {
     const els = buildEls();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     controller.setCapacitorStats("shipA", capacitorStats());
     controller.updateRuntime({ shipA: capacitorView(), shipB: capacitorView() });
     const section = els.shipA.section as unknown as FakeElement;
@@ -191,7 +200,7 @@ describe("CapacitorControllerImpl stats rendering", () => {
 
   test("marks a usage row starved with the insufficient-capacitor hint", () => {
     const els = buildEls();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     controller.setCapacitorStats("shipA", capacitorStats({
       rows: [{ moduleId: BOOSTER_MODULE, moduleName: "Microwarpdrive II", amount: 200, cycleTime: 10, perSecond: 20, count: 1 }],
     }));
@@ -206,7 +215,7 @@ describe("CapacitorControllerImpl stats rendering", () => {
 
   test("keeps usage rows running when no runtime view arrived yet", () => {
     const els = buildEls();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     controller.setCapacitorStats("shipA", capacitorStats({
       rows: [{ moduleId: BOOSTER_MODULE, moduleName: "Microwarpdrive II", amount: 200, cycleTime: 10, perSecond: 20, count: 1 }],
     }));
@@ -218,7 +227,7 @@ describe("CapacitorControllerImpl stats rendering", () => {
 
   test("shows a booster reload countdown and re-enables manual inject between cycles", () => {
     const els = buildEls();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     controller.setCapacitorStats("shipA", statsWithBooster(CHARGE_NAVY));
     const reloading = capacitorView({
       boosters: [{ moduleId: BOOSTER_MODULE, amount: 800, cycleTime: 10, clipSize: 3, reloadTime: 60, mode: "manual", charges: 0, cycleTimer: 0, reloading: true, reloadTimer: 3.04 }],
@@ -247,7 +256,7 @@ describe("CapacitorControllerImpl summary and playing state", () => {
 
   test("live percentage replaces the static summary while playing and keeps the threshold class", () => {
     const els = buildEls();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     controller.setCapacitorStats("shipA", capacitorStats());
     controller.updateRuntime({ shipA: capacitorView({ percentage: 41.06 }), shipB: capacitorView() });
     controller.setPlaying(true);
@@ -272,7 +281,7 @@ describe("CapacitorControllerImpl configuration state", () => {
   test("infinite capacitor toggle defaults to false and emits config invalidation on change", () => {
     const els = buildEls();
     const { events, mock } = buildEvents();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog() });
     expect(controller.infiniteCapacitor("shipA")).toBe(false);
     controller.setInfiniteCapacitor("shipA", true);
     expect(controller.infiniteCapacitor("shipA")).toBe(true);
@@ -283,7 +292,7 @@ describe("CapacitorControllerImpl configuration state", () => {
   test("booster mode defaults to auto and emits config invalidation on change", () => {
     const els = buildEls();
     const { events, mock } = buildEvents();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog() });
     expect(controller.capBoosterMode("shipA", BOOSTER_MODULE)).toBe("auto");
     controller.setCapBoosterMode("shipA", BOOSTER_MODULE, "manual");
     expect(controller.capBoosterMode("shipA", BOOSTER_MODULE)).toBe("manual");
@@ -292,7 +301,7 @@ describe("CapacitorControllerImpl configuration state", () => {
 
   test("capBoosterSpecs uses the fitted charge unless overridden and excludes unresolvable boosters", () => {
     const els = buildEls();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     controller.setCapacitorStats("shipA", statsWithBooster(CHARGE_NAVY));
     expect(controller.capBoosterCharge("shipA", BOOSTER_MODULE)).toBe(CHARGE_NAVY);
     expect(controller.capBoosterSpecs("shipA")).toEqual([{ moduleId: BOOSTER_MODULE, amount: 800, cycleTime: 10, clipSize: 3, reloadTime: 60, mode: "auto" }]);
@@ -305,7 +314,7 @@ describe("CapacitorControllerImpl configuration state", () => {
 
   test("boosters without any charge are excluded from the sim specs", () => {
     const els = buildEls();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     controller.setCapacitorStats("shipA", statsWithBooster(undefined));
     expect(controller.capBoosterCharge("shipA", BOOSTER_MODULE)).toBeUndefined();
     expect(controller.capBoosterSpecs("shipA")).toEqual([]);
@@ -313,7 +322,7 @@ describe("CapacitorControllerImpl configuration state", () => {
 
   test("capture and restore round-trip the capacitor configuration", () => {
     const els = buildEls();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     controller.setInfiniteCapacitor("shipA", true);
     controller.setCapBoosterMode("shipA", BOOSTER_MODULE, "manual");
     controller.setCapBoosterCharge("shipA", BOOSTER_MODULE, CHARGE_NAVY);
@@ -323,7 +332,7 @@ describe("CapacitorControllerImpl configuration state", () => {
       modes: [{ moduleId: BOOSTER_MODULE, mode: "manual" }],
       charges: [{ moduleId: BOOSTER_MODULE, chargeId: CHARGE_NAVY }],
     });
-    const restored = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events });
+    const restored = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
     restored.restore("shipA", captured.infinite, captured.modes as readonly StoredCapBoosterMode[], captured.charges as readonly StoredCapBoosterCharge[]);
     expect(restored.infiniteCapacitor("shipA")).toBe(true);
     expect(restored.capBoosterMode("shipA", BOOSTER_MODULE)).toBe("manual");
@@ -341,7 +350,7 @@ describe("CapacitorControllerImpl events", () => {
   test("refreshes the stats when a fitting is imported", () => {
     const els = buildEls();
     const { events, mock } = buildEvents();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog() });
     const listener = mock.onFittingImported.mock.calls[0][0] as (side: "shipA" | "shipB", imported: { capacitor: CapacitorStats }) => void;
     listener("shipA", { capacitor: capacitorStats() });
     expect(summaryText(els)).toBe("Stable @ 87.3%");
@@ -350,7 +359,7 @@ describe("CapacitorControllerImpl events", () => {
   test("manual inject emits the booster index for the clicked module", () => {
     const els = buildEls();
     const { events, mock } = buildEvents();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog() });
     const second = toTypeId("2031");
     const twoBoosters = capacitorStats({
       boosters: [
@@ -376,11 +385,77 @@ describe("CapacitorControllerImpl events", () => {
   test("re-renders on language change", () => {
     const els = buildEls();
     const { events, mock } = buildEvents();
-    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events });
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog() });
     controller.setCapacitorStats("shipA", capacitorStats());
     expect(summaryText(els)).toBe("Stable @ 87.3%");
     const listener = mock.onLanguageChanged.mock.calls[0][0] as () => void;
     listener();
     expect(summaryText(els)).toBe("Stable @ 87.3%");
+  });
+});
+
+describe("CapacitorControllerImpl incoming drains", () => {
+  test("shows the empty incoming state before any drains arrive", () => {
+    const els = buildEls();
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
+    controller.setCapacitorStats("shipA", capacitorStats());
+    const section = els.shipA.section as unknown as FakeElement;
+    const rows = findByClass(section, "capacitor-incoming-row");
+    expect(rows.length).toBe(1);
+    expect(rows[0].className).toBe("capacitor-incoming-row is-off");
+    expect(textOf(rows[0])).toBe("No incoming drains");
+  });
+
+  test("renders incoming drain rows with catalog names and per-second values", () => {
+    const els = buildEls();
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
+    controller.setCapacitorStats("shipA", capacitorStats());
+    controller.updateRuntime({
+      shipA: capacitorView({ incoming: [
+        { moduleId: NEUTRALIZER_MODULE, amount: 1200, interval: 24, transfer: false, count: 2, timer: 3, running: true },
+        { moduleId: NOSFERATU_MODULE, amount: 36, interval: 5, transfer: true, count: 1, timer: 0, running: true },
+      ] }),
+      shipB: capacitorView(),
+    });
+    const section = els.shipA.section as unknown as FakeElement;
+    const rows = findByClass(section, "capacitor-incoming-row");
+    expect(rows.length).toBe(2);
+    expect(rows[0].className).toBe("capacitor-incoming-row");
+    expect(textOf(rows[0])).toContain("Heavy Energy Neutralizer II x2");
+    expect(textOf(rows[0])).toContain("50.00 GJ/s");
+    expect(textOf(rows[1])).toContain("Medium Energy Nosferatu II");
+    expect(textOf(rows[1])).toContain("7.20 GJ/s");
+    const states = findByClass(section, "capacitor-row-state");
+    expect(states.every((state) => state.hidden)).toBe(true);
+  });
+
+  test("marks incoming rows off when the drain is not running", () => {
+    const els = buildEls();
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
+    controller.setCapacitorStats("shipA", capacitorStats());
+    controller.updateRuntime({
+      shipA: capacitorView({ incoming: [{ moduleId: NEUTRALIZER_MODULE, amount: 600, interval: 24, transfer: false, count: 1, timer: 0, running: false }] }),
+      shipB: capacitorView(),
+    });
+    const section = els.shipA.section as unknown as FakeElement;
+    const row = findByClass(section, "capacitor-incoming-row")[0];
+    expect(row.className).toBe("capacitor-incoming-row is-off");
+    const stateLabel = findByClass(section, "capacitor-row-state")[0];
+    expect(stateLabel.hidden).toBe(false);
+    expect(stateLabel.textContent).toBe("Off");
+  });
+
+  test("rebuilds incoming rows when a fitting replaces the runtime view", () => {
+    const els = buildEls();
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildEvents().events, itemNameCatalog: buildCatalog() });
+    controller.updateRuntime({
+      shipA: capacitorView({ incoming: [{ moduleId: NEUTRALIZER_MODULE, amount: 600, interval: 24, transfer: false, count: 1, timer: 0, running: true }] }),
+      shipB: capacitorView(),
+    });
+    controller.setCapacitorStats("shipA", capacitorStats());
+    const section = els.shipA.section as unknown as FakeElement;
+    const rows = findByClass(section, "capacitor-incoming-row");
+    expect(rows.length).toBe(1);
+    expect(textOf(rows[0])).toContain("Heavy Energy Neutralizer II");
   });
 });

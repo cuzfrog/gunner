@@ -24,6 +24,8 @@ export interface StoredEwarActivation {
   readonly scramblers?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
   readonly painters?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
   readonly dampeners?: readonly { readonly active: boolean; readonly overloaded: boolean; readonly script: StoredDisruptionScript }[];
+  readonly neutralizers?: readonly { readonly active: boolean }[];
+  readonly nosferatu?: readonly { readonly active: boolean }[];
 }
 
 export interface StoredMissileBoosterActivation {
@@ -70,6 +72,7 @@ export interface FittedHullSummary {
   readonly propulsion?: PropulsionStats;
   readonly baseMaxSpeed?: number;
   readonly capacitor?: CapacitorSpec;
+  readonly energyWarfareResistancePercent?: number;
 }
 
 export interface ProfileParamOverrides {

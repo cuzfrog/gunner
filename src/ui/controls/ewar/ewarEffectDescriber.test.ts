@@ -9,7 +9,7 @@ const IDENTITY_POTENTIALS: EwarEffectPotentials = {
   scanResolutionMultiplier: 1, targetingRangeMultiplier: 1,
 };
 
-const ZERO_REACH: EwarReach = { web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 };
+const ZERO_REACH: EwarReach = { web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, };
 
 const resolver = vi.mocked<EwarResolver>({
   speedMultiplier: vi.fn(),
@@ -54,7 +54,7 @@ const i18n = vi.mocked<I18n>({
 });
 
 const describer = new EwarEffectDescriberImpl({ ewarResolver: resolver, i18n });
-const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], } };
+const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], } };
 const distance = 5000;
 
 beforeEach(() => {
@@ -148,9 +148,9 @@ describe("EwarEffectDescriber", () => {
       loadout: {
         webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }],
         grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [],
-        dampenerScripts: [],
+        dampenerScripts: [], neutralizers: [], nosferatu: [],
       },
-      activation: { webs: [{ active: true, overloaded: true }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [] },
+      activation: { webs: [{ active: true, overloaded: true }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
     } as EwarProjection;
     resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, speedMultiplier: 0.4 });
     resolver.reach.mockReturnValue({ ...ZERO_REACH, web: 13000 });
@@ -163,9 +163,9 @@ describe("EwarEffectDescriber", () => {
         webs: [], grapplers: [],
         disruptors: [{ moduleName: "Tracking Disruptor II", moduleId: toTypeId("2109"), optimal: 48000, falloff: 24000, disruption: 0.1719, defaultScript: undefined, overloadStrengthBonusPercent: 20 }],
         scramblers: [], painters: [], dampeners: [], scripts: [],
-        dampenerScripts: [],
+        dampenerScripts: [], neutralizers: [], nosferatu: [],
       },
-      activation: { webs: [], grapplers: [], disruptors: [{ active: true, overloaded: true, script: undefined }], scramblers: []  , painters: [], dampeners: [] },
+      activation: { webs: [], grapplers: [], disruptors: [{ active: true, overloaded: true, script: undefined }], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
     } as EwarProjection;
     resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, trackingMultiplier: 0.7, optimalMultiplier: 0.55, falloffMultiplier: 0.55 });
     resolver.reach.mockReturnValue({ ...ZERO_REACH, disruptor: 72000 });
@@ -178,9 +178,9 @@ describe("EwarEffectDescriber", () => {
         webs: [], grapplers: [], disruptors: [],
         scramblers: [{ moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 }],
         painters: [], dampeners: [], scripts: [],
-        dampenerScripts: [],
+        dampenerScripts: [], neutralizers: [], nosferatu: [],
       },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active: true, overloaded: true }], painters: [], dampeners: [] },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active: true, overloaded: true }], painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
     } as EwarProjection;
     resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, propulsionSuppressed: true });
     resolver.reach.mockReturnValue({ ...ZERO_REACH, scrambler: 10800 });
@@ -221,8 +221,8 @@ describe("EwarEffectDescriber", () => {
     const speedFactor = 0.6;
     const webSpec: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor, overloadRangeBonusPercent: 30 };
     const webProj = {
-      loadout: { webs: [webSpec], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
-      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [] },
+      loadout: { webs: [webSpec], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
+      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
     } as EwarProjection;
     resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, speedMultiplier: 1 - speedFactor });
     const hintEffect = describer.webHint(webProj).split(" · ")[0];
@@ -232,8 +232,8 @@ describe("EwarEffectDescriber", () => {
   test("painterHint reports signature bonus and range", () => {
     const painterSpec: TargetPainterSpec = { moduleName: "Target Painter II", moduleId: toTypeId("12275"), maxRange: 36000, falloff: 90000, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 20 };
     const painterProj = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [painterSpec], dampeners: [], scripts: [], dampenerScripts: [], },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [{ active: true, overloaded: false }], dampeners: [] },
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [painterSpec], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [{ active: true, overloaded: false }], dampeners: [], neutralizers: [], nosferatu: [], },
     } as EwarProjection;
     resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, sigMultiplier: 1.3 });
     resolver.reach.mockReturnValue({ ...ZERO_REACH, painter: 126000 });
@@ -242,7 +242,7 @@ describe("EwarEffectDescriber", () => {
 
   test("painterHint reports out of range when no active painter", () => {
     const painterProj = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
     } as EwarProjection;
     resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, sigMultiplier: 1 });
     expect(describer.painterHint(painterProj)).toBe("No effect at this range · range 0 m");
@@ -256,8 +256,8 @@ describe("EwarEffectDescriber", () => {
   test("dampenerHint reports scan resolution and targeting range reductions and range", () => {
     const dampenerSpec: SensorDampenerSpec = { moduleName: "Sensor Dampener II", moduleId: toTypeId("2120"), optimal: 48000, falloff: 24000, scanResolutionBonusPercent: -40, maxTargetRangeBonusPercent: -40, overloadStrengthBonusPercent: 20, defaultScript: undefined };
     const dampenerProj = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [dampenerSpec], scripts: [], dampenerScripts: [], },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [{ active: true, overloaded: false, script: undefined }] },
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [dampenerSpec], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [{ active: true, overloaded: false, script: undefined }], neutralizers: [], nosferatu: [] },
     } as EwarProjection;
     resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, scanResolutionMultiplier: 0.6, targetingRangeMultiplier: 0.6 });
     resolver.reach.mockReturnValue({ ...ZERO_REACH, dampener: 72000 });
@@ -266,7 +266,7 @@ describe("EwarEffectDescriber", () => {
 
   test("dampenerHint reports out of range when no active dampener", () => {
     const dampenerProj = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
     } as EwarProjection;
     resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 });
     expect(describer.dampenerHint(dampenerProj)).toBe("No effect at this range · range 0 m");

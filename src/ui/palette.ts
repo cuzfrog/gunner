@@ -13,6 +13,8 @@ export const PALETTE = {
   overlayGrappler: "#2b6cb5",
   overlayScrambler: "#8bb8e8",
   overlayDisruptor: "#1e3f7a",
+  overlayNeutralizer: "#e0b84a",
+  overlayNosferatu: "#a07ad8",
   textPrimary: "#e8eef0",
   textSecondary: "#9fb3b8",
   textDim: "#5d7078",

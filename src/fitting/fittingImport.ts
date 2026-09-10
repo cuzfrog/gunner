@@ -65,6 +65,7 @@ export interface ImportedFitting {
   readonly drones: readonly ImportedDrone[];
   readonly cargoCharges: readonly CargoCharge[];
   readonly ewar: EwarLoadout;
+  readonly energyWarfareResistancePercent: number;
   readonly boosts: BoostLoadout;
   readonly missileBoosts: MissileBoosterLoadout;
   readonly sensorSpec: SensorSpec;
@@ -186,6 +187,7 @@ export class FittingImportImpl implements FittingImport {
     const drones = this.calculator.resolveDrones(fittingState, conditions);
     const cargoCharges = this.calculator.resolveCargoCharges(fittingState);
     const ewar = this.calculator.resolveEwar(fittingState);
+    const energyWarfareResistancePercent = this.calculator.resolveEnergyWarfareResistance(fittingState);
     const boosts = this.calculator.resolveBoosts(fittingState);
     const missileBoosts = this.calculator.resolveMissileBoosts(fittingState);
     const sensorSpec = this.calculator.resolveSensorSpec(fittingState, conditions);
@@ -205,6 +207,7 @@ export class FittingImportImpl implements FittingImport {
       drones,
       cargoCharges,
       ewar,
+      energyWarfareResistancePercent,
       boosts,
       missileBoosts,
       sensorSpec,

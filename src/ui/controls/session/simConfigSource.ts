@@ -112,6 +112,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
       sigBloom: state.sigBloomFactor ?? 0,
       sigPenalty: this.defenseController.spec(side)?.signaturePenalty ?? 0,
       capacitor: state.capacitor,
+      energyWarfareResistancePercent: state.energyWarfareResistancePercent,
       propulsionCapNeed: state.propulsionCapNeed,
       propulsionCapacityMultiplier: state.propulsionCapacityMultiplier,
       orbitDirection: "cw",
@@ -190,6 +191,10 @@ function drainsFromProjections(ewar: EwarProjection, boosts: TurretBoostProjecti
       drains.push({ moduleId: spec.moduleId, amount: spec.capacitorNeed, interval: spec.cycleTime, active: family.activeAt(i) ?? true });
     });
   }
+  ewar.loadout.neutralizers.forEach((spec, i) => {
+    if (spec.capacitorNeed <= 0) return;
+    drains.push({ moduleId: spec.moduleId, amount: spec.capacitorNeed, interval: spec.cycleTime, active: activation?.neutralizers[i]?.active ?? true });
+  });
   const boosterFamilies = [
     { specs: boosts.loadout.computers, activation: boosts.activation?.computers },
     { specs: missileBoosts.loadout.computers, activation: missileBoosts.activation?.computers },

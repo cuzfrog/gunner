@@ -64,14 +64,16 @@
   white-space: nowrap;
 }
 
-.capacitor-usage-row {
+.capacitor-usage-row,
+.capacitor-incoming-row {
   display: flex;
   align-items: center;
   gap: 9px;
   padding: 2px;
 }
 
-.capacitor-usage-name {
+.capacitor-usage-name,
+.capacitor-incoming-name {
   flex: 1 1 auto;
   font-size: 13px;
   color: var(--text-primary);
@@ -84,7 +86,8 @@
   color: var(--warn-yellow-85);
 }
 
-.capacitor-usage-value {
+.capacitor-usage-value,
+.capacitor-incoming-value {
   flex-shrink: 0;
   font-size: 12px;
   color: var(--text-primary);
@@ -107,6 +110,12 @@
 
 .capacitor-usage-row.is-off .capacitor-usage-name,
 .capacitor-usage-row.is-off .capacitor-row-state {
+  color: var(--text-dim);
+}
+
+.capacitor-incoming-row.is-off .capacitor-incoming-name,
+.capacitor-incoming-row.is-off .capacitor-incoming-value,
+.capacitor-incoming-row.is-off .capacitor-row-state {
   color: var(--text-dim);
 }
 

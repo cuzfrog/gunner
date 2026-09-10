@@ -9,7 +9,7 @@ import type { ViewStream } from "../../viewStream";
 import type { RangeOverlayController, RangeOverlayEls } from "./rangeOverlayControllerContract";
 import { html } from "../markup";
 
-const ALL_KINDS: readonly RangeOverlayKind[] = ["web", "grappler", "scrambler", "disruptor"];
+const ALL_KINDS: readonly RangeOverlayKind[] = ["web", "grappler", "scrambler", "disruptor", "neutralizer", "nosferatu"];
 const SIDES: readonly Side[] = ["shipA", "shipB"];
 const TITLE_REFRESH_INTERVAL_MS = 250;
 
@@ -88,6 +88,8 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
       case "grappler": return this.ewarEffectDescriber.grapplerDescription(projection, distance);
       case "scrambler": return this.ewarEffectDescriber.scramblerDescription(projection, distance);
       case "disruptor": return this.ewarEffectDescriber.disruptorDescription(projection, distance);
+      case "neutralizer": return this.ewarEffectDescriber.neutralizerDescription(projection, distance);
+      case "nosferatu": return this.ewarEffectDescriber.nosferatuDescription(projection, distance);
     }
   }
 
@@ -178,7 +180,31 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
         return reach.grappler > 0 ? this.grapplerFalloffOverlay(side, projection) : undefined;
       case "disruptor":
         return reach.disruptor > 0 ? this.disruptorFalloffOverlay(side, projection) : undefined;
+      case "neutralizer":
+        return reach.neutralizer > 0 ? this.capWarfareFalloffOverlay(side, "neutralizer", projection.loadout.neutralizers, projection.activation?.neutralizers) : undefined;
+      case "nosferatu":
+        return reach.nosferatu > 0 ? this.capWarfareFalloffOverlay(side, "nosferatu", projection.loadout.nosferatu, projection.activation?.nosferatu) : undefined;
     }
+  }
+
+  private capWarfareFalloffOverlay(
+    side: Side,
+    kind: "neutralizer" | "nosferatu",
+    specs: readonly { readonly maxRange: number; readonly falloff: number }[],
+    activations: readonly { readonly active: boolean }[] | undefined,
+  ): RangeOverlay | undefined {
+    let bestMaxRange = 0;
+    let bestFalloff = 0;
+    for (let i = 0; i < specs.length; i++) {
+      const activation = activations?.[i];
+      if (activation && !activation.active) continue;
+      if (specs[i].maxRange + specs[i].falloff > bestMaxRange + bestFalloff) {
+        bestMaxRange = specs[i].maxRange;
+        bestFalloff = specs[i].falloff;
+      }
+    }
+    if (bestMaxRange <= 0) return undefined;
+    return { side, kind, radius: bestMaxRange, falloffRadius: bestFalloff };
   }
 
   private grapplerFalloffOverlay(side: Side, projection: EwarProjection): RangeOverlay | undefined {
@@ -237,6 +263,8 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
       scramblers: [...(shipA?.loadout.scramblers ?? []), ...(shipB?.loadout.scramblers ?? [])],
       painters: [...(shipA?.loadout.painters ?? []), ...(shipB?.loadout.painters ?? [])],
       dampeners: [...(shipA?.loadout.dampeners ?? []), ...(shipB?.loadout.dampeners ?? [])],
+      neutralizers: [...(shipA?.loadout.neutralizers ?? []), ...(shipB?.loadout.neutralizers ?? [])],
+      nosferatu: [...(shipA?.loadout.nosferatu ?? []), ...(shipB?.loadout.nosferatu ?? [])],
       scripts: [...(shipA?.loadout.scripts ?? []), ...(shipB?.loadout.scripts ?? [])],
       dampenerScripts: [],
     };
@@ -247,6 +275,8 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
       scramblers: [...(shipA?.activation?.scramblers ?? []), ...(shipB?.activation?.scramblers ?? [])],
       painters: [...(shipA?.activation?.painters ?? []), ...(shipB?.activation?.painters ?? [])],
       dampeners: [...(shipA?.activation?.dampeners ?? []), ...(shipB?.activation?.dampeners ?? [])],
+      neutralizers: [...(shipA?.activation?.neutralizers ?? []), ...(shipB?.activation?.neutralizers ?? [])],
+      nosferatu: [...(shipA?.activation?.nosferatu ?? []), ...(shipB?.activation?.nosferatu ?? [])],
     } : undefined;
     return { loadout, activation };
   }
@@ -259,6 +289,8 @@ function hasKind(projection: EwarProjection | undefined, kind: RangeOverlayKind)
     case "grappler": return projection.loadout.grapplers.length > 0;
     case "scrambler": return projection.loadout.scramblers.length > 0;
     case "disruptor": return projection.loadout.disruptors.length > 0;
+    case "neutralizer": return projection.loadout.neutralizers.length > 0;
+    case "nosferatu": return projection.loadout.nosferatu.length > 0;
   }
 }
 

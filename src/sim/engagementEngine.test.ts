@@ -1,7 +1,7 @@
 import { EngagementEngineImpl, _projectionHorizonSeconds } from "./engagementEngine";
 import { Vec2 } from "./vec2";
 import { toTypeId } from "../gamedata/ids";
-import { EMPTY_DEFENSE_SPEC, ZERO_DAMAGE, type EngagementFrame, type HitChanceBreakdown, type LayerDamage, type LockState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "./types";
+import { EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, ZERO_DAMAGE, type AppliedEwarEffect, type EnergyNeutralizerSpec, type EngagementFrame, type EwarProjection, type HitChanceBreakdown, type LayerDamage, type LockState, type NosferatuSpec, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "./types";
 import { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
 import type { AttackAssessment } from "./fireControl";
 import type { DefenseSimulator, DefenseSimulatorState, DefenseView, SidePoolsSnapshot } from "./defenseSimulator";
@@ -16,6 +16,7 @@ import type { Simulation, SimulationState } from "./simulation";
 import type { SimWorld } from "./simWorld";
 import type { WeaponClock, WeaponClockState } from "./weaponClock";
 import type { CapacitorSimulator, CapacitorSimulatorState, CapacitorView } from "./capacitorSimulator";
+import type { EngineConfig } from "./engagementEngine";
 import type { CapacitorSideConfig } from "./types";
 
 const LOCKED_STATE: LockState = { status: "locked", progress: 1, remaining: 0, lockTime: 0, inRange: true };
@@ -117,7 +118,7 @@ function mockWorld() {
     missileSimulator: vi.mocked<MissileSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(() => []), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })), capture: vi.fn(missileSimulatorState), restore: vi.fn() }),
     weaponClock: vi.mocked<WeaponClock>({ reset: vi.fn(), step: vi.fn(() => []), capture: vi.fn(weaponClockState), restore: vi.fn(), spoolCycles: vi.fn(() => 0) }),
     defenseSimulator: vi.mocked<DefenseSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), flushPendingDamage: vi.fn(), view: vi.fn(() => emptyDefenseView), inflictedTotals: vi.fn(zeroTotals), capture: vi.fn(defenseSimulatorState), restore: vi.fn() }),
-    capacitorSimulator: vi.mocked<CapacitorSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(() => emptyCapacitorView), attemptDebit: vi.fn(() => true), propulsionStarved: vi.fn(() => false), injectBooster: vi.fn(), capture: vi.fn(capacitorSimulatorState), restore: vi.fn() }),
+    capacitorSimulator: vi.mocked<CapacitorSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(() => emptyCapacitorView), attemptDebit: vi.fn(() => true), incomingDrains: vi.fn(), propulsionStarved: vi.fn(() => false), injectBooster: vi.fn(), capture: vi.fn(capacitorSimulatorState), restore: vi.fn() }),
   };
 }
 
@@ -126,15 +127,15 @@ function capacitorSimulatorState(): CapacitorSimulatorState {
 }
 
 function emptyCapacitorSnapshot(): import("./capacitorSimulator").SideCapacitorSnapshot {
-  return { spec: undefined, infinite: false, cap: 0, drains: [], boosters: [], propulsion: undefined };
+  return { spec: undefined, infinite: false, cap: 0, drains: [], boosters: [], incoming: [], propulsion: undefined };
 }
 
 const emptyCapacitorView: Record<"shipA" | "shipB", CapacitorView> = {
-  shipA: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [] },
-  shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [] },
-};
+  shipA: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [], incoming: [] },
+  shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [], incoming: [] },
+  };
 
-const EMPTY_CAPACITOR_SIDE: CapacitorSideConfig = { infinite: false, drains: [], boosters: [] };
+const EMPTY_CAPACITOR_SIDE: CapacitorSideConfig = { infinite: false, drains: [], boosters: [], };
 
 function makeEngine() {
   const live = mockWorld();
@@ -151,7 +152,7 @@ function makeEngine() {
     disruptionMultipliers: vi.fn(() => ({ tracking: 1, optimal: 1, falloff: 1 })),
     dampenedSensorSpec: vi.fn((s) => s), dampenedSensorSpecIgnoringRange: vi.fn((s) => s),
     dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
-    reach: vi.fn(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 })),
+    reach: vi.fn(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, })),
     potentials: vi.fn(() => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 })),
   });
   const sensorBoosterResolver = vi.mocked<SensorBoosterResolver>({ boostedSensorSpec: vi.fn((s) => s) });
@@ -492,6 +493,55 @@ describe("EngagementEngineImpl", () => {
     deps.engagementFrameComposer.compose.mockReturnValue(deadView);
     deps.engine.step(0.1);
     expect(destroyed).toEqual(["shipA", "shipA"]);
+  });
+
+  describe("incoming cap warfare", () => {
+    const NEUT_ID = toTypeId("12271");
+    const NOS_ID = toTypeId("12259");
+    const NEUT: EnergyNeutralizerSpec = { moduleName: "Heavy Energy Neutralizer II", moduleId: NEUT_ID, amount: 600, cycleTime: 24, capacitorNeed: 500, maxRange: 20000, falloff: 10000 };
+    const NOS: NosferatuSpec = { moduleName: "Medium Energy Nosferatu II", moduleId: NOS_ID, amount: 36, cycleTime: 5, maxRange: 10000, falloff: 5000 };
+
+    function ewarProjection(): EwarProjection {
+      return { loadout: { ...EMPTY_EWAR_LOADOUT, neutralizers: [NEUT, NEUT], nosferatu: [NOS] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [{ active: true }, { active: true }], nosferatu: [{ active: true }] } };
+    }
+
+    function capWarfareEffects(): readonly AppliedEwarEffect[] {
+      return [
+        { family: "neutralizer", moduleId: NEUT_ID, amountPerCycle: 600, cycleTime: 24 },
+        { family: "neutralizer", moduleId: NEUT_ID, amountPerCycle: 600, cycleTime: 24 },
+        { family: "nosferatu", moduleId: NOS_ID, amountPerCycle: 36, cycleTime: 5 },
+      ];
+    }
+
+    function stepWithOpponentEwar(deps: ReturnType<typeof makeEngine>, config = engineConfig()): void {
+      const projection = ewarProjection();
+      const withEwar: SimSnapshot = { ...snapshot, shipB: { ...snapshot.shipB, ewar: projection } };
+      deps.live.simulation.snapshot.mockReturnValue(withEwar);
+      deps.ewarResolver.appliedEffects.mockImplementation((candidate) => (candidate === projection ? capWarfareEffects() : []));
+      deps.engine.reset(config);
+      deps.engine.step(0.1);
+    }
+
+    test("step feeds the opponent's aggregated cap warfare effects as incoming drains", () => {
+      const deps = makeEngine();
+      stepWithOpponentEwar(deps);
+      expect(deps.live.capacitorSimulator.incomingDrains).toHaveBeenCalledWith("shipA", [
+        { moduleId: NEUT_ID, amount: 1200, interval: 24, transfer: false, count: 2 },
+        { moduleId: NOS_ID, amount: 36, interval: 5, transfer: true, count: 1 },
+      ]);
+      expect(deps.live.capacitorSimulator.incomingDrains).toHaveBeenCalledWith("shipB", []);
+    });
+
+    test("the victim's energy warfare resistance scales incoming amounts", () => {
+      const deps = makeEngine();
+      const base = engineConfig();
+      const config: EngineConfig = { ...base, sim: { ...base.sim, shipA: { ...base.sim.shipA, energyWarfareResistancePercent: 25 } } };
+      stepWithOpponentEwar(deps, config);
+      expect(deps.live.capacitorSimulator.incomingDrains).toHaveBeenCalledWith("shipA", [
+        { moduleId: NEUT_ID, amount: 900, interval: 24, transfer: false, count: 2 },
+        { moduleId: NOS_ID, amount: 27, interval: 5, transfer: true, count: 1 },
+      ]);
+    });
   });
 });
 

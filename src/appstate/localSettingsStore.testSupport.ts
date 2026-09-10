@@ -282,6 +282,7 @@ const EMPTY_FITTING_STATE: FittingState = {
 export const IMPORTED_RIFTER: ImportedFitting = {
   profile: RIFTER_PROFILE,
   fittingName: "Brawler",
+  energyWarfareResistancePercent: 0,
   fitted: RIFTER_FITTED,
   fittingState: EMPTY_FITTING_STATE,
   propulsion: RIFTER_PROPULSION,
@@ -302,7 +303,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   },
   drones: [],
   cargoCharges: [],
-  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
+  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
   defense: EMPTY_DEFENSE_SPEC,

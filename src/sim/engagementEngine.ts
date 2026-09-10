@@ -1,5 +1,6 @@
 import type { CapacitorSimConfig, CapacitorView } from "./capacitorSimulator";
-import type { DamageEvent, DroneRuntimeState, DroneSpec, InflictedDps, LayerDamage, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec, CapacitorSideConfig } from "./types";
+import type { AppliedEwarEffect, DamageEvent, DroneRuntimeState, DroneSpec, InflictedDps, IncomingDrain, LayerDamage, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec, CapacitorSideConfig } from "./types";
+import type { TypeId } from "../gamedata/ids";
 import type { DefenseSimConfig, DefenseView } from "./defenseSimulator";
 import type { DroneSimConfig } from "./droneSimulator";
 import type { EngagementFrameComposer, EngagementInput, EngagementView } from "./engagementFrameComposer";
@@ -211,6 +212,8 @@ export class EngagementEngineImpl implements EngagementEngine {
   private runStep(world: SimWorld, config: EngineConfig, dt: number): { composed: EngagementView; snapshot: SimSnapshot } {
     const preSnapshot = world.simulation.snapshot();
     const preDistance = preSnapshot.shipB.position.sub(preSnapshot.shipA.position).len();
+    world.capacitorSimulator.incomingDrains("shipA", incomingDrains(this.ewarResolver.appliedEffects(preSnapshot.shipB.ewar, preDistance), config.sim.shipA.energyWarfareResistancePercent ?? 0));
+    world.capacitorSimulator.incomingDrains("shipB", incomingDrains(this.ewarResolver.appliedEffects(preSnapshot.shipA.ewar, preDistance), config.sim.shipB.energyWarfareResistancePercent ?? 0));
     world.capacitorSimulator.step(dt, {
       shipA: this.ewarResolver.propulsionSuppressed(preSnapshot.shipB.ewar, preDistance),
       shipB: this.ewarResolver.propulsionSuppressed(preSnapshot.shipA.ewar, preDistance),
@@ -346,6 +349,21 @@ function inflictedDps(before: LayerDamage, after: LayerDamage, horizon: number):
     hull: (after.hull - before.hull) / horizon,
   };
   return { total: byLayer.shield + byLayer.armor + byLayer.hull, byLayer };
+}
+
+function incomingDrains(effects: readonly AppliedEwarEffect[], resistancePercent: number): readonly IncomingDrain[] {
+  const byModule = new Map<TypeId, IncomingDrain>();
+  for (const effect of effects) {
+    if (effect.family !== "neutralizer" && effect.family !== "nosferatu") continue;
+    const amount = effect.amountPerCycle * (1 - resistancePercent / 100);
+    const existing = byModule.get(effect.moduleId);
+    if (existing) {
+      byModule.set(effect.moduleId, { ...existing, amount: existing.amount + amount, count: existing.count + 1 });
+    } else {
+      byModule.set(effect.moduleId, { moduleId: effect.moduleId, amount, interval: effect.cycleTime, transfer: effect.family === "nosferatu", count: 1 });
+    }
+  }
+  return [...byModule.values()];
 }
 
 export { projectionHorizonSeconds as _projectionHorizonSeconds };

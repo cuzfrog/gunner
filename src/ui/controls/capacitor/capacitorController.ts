@@ -1,8 +1,9 @@
-import type { CapBoosterMode, CapBoosterSimSpec, CapacitorView } from "../../../sim";
+import type { CapBoosterMode, CapBoosterSimSpec, CapacitorView, IncomingDrainState } from "../../../sim";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
+import type { ItemNameCatalog } from "../../../gamedata";
 import type { CapacitorBoosterStats, CapacitorStats } from "../../../fitting";
 import type { StoredCapBoosterCharge, StoredCapBoosterMode } from "../../../appstate";
-import type { I18n } from "../../i18n";
+import type { I18n, Language } from "../../i18n";
 import type { UiEvents } from "../../events";
 import { formatWithCommas } from "../controlsFormat";
 import { ChoiceGroupImpl } from "../choiceGroup";
@@ -33,6 +34,7 @@ interface LiveRefs {
   readonly net: HTMLElement;
   readonly usageRows: UsageRowRefs[];
   boosters: BoosterLiveRefs[];
+  incoming: HTMLElement | undefined;
 }
 
 interface UsageRowRefs {
@@ -58,16 +60,18 @@ export class CapacitorControllerImpl implements CapacitorController {
   private readonly sectionBlock: SectionBlockImpl;
   private readonly injectAction: IconActionImpl;
   private readonly fields: Record<Side, PopupField>;
+  private readonly itemNameCatalog: ItemNameCatalog;
   private readonly chargeSections: Record<Side, ScriptSection<TypeId>>;
   private readonly liveRefs: Record<Side, LiveRefs | undefined> = { shipA: undefined, shipB: undefined };
   private readonly summaryRefs: Record<Side, SummaryRefs | undefined> = { shipA: undefined, shipB: undefined };
   private playing = false;
 
-  constructor(deps: { els: CapacitorEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents }) {
+  constructor(deps: { els: CapacitorEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents; itemNameCatalog: ItemNameCatalog }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.popupGroup = deps.popupGroup;
+    this.itemNameCatalog = deps.itemNameCatalog;
     this.sectionBlock = new SectionBlockImpl();
     this.injectAction = new IconActionImpl({
       buttonClass: "capacitor-inject-button btn icon-button",
@@ -235,6 +239,7 @@ export class CapacitorControllerImpl implements CapacitorController {
     section.appendChild(this.sectionBlock.create(this.i18n.t("capacitor.runtime"), this.runtimeRows(side)));
     section.appendChild(this.sectionBlock.create(this.i18n.t("capacitor.stats"), this.statRows(stats)));
     this.renderUsageSection(section, side, stats);
+    this.renderIncomingSection(side, section);
     this.renderBoosterSection(section, side, stats);
     this.renderInfiniteSection(section, side);
     this.updateLive(side);
@@ -255,6 +260,7 @@ export class CapacitorControllerImpl implements CapacitorController {
       net,
       usageRows: [],
       boosters: [],
+      incoming: undefined,
     };
     return [
       row,
@@ -298,6 +304,41 @@ export class CapacitorControllerImpl implements CapacitorController {
     }
     section.appendChild(this.sectionBlock.create(this.i18n.t("capacitor.usage"), rows));
     this.updateUsageRows(side);
+  }
+
+  private renderIncomingSection(side: Side, section: HTMLElement): void {
+    const live = this.liveRefs[side];
+    if (!live) return;
+    const container = html`<div></div>` as unknown as HTMLElement;
+    live.incoming = container;
+    section.appendChild(this.sectionBlock.create(this.i18n.t("capacitor.incoming"), [container]));
+    this.updateIncomingRows(side);
+  }
+
+  private updateIncomingRows(side: Side): void {
+    const live = this.liveRefs[side];
+    if (!live?.incoming) return;
+    live.incoming.innerHTML = "";
+    const incoming = this.runtimeViews[side]?.incoming ?? [];
+    if (incoming.length === 0) {
+      live.incoming.appendChild(this.incomingRow(undefined));
+      return;
+    }
+    const language = this.i18n.current();
+    for (const entry of incoming) live.incoming.appendChild(this.incomingRow(entry, language));
+  }
+
+  private incomingRow(entry: IncomingDrainState | undefined, language?: Language): HTMLElement {
+    if (!entry) return html`<div class="capacitor-incoming-row is-off"><span class="capacitor-incoming-name">${this.i18n.t("capacitor.incoming.none")}</span></div>` as unknown as HTMLElement;
+    const name = entry.count > 1 ? `${this.itemNameCatalog.nameForId(entry.moduleId, language ?? "en")} x${entry.count}` : this.itemNameCatalog.nameForId(entry.moduleId, language ?? "en");
+    const perSecond = entry.interval > 0 ? entry.amount / entry.interval : 0;
+    const element = html`<div class="capacitor-incoming-row"><span class="capacitor-incoming-name">${name}</span><span class="capacitor-incoming-value mono">${formatWithCommas(perSecond, 2)} ${GJ_PER_SECOND}</span><span class="capacitor-row-state" hidden></span></div>` as unknown as HTMLElement;
+    const stateLabel = element.querySelector<HTMLElement>(".capacitor-row-state");
+    if (!stateLabel) throw new Error("capacitor incoming row markup incomplete");
+    element.className = entry.running ? "capacitor-incoming-row" : "capacitor-incoming-row is-off";
+    stateLabel.hidden = entry.running;
+    stateLabel.textContent = entry.running ? "" : this.i18n.t("capacitor.rowOff");
+    return element;
   }
 
   private updateUsageRows(side: Side): void {
@@ -391,7 +432,9 @@ export class CapacitorControllerImpl implements CapacitorController {
     this.renderSummaryValue(side);
     const view = this.runtimeViews[side];
     const live = this.liveRefs[side];
-    if (!view || !live) return;
+    if (!live) return;
+    this.updateIncomingRows(side);
+    if (!view) return;
     const percentage = clampPercentage(view.percentage);
     live.barFill.style.setProperty("--fill", `${percentage.toFixed(1)}%`);
     live.barFill.className = percentage < CRITICAL_PERCENT ? (percentage <= 0 ? "capacitor-bar-fill is-empty" : "capacitor-bar-fill is-critical") : percentage < LOW_PERCENT ? "capacitor-bar-fill is-low" : "capacitor-bar-fill";

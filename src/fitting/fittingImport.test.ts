@@ -1163,6 +1163,40 @@ Stasis Webifier II/OFFLINE`,
     expect(result!.ewar.scramblers).toEqual([]);
   });
 
+  test("resolves energy neutralizers and nosferatu into the ewar loadout", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Cap Warfare]
+Heavy Energy Neutralizer II
+Medium Energy Nosferatu II`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.ewar.neutralizers).toEqual([
+      expect.objectContaining({ moduleName: "Heavy Energy Neutralizer II", amount: 600, cycleTime: 24, capacitorNeed: 500, maxRange: 20000, falloff: 10000 }),
+    ]);
+    expect(result!.ewar.nosferatu).toEqual([
+      expect.objectContaining({ moduleName: "Medium Energy Nosferatu II", amount: 36, cycleTime: 5, maxRange: 10000, falloff: 5000 }),
+    ]);
+  });
+
+  test("cap batteries raise the energy warfare resistance percent", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const none = importer.importFitting(`[Rifter, Bare]`, conditions);
+    expect(none!.energyWarfareResistancePercent).toBe(0);
+    const one = importer.importFitting(`[Rifter, Battery]
+Medium Cap Battery II`, conditions);
+    expect(one!.energyWarfareResistancePercent).toBe(25);
+    const two = importer.importFitting(`[Rifter, Batteries]
+Medium Cap Battery II
+Small Cap Battery II`, conditions);
+    expect(two!.energyWarfareResistancePercent).toBeCloseTo(43.75, 6);
+  });
+
   test("preserves duplicate ewar instances and mixed variants", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);

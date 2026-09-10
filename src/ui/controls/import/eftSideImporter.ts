@@ -76,6 +76,7 @@ export class EftSideImporter {
       fitted: imported.fitted,
       propulsion: imported.propulsion,
       capacitor: imported.capacitor?.spec,
+      energyWarfareResistancePercent: imported.energyWarfareResistancePercent,
     };
   }
 }

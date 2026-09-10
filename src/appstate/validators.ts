@@ -27,6 +27,8 @@ export function isOptionalEwarActivation(value: unknown): boolean {
   }
   if (s.scramblers !== undefined && (!Array.isArray(s.scramblers) || !s.scramblers.every(isStoredScramblerActivation))) return false;
   if (s.painters !== undefined && (!Array.isArray(s.painters) || !s.painters.every(isStoredWebActivation))) return false;
+  if (s.neutralizers !== undefined && (!Array.isArray(s.neutralizers) || !s.neutralizers.every(isStoredToggleActivation))) return false;
+  if (s.nosferatu !== undefined && (!Array.isArray(s.nosferatu) || !s.nosferatu.every(isStoredToggleActivation))) return false;
   if (s.dampeners !== undefined) {
     if (!Array.isArray(s.dampeners)) return false;
     for (const item of s.dampeners) {
@@ -34,6 +36,12 @@ export function isOptionalEwarActivation(value: unknown): boolean {
     }
   }
   return true;
+}
+
+function isStoredToggleActivation(value: unknown): boolean {
+  if (typeof value === "boolean") return true;
+  if (!isRecord(value)) return false;
+  return typeof value.active === "boolean";
 }
 
 export function isOptionalBoosterActivation(value: unknown): boolean {

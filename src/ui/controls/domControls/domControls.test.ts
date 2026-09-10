@@ -91,7 +91,7 @@ function makeEngineView(view: EngagementView, effective: EffectiveReadouts, defe
 }
 
 function emptyCapacitorView(): Record<Side, CapacitorView> {
-  const side: CapacitorView = { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [] };
+  const side: CapacitorView = { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [], incoming: [] };
   return { shipA: side, shipB: { ...side } };
 }
 
@@ -326,13 +326,13 @@ describe("DomControls", () => {
       painters: [],
       dampeners: [],
       scripts: [],
-      dampenerScripts: [],
+      dampenerScripts: [], neutralizers: [], nosferatu: [],
     };
     cradle.cradle.ewarController.setLoadout("shipA", shipAEwar);
     const config = controls.getConfig();
     expect(config.shipA.ewar?.loadout.webs).toHaveLength(1);
     expect(config.shipA.ewar).not.toHaveProperty("overloaded");
-    expect(config.shipA.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] , painters: [], dampeners: [] });
+    expect(config.shipA.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] , painters: [], dampeners: [], neutralizers: [], nosferatu: [], });
     expect(config.shipB.ewar).toBeUndefined();
   });
 
@@ -349,7 +349,7 @@ describe("DomControls", () => {
       painters: [],
       dampeners: [],
       scripts: [],
-      dampenerScripts: [],
+      dampenerScripts: [], neutralizers: [], nosferatu: [],
     };
     cradle.cradle.ewarController.setLoadout("shipB", shipBEwar);
     const config = controls.getConfig();
@@ -391,7 +391,7 @@ describe("DomControls", () => {
     shipBSide.profile = RIFTER;
     shipBSide.sections.propulsion.setPropulsionActive("mwd-5mn");
     shipBSide.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
-    cradle.cradle.ewarController.setLoadout("shipB", { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: [], dampenerScripts: [], });
+    cradle.cradle.ewarController.setLoadout("shipB", { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], });
 
     const config = controls.getConfig();
     expect(config.shipB.maxSpeed).toBe(1800);

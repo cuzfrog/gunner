@@ -33,7 +33,7 @@ import {
   type DisruptionScriptStats,
 } from "../gamedata/fittingDb";
 import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../ships";
-import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec } from "../sim";
+import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec, EnergyNeutralizerSpec, NosferatuSpec } from "../sim";
 import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, damageVectorFromPartial, damageVectorScale } from "../sim";
 import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher } from "./chargeCatalog";
 import type { GunFamily, GunFamilies } from "./gunFamilies";
@@ -63,6 +63,7 @@ export interface FittingCalculator {
   resolveHull(fitting: FittingState, conditions: StatConditions): HullSideAggregation;
   resolvePropulsion(fitting: FittingState): PropulsionResult | undefined;
   resolveEwar(fitting: FittingState): EwarLoadout;
+  resolveEnergyWarfareResistance(fitting: FittingState): number;
   resolveBoosts(fitting: FittingState): BoostLoadout;
   resolveMissileBoosts(fitting: FittingState): MissileBoosterLoadout;
   resolveSensorBoosts(fitting: FittingState): SensorBoostLoadout;
@@ -369,6 +370,8 @@ export class FittingCalculatorImpl implements FittingCalculator {
     const scramblers: WarpScramblerSpec[] = [];
     const painters: TargetPainterSpec[] = [];
     const dampeners: SensorDampenerSpec[] = [];
+    const neutralizers: EnergyNeutralizerSpec[] = [];
+    const nosferatu: NosferatuSpec[] = [];
 
     for (const mod of fitting.ewarModules) {
       const webStats = this.db.stasisWebs[mod.moduleId];
@@ -403,11 +406,25 @@ export class FittingCalculatorImpl implements FittingCalculator {
         const scriptName = mod.chargeId ? this.itemNameCatalog.nameForId(mod.chargeId, "en") : undefined;
         const defaultScript = scriptName ? dampenerScriptByName.get(scriptName) : undefined;
         dampeners.push(sensorDampenerSpecFrom(dampenerStats, defaultScript));
+        continue;
+      }
+      const moduleStats = this.db.modules[mod.moduleId];
+      if (moduleStats?.neutralizer) {
+        neutralizers.push({ moduleName: moduleStats.name, moduleId: mod.moduleId, amount: moduleStats.neutralizer.amount, cycleTime: moduleStats.neutralizer.cycleTime, capacitorNeed: moduleStats.neutralizer.capacitorNeed, maxRange: moduleStats.neutralizer.maxRange, falloff: moduleStats.neutralizer.falloff });
+        continue;
+      }
+      if (moduleStats?.nosferatu) {
+        nosferatu.push({ moduleName: moduleStats.name, moduleId: mod.moduleId, amount: moduleStats.nosferatu.amount, cycleTime: moduleStats.nosferatu.cycleTime, maxRange: moduleStats.nosferatu.maxRange, falloff: moduleStats.nosferatu.falloff });
       }
     }
 
-    if (webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && painters.length === 0 && dampeners.length === 0) return { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts };
-    return { webs, grapplers, disruptors, scramblers, painters, dampeners, scripts, dampenerScripts };
+    const empty = webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && painters.length === 0 && dampeners.length === 0 && neutralizers.length === 0 && nosferatu.length === 0;
+    if (empty) return { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], scripts: [], dampenerScripts };
+    return { webs, grapplers, disruptors, scramblers, painters, dampeners, neutralizers, nosferatu, scripts, dampenerScripts };
+  }
+
+  resolveEnergyWarfareResistance(fitting: FittingState): number {
+    return energyWarfareResistancePercent(fitting.supportModules, this.db.modules);
   }
 
   resolveBoosts(fitting: FittingState): BoostLoadout {
@@ -808,3 +825,13 @@ function computeDroneControlRange(droneBoosterModules: readonly FittedModule[], 
 }
 
 export { computeDroneControlRange as _computeDroneControlRange };
+
+function energyWarfareResistancePercent(supportModules: readonly FittedModule[], modules: Readonly<Record<string, FittingModuleStats>>): number {
+  let remaining = 1;
+  for (const mod of supportModules) {
+    const bonus = modules[mod.moduleId]?.capacitor?.energyWarfareResistanceBonus;
+    if (bonus === undefined) continue;
+    remaining *= 1 + bonus / 100;
+  }
+  return (1 - remaining) * 100;
+}

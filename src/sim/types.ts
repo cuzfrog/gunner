@@ -78,6 +78,9 @@ export interface ShipConfig {
   // Propulsion capacitor capacity multiplier (e.g. MWD 0.75). Composes the
   // effective pool from the propulsion-independent CapacitorSpec capacity.
   readonly propulsionCapacityMultiplier?: number;
+  // Energy warfare resistance from fitted cap batteries, positive percent
+  // (e.g. 25 scales incoming neutralizer/nosferatu amounts by 0.75).
+  readonly energyWarfareResistancePercent?: number;
   readonly orbitDirection?: OrbitDirection;
 }
 
@@ -479,6 +482,25 @@ export interface MissileBoosterLoadout {
 
 export const EMPTY_MISSILE_BOOSTER_LOADOUT: MissileBoosterLoadout = { computers: [], enhancers: [], scripts: [] };
 
+export interface EnergyNeutralizerSpec {
+  readonly moduleName: string;
+  readonly moduleId: TypeId;
+  readonly amount: number; // GJ drained from the target per cycle
+  readonly cycleTime: number;
+  readonly capacitorNeed: number; // GJ consumed by the user per cycle
+  readonly maxRange: number;
+  readonly falloff: number;
+}
+
+export interface NosferatuSpec {
+  readonly moduleName: string;
+  readonly moduleId: TypeId;
+  readonly amount: number; // GJ transferred per cycle
+  readonly cycleTime: number;
+  readonly maxRange: number;
+  readonly falloff: number;
+}
+
 export interface EwarLoadout {
   readonly webs: readonly StasisWebSpec[];
   readonly grapplers: readonly StasisGrapplerSpec[];
@@ -486,11 +508,13 @@ export interface EwarLoadout {
   readonly scramblers: readonly WarpScramblerSpec[];
   readonly painters: readonly TargetPainterSpec[];
   readonly dampeners: readonly SensorDampenerSpec[];
+  readonly neutralizers: readonly EnergyNeutralizerSpec[];
+  readonly nosferatu: readonly NosferatuSpec[];
   readonly scripts: readonly DisruptionScriptSpec[];
   readonly dampenerScripts: readonly SensorDampenerScriptSpec[];
 }
 
-export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [] };
+export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], scripts: [], dampenerScripts: [] };
 
 export interface WebActivation {
   readonly active: boolean;
@@ -524,6 +548,14 @@ export interface DampenerActivation {
   readonly script: SensorDampenerScriptSpec | undefined;
 }
 
+export interface NeutralizerActivation {
+  readonly active: boolean;
+}
+
+export interface NosferatuActivation {
+  readonly active: boolean;
+}
+
 export interface EwarActivation {
   readonly webs: readonly WebActivation[];
   readonly grapplers: readonly GrapplerActivation[];
@@ -531,6 +563,8 @@ export interface EwarActivation {
   readonly scramblers: readonly ScramblerActivation[];
   readonly painters: readonly PainterActivation[];
   readonly dampeners: readonly DampenerActivation[];
+  readonly neutralizers: readonly NeutralizerActivation[];
+  readonly nosferatu: readonly NosferatuActivation[];
 }
 
 export interface EwarProjection {
@@ -545,6 +579,8 @@ export interface EwarReach {
   readonly disruptor: number;
   readonly painter: number;
   readonly dampener: number;
+  readonly neutralizer: number;
+  readonly nosferatu: number;
 }
 
 export interface EwarEffectPotentials {
@@ -558,7 +594,7 @@ export interface EwarEffectPotentials {
   readonly targetingRangeMultiplier: number;
 }
 
-export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener" | "painter";
+export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener" | "painter" | "neutralizer" | "nosferatu";
 
 export type AppliedEwarEffect =
   | { readonly family: "web"; readonly moduleId: TypeId; readonly speedMultiplier: number }
@@ -566,7 +602,9 @@ export type AppliedEwarEffect =
   | { readonly family: "scrambler"; readonly moduleId: TypeId }
   | { readonly family: "disruptor"; readonly moduleId: TypeId; readonly trackingMultiplier: number; readonly optimalMultiplier: number; readonly falloffMultiplier: number }
   | { readonly family: "dampener"; readonly moduleId: TypeId; readonly scanResolutionMultiplier: number; readonly maxTargetRangeMultiplier: number }
-  | { readonly family: "painter"; readonly moduleId: TypeId; readonly signatureMultiplier: number };
+  | { readonly family: "painter"; readonly moduleId: TypeId; readonly signatureMultiplier: number }
+  | { readonly family: "neutralizer"; readonly moduleId: TypeId; readonly amountPerCycle: number; readonly cycleTime: number }
+  | { readonly family: "nosferatu"; readonly moduleId: TypeId; readonly amountPerCycle: number; readonly cycleTime: number };
 
 export type ActiveOffensiveModule =
   | { readonly category: "weapon"; readonly weaponKind: WeaponKind; readonly moduleId: TypeId }
@@ -732,6 +770,15 @@ export interface ScheduledDrain {
   readonly amount: number; // GJ per cycle
   readonly interval: number; // seconds between debits
   readonly active: boolean;
+}
+
+/** Projected cap-warfare debit on one side, built by the engine from the opponent's applied effects. */
+export interface IncomingDrain {
+  readonly moduleId: TypeId;
+  readonly amount: number; // GJ per cycle, falloff and target resistance already applied
+  readonly interval: number; // seconds between debits
+  readonly transfer: boolean; // nosferatu: debit credits the opponent pool
+  readonly count: number; // aggregated module instances represented by this entry
 }
 
 export interface CapBoosterSimSpec {

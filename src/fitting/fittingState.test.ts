@@ -142,6 +142,19 @@ describe("FittingStateFactory", () => {
     expect(state.supportModules.length).toBe(1);
   });
 
+  test("classifies energy neutralizer and nosferatu as ewar modules", () => {
+    const factory = new FittingStateFactory(FITTING_DB);
+    const state = factory.create(profile, hullBonuses, [
+      entry("Heavy Energy Neutralizer II"),
+      entry("Medium Energy Nosferatu II"),
+      entry("Heat Sink II"),
+    ], [], []);
+    expect(state.ewarModules.length).toBe(2);
+    expect(state.ewarModules[0].moduleId).toBe(moduleId("Heavy Energy Neutralizer II"));
+    expect(state.ewarModules[1].moduleId).toBe(moduleId("Medium Energy Nosferatu II"));
+    expect(state.supportModules.length).toBe(1);
+  });
+
   test("classifies missile guidance computer as missile booster module", () => {
     const factory = new FittingStateFactory(FITTING_DB);
     const state = factory.create(profile, hullBonuses, [

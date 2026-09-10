@@ -75,15 +75,16 @@ function mockCalculator(): FittingCalculator {
     resolveLauncher: vi.fn(() => undefined),
     resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } })),
     resolvePropulsion: vi.fn(() => undefined),
-    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], painters: [], scramblers: [], dampeners: [], scripts: [], dampenerScripts: [], })),
+    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], painters: [], scramblers: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], })),
     resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
     resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })),
-    resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [] })),
+    resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], })),
     resolveSensorSpec: vi.fn(() => ({ scanResolution: 0, maxTargetingRange: 0, maxLockedTargets: 0 })),
     resolveDrones: vi.fn((fitting: FittingState, _conditions: StatConditions): readonly ImportedDrone[] => {
       return fitting.droneGroups.map((g) => makeImportedDrone(String(g.typeId), g.count));
     }),
     resolveCargoCharges: vi.fn(() => []),
+    resolveEnergyWarfareResistance: vi.fn(() => 0),
   };
 }
 

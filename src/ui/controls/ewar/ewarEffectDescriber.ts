@@ -1,5 +1,5 @@
 import type { EwarResolver } from "../../../sim";
-import type { DisruptionScriptSpec, EwarEffectPotentials, EwarProjection, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec } from "../../../sim";
+import type { AppliedEwarEffect, DisruptionScriptSpec, EwarEffectPotentials, EwarProjection, EnergyNeutralizerSpec, NosferatuSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 import { formatDistance, percentFromMultiplier, signedPercentFromMultiplier } from "../../format";
 
@@ -12,10 +12,16 @@ export interface EwarEffectDescriber {
   disruptorHint(projection: EwarProjection): string;
   scramblerDescription(projection: EwarProjection, distance: number): string;
   scramblerHint(projection: EwarProjection): string;
+  neutralizerDescription(projection: EwarProjection, distance: number): string;
+  nosferatuDescription(projection: EwarProjection, distance: number): string;
   painterHint(projection: EwarProjection): string;
   dampenerHint(projection: EwarProjection): string;
   painterModuleEffect(spec: TargetPainterSpec): string;
   dampenerModuleEffect(spec: SensorDampenerSpec, script: SensorDampenerScriptSpec | undefined): string;
+  neutralizerModuleEffect(spec: EnergyNeutralizerSpec): string;
+  nosferatuModuleEffect(spec: NosferatuSpec): string;
+  neutralizerHint(projection: EwarProjection): string;
+  nosferatuHint(projection: EwarProjection): string;
   webModuleEffect(spec: StasisWebSpec): string;
   grapplerModuleEffect(spec: StasisGrapplerSpec): string;
   disruptorModuleEffect(spec: TrackingDisruptorSpec, script: DisruptionScriptSpec | undefined): string;
@@ -74,9 +80,24 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
     return `${potentials.propulsionSuppressed ? this.i18n.t("ewar.hover.scrambler") : this.i18n.t("ewar.hover.outOfRange")} · ${this.formatRange(reach.scrambler)}`;
   }
 
+  neutralizerDescription(projection: EwarProjection, distance: number): string {
+    return this.capWarfareDescription(projection, distance, "neutralizer");
+  }
+
+  nosferatuDescription(projection: EwarProjection, distance: number): string {
+    return this.capWarfareDescription(projection, distance, "nosferatu");
+  }
+
   private speedDescription(multiplier: number): string {
     if (multiplier === 1) return this.i18n.t("ewar.hover.outOfRange");
     return `${this.i18n.t("ewar.hover.web")} ${percentFromMultiplier(multiplier)}%`;
+  }
+
+  private capWarfareDescription(projection: EwarProjection, distance: number, family: "neutralizer" | "nosferatu"): string {
+    const applied = this.resolver.appliedEffects(projection, distance).filter((e): e is Extract<AppliedEwarEffect, { family: typeof family }> => e.family === family);
+    if (applied.length === 0) return this.i18n.t("ewar.hover.outOfRange");
+    const perSecond = applied.reduce((sum, e) => sum + e.amountPerCycle / e.cycleTime, 0);
+    return `${Math.round(perSecond * 10) / 10} GJ/s`;
   }
 
   private turretFromValues(tracking: number, optimal: number, falloff: number): string {
@@ -129,6 +150,38 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
     return this.i18n.t("ewar.hover.scrambler");
   }
 
+  neutralizerModuleEffect(spec: EnergyNeutralizerSpec): string {
+    return `${this.i18n.t("ewar.hover.neutralizer")} ${spec.amount} GJ / ${spec.cycleTime}s`;
+  }
+
+  nosferatuModuleEffect(spec: NosferatuSpec): string {
+    return `${this.i18n.t("ewar.hover.nosferatu")} ${spec.amount} GJ / ${spec.cycleTime}s`;
+  }
+
+  neutralizerHint(projection: EwarProjection): string {
+    return this.capWarfareHint(projection.loadout.neutralizers, projection.activation?.neutralizers, (specs) => this.totalDrainPerSecond(specs), this.resolver.reach(projection).neutralizer);
+  }
+
+  nosferatuHint(projection: EwarProjection): string {
+    return this.capWarfareHint(projection.loadout.nosferatu, projection.activation?.nosferatu, (specs) => this.totalDrainPerSecond(specs), this.resolver.reach(projection).nosferatu);
+  }
+
+  private totalDrainPerSecond(specs: readonly { readonly amount: number; readonly cycleTime: number }[]): string {
+    const perSecond = specs.reduce((sum, spec) => sum + spec.amount / spec.cycleTime, 0);
+    return `${roundTo1(perSecond)} GJ/s`;
+  }
+
+  private capWarfareHint(
+    specs: readonly { readonly amount: number; readonly cycleTime: number }[],
+    activations: readonly { readonly active: boolean }[] | undefined,
+    drain: (specs: readonly { readonly amount: number; readonly cycleTime: number }[]) => string,
+    reach: number,
+  ): string {
+    const active = specs.filter((_, i) => activations?.[i]?.active ?? true);
+    const drainLabel = active.length > 0 ? drain(active) : this.i18n.t("ewar.hover.outOfRange");
+    return `${drainLabel} · ${this.formatRange(reach)}`;
+  }
+
   painterHint(projection: EwarProjection): string {
     const potentials = this.resolver.potentials(projection);
     const reach = this.resolver.reach(projection);
@@ -174,4 +227,8 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
     const rangeLabel = this.i18n.t("ewar.hover.targetingRange");
     return `${scanResLabel} -${scanRes}% · ${rangeLabel} -${range}%`;
   }
+}
+
+function roundTo1(value: number): number {
+  return Math.round(value * 10) / 10;
 }

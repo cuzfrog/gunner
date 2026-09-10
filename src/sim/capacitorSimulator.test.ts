@@ -1,6 +1,6 @@
 import { CapacitorSimulatorImpl, type CapacitorSimConfig, type CapacitorSimulatorState } from "./capacitorSimulator";
 import { toTypeId } from "../gamedata/ids";
-import type { CapacitorSideConfig, CapacitorSpec, CombatantConfig, ScheduledDrain } from "./types";
+import type { CapacitorSideConfig, CapacitorSpec, CombatantConfig, IncomingDrain, ScheduledDrain } from "./types";
 
 const SPEC: CapacitorSpec = { capacity: 6375, rechargeTime: 1250 };
 const SMALL_SPEC: CapacitorSpec = { capacity: 1000, rechargeTime: 1250 };
@@ -12,6 +12,10 @@ function regenClosedForm(cap: number, dt: number, spec: CapacitorSpec = SPEC): n
 
 function drain(moduleId: string, amount: number, interval: number, active = true): ScheduledDrain {
   return { moduleId: toTypeId(moduleId), amount, interval, active };
+}
+
+function incoming(moduleId: string, amount: number, interval: number, transfer = false, count = 1): IncomingDrain {
+  return { moduleId: toTypeId(moduleId), amount, interval, transfer, count };
 }
 
 function sideConfig(overrides: Partial<CapacitorSideConfig> = {}): CapacitorSideConfig {
@@ -229,8 +233,8 @@ describe("CapacitorSimulatorImpl", () => {
     const state: CapacitorSimulatorState = {
       time: 0,
       sides: {
-        shipA: { spec: SPEC, infinite: false, cap: SPEC.capacity * 0.25, drains: [], boosters: [], propulsion: undefined },
-        shipB: { spec: SPEC, infinite: false, cap: SPEC.capacity, drains: [], boosters: [], propulsion: undefined },
+        shipA: { spec: SPEC, infinite: false, cap: SPEC.capacity * 0.25, drains: [], incoming: [], boosters: [], propulsion: undefined },
+        shipB: { spec: SPEC, infinite: false, cap: SPEC.capacity, drains: [], incoming: [], boosters: [], propulsion: undefined },
       },
     };
     sim.restore(state);
@@ -277,5 +281,125 @@ describe("CapacitorSimulatorImpl", () => {
     expect(restored.view().shipA.cap).toBeCloseTo(sim.view().shipA.cap, 9);
     expect(restored.view().shipA.boosters[0].charges).toBe(sim.view().shipA.boosters[0].charges);
     expect(restored.view().shipA.drains[0].timer).toBeCloseTo(sim.view().shipA.drains[0].timer, 9);
+  });
+});
+
+describe("CapacitorSimulatorImpl incoming cap warfare drains", () => {
+  test("incoming neutralizer debits the victim in chunks at each interval", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig());
+    sim.incomingDrains("shipA", [incoming("500", 600, 24)]);
+    sim.step(24, { shipA: false, shipB: false });
+    const afterFirst = sim.view().shipA.cap;
+    expect(afterFirst).toBeCloseTo(regenClosedForm(SPEC.capacity - 600, 24), 6);
+    const entry = sim.view().shipA.incoming[0];
+    expect(entry.moduleId).toBe(toTypeId("500"));
+    expect(entry.amount).toBe(600);
+    expect(entry.interval).toBe(24);
+    expect(entry.transfer).toBe(false);
+    expect(entry.count).toBe(1);
+    expect(entry.running).toBe(true);
+    sim.step(24, { shipA: false, shipB: false });
+    expect(sim.view().shipA.cap).toBeCloseTo(regenClosedForm(afterFirst - 600, 24), 6);
+  });
+
+  test("incoming drain floors the victim capacitor at zero", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({}, {}, SMALL_SPEC));
+    sim.attemptDebit("shipA", SMALL_SPEC.capacity - 20);
+    sim.incomingDrains("shipA", [incoming("500", 600, 24)]);
+    sim.step(24, { shipA: false, shipB: false });
+    expect(sim.view().shipA.cap).toBeCloseTo(regenClosedForm(0, 24, SMALL_SPEC), 6);
+  });
+
+  test("incoming drains vanish when the engine stops projecting them", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig());
+    sim.incomingDrains("shipA", [incoming("500", 600, 24)]);
+    sim.step(5, { shipA: false, shipB: false });
+    const before = sim.view().shipA.cap;
+    sim.incomingDrains("shipA", []);
+    sim.step(30, { shipA: false, shipB: false });
+    expect(sim.view().shipA.incoming).toHaveLength(0);
+    expect(sim.view().shipA.cap).toBeCloseTo(regenClosedForm(before, 30), 6);
+  });
+
+  test("merge updates the amount while preserving the cycle timer", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig());
+    sim.incomingDrains("shipA", [incoming("500", 100, 10)]);
+    sim.step(7, { shipA: false, shipB: false });
+    const before = sim.view().shipA.cap;
+    sim.incomingDrains("shipA", [incoming("500", 200, 10)]);
+    sim.step(5, { shipA: false, shipB: false });
+    const afterRegen = regenClosedForm(before, 3);
+    expect(sim.view().shipA.cap).toBeCloseTo(regenClosedForm(afterRegen - 200, 2), 6);
+  });
+
+  test("nosferatu transfers only when the attacker capacitor is lower than the victim", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig());
+    sim.attemptDebit("shipA", SPEC.capacity - 1000);
+    sim.incomingDrains("shipA", [incoming("600", 36, 5, true)]);
+    sim.step(5, { shipA: false, shipB: false });
+    expect(sim.view().shipA.cap).toBeCloseTo(regenClosedForm(1000, 5), 6);
+    expect(sim.view().shipB.cap).toBeCloseTo(SPEC.capacity, 6);
+
+    const sim2 = new CapacitorSimulatorImpl();
+    sim2.reset(makeConfig());
+    sim2.attemptDebit("shipB", SPEC.capacity - 1000);
+    sim2.incomingDrains("shipA", [incoming("600", 36, 5, true)]);
+    sim2.step(5, { shipA: false, shipB: false });
+    expect(sim2.view().shipA.cap).toBeCloseTo(regenClosedForm(SPEC.capacity - 36, 5), 6);
+    expect(sim2.view().shipB.cap).toBeCloseTo(regenClosedForm(1036, 5), 6);
+  });
+
+  test("nosferatu transfer is capped by the victim capacitor and attacker headroom", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig());
+    sim.attemptDebit("shipA", SPEC.capacity - 20);
+    sim.attemptDebit("shipB", SPEC.capacity - 10);
+    sim.incomingDrains("shipA", [incoming("600", 36, 5, true)]);
+    sim.step(5, { shipA: false, shipB: false });
+    expect(sim.view().shipA.cap).toBeCloseTo(regenClosedForm(0, 5), 6);
+    expect(sim.view().shipB.cap).toBeCloseTo(regenClosedForm(30, 5), 6);
+  });
+
+  test("infinite victim never loses capacitor to incoming drains", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({ infinite: true }));
+    sim.incomingDrains("shipA", [incoming("500", 600, 24)]);
+    sim.step(24, { shipA: false, shipB: false });
+    expect(sim.view().shipA.cap).toBeCloseTo(SPEC.capacity, 6);
+    expect(sim.view().shipA.incoming[0].running).toBe(true);
+  });
+
+  test("mirror fits keep own drains and incoming drains apart", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({ drains: [drain("500", 100, 10)] }));
+    sim.incomingDrains("shipA", [incoming("500", 600, 24)]);
+    sim.step(24, { shipA: false, shipB: false });
+    expect(sim.view().shipA.drains).toHaveLength(1);
+    expect(sim.view().shipA.drains[0].amount).toBe(100);
+    expect(sim.view().shipA.incoming).toHaveLength(1);
+    expect(sim.view().shipA.incoming[0].amount).toBe(600);
+    expect(sim.view().shipA.cap).toBeLessThan(SPEC.capacity - 700);
+  });
+
+  test("capture and restore round-trip incoming drain timers", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig());
+    sim.incomingDrains("shipA", [incoming("500", 600, 24)]);
+    sim.step(9, { shipA: false, shipB: false });
+    const state = sim.capture();
+    const restored = new CapacitorSimulatorImpl();
+    restored.reset(makeConfig());
+    restored.incomingDrains("shipA", [incoming("500", 600, 24)]);
+    restored.step(3, { shipA: false, shipB: false });
+    restored.restore(state);
+    sim.step(15, { shipA: false, shipB: false });
+    restored.step(15, { shipA: false, shipB: false });
+    expect(restored.view().shipA.cap).toBeCloseTo(sim.view().shipA.cap, 9);
+    expect(restored.view().shipA.incoming[0].timer).toBeCloseTo(sim.view().shipA.incoming[0].timer, 9);
   });
 });

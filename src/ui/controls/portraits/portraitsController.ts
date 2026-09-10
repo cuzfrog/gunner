@@ -159,6 +159,10 @@ function ewarEffectHint(effect: ActiveOffensiveModule & { category: "ewar" }, i1
       const percent = signedPercentFromMultiplier(effect.signatureMultiplier);
       return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.sigRadius")} ${percent > 0 ? "+" : ""}${percent}%` };
     }
+    case "neutralizer":
+      return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.neutralizer")} ${effect.amountPerCycle} GJ / ${effect.cycleTime}s` };
+    case "nosferatu":
+      return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.nosferatu")} ${effect.amountPerCycle} GJ / ${effect.cycleTime}s` };
   }
 }
 
