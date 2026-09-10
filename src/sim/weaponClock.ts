@@ -117,16 +117,18 @@ export class WeaponClockImpl implements WeaponClock {
       if (attack.assessment.drone && !attack.assessment.drone.inRange) continue;
       const cycleTime = attack.weapon.cycleTime;
       if (cycleTime <= 0) continue;
+      const spoolSpec = attack.weapon.kind === "turret" ? attack.weapon.spool : undefined;
+      if (spoolSpec !== undefined && attack.assessment.turret && !attack.assessment.turret.inOptimal) {
+        // A disintegrator deactivates while its target is beyond optimal; reactivation restarts cycle and spool.
+        // Deactivation is checked BEFORE the activation debit: a weapon about to deactivate never pays an activation,
+        // otherwise an out-of-optimal spooling turret with a capacitor need would re-activate (and re-debit) every frame.
+        clock.cooldowns.delete(i);
+        continue;
+      }
       const capNeed = turretCapacitorNeed(attack.weapon);
       const isNew = !clock.cooldowns.has(i);
       if (capacitor && capNeed > 0 && isNew && !capacitor.attemptDebit(source, capNeed, attack.weapon.moduleId)) {
         // Activation denied: no cooldown entry, the debit is retried next frame.
-        continue;
-      }
-      const spoolSpec = attack.weapon.kind === "turret" ? attack.weapon.spool : undefined;
-      if (spoolSpec !== undefined && attack.assessment.turret && !attack.assessment.turret.inOptimal) {
-        // A disintegrator deactivates while its target is beyond optimal; reactivation restarts cycle and spool.
-        clock.cooldowns.delete(i);
         continue;
       }
       const cooldown = clock.cooldowns.get(i) ?? { timer: cycleTime, cycleTime, spoolCycles: 0 };

@@ -62,12 +62,13 @@ function recordingGate(allow: boolean): { gate: CapacitorGate; debits: DebitReco
   return { debits, gate: { attemptDebit: (side: Side, amount: number) => { debits.push({ side, amount }); return allow; } } };
 }
 
-function spoolingAttack(volley: { em: number; thermal: number; kinetic: number; explosive: number }, inOptimal = true): WeaponAttack {
+function spoolingAttack(volley: { em: number; thermal: number; kinetic: number; explosive: number }, inOptimal = true, capacitorNeed?: number): WeaponAttack {
+  const weapon: TurretSpec = capacitorNeed === undefined ? spoolingTurret : { ...spoolingTurret, capacitorNeed };
   return {
-    weapon: spoolingTurret,
+    weapon,
     assessment: {
-      boostedWeapon: spoolingTurret,
-      effectiveWeapon: spoolingTurret,
+      boostedWeapon: weapon,
+      effectiveWeapon: weapon,
       damage: { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: volley },
       turret: { hit, expectedMultiplier: 1, spoolFactor: 1, inOptimal },
     },
@@ -311,6 +312,35 @@ describe("WeaponClockImpl", () => {
     expect(clock.step(4, inOptimal)).toHaveLength(0);
     expect(clock.step(1, inOptimal)[0].rawByType.kinetic).toBeCloseTo(100, 6);
     expect(clock.spoolCycles("shipA", 0)).toBe(1);
+  });
+
+  test("capacitor-gated spooling turret pays one activation, no debits while deactivated, one on re-entry", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const { gate, debits } = recordingGate(true);
+    const volley = { em: 0, thermal: 0, kinetic: 100, explosive: 0 };
+    const inOptimal = makeView([spoolingAttack(volley, true, 36)]);
+    const outOfOptimal = makeView([spoolingAttack(volley, false, 36)]);
+    clock.step(1, inOptimal, gate);
+    expect(debits).toEqual([{ side: "shipA", amount: 36 }]);
+    expect(clock.spoolCycles("shipA", 0)).toBe(0);
+    for (let frame = 0; frame < 60; frame++) clock.step(1, outOfOptimal, gate);
+    expect(debits).toEqual([{ side: "shipA", amount: 36 }]);
+    expect(clock.spoolCycles("shipA", 0)).toBe(0);
+    clock.step(1, inOptimal, gate);
+    expect(debits).toEqual([{ side: "shipA", amount: 36 }, { side: "shipA", amount: 36 }]);
+    expect(clock.spoolCycles("shipA", 0)).toBe(0);
+  });
+
+  test("capacitor-gated spooling turret completes cycles while in optimal", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const { gate, debits } = recordingGate(true);
+    const volley = { em: 0, thermal: 0, kinetic: 100, explosive: 0 };
+    const view = makeView([spoolingAttack(volley, true, 36)]);
+    expect(clock.step(5, view, gate)).toHaveLength(1);
+    expect(debits).toEqual([{ side: "shipA", amount: 36 }, { side: "shipA", amount: 36 }]);
+    expect(clock.step(5, view, gate)).toHaveLength(1);
+    expect(clock.spoolCycles("shipA", 0)).toBe(2);
+    expect(debits).toEqual([{ side: "shipA", amount: 36 }, { side: "shipA", amount: 36 }, { side: "shipA", amount: 36 }]);
   });
 
   test("non-spooling turret keeps firing beyond optimal", () => {
