@@ -119,7 +119,7 @@ export class WeaponClockImpl implements WeaponClock {
       if (cycleTime <= 0) continue;
       const capNeed = turretCapacitorNeed(attack.weapon);
       const isNew = !clock.cooldowns.has(i);
-      if (capacitor && capNeed > 0 && isNew && !capacitor.attemptDebit(source, capNeed)) {
+      if (capacitor && capNeed > 0 && isNew && !capacitor.attemptDebit(source, capNeed, attack.weapon.moduleId)) {
         // Activation denied: no cooldown entry, the debit is retried next frame.
         continue;
       }
@@ -132,7 +132,7 @@ export class WeaponClockImpl implements WeaponClock {
       const cooldown = clock.cooldowns.get(i) ?? { timer: cycleTime, cycleTime, spoolCycles: 0 };
       cooldown.timer -= dt;
       if (cooldown.timer <= 0) {
-        if (capacitor && capNeed > 0 && !capacitor.attemptDebit(source, capNeed)) {
+        if (capacitor && capNeed > 0 && !capacitor.attemptDebit(source, capNeed, attack.weapon.moduleId)) {
           // Starved mid-cycle: the module stays off until the capacitor recovers.
           cooldown.timer = 0;
           clock.cooldowns.set(i, cooldown);

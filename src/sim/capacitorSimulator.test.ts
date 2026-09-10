@@ -126,6 +126,25 @@ describe("CapacitorSimulatorImpl", () => {
     expect(sim.view().shipA.cap).toBeCloseTo(SPEC.capacity - 1000, 6);
   });
 
+  test("attemptDebit reports the starved module id and clears it on the next step", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig());
+    expect(sim.attemptDebit("shipA", 1000)).toBe(true);
+    expect(sim.attemptDebit("shipA", SPEC.capacity, toTypeId("101"))).toBe(false);
+    expect(sim.view().shipA.starvedModuleIds).toEqual([toTypeId("101")]);
+    sim.step(1, { shipA: false, shipB: false });
+    expect(sim.view().shipA.starvedModuleIds).toEqual([]);
+  });
+
+  test("starved drains report their module ids in the view", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({ drains: [drain("55", 200, 10)], boosters: [] }, {}, { capacity: 250, rechargeTime: 100 }));
+    sim.step(20, { shipA: false, shipB: false });
+    const view = sim.view().shipA;
+    expect(view.starved).toBe(true);
+    expect(view.starvedModuleIds).toEqual([toTypeId("55")]);
+  });
+
   test("propulsion debit starvation is reported and recovers", () => {
     const sim = new CapacitorSimulatorImpl();
     sim.reset(makeConfig({}, {}, { capacity: 1000, rechargeTime: 100 }, SPEC, 150));

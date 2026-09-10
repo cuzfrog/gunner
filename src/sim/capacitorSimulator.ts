@@ -1,3 +1,4 @@
+import type { TypeId } from "../gamedata/ids";
 import type { CapBoosterMode, CapBoosterSimSpec, CapacitorSideConfig, CapacitorSpec, ScheduledDrain, Side, SimConfig } from "./types";
 import type { Restorable } from "./restorable";
 
@@ -40,12 +41,15 @@ export interface CapacitorView {
   readonly netPerSecond: number;
   readonly incomingDrainPerSecond: number;
   readonly starved: boolean;
+  // Module ids denied a debit during the current engine frame (weapons, repairers, drains).
+  readonly starvedModuleIds: readonly TypeId[];
+  readonly propulsionStarved: boolean;
   readonly drains: readonly CapacitorDrainState[];
   readonly boosters: readonly CapacitorBoosterState[];
 }
 
 export interface CapacitorGate {
-  attemptDebit(side: Side, amount: number): boolean;
+  attemptDebit(side: Side, amount: number, moduleId?: TypeId): boolean;
 }
 
 export interface CapacitorSimConfig {
@@ -116,6 +120,7 @@ interface SideRuntime {
   propulsion: PropulsionRuntime | undefined;
   propulsionSuppressed: boolean;
   anyStarved: boolean;
+  starvedModuleIds: TypeId[];
   drainedThisStep: number;
   lastDt: number;
 }
@@ -153,7 +158,7 @@ export class CapacitorSimulatorImpl implements CapacitorSimulator {
     stepSide(this.sides.shipB, dt, propulsionSuppressed.shipB);
   }
 
-  attemptDebit(side: Side, amount: number): boolean {
+  attemptDebit(side: Side, amount: number, moduleId?: TypeId): boolean {
     const runtime = this.sides[side];
     if (!hasPool(runtime)) return true;
     if (runtime.cap + capacityEpsilon(runtime.spec) >= amount) {
@@ -162,6 +167,7 @@ export class CapacitorSimulatorImpl implements CapacitorSimulator {
       return true;
     }
     runtime.anyStarved = true;
+    if (moduleId !== undefined && !runtime.starvedModuleIds.includes(moduleId)) runtime.starvedModuleIds.push(moduleId);
     return false;
   }
 
@@ -212,7 +218,7 @@ function capacityEpsilon(spec: CapacitorSpec | undefined): number {
 }
 
 function emptySide(): SideRuntime {
-  return { spec: undefined, infinite: false, cap: 0, drains: [], boosters: [], propulsion: undefined, propulsionSuppressed: false, anyStarved: false, drainedThisStep: 0, lastDt: 0 };
+  return { spec: undefined, infinite: false, cap: 0, drains: [], boosters: [], propulsion: undefined, propulsionSuppressed: false, anyStarved: false, starvedModuleIds: [], drainedThisStep: 0, lastDt: 0 };
 }
 
 function sideFromConfig(spec: CapacitorSpec | undefined, propulsionCapNeed: number | undefined, capacityMultiplier: number | undefined, config: CapacitorSideConfig): SideRuntime {
@@ -298,6 +304,7 @@ function mergePropulsion(runtime: SideRuntime, propulsionCapNeed: number | undef
 
 function stepSide(runtime: SideRuntime, dt: number, suppressed: boolean): void {
   runtime.anyStarved = false;
+  runtime.starvedModuleIds = [];
   runtime.drainedThisStep = 0;
   runtime.lastDt = dt;
   if (!hasPool(runtime)) {
@@ -424,6 +431,7 @@ function applyDrainEvent(runtime: SideRuntime, drain: DrainRuntime): number {
   drain.running = false;
   drain.starved = true;
   runtime.anyStarved = true;
+  if (!runtime.starvedModuleIds.includes(drain.moduleId)) runtime.starvedModuleIds.push(drain.moduleId);
   return retryDelay(runtime, drain.amount);
 }
 
@@ -493,6 +501,7 @@ function sideView(runtime: SideRuntime): CapacitorView {
     return {
       cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0,
       incomingDrainPerSecond: drainRate(runtime), starved: runtime.anyStarved,
+      starvedModuleIds: [], propulsionStarved: false,
       drains: runtime.drains.map(drainState), boosters: runtime.boosters.map(boosterState),
     };
   }
@@ -500,7 +509,7 @@ function sideView(runtime: SideRuntime): CapacitorView {
     const incoming = drainRate(runtime);
     return {
       cap: runtime.spec.capacity, capacity: runtime.spec.capacity, percentage: 100, regenPerSecond: 0, netPerSecond: -incoming,
-      incomingDrainPerSecond: incoming, starved: false,
+      incomingDrainPerSecond: incoming, starved: false, starvedModuleIds: [], propulsionStarved: false,
       drains: runtime.drains.map((drain) => drainState({ ...drain, running: drain.active, starved: false })),
       boosters: runtime.boosters.map(boosterState),
     };
@@ -513,6 +522,7 @@ function sideView(runtime: SideRuntime): CapacitorView {
     cap: runtime.cap, capacity: runtime.spec.capacity, percentage: (runtime.cap / runtime.spec.capacity) * 100,
     regenPerSecond, netPerSecond: regenPerSecond - incoming, incomingDrainPerSecond: incoming,
     starved: runtime.anyStarved,
+    starvedModuleIds: [...runtime.starvedModuleIds], propulsionStarved: runtime.propulsion?.starved ?? false,
     drains: runtime.drains.map(drainState), boosters: runtime.boosters.map(boosterState),
   };
 }
@@ -551,6 +561,7 @@ function sideFromSnapshot(snapshot: SideCapacitorSnapshot): SideRuntime {
     propulsion: snapshot.propulsion ? { ...snapshot.propulsion } : undefined,
     propulsionSuppressed: false,
     anyStarved: false,
+    starvedModuleIds: [],
     drainedThisStep: 0,
     lastDt: 0,
   };

@@ -19,6 +19,7 @@ export interface RepairerViewState {
   readonly active: boolean;
   readonly overloaded: boolean;
   readonly hpPerSecond: number;
+  readonly starved: boolean;
 }
 
 export interface RahViewState {
@@ -134,6 +135,7 @@ interface RepairerState {
   active: boolean;
   overloaded: boolean;
   hpThisCycle: number;
+  starved: boolean;
 }
 
 interface RahState {
@@ -396,6 +398,7 @@ function createRepairerStates(specs: readonly RepairerSpec[], activation: readon
       active: saved?.active ?? true,
       overloaded: saved?.overloaded ?? true,
       hpThisCycle: 0,
+      starved: false,
     };
   });
 }
@@ -440,6 +443,7 @@ function mergeRepairerStates(prev: RepairerState[], specs: readonly RepairerSpec
       active: saved?.active ?? true,
       overloaded: saved?.overloaded ?? true,
       hpThisCycle: 0,
+      starved: false,
     };
   });
 }
@@ -557,6 +561,7 @@ function stepRepairers(pools: SidePools, dt: number, side: Side, capacitor: Capa
 }
 
 function stepRepairer(pools: SidePools, side: Side, spec: RepairerSpec, state: RepairerState, dt: number, capacitor: CapacitorGate | undefined): void {
+  state.starved = false;
   if (state.reloading) {
     state.reloadTimer -= dt;
     if (state.reloadTimer <= 0) {
@@ -584,8 +589,9 @@ function shouldStartCycle(pools: SidePools, spec: RepairerSpec, state: RepairerS
 }
 
 function startCycle(pools: SidePools, side: Side, spec: RepairerSpec, state: RepairerState, capacitor: CapacitorGate | undefined): void {
-  if (capacitor && spec.capacitorNeed > 0 && !capacitor.attemptDebit(side, spec.capacitorNeed)) {
+  if (capacitor && spec.capacitorNeed > 0 && !capacitor.attemptDebit(side, spec.capacitorNeed, spec.moduleId)) {
     // Starved: the module stays off until the capacitor recovers; retried next frame.
+    state.starved = true;
     return;
   }
   state.inCycle = true;
@@ -654,7 +660,7 @@ function stepRah(pools: SidePools, dt: number, armorDamageByType: MutableDamageV
   }
   if (!rah.active) return;
   if (!rah.inCycle) {
-    if (capacitor && (rahSpec.capacitorNeed ?? 0) > 0 && !capacitor.attemptDebit(side, rahSpec.capacitorNeed ?? 0)) {
+    if (capacitor && (rahSpec.capacitorNeed ?? 0) > 0 && !capacitor.attemptDebit(side, rahSpec.capacitorNeed ?? 0, rahSpec.moduleId)) {
       // Starved: the module stays off until the capacitor recovers; retried next frame.
       return;
     }
@@ -718,6 +724,7 @@ function repairerViews(pools: SidePools): readonly RepairerViewState[] {
       active: state.active,
       overloaded: state.overloaded,
       hpPerSecond,
+      starved: state.starved,
     };
   });
 }
@@ -796,7 +803,7 @@ function snapshotRepairerState(state: RepairerState): RepairerStateSnapshot {
 function materializeRepairerState(snapshot: RepairerStateSnapshot): RepairerState {
   return {
     cycleTimer: snapshot.cycleTimer, inCycle: snapshot.inCycle, ancillaryCharges: snapshot.ancillaryCharges, reloading: snapshot.reloading,
-    reloadTimer: snapshot.reloadTimer, active: snapshot.active, overloaded: snapshot.overloaded, hpThisCycle: snapshot.hpThisCycle,
+    reloadTimer: snapshot.reloadTimer, active: snapshot.active, overloaded: snapshot.overloaded, hpThisCycle: snapshot.hpThisCycle, starved: false,
   };
 }
 

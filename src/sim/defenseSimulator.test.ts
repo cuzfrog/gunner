@@ -309,10 +309,12 @@ describe("DefenseSimulatorImpl", () => {
     const gate: CapacitorGate = { attemptDebit: () => allow.value };
     sim.step(2, events(EM_DAMAGE, ZERO_DAMAGE), gate);
     expect(sim.view().repairers.shipA[0].cycling).toBe(false);
+    expect(sim.view().repairers.shipA[0].starved).toBe(true);
     expect(sim.view().pools.shipA.armor).toBe(900); // damage applied, no repair
     allow.value = true;
     sim.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE), gate);
     expect(sim.view().repairers.shipA[0].cycling).toBe(true);
+    expect(sim.view().repairers.shipA[0].starved).toBe(false);
     expect(sim.view().pools.shipA.armor).toBe(900); // armor heal lands at cycle end
   });
 

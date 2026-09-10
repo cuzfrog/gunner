@@ -14,11 +14,28 @@ export interface CapacitorUsageRow {
   readonly count: number;
 }
 
+export interface CapacitorBoosterChargeOption {
+  readonly id: TypeId;
+  readonly name: string;
+  readonly amount: number; // GJ injected per charge
+  readonly clipSize: number; // floor(chargeCapacity / charge volume)
+}
+
+export interface CapacitorBoosterStats {
+  readonly moduleId: TypeId;
+  readonly moduleName: string;
+  readonly chargeId?: TypeId; // charge loaded by the fitting
+  readonly cycleTime: number; // seconds
+  readonly reloadTime: number; // seconds
+  readonly chargeOptions: readonly CapacitorBoosterChargeOption[];
+}
+
 export interface CapacitorStats {
   readonly spec: CapacitorSpec;
   readonly peakRecharge: number; // GJ/s at 25% capacity: 2.5 * capacity / rechargeTime
   readonly rows: readonly CapacitorUsageRow[];
   readonly usagePerSecond: number;
+  readonly boosters: readonly CapacitorBoosterStats[];
   readonly stablePercent?: number; // pyfa watermark average, when cap-stable
   readonly depletesInSeconds?: number; // seconds until the pool depletes, when unstable
 }
@@ -58,6 +75,7 @@ export class CapacitorCalculatorImpl implements CapacitorCalculator {
       peakRecharge: (2.5 * effective.capacity) / effective.rechargeTime,
       rows,
       usagePerSecond,
+      boosters: buildBoosterStats(this.db, fitting),
       ...(stablePercent !== undefined ? { stablePercent } : {}),
       ...(depletesInSeconds !== undefined ? { depletesInSeconds } : {}),
     };
@@ -188,7 +206,32 @@ export function buildInjectorDrains(fitting: FittingState, db: FittingDb): reado
   return drains;
 }
 
+/** Fitted cap boosters with every group-87 charge that fits their charge capacity (pyfa volume rule). */
+function buildBoosterStats(db: FittingDb, fitting: FittingState): readonly CapacitorBoosterStats[] {
+  const result: CapacitorBoosterStats[] = [];
+  for (const mod of fitting.supportModules) {
+    const booster = db.modules[mod.moduleId]?.capacitor;
+    if (!booster || booster.kind !== "capacitorBooster" || !booster.cycleTime || !booster.reloadTime || !booster.chargeCapacity) continue;
+    const chargeOptions: CapacitorBoosterChargeOption[] = [];
+    for (const charge of Object.values(db.charges)) {
+      if (charge.chargeGroup !== CAP_BOOSTER_CHARGE_GROUP || !charge.capacitorBonus || !charge.volume) continue;
+      if (charge.volume > booster.chargeCapacity) continue;
+      chargeOptions.push({ id: charge.id, name: charge.name, amount: charge.capacitorBonus, clipSize: Math.floor(booster.chargeCapacity / charge.volume) });
+    }
+    result.push({
+      moduleId: mod.moduleId,
+      moduleName: db.modules[mod.moduleId]?.name ?? "",
+      ...(mod.chargeId !== undefined ? { chargeId: mod.chargeId } : {}),
+      cycleTime: booster.cycleTime,
+      reloadTime: booster.reloadTime,
+      chargeOptions,
+    });
+  }
+  return result;
+}
+
 const PROPULSION_CYCLE_TIME = 10; // seconds, fixed propulsion cycle
+const CAP_BOOSTER_CHARGE_GROUP = 87;
 const WEAPON_OVERLOAD_ROF_MULTIPLIER = 0.85;
 const ENERGY_MANAGEMENT_BONUS = 0.05;
 const ENERGY_SYSTEMS_OPERATIONS_BONUS = 0.05;

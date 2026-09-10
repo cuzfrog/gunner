@@ -212,6 +212,36 @@ describe("capacitorCalculator", () => {
     expect(buildInjectorDrains(state, FITTING_DB)).toHaveLength(0);
   });
 
+  test("cap boosters resolve with charge options for the popup and sim wiring", () => {
+    const result = resolve([moduleEntry("Medium Capacitor Booster II", "Cap Booster 200")]);
+    expect(result.boosters).toHaveLength(1);
+    const booster = result.boosters[0];
+    expect(booster?.moduleName).toBe("Medium Capacitor Booster II");
+    expect(booster?.cycleTime).toBeCloseTo(12, 3);
+    expect(booster?.reloadTime).toBeCloseTo(10, 3);
+    expect(booster?.chargeId).toBeDefined();
+    const option = booster?.chargeOptions.find((candidate) => candidate.id === booster?.chargeId);
+    expect(option?.amount).toBeCloseTo(200, 3);
+    expect(option?.clipSize).toBe(5); // floor(40 / 8)
+  });
+
+  test("cap booster charge options list fitting charges with per-charge clip sizes", () => {
+    const result = resolve([moduleEntry("Medium Capacitor Booster II")]);
+    const booster = result.boosters[0];
+    expect(booster?.chargeId).toBeUndefined();
+    const ids = booster?.chargeOptions.map((candidate) => candidate.id) ?? [];
+    expect(ids.length).toBeGreaterThan(1);
+    for (const option of booster?.chargeOptions ?? []) {
+      expect(option.amount).toBeGreaterThan(0);
+      expect(option.clipSize).toBeGreaterThan(0);
+    }
+  });
+
+  test("battery does not appear as a booster", () => {
+    const result = resolve([moduleEntry("Large Cap Battery II")]);
+    expect(result.boosters).toHaveLength(0);
+  });
+
   test("usage per second sums scaled rows", () => {
     const result = resolve([moduleEntry("Stasis Webifier II"), moduleEntry("Mega Pulse Laser II")]);
     expect(result.usagePerSecond).toBeCloseTo(6 / 5 + 36 / 7.875, 3);

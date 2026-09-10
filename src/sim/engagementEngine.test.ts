@@ -130,8 +130,8 @@ function emptyCapacitorSnapshot(): import("./capacitorSimulator").SideCapacitorS
 }
 
 const emptyCapacitorView: Record<"shipA" | "shipB", CapacitorView> = {
-  shipA: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, drains: [], boosters: [] },
-  shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, drains: [], boosters: [] },
+  shipA: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [] },
+  shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsionStarved: false, drains: [], boosters: [] },
 };
 
 const EMPTY_CAPACITOR_SIDE: CapacitorSideConfig = { infinite: false, drains: [], boosters: [] };
