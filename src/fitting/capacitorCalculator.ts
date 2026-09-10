@@ -4,6 +4,7 @@ import { type CapacitorSkills, type StatConditions, defaultCapacitorSkills } fro
 import { type CapacitorSpec, type DefenseSpec, type StackingPenalty } from "../sim";
 import { runCapSim, type StaticDrain } from "./capacitorSim";
 import type { FittingState } from "./fittingState";
+import type { ImportedTurret } from "./chargeCatalog";
 
 export interface CapacitorUsageRow {
   readonly moduleId: TypeId;
@@ -41,8 +42,11 @@ export interface CapacitorStats {
 }
 
 export interface CapacitorCalculator {
-  resolve(fitting: FittingState, conditions: StatConditions, defense: DefenseSpec): CapacitorStats;
+  resolve(fitting: FittingState, conditions: StatConditions, defense: DefenseSpec, turrets: readonly ImportedTurret[]): CapacitorStats;
 }
+
+/** Cycle-time fields the capacitor rows consume from the resolved turret groups. */
+type TurretCycle = Pick<ImportedTurret, "moduleId" | "cycleTime" | "turretCount">;
 
 interface CapacitorCalculatorDeps {
   readonly fittingDb: FittingDb;
@@ -58,12 +62,12 @@ export class CapacitorCalculatorImpl implements CapacitorCalculator {
     this.stacking = stackingPenalty;
   }
 
-  resolve(fitting: FittingState, conditions: StatConditions, defense: DefenseSpec): CapacitorStats {
+  resolve(fitting: FittingState, conditions: StatConditions, defense: DefenseSpec, turrets: readonly ImportedTurret[]): CapacitorStats {
     const skills = conditions.capacitorSkills ?? defaultCapacitorSkills(conditions.skillLevel);
     const spec = resolveSpec(this.db, fitting, skills, this.stacking);
     const propulsion = fitting.propulsionModule ? this.db.modules[fitting.propulsionModule.moduleId]?.propulsion : undefined;
     const effective = multiplyCapacity(spec, propulsion?.capacitorCapacityMultiplier);
-    const rows = buildUsageRows(this.db, fitting, conditions, defense);
+    const rows = buildUsageRows(this.db, fitting, conditions, defense, turrets);
     const injectors = buildInjectorDrains(fitting, this.db);
     const usagePerSecond = rows.reduce((sum, row) => sum + row.perSecond * row.count, 0);
     const drains: readonly StaticDrain[] = [...rows.map((row) => ({ amount: row.amount, interval: row.cycleTime, count: row.count })), ...injectors];
@@ -112,13 +116,17 @@ function multiplyCapacity(spec: CapacitorSpec, multiplier: number | undefined): 
   return { capacity: spec.capacity * multiplier, rechargeTime: spec.rechargeTime };
 }
 
-function buildUsageRows(db: FittingDb, fitting: FittingState, conditions: StatConditions, defense: DefenseSpec): readonly CapacitorUsageRow[] {
+function buildUsageRows(db: FittingDb, fitting: FittingState, conditions: StatConditions, defense: DefenseSpec, turrets: readonly ImportedTurret[]): readonly CapacitorUsageRow[] {
   const rows: CapacitorUsageRow[] = [];
 
-  for (const group of fitting.turretGroups) {
+  for (let i = 0; i < fitting.turretGroups.length; i++) {
+    const group = fitting.turretGroups[i];
     const stats = db.turrets[group.moduleId];
     if (!stats || stats.capacitorNeed <= 0) continue;
-    const cycleTime = stats.cycleTime * (conditions.weaponOverloaded ? WEAPON_OVERLOAD_ROF_MULTIPLIER : 1);
+    const resolved = turrets[i];
+    // The resolved turret carries the final cycle time (skill/module/hull/overload adjusted);
+    // fall back to the raw catalog cycle for groups the resolver skipped.
+    const cycleTime = resolved && resolved.moduleId === group.moduleId ? resolved.cycleTime : stats.cycleTime * (conditions.weaponOverloaded ? WEAPON_OVERLOAD_ROF_MULTIPLIER : 1);
     rows.push(buildRow(group.moduleId, stats.name, stats.capacitorNeed, cycleTime, group.count));
   }
 

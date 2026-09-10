@@ -5,6 +5,8 @@ import { StackingPenaltyImpl, type DefenseSpec } from "../sim";
 import { FittingStateFactory, type CargoEntry, type FittingModuleEntry } from "./fittingState";
 import { DefenseCalculatorImpl } from "./defenseCalculator";
 import { CapacitorCalculatorImpl, buildInjectorDrains } from "./capacitorCalculator";
+import type { ImportedTurret } from "./chargeCatalog";
+import { EMPTY_DAMAGE_BREAKDOWN } from "./damageBreakdown";
 
 const profile: ShipProfile = {
   id: "24692" as ShipId,
@@ -58,10 +60,18 @@ function findChargeId(name: string): TypeId {
   throw new Error(`Charge not found: ${name}`);
 }
 
-function resolve(entries: readonly FittingModuleEntry[], conditions: StatConditions = emptyConditions): ReturnType<CapacitorCalculatorImpl["resolve"]> {
+function resolve(entries: readonly FittingModuleEntry[], conditions: StatConditions = emptyConditions, turrets: readonly ImportedTurret[] = []): ReturnType<CapacitorCalculatorImpl["resolve"]> {
   const state = factory.create(profile, [] as readonly HullBonus[], entries, [], [] as readonly CargoEntry[]);
   const defense = defenseCalculator.resolve(state, conditions);
-  return calculator.resolve(state, conditions, defense);
+  return calculator.resolve(state, conditions, defense, turrets);
+}
+
+function resolvedTurret(entry: FittingModuleEntry, cycleTime: number, turretCount = 1): ImportedTurret {
+  return {
+    tracking: 0, sigResolutionClass: "S", optimal: 0, falloff: 0, chargeSize: 1, base: { tracking: 0, optimal: 0, falloff: 0 },
+    chargeId: entry.chargeId ?? ("" as TypeId), moduleId: entry.moduleId, damageMultiplier: 1,
+    damagePerShot: { em: 0, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime, turretCount, damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
+  };
 }
 
 describe("capacitorCalculator", () => {
@@ -122,8 +132,9 @@ describe("capacitorCalculator", () => {
     expect(result.spec.rechargeTime).toBeCloseTo(1250 * 0.61, 3);
   });
 
-  test("turret groups produce count-scaled rows from the turret catalog", () => {
-    const result = resolve([moduleEntry("Mega Pulse Laser II"), moduleEntry("Mega Pulse Laser II"), moduleEntry("Mega Pulse Laser II"), moduleEntry("Mega Pulse Laser II")]);
+  test("turret groups produce count-scaled rows from the resolved cycle time", () => {
+    const entry = moduleEntry("Mega Pulse Laser II");
+    const result = resolve([entry, entry, entry, entry], emptyConditions, [resolvedTurret(entry, 7.875, 4)]);
     const row = result.rows.find((candidate) => candidate.moduleName === "Mega Pulse Laser II");
     expect(row).toBeDefined();
     expect(row?.amount).toBeCloseTo(36, 3);
@@ -132,9 +143,29 @@ describe("capacitorCalculator", () => {
     expect(row?.perSecond).toBeCloseTo(36 / 7.875, 3);
   });
 
-  test("weapon overload shortens turret cycle time", () => {
+  test("turret row cycle reflects the skill-adjusted resolved cycle (Rapid Firing V)", () => {
+    const entry = moduleEntry("Mega Pulse Laser II");
+    const conditions: StatConditions = { ...emptyConditions, skillLevel: 5 as SkillLevel };
+    const result = resolve([entry], conditions, [resolvedTurret(entry, 7.875 * 0.75)]);
+    const row = result.rows.find((candidate) => candidate.moduleName === "Mega Pulse Laser II");
+    expect(row?.cycleTime).toBeCloseTo(7.875 * 0.75, 6);
+    expect(row?.amount).toBeCloseTo(36, 3);
+    expect(row?.perSecond).toBeCloseTo(36 / (7.875 * 0.75), 6);
+  });
+
+  test("resolved turret cycle passes through without re-applying the overload multiplier", () => {
+    const entry = moduleEntry("Mega Pulse Laser II");
     const conditions: StatConditions = { ...emptyConditions, weaponOverloaded: true };
-    const result = resolve([moduleEntry("Mega Pulse Laser II")], conditions);
+    const result = resolve([entry], conditions, [resolvedTurret(entry, 7.875 * 0.85)]);
+    const row = result.rows.find((candidate) => candidate.moduleName === "Mega Pulse Laser II");
+    expect(row?.cycleTime).toBeCloseTo(7.875 * 0.85, 6);
+    expect(row?.cycleTime).not.toBeCloseTo(7.875 * 0.85 * 0.85, 6);
+  });
+
+  test("weapon overload shortens turret cycle time via the resolved cycle", () => {
+    const entry = moduleEntry("Mega Pulse Laser II");
+    const conditions: StatConditions = { ...emptyConditions, weaponOverloaded: true };
+    const result = resolve([entry], conditions, [resolvedTurret(entry, 7.875 * 0.85)]);
     const row = result.rows.find((candidate) => candidate.moduleName === "Mega Pulse Laser II");
     expect(row?.cycleTime).toBeCloseTo(7.875 * 0.85, 3);
   });

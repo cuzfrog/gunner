@@ -193,7 +193,7 @@ export class FittingImportImpl implements FittingImport {
     const sensorSpec = this.calculator.resolveSensorSpec(fittingState, conditions);
     const sensorBoosts = this.calculator.resolveSensorBoosts(fittingState);
     const defense = this.defenseCalculator.resolve(fittingState, conditions);
-    const capacitor = this.capacitorCalculator.resolve(fittingState, conditions, defense);
+    const capacitor = this.capacitorCalculator.resolve(fittingState, conditions, defense, turrets);
 
     return {
       profile: resolved.profile,
