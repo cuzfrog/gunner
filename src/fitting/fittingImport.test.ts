@@ -1182,7 +1182,7 @@ Medium Energy Nosferatu II`,
     ]);
   });
 
-  test("cap batteries raise the energy warfare resistance percent", () => {
+  test("cap batteries raise the energy warfare resistance percent with stacking penalties", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
     const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
@@ -1194,7 +1194,12 @@ Medium Cap Battery II`, conditions);
     const two = importer.importFitting(`[Rifter, Batteries]
 Medium Cap Battery II
 Small Cap Battery II`, conditions);
-    expect(two!.energyWarfareResistancePercent).toBeCloseTo(43.75, 6);
+    expect(two!.energyWarfareResistancePercent).toBeCloseTo(41.296, 3);
+    const three = importer.importFitting(`[Rifter, Three batteries]
+Medium Cap Battery II
+Small Cap Battery II
+Large Cap Battery II`, conditions);
+    expect(three!.energyWarfareResistancePercent).toBeCloseTo(49.670, 3);
   });
 
   test("preserves duplicate ewar instances and mixed variants", () => {

@@ -424,7 +424,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
   }
 
   resolveEnergyWarfareResistance(fitting: FittingState): number {
-    return energyWarfareResistancePercent(fitting.supportModules, this.db.modules);
+    return (1 - this.stacking.apply(energyWarfareResistanceMultipliers(fitting.supportModules, this.db.modules))) * 100;
   }
 
   resolveBoosts(fitting: FittingState): BoostLoadout {
@@ -826,12 +826,12 @@ function computeDroneControlRange(droneBoosterModules: readonly FittedModule[], 
 
 export { computeDroneControlRange as _computeDroneControlRange };
 
-function energyWarfareResistancePercent(supportModules: readonly FittedModule[], modules: Readonly<Record<string, FittingModuleStats>>): number {
-  let remaining = 1;
+function energyWarfareResistanceMultipliers(supportModules: readonly FittedModule[], modules: Readonly<Record<string, FittingModuleStats>>): readonly number[] {
+  const multipliers: number[] = [];
   for (const mod of supportModules) {
     const bonus = modules[mod.moduleId]?.capacitor?.energyWarfareResistanceBonus;
     if (bonus === undefined) continue;
-    remaining *= 1 + bonus / 100;
+    multipliers.push(1 + bonus / 100);
   }
-  return (1 - remaining) * 100;
+  return multipliers;
 }
