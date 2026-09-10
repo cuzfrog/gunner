@@ -572,6 +572,7 @@ describe("SettingsParser", () => {
       fitted: IMPORTED_RIFTER.fitted,
       propulsion: RIFTER_MODULE,
       baseMaxSpeed: RIFTER_MWD_STATS.baseMaxSpeed,
+      capacitor: { capacity: 0, rechargeTime: 0 },
     });
     expect(decoded!.shipA.mass).toBe(1_500_000);
     expect(decoded!.shipA.speed).toBe(4_649.72);

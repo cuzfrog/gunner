@@ -1,7 +1,18 @@
 import { DefenseSimulatorImpl } from "./defenseSimulator";
+import type { CapacitorGate } from "./capacitorSimulator";
 import type { DefenseSimConfig } from "./defenseSimulator";
-import type { DamageEvent, DamageVector, DefenseSpec, LayerDamage, RahSpec, RepairerSpec } from "./types";
+import type { DamageEvent, DamageVector, DefenseSpec, LayerDamage, RahSpec, RepairerSpec, Side } from "./types";
 import { ZERO_DAMAGE } from "./types";
+
+interface DebitRecord {
+  readonly side: Side;
+  readonly amount: number;
+}
+
+function recordingGate(allow: boolean): { gate: CapacitorGate; debits: DebitRecord[] } {
+  const debits: DebitRecord[] = [];
+  return { debits, gate: { attemptDebit: (side: Side, amount: number) => { debits.push({ side, amount }); return allow; } } };
+}
 
 function totalOf(layer: LayerDamage): number {
   return layer.shield + layer.armor + layer.hull;
@@ -278,6 +289,50 @@ describe("DefenseSimulatorImpl", () => {
     sim.update(config(repairSpec));
     expect(sim.view().repairers.shipA[0].cycling).toBe(true);
     expect(sim.view().repairers.shipA[0].cycleProgress).toBeGreaterThan(0);
+  });
+
+  test("repairer debits capacitorNeed at cycle start", () => {
+    const sim = new DefenseSimulatorImpl();
+    const repairSpec = spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, armorResists: { em: 0 }, repairers: [{ layer: "armor", amount: 100, cycleTime: 4, capacitorNeed: 320, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }] });
+    sim.reset(config(repairSpec));
+    const { gate, debits } = recordingGate(true);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE), gate);
+    expect(sim.view().repairers.shipA[0].cycling).toBe(true);
+    expect(debits).toEqual([{ side: "shipA", amount: 320 }]);
+  });
+
+  test("starved repairer does not cycle until the gate allows it", () => {
+    const sim = new DefenseSimulatorImpl();
+    const repairSpec = spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, armorResists: { em: 0 }, repairers: [{ layer: "armor", amount: 100, cycleTime: 4, capacitorNeed: 320, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }] });
+    sim.reset(config(repairSpec));
+    const allow: { value: boolean } = { value: false };
+    const gate: CapacitorGate = { attemptDebit: () => allow.value };
+    sim.step(2, events(EM_DAMAGE, ZERO_DAMAGE), gate);
+    expect(sim.view().repairers.shipA[0].cycling).toBe(false);
+    expect(sim.view().pools.shipA.armor).toBe(900); // damage applied, no repair
+    allow.value = true;
+    sim.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE), gate);
+    expect(sim.view().repairers.shipA[0].cycling).toBe(true);
+    expect(sim.view().pools.shipA.armor).toBe(900); // armor heal lands at cycle end
+  });
+
+  test("active rah debits capacitorNeed per cycle", () => {
+    const sim = new DefenseSimulatorImpl();
+    const rahSpec: RahSpec = { cycleTime: 9, shiftAmount: 0.3, baseResists: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, overloadCycleTimeMultiplier: 1, armorResistsWithoutRah: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, capacitorNeed: 42 };
+    sim.reset({ ...config(spec({ armorHp: 1000, rah: rahSpec })), rahActivation: { shipA: { active: true, overloaded: false }, shipB: undefined } });
+    const { gate, debits } = recordingGate(true);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE), gate);
+    expect(debits).toEqual([{ side: "shipA", amount: 42 }]);
+  });
+
+  test("repairers without capacitorNeed cycle without debiting", () => {
+    const sim = new DefenseSimulatorImpl();
+    const repairSpec = spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, armorResists: { em: 0 }, repairers: [{ layer: "armor", amount: 100, cycleTime: 4, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }] });
+    sim.reset(config(repairSpec));
+    const { gate, debits } = recordingGate(true);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE), gate);
+    expect(sim.view().repairers.shipA[0].cycling).toBe(true);
+    expect(debits).toHaveLength(0);
   });
 
   test("update clamps pool to new max when spec max decreases", () => {

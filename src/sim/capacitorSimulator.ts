@@ -1,0 +1,557 @@
+import type { CapBoosterMode, CapBoosterSimSpec, CapacitorSideConfig, CapacitorSpec, ScheduledDrain, Side, SimConfig } from "./types";
+import type { Restorable } from "./restorable";
+
+export interface CapacitorDrainState {
+  readonly moduleId: ScheduledDrain["moduleId"];
+  readonly amount: number;
+  readonly interval: number;
+  readonly active: boolean;
+  readonly running: boolean;
+  readonly starved: boolean;
+  readonly timer: number;
+}
+
+export interface CapacitorBoosterState {
+  readonly moduleId: CapBoosterSimSpec["moduleId"];
+  readonly amount: number;
+  readonly cycleTime: number;
+  readonly clipSize: number;
+  readonly reloadTime: number;
+  readonly mode: CapBoosterMode;
+  readonly charges: number;
+  readonly cycleTimer: number;
+  readonly reloading: boolean;
+  readonly reloadTimer: number;
+}
+
+export interface CapacitorPropulsionState {
+  readonly amount: number;
+  readonly interval: number;
+  readonly timer: number;
+  readonly running: boolean;
+  readonly starved: boolean;
+}
+
+export interface CapacitorView {
+  readonly cap: number;
+  readonly capacity: number;
+  readonly percentage: number;
+  readonly regenPerSecond: number;
+  readonly netPerSecond: number;
+  readonly incomingDrainPerSecond: number;
+  readonly starved: boolean;
+  readonly drains: readonly CapacitorDrainState[];
+  readonly boosters: readonly CapacitorBoosterState[];
+}
+
+export interface CapacitorGate {
+  attemptDebit(side: Side, amount: number): boolean;
+}
+
+export interface CapacitorSimConfig {
+  readonly sim: SimConfig;
+  readonly sides: Record<Side, CapacitorSideConfig>;
+}
+
+export interface SideCapacitorSnapshot {
+  readonly spec: CapacitorSpec | undefined;
+  readonly infinite: boolean;
+  readonly cap: number;
+  readonly drains: readonly CapacitorDrainState[];
+  readonly boosters: readonly CapacitorBoosterState[];
+  readonly propulsion: CapacitorPropulsionState | undefined;
+}
+
+export interface CapacitorSimulatorState {
+  readonly time: number;
+  readonly sides: Record<Side, SideCapacitorSnapshot>;
+}
+
+export interface CapacitorSimulator extends CapacitorGate, Restorable<CapacitorSimulatorState> {
+  reset(config: CapacitorSimConfig): void;
+  update(config: CapacitorSimConfig): void;
+  step(dt: number, propulsionSuppressed: Record<Side, boolean>): void;
+  view(): Record<Side, CapacitorView>;
+  propulsionStarved(side: Side): boolean;
+  injectBooster(side: Side, boosterIndex: number): void;
+}
+
+interface DrainRuntime {
+  moduleId: ScheduledDrain["moduleId"];
+  amount: number;
+  interval: number;
+  active: boolean;
+  running: boolean;
+  starved: boolean;
+  timer: number;
+}
+
+interface BoosterRuntime {
+  moduleId: CapBoosterSimSpec["moduleId"];
+  amount: number;
+  cycleTime: number;
+  clipSize: number;
+  reloadTime: number;
+  mode: CapBoosterMode;
+  charges: number;
+  cycleTimer: number;
+  reloading: boolean;
+  reloadTimer: number;
+}
+
+interface PropulsionRuntime {
+  amount: number;
+  interval: number;
+  timer: number;
+  running: boolean;
+  starved: boolean;
+}
+
+interface SideRuntime {
+  spec: CapacitorSpec | undefined;
+  infinite: boolean;
+  cap: number;
+  drains: DrainRuntime[];
+  boosters: BoosterRuntime[];
+  propulsion: PropulsionRuntime | undefined;
+  propulsionSuppressed: boolean;
+  anyStarved: boolean;
+  drainedThisStep: number;
+  lastDt: number;
+}
+
+const PROPULSION_INTERVAL = 10; // seconds, fixed propulsion cycle
+const TAU_DENOMINATOR = 5; // EVE recharge tau = rechargeTime / 5
+const CAPACITY_EPSILON_FACTOR = 1e-9;
+
+export class CapacitorSimulatorImpl implements CapacitorSimulator {
+  private sides: Record<Side, SideRuntime>;
+  private time: number;
+
+  constructor() {
+    this.time = 0;
+    this.sides = { shipA: emptySide(), shipB: emptySide() };
+  }
+
+  reset(config: CapacitorSimConfig): void {
+    this.time = 0;
+    this.sides = {
+      shipA: sideFromConfig(config.sim.shipA.capacitor, config.sim.shipA.propulsionCapNeed, config.sim.shipA.propulsionCapacityMultiplier, config.sides.shipA),
+      shipB: sideFromConfig(config.sim.shipB.capacitor, config.sim.shipB.propulsionCapNeed, config.sim.shipB.propulsionCapacityMultiplier, config.sides.shipB),
+    };
+  }
+
+  update(config: CapacitorSimConfig): void {
+    mergeSide(this.sides.shipA, config.sim.shipA.capacitor, config.sim.shipA.propulsionCapNeed, config.sim.shipA.propulsionCapacityMultiplier, config.sides.shipA);
+    mergeSide(this.sides.shipB, config.sim.shipB.capacitor, config.sim.shipB.propulsionCapNeed, config.sim.shipB.propulsionCapacityMultiplier, config.sides.shipB);
+  }
+
+  step(dt: number, propulsionSuppressed: Record<Side, boolean>): void {
+    if (dt <= 0) return;
+    this.time += dt;
+    stepSide(this.sides.shipA, dt, propulsionSuppressed.shipA);
+    stepSide(this.sides.shipB, dt, propulsionSuppressed.shipB);
+  }
+
+  attemptDebit(side: Side, amount: number): boolean {
+    const runtime = this.sides[side];
+    if (!hasPool(runtime)) return true;
+    if (runtime.cap + capacityEpsilon(runtime.spec) >= amount) {
+      runtime.cap -= amount;
+      runtime.drainedThisStep += amount;
+      return true;
+    }
+    runtime.anyStarved = true;
+    return false;
+  }
+
+  propulsionStarved(side: Side): boolean {
+    return this.sides[side].propulsion?.starved ?? false;
+  }
+
+  injectBooster(side: Side, boosterIndex: number): void {
+    const runtime = this.sides[side];
+    if (!hasPool(runtime)) return;
+    const booster = runtime.boosters[boosterIndex];
+    if (!booster || booster.mode !== "manual" || booster.reloading || booster.charges <= 0 || booster.cycleTimer > 0) return;
+    injectCharge(runtime, booster);
+    if (booster.charges <= 0) {
+      booster.reloading = true;
+      booster.reloadTimer = booster.reloadTime;
+      booster.cycleTimer = 0;
+    }
+  }
+
+  view(): Record<Side, CapacitorView> {
+    return { shipA: sideView(this.sides.shipA), shipB: sideView(this.sides.shipB) };
+  }
+
+  capture(): CapacitorSimulatorState {
+    return {
+      time: this.time,
+      sides: { shipA: sideSnapshot(this.sides.shipA), shipB: sideSnapshot(this.sides.shipB) },
+    };
+  }
+
+  restore(state: CapacitorSimulatorState): void {
+    this.time = state.time;
+    this.sides = { shipA: sideFromSnapshot(state.sides.shipA), shipB: sideFromSnapshot(state.sides.shipB) };
+  }
+}
+
+function hasPool(runtime: SideRuntime): boolean {
+  return runtime.spec !== undefined && !runtime.infinite && runtime.spec.capacity > 0;
+}
+
+function capacityOf(spec: CapacitorSpec | undefined): number {
+  return spec?.capacity ?? 0;
+}
+
+function capacityEpsilon(spec: CapacitorSpec | undefined): number {
+  return capacityOf(spec) * CAPACITY_EPSILON_FACTOR;
+}
+
+function emptySide(): SideRuntime {
+  return { spec: undefined, infinite: false, cap: 0, drains: [], boosters: [], propulsion: undefined, propulsionSuppressed: false, anyStarved: false, drainedThisStep: 0, lastDt: 0 };
+}
+
+function sideFromConfig(spec: CapacitorSpec | undefined, propulsionCapNeed: number | undefined, capacityMultiplier: number | undefined, config: CapacitorSideConfig): SideRuntime {
+  const runtime = emptySide();
+  const effective = multiplyCapacity(spec, capacityMultiplier);
+  runtime.spec = effective;
+  runtime.infinite = config.infinite;
+  runtime.cap = effective && effective.capacity > 0 ? effective.capacity : 0;
+  runtime.drains = config.drains.filter((drain) => drain.interval > 0).map((drain) => ({ moduleId: drain.moduleId, amount: drain.amount, interval: drain.interval, active: drain.active, running: false, starved: false, timer: 0 }));
+  runtime.boosters = config.boosters.map((booster) => ({ ...booster, charges: booster.clipSize, cycleTimer: 0, reloading: false, reloadTimer: 0 }));
+  runtime.propulsion = propulsionCapNeed && propulsionCapNeed > 0 ? { amount: propulsionCapNeed, interval: PROPULSION_INTERVAL, timer: 0, running: false, starved: false } : undefined;
+  return runtime;
+}
+
+function mergeSide(runtime: SideRuntime, spec: CapacitorSpec | undefined, propulsionCapNeed: number | undefined, capacityMultiplier: number | undefined, config: CapacitorSideConfig): void {
+  const effective = multiplyCapacity(spec, capacityMultiplier);
+  const specChanged = runtime.spec?.capacity !== effective?.capacity || runtime.spec?.rechargeTime !== effective?.rechargeTime;
+  runtime.spec = effective;
+  runtime.infinite = config.infinite;
+  if (specChanged && effective && effective.capacity > 0) runtime.cap = effective.capacity;
+  mergeDrains(runtime, config.drains);
+  mergeBoosters(runtime, config.boosters);
+  mergePropulsion(runtime, propulsionCapNeed);
+}
+
+/** Propulsion capacity penalty (e.g. MWD 0.75) composes the effective pool from the propulsion-independent spec. */
+function multiplyCapacity(spec: CapacitorSpec | undefined, multiplier: number | undefined): CapacitorSpec | undefined {
+  if (!spec || multiplier === undefined || multiplier === 1) return spec;
+  return { capacity: spec.capacity * multiplier, rechargeTime: spec.rechargeTime };
+}
+
+function mergeDrains(runtime: SideRuntime, drains: readonly ScheduledDrain[]): void {
+  const merged: DrainRuntime[] = [];
+  for (const drain of drains) {
+    if (drain.interval <= 0) continue;
+    const existing = runtime.drains.find((candidate) => candidate.moduleId === drain.moduleId);
+    if (existing) {
+      existing.amount = drain.amount;
+      existing.interval = drain.interval;
+      const reactivated = drain.active && !existing.active;
+      existing.active = drain.active;
+      if (!drain.active) {
+        existing.running = false;
+        existing.starved = false;
+      } else if (reactivated) {
+        existing.timer = 0;
+        existing.starved = false;
+      }
+      merged.push(existing);
+    } else {
+      merged.push({ moduleId: drain.moduleId, amount: drain.amount, interval: drain.interval, active: drain.active, running: false, starved: false, timer: 0 });
+    }
+  }
+  runtime.drains = merged;
+}
+
+function mergeBoosters(runtime: SideRuntime, boosters: readonly CapBoosterSimSpec[]): void {
+  const merged: BoosterRuntime[] = [];
+  for (const booster of boosters) {
+    const existing = runtime.boosters.find((candidate) => candidate.moduleId === booster.moduleId);
+    if (existing && sameBoosterSpec(existing, booster)) {
+      existing.mode = booster.mode;
+      merged.push(existing);
+    } else {
+      merged.push({ ...booster, charges: booster.clipSize, cycleTimer: 0, reloading: false, reloadTimer: 0 });
+    }
+  }
+  runtime.boosters = merged;
+}
+
+function sameBoosterSpec(existing: BoosterRuntime, booster: CapBoosterSimSpec): boolean {
+  return existing.amount === booster.amount && existing.cycleTime === booster.cycleTime && existing.clipSize === booster.clipSize && existing.reloadTime === booster.reloadTime;
+}
+
+function mergePropulsion(runtime: SideRuntime, propulsionCapNeed: number | undefined): void {
+  if (!propulsionCapNeed || propulsionCapNeed <= 0) {
+    runtime.propulsion = undefined;
+    return;
+  }
+  if (runtime.propulsion && runtime.propulsion.amount === propulsionCapNeed) return;
+  runtime.propulsion = { amount: propulsionCapNeed, interval: PROPULSION_INTERVAL, timer: 0, running: false, starved: false };
+}
+
+function stepSide(runtime: SideRuntime, dt: number, suppressed: boolean): void {
+  runtime.anyStarved = false;
+  runtime.drainedThisStep = 0;
+  runtime.lastDt = dt;
+  if (!hasPool(runtime)) {
+    stepFreeSide(runtime, dt);
+    return;
+  }
+  updateSuppression(runtime, suppressed);
+  rescheduleStarved(runtime);
+  walkEvents(runtime, dt);
+}
+
+function stepFreeSide(runtime: SideRuntime, dt: number): void {
+  for (const drain of runtime.drains) {
+    if (!drain.active) continue;
+    drain.running = true;
+    drain.starved = false;
+    drain.timer -= dt;
+    if (drain.timer <= 0) drain.timer = drain.interval;
+  }
+  const propulsion = runtime.propulsion;
+  if (propulsion) {
+    propulsion.running = true;
+    propulsion.starved = false;
+    propulsion.timer -= dt;
+    if (propulsion.timer <= 0) propulsion.timer = propulsion.interval;
+  }
+  if (runtime.infinite && runtime.spec) runtime.cap = runtime.spec.capacity;
+}
+
+function updateSuppression(runtime: SideRuntime, suppressed: boolean): void {
+  const propulsion = runtime.propulsion;
+  if (!propulsion) return;
+  if (suppressed) {
+    propulsion.running = false;
+    propulsion.starved = false;
+    runtime.propulsionSuppressed = true;
+    return;
+  }
+  if (runtime.propulsionSuppressed) {
+    // Reactivation starts a fresh cycle: debit immediately.
+    propulsion.timer = 0;
+  }
+  runtime.propulsionSuppressed = false;
+}
+
+function rescheduleStarved(runtime: SideRuntime): void {
+  for (const drain of runtime.drains) {
+    if (drain.active && drain.starved) drain.timer = retryDelay(runtime, drain.amount);
+  }
+  const propulsion = runtime.propulsion;
+  if (propulsion && propulsion.starved && !runtime.propulsionSuppressed) propulsion.timer = retryDelay(runtime, propulsion.amount);
+}
+
+interface EventHolder {
+  at: number;
+  fire(): number; // returns the next relative event time, or Infinity when done
+  save(remaining: number): void;
+}
+
+function collectHolders(runtime: SideRuntime): EventHolder[] {
+  const holders: EventHolder[] = [];
+  for (const drain of runtime.drains) {
+    if (drain.active && Number.isFinite(drain.timer)) {
+      holders.push({ at: drain.timer, fire: () => applyDrainEvent(runtime, drain), save: (remaining) => { drain.timer = remaining; } });
+    }
+  }
+  const propulsion = runtime.propulsion;
+  if (propulsion && !runtime.propulsionSuppressed && Number.isFinite(propulsion.timer)) {
+    holders.push({ at: propulsion.timer, fire: () => applyPropulsionEvent(runtime, propulsion), save: (remaining) => { propulsion.timer = remaining; } });
+  }
+  for (const booster of runtime.boosters) {
+    if (booster.reloading || booster.mode === "auto") {
+      holders.push({ at: booster.reloading ? booster.reloadTimer : booster.cycleTimer, fire: () => fireBooster(runtime, booster), save: (remaining) => saveBoosterTimer(booster, remaining) });
+    }
+  }
+  return holders;
+}
+
+function fireBooster(runtime: SideRuntime, booster: BoosterRuntime): number {
+  if (booster.reloading) {
+    completeReload(booster);
+    return booster.mode === "auto" ? booster.cycleTime : Number.POSITIVE_INFINITY;
+  }
+  applyAutoBoosterEvent(runtime, booster);
+  return booster.reloading ? booster.reloadTime : booster.cycleTime;
+}
+
+function saveBoosterTimer(booster: BoosterRuntime, remaining: number): void {
+  if (booster.reloading) booster.reloadTimer = remaining;
+  else booster.cycleTimer = remaining;
+}
+
+/** Walks every scheduled event inside the step in time order, regenerating between events. */
+function walkEvents(runtime: SideRuntime, dt: number): void {
+  for (const booster of runtime.boosters) {
+    if (booster.mode === "manual" && !booster.reloading) booster.cycleTimer = Math.max(0, booster.cycleTimer - dt);
+  }
+  const holders = collectHolders(runtime);
+  let elapsed = 0;
+  for (;;) {
+    let best: EventHolder | undefined;
+    for (const holder of holders) {
+      if (best === undefined || holder.at < best.at) best = holder;
+    }
+    if (!best || best.at >= dt) break;
+    regen(runtime, best.at - elapsed);
+    elapsed = best.at;
+    const nextRelative = best.fire();
+    if (Number.isFinite(nextRelative)) best.at = elapsed + nextRelative;
+    else holders.splice(holders.indexOf(best), 1);
+  }
+  regen(runtime, dt - elapsed);
+  for (const holder of holders) holder.save(holder.at - dt);
+}
+
+function applyDrainEvent(runtime: SideRuntime, drain: DrainRuntime): number {
+  if (runtime.cap + capacityEpsilon(runtime.spec) >= drain.amount) {
+    runtime.cap -= drain.amount;
+    runtime.drainedThisStep += drain.amount;
+    drain.running = true;
+    drain.starved = false;
+    return drain.interval;
+  }
+  drain.running = false;
+  drain.starved = true;
+  runtime.anyStarved = true;
+  return retryDelay(runtime, drain.amount);
+}
+
+function applyPropulsionEvent(runtime: SideRuntime, propulsion: PropulsionRuntime): number {
+  if (runtime.cap + capacityEpsilon(runtime.spec) >= propulsion.amount) {
+    runtime.cap -= propulsion.amount;
+    runtime.drainedThisStep += propulsion.amount;
+    propulsion.running = true;
+    propulsion.starved = false;
+    return propulsion.interval;
+  }
+  propulsion.running = false;
+  propulsion.starved = true;
+  runtime.anyStarved = true;
+  return retryDelay(runtime, propulsion.amount);
+}
+
+function applyAutoBoosterEvent(runtime: SideRuntime, booster: BoosterRuntime): void {
+  if (runtime.cap >= capacityOf(runtime.spec) - capacityEpsilon(runtime.spec)) {
+    // pyfa semantics: postpone injection that would overshoot a full pool.
+    booster.cycleTimer = booster.cycleTime;
+    return;
+  }
+  injectCharge(runtime, booster);
+  if (booster.charges <= 0) {
+    booster.reloading = true;
+    booster.reloadTimer = booster.reloadTime;
+    booster.cycleTimer = 0;
+  }
+}
+
+function injectCharge(runtime: SideRuntime, booster: BoosterRuntime): void {
+  runtime.cap = Math.min(runtime.cap + booster.amount, capacityOf(runtime.spec));
+  booster.charges -= 1;
+  booster.cycleTimer = booster.cycleTime;
+}
+
+function completeReload(booster: BoosterRuntime): void {
+  booster.reloading = false;
+  booster.charges = booster.clipSize;
+  booster.cycleTimer = booster.cycleTime;
+}
+
+/** Closed-form time until regen reaches the given amount, so retries are frame-size independent. */
+function retryDelay(runtime: SideRuntime, amount: number): number {
+  const spec = runtime.spec;
+  if (!spec) return Number.POSITIVE_INFINITY;
+  const target = amount + capacityEpsilon(spec);
+  if (target >= spec.capacity) return Number.POSITIVE_INFINITY;
+  if (runtime.cap + capacityEpsilon(spec) >= target) return 0;
+  const tau = spec.rechargeTime / TAU_DENOMINATOR;
+  const numerator = Math.sqrt(target / spec.capacity) - 1;
+  const denominator = Math.sqrt(Math.max(runtime.cap, 0) / spec.capacity) - 1;
+  return -tau * Math.log(numerator / denominator);
+}
+
+function regen(runtime: SideRuntime, dt: number): void {
+  const spec = runtime.spec;
+  if (dt <= 0 || !spec || runtime.cap >= spec.capacity) return;
+  const tau = spec.rechargeTime / TAU_DENOMINATOR;
+  const root = Math.sqrt(runtime.cap / spec.capacity);
+  runtime.cap = spec.capacity * Math.pow(1 + (root - 1) * Math.exp(-dt / tau), 2);
+}
+
+function sideView(runtime: SideRuntime): CapacitorView {
+  if (!runtime.spec || runtime.spec.capacity <= 0) {
+    return {
+      cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0,
+      incomingDrainPerSecond: drainRate(runtime), starved: runtime.anyStarved,
+      drains: runtime.drains.map(drainState), boosters: runtime.boosters.map(boosterState),
+    };
+  }
+  if (runtime.infinite) {
+    const incoming = drainRate(runtime);
+    return {
+      cap: runtime.spec.capacity, capacity: runtime.spec.capacity, percentage: 100, regenPerSecond: 0, netPerSecond: -incoming,
+      incomingDrainPerSecond: incoming, starved: false,
+      drains: runtime.drains.map((drain) => drainState({ ...drain, running: drain.active, starved: false })),
+      boosters: runtime.boosters.map(boosterState),
+    };
+  }
+  const tau = runtime.spec.rechargeTime / TAU_DENOMINATOR;
+  const root = Math.sqrt(runtime.cap / runtime.spec.capacity);
+  const regenPerSecond = (2 * runtime.spec.capacity * root * (1 - root)) / tau;
+  const incoming = runtime.lastDt > 0 ? runtime.drainedThisStep / runtime.lastDt : 0;
+  return {
+    cap: runtime.cap, capacity: runtime.spec.capacity, percentage: (runtime.cap / runtime.spec.capacity) * 100,
+    regenPerSecond, netPerSecond: regenPerSecond - incoming, incomingDrainPerSecond: incoming,
+    starved: runtime.anyStarved,
+    drains: runtime.drains.map(drainState), boosters: runtime.boosters.map(boosterState),
+  };
+}
+
+function drainRate(runtime: SideRuntime): number {
+  if (runtime.lastDt <= 0) return 0;
+  return runtime.drainedThisStep / runtime.lastDt;
+}
+
+function drainState(drain: DrainRuntime): CapacitorDrainState {
+  return { moduleId: drain.moduleId, amount: drain.amount, interval: drain.interval, active: drain.active, running: drain.running, starved: drain.starved, timer: drain.timer };
+}
+
+function boosterState(booster: BoosterRuntime): CapacitorBoosterState {
+  return { moduleId: booster.moduleId, amount: booster.amount, cycleTime: booster.cycleTime, clipSize: booster.clipSize, reloadTime: booster.reloadTime, mode: booster.mode, charges: booster.charges, cycleTimer: booster.cycleTimer, reloading: booster.reloading, reloadTimer: booster.reloadTimer };
+}
+
+function sideSnapshot(runtime: SideRuntime): SideCapacitorSnapshot {
+  return {
+    spec: runtime.spec ? { ...runtime.spec } : undefined,
+    infinite: runtime.infinite,
+    cap: runtime.cap,
+    drains: runtime.drains.map(drainState),
+    boosters: runtime.boosters.map(boosterState),
+    propulsion: runtime.propulsion ? { ...runtime.propulsion } : undefined,
+  };
+}
+
+function sideFromSnapshot(snapshot: SideCapacitorSnapshot): SideRuntime {
+  return {
+    spec: snapshot.spec ? { ...snapshot.spec } : undefined,
+    infinite: snapshot.infinite,
+    cap: snapshot.cap,
+    drains: snapshot.drains.map((drain) => ({ ...drain })),
+    boosters: snapshot.boosters.map((booster) => ({ ...booster })),
+    propulsion: snapshot.propulsion ? { ...snapshot.propulsion } : undefined,
+    propulsionSuppressed: false,
+    anyStarved: false,
+    drainedThisStep: 0,
+    lastDt: 0,
+  };
+}

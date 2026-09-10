@@ -75,6 +75,7 @@ export class EftSideImporter {
       propulsionKind: propulsionId !== undefined ? this.panel(side).ships.fittingOption(imported.profile, propulsionId)?.kind : undefined,
       fitted: imported.fitted,
       propulsion: imported.propulsion,
+      capacitor: imported.capacitor?.spec,
     };
   }
 }

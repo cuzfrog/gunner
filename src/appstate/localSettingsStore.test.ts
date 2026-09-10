@@ -696,6 +696,7 @@ describe("LocalSettingsStore", () => {
       fitted: RIFTER_FITTED,
       propulsion: RIFTER_MODULE,
       baseMaxSpeed: RIFTER_MWD_STATS.baseMaxSpeed,
+      capacitor: { capacity: 0, rechargeTime: 0 },
     });
     expect(loaded!.shipA.mass).toBe(2_000_000);
     expect(loaded!.shipA.inertia).toBe(2);

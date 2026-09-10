@@ -232,6 +232,20 @@ describe("SimulationImpl", () => {
     expect(snapshot.shipB.maxSpeed).toBe(200);
   });
 
+  test("capacitor starvation suppresses the MWD like a scrambler", () => {
+    const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
+    const config = {
+      shipA: shipConfig("shipA", "midships"),
+      shipB: { ...shipConfig("shipB", "midships"), baseMaxSpeed: 200, maxSpeed: 1000, propulsionKind: "microwarpdrive" as const },
+      initialDistance: 5000,
+    };
+    const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver, simConfig: config });
+    sim.step(1, { propulsionStarved: { shipA: false, shipB: true } });
+    expect(sim.snapshot().shipB.maxSpeed).toBe(200);
+    sim.step(1, { propulsionStarved: { shipA: false, shipB: false } });
+    expect(sim.snapshot().shipB.maxSpeed).toBe(1000);
+  });
+
   test("snapshot leaves max speed unchanged when the projection is out of range", () => {
     const resolver: EwarResolver = {
       speedMultiplier: (projection, distance) => (distance <= 5000 ? 0.4 : 1),

@@ -373,24 +373,24 @@ export class FittingCalculatorImpl implements FittingCalculator {
     for (const mod of fitting.ewarModules) {
       const webStats = this.db.stasisWebs[mod.moduleId];
       if (webStats) {
-        webs.push({ moduleName: webStats.name, moduleId: webStats.id, maxRange: webStats.maxRange, speedFactor: Math.round(-webStats.speedFactorPercent * 10000) / 1000000, overloadRangeBonusPercent: webStats.overloadRangeBonusPercent });
+        webs.push({ moduleName: webStats.name, moduleId: webStats.id, maxRange: webStats.maxRange, speedFactor: Math.round(-webStats.speedFactorPercent * 10000) / 1000000, overloadRangeBonusPercent: webStats.overloadRangeBonusPercent, capacitorNeed: webStats.capacitorNeed, cycleTime: webStats.cycleTime });
         continue;
       }
       const grapplerStats = this.db.stasisGrapplers[mod.moduleId];
       if (grapplerStats) {
-        grapplers.push({ moduleName: grapplerStats.name, moduleId: grapplerStats.id, optimal: grapplerStats.optimal, falloff: grapplerStats.falloff, speedFactor: Math.round(-grapplerStats.speedFactorPercent * 10000) / 1000000, overloadOptimalBonusPercent: grapplerStats.overloadOptimalBonusPercent });
+        grapplers.push({ moduleName: grapplerStats.name, moduleId: grapplerStats.id, optimal: grapplerStats.optimal, falloff: grapplerStats.falloff, speedFactor: Math.round(-grapplerStats.speedFactorPercent * 10000) / 1000000, overloadOptimalBonusPercent: grapplerStats.overloadOptimalBonusPercent, capacitorNeed: grapplerStats.capacitorNeed, cycleTime: grapplerStats.cycleTime });
         continue;
       }
       const disruptorStats = this.db.trackingDisruptors[mod.moduleId];
       if (disruptorStats) {
         const scriptName = mod.chargeId ? this.itemNameCatalog.nameForId(mod.chargeId, "en") : undefined;
         const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
-        disruptors.push({ moduleName: disruptorStats.name, moduleId: disruptorStats.id, optimal: disruptorStats.optimal, falloff: disruptorStats.falloff, disruption: Math.round(-disruptorStats.disruptionPercent * 10000) / 1000000, defaultScript, overloadStrengthBonusPercent: disruptorStats.overloadStrengthBonusPercent });
+        disruptors.push({ moduleName: disruptorStats.name, moduleId: disruptorStats.id, optimal: disruptorStats.optimal, falloff: disruptorStats.falloff, disruption: Math.round(-disruptorStats.disruptionPercent * 10000) / 1000000, defaultScript, overloadStrengthBonusPercent: disruptorStats.overloadStrengthBonusPercent, capacitorNeed: disruptorStats.capacitorNeed, cycleTime: disruptorStats.cycleTime });
         continue;
       }
       const scramblerStats = this.db.warpScramblers[mod.moduleId];
       if (scramblerStats) {
-        scramblers.push({ moduleName: scramblerStats.name, moduleId: scramblerStats.id, maxRange: scramblerStats.maxRange, overloadRangeBonusPercent: scramblerStats.overloadRangeBonusPercent });
+        scramblers.push({ moduleName: scramblerStats.name, moduleId: scramblerStats.id, maxRange: scramblerStats.maxRange, overloadRangeBonusPercent: scramblerStats.overloadRangeBonusPercent, capacitorNeed: scramblerStats.capacitorNeed, cycleTime: scramblerStats.cycleTime });
         continue;
       }
       const painterStats = this.db.targetPainters[mod.moduleId];
@@ -420,7 +420,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       if (!computerStats) continue;
       const scriptName = mod.chargeId ? this.itemNameCatalog.nameForId(mod.chargeId, "en") : undefined;
       const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
-      computers.push({ moduleName: computerStats.name, moduleId: computerStats.id, trackingBonusPercent: computerStats.trackingBonusPercent, optimalBonusPercent: computerStats.optimalBonusPercent, falloffBonusPercent: computerStats.falloffBonusPercent, defaultScript });
+      computers.push({ moduleName: computerStats.name, moduleId: computerStats.id, trackingBonusPercent: computerStats.trackingBonusPercent, optimalBonusPercent: computerStats.optimalBonusPercent, falloffBonusPercent: computerStats.falloffBonusPercent, defaultScript, capacitorNeed: computerStats.capacitorNeed, cycleTime: computerStats.cycleTime });
     }
 
     return { computers, scripts };
@@ -606,11 +606,11 @@ function disruptionScriptSpecsFrom(scripts: Readonly<Record<string, DisruptionSc
 }
 
 function painterSpecFrom(stats: TargetPainterStats): TargetPainterSpec {
-  return { moduleName: stats.name, moduleId: stats.id, maxRange: stats.maxRange, falloff: stats.falloff, signatureRadiusBonusPercent: stats.signatureRadiusBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent };
+  return { moduleName: stats.name, moduleId: stats.id, maxRange: stats.maxRange, falloff: stats.falloff, signatureRadiusBonusPercent: stats.signatureRadiusBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent, capacitorNeed: stats.capacitorNeed, cycleTime: stats.cycleTime };
 }
 
 function sensorDampenerSpecFrom(stats: SensorDampenerStats, defaultScript: SensorDampenerScriptSpec | undefined): SensorDampenerSpec {
-  return { moduleName: stats.name, moduleId: stats.id, optimal: stats.optimal, falloff: stats.falloff, scanResolutionBonusPercent: stats.scanResolutionBonusPercent, maxTargetRangeBonusPercent: stats.maxTargetRangeBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent, defaultScript };
+  return { moduleName: stats.name, moduleId: stats.id, optimal: stats.optimal, falloff: stats.falloff, scanResolutionBonusPercent: stats.scanResolutionBonusPercent, maxTargetRangeBonusPercent: stats.maxTargetRangeBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent, defaultScript, capacitorNeed: stats.capacitorNeed, cycleTime: stats.cycleTime };
 }
 
 function sensorDampenerScriptSpecsFrom(scripts: Readonly<Record<string, SensorDampenerScriptStats>>): SensorDampenerScriptSpec[] {
@@ -630,7 +630,7 @@ function sensorBoosterScriptSpecsFrom(scripts: Readonly<Record<string, SensorBoo
 }
 
 function sensorBoosterSpecFrom(stats: SensorBoosterStats, defaultScript: SensorBoosterScriptSpec | undefined): SensorBoosterSpec {
-  return { moduleName: stats.name, moduleId: stats.id, scanResolutionBonusPercent: stats.scanResolutionBonusPercent, maxTargetRangeBonusPercent: stats.maxTargetRangeBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent, defaultScript };
+  return { moduleName: stats.name, moduleId: stats.id, scanResolutionBonusPercent: stats.scanResolutionBonusPercent, maxTargetRangeBonusPercent: stats.maxTargetRangeBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent, defaultScript, capacitorNeed: stats.capacitorNeed, cycleTime: stats.cycleTime };
 }
 
 function signalAmplifierSpecFrom(stats: SignalAmplifierStats): SignalAmplifierSpec {
@@ -646,7 +646,7 @@ function missileScriptSpecsFrom(scripts: Readonly<Record<string, MissileScriptSt
 }
 
 function missileBoosterSpecFrom(stats: MissileGuidanceComputerStats, defaultScript: MissileScriptSpec | undefined): MissileBoosterSpec {
-  return { moduleName: stats.name, moduleId: stats.id, explosionRadiusBonusPercent: stats.explosionRadiusBonusPercent, explosionVelocityBonusPercent: stats.explosionVelocityBonusPercent, missileVelocityBonusPercent: stats.missileVelocityBonusPercent, flightTimeBonusPercent: stats.flightTimeBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent, defaultScript };
+  return { moduleName: stats.name, moduleId: stats.id, explosionRadiusBonusPercent: stats.explosionRadiusBonusPercent, explosionVelocityBonusPercent: stats.explosionVelocityBonusPercent, missileVelocityBonusPercent: stats.missileVelocityBonusPercent, flightTimeBonusPercent: stats.flightTimeBonusPercent, overloadStrengthBonusPercent: stats.overloadStrengthBonusPercent, defaultScript, capacitorNeed: stats.capacitorNeed, cycleTime: stats.cycleTime };
 }
 
 function missileEnhancerSpecFrom(stats: MissileGuidanceEnhancerStats): MissileEnhancerSpec {

@@ -15,6 +15,8 @@ import type { SensorBoosterResolver } from "./sensorBoosterResolver";
 import type { Simulation, SimulationState } from "./simulation";
 import type { SimWorld } from "./simWorld";
 import type { WeaponClock, WeaponClockState } from "./weaponClock";
+import type { CapacitorSimulator, CapacitorSimulatorState, CapacitorView } from "./capacitorSimulator";
+import type { CapacitorSideConfig } from "./types";
 
 const LOCKED_STATE: LockState = { status: "locked", progress: 1, remaining: 0, lockTime: 0, inRange: true };
 const IDLE_STATE: LockState = { status: "idle", progress: 0, remaining: 0, lockTime: 0, inRange: true };
@@ -115,8 +117,24 @@ function mockWorld() {
     missileSimulator: vi.mocked<MissileSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(() => []), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })), capture: vi.fn(missileSimulatorState), restore: vi.fn() }),
     weaponClock: vi.mocked<WeaponClock>({ reset: vi.fn(), step: vi.fn(() => []), capture: vi.fn(weaponClockState), restore: vi.fn(), spoolCycles: vi.fn(() => 0) }),
     defenseSimulator: vi.mocked<DefenseSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), flushPendingDamage: vi.fn(), view: vi.fn(() => emptyDefenseView), inflictedTotals: vi.fn(zeroTotals), capture: vi.fn(defenseSimulatorState), restore: vi.fn() }),
+    capacitorSimulator: vi.mocked<CapacitorSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(() => emptyCapacitorView), attemptDebit: vi.fn(() => true), propulsionStarved: vi.fn(() => false), injectBooster: vi.fn(), capture: vi.fn(capacitorSimulatorState), restore: vi.fn() }),
   };
 }
+
+function capacitorSimulatorState(): CapacitorSimulatorState {
+  return { time: 0, sides: { shipA: emptyCapacitorSnapshot(), shipB: emptyCapacitorSnapshot() } };
+}
+
+function emptyCapacitorSnapshot(): import("./capacitorSimulator").SideCapacitorSnapshot {
+  return { spec: undefined, infinite: false, cap: 0, drains: [], boosters: [], propulsion: undefined };
+}
+
+const emptyCapacitorView: Record<"shipA" | "shipB", CapacitorView> = {
+  shipA: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, drains: [], boosters: [] },
+  shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, drains: [], boosters: [] },
+};
+
+const EMPTY_CAPACITOR_SIDE: CapacitorSideConfig = { infinite: false, drains: [], boosters: [] };
 
 function makeEngine() {
   const live = mockWorld();
@@ -153,6 +171,7 @@ function engineConfig(): import("./engagementEngine").EngineConfig {
       rahActivation: { shipA: undefined, shipB: undefined },
     },
     overloaded: { shipA: false, shipB: false },
+    capacitor: { shipA: EMPTY_CAPACITOR_SIDE, shipB: EMPTY_CAPACITOR_SIDE },
   };
 }
 
@@ -190,10 +209,11 @@ describe("EngagementEngineImpl", () => {
     expect(deps.live.droneSimulator.reset).toHaveBeenCalledTimes(1);
   });
 
-  test("step calls live sub-simulators in the correct order: simulation, lock, compose, drone, missile, weapon, defense", () => {
+  test("step calls live sub-simulators in the correct order: capacitor, simulation, lock, compose, drone, missile, weapon, defense", () => {
     const deps = makeEngine();
     deps.engine.reset(engineConfig());
     const order: string[] = [];
+    deps.live.capacitorSimulator.step.mockImplementation(() => { order.push("capacitor"); });
     deps.live.simulation.step.mockImplementation(() => { order.push("simulation"); });
     deps.live.lockClock.step.mockImplementation(() => { order.push("lock"); return { shipA: LOCKED_STATE, shipB: LOCKED_STATE }; });
     deps.engagementFrameComposer.compose.mockImplementation(() => { order.push("compose"); return baseView(); });
@@ -202,7 +222,71 @@ describe("EngagementEngineImpl", () => {
     deps.live.weaponClock.step.mockImplementation(() => { order.push("weapon"); return []; });
     deps.live.defenseSimulator.step.mockImplementation(() => { order.push("defense"); });
     deps.engine.step(0.1);
-    expect(order).toEqual(["simulation", "lock", "compose", "drone", "missile", "weapon", "defense"]);
+    expect(order).toEqual(["capacitor", "simulation", "lock", "compose", "drone", "missile", "weapon", "defense"]);
+  });
+
+  test("capacitor.step precedes simulation.step and receives ewar suppression with the pre-step distance", () => {
+    const deps = makeEngine();
+    deps.ewarResolver.propulsionSuppressed = vi.fn(() => true);
+    deps.engine.reset(engineConfig());
+    deps.engine.step(0.1);
+    expect(deps.live.capacitorSimulator.step).toHaveBeenCalledWith(0.1, { shipA: true, shipB: true });
+    expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: false, shipB: false } });
+  });
+
+  test("capacitor starvation from the simulator suppresses propulsion in simulation.step", () => {
+    const deps = makeEngine();
+    deps.live.capacitorSimulator.propulsionStarved = vi.fn((side: "shipA" | "shipB") => side === "shipA");
+    deps.engine.reset(engineConfig());
+    deps.engine.step(0.1);
+    expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: true, shipB: false } });
+  });
+
+  test("weaponClock.step and defenseSimulator.step receive the capacitor gate", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    deps.engine.step(0.1);
+    expect(deps.live.weaponClock.step).toHaveBeenCalledWith(0.1, expect.anything(), deps.live.capacitorSimulator);
+    expect(deps.live.defenseSimulator.step).toHaveBeenCalledWith(0.1, expect.anything(), deps.live.capacitorSimulator);
+  });
+
+  test("reset and update wire the capacitor simulator config", () => {
+    const deps = makeEngine();
+    const config = engineConfig();
+    deps.engine.reset(config);
+    expect(deps.live.capacitorSimulator.reset).toHaveBeenCalledWith({ sim: config.sim, sides: config.capacitor });
+    deps.engine.update(config);
+    expect(deps.live.capacitorSimulator.update).toHaveBeenCalledWith({ sim: config.sim, sides: config.capacitor });
+  });
+
+  test("projection restores the capacitor simulator and flushes pending damage through the gate", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    expect(deps.projection.capacitorSimulator.restore).toHaveBeenCalledWith(deps.live.capacitorSimulator.capture());
+    expect(deps.projection.defenseSimulator.flushPendingDamage).toHaveBeenCalledWith(deps.projection.capacitorSimulator);
+  });
+
+  test("view carries capacitorRuntime from the live capacitor simulator", () => {
+    const deps = makeEngine();
+    const view = deps.engine.reset(engineConfig());
+    expect(view.capacitorRuntime).toBe(emptyCapacitorView);
+  });
+
+  test("injectCapBooster delegates to the live simulator, republishes the view, and marks projection dirty", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    const listener = vi.fn();
+    deps.engine.events().onViewUpdated(listener);
+    deps.live.capacitorSimulator.injectBooster.mockClear();
+    const view = deps.engine.injectCapBooster("shipA", 2);
+    expect(deps.live.capacitorSimulator.injectBooster).toHaveBeenCalledWith("shipA", 2);
+    expect(view.capacitorRuntime).toBe(emptyCapacitorView);
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener.mock.calls[0][0]).toBe(view);
+    deps.projection.defenseSimulator.inflictedTotals.mockClear();
+    deps.live.simulation.snapshot.mockReturnValue({ ...snapshot, time: 0.5 });
+    deps.engine.step(0.1);
+    expect(deps.projection.defenseSimulator.inflictedTotals).toHaveBeenCalledTimes(2);
   });
 
   test("projection restores the live state into the projection world and steps it over the horizon", () => {

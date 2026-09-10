@@ -198,6 +198,9 @@ export class SidePanelImpl implements SidePanel {
       sig: Math.max(num(this.els.shipSig), 1),
       sigBloomFactor: this.sections.stats.currentSigBloomFactor(),
       sensorSpec: this.sensorSpecValue,
+      capacitor: this.fittedHull?.capacitor,
+      propulsionCapNeed: this.fittedHull?.propulsion?.capacitorNeed,
+      propulsionCapacityMultiplier: this.fittedHull?.propulsion?.capacitorCapacityMultiplier,
     };
   }
 

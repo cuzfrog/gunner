@@ -211,6 +211,7 @@ class TraceParamsParserImpl implements TraceParamsParser {
         rahActivation: { shipA: undefined, shipB: undefined },
       },
       overloaded: { shipA: false, shipB: false },
+      capacitor: { shipA: { infinite: false, drains: [], boosters: [] }, shipB: { infinite: false, drains: [], boosters: [] } },
     };
   }
 

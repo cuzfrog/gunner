@@ -1,6 +1,6 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 import type { DefenseSkills, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../../../ships";
-import type { AutopilotMode, SensorSpec, SimValueParser } from "../../../sim";
+import type { AutopilotMode, CapacitorSpec, SensorSpec, SimValueParser } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting } from "../../../appstate";
@@ -83,6 +83,9 @@ export interface SidePanelState {
   readonly sig?: number;
   readonly sigBloomFactor?: number;
   readonly sensorSpec?: SensorSpec;
+  readonly capacitor?: CapacitorSpec;
+  readonly propulsionCapNeed?: number;
+  readonly propulsionCapacityMultiplier?: number;
 }
 
 export interface FittingPopupControl {

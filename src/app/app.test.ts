@@ -47,6 +47,7 @@ const engineConfig: EngineConfig = {
     rahActivation: { shipA: undefined, shipB: undefined },
   },
   overloaded: { shipA: false, shipB: false },
+  capacitor: { shipA: { infinite: false, drains: [], boosters: [] }, shipB: { infinite: false, drains: [], boosters: [] } },
 };
 
 function baseView(): EngineView {
@@ -67,6 +68,10 @@ function baseView(): EngineView {
     ...engagementView,
     snapshot,
     defenseRuntime: emptyDefenseView,
+    capacitorRuntime: {
+      shipA: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, drains: [], boosters: [] },
+      shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, drains: [], boosters: [] },
+    },
     inflicted: ZERO_INFLICTED,
     drones: { shipA: [], shipB: [] },
     droneSpecs: { shipA: [], shipB: [] },
@@ -106,6 +111,7 @@ const engine = vi.mocked<EngagementEngine>({
   update: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
   step: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
   view: vi.fn(() => baseView()),
+  injectCapBooster: vi.fn(() => baseView()),
   events: vi.fn(() => engineEvents),
 });
 

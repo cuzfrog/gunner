@@ -1,4 +1,4 @@
-import { EMPTY_DEFENSE_SPEC, type CombatantConfig, type EngineConfig, type SimConfig, type WeaponSpec } from "../../../sim";
+import { EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, type CombatantConfig, type EngineConfig, type SimConfig, type WeaponSpec, type ScheduledDrain, type EwarProjection, type TurretBoostProjection, type MissileBoosterProjection, type SensorBoostProjection } from "../../../sim";
 import type { StatConditions } from "../../../ships";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
@@ -76,6 +76,20 @@ export class SimConfigSourceImpl implements SimConfigSource {
       weapons: { shipA: this.weaponsFor("shipA"), shipB: this.weaponsFor("shipB") },
       defense: this.defenseSimConfig(),
       overloaded: { shipA: this.overloadedFor("shipA"), shipB: this.overloadedFor("shipB") },
+      capacitor: { shipA: this.capacitorSide("shipA"), shipB: this.capacitorSide("shipB") },
+    };
+  }
+
+  private capacitorSide(side: Side): EngineConfig["capacitor"][Side] {
+    return {
+      infinite: false,
+      drains: drainsFromProjections(
+        this.ewarController.projection(side) ?? { loadout: EMPTY_EWAR_LOADOUT, activation: undefined },
+        this.boosterController.projection(side) ?? { loadout: EMPTY_BOOST_LOADOUT, activation: undefined },
+        this.missileBoosterController.projection(side) ?? { loadout: EMPTY_MISSILE_BOOSTER_LOADOUT, activation: undefined },
+        this.sensorBoosterController.projection(side) ?? { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: undefined },
+      ),
+      boosters: [],
     };
   }
 
@@ -93,6 +107,9 @@ export class SimConfigSourceImpl implements SimConfigSource {
       sig: state.sig ?? 1,
       sigBloom: state.sigBloomFactor ?? 0,
       sigPenalty: this.defenseController.spec(side)?.signaturePenalty ?? 0,
+      capacitor: state.capacitor,
+      propulsionCapNeed: state.propulsionCapNeed,
+      propulsionCapacityMultiplier: state.propulsionCapacityMultiplier,
       orbitDirection: "cw",
       ewar: this.ewarController.projection(side),
       boosts: this.boosterController.projection(side),
@@ -149,4 +166,36 @@ export class SimConfigSourceImpl implements SimConfigSource {
 interface SidePanelConfigSource {
   capture(): SidePanelState;
   skillConditions(): StatConditions;
+}
+
+/** Scheduled capacitor drains from every active ewar/booster module across the four controller projections. */
+function drainsFromProjections(ewar: EwarProjection, boosts: TurretBoostProjection, missileBoosts: MissileBoosterProjection, sensorBoosts: SensorBoostProjection): readonly ScheduledDrain[] {
+  const drains: ScheduledDrain[] = [];
+  const activation = ewar.activation;
+  const ewarFamilies = [
+    { specs: ewar.loadout.webs, activeAt: (i: number) => activation?.webs[i]?.active },
+    { specs: ewar.loadout.grapplers, activeAt: (i: number) => activation?.grapplers[i]?.active },
+    { specs: ewar.loadout.disruptors, activeAt: (i: number) => activation?.disruptors[i]?.active },
+    { specs: ewar.loadout.scramblers, activeAt: (i: number) => activation?.scramblers[i]?.active },
+    { specs: ewar.loadout.painters, activeAt: (i: number) => activation?.painters[i]?.active },
+    { specs: ewar.loadout.dampeners, activeAt: (i: number) => activation?.dampeners[i]?.active },
+  ] as const;
+  for (const family of ewarFamilies) {
+    family.specs.forEach((spec, i) => {
+      if (spec.capacitorNeed === undefined || spec.cycleTime === undefined || spec.capacitorNeed <= 0) return;
+      drains.push({ moduleId: spec.moduleId, amount: spec.capacitorNeed, interval: spec.cycleTime, active: family.activeAt(i) ?? true });
+    });
+  }
+  const boosterFamilies = [
+    { specs: boosts.loadout.computers, activation: boosts.activation?.computers },
+    { specs: missileBoosts.loadout.computers, activation: missileBoosts.activation?.computers },
+    { specs: sensorBoosts.loadout.boosters, activation: sensorBoosts.activation },
+  ] as const;
+  for (const family of boosterFamilies) {
+    family.specs.forEach((spec, i) => {
+      if (spec.capacitorNeed === undefined || spec.cycleTime === undefined || spec.capacitorNeed <= 0) return;
+      drains.push({ moduleId: spec.moduleId, amount: spec.capacitorNeed, interval: spec.cycleTime, active: family.activation?.[i]?.active ?? true });
+    });
+  }
+  return drains;
 }

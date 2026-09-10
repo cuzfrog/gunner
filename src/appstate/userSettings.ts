@@ -1,4 +1,4 @@
-import type { AutopilotMode, SigResolutionClass, WeaponKind } from "../sim";
+import type { AutopilotMode, CapacitorSpec, SigResolutionClass, WeaponKind } from "../sim";
 import type { DefenseSkills, FittedHull, PropulsionId, PropulsionKind, PropulsionStats, SkillLevel, TargetingSkills } from "../ships";
 import type { ShipId, TypeId } from "../gamedata/ids";
 import type { DroneGroup } from "../fitting";
@@ -59,6 +59,7 @@ export interface FittedHullSummary {
   readonly fitted: FittedHull;
   readonly propulsion?: PropulsionStats;
   readonly baseMaxSpeed?: number;
+  readonly capacitor?: CapacitorSpec;
 }
 
 export interface ProfileParamOverrides {

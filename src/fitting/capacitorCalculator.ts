@@ -44,16 +44,18 @@ export class CapacitorCalculatorImpl implements CapacitorCalculator {
   resolve(fitting: FittingState, conditions: StatConditions, defense: DefenseSpec): CapacitorStats {
     const skills = conditions.capacitorSkills ?? defaultCapacitorSkills(conditions.skillLevel);
     const spec = resolveSpec(this.db, fitting, skills, this.stacking);
+    const propulsion = fitting.propulsionModule ? this.db.modules[fitting.propulsionModule.moduleId]?.propulsion : undefined;
+    const effective = multiplyCapacity(spec, propulsion?.capacitorCapacityMultiplier);
     const rows = buildUsageRows(this.db, fitting, conditions, defense);
     const injectors = buildInjectorDrains(fitting, this.db);
     const usagePerSecond = rows.reduce((sum, row) => sum + row.perSecond * row.count, 0);
     const drains: readonly StaticDrain[] = [...rows.map((row) => ({ amount: row.amount, interval: row.cycleTime, count: row.count })), ...injectors];
-    const sim = runCapSim({ spec, drains });
-    const stablePercent = sim.stable ? ((sim.stableLow + sim.stableHigh) / 2 / spec.capacity) * 100 : undefined;
+    const sim = runCapSim({ spec: effective, drains });
+    const stablePercent = sim.stable ? ((sim.stableLow + sim.stableHigh) / 2 / effective.capacity) * 100 : undefined;
     const depletesInSeconds = sim.stable ? undefined : sim.depletesAt;
     return {
       spec,
-      peakRecharge: (2.5 * spec.capacity) / spec.rechargeTime,
+      peakRecharge: (2.5 * effective.capacity) / effective.rechargeTime,
       rows,
       usagePerSecond,
       ...(stablePercent !== undefined ? { stablePercent } : {}),
@@ -76,9 +78,6 @@ function resolveSpec(db: FittingDb, fitting: FittingState, skills: CapacitorSkil
     if (capacitor.capacityAdd !== undefined) capacityAdds.push(capacitor.capacityAdd);
   }
 
-  const propulsion = fitting.propulsionModule ? db.modules[fitting.propulsionModule.moduleId]?.propulsion : undefined;
-  if (propulsion?.capacitorCapacityMultiplier !== undefined) capacityMultipliers.push(propulsion.capacitorCapacityMultiplier);
-
   const capacityMultiplier = capacityMultipliers.length > 0 ? stacking.apply(capacityMultipliers) : 1;
   const rechargeMultiplier = rechargeMultipliers.length > 0 ? stacking.apply(rechargeMultipliers) : 1;
   const capacityAdd = capacityAdds.reduce((sum, add) => sum + add, 0);
@@ -87,6 +86,12 @@ function resolveSpec(db: FittingDb, fitting: FittingState, skills: CapacitorSkil
   const capacity = (profile.capacitorCapacity + capacityAdd) * capacityMultiplier * (1 + ENERGY_MANAGEMENT_BONUS * skills.energyManagement);
   const rechargeTime = profile.capacitorRechargeTime * rechargeMultiplier * (1 - ENERGY_SYSTEMS_OPERATIONS_BONUS * skills.energySystemsOperations);
   return { capacity, rechargeTime };
+}
+
+/** Propulsion capacity penalty (e.g. MWD -25%) applies at the consumer: the exported spec stays propulsion-independent. */
+function multiplyCapacity(spec: CapacitorSpec, multiplier: number | undefined): CapacitorSpec {
+  if (multiplier === undefined || multiplier === 1) return spec;
+  return { capacity: spec.capacity * multiplier, rechargeTime: spec.rechargeTime };
 }
 
 function buildUsageRows(db: FittingDb, fitting: FittingState, conditions: StatConditions, defense: DefenseSpec): readonly CapacitorUsageRow[] {

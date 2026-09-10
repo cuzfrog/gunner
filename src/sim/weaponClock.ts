@@ -1,8 +1,9 @@
 import type { Rng, RngFactory } from "./rng";
 import { type HitRollStrategy, sampledHitRoll } from "./hitRoll";
+import type { CapacitorGate } from "./capacitorSimulator";
 import type { Restorable } from "./restorable";
 import type { EngagementView, WeaponAttack } from "./engagementFrameComposer";
-import type { DamageEvent, Side, WeaponKind } from "./types";
+import type { DamageEvent, Side, WeaponKind, WeaponSpec } from "./types";
 import { damageVectorScale, damageVectorSum } from "./types";
 
 export interface WeaponCooldownSnapshot {
@@ -23,7 +24,7 @@ export interface WeaponClockState {
 
 export interface WeaponClock extends Restorable<WeaponClockState> {
   reset(): void;
-  step(dt: number, view: EngagementView): readonly DamageEvent[];
+  step(dt: number, view: EngagementView, capacitor?: CapacitorGate): readonly DamageEvent[];
   spoolCycles(side: Side, weaponIndex: number): number;
 }
 
@@ -76,16 +77,16 @@ export class WeaponClockImpl implements WeaponClock {
     };
   }
 
-  step(dt: number, view: EngagementView): readonly DamageEvent[] {
+  step(dt: number, view: EngagementView, capacitor?: CapacitorGate): readonly DamageEvent[] {
     const events: DamageEvent[] = [];
     if (view.locks.shipA.status === "locked") {
-      const shipAEvents = this.stepSide("shipA", dt, view.weaponAttacks.shipA, "shipB");
+      const shipAEvents = this.stepSide("shipA", dt, view.weaponAttacks.shipA, "shipB", capacitor);
       for (const event of shipAEvents) events.push(event);
     } else {
       this.clearCooldowns("shipA", view.weaponAttacks.shipA);
     }
     if (view.locks.shipB.status === "locked") {
-      const shipBEvents = this.stepSide("shipB", dt, view.weaponAttacks.shipB, "shipA");
+      const shipBEvents = this.stepSide("shipB", dt, view.weaponAttacks.shipB, "shipA", capacitor);
       for (const event of shipBEvents) events.push(event);
     } else {
       this.clearCooldowns("shipB", view.weaponAttacks.shipB);
@@ -99,7 +100,7 @@ export class WeaponClockImpl implements WeaponClock {
     clock.weaponSignature = weaponSignature(attacks);
   }
 
-  private stepSide(source: Side, dt: number, attacks: readonly WeaponAttack[], target: Side): readonly DamageEvent[] {
+  private stepSide(source: Side, dt: number, attacks: readonly WeaponAttack[], target: Side, capacitor?: CapacitorGate): readonly DamageEvent[] {
     const events: DamageEvent[] = [];
     const clock = this.sides[source];
     const signature = weaponSignature(attacks);
@@ -116,6 +117,12 @@ export class WeaponClockImpl implements WeaponClock {
       if (attack.assessment.drone && !attack.assessment.drone.inRange) continue;
       const cycleTime = attack.weapon.cycleTime;
       if (cycleTime <= 0) continue;
+      const capNeed = turretCapacitorNeed(attack.weapon);
+      const isNew = !clock.cooldowns.has(i);
+      if (capacitor && capNeed > 0 && isNew && !capacitor.attemptDebit(source, capNeed)) {
+        // Activation denied: no cooldown entry, the debit is retried next frame.
+        continue;
+      }
       const spoolSpec = attack.weapon.kind === "turret" ? attack.weapon.spool : undefined;
       if (spoolSpec !== undefined && attack.assessment.turret && !attack.assessment.turret.inOptimal) {
         // A disintegrator deactivates while its target is beyond optimal; reactivation restarts cycle and spool.
@@ -125,6 +132,12 @@ export class WeaponClockImpl implements WeaponClock {
       const cooldown = clock.cooldowns.get(i) ?? { timer: cycleTime, cycleTime, spoolCycles: 0 };
       cooldown.timer -= dt;
       if (cooldown.timer <= 0) {
+        if (capacitor && capNeed > 0 && !capacitor.attemptDebit(source, capNeed)) {
+          // Starved mid-cycle: the module stays off until the capacitor recovers.
+          cooldown.timer = 0;
+          clock.cooldowns.set(i, cooldown);
+          continue;
+        }
         cooldown.timer += cycleTime;
         if (cooldown.timer < 0) cooldown.timer = cycleTime;
         const event = this.rollEvent(source, target, i, kind, attack, breakdown.hit.chance, breakdown.expectedMultiplier, clock.rng);
@@ -176,4 +189,9 @@ function weaponSignature(attacks: readonly WeaponAttack[]): string {
     sig += w.kind + ":" + w.cycleTime + (spool ? ":" + spool : "") + ";";
   }
   return sig;
+}
+
+function turretCapacitorNeed(weapon: WeaponSpec): number {
+  if (weapon.kind !== "turret" || weapon.capacitorNeed === undefined) return 0;
+  return weapon.capacitorNeed * weapon.turretCount;
 }

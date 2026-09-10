@@ -86,9 +86,10 @@ describe("capacitorCalculator", () => {
     expect(result.spec.capacity).toBeCloseTo(10000, 3); // (6375 + 1625) * 1.25
   });
 
-  test("MWD multiplies capacity and drains per 10 s cycle", () => {
+  test("MWD capacity penalty applies to peak recharge but not the exported spec", () => {
     const result = resolve([moduleEntry("50MN Microwarpdrive I")]);
-    expect(result.spec.capacity).toBeCloseTo(6375 * 0.75, 3);
+    expect(result.spec.capacity).toBeCloseTo(6375, 3);
+    expect(result.peakRecharge).toBeCloseTo((2.5 * 6375 * 0.75) / 1250, 6);
     const row = result.rows.find((candidate) => candidate.moduleName === "50MN Microwarpdrive I");
     expect(row).toBeDefined();
     expect(row?.amount).toBeCloseTo(180, 3);

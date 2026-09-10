@@ -240,6 +240,58 @@ describe("SimConfigSourceImpl", () => {
     expect(engineConfig.overloaded).toEqual({ shipA: true, shipB: true });
   });
 
+  test("getEngineConfig carries capacitor spec, propulsion cap need, and multiplier from side state", () => {
+    const deps = build();
+    const base = deps.shipASide.capture();
+    deps.shipASide.capture = vi.fn(() => ({ ...base, capacitor: { capacity: 6375, rechargeTime: 1250 }, propulsionCapNeed: 180, propulsionCapacityMultiplier: 0.75 }));
+    const engineConfig = makeSource(deps).getEngineConfig();
+    expect(engineConfig.sim.shipA.capacitor).toEqual({ capacity: 6375, rechargeTime: 1250 });
+    expect(engineConfig.sim.shipA.propulsionCapNeed).toBe(180);
+    expect(engineConfig.sim.shipA.propulsionCapacityMultiplier).toBe(0.75);
+    expect(engineConfig.sim.shipB.capacitor).toBeUndefined();
+  });
+
+  test("getEngineConfig builds drains from active ewar and booster modules only", () => {
+    const deps = build();
+    const web: import("../../../sim").StasisWebSpec = { moduleName: "Web", moduleId: toTypeId("526"), maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 0, capacitorNeed: 6, cycleTime: 5 };
+    const painter: import("../../../sim").TargetPainterSpec = { moduleName: "Painter", moduleId: toTypeId("12709"), maxRange: 30000, falloff: 7500, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 0, capacitorNeed: 8, cycleTime: 5 };
+    const computer: import("../../../sim").TrackingBoosterSpec = { moduleName: "Computer", moduleId: toTypeId("1978"), trackingBonusPercent: 15, optimalBonusPercent: 7.5, falloffBonusPercent: 15, defaultScript: undefined, capacitorNeed: 10, cycleTime: 10 };
+    const sensor: import("../../../sim").SensorBoosterSpec = { moduleName: "Booster", moduleId: toTypeId("1952"), scanResolutionBonusPercent: 30, maxTargetRangeBonusPercent: 30, overloadStrengthBonusPercent: 15, defaultScript: undefined, capacitorNeed: 12, cycleTime: 10 };
+    const ewar: EwarProjection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [painter], dampeners: [], scripts: [], dampenerScripts: [] }, activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [{ active: false, overloaded: false }], dampeners: [] } };
+    const boost: TurretBoostProjection = { loadout: { computers: [computer], scripts: [] }, activation: { computers: [{ active: true, overloaded: false, script: undefined }] } };
+    deps.ewarController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? ewar : undefined));
+    deps.boosterController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? boost : undefined));
+    deps.sensorBoosterController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? { loadout: { boosters: [sensor], amplifiers: [], boosterScripts: [] }, activation: [{ active: false, overloaded: false, script: undefined }] } : undefined));
+    const engineConfig = makeSource(deps).getEngineConfig();
+    expect(engineConfig.capacitor.shipA.drains).toEqual([
+      { moduleId: web.moduleId, amount: 6, interval: 5, active: true },
+      { moduleId: painter.moduleId, amount: 8, interval: 5, active: false },
+      { moduleId: computer.moduleId, amount: 10, interval: 10, active: true },
+      { moduleId: sensor.moduleId, amount: 12, interval: 10, active: false },
+    ]);
+    expect(engineConfig.capacitor.shipB.drains).toEqual([]);
+    expect(engineConfig.capacitor.shipA.boosters).toEqual([]);
+    expect(engineConfig.capacitor.shipA.infinite).toBe(false);
+  });
+
+  test("getEngineConfig builds drains when activation is absent (defaults to active)", () => {
+    const deps = build();
+    const web: import("../../../sim").StasisWebSpec = { moduleName: "Web", moduleId: toTypeId("526"), maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 0, capacitorNeed: 6, cycleTime: 5 };
+    const ewar: EwarProjection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [] } };
+    deps.ewarController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? ewar : undefined));
+    const engineConfig = makeSource(deps).getEngineConfig();
+    expect(engineConfig.capacitor.shipA.drains).toEqual([{ moduleId: web.moduleId, amount: 6, interval: 5, active: true }]);
+  });
+
+  test("getEngineConfig drops drains for specs without capacitor data", () => {
+    const deps = build();
+    const computer: import("../../../sim").TrackingBoosterSpec = { moduleName: "Computer", moduleId: toTypeId("1978"), trackingBonusPercent: 15, optimalBonusPercent: 7.5, falloffBonusPercent: 15, defaultScript: undefined };
+    const boost: TurretBoostProjection = { loadout: { computers: [computer], scripts: [] }, activation: { computers: [] } };
+    deps.boosterController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? boost : undefined));
+    const engineConfig = makeSource(deps).getEngineConfig();
+    expect(engineConfig.capacitor.shipA.drains).toEqual([]);
+  });
+
   test("getEngineConfig weapons reflect the active weapon system switch kind", () => {
     const deps = build();
     deps.weaponSystemSwitches.shipA.activeKind = vi.fn(() => "missile" as const);
