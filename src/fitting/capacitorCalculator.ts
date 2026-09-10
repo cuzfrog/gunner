@@ -167,7 +167,10 @@ interface ActiveCapFamily {
 
 /** Capacitor-consuming active stats across the fittingDb family catalogs. */
 function findActiveCapFamily(db: FittingDb, moduleId: TypeId): ActiveCapFamily | undefined {
-  const family = db.stasisWebs[moduleId] ?? db.stasisGrapplers[moduleId] ?? db.trackingDisruptors[moduleId] ?? db.warpScramblers[moduleId] ?? db.targetPainters[moduleId] ?? db.sensorDampeners[moduleId] ?? db.trackingComputers[moduleId] ?? db.missileGuidanceComputers[moduleId] ?? db.sensorBoosters[moduleId] ?? db.omnidirectionalTrackingLinks[moduleId];
+  // Omnidirectional tracking links are deliberately absent: phase 3 scoped their drain out of the
+  // runtime simulation (drones run their own pool; the effect is pre-baked into drone stats), so
+  // the static usage rows must not include a drain that never happens.
+  const family = db.stasisWebs[moduleId] ?? db.stasisGrapplers[moduleId] ?? db.trackingDisruptors[moduleId] ?? db.warpScramblers[moduleId] ?? db.targetPainters[moduleId] ?? db.sensorDampeners[moduleId] ?? db.trackingComputers[moduleId] ?? db.missileGuidanceComputers[moduleId] ?? db.sensorBoosters[moduleId];
   if (family) return { moduleName: family.name, capacitorNeed: family.capacitorNeed, cycleTime: family.cycleTime };
   const stats: FittingModuleStats | undefined = db.modules[moduleId];
   if (stats?.neutralizer) return { moduleName: stats.name, capacitorNeed: stats.neutralizer.capacitorNeed, cycleTime: stats.neutralizer.cycleTime };

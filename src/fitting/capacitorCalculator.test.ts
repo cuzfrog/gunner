@@ -39,7 +39,7 @@ const calculator = new CapacitorCalculatorImpl({ fittingDb: FITTING_DB, stacking
 const emptyConditions: StatConditions = { skillLevel: 0 as SkillLevel, overloaded: false, weaponOverloaded: false };
 
 function moduleEntry(name: string, chargeName?: string): FittingModuleEntry {
-  const searchCatalogs = [FITTING_DB.modules, FITTING_DB.turrets, FITTING_DB.launchers, FITTING_DB.trackingComputers] as const;
+  const searchCatalogs = [FITTING_DB.modules, FITTING_DB.turrets, FITTING_DB.launchers, FITTING_DB.trackingComputers, FITTING_DB.omnidirectionalTrackingLinks] as const;
   for (const catalog of searchCatalogs) {
     for (const stats of Object.values(catalog)) {
       if (stats.name === name) {
@@ -181,6 +181,20 @@ describe("capacitorCalculator", () => {
     expect(row).toBeDefined();
     expect(row?.amount).toBeCloseTo(10, 3);
     expect(row?.cycleTime).toBeCloseTo(10, 3);
+  });
+
+  test("omnidirectional tracking links produce no usage row (runtime never debits them)", () => {
+    const withOmni = resolve([moduleEntry("Omnidirectional Tracking Link II")]);
+    const withoutOmni = resolve([]);
+    expect(withOmni.rows).toHaveLength(0);
+    expect(withOmni.usagePerSecond).toBeCloseTo(withoutOmni.usagePerSecond, 9);
+    expect(withOmni.stablePercent ?? 0).toBeCloseTo(withoutOmni.stablePercent ?? 0, 9);
+  });
+
+  test("omnidirectional tracking link alongside a stasis web yields exactly the web row", () => {
+    const result = resolve([moduleEntry("Omnidirectional Tracking Link II"), moduleEntry("Stasis Webifier II")]);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0]?.moduleName).toBe("Stasis Webifier II");
   });
 
   test("energy neutralizers drain own capacitor, nosferatu do not", () => {
