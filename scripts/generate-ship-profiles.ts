@@ -172,10 +172,16 @@ interface CapacitorData {
 
 function extractCapacitorData(typeId: string, typedogmas: Record<string, SdeTypeDogma>, attributeNames: Map<number, string>): CapacitorData {
   const typeDogma = typedogmas[typeId];
+  // Legacy entries (ships absent from the SDE ship index) have no dogma to read; generation warns for them.
+  if (!typeDogma) return { capacitorCapacity: 0, capacitorRechargeTime: 0 };
   const values = buildAttributeValues(attributeNames, typeDogma);
+  const capacity = values.get("capacitorCapacity");
+  const rechargeRate = values.get("rechargeRate");
+  if (capacity === undefined) throw new Error(`${typeId}: missing capacitorCapacity dogma attribute`);
+  if (rechargeRate === undefined) throw new Error(`${typeId}: missing rechargeRate dogma attribute`);
   return {
-    capacitorCapacity: values.get("capacitorCapacity") ?? 0,
-    capacitorRechargeTime: (values.get("rechargeRate") ?? 0) / SHIELD_RECHARGE_RATE_MS,
+    capacitorCapacity: capacity,
+    capacitorRechargeTime: rechargeRate / SHIELD_RECHARGE_RATE_MS,
   };
 }
 
