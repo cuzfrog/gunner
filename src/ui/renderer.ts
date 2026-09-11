@@ -121,13 +121,15 @@ export class CanvasRenderer implements Renderer {
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly i18n: I18n;
-  private camera: Camera = { center: new Vec2(0, 0), scale: 1 };
+  // scale 0 marks "no frame drawn yet": a fresh manual session anchors on its first frame's auto scale.
+  private camera: Camera = { center: new Vec2(0, 0), scale: 0 };
   private gridBrightness = DEFAULT_GRID_BRIGHTNESS;
   private weaponRangeVisibility: WeaponRangeVisibility = "both";
   private droneRangeVisibility: WeaponRangeVisibility = "none";
   private droneControlRangeVisibility: WeaponRangeVisibility = "none";
   private autoZoom = true;
   private zoomFactor = 1;
+  private manualAnchor: number | undefined; // scale the slider multiplies; captured when manual mode engages
   private cameraRanges: WeaponRanges = UNCONFIGURED_RANGES;
   private lockStates: Record<Side, LockState> | undefined;
 
@@ -200,8 +202,16 @@ export class CanvasRenderer implements Renderer {
     const distance = shipA.position.dist(shipB.position);
     const minDim = Math.min(this.canvas.width, this.canvas.height);
     const autoScale = autoCameraScale(distance, minDim, this.cameraRanges, this.weaponRangeVisibility);
-    const zoom = this.autoZoom ? 1 : this.zoomFactor;
-    this.camera = { center, scale: autoScale * zoom };
+    this.camera = { center, scale: this.applyZoom(autoScale) };
+  }
+
+  private applyZoom(autoScale: number): number {
+    if (this.autoZoom) {
+      this.manualAnchor = undefined;
+      return autoScale;
+    }
+    if (this.manualAnchor === undefined) this.manualAnchor = (this.camera.scale > 0 ? this.camera.scale : autoScale) / this.zoomFactor;
+    return this.manualAnchor * this.zoomFactor;
   }
 
   private worldToScreen(p: Vec2): Vec2 {

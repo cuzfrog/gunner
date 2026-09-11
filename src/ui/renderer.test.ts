@@ -251,6 +251,90 @@ describe("CanvasRenderer", () => {
     });
   });
 
+  describe("manual zoom anchoring", () => {
+    function zoomRenderer(): CanvasRenderer {
+      const renderer = new CanvasRenderer({ canvas: fakeCanvas(1000, 1000), i18n: fakeI18n() });
+      renderer.setCameraRanges(zeroRanges);
+      return renderer;
+    }
+
+    function drawShips(renderer: CanvasRenderer, shipB: ShipState): void {
+      renderer.draw({ ...snapshot, shipB }, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, undefined);
+    }
+
+    function zoomFactorOf(renderer: CanvasRenderer): number {
+      return (renderer as unknown as { zoomFactor: number }).zoomFactor;
+    }
+
+    const shipA = shipAt(new Vec2(0, 0), "shipA");
+    const at5000 = shipAt(new Vec2(0, 5000), "shipB");
+    const at10000 = shipAt(new Vec2(0, 10000), "shipB");
+    const at20000 = shipAt(new Vec2(0, 20000), "shipB");
+
+    test("toggling auto zoom off keeps the current scale", () => {
+      const renderer = zoomRenderer();
+      drawShips(renderer, at5000);
+      const before = scaleOf(renderer);
+      renderer.setManualZoom(false, 1);
+      drawShips(renderer, at10000);
+      expect(scaleOf(renderer)).toBe(before);
+    });
+
+    test("manual zoom factor multiplies the anchored scale", () => {
+      const renderer = zoomRenderer();
+      renderer.setManualZoom(false, 1);
+      drawShips(renderer, at5000);
+      const anchored = scaleOf(renderer);
+      renderer.setManualZoom(false, 2);
+      drawShips(renderer, at5000);
+      expect(scaleOf(renderer)).toBeCloseTo(anchored * 2, 10);
+    });
+
+    test("manual scale stays constant while distance and camera ranges change", () => {
+      const renderer = zoomRenderer();
+      renderer.setManualZoom(false, 1);
+      drawShips(renderer, at5000);
+      const anchored = scaleOf(renderer);
+      renderer.setCameraRanges({ shipA: { kind: "turret", optimal: 12000, falloff: 0 }, shipB: { kind: "turret", optimal: 12000, falloff: 0 } });
+      drawShips(renderer, at20000);
+      expect(scaleOf(renderer)).toBe(anchored);
+    });
+
+    test("re-enabling manual zoom re-anchors at the current auto scale", () => {
+      const renderer = zoomRenderer();
+      renderer.setManualZoom(false, 1);
+      drawShips(renderer, at5000);
+      const first = scaleOf(renderer);
+      renderer.setManualZoom(true, 1);
+      drawShips(renderer, at20000);
+      const auto = scaleOf(renderer);
+      expect(auto).not.toBe(first);
+      renderer.setManualZoom(false, 1);
+      drawShips(renderer, at20000);
+      expect(scaleOf(renderer)).toBe(auto);
+    });
+
+    test("a fresh manual session anchors on the first frame's auto scale", () => {
+      const autoRenderer = zoomRenderer();
+      drawShips(autoRenderer, at5000);
+      const autoScale = scaleOf(autoRenderer);
+      const manualRenderer = zoomRenderer();
+      manualRenderer.setManualZoom(false, 2);
+      drawShips(manualRenderer, at5000);
+      expect(scaleOf(manualRenderer)).toBeCloseTo(autoScale, 10);
+      drawShips(manualRenderer, at20000);
+      expect(scaleOf(manualRenderer)).toBeCloseTo(autoScale, 10);
+    });
+
+    test("manual zoom factor stays clamped to [0.25, 4]", () => {
+      const renderer = zoomRenderer();
+      renderer.setManualZoom(false, 10);
+      expect(zoomFactorOf(renderer)).toBe(4);
+      renderer.setManualZoom(false, 0.1);
+      expect(zoomFactorOf(renderer)).toBe(0.25);
+    });
+  });
+
   describe("drawRangeOverlays", () => {
     function cameraOf(renderer: CanvasRenderer): { center: Vec2; scale: number } {
       return (renderer as unknown as { camera: { center: Vec2; scale: number } }).camera;
