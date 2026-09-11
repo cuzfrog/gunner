@@ -68,18 +68,18 @@ function emptyCapacitorView(shipAStarved: readonly TypeId[] = []): Record<"shipA
 
 function buildDeps() {
   const viewStream = createTestViewStream();
-  const engagementReadout = { update: vi.fn() } as unknown as EngagementReadout;
-  const effectiveReadout = { update: vi.fn() } as unknown as EffectiveReadout;
+  const engagementReadout = { update: vi.fnUntracked() } as unknown as EngagementReadout;
+  const effectiveReadout = { update: vi.fnUntracked() } as unknown as EffectiveReadout;
   const defenseReadout: DefenseReadout = {
-    updateAssessments: vi.fn(),
-    updateDefenseView: vi.fn(),
-    updateEffectiveSig: vi.fn(),
+    updateAssessments: vi.fnUntracked(),
+    updateDefenseView: vi.fnUntracked(),
+    updateEffectiveSig: vi.fnUntracked(),
   };
   const capacitorReadout: CapacitorReadout = {
-    updateRuntime: vi.fn(),
-    setPlaying: vi.fn(),
+    updateRuntime: vi.fnUntracked(),
+    setPlaying: vi.fnUntracked(),
   };
-  const starvedReadout = { updateStarvedModules: vi.fn() };
+  const starvedReadout = { updateStarvedModules: vi.fnUntracked() };
   let fakeNow = 0;
   const deps = { viewStream, engagementReadout, effectiveReadout, defenseReadout, capacitorReadout, starvedReadout, i18n: mockI18n(), now: () => fakeNow };
   return { ...deps, setNow: (n: number) => { fakeNow = n; } };
@@ -165,9 +165,9 @@ describe("ReadoutPresenterImpl", () => {
     const firstAssessArgs = assessMock.mock.calls.map((c) => [...c]);
     const firstEffArgs = effMock.mock.calls.map((c) => [...c]);
     const mutatedDefenseReadout: DefenseReadout = {
-      updateAssessments: vi.fn(),
-      updateDefenseView: vi.fn(),
-      updateEffectiveSig: vi.fn(),
+      updateAssessments: vi.fnUntracked(),
+      updateDefenseView: vi.fnUntracked(),
+      updateEffectiveSig: vi.fnUntracked(),
     };
     Object.assign(d.defenseReadout, mutatedDefenseReadout);
     d.viewStream.emit(view);

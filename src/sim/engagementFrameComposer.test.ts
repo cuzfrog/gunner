@@ -77,9 +77,9 @@ const shipBAssessment: AttackAssessment = {
 };
 
 function makeComposer() {
-  const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn(() => frame) });
+  const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fnUntracked(() => frame) });
   const engagementEvaluator = vi.mocked<EngagementEvaluator>({
-    evaluate: vi.fn(() => ({ shipA: shipAAssessment, shipB: shipBAssessment })),
+    evaluate: vi.fnUntracked(() => ({ shipA: shipAAssessment, shipB: shipBAssessment })),
   });
   const defenseAssessor: DefenseAssessor = new DefenseAssessorImpl();
   const ewarResolver: EwarResolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });

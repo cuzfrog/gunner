@@ -19,6 +19,8 @@ const mockFooService = vi.mocked<FooService>({
 
 `vi.mocked` is added onto the global namespace in `tests/test-setup.ts`. The shim tracks every mock created via `vi.fn`/`vi.spyOn` and installs a global `beforeEach` that resets all of them between tests for max isolation: call history, sticky `mockReturnValue`, and the `mockReturnValueOnce` queue are wiped, and spies are uninstalled (original implementation restored). A factory implementation passed to `vi.fn(impl)` survives the reset — it is the mock's default behavior, not per-test state. (Bun's built-in `resetAllMocks` alone is not enough: it keeps sticky returns installed, hence the tracking.) So create mocks at file top, and configure behavior in `beforeEach` — never in `beforeAll`, where the global reset hook runs afterwards and silently undoes the configuration.
 
+Mocks that are created fresh per test — inside a factory or constructor invoked in `beforeEach`/the test body, e.g. fake DOM elements — must use `vi.fnUntracked()`/`vi.spyOnUntracked()` instead: they die with their test, so resetting them is pointless, and tracking them would grow the reset registry by thousands of entries per run (the registry keeps every mock alive until the run ends, which once made late-suite tests ~10x slower). Same matchers (`toHaveBeenCalled`, etc.) work on untracked mocks; the only difference is that the global reset does not know them.
+
 ## Pattern: file-top mocks, reused across tests
 
 Define mocks at the top of the test file, above `describe`. The same mock object is reused across every test in the file; only its behavior is reset between tests by the global `beforeEach`.

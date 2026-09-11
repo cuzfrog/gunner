@@ -112,13 +112,13 @@ function zeroTotals(): Record<"shipA" | "shipB", LayerDamage> {
 
 function mockWorld() {
   return {
-    simulation: vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(() => snapshot), reset: vi.fn(), update: vi.fn(), capture: vi.fn(simulationState), restore: vi.fn() }),
-    lockClock: vi.mocked<LockClock>({ reset: vi.fn(), step: vi.fn(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), states: vi.fn(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), capture: vi.fn(lockClockState), restore: vi.fn() }),
-    droneSimulator: vi.mocked<DroneSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), states: vi.fn(() => []), capture: vi.fn(droneSimulatorState), restore: vi.fn() }),
-    missileSimulator: vi.mocked<MissileSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(() => []), states: vi.fn(() => []), facts: vi.fn(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })), capture: vi.fn(missileSimulatorState), restore: vi.fn() }),
-    weaponClock: vi.mocked<WeaponClock>({ reset: vi.fn(), step: vi.fn(() => []), capture: vi.fn(weaponClockState), restore: vi.fn(), spoolCycles: vi.fn(() => 0) }),
-    defenseSimulator: vi.mocked<DefenseSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), flushPendingDamage: vi.fn(), view: vi.fn(() => emptyDefenseView), inflictedTotals: vi.fn(zeroTotals), capture: vi.fn(defenseSimulatorState), restore: vi.fn() }),
-    capacitorSimulator: vi.mocked<CapacitorSimulator>({ reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(() => emptyCapacitorView), attemptDebit: vi.fn(() => true), incomingDrains: vi.fn(), propulsionStarved: vi.fn(() => false), injectBooster: vi.fn(), capture: vi.fn(capacitorSimulatorState), restore: vi.fn() }),
+    simulation: vi.mocked<Simulation>({ step: vi.fnUntracked(), snapshot: vi.fnUntracked(() => snapshot), reset: vi.fnUntracked(), update: vi.fnUntracked(), capture: vi.fnUntracked(simulationState), restore: vi.fnUntracked() }),
+    lockClock: vi.mocked<LockClock>({ reset: vi.fnUntracked(), step: vi.fnUntracked(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), states: vi.fnUntracked(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), capture: vi.fnUntracked(lockClockState), restore: vi.fnUntracked() }),
+    droneSimulator: vi.mocked<DroneSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), states: vi.fnUntracked(() => []), capture: vi.fnUntracked(droneSimulatorState), restore: vi.fnUntracked() }),
+    missileSimulator: vi.mocked<MissileSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(() => []), states: vi.fnUntracked(() => []), facts: vi.fnUntracked(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })), capture: vi.fnUntracked(missileSimulatorState), restore: vi.fnUntracked() }),
+    weaponClock: vi.mocked<WeaponClock>({ reset: vi.fnUntracked(), step: vi.fnUntracked(() => []), capture: vi.fnUntracked(weaponClockState), restore: vi.fnUntracked(), spoolCycles: vi.fnUntracked(() => 0) }),
+    defenseSimulator: vi.mocked<DefenseSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), flushPendingDamage: vi.fnUntracked(), view: vi.fnUntracked(() => emptyDefenseView), inflictedTotals: vi.fnUntracked(zeroTotals), capture: vi.fnUntracked(defenseSimulatorState), restore: vi.fnUntracked() }),
+    capacitorSimulator: vi.mocked<CapacitorSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), view: vi.fnUntracked(() => emptyCapacitorView), attemptDebit: vi.fnUntracked(() => true), incomingDrains: vi.fnUntracked(), propulsionStarved: vi.fnUntracked(() => false), injectBooster: vi.fnUntracked(), capture: vi.fnUntracked(capacitorSimulatorState), restore: vi.fnUntracked() }),
   };
 }
 
@@ -140,22 +140,22 @@ const EMPTY_CAPACITOR_SIDE: CapacitorSideConfig = { infinite: false, drains: [],
 function makeEngine() {
   const live = mockWorld();
   const projection = mockWorld();
-  const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn(() => baseView()) });
+  const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fnUntracked(() => baseView()) });
   const ewarResolver = vi.mocked<Required<EwarResolver>>({
-    speedMultiplier: vi.fn(() => 1), speedMultiplierIgnoringRange: vi.fn(() => 1),
-    sigMultiplier: vi.fn(() => 1), sigMultiplierIgnoringRange: vi.fn(() => 1),
-    disruptedTurret: vi.fn((t) => t), disruptedTurretIgnoringRange: vi.fn((t) => t),
-    propulsionSuppressed: vi.fn(() => false), propulsionSuppressedIgnoringRange: vi.fn(() => false),
-    appliedEffects: vi.fn(() => []),
-    speedBreakdown: vi.fn(() => ({ effects: [], propulsionSuppressed: false })),
-    disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
-    disruptionMultipliers: vi.fn(() => ({ tracking: 1, optimal: 1, falloff: 1 })),
-    dampenedSensorSpec: vi.fn((s) => s), dampenedSensorSpecIgnoringRange: vi.fn((s) => s),
-    dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
-    reach: vi.fn(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, })),
-    potentials: vi.fn(() => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 })),
+    speedMultiplier: vi.fnUntracked(() => 1), speedMultiplierIgnoringRange: vi.fnUntracked(() => 1),
+    sigMultiplier: vi.fnUntracked(() => 1), sigMultiplierIgnoringRange: vi.fnUntracked(() => 1),
+    disruptedTurret: vi.fnUntracked((t) => t), disruptedTurretIgnoringRange: vi.fnUntracked((t) => t),
+    propulsionSuppressed: vi.fnUntracked(() => false), propulsionSuppressedIgnoringRange: vi.fnUntracked(() => false),
+    appliedEffects: vi.fnUntracked(() => []),
+    speedBreakdown: vi.fnUntracked(() => ({ effects: [], propulsionSuppressed: false })),
+    disruptionBreakdown: vi.fnUntracked(() => ({ tracking: [], optimal: [], falloff: [] })),
+    disruptionMultipliers: vi.fnUntracked(() => ({ tracking: 1, optimal: 1, falloff: 1 })),
+    dampenedSensorSpec: vi.fnUntracked((s) => s), dampenedSensorSpecIgnoringRange: vi.fnUntracked((s) => s),
+    dampenerBreakdown: vi.fnUntracked(() => ({ scanResolution: [], maxTargetRange: [] })),
+    reach: vi.fnUntracked(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, })),
+    potentials: vi.fnUntracked(() => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 })),
   });
-  const sensorBoosterResolver = vi.mocked<SensorBoosterResolver>({ boostedSensorSpec: vi.fn((s) => s) });
+  const sensorBoosterResolver = vi.mocked<SensorBoosterResolver>({ boostedSensorSpec: vi.fnUntracked((s) => s) });
   const engine = new EngagementEngineImpl({ live, projection, engagementFrameComposer, ewarResolver, sensorBoosterResolver });
   return { engine, live, projection, engagementFrameComposer, ewarResolver, sensorBoosterResolver };
 }
@@ -228,7 +228,7 @@ describe("EngagementEngineImpl", () => {
 
   test("capacitor.step precedes simulation.step and receives ewar suppression with the pre-step distance", () => {
     const deps = makeEngine();
-    deps.ewarResolver.propulsionSuppressed = vi.fn(() => true);
+    deps.ewarResolver.propulsionSuppressed = vi.fnUntracked(() => true);
     deps.engine.reset(engineConfig());
     deps.engine.step(0.1);
     expect(deps.live.capacitorSimulator.step).toHaveBeenCalledWith(0.1, { shipA: true, shipB: true });
@@ -237,7 +237,7 @@ describe("EngagementEngineImpl", () => {
 
   test("capacitor starvation from the simulator suppresses propulsion in simulation.step", () => {
     const deps = makeEngine();
-    deps.live.capacitorSimulator.propulsionStarved = vi.fn((side: "shipA" | "shipB") => side === "shipA");
+    deps.live.capacitorSimulator.propulsionStarved = vi.fnUntracked((side: "shipA" | "shipB") => side === "shipA");
     deps.engine.reset(engineConfig());
     deps.engine.step(0.1);
     expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: true, shipB: false } });
@@ -276,7 +276,7 @@ describe("EngagementEngineImpl", () => {
   test("injectCapBooster delegates to the live simulator, republishes the view, and marks projection dirty", () => {
     const deps = makeEngine();
     deps.engine.reset(engineConfig());
-    const listener = vi.fn();
+    const listener = vi.fnUntracked();
     deps.engine.events().onViewUpdated(listener);
     deps.live.capacitorSimulator.injectBooster.mockClear();
     const view = deps.engine.injectCapBooster("shipA", 2);

@@ -21,7 +21,7 @@ class FakeElement {
   hidden = true;
   checked = true;
   textContent = "";
-  classList = { toggle: vi.fn() };
+  classList = { toggle: vi.fnUntracked() };
   private attributes: Record<string, string | null> = {};
   private handlers: Record<string, Array<(event?: unknown) => void>> = {};
   style: Record<string, string> & { setProperty(name: string, value: string): void } = Object.assign(Object.create(null), {
@@ -81,72 +81,72 @@ function fakeEls(): PreferencesEls {
 function mockI18n(): I18n {
   let current: "en" | "zh" | "ja" = "en";
   return {
-    current: vi.fn(() => current),
-    setLanguage: vi.fn((language) => {
+    current: vi.fnUntracked(() => current),
+    setLanguage: vi.fnUntracked((language) => {
       current = language;
     }),
-    t: vi.fn((key) => key),
-    translateDocument: vi.fn(),
+    t: vi.fnUntracked((key) => key),
+    translateDocument: vi.fnUntracked(),
   };
 }
 
 function mockSettingsStore(): SettingsStore {
   return {
-    loadStartupState: vi.fn(),
-    listProfiles: vi.fn(),
-    saveProfile: vi.fn(),
-    loadProfile: vi.fn(),
-    deleteProfile: vi.fn(),
-    selectProfile: vi.fn(),
-    clearSelectedProfile: vi.fn(),
-    encodeUrl: vi.fn(),
-    loadPreferences: vi.fn(),
-    savePreferences: vi.fn(),
+    loadStartupState: vi.fnUntracked(),
+    listProfiles: vi.fnUntracked(),
+    saveProfile: vi.fnUntracked(),
+    loadProfile: vi.fnUntracked(),
+    deleteProfile: vi.fnUntracked(),
+    selectProfile: vi.fnUntracked(),
+    clearSelectedProfile: vi.fnUntracked(),
+    encodeUrl: vi.fnUntracked(),
+    loadPreferences: vi.fnUntracked(),
+    savePreferences: vi.fnUntracked(),
   };
 }
 
 function mockRangeOverlayController(): RangeOverlayController {
   return {
-    descriptors: vi.fn(() => []),
-    overlays: vi.fn(() => []),
-    toggle: vi.fn(),
-    visibilityFor: vi.fn(() => "none" as const),
-    describe: vi.fn(() => ""),
-    overlayVisibility: vi.fn(() => ({})),
-    restoreVisibility: vi.fn(),
-    render: vi.fn(),
-    update: vi.fn(),
+    descriptors: vi.fnUntracked(() => []),
+    overlays: vi.fnUntracked(() => []),
+    toggle: vi.fnUntracked(),
+    visibilityFor: vi.fnUntracked(() => "none" as const),
+    describe: vi.fnUntracked(() => ""),
+    overlayVisibility: vi.fnUntracked(() => ({})),
+    restoreVisibility: vi.fnUntracked(),
+    render: vi.fnUntracked(),
+    update: vi.fnUntracked(),
   };
 }
 
 function mockPopupGroup(): PopupGroup {
   return {
-    register: vi.fn(),
-    open: vi.fn(),
-    toggle: vi.fn(),
-    close: vi.fn(),
-    closeAll: vi.fn(),
-    hasOpen: vi.fn(),
-    onPointerDown: vi.fn(),
-    onKeyDown: vi.fn(),
+    register: vi.fnUntracked(),
+    open: vi.fnUntracked(),
+    toggle: vi.fnUntracked(),
+    close: vi.fnUntracked(),
+    closeAll: vi.fnUntracked(),
+    hasOpen: vi.fnUntracked(),
+    onPointerDown: vi.fnUntracked(),
+    onKeyDown: vi.fnUntracked(),
   };
 }
 
 function mockPopup(): Popup {
-  return { isOpen: vi.fn(), open: vi.fn(), close: vi.fn(), focusTrigger: vi.fn(), contains: vi.fn() };
+  return { isOpen: vi.fnUntracked(), open: vi.fnUntracked(), close: vi.fnUntracked(), focusTrigger: vi.fnUntracked(), contains: vi.fnUntracked() };
 }
 
 class FakeTurretController implements TurretController {
   readonly side: Side;
   readonly popup: Popup;
   private readonly trackingInput: TrackingInput;
-  turret = vi.fn(() => undefined as import("../../../fitting").ImportedTurret | undefined);
-  ammo = vi.fn(() => "Hail S");
-  ammoId = vi.fn(() => "12608" as import("../../../gamedata/ids").TypeId);
-  applyImported = vi.fn();
+  turret = vi.fnUntracked(() => undefined as import("../../../fitting").ImportedTurret | undefined);
+  ammo = vi.fnUntracked(() => "Hail S");
+  ammoId = vi.fnUntracked(() => "12608" as import("../../../gamedata/ids").TypeId);
+  applyImported = vi.fnUntracked();
   restore(_arg1?: unknown, _arg2?: unknown, _arg3?: unknown, _arg4?: unknown): void {}
-  clear = vi.fn();
-  currentTurretSpec = vi.fn((): import("../../../sim").TurretSpec | undefined => ({
+  clear = vi.fnUntracked();
+  currentTurretSpec = vi.fnUntracked((): import("../../../sim").TurretSpec | undefined => ({
     kind: "turret",
     moduleId: toTypeId("1"),
     tracking: this.trackingInput.rad,
@@ -157,22 +157,22 @@ class FakeTurretController implements TurretController {
     cycleTime: 1,
     turretCount: 1,
   }));
-  currentTurretSpecs = vi.fn((): readonly import("../../../sim").TurretSpec[] => []);
-  currentSigResClass = vi.fn((): import("../../../sim").SigResolutionClass => "S");
-  capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "12608" as import("../../../gamedata/ids").TypeId }));
-  isAmmoPopupOpen = vi.fn();
-  openAmmoPopup = vi.fn();
-  closeAmmoPopup = vi.fn();
+  currentTurretSpecs = vi.fnUntracked((): readonly import("../../../sim").TurretSpec[] => []);
+  currentSigResClass = vi.fnUntracked((): import("../../../sim").SigResolutionClass => "S");
+  capture = vi.fnUntracked(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "12608" as import("../../../gamedata/ids").TypeId }));
+  isAmmoPopupOpen = vi.fnUntracked();
+  openAmmoPopup = vi.fnUntracked();
+  closeAmmoPopup = vi.fnUntracked();
   setTrackingUnit: (unit: TrackingUnit) => void;
   trackingUnit(): TrackingUnit { return this.trackingInput.unit; }
-  setHullProfile = vi.fn();
-  render = vi.fn();
+  setHullProfile = vi.fnUntracked();
+  render = vi.fnUntracked();
 
   constructor(side: Side, trackingInput: TrackingInput = mockTrackingInput()) {
     this.side = side;
     this.popup = mockPopup();
     this.trackingInput = trackingInput;
-    this.setTrackingUnit = vi.fn((unit: TrackingUnit) => { this.trackingInput.setUnit(unit, 40); });
+    this.setTrackingUnit = vi.fnUntracked((unit: TrackingUnit) => { this.trackingInput.setUnit(unit, 40); });
   }
 }
 
@@ -180,17 +180,17 @@ class FakeDroneController implements DroneController {
   readonly side: Side;
   readonly popup: Popup;
   private specs: readonly DroneSpec[] = [];
-  drone = vi.fn(() => undefined);
-  currentDroneSpecs = vi.fn((): readonly DroneSpec[] => this.specs);
-  validation = vi.fn(() => undefined);
-  applyImported = vi.fn();
-  restore = vi.fn();
-  clear = vi.fn();
-  capture = vi.fn(() => ({ droneGroups: [] }));
-  isPopupOpen = vi.fn();
-  openPopup = vi.fn();
-  closePopup = vi.fn();
-  render = vi.fn();
+  drone = vi.fnUntracked(() => undefined);
+  currentDroneSpecs = vi.fnUntracked((): readonly DroneSpec[] => this.specs);
+  validation = vi.fnUntracked(() => undefined);
+  applyImported = vi.fnUntracked();
+  restore = vi.fnUntracked();
+  clear = vi.fnUntracked();
+  capture = vi.fnUntracked(() => ({ droneGroups: [] }));
+  isPopupOpen = vi.fnUntracked();
+  openPopup = vi.fnUntracked();
+  closePopup = vi.fnUntracked();
+  render = vi.fnUntracked();
 
   constructor(side: Side) {
     this.side = side;
@@ -207,42 +207,42 @@ function build() {
   const i18n = mockI18n();
   const settingsStore = vi.mocked<SettingsStore>(mockSettingsStore());
   const events: UiEvents = {
-    onLanguageChanged: vi.fn(),
-    offLanguageChanged: vi.fn(),
-    emitLanguageChanged: vi.fn(),
-    onConfigInvalidated: vi.fn(),
-    offConfigInvalidated: vi.fn(),
-    emitConfigInvalidated: vi.fn(),
-    onDisplayInvalidated: vi.fn(),
-    offDisplayInvalidated: vi.fn(),
-    emitDisplayInvalidated: vi.fn(),
-    onFittingImported: vi.fn(),
-    offFittingImported: vi.fn(),
-    emitFittingImported: vi.fn(),
-    onCapBoosterInject: vi.fn(),
-    offCapBoosterInject: vi.fn(),
-    emitCapBoosterInject: vi.fn(),
-    onProfileLoaded: vi.fn(),
-    offProfileLoaded: vi.fn(),
-    emitProfileLoaded: vi.fn(),
-    onNewProfile: vi.fn(),
-    offNewProfile: vi.fn(),
-    emitNewProfile: vi.fn(),
-    onProfileDeleted: vi.fn(),
-    offProfileDeleted: vi.fn(),
-    emitProfileDeleted: vi.fn(),
-    onProfileTextLoaded: vi.fn(),
-    offProfileTextLoaded: vi.fn(),
-    emitProfileTextLoaded: vi.fn(),
-    onSessionRestored: vi.fn(),
-    offSessionRestored: vi.fn(),
-    emitSessionRestored: vi.fn(),
-    onSessionReset: vi.fn(),
-    offSessionReset: vi.fn(),
-    emitSessionReset: vi.fn(),
-    onStartupDefaultsApplied: vi.fn(),
-    offStartupDefaultsApplied: vi.fn(),
-    emitStartupDefaultsApplied: vi.fn(),
+    onLanguageChanged: vi.fnUntracked(),
+    offLanguageChanged: vi.fnUntracked(),
+    emitLanguageChanged: vi.fnUntracked(),
+    onConfigInvalidated: vi.fnUntracked(),
+    offConfigInvalidated: vi.fnUntracked(),
+    emitConfigInvalidated: vi.fnUntracked(),
+    onDisplayInvalidated: vi.fnUntracked(),
+    offDisplayInvalidated: vi.fnUntracked(),
+    emitDisplayInvalidated: vi.fnUntracked(),
+    onFittingImported: vi.fnUntracked(),
+    offFittingImported: vi.fnUntracked(),
+    emitFittingImported: vi.fnUntracked(),
+    onCapBoosterInject: vi.fnUntracked(),
+    offCapBoosterInject: vi.fnUntracked(),
+    emitCapBoosterInject: vi.fnUntracked(),
+    onProfileLoaded: vi.fnUntracked(),
+    offProfileLoaded: vi.fnUntracked(),
+    emitProfileLoaded: vi.fnUntracked(),
+    onNewProfile: vi.fnUntracked(),
+    offNewProfile: vi.fnUntracked(),
+    emitNewProfile: vi.fnUntracked(),
+    onProfileDeleted: vi.fnUntracked(),
+    offProfileDeleted: vi.fnUntracked(),
+    emitProfileDeleted: vi.fnUntracked(),
+    onProfileTextLoaded: vi.fnUntracked(),
+    offProfileTextLoaded: vi.fnUntracked(),
+    emitProfileTextLoaded: vi.fnUntracked(),
+    onSessionRestored: vi.fnUntracked(),
+    offSessionRestored: vi.fnUntracked(),
+    emitSessionRestored: vi.fnUntracked(),
+    onSessionReset: vi.fnUntracked(),
+    offSessionReset: vi.fnUntracked(),
+    emitSessionReset: vi.fnUntracked(),
+    onStartupDefaultsApplied: vi.fnUntracked(),
+    offStartupDefaultsApplied: vi.fnUntracked(),
+    emitStartupDefaultsApplied: vi.fnUntracked(),
   };
   const rangeOverlayController = mockRangeOverlayController();
   const popupGroup = mockPopupGroup();
@@ -250,7 +250,7 @@ function build() {
   const shipBTurretController = new FakeTurretController("shipB");
   const shipADroneController = new FakeDroneController("shipA");
   const shipBDroneController = new FakeDroneController("shipB");
-  const portraitsController = vi.mocked<PortraitsController>({ update: vi.fn(), setHpValueDisplay: vi.fn() });
+  const portraitsController = vi.mocked<PortraitsController>({ update: vi.fnUntracked(), setHpValueDisplay: vi.fnUntracked() });
   const controller = new PreferencesControllerImpl({
     els,
     i18n,
@@ -262,7 +262,7 @@ function build() {
     shipBDroneController,
     events,
     rangeOverlayController,
-    itemNameLoader: { ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) },
+    itemNameLoader: { ensureLoaded: vi.fnUntracked(), isLoaded: vi.fnUntracked(() => true), load: vi.fnUntracked(() => Promise.resolve()) },
     portraitsController,
   });
   return { controller, els, i18n, popupGroup, settingsStore, events, rangeOverlayController, shipATurretController, shipBTurretController, shipADroneController, shipBDroneController, portraitsController };

@@ -338,51 +338,51 @@ const NAME_FOR_ID: Record<string, string> = {
 
 export function makeFittingImport() {
   return vi.mocked<FittingImport>({
-    importFitting: vi.fn(() => undefined),
-    propulsionVariantNames: vi.fn(() => []),
-    propulsionStats: vi.fn(() => undefined),
-    propulsionStatsById: vi.fn(() => undefined),
-    summarize: vi.fn(() => undefined),
-    canonicalEftText: vi.fn(() => undefined),
-    itemNameForId: vi.fn((id) => NAME_FOR_ID[id] ?? id),
-    detectLanguageFromText: vi.fn(() => undefined),
+    importFitting: vi.fnUntracked(() => undefined),
+    propulsionVariantNames: vi.fnUntracked(() => []),
+    propulsionStats: vi.fnUntracked(() => undefined),
+    propulsionStatsById: vi.fnUntracked(() => undefined),
+    summarize: vi.fnUntracked(() => undefined),
+    canonicalEftText: vi.fnUntracked(() => undefined),
+    itemNameForId: vi.fnUntracked((id) => NAME_FOR_ID[id] ?? id),
+    detectLanguageFromText: vi.fnUntracked(() => undefined),
   });
 }
 export function makeChargeCatalog(): ChargeCatalog {
   const hail = toTypeId("12608");
   const republic = toTypeId("21898");
   const catalog = vi.mocked<ChargeCatalog>({
-    usualForChargeSize: vi.fn(() => hail),
-    usualForTurret: vi.fn(() => hail),
-    chargesForSize: vi.fn(() => []),
-    chargesForTurret: vi.fn(() => []),
-    withCharge: vi.fn((turret, charge) => ({ ...turret, chargeId: charge })),
-    idForName: vi.fn((name: string) => (name === "Hail S" ? hail : name === "Republic Fleet EMP S" ? republic : undefined)),
-    has: vi.fn((id: TypeId) => id === hail || id === republic),
-    equivalentInSize: vi.fn(() => undefined),
+    usualForChargeSize: vi.fnUntracked(() => hail),
+    usualForTurret: vi.fnUntracked(() => hail),
+    chargesForSize: vi.fnUntracked(() => []),
+    chargesForTurret: vi.fnUntracked(() => []),
+    withCharge: vi.fnUntracked((turret, charge) => ({ ...turret, chargeId: charge })),
+    idForName: vi.fnUntracked((name: string) => (name === "Hail S" ? hail : name === "Republic Fleet EMP S" ? republic : undefined)),
+    has: vi.fnUntracked((id: TypeId) => id === hail || id === republic),
+    equivalentInSize: vi.fnUntracked(() => undefined),
   });
-  catalog.chargesForTurret = vi.fn((turret) => catalog.chargesForSize(turret.chargeSize));
+  catalog.chargesForTurret = vi.fnUntracked((turret) => catalog.chargesForSize(turret.chargeSize));
   return catalog;
 }
 export function makeShips() {
   return vi.mocked<Ships>({
-    hulls: vi.fn(),
-    hullView: vi.fn(),
-    findHull: vi.fn((name: string) => HULL_BY_NAME.get(name.trim().toLowerCase())),
-    findHullById: vi.fn((id: ShipId) => HULL_BY_ID.get(id)),
-    findHullByName: vi.fn(),
-    parsePropulsionId: vi.fn((value: unknown) => {
+    hulls: vi.fnUntracked(),
+    hullView: vi.fnUntracked(),
+    findHull: vi.fnUntracked((name: string) => HULL_BY_NAME.get(name.trim().toLowerCase())),
+    findHullById: vi.fnUntracked((id: ShipId) => HULL_BY_ID.get(id)),
+    findHullByName: vi.fnUntracked(),
+    parsePropulsionId: vi.fnUntracked((value: unknown) => {
       if (typeof value !== "string") return undefined;
       return VALID_PROPULSION_IDS.includes(value) ? (value as PropulsionId) : undefined;
     }),
-    fittingOptions: vi.fn(),
-    allFittingOptions: vi.fn(() => []),
-    fittingOption: vi.fn(),
-    turretSizeOptions: vi.fn(),
-    shipTier: vi.fn(),
-    fittedStats: vi.fn(),
-    maxSpeedForFittedMass: vi.fn(),
-    alignTime: vi.fn(),
+    fittingOptions: vi.fnUntracked(),
+    allFittingOptions: vi.fnUntracked(() => []),
+    fittingOption: vi.fnUntracked(),
+    turretSizeOptions: vi.fnUntracked(),
+    shipTier: vi.fnUntracked(),
+    fittedStats: vi.fnUntracked(),
+    maxSpeedForFittedMass: vi.fnUntracked(),
+    alignTime: vi.fnUntracked(),
   });
 }
 export function resetMocks(): void {
@@ -422,11 +422,11 @@ export function makeStore(options: {
 
 function mockMissileCatalog(): MissileCatalog {
   return {
-    missilesForLauncher: vi.fn(() => []),
-    usualForLauncher: vi.fn(() => undefined),
-    withCharge: vi.fn(),
-    has: vi.fn(() => false),
-    idForName: vi.fn(() => undefined),
-    equivalentInGroups: vi.fn(() => undefined),
+    missilesForLauncher: vi.fnUntracked(() => []),
+    usualForLauncher: vi.fnUntracked(() => undefined),
+    withCharge: vi.fnUntracked(),
+    has: vi.fnUntracked(() => false),
+    idForName: vi.fnUntracked(() => undefined),
+    equivalentInGroups: vi.fnUntracked(() => undefined),
   };
 }

@@ -34,6 +34,8 @@ const _vi = Object.assign(_bunVi, {
     });
     return mock;
   },
+  fnUntracked: _bunFn,
+  spyOnUntracked: _bunSpyOn,
   spyOn: function <T extends object, K extends keyof T>(obj: T, key: K): Mock<Extract<T[K], (...args: any[]) => any>> {
     const mock = _bunSpyOn(obj, key);
     registeredMocks.push({
