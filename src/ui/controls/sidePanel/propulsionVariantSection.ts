@@ -73,21 +73,15 @@ export class PropulsionVariantSection {
     const profile = this.panel.profile;
     const propulsion = this.fittingImport.propulsionStatsById(id);
     const propulsionId = this.panel.sections.propulsion.currentPropulsionId();
-    if (!profile || !propulsion || !propulsionId) return;
+    const module = this.panel.sections.propulsion.currentPropulsionModule();
+    if (!profile || !propulsion || !propulsionId || !module) return;
     const enName = this.fittingImport.itemNameForId(id, "en") ?? "";
     const fitted = this.panel.fittedHull;
-    const kind = this.panel.sections.propulsion.currentPropulsionModule()?.kind;
-    const updated: FittedHullSummary = {
-      fittingName: fitted?.fittingName ?? "",
-      fitted: fitted?.fitted ?? this.panel.sections.propulsion.nakedFitted(profile),
-      propulsionId,
-      propulsionModuleId: id,
-      propulsionName: enName,
-      propulsionKind: kind,
-      propulsion,
-    };
+    const updated = fitted
+      ? { ...fitted, propulsionId, propulsionModuleId: id, propulsionName: enName, propulsionKind: module.kind, propulsion }
+      : this.panel.sections.hull.buildManualSummary(profile, { propulsionId, propulsionModuleId: id, propulsionName: enName, kind: module.kind, propulsion });
     this.panel.fittedHull = updated;
-    if (kind) this.panel.sections.propulsion.notePropulsionVariant(kind, id);
+    this.panel.sections.propulsion.notePropulsionVariant(module.kind, id);
     this.panel.sections.stats.updateShipStats({ updateInertia: false, updateMass: true, updateSig: true });
     this.panel.sections.skill.setOverloadDisabled();
     this.section.renderVariants();

@@ -71,8 +71,8 @@ export interface FittedHullSummary {
   readonly fitted: FittedHull;
   readonly propulsion?: PropulsionStats;
   readonly baseMaxSpeed?: number;
-  readonly capacitor?: CapacitorSpec;
-  readonly energyWarfareResistancePercent?: number;
+  readonly capacitor: CapacitorSpec;
+  readonly energyWarfareResistancePercent: number;
 }
 
 export interface ProfileParamOverrides {

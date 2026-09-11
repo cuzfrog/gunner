@@ -75,7 +75,7 @@ describe("SidePanel", () => {
     panel.profile = RIFTER;
     panel.fittingText = "[Rifter, Brawler]";
     const state = panel.capture();
-    panel.restore({ ...state, fittedHull: { fittingName: "Stale", fitted: FITTED } });
+    panel.restore({ ...state, fittedHull: { fittingName: "Stale", fitted: FITTED, capacitor: { capacity: 4375, rechargeTime: 656.25 }, energyWarfareResistancePercent: 0 } });
     expect(panel.fittedHull?.fittingName).toBe("Brawler");
     expect(panel.fittedHull?.capacitor?.capacity).toBe(200);
   });
@@ -86,7 +86,7 @@ describe("SidePanel", () => {
     panel.profile = RIFTER;
     panel.fittingText = "[Rifter, Brawler]";
     const state = panel.capture();
-    const stale: FittedHullSummary = { fittingName: "Stale", fitted: FITTED, capacitor: { capacity: 111, rechargeTime: 100 } };
+    const stale: FittedHullSummary = { fittingName: "Stale", fitted: FITTED, capacitor: { capacity: 111, rechargeTime: 100 }, energyWarfareResistancePercent: 0 };
     panel.restore({ ...state, fittedHull: stale });
     expect(panel.fittedHull?.fittingName).toBe("Stale");
     expect(panel.fittedHull?.capacitor?.capacity).toBe(111);

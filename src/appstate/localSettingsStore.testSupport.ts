@@ -114,6 +114,8 @@ export const FITTED_HULL_SUMMARY: FittedHullSummary = {
   fitted: FITTED_HULL,
   propulsion: FITTED_PROPULSION,
   baseMaxSpeed: 456.25,
+  capacitor: { capacity: 4375, rechargeTime: 656.25 },
+  energyWarfareResistancePercent: 0,
 };
 export const RIFTER_PROFILE: ShipProfile = {
   id: toShipId("587"),

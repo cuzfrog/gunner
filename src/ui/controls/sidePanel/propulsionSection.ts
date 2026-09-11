@@ -130,20 +130,9 @@ export class PropulsionSection implements IPropulsionSection {
       const module = this.ships.fittingOption(profile, propulsionId);
       if (module) {
         const variant = this.resolvePropulsionVariantWithMemory(module, fitted);
-        const propulsionModuleId = variant?.id;
-        const propulsionName = variant?.name ?? module.label;
-        const propulsion = (propulsionModuleId ? this.fittingImport.propulsionStatsById(propulsionModuleId) : undefined) ?? module;
-        updated = {
-          fittingName: fitted?.fittingName ?? "",
-          fitted: fitted?.fitted ?? this.nakedFitted(profile),
-          propulsionId,
-          propulsionModuleId,
-          propulsionName,
-          propulsionKind: module.kind,
-          propulsion,
-        };
-        if (propulsionModuleId) {
-          this.propulsionSelection.noteApplied({ kind: module.kind, module }, { moduleId: propulsionModuleId });
+        updated = this.updatedSummary(profile, propulsionId, module, variant ? { id: variant.id, name: variant.name } : undefined);
+        if (variant) {
+          this.propulsionSelection.noteApplied({ kind: module.kind, module }, { moduleId: variant.id });
         }
       }
     } else if (fitted) {
@@ -156,6 +145,20 @@ export class PropulsionSection implements IPropulsionSection {
     this.panel.sections.skill.setOverloadDisabled();
     this.variants.updateUI();
     this.panel.host.persistConfigChange();
+  }
+
+  private updatedSummary(
+    profile: ShipProfile,
+    propulsionId: PropulsionId,
+    module: PropulsionModule,
+    variant: { readonly id: TypeId; readonly name: string } | undefined,
+  ): FittedHullSummary {
+    const propulsion = (variant ? this.fittingImport.propulsionStatsById(variant.id) : undefined) ?? module;
+    const fitted = this.panel.fittedHull;
+    if (fitted) {
+      return { ...fitted, propulsionId, propulsionModuleId: variant?.id, propulsionName: variant?.name ?? module.label, propulsionKind: module.kind, propulsion };
+    }
+    return this.panel.sections.hull.buildManualSummary(profile, { propulsionId, propulsionModuleId: variant?.id, propulsionName: variant?.name ?? module.label, kind: module.kind, propulsion });
   }
 
   notePropulsionVariant(kind: PropulsionKind, moduleId: TypeId): void {
@@ -221,10 +224,6 @@ export class PropulsionSection implements IPropulsionSection {
 
   defaultPropulsionName(module: PropulsionModule): string {
     return this.defaultPropulsionVariant(module)?.name ?? module.label;
-  }
-
-  nakedFitted(profile: ShipProfile): FittedHull {
-    return { mass: profile.mass, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 };
   }
 
 }

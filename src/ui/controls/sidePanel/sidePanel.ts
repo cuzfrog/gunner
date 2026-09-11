@@ -243,8 +243,20 @@ export class SidePanelImpl implements SidePanel {
   /** The saved summary can predate newer derived fields (e.g. capacitor), so the fitting text is the source of truth. */
   private restoreFittedSummary(state: SidePanelState): void {
     const reimported = state.fitting ? this.fittingImport.importFitting(state.fitting, this.skillConditions()) : undefined;
-    const summary = reimported && reimported.profile.id === state.hull ? this.sections.hull.buildFittedSummary(reimported) : state.fittedHull;
+    const summary = reimported && reimported.profile.id === state.hull ? this.sections.hull.buildFittedSummary(reimported) : this.legacySummary(state);
     if (summary) this.sections.hull.restoreFittingSummary(summary);
+  }
+
+  /** Old persisted summaries may predate required fit-derived fields; fill those from the saved hull. */
+  private legacySummary(state: SidePanelState): FittedHullSummary | undefined {
+    const saved = state.fittedHull;
+    if (!saved) return undefined;
+    const profile = state.hull ? this.ships.findHullById(state.hull) : undefined;
+    return {
+      ...saved,
+      capacitor: saved.capacitor ?? (profile ? { capacity: profile.capacitorCapacity, rechargeTime: profile.capacitorRechargeTime } : { capacity: 0, rechargeTime: 0 }),
+      energyWarfareResistancePercent: saved.energyWarfareResistancePercent ?? 0,
+    };
   }
 
   private setButtonDisabled(button: HTMLButtonElement, enabled: boolean): void {

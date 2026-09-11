@@ -16,6 +16,8 @@ const baseFittedHull: FittedHull = {
 const baseFittedHullSummary: FittedHullSummary = {
   fittingName: "Test Hull",
   fitted: baseFittedHull,
+  capacitor: { capacity: 4375, rechargeTime: 656.25 },
+  energyWarfareResistancePercent: 0,
 };
 
 const baseEwarActivation: StoredEwarActivation = {

@@ -162,6 +162,30 @@ test.describe.serial("Capacitor runtime drain", () => {
     await page.locator("#reset").click();
   });
 
+  test("toggling propulsion off and on keeps the killmail fit draining", async ({ }) => {
+    test.setTimeout(120000);
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#scene")).toBeVisible();
+    await importFittingViaPaste(page, "ship-a", KILLMAIL_HARBINGER);
+    await importFittingViaPaste(page, "ship-b", loadFittingText(FITTING_ABADDON));
+    const activeButton = page.locator("#ship-a-propulsion-options button[aria-pressed='true']");
+    await expect(activeButton).toHaveCount(1);
+    const propulsionId = await activeButton.getAttribute("data-value");
+    expect(propulsionId).toBeTruthy();
+    await activeButton.click();
+    await expect(page.locator("#ship-a-propulsion-options button[aria-pressed='true']")).toHaveCount(0);
+    await page.locator(`#ship-a-propulsion-options button[data-value='${propulsionId}']`).click();
+    await expect(page.locator("#ship-a-propulsion-options button[aria-pressed='true']")).toHaveCount(1);
+    const barA = page.locator("#ship-a-capacitor-section .capacitor-bar-value");
+    const beforeA = gjValue(await barA.textContent());
+    await page.locator("#play").click();
+    await page.waitForTimeout(15000);
+    const afterA = gjValue(await barA.textContent());
+    expect(beforeA).toBeGreaterThan(0);
+    expect(afterA).toBeLessThan(beforeA * 0.7);
+    await page.locator("#reset").click();
+  });
+
   test("restoring a saved profile drains the killmail fit during simulation", async ({ }) => {
     test.setTimeout(120000);
     await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });

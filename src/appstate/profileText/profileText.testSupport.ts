@@ -14,7 +14,9 @@ export const SHIP_A_FITTED_HULL: FittedHullSummary = {
   propulsionId: "mwd-5mn",
   propulsionKind: "microwarpdrive",
   fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 },
-  propulsion: { thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5, capacitorNeed: 45 }
+  propulsion: { thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5, capacitorNeed: 45 },
+  capacitor: { capacity: 4375, rechargeTime: 656.25 },
+  energyWarfareResistancePercent: 0
 };
 
 export const SHIP_B_FITTED_HULL: FittedHullSummary = {
@@ -22,7 +24,9 @@ export const SHIP_B_FITTED_HULL: FittedHullSummary = {
   propulsionId: "mwd-5mn",
   propulsionKind: "microwarpdrive",
   fitted: { mass: 1_500_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 },
-  propulsion: { thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5, capacitorNeed: 45 }
+  propulsion: { thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5, capacitorNeed: 45 },
+  capacitor: { capacity: 4375, rechargeTime: 656.25 },
+  energyWarfareResistancePercent: 0
 };
 
 export const FULL_PROFILE: ProfileSettings = {

@@ -99,7 +99,8 @@ export class FittingBasis {
       fitted: imported.fitted,
       propulsion: fittedPropulsion,
       baseMaxSpeed: stats.baseMaxSpeed,
-      capacitor: imported.capacitor?.spec,
+      capacitor: imported.capacitor.spec,
+      energyWarfareResistancePercent: imported.energyWarfareResistancePercent,
     };
     const massOverride = side === "shipA" ? override.shipAMass : override.shipBMass;
     const mass = massOverride ?? stats.mass;

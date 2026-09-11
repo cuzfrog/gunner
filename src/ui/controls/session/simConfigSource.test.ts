@@ -72,6 +72,8 @@ function fittedHull(propulsionKind: "afterburner" | "microwarpdrive" | undefined
     fittingName: "Brawler",
     fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 },
     propulsionKind,
+    capacitor: { capacity: 4375, rechargeTime: 656.25 },
+    energyWarfareResistancePercent: 0,
   };
 }
 
