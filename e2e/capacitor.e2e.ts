@@ -186,6 +186,31 @@ test.describe.serial("Capacitor runtime drain", () => {
     await page.locator("#reset").click();
   });
 
+  test("a manually configured hull without a fitting has a draining capacitor pool", async ({ }) => {
+    test.setTimeout(120000);
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#scene")).toBeVisible();
+    await page.locator("#ship-a-ship-select-trigger").click();
+    await page.locator("#ship-a-hull").fill("Harbinger");
+    await page.locator("#ship-a-hull").press("Tab");
+    await page.locator("body").click({ position: { x: 0, y: 0 } });
+    await expect(page.locator("#ship-a-ship-select-popup")).toBeHidden();
+    await page.locator("#ship-b-ship-select-trigger").click();
+    await page.locator("#ship-b-hull").fill("Abaddon");
+    await page.locator("#ship-b-hull").press("Tab");
+    await page.locator("body").click({ position: { x: 0, y: 0 } });
+    await expect(page.locator("#ship-b-ship-select-popup")).toBeHidden();
+    await page.locator("#ship-a-propulsion-options button").first().click();
+    const barA = page.locator("#ship-a-capacitor-section .capacitor-bar-value");
+    const beforeA = gjValue(await barA.textContent());
+    expect(beforeA).toBeGreaterThan(0);
+    await page.locator("#play").click();
+    await page.waitForTimeout(15000);
+    const afterA = gjValue(await barA.textContent());
+    expect(afterA).toBeLessThan(beforeA);
+    await page.locator("#reset").click();
+  });
+
   test("restoring a saved profile drains the killmail fit during simulation", async ({ }) => {
     test.setTimeout(120000);
     await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });

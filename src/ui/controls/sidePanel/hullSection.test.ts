@@ -113,7 +113,6 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
       notePropulsionVariant: vi.fn(),
       seedPropulsionMemory: vi.fn(),
       defaultPropulsionName: vi.fn(),
-      nakedFitted: vi.fn(),
       popup: {} as unknown as Popup,
     } as unknown as ISidePanelSections["propulsion"],
     paste: {
