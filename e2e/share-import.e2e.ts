@@ -1,7 +1,21 @@
-import { test, expect, loadFittingText, FITTING_THRASHER, setClipboardText, getClipboardText } from "./fixtures";
+import { test, expect, loadFittingText, FITTING_THRASHER, setClipboardText, getClipboardText, BASE_URL } from "./fixtures";
+import type { Page } from "@playwright/test";
 
-test.describe("share and import", () => {
-  test("share popup opens and closes", async ({ cleanPage: page }) => {
+let page: Page;
+
+test.describe.serial("share and import", () => {
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext({ permissions: ["clipboard-read", "clipboard-write"] });
+    page = await context.newPage();
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#scene")).toBeVisible();
+  });
+
+  test.afterAll(async () => {
+    await page.context().close();
+  });
+
+  test("share popup opens and closes", async () => {
     await page.locator("#share-link").click();
     await expect(page.locator("#share-popup")).toBeVisible();
     await expect(page.locator("#share-copy-url")).toBeVisible();
@@ -10,7 +24,7 @@ test.describe("share and import", () => {
     await expect(page.locator("#share-popup")).toBeHidden();
   });
 
-  test("copy as URL writes share link to clipboard", async ({ cleanPage: page }) => {
+  test("copy as URL writes share link to clipboard", async () => {
     await page.locator("#share-link").click();
     await page.locator("#share-copy-url").click();
     await expect(page.locator("#share-status")).not.toHaveText("");
@@ -19,7 +33,7 @@ test.describe("share and import", () => {
     expect(clipboardText).toContain("localhost");
   });
 
-  test("copy as text writes profile text to clipboard", async ({ cleanPage: page }) => {
+  test("copy as text writes profile text to clipboard", async () => {
     await page.locator("#share-link").click();
     await page.locator("#share-copy-text").click();
     await expect(page.locator("#share-status")).not.toHaveText("");
@@ -28,16 +42,18 @@ test.describe("share and import", () => {
     expect(clipboardText.length).toBeGreaterThan(10);
   });
 
-  test("import EFT from clipboard opens side selection", async ({ cleanPage: page }) => {
+  test("import EFT from clipboard opens side selection", async () => {
     const eftText = loadFittingText(FITTING_THRASHER);
     await setClipboardText(page, eftText);
     await page.locator("#import-profile").click();
     await expect(page.locator("#import-side-popup")).toBeVisible();
     await expect(page.locator("#import-side-ship-a")).toBeVisible();
     await expect(page.locator("#import-side-ship-b")).toBeVisible();
+    await page.locator("body").click({ position: { x: 0, y: 0 } });
+    await expect(page.locator("#import-side-popup")).toBeHidden();
   });
 
-  test("import to ship A applies fitting", async ({ cleanPage: page }) => {
+  test("import to ship A applies fitting", async () => {
     const eftText = loadFittingText(FITTING_THRASHER);
     await setClipboardText(page, eftText);
     await page.locator("#import-profile").click();
@@ -47,7 +63,7 @@ test.describe("share and import", () => {
     await expect(page.locator("#ship-a-ammo-summary")).not.toHaveText("");
   });
 
-  test("import to ship B applies fitting", async ({ cleanPage: page }) => {
+  test("import to ship B applies fitting", async () => {
     const eftText = loadFittingText(FITTING_THRASHER);
     await setClipboardText(page, eftText);
     await page.locator("#import-profile").click();
@@ -56,14 +72,14 @@ test.describe("share and import", () => {
     await expect(page.locator("#ship-b-turret-panel")).toBeVisible();
   });
 
-  test("invalid clipboard shows error status", async ({ cleanPage: page }) => {
+  test("invalid clipboard shows error status", async () => {
     await setClipboardText(page, "this is not a valid fitting or profile");
     await page.locator("#import-profile").click();
     await expect(page.locator("#share-status")).not.toHaveText("");
     await expect(page.locator("#import-side-popup")).toBeHidden();
   });
 
-  test("paste popup accepts manual EFT input", async ({ cleanPage: page }) => {
+  test("paste popup accepts manual EFT input", async () => {
     const eftText = loadFittingText(FITTING_THRASHER);
     await page.evaluate(() => {
       Object.defineProperty(navigator, "clipboard", {

@@ -1,20 +1,34 @@
-import { test, expect } from "./fixtures";
+import { test, expect, BASE_URL } from "./fixtures";
 import { readFileSync } from "node:fs";
+import type { Page } from "@playwright/test";
 
-test.describe("page load", () => {
-  test("page loads without console errors", async ({ rawPage: page }) => {
+let page: Page;
+
+test.describe.serial("page load", () => {
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext();
+    page = await context.newPage();
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#scene")).toBeVisible();
+  });
+
+  test.afterAll(async () => {
+    await page.context().close();
+  });
+
+  test("page loads without console errors", async () => {
     const errors: string[] = [];
     page.on("console", (msg) => {
       if (msg.type() === "error") errors.push(msg.text());
     });
     page.on("pageerror", (err) => errors.push(err.message));
-    await page.goto("/");
+    await page.reload({ waitUntil: "domcontentloaded" });
     await expect(page.locator("#scene")).toBeVisible();
     await expect(page.locator(".app-header")).toBeVisible();
     expect(errors).toEqual([]);
   });
 
-  test("default control values are present", async ({ cleanPage: page }) => {
+  test("default control values are present", async () => {
     await expect(page.locator("#ship-a-tracking")).toHaveValue("0.32");
     await expect(page.locator("#ship-a-optimal")).toHaveValue("5000");
     await expect(page.locator("#ship-a-falloff")).toHaveValue("5000");
@@ -32,7 +46,7 @@ test.describe("page load", () => {
     await expect(page.locator("#ship-b-mode")).toHaveValue("orbit");
   });
 
-  test("result grid shows initial placeholders", async ({ cleanPage: page }) => {
+  test("result grid shows initial placeholders", async () => {
     await expect(page.locator("#res-distance")).toHaveText("20.0 km");
     await expect(page.locator("#res-applied-dps-a")).toHaveText("-");
     await expect(page.locator("#res-inflicted-dps-a")).toHaveText("-");
@@ -43,7 +57,7 @@ test.describe("page load", () => {
     await expect(page.locator("#res-hit-a")).toHaveText("-");
   });
 
-  test("both side panels and canvas frame render", async ({ cleanPage: page }) => {
+  test("both side panels and canvas frame render", async () => {
     await expect(page.locator(".side-panel-ship-a")).toBeVisible();
     await expect(page.locator(".side-panel-ship-b")).toBeVisible();
     await expect(page.locator(".canvas-frame")).toBeVisible();
@@ -52,7 +66,7 @@ test.describe("page load", () => {
     await expect(page.locator(".app-footer")).toBeVisible();
   });
 
-  test("app version matches package.json", async ({ cleanPage: page }) => {
+  test("app version matches package.json", async () => {
     const pkg = JSON.parse(readFileSync("package.json", "utf-8"));
     await expect(page.locator("#app-version")).toHaveText(`v${pkg.version}`);
   });

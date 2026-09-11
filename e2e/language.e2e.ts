@@ -1,20 +1,34 @@
-import { test, expect } from "./fixtures";
+import { test, expect, BASE_URL } from "./fixtures";
+import type { Page } from "@playwright/test";
 
-test.describe("language switching", () => {
-  test("switch to Chinese updates html lang and UI text", async ({ cleanPage: page }) => {
+let page: Page;
+
+test.describe.serial("language switching", () => {
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext();
+    page = await context.newPage();
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#scene")).toBeVisible();
+  });
+
+  test.afterAll(async () => {
+    await page.context().close();
+  });
+
+  test("switch to Chinese updates html lang and UI text", async () => {
     await page.locator("#lang-zh").click();
     await expect(page.locator("html")).toHaveAttribute("lang", "zh");
     await expect(page.locator("#play")).not.toHaveText("Start");
     await expect(page.locator("[data-i18n='label.initialDistance']")).not.toHaveText("Initial distance");
   });
 
-  test("switch to Japanese updates html lang and UI text", async ({ cleanPage: page }) => {
+  test("switch to Japanese updates html lang and UI text", async () => {
     await page.locator("#lang-ja").click();
     await expect(page.locator("html")).toHaveAttribute("lang", "ja");
     await expect(page.locator("#play")).not.toHaveText("Start");
   });
 
-  test("switch back to English restores text", async ({ cleanPage: page }) => {
+  test("switch back to English restores text", async () => {
     await page.locator("#lang-zh").click();
     await expect(page.locator("html")).toHaveAttribute("lang", "zh");
     await page.locator("#lang-en").click();
@@ -23,7 +37,7 @@ test.describe("language switching", () => {
     await expect(page.locator("[data-i18n='label.initialDistance']")).toHaveText("Initial distance");
   });
 
-  test("hull datalist repopulates on language change", async ({ cleanPage: page }) => {
+  test("hull datalist repopulates on language change", async () => {
     await page.locator("#ship-a-ship-select-trigger").click();
     await expect(page.locator("#ship-a-ship-select-popup")).toBeVisible();
     await page.locator("#ship-a-hull").fill("Abaddon");

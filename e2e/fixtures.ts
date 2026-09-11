@@ -22,20 +22,7 @@ export function loadFittingText(relativePath: string): string {
   return text;
 }
 
-const test = base.extend<{ cleanPage: Page; rawPage: Page }>({
-  rawPage: async ({ page }, use) => {
-    await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-    await use(page);
-  },
-  cleanPage: async ({ page }, use) => {
-    await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-    await page.goto(BASE_URL);
-    await page.evaluate(() => localStorage.clear());
-    await page.goto(BASE_URL);
-    await expect(page.locator("#scene")).toBeVisible();
-    await use(page);
-  },
-});
+const test = base;
 
 export { test, expect };
 
@@ -77,17 +64,29 @@ export async function importFittingViaClipboard(page: Page, side: "ship-a" | "sh
 
 export async function importFittingViaPaste(page: Page, side: "ship-a" | "ship-b", eftText: string): Promise<void> {
   await page.evaluate(() => {
+    const holder = window as { __originalClipboard?: Clipboard };
+    holder.__originalClipboard = navigator.clipboard;
     Object.defineProperty(navigator, "clipboard", {
       value: { readText: () => Promise.reject(new Error("denied")), writeText: () => Promise.resolve() },
       configurable: true,
     });
   });
-  await page.locator(`#${side}-import-fitting`).click();
-  await expect(page.locator(`#${side}-paste-popup`)).toBeVisible();
-  await page.locator(`#${side}-paste-input`).evaluate((el, text) => {
-    const dataTransfer = new DataTransfer();
-    dataTransfer.setData("text/plain", text);
-    el.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dataTransfer, bubbles: true }));
-  }, eftText);
-  await expect(page.locator(`#${side}-fitting-name`)).toBeVisible();
+  try {
+    await page.locator(`#${side}-import-fitting`).click();
+    await expect(page.locator(`#${side}-paste-popup`)).toBeVisible();
+    await page.locator(`#${side}-paste-input`).evaluate((el, text) => {
+      const dataTransfer = new DataTransfer();
+      dataTransfer.setData("text/plain", text);
+      el.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dataTransfer, bubbles: true }));
+    }, eftText);
+    await expect(page.locator(`#${side}-fitting-name`)).toBeVisible();
+  } finally {
+    await page.evaluate(() => {
+      const holder = window as { __originalClipboard?: Clipboard };
+      if (holder.__originalClipboard) {
+        Object.defineProperty(navigator, "clipboard", { value: holder.__originalClipboard, configurable: true });
+        delete holder.__originalClipboard;
+      }
+    });
+  }
 }
