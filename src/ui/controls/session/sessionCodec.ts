@@ -371,18 +371,27 @@ export class SessionCodecImpl implements SessionCodec {
   }
 
   restoreStartup(startup: StartupState): void {
+    this.applyStoredPreferences();
     if (startup.settings) {
       this.restore(startup.settings, startup.selectedProfileName ?? "");
       return;
     }
     if (this.profileController.restoreFromStartup(startup)) return;
-    this.applyDefaultStartup();
+    applyStartupDefaults({
+      shipASide: this.shipASide,
+      shipBSide: this.shipBSide,
+      profileController: this.profileController,
+    });
+    this.events.emitStartupDefaultsApplied();
+  }
+
+  private applyStoredPreferences(): void {
+    this.preferencesController.applyPreferences(this.settingsStore.loadPreferences());
+    this.i18n.translateDocument();
   }
 
   private applyDefaultStartup(): void {
-    const preferences = this.settingsStore.loadPreferences();
-    this.preferencesController.applyPreferences(preferences);
-    this.i18n.translateDocument();
+    this.applyStoredPreferences();
     applyStartupDefaults({
       shipASide: this.shipASide,
       shipBSide: this.shipBSide,

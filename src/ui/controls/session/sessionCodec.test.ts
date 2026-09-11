@@ -422,7 +422,7 @@ function buildCodec(options: {
     ...options.profileController,
   } as unknown as ProfileController;
   const settingsStore = {
-    loadPreferences: vi.fn(),
+    loadPreferences: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, droneRangeVisibility: "none" as const, droneControlRangeVisibility: "none" as const, simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 })),
     savePreferences: vi.fn(),
     clearSelectedProfile: vi.fn(),
     loadProfile: vi.fn(),
@@ -603,7 +603,7 @@ describe("SessionCodec", () => {
     const shipA = mockSidePanel("shipA", panelStateFrom(settings, "shipA"));
     const shipB = mockSidePanel("shipB", panelStateFrom(settings, "shipB"));
     const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn(), refresh: vi.fn() } as unknown as ProfileController;
-    const settingsStore = { savePreferences: vi.fn(), loadPreferences: vi.fn() } as unknown as SettingsStore;
+    const settingsStore = { savePreferences: vi.fn(), loadPreferences: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, droneRangeVisibility: "none" as const, droneControlRangeVisibility: "none" as const, simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 })) } as unknown as SettingsStore;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
     const events = new UiEventsImpl();
@@ -654,7 +654,7 @@ describe("SessionCodec", () => {
     const shipA = mockSidePanel("shipA", panelStateFrom(settings, "shipA"));
     const shipB = mockSidePanel("shipB", panelStateFrom(settings, "shipB"));
     const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn(), refresh: vi.fn() } as unknown as ProfileController;
-    const settingsStore = { savePreferences: vi.fn(), loadPreferences: vi.fn() } as unknown as SettingsStore;
+    const settingsStore = { savePreferences: vi.fn(), loadPreferences: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, droneRangeVisibility: "none" as const, droneControlRangeVisibility: "none" as const, simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 })) } as unknown as SettingsStore;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
     const events = new UiEventsImpl();
@@ -674,7 +674,7 @@ describe("SessionCodec", () => {
     const shipA = mockSidePanel("shipA", panelStateFrom(settings, "shipA"));
     const shipB = mockSidePanel("shipB", panelStateFrom(settings, "shipB"));
     const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn(), refresh: vi.fn() } as unknown as ProfileController;
-    const settingsStore = { savePreferences: vi.fn(), loadPreferences: vi.fn() } as unknown as SettingsStore;
+    const settingsStore = { savePreferences: vi.fn(), loadPreferences: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, droneRangeVisibility: "none" as const, droneControlRangeVisibility: "none" as const, simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 })) } as unknown as SettingsStore;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
     const events = new UiEventsImpl();
@@ -814,6 +814,20 @@ describe("SessionCodec", () => {
     expect(shipB.sections.propulsion.renderPropulsionOptions).toHaveBeenCalled();
     expect(onStartupDefaultsApplied).toHaveBeenCalled();
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
+  });
+
+  test("restoreStartup with a selected profile applies stored preferences before profile restore", () => {
+    const settingsStore = { loadPreferences: vi.fn(() => ({ language: "zh" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, droneRangeVisibility: "none" as const, droneControlRangeVisibility: "none" as const, simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 })), savePreferences: vi.fn(), loadProfile: vi.fn(() => null) } as unknown as SettingsStore;
+    const profileController = { restoreFromStartup: vi.fn(() => true), markLoaded: vi.fn(), refresh: vi.fn() } as unknown as ProfileController;
+    const events = new UiEventsImpl();
+    const onStartupDefaultsApplied = vi.fn();
+    events.onStartupDefaultsApplied(onStartupDefaultsApplied);
+    const { codec, preferences } = buildCodec({ settingsStore, profileController, events });
+
+    codec.restoreStartup({ settings: null, selectedProfileName: "PersistTest" });
+
+    expect(preferences.applyPreferences).toHaveBeenCalledWith(expect.objectContaining({ language: "zh" }));
+    expect(onStartupDefaultsApplied).not.toHaveBeenCalled();
   });
 
   test("resetToDefaults clears the selected profile and ship state back to pristine", () => {
