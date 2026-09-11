@@ -183,6 +183,35 @@ test.describe.serial("Capacitor runtime drain", () => {
     await page.locator("#reset").click();
   });
 
+  test("a profile saved by an older build without a capacitor summary drains after restore", async ({ }) => {
+    test.setTimeout(120000);
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#scene")).toBeVisible();
+    await importFittingViaPaste(page, "ship-a", KILLMAIL_HARBINGER);
+    await importFittingViaPaste(page, "ship-b", loadFittingText(FITTING_ABADDON));
+    await page.locator("#profile-new").click();
+    await page.locator("#new-profile-name").fill("LegacyCapProfile");
+    await page.locator("#new-profile-confirm").click();
+    await expect(page.locator("#profile-select-label")).toContainText("LegacyCapProfile");
+    // Simulate a profile saved before fittedHull summaries carried capacitor/propulsion stats.
+    await page.evaluate(() => {
+      const key = "gunner-profiles-v6";
+      const profiles = JSON.parse(localStorage.getItem(key) ?? "{}") as Record<string, { shipAFittedHull?: { capacitor?: unknown } }>;
+      const legacy = profiles["LegacyCapProfile"];
+      if (legacy?.shipAFittedHull) delete legacy.shipAFittedHull.capacitor;
+      localStorage.setItem(key, JSON.stringify(profiles));
+    });
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.locator("#ship-a-capacitor-trigger")).toBeEnabled();
+    const beforeA = gjValue(await page.locator("#ship-a-capacitor-section .capacitor-bar-value").textContent());
+    await page.locator("#play").click();
+    await page.waitForTimeout(15000);
+    const afterA = gjValue(await page.locator("#ship-a-capacitor-section .capacitor-bar-value").textContent());
+    expect(beforeA).toBeGreaterThan(0);
+    expect(afterA).toBeLessThan(beforeA * 0.7);
+    await page.locator("#reset").click();
+  });
+
   test("infinite capacitor keeps the runtime bar at full while the opponent drains", async ({ }) => {
     test.setTimeout(90000);
     await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });

@@ -29,7 +29,8 @@ export interface IHullSection {
   setHullValidation(isInvalid: boolean): void;
   updateHullHint(module?: PropulsionModule): void;
   refreshHullInputs(): void;
-  applyImportedFitting(summary: FittedHullSummary): void;
+  applyImportedFitting(imported: ImportedFitting): void;
+  buildFittedSummary(imported: ImportedFitting): FittedHullSummary;
   restoreFittingSummary(summary: FittedHullSummary): void;
 }
 

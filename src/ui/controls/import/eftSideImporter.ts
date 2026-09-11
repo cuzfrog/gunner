@@ -1,5 +1,5 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
-import { PROPULSION_NONE, type FittedHullSummary } from "../../../appstate";
+import { PROPULSION_NONE } from "../../../appstate";
 import type { Side } from "../side";
 import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
 import type { ShipATurret } from "./shipATurret";
@@ -52,7 +52,7 @@ export class EftSideImporter {
     panel.fittingText = this.fittingImport.canonicalEftText(text) ?? text;
     panel.clearOverrides();
     panel.sections.hull.loadHull(imported.profile.id, imported.propulsion?.propulsionId ?? PROPULSION_NONE);
-    panel.sections.hull.applyImportedFitting(this.fittedHullSummary(side, imported));
+    panel.sections.hull.applyImportedFitting(imported);
     panel.setSensorData(imported.sensorSpec);
     this.turrets[side].applyImported(imported, conditions);
     this.launchers[side].applyImported(imported, conditions);
@@ -63,20 +63,5 @@ export class EftSideImporter {
     }
     if (showImportedHint) panel.sections.paste.showImportHint("status.fittingImported");
     return imported;
-  }
-
-  private fittedHullSummary(side: Side, imported: ImportedFitting): FittedHullSummary {
-    const propulsionId = imported.propulsion?.propulsionId;
-    return {
-      fittingName: imported.fittingName,
-      propulsionId,
-      propulsionModuleId: imported.propulsion?.propulsionModuleId,
-      propulsionName: imported.propulsion?.propulsionName,
-      propulsionKind: propulsionId !== undefined ? this.panel(side).ships.fittingOption(imported.profile, propulsionId)?.kind : undefined,
-      fitted: imported.fitted,
-      propulsion: imported.propulsion,
-      capacitor: imported.capacitor?.spec,
-      energyWarfareResistancePercent: imported.energyWarfareResistancePercent,
-    };
   }
 }

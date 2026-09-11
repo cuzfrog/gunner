@@ -234,10 +234,17 @@ export class SidePanelImpl implements SidePanel {
     this.sections.skill.setOverloadActive(state.overload);
     this.sections.skill.setWeaponOverloaded(state.weaponOverload);
     this.sections.skill.setOverloadDisabled();
-    if (state.fittedHull) this.sections.hull.restoreFittingSummary(state.fittedHull);
+    this.restoreFittedSummary(state);
     if (state.sig !== undefined) this.els.shipSig.value = String(state.sig);
     this.sections.stats.updateShipStats({ updateInertia: true, updateMass: false, updateSig: true });
     this.sections.stats.updateAlignTime();
+  }
+
+  /** The saved summary can predate newer derived fields (e.g. capacitor), so the fitting text is the source of truth. */
+  private restoreFittedSummary(state: SidePanelState): void {
+    const reimported = state.fitting ? this.fittingImport.importFitting(state.fitting, this.skillConditions()) : undefined;
+    const summary = reimported && reimported.profile.id === state.hull ? this.sections.hull.buildFittedSummary(reimported) : state.fittedHull;
+    if (summary) this.sections.hull.restoreFittingSummary(summary);
   }
 
   private setButtonDisabled(button: HTMLButtonElement, enabled: boolean): void {

@@ -158,9 +158,9 @@ export class HullSection implements IHullSection {
     if (this.panel.profile) this.els.hull.value = this.ships.hullView(this.panel.profile, this.i18n.current()).name;
   }
 
-  applyImportedFitting(summary: FittedHullSummary): void {
-    this.panel.fittedHull = summary;
-    this.panel.sections.propulsion.renderPropulsionOptions(summary.propulsionId ?? PROPULSION_NONE);
+  applyImportedFitting(imported: ImportedFitting): void {
+    this.panel.fittedHull = this.buildFittedSummary(imported);
+    this.panel.sections.propulsion.renderPropulsionOptions(this.panel.fittedHull.propulsionId ?? PROPULSION_NONE);
     this.panel.sections.propulsion.seedPropulsionMemory();
     this.panel.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
   }
@@ -171,5 +171,20 @@ export class HullSection implements IHullSection {
     this.panel.sections.propulsion.seedPropulsionMemory();
     this.panel.sections.paste.clearImportHint();
     this.updateHullHint(this.panel.sections.stats.currentFittedPropulsionModule(summary));
+  }
+
+  buildFittedSummary(imported: ImportedFitting): FittedHullSummary {
+    const propulsionId = imported.propulsion?.propulsionId;
+    return {
+      fittingName: imported.fittingName,
+      propulsionId,
+      propulsionModuleId: imported.propulsion?.propulsionModuleId,
+      propulsionName: imported.propulsion?.propulsionName,
+      propulsionKind: propulsionId !== undefined ? this.ships.fittingOption(imported.profile, propulsionId)?.kind : undefined,
+      fitted: imported.fitted,
+      propulsion: imported.propulsion,
+      capacitor: imported.capacitor?.spec,
+      energyWarfareResistancePercent: imported.energyWarfareResistancePercent,
+    };
   }
 }
