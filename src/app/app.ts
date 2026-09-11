@@ -12,6 +12,7 @@ export class AppImpl implements App {
   private readonly engine: EngagementEngine;
   private readonly renderer: Renderer;
   private readonly loop: Loop;
+  private cameraRanges: WeaponRanges = { shipA: ZERO_RANGE, shipB: ZERO_RANGE };
 
   constructor(deps: {
     controls: Controls;
@@ -28,6 +29,7 @@ export class AppImpl implements App {
   }
 
   start(): void {
+    this.refreshCameraRanges();
     this.loop.setTickHandler((dt) => this.tick(dt));
     this.loop.setSpeed(this.controls.getSpeed());
     this.controls.setCallbacks({
@@ -37,6 +39,7 @@ export class AppImpl implements App {
         this.controls.setPlaying(this.loop.isRunning(), false);
       },
       onConfigChange: () => {
+        this.refreshCameraRanges();
         this.engine.update(this.controls.getEngineConfig());
       },
       onDisplayChange: () => this.renderFrame(),
@@ -79,8 +82,14 @@ export class AppImpl implements App {
     this.renderer.setDroneRangeVisibility(this.controls.getDroneRangeVisibility());
     this.renderer.setDroneControlRangeVisibility(this.controls.getDroneControlRangeVisibility());
     this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
+    this.renderer.setCameraRanges(this.cameraRanges);
     this.renderer.setLockStates(v.locks);
     this.renderer.draw(v.snapshot, v.frame, this.rendererWeaponRanges(v), this.controls.getOverlays(), this.droneRenderInfo(v), this.missileRenderInfo(v), v.defenseRuntime);
+  }
+
+  private refreshCameraRanges(): void {
+    const weapons = this.controls.getEngineConfig().weapons;
+    this.cameraRanges = { shipA: configuredWeaponRange(weapons.shipA[0]), shipB: configuredWeaponRange(weapons.shipB[0]) };
   }
 
   private rendererWeaponRanges(view: EngineView): WeaponRanges {
@@ -105,13 +114,20 @@ export class AppImpl implements App {
   }
 
   private weaponRangeForRenderer(weapon: WeaponSpec | undefined, side: Side): WeaponRange {
-    if (weapon?.kind === "turret") return { kind: "turret", optimal: weapon.optimal, falloff: weapon.falloff };
-    if (weapon?.kind === "drone") return { kind: "drone", optimal: weapon.optimal, falloff: weapon.falloff };
-    if (weapon?.kind === "missile") return { kind: "missile", range: weapon.flightRange };
+    if (weapon) return configuredWeaponRange(weapon);
     const fallback = this.controls.getWeapon(side);
     if (fallback?.kind === "missile") return { kind: "missile", range: fallback.flightRange };
-    return { kind: "turret", optimal: 0, falloff: 0 };
+    return ZERO_RANGE;
   }
+}
+
+const ZERO_RANGE: WeaponRange = { kind: "turret", optimal: 0, falloff: 0 };
+
+function configuredWeaponRange(weapon: WeaponSpec | undefined): WeaponRange {
+  if (weapon?.kind === "turret") return { kind: "turret", optimal: weapon.optimal, falloff: weapon.falloff };
+  if (weapon?.kind === "drone") return { kind: "drone", optimal: weapon.optimal, falloff: weapon.falloff };
+  if (weapon?.kind === "missile") return { kind: "missile", range: weapon.flightRange };
+  return ZERO_RANGE;
 }
 
 function droneGroupRenderInfo(states: readonly DroneRuntimeState[], specs: readonly DroneSpec[]): readonly DroneGroupRenderInfo[] {

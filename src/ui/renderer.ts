@@ -60,6 +60,7 @@ export interface Renderer {
   setDroneRangeVisibility(visibility: WeaponRangeVisibility): void;
   setDroneControlRangeVisibility(visibility: WeaponRangeVisibility): void;
   setManualZoom(autoZoom: boolean, factor: number): void;
+  setCameraRanges(ranges: WeaponRanges): void;
   setLockStates(states: Record<Side, LockState> | undefined): void;
   draw(snapshot: SimSnapshot, frame: EngagementFrame, ranges: WeaponRanges, overlays: readonly RangeOverlay[], droneInfo: DroneRenderInfo, missileInfo: MissileRenderCollection | undefined, defenseView: DefenseView | undefined): void;
 }
@@ -99,12 +100,13 @@ const OVERLAY_COLORS: { readonly [K in RangeOverlayKind]: string } = {
 const GRID_MAX_ALPHA = 0.4;
 const DEFAULT_GRID_BRIGHTNESS = 0.5;
 
+const UNCONFIGURED_RANGES: WeaponRanges = { shipA: { kind: "turret", optimal: 0, falloff: 0 }, shipB: { kind: "turret", optimal: 0, falloff: 0 } };
+
 const VECTOR_SCALE = 0.5; // seconds of travel shown as an arrow
-const MIN_SEPARATION_PX = 140;
-const MIN_VIEW_RADIUS = 250;
-const FAR_MARGIN = 1.25;
-const ZOOM_OUT_MARGIN_PX = 80; // keep ships this far from the canvas edge before zooming out
-const MAX_ZOOM_FACTOR = 3; // relative to the far-range fit scale
+const MIN_SEPARATION_PX = 140; // hard floor: ships are never drawn closer than this
+const MIN_VIEW_RADIUS = 250; // degenerate-distance guard only
+const RING_MARGIN = 1.25; // pad the widest framing ring by this factor
+const ZOOM_OUT_MARGIN_PX = 80; // hard fit margin: keep ships this far from the canvas edge
 const SHIP_ICON_SIZE = 8;
 const DRONE_ICON_SIZE = 2.5;
 const MISSILE_ICON_SIZE = 2;
@@ -126,6 +128,7 @@ export class CanvasRenderer implements Renderer {
   private droneControlRangeVisibility: WeaponRangeVisibility = "none";
   private autoZoom = true;
   private zoomFactor = 1;
+  private cameraRanges: WeaponRanges = UNCONFIGURED_RANGES;
   private lockStates: Record<Side, LockState> | undefined;
 
   constructor({ canvas, i18n }: { canvas: HTMLCanvasElement; i18n: I18n }) {
@@ -158,13 +161,17 @@ export class CanvasRenderer implements Renderer {
     if (Number.isFinite(factor)) this.zoomFactor = Math.max(0.25, Math.min(4, factor));
   }
 
+  setCameraRanges(ranges: WeaponRanges): void {
+    this.cameraRanges = ranges;
+  }
+
   setLockStates(states: Record<Side, LockState> | undefined): void {
     this.lockStates = states;
   }
 
   draw(snapshot: SimSnapshot, frame: EngagementFrame, ranges: WeaponRanges, overlays: readonly RangeOverlay[], droneInfo: DroneRenderInfo, missileInfo: MissileRenderCollection | undefined, defenseView: DefenseView | undefined): void {
     this.syncBufferSize();
-    this.updateCamera(snapshot, ranges);
+    this.updateCamera(snapshot);
     this.clear();
     this.drawGrid();
     this.drawWeaponRangeRings(snapshot, ranges);
@@ -187,27 +194,12 @@ export class CanvasRenderer implements Renderer {
     this.drawReadouts(frame);
   }
 
-  private updateCamera(snapshot: SimSnapshot, ranges: WeaponRanges): void {
+  private updateCamera(snapshot: SimSnapshot): void {
     const { shipA, shipB } = snapshot;
     const center = shipA.position.add(shipB.position).scale(0.5);
     const distance = shipA.position.dist(shipB.position);
     const minDim = Math.min(this.canvas.width, this.canvas.height);
-
-    const farRadius = Math.max(
-      weaponRangeMax(ranges.shipA),
-      weaponRangeMax(ranges.shipB),
-      shipA.desiredRange, shipB.desiredRange, 500,
-    );
-    const farScale = minDim / (2 * farRadius * FAR_MARGIN);
-
-    const closeRadius = Math.max((distance * minDim) / (2 * MIN_SEPARATION_PX), MIN_VIEW_RADIUS);
-    const closeScale = minDim / (2 * closeRadius);
-
-    const fitScale = distance > 0 ? (minDim - 2 * ZOOM_OUT_MARGIN_PX) / distance : farScale;
-    const autoScale = Math.min(
-      Math.max(closeScale, farScale / MAX_ZOOM_FACTOR, Math.min(farScale, fitScale)),
-      farScale * MAX_ZOOM_FACTOR
-    );
+    const autoScale = autoCameraScale(distance, minDim, this.cameraRanges, this.weaponRangeVisibility);
     const zoom = this.autoZoom ? 1 : this.zoomFactor;
     this.camera = { center, scale: autoScale * zoom };
   }
@@ -533,6 +525,20 @@ export class CanvasRenderer implements Renderer {
     this.ctx.fillText(text, x, y);
   }
 
+}
+
+function autoCameraScale(distance: number, minDim: number, ranges: WeaponRanges, visibility: WeaponRangeVisibility): number {
+  if (distance <= 0) return minDim / (2 * MIN_VIEW_RADIUS);
+  const lower = MIN_SEPARATION_PX / distance;
+  const upper = (minDim - 2 * ZOOM_OUT_MARGIN_PX) / distance;
+  return Math.min(Math.max(ringFramingScale(minDim, ranges, visibility), lower), Math.max(lower, upper));
+}
+
+function ringFramingScale(minDim: number, ranges: WeaponRanges, visibility: WeaponRangeVisibility): number {
+  if (visibility === "none") return Infinity;
+  const radius = Math.max(weaponRangeMax(ranges.shipA), weaponRangeMax(ranges.shipB));
+  if (radius <= 0) return Infinity;
+  return minDim / (2 * radius * RING_MARGIN);
 }
 
 function weaponRangeMax(range: WeaponRange): number {

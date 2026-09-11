@@ -1,4 +1,4 @@
-import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineEvents, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type InflictedDps, type MissileRuntimeState, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineEvents, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type InflictedDps, type MissileRuntimeState, type MissileSpec, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "../sim";
 import { toTypeId } from "../gamedata/ids";
 import type { Controls, ControlsCallbacks, Loop, Renderer, UiEvents } from "../ui";
 import type { EngagementEngine } from "../sim";
@@ -115,7 +115,7 @@ const engine = vi.mocked<EngagementEngine>({
   events: vi.fn(() => engineEvents),
 });
 
-const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setDroneRangeVisibility: vi.fn(), setDroneControlRangeVisibility: vi.fn(), setManualZoom: vi.fn(), setLockStates: vi.fn() });
+const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setDroneRangeVisibility: vi.fn(), setDroneControlRangeVisibility: vi.fn(), setManualZoom: vi.fn(), setCameraRanges: vi.fn(), setLockStates: vi.fn() });
 const loop = vi.mocked<Loop>({
   setTickHandler: vi.fn(),
   start: vi.fn(),
@@ -132,6 +132,7 @@ describe("AppImpl", () => {
 
   beforeEach(() => {
     controls.getWeapon.mockReturnValue(turret);
+    controls.getEngineConfig.mockReturnValue(engineConfig);
     viewListeners.clear();
     destroyListeners.clear();
     engine.reset.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
@@ -265,6 +266,22 @@ describe("AppImpl", () => {
     app.start();
     callbacks().onSpeedChange(4);
     expect(loop.setSpeed).toHaveBeenCalledWith(4);
+  });
+
+  test("start frames the camera from the configured weapons before the first draw", () => {
+    app.start();
+    expect(renderer.setCameraRanges).toHaveBeenCalledWith({ shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } });
+    expect(renderer.setCameraRanges.mock.invocationCallOrder[0]).toBeLessThan(renderer.draw.mock.invocationCallOrder[0]);
+  });
+
+  test("config change reframes the camera from the updated configured weapons", () => {
+    app.start();
+    renderer.setCameraRanges.mockClear();
+    const missile: MissileSpec = { kind: "missile", moduleId: toTypeId("3"), damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 1, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 0.604, maxVelocity: 3750, flightTime: 5, flightRange: 18750 };
+    controls.getEngineConfig.mockReturnValue({ ...engineConfig, weapons: { shipA: [missile], shipB: [turret] } });
+    callbacks().onConfigChange();
+    expect(renderer.setCameraRanges).toHaveBeenCalledWith({ shipA: { kind: "missile", range: 18750 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } });
+    controls.getEngineConfig.mockReturnValue(engineConfig);
   });
 
   test("renderFrame passes engine view snapshot, frame, weapon ranges, and defense runtime to renderer", () => {
