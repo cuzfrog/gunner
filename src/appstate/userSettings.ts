@@ -70,7 +70,6 @@ export interface FittedHullSummary {
   readonly propulsionKind?: PropulsionKind;
   readonly fitted: FittedHull;
   readonly propulsion?: PropulsionStats;
-  readonly baseMaxSpeed?: number;
   readonly capacitor: CapacitorSpec;
   readonly energyWarfareResistancePercent: number;
 }

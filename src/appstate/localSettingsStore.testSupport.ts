@@ -113,7 +113,6 @@ export const FITTED_HULL_SUMMARY: FittedHullSummary = {
   propulsionKind: "afterburner",
   fitted: FITTED_HULL,
   propulsion: FITTED_PROPULSION,
-  baseMaxSpeed: 456.25,
   capacitor: { capacity: 4375, rechargeTime: 656.25 },
   energyWarfareResistancePercent: 0,
 };

@@ -695,7 +695,6 @@ describe("LocalSettingsStore", () => {
       propulsionKind: "microwarpdrive",
       fitted: RIFTER_FITTED,
       propulsion: RIFTER_MODULE,
-      baseMaxSpeed: RIFTER_MWD_STATS.baseMaxSpeed,
       capacitor: { capacity: 0, rechargeTime: 0 },
       energyWarfareResistancePercent: 0,
     });

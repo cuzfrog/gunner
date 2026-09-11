@@ -98,7 +98,6 @@ export class FittingBasis {
       propulsionKind: fittedPropulsionId !== undefined ? this.ships.fittingOption(profile, fittedPropulsionId)?.kind : undefined,
       fitted: imported.fitted,
       propulsion: fittedPropulsion,
-      baseMaxSpeed: stats.baseMaxSpeed,
       capacitor: imported.capacitor.spec,
       energyWarfareResistancePercent: imported.energyWarfareResistancePercent,
     };
