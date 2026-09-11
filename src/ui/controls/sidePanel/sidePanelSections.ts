@@ -86,6 +86,7 @@ export interface IPropulsionSection {
   currentPropulsionModule(): PropulsionModule | undefined;
   renderPropulsionOptions(selectedId?: PropulsionSelection): void;
   onPropulsionChange(): void;
+  applyPropulsionVariant(id: TypeId): void;
   setPropulsionActive(propulsionId: string): void;
   resolvePropulsionVariant(module: PropulsionModule, fitted: FittedHullSummary | undefined): { readonly id: TypeId; readonly name: string } | undefined;
   notePropulsionVariant(kind: PropulsionKind, moduleId: TypeId): void;

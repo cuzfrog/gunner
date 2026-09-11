@@ -125,26 +125,31 @@ export class PropulsionSection implements IPropulsionSection {
     if (!profile) return;
     const propulsionId = this.currentPropulsionId();
     const fitted = this.panel.fittedHull;
-    let updated: FittedHullSummary | undefined;
-    if (propulsionId) {
-      const module = this.ships.fittingOption(profile, propulsionId);
-      if (module) {
-        const variant = this.resolvePropulsionVariantWithMemory(module, fitted);
-        updated = this.updatedSummary(profile, propulsionId, module, variant ? { id: variant.id, name: variant.name } : undefined);
-        if (variant) {
-          this.propulsionSelection.noteApplied({ kind: module.kind, module }, { moduleId: variant.id });
-        }
+    if (!propulsionId) {
+      if (fitted) this.panel.fittedHull = { ...fitted, propulsionId: undefined, propulsionKind: undefined, propulsion: undefined };
+      this.afterPropulsionChange();
+      return;
+    }
+    const module = this.ships.fittingOption(profile, propulsionId);
+    if (module) {
+      const variant = this.resolvePropulsionVariantWithMemory(module, fitted);
+      this.panel.fittedHull = this.updatedSummary(profile, propulsionId, module, variant ? { id: variant.id, name: variant.name } : undefined);
+      if (variant) {
+        this.propulsionSelection.noteApplied({ kind: module.kind, module }, { moduleId: variant.id });
       }
-    } else if (fitted) {
-      updated = { ...fitted, propulsionId: undefined, propulsionKind: undefined, propulsion: undefined };
     }
-    if (updated) {
-      this.panel.fittedHull = updated;
-    }
-    this.panel.sections.stats.updateShipStats({ updateInertia: false, updateMass: true, updateSig: true });
-    this.panel.sections.skill.setOverloadDisabled();
-    this.variants.updateUI();
-    this.panel.host.persistConfigChange();
+    this.afterPropulsionChange();
+  }
+
+  applyPropulsionVariant(id: TypeId): void {
+    const profile = this.panel.profile;
+    const module = this.currentPropulsionModule();
+    const propulsionId = this.currentPropulsionId();
+    if (!profile || !module || !propulsionId || !this.fittingImport.propulsionStatsById(id)) return;
+    const name = this.fittingImport.itemNameForId(id, "en") ?? module.label;
+    this.panel.fittedHull = this.updatedSummary(profile, propulsionId, module, { id, name });
+    this.propulsionSelection.noteApplied({ kind: module.kind, module }, { moduleId: id });
+    this.afterPropulsionChange();
   }
 
   private updatedSummary(
@@ -159,6 +164,13 @@ export class PropulsionSection implements IPropulsionSection {
       return { ...fitted, propulsionId, propulsionModuleId: variant?.id, propulsionName: variant?.name ?? module.label, propulsionKind: module.kind, propulsion };
     }
     return this.panel.sections.hull.buildManualSummary(profile, { propulsionId, propulsionModuleId: variant?.id, propulsionName: variant?.name ?? module.label, kind: module.kind, propulsion });
+  }
+
+  private afterPropulsionChange(): void {
+    this.panel.sections.stats.updateShipStats({ updateInertia: false, updateMass: true, updateSig: true });
+    this.panel.sections.skill.setOverloadDisabled();
+    this.variants.updateUI();
+    this.panel.host.persistConfigChange();
   }
 
   notePropulsionVariant(kind: PropulsionKind, moduleId: TypeId): void {

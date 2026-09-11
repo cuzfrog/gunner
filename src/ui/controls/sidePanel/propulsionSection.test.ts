@@ -1,6 +1,6 @@
 import type { FittingImport } from "../../../fitting";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
-import type { PropulsionId, PropulsionModule, ShipProfile, Ships } from "../../../ships";
+import type { PropulsionId, PropulsionModule, PropulsionKind, PropulsionStats, ShipProfile, Ships } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { PROPULSION_NONE, type FittedHullSummary } from "../../../appstate";
