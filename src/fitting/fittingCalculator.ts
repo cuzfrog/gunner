@@ -221,6 +221,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
         damageMultiplier: finalDamageMultiplier,
         damagePerShot: damageVectorScale(damageVectorFromPartial(chargeDamageByType(charge)), finalDamageMultiplier),
         cycleTime: finalCycleTime,
+        capacitorNeed: turret.capacitorNeed,
         turretCount: group.count,
         spool,
         damageBreakdown: { damageByType: chargeDamageByType(charge), factors },

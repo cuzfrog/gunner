@@ -70,7 +70,7 @@ function resolvedTurret(entry: FittingModuleEntry, cycleTime: number, turretCoun
   return {
     tracking: 0, sigResolutionClass: "S", optimal: 0, falloff: 0, chargeSize: 1, base: { tracking: 0, optimal: 0, falloff: 0 },
     chargeId: entry.chargeId ?? ("" as TypeId), moduleId: entry.moduleId, damageMultiplier: 1,
-    damagePerShot: { em: 0, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime, turretCount, damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
+    damagePerShot: { em: 0, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime, turretCount, capacitorNeed: 0, damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
   };
 }
 

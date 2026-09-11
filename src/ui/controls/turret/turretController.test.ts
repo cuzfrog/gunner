@@ -202,6 +202,13 @@ describe("TurretController", () => {
     expect(controller.currentTurretSpec()).toBeUndefined();
   });
 
+  test("currentTurretSpec carries the capacitor need for the capacitor gate", () => {
+    const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
+    expect(controller.currentTurretSpec()!.capacitorNeed).toBe(36);
+    expect(controller.currentTurretSpecs()[0].capacitorNeed).toBe(36);
+  });
+
   test("currentTurretSpecs returns single-element array for single turret", () => {
     const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });

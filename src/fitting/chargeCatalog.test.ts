@@ -120,6 +120,7 @@ function turret(overrides: Partial<ImportedTurret> = {}): ImportedTurret {
     damageMultiplier: 3,
     damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 },
     cycleTime: 5,
+    capacitorNeed: 36,
     turretCount: 1,
     damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
     ...overrides,

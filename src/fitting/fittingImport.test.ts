@@ -697,6 +697,7 @@ describe("FittingImportImpl", () => {
     expect(result!.turret!.optimal).toBe(12_600 * 0.5);
     expect(result!.turret!.falloff).toBe(5_000);
     expect(result!.turret!.sigResolutionClass).toBe("M");
+    expect(result!.turret!.capacitorNeed).toBe(36);
     expect(result!.turret!.tracking).toBeCloseTo((26 * 0.7 * 125) / 40_000, 10);
     expect(result!.turret!.base.optimal).toBe(12_600);
     expect(result!.turret!.base.falloff).toBe(5_000);
