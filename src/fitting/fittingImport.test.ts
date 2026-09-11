@@ -1147,6 +1147,37 @@ Tracking Disruptor II, Optimal Range Disruption Script`,
     ]);
   });
 
+  test("capacitor rows derive from the resolved turrets, ewar loadout, and defense spec", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Cap Sources]
+Heavy Pulse Laser II, Conflagration M
+Stasis Webifier II
+Stasis Webifier II
+Reactive Armor Hardener`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    const rows = result!.capacitor.rows;
+    const webRow = rows.find((candidate) => candidate.moduleName === "Stasis Webifier II");
+    expect(webRow?.count).toBe(2);
+    expect(webRow?.amount).toBeCloseTo(6, 6);
+    expect(webRow?.cycleTime).toBeCloseTo(5, 6);
+    const rahRow = rows.find((candidate) => candidate.moduleName === "Reactive Armor Hardener");
+    expect(rahRow?.amount).toBeCloseTo(42, 6);
+    expect(rahRow?.cycleTime).toBeCloseTo(10, 6);
+    const laser = result!.turrets![0];
+    const turretRow = rows.find((candidate) => candidate.moduleId === laser.moduleId);
+    expect(turretRow?.amount).toBe(laser.capacitorNeed);
+    expect(turretRow?.cycleTime).toBe(laser.cycleTime);
+    expect(turretRow?.count).toBe(1);
+    expect(rows).toHaveLength(3);
+    const usage = rows.reduce((sum, row) => sum + row.perSecond * row.count, 0);
+    expect(result!.capacitor.usagePerSecond).toBeCloseTo(usage, 9);
+  });
+
   test("ignores offline ewar and returns empty ewar loadout when none are fitted", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);

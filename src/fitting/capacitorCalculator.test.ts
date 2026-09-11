@@ -1,10 +1,10 @@
 import { type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import { FITTING_DB, type HullBonus } from "../gamedata/fittingDb";
 import { type ShipProfile, type SkillLevel, type StatConditions, defaultCapacitorSkills } from "../ships";
-import { StackingPenaltyImpl, type DefenseSpec } from "../sim";
+import { EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, PROPULSION_CYCLE_SECONDS, StackingPenaltyImpl, type BoostLoadout, type EwarLoadout, type EnergyNeutralizerSpec, type MissileBoosterLoadout, type SensorBoostLoadout, type StasisWebSpec, type TrackingBoosterSpec } from "../sim";
 import { FittingStateFactory, type CargoEntry, type FittingModuleEntry } from "./fittingState";
 import { DefenseCalculatorImpl } from "./defenseCalculator";
-import { CapacitorCalculatorImpl, buildInjectorDrains } from "./capacitorCalculator";
+import { CapacitorCalculatorImpl, buildInjectorDrains, type CapacitorDrainSources } from "./capacitorCalculator";
 import type { ImportedTurret } from "./chargeCatalog";
 import { EMPTY_DAMAGE_BREAKDOWN } from "./damageBreakdown";
 
@@ -60,18 +60,49 @@ function findChargeId(name: string): TypeId {
   throw new Error(`Charge not found: ${name}`);
 }
 
-function resolve(entries: readonly FittingModuleEntry[], conditions: StatConditions = emptyConditions, turrets: readonly ImportedTurret[] = []): ReturnType<CapacitorCalculatorImpl["resolve"]> {
+interface DrainLoadouts {
+  readonly ewar?: EwarLoadout;
+  readonly boosts?: BoostLoadout;
+  readonly missileBoosts?: MissileBoosterLoadout;
+  readonly sensorBoosts?: SensorBoostLoadout;
+}
+
+function resolve(entries: readonly FittingModuleEntry[], conditions: StatConditions = emptyConditions, turrets: readonly ImportedTurret[] = [], loadouts: DrainLoadouts = {}): ReturnType<CapacitorCalculatorImpl["resolve"]> {
   const state = factory.create(profile, [] as readonly HullBonus[], entries, [], [] as readonly CargoEntry[]);
   const defense = defenseCalculator.resolve(state, conditions);
-  return calculator.resolve(state, conditions, defense, turrets);
+  const sources: CapacitorDrainSources = { defense, turrets, ewar: loadouts.ewar ?? EMPTY_EWAR_LOADOUT, boosts: loadouts.boosts ?? EMPTY_BOOST_LOADOUT, missileBoosts: loadouts.missileBoosts ?? EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: loadouts.sensorBoosts ?? EMPTY_SENSOR_BOOST_LOADOUT };
+  return calculator.resolve(state, conditions, sources);
 }
 
 function resolvedTurret(entry: FittingModuleEntry, cycleTime: number, turretCount = 1): ImportedTurret {
+  const turretStats = FITTING_DB.turrets[entry.moduleId];
+  if (!turretStats) throw new Error(`Turret not found: ${entry.moduleId}`);
   return {
     tracking: 0, sigResolutionClass: "S", optimal: 0, falloff: 0, chargeSize: 1, base: { tracking: 0, optimal: 0, falloff: 0 },
     chargeId: entry.chargeId ?? ("" as TypeId), moduleId: entry.moduleId, damageMultiplier: 1,
-    damagePerShot: { em: 0, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime, turretCount, capacitorNeed: 0, damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
+    damagePerShot: { em: 0, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime, turretCount, capacitorNeed: turretStats.capacitorNeed, damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
   };
+}
+
+function webSpec(name: string): StasisWebSpec {
+  for (const stats of Object.values(FITTING_DB.stasisWebs)) {
+    if (stats.name === name) return { moduleName: stats.name, moduleId: stats.id, maxRange: stats.maxRange, speedFactor: Math.round(-stats.speedFactorPercent * 10000) / 1000000, overloadRangeBonusPercent: stats.overloadRangeBonusPercent, capacitorNeed: stats.capacitorNeed, cycleTime: stats.cycleTime };
+  }
+  throw new Error(`Stasis web not found: ${name}`);
+}
+
+function trackingComputerSpec(name: string): TrackingBoosterSpec {
+  for (const stats of Object.values(FITTING_DB.trackingComputers)) {
+    if (stats.name === name) return { moduleName: stats.name, moduleId: stats.id, trackingBonusPercent: stats.trackingBonusPercent, optimalBonusPercent: stats.optimalBonusPercent, falloffBonusPercent: stats.falloffBonusPercent, defaultScript: undefined, capacitorNeed: stats.capacitorNeed, cycleTime: stats.cycleTime };
+  }
+  throw new Error(`Tracking computer not found: ${name}`);
+}
+
+function neutralizerSpec(name: string): EnergyNeutralizerSpec {
+  for (const stats of Object.values(FITTING_DB.modules)) {
+    if (stats.name === name && stats.neutralizer) return { moduleName: stats.name, moduleId: stats.id, amount: stats.neutralizer.amount, cycleTime: stats.neutralizer.cycleTime, capacitorNeed: stats.neutralizer.capacitorNeed, maxRange: stats.neutralizer.maxRange, falloff: stats.neutralizer.falloff };
+  }
+  throw new Error(`Neutralizer not found: ${name}`);
 }
 
 describe("capacitorCalculator", () => {
@@ -171,7 +202,8 @@ describe("capacitorCalculator", () => {
   });
 
   test("projectile turrets and launchers consume no capacitor", () => {
-    const result = resolve([moduleEntry("200mm AutoCannon II"), moduleEntry("Rocket Launcher I")]);
+    const entry = moduleEntry("200mm AutoCannon II");
+    const result = resolve([entry, moduleEntry("Rocket Launcher I")], emptyConditions, [resolvedTurret(entry, 2, 1)]);
     expect(result.rows).toHaveLength(0);
   });
 
@@ -190,7 +222,7 @@ describe("capacitorCalculator", () => {
     expect(row?.cycleTime).toBeCloseTo(15 * 0.85, 3);
   });
 
-  test("reactive armor hardener produces a row", () => {
+  test("reactive armor hardener produces a row from the resolved defense spec", () => {
     const result = resolve([moduleEntry("Reactive Armor Hardener")]);
     const row = result.rows.find((candidate) => candidate.moduleName === "Reactive Armor Hardener");
     expect(row).toBeDefined();
@@ -198,16 +230,25 @@ describe("capacitorCalculator", () => {
     expect(row?.cycleTime).toBeCloseTo(10, 3);
   });
 
-  test("ewar modules produce rows from their family catalogs", () => {
-    const result = resolve([moduleEntry("Stasis Webifier II")]);
+  test("ewar loadout drains produce usage rows", () => {
+    const result = resolve([moduleEntry("Stasis Webifier II")], emptyConditions, [], { ewar: { ...EMPTY_EWAR_LOADOUT, webs: [webSpec("Stasis Webifier II")] } });
     const row = result.rows.find((candidate) => candidate.moduleName === "Stasis Webifier II");
     expect(row).toBeDefined();
     expect(row?.amount).toBeCloseTo(6, 3);
     expect(row?.cycleTime).toBeCloseTo(5, 3);
+    expect(row?.count).toBe(1);
+  });
+
+  test("identical ewar modules group into one count-scaled row", () => {
+    const web = webSpec("Stasis Webifier II");
+    const result = resolve([moduleEntry("Stasis Webifier II"), moduleEntry("Stasis Webifier II")], emptyConditions, [], { ewar: { ...EMPTY_EWAR_LOADOUT, webs: [web, web] } });
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0]?.count).toBe(2);
+    expect(result.usagePerSecond).toBeCloseTo((6 / 5) * 2, 6);
   });
 
   test("tracking computers produce rows", () => {
-    const result = resolve([moduleEntry("Tracking Computer II")]);
+    const result = resolve([moduleEntry("Tracking Computer II")], emptyConditions, [], { boosts: { ...EMPTY_BOOST_LOADOUT, computers: [trackingComputerSpec("Tracking Computer II")] } });
     const row = result.rows.find((candidate) => candidate.moduleName === "Tracking Computer II");
     expect(row).toBeDefined();
     expect(row?.amount).toBeCloseTo(10, 3);
@@ -223,13 +264,13 @@ describe("capacitorCalculator", () => {
   });
 
   test("omnidirectional tracking link alongside a stasis web yields exactly the web row", () => {
-    const result = resolve([moduleEntry("Omnidirectional Tracking Link II"), moduleEntry("Stasis Webifier II")]);
+    const result = resolve([moduleEntry("Omnidirectional Tracking Link II"), moduleEntry("Stasis Webifier II")], emptyConditions, [], { ewar: { ...EMPTY_EWAR_LOADOUT, webs: [webSpec("Stasis Webifier II")] } });
     expect(result.rows).toHaveLength(1);
     expect(result.rows[0]?.moduleName).toBe("Stasis Webifier II");
   });
 
   test("energy neutralizers drain own capacitor, nosferatu do not", () => {
-    const result = resolve([moduleEntry("Heavy Energy Neutralizer II"), moduleEntry("Medium Energy Nosferatu II")]);
+    const result = resolve([moduleEntry("Heavy Energy Neutralizer II"), moduleEntry("Medium Energy Nosferatu II")], emptyConditions, [], { ewar: { ...EMPTY_EWAR_LOADOUT, neutralizers: [neutralizerSpec("Heavy Energy Neutralizer II")] } });
     const neutRow = result.rows.find((candidate) => candidate.moduleName === "Heavy Energy Neutralizer II");
     expect(neutRow).toBeDefined();
     expect(neutRow?.amount).toBeCloseTo(500, 3);
@@ -288,12 +329,19 @@ describe("capacitorCalculator", () => {
   });
 
   test("usage per second sums scaled rows", () => {
-    const result = resolve([moduleEntry("Stasis Webifier II"), moduleEntry("Mega Pulse Laser II")]);
+    const turretEntry = moduleEntry("Mega Pulse Laser II");
+    const result = resolve([moduleEntry("Stasis Webifier II"), turretEntry], emptyConditions, [resolvedTurret(turretEntry, 7.875, 1)], { ewar: { ...EMPTY_EWAR_LOADOUT, webs: [webSpec("Stasis Webifier II")] } });
     expect(result.usagePerSecond).toBeCloseTo(6 / 5 + 36 / 7.875, 3);
   });
 
+  test("propulsion row interval matches the simulated propulsion cycle", () => {
+    const result = resolve([moduleEntry("50MN Microwarpdrive I")]);
+    const row = result.rows.find((candidate) => candidate.moduleName === "50MN Microwarpdrive I");
+    expect(row?.cycleTime).toBe(PROPULSION_CYCLE_SECONDS);
+  });
+
   test("light drain is cap stable with a watermark percent", () => {
-    const result = resolve([moduleEntry("Stasis Webifier II")]);
+    const result = resolve([moduleEntry("Stasis Webifier II")], emptyConditions, [], { ewar: { ...EMPTY_EWAR_LOADOUT, webs: [webSpec("Stasis Webifier II")] } });
     expect(result.stablePercent).toBeDefined();
     expect(result.stablePercent).toBeGreaterThan(85);
   });

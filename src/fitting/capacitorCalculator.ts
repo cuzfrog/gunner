@@ -1,7 +1,7 @@
-import type { ChargeStats, FittingDb, FittingModuleStats } from "../gamedata/fittingDb";
+import type { ChargeStats, FittingDb } from "../gamedata/fittingDb";
 import type { TypeId } from "../gamedata/ids";
 import { type CapacitorSkills, type StatConditions, defaultCapacitorSkills } from "../ships";
-import { type CapacitorSpec, type DefenseSpec, type StackingPenalty } from "../sim";
+import { type BoostLoadout, type CapacitorSpec, type DefenseSpec, type EwarLoadout, type MissileBoosterLoadout, PROPULSION_CYCLE_SECONDS, scheduledDrainsFromProjections, type ScheduledDrain, type SensorBoostLoadout, type StackingPenalty } from "../sim";
 import { runCapSim, type StaticDrain } from "./capacitorSim";
 import type { FittingState } from "./fittingState";
 import type { ImportedTurret } from "./chargeCatalog";
@@ -41,12 +41,19 @@ export interface CapacitorStats {
   readonly depletesInSeconds?: number; // seconds until the pool depletes, when unstable
 }
 
-export interface CapacitorCalculator {
-  resolve(fitting: FittingState, conditions: StatConditions, defense: DefenseSpec, turrets: readonly ImportedTurret[]): CapacitorStats;
+/** Resolved products the capacitor rows and the runtime drains both derive from. */
+export interface CapacitorDrainSources {
+  readonly defense: DefenseSpec;
+  readonly turrets: readonly ImportedTurret[];
+  readonly ewar: EwarLoadout;
+  readonly boosts: BoostLoadout;
+  readonly missileBoosts: MissileBoosterLoadout;
+  readonly sensorBoosts: SensorBoostLoadout;
 }
 
-/** Cycle-time fields the capacitor rows consume from the resolved turret groups. */
-type TurretCycle = Pick<ImportedTurret, "moduleId" | "cycleTime" | "turretCount">;
+export interface CapacitorCalculator {
+  resolve(fitting: FittingState, conditions: StatConditions, sources: CapacitorDrainSources): CapacitorStats;
+}
 
 interface CapacitorCalculatorDeps {
   readonly fittingDb: FittingDb;
@@ -62,12 +69,12 @@ export class CapacitorCalculatorImpl implements CapacitorCalculator {
     this.stacking = stackingPenalty;
   }
 
-  resolve(fitting: FittingState, conditions: StatConditions, defense: DefenseSpec, turrets: readonly ImportedTurret[]): CapacitorStats {
+  resolve(fitting: FittingState, conditions: StatConditions, sources: CapacitorDrainSources): CapacitorStats {
     const skills = conditions.capacitorSkills ?? defaultCapacitorSkills(conditions.skillLevel);
     const spec = resolveSpec(this.db, fitting, skills, this.stacking);
     const propulsion = fitting.propulsionModule ? this.db.modules[fitting.propulsionModule.moduleId]?.propulsion : undefined;
     const effective = multiplyCapacity(spec, propulsion?.capacitorCapacityMultiplier);
-    const rows = buildUsageRows(this.db, fitting, conditions, defense, turrets);
+    const rows = buildUsageRows(this.db, fitting, conditions, sources);
     const injectors = buildInjectorDrains(fitting, this.db);
     const usagePerSecond = rows.reduce((sum, row) => sum + row.perSecond * row.count, 0);
     const drains: readonly StaticDrain[] = [...rows.map((row) => ({ amount: row.amount, interval: row.cycleTime, count: row.count })), ...injectors];
@@ -116,73 +123,51 @@ function multiplyCapacity(spec: CapacitorSpec, multiplier: number | undefined): 
   return { capacity: spec.capacity * multiplier, rechargeTime: spec.rechargeTime };
 }
 
-function buildUsageRows(db: FittingDb, fitting: FittingState, conditions: StatConditions, defense: DefenseSpec, turrets: readonly ImportedTurret[]): readonly CapacitorUsageRow[] {
+function buildUsageRows(db: FittingDb, fitting: FittingState, conditions: StatConditions, sources: CapacitorDrainSources): readonly CapacitorUsageRow[] {
   const rows: CapacitorUsageRow[] = [];
 
-  for (let i = 0; i < fitting.turretGroups.length; i++) {
-    const group = fitting.turretGroups[i];
-    const stats = db.turrets[group.moduleId];
-    if (!stats || stats.capacitorNeed <= 0) continue;
-    const resolved = turrets[i];
-    // The resolved turret carries the final cycle time (skill/module/hull/overload adjusted);
-    // fall back to the raw catalog cycle for groups the resolver skipped.
-    const cycleTime = resolved && resolved.moduleId === group.moduleId ? resolved.cycleTime : stats.cycleTime * (conditions.weaponOverloaded ? WEAPON_OVERLOAD_ROF_MULTIPLIER : 1);
-    rows.push(buildRow(group.moduleId, stats.name, stats.capacitorNeed, cycleTime, group.count));
+  for (const turret of sources.turrets) {
+    if (turret.capacitorNeed <= 0) continue;
+    rows.push(buildRow(turret.moduleId, turretNameFor(db, turret.moduleId), turret.capacitorNeed, turret.cycleTime, turret.turretCount));
   }
 
-  for (const moduleId of collectFittedModuleIds(fitting)) {
-    const family = findActiveCapFamily(db, moduleId);
-    if (!family) continue;
-    rows.push(buildRow(moduleId, family.moduleName, family.capacitorNeed, family.cycleTime, 1));
-  }
+  // Same extraction the runtime uses for its scheduled drains: the static rows cannot diverge from the sim.
+  const drains = scheduledDrainsFromProjections({ loadout: sources.ewar }, { loadout: sources.boosts }, { loadout: sources.missileBoosts }, { loadout: sources.sensorBoosts });
+  rows.push(...drainRows(db, drains));
 
-  for (const repairer of defense.repairers) {
+  for (const repairer of sources.defense.repairers) {
     if (repairer.capacitorNeed <= 0 || !repairer.moduleId) continue;
     const overloadCycle = conditions.overloaded ? repairer.overload.cycleTimeMultiplier : 1;
-    const moduleName = db.modules[repairer.moduleId]?.name ?? "";
-    rows.push(buildRow(repairer.moduleId, moduleName, repairer.capacitorNeed, repairer.cycleTime * overloadCycle, 1));
+    rows.push(buildRow(repairer.moduleId, moduleNameFor(db, repairer.moduleId), repairer.capacitorNeed, repairer.cycleTime * overloadCycle, 1));
   }
 
-  for (const mod of fitting.defenseModules) {
-    const defenseStats = db.modules[mod.moduleId]?.defense;
-    if (!defenseStats || defenseStats.kind !== "rah") continue;
-    const { capacitorNeed, cycleTime } = defenseStats;
-    if (capacitorNeed === undefined || capacitorNeed <= 0 || cycleTime === undefined) continue;
-    const overloadCycle = conditions.overloaded ? (defenseStats.overloadCycleTimeMultiplier ?? 1) : 1;
-    const moduleName = db.modules[mod.moduleId]?.name ?? "";
-    rows.push(buildRow(mod.moduleId, moduleName, capacitorNeed, cycleTime * overloadCycle, 1));
+  const rah = sources.defense.rah;
+  if (rah?.moduleId && (rah.capacitorNeed ?? 0) > 0) {
+    const overloadCycle = conditions.overloaded ? rah.overloadCycleTimeMultiplier : 1;
+    rows.push(buildRow(rah.moduleId, moduleNameFor(db, rah.moduleId), rah.capacitorNeed ?? 0, rah.cycleTime * overloadCycle, 1));
   }
 
   const propulsionModule = fitting.propulsionModule;
   const propulsion = propulsionModule ? db.modules[propulsionModule.moduleId]?.propulsion : undefined;
   if (propulsionModule && propulsion && propulsion.capacitorNeed > 0) {
-    const moduleName = db.modules[propulsionModule.moduleId]?.name ?? "";
-    rows.push(buildRow(propulsionModule.moduleId, moduleName, propulsion.capacitorNeed, PROPULSION_CYCLE_TIME, 1));
+    rows.push(buildRow(propulsionModule.moduleId, moduleNameFor(db, propulsionModule.moduleId), propulsion.capacitorNeed, PROPULSION_CYCLE_SECONDS, 1));
   }
 
   return rows;
 }
 
+function drainRows(db: FittingDb, drains: readonly ScheduledDrain[]): readonly CapacitorUsageRow[] {
+  const grouped = new Map<TypeId, { amount: number; interval: number; count: number }>();
+  for (const drain of drains) {
+    const existing = grouped.get(drain.moduleId);
+    if (existing) existing.count += 1;
+    else grouped.set(drain.moduleId, { amount: drain.amount, interval: drain.interval, count: 1 });
+  }
+  return [...grouped.entries()].map(([moduleId, group]) => buildRow(moduleId, moduleNameFor(db, moduleId), group.amount, group.interval, group.count));
+}
+
 function buildRow(moduleId: TypeId, moduleName: string, amount: number, cycleTime: number, count: number): CapacitorUsageRow {
   return { moduleId, moduleName, amount, cycleTime, perSecond: amount / cycleTime, count };
-}
-
-interface ActiveCapFamily {
-  readonly moduleName: string;
-  readonly capacitorNeed: number;
-  readonly cycleTime: number;
-}
-
-/** Capacitor-consuming active stats across the fittingDb family catalogs. */
-function findActiveCapFamily(db: FittingDb, moduleId: TypeId): ActiveCapFamily | undefined {
-  // Omnidirectional tracking links are deliberately absent: phase 3 scoped their drain out of the
-  // runtime simulation (drones run their own pool; the effect is pre-baked into drone stats), so
-  // the static usage rows must not include a drain that never happens.
-  const family = db.stasisWebs[moduleId] ?? db.stasisGrapplers[moduleId] ?? db.trackingDisruptors[moduleId] ?? db.warpScramblers[moduleId] ?? db.targetPainters[moduleId] ?? db.sensorDampeners[moduleId] ?? db.trackingComputers[moduleId] ?? db.missileGuidanceComputers[moduleId] ?? db.sensorBoosters[moduleId];
-  if (family) return { moduleName: family.name, capacitorNeed: family.capacitorNeed, cycleTime: family.cycleTime };
-  const stats: FittingModuleStats | undefined = db.modules[moduleId];
-  if (stats?.neutralizer) return { moduleName: stats.name, capacitorNeed: stats.neutralizer.capacitorNeed, cycleTime: stats.neutralizer.cycleTime };
-  return undefined;
 }
 
 function collectFittedModuleIds(fitting: FittingState): readonly TypeId[] {
@@ -217,6 +202,16 @@ export function buildInjectorDrains(fitting: FittingState, db: FittingDb): reado
   return drains;
 }
 
+/** Display names for drain row modules; family catalogs cover ids absent from db.modules (e.g. tracking computers). */
+function moduleNameFor(db: FittingDb, moduleId: TypeId): string {
+  const family = db.stasisWebs[moduleId] ?? db.stasisGrapplers[moduleId] ?? db.trackingDisruptors[moduleId] ?? db.warpScramblers[moduleId] ?? db.targetPainters[moduleId] ?? db.sensorDampeners[moduleId] ?? db.trackingComputers[moduleId] ?? db.missileGuidanceComputers[moduleId] ?? db.sensorBoosters[moduleId];
+  return db.modules[moduleId]?.name ?? family?.name ?? "";
+}
+
+function turretNameFor(db: FittingDb, moduleId: TypeId): string {
+  return db.turrets[moduleId]?.name ?? "";
+}
+
 /** Fitted cap boosters with every group-87 charge that fits their charge capacity (pyfa volume rule). */
 function buildBoosterStats(db: FittingDb, fitting: FittingState): readonly CapacitorBoosterStats[] {
   const result: CapacitorBoosterStats[] = [];
@@ -241,8 +236,6 @@ function buildBoosterStats(db: FittingDb, fitting: FittingState): readonly Capac
   return result;
 }
 
-const PROPULSION_CYCLE_TIME = 10; // seconds, fixed propulsion cycle
 const CAP_BOOSTER_CHARGE_GROUP = 87;
-const WEAPON_OVERLOAD_ROF_MULTIPLIER = 0.85;
 const ENERGY_MANAGEMENT_BONUS = 0.05;
 const ENERGY_SYSTEMS_OPERATIONS_BONUS = 0.05;

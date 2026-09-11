@@ -151,7 +151,7 @@ interface SideRuntime {
   lastDt: number;
 }
 
-const PROPULSION_INTERVAL = 10; // seconds, fixed propulsion cycle
+export const PROPULSION_CYCLE_SECONDS = 10; // seconds, fixed propulsion cycle shared with the fitting preview
 const TAU_DENOMINATOR = 5; // EVE recharge tau = rechargeTime / 5
 const CAPACITY_EPSILON_FACTOR = 1e-9;
 
@@ -274,7 +274,7 @@ function sideFromConfig(spec: CapacitorSpec | undefined, propulsionCapNeed: numb
   runtime.cap = effective && effective.capacity > 0 ? effective.capacity : 0;
   runtime.drains = config.drains.filter((drain) => drain.interval > 0).map((drain) => ({ moduleId: drain.moduleId, amount: drain.amount, interval: drain.interval, active: drain.active, running: false, starved: false, timer: 0 }));
   runtime.boosters = config.boosters.map((booster) => ({ ...booster, charges: booster.clipSize, cycleTimer: 0, reloading: false, reloadTimer: 0 }));
-  runtime.propulsion = propulsionCapNeed && propulsionCapNeed > 0 ? { amount: propulsionCapNeed, interval: PROPULSION_INTERVAL, timer: 0, running: false, starved: false } : undefined;
+  runtime.propulsion = propulsionCapNeed && propulsionCapNeed > 0 ? { amount: propulsionCapNeed, interval: PROPULSION_CYCLE_SECONDS, timer: 0, running: false, starved: false } : undefined;
   return runtime;
 }
 
@@ -344,7 +344,7 @@ function mergePropulsion(runtime: SideRuntime, propulsionCapNeed: number | undef
     return;
   }
   if (runtime.propulsion && runtime.propulsion.amount === propulsionCapNeed) return;
-  runtime.propulsion = { amount: propulsionCapNeed, interval: PROPULSION_INTERVAL, timer: 0, running: false, starved: false };
+  runtime.propulsion = { amount: propulsionCapNeed, interval: PROPULSION_CYCLE_SECONDS, timer: 0, running: false, starved: false };
 }
 
 function stepSide(sides: Record<Side, SideRuntime>, side: Side, dt: number, suppressed: boolean): void {

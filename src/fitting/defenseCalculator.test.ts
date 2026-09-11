@@ -239,6 +239,7 @@ describe("DefenseCalculatorImpl", () => {
     expect(eanmPlusRah.rah?.baseResists.em).toBeCloseTo(0.15, 5);
     expect(eanmPlusRah.rah?.shiftAmount).toBeCloseTo(0.06, 5);
     expect(eanmPlusRah.rah?.cycleTime).toBeGreaterThan(0);
+    expect(eanmPlusRah.rah?.capacitorNeed).toBeCloseTo(42, 5);
     expect(eanmPlusRah.rah?.armorResistsWithoutRah.em).toBeCloseTo(eanmOnly.layers.armor.resists.em, 5);
   });
 

@@ -14,7 +14,7 @@ export type { DefenseAssessor, DefenseAssessment, LayerEhp } from "./defenseAsse
 export { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
 export type { DefenseSimulator, DefenseView, DefensePoolState, DefenseSimConfig, RepairerViewState, RahViewState, RepairMode } from "./defenseSimulator";
 export type { CapacitorSimulator, CapacitorSimConfig, CapacitorSimulatorState, CapacitorGate, CapacitorView, CapacitorDrainState, CapacitorBoosterState, CapacitorPropulsionState, SideCapacitorSnapshot, IncomingDrainState } from "./capacitorSimulator";
-export { CapacitorSimulatorImpl } from "./capacitorSimulator";
+export { CapacitorSimulatorImpl, PROPULSION_CYCLE_SECONDS } from "./capacitorSimulator";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { DroneApplication } from "./droneApplication";
 export type { DroneSimulator, DroneSimConfig } from "./droneSimulator";
