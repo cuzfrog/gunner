@@ -82,12 +82,17 @@ test.describe.serial("canvas settings and playback", () => {
     await expect(page.locator("#ship-a-portrait .portrait-image")).toBeVisible();
     await expect(page.locator("#ship-b-portrait")).toBeVisible();
     await expect(page.locator("#ship-b-portrait .portrait-image")).toBeVisible();
+    // Start inside weapon range so the first hit lands without a long approach.
+    await page.locator("#initial-distance").fill("8000");
+    await page.locator("#initial-distance").dispatchEvent("input");
+    await resetSim(page, "8,000 m");
     await page.locator("#play").click();
     await expect(page.locator("#res-hit-a")).not.toHaveText("-", { timeout: 15000 });
     await expect(page.locator("#res-hit-a")).not.toHaveText("0%", { timeout: 15000 });
     await expect(page.locator("#res-applied-dps-a")).not.toHaveText("-", { timeout: 15000 });
     await expect(page.locator("#res-nominal-dps-a")).not.toHaveText("-");
-    await page.locator("#play").click();
+    // A kill flips the button to "Restart"; the helper pauses instead of restarting.
+    await pauseIfPlaying(page);
     await expect(page.locator("#play")).toHaveText("Start");
   });
 
@@ -104,12 +109,15 @@ test.describe.serial("canvas settings and playback", () => {
 
   test("sim speed select changes playback speed", async () => {
     const distance = page.locator("#res-distance");
+    await page.locator("#initial-distance").fill("20000");
+    await page.locator("#initial-distance").dispatchEvent("input");
+    await resetSim(page);
     await page.locator("#sim-speed").selectOption("8");
     await page.locator("#play").click();
-    await expect.poll(async () => parseDistance((await distance.textContent())!), { timeout: 10000 }).toBeLessThan(19000);
+    await expect.poll(async () => parseDistance((await distance.textContent())!), { timeout: 15000 }).toBeLessThan(16000);
     await pauseIfPlaying(page);
-    await resetSim(page);
     await page.locator("#sim-speed").selectOption("0.25");
+    await resetSim(page);
     await page.locator("#play").click();
     await page.waitForTimeout(800);
     await pauseIfPlaying(page);

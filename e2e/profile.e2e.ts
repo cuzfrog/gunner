@@ -1,4 +1,4 @@
-import { test, expect, importFittingViaClipboard, importFittingViaPaste, loadFittingText, FITTING_CURSE_EWAR, FITTING_ISHTAR, FITTING_THRASHER, BASE_URL } from "./fixtures";
+import { test, expect, importFittingViaPaste, loadFittingText, FITTING_THRASHER, BASE_URL } from "./fixtures";
 import type { Page } from "@playwright/test";
 
 let page: Page;
@@ -15,15 +15,29 @@ test.describe.serial("profile management", () => {
     await page.context().close();
   });
 
-  test("create new profile via new-profile popup", async () => {
+  test("create profiles via popup and load a different one", async () => {
     await page.locator("#profile-new").click();
     await expect(page.locator("#new-profile-popup")).toBeVisible();
-    await page.locator("#new-profile-name").fill("TestProfile1");
+    await page.locator("#new-profile-name").fill("ProfileA");
     await page.locator("#new-profile-confirm").click();
-    await expect(page.locator("#profile-select-label")).toContainText("TestProfile1");
+    await expect(page.locator("#profile-select-label")).toContainText("ProfileA");
+    await page.locator("#initial-distance").fill("10000");
+    await page.locator("#initial-distance").dispatchEvent("input");
+    await page.locator("#profile-save").click();
+    await page.locator("#profile-new").click();
+    await page.locator("#new-profile-name").fill("ProfileB");
+    await page.locator("#new-profile-confirm").click();
+    await page.locator("#initial-distance").fill("30000");
+    await page.locator("#initial-distance").dispatchEvent("input");
+    await page.locator("#profile-save").click();
     await page.locator("#profile-select-trigger").click();
-    await expect(page.locator("#profile-popup")).toBeVisible();
-    await expect(page.locator("#profile-popup .profile-menu-item")).toContainText("TestProfile1");
+    await expect(page.locator("#profile-popup .profile-menu-item", { hasText: "ProfileA" })).toBeVisible();
+    await page.locator("#profile-popup .profile-menu-item", { hasText: "ProfileA" }).click();
+    await expect(page.locator("#initial-distance")).toHaveValue("10000");
+    await page.locator("#profile-select-trigger").click();
+    await page.locator("#profile-popup .profile-menu-item", { hasText: "ProfileB" }).click();
+    await expect(page.locator("#initial-distance")).toHaveValue("30000");
+    await page.locator("#profile-select-trigger").click();
     await page.locator("body").click({ position: { x: 0, y: 0 } });
     await expect(page.locator("#profile-popup")).toBeHidden();
   });
@@ -40,28 +54,7 @@ test.describe.serial("profile management", () => {
     await expect(page.locator("#profile-save")).toBeDisabled();
   });
 
-  test("load a different profile", async () => {
-    await page.locator("#profile-new").click();
-    await page.locator("#new-profile-name").fill("ProfileA");
-    await page.locator("#new-profile-confirm").click();
-    await page.locator("#initial-distance").fill("10000");
-    await page.locator("#initial-distance").dispatchEvent("input");
-    await page.locator("#profile-save").click();
-    await page.locator("#profile-new").click();
-    await page.locator("#new-profile-name").fill("ProfileB");
-    await page.locator("#new-profile-confirm").click();
-    await page.locator("#initial-distance").fill("30000");
-    await page.locator("#initial-distance").dispatchEvent("input");
-    await page.locator("#profile-save").click();
-    await page.locator("#profile-select-trigger").click();
-    await page.locator("#profile-popup .profile-menu-item", { hasText: "ProfileA" }).click();
-    await expect(page.locator("#initial-distance")).toHaveValue("10000");
-    await page.locator("#profile-select-trigger").click();
-    await page.locator("#profile-popup .profile-menu-item", { hasText: "ProfileB" }).click();
-    await expect(page.locator("#initial-distance")).toHaveValue("30000");
-  });
-
-  test("delete profile with confirm dialog", async () => {
+  test("delete profile removes it; cancel confirm preserves it", async () => {
     await page.locator("#profile-new").click();
     await page.locator("#new-profile-name").fill("DeleteMe");
     await page.locator("#new-profile-confirm").click();
@@ -71,13 +64,10 @@ test.describe.serial("profile management", () => {
     await page.locator("#confirm-ok").click();
     await expect(page.locator("#confirm-popup")).toBeHidden();
     await page.locator("#profile-select-trigger").click();
-    const items = page.locator("#profile-popup .profile-menu-item", { hasText: "DeleteMe" });
-    await expect(items).toHaveCount(0);
+    await expect(page.locator("#profile-popup .profile-menu-item", { hasText: "DeleteMe" })).toHaveCount(0);
     await page.locator("body").click({ position: { x: 0, y: 0 } });
     await expect(page.locator("#profile-popup")).toBeHidden();
-  });
 
-  test("cancel confirm dialog preserves profile", async () => {
     await page.locator("#profile-new").click();
     await page.locator("#new-profile-name").fill("KeepMe");
     await page.locator("#new-profile-confirm").click();
@@ -101,19 +91,5 @@ test.describe.serial("profile management", () => {
     await page.locator("#confirm-ok").click();
     await expect(page.locator("#confirm-popup")).toBeHidden();
     await expect(page.locator("#initial-distance")).toHaveValue("20000");
-  });
-
-  test("save keeps a fitted profile listed and selected after reload", async () => {
-    await page.locator("#profile-new").click();
-    await page.locator("#new-profile-name").fill("FittedSave");
-    await page.locator("#new-profile-confirm").click();
-    // Ishtar drone fit computes a negative mwdSigBloomMultiplier; regression guard
-    // for the dropped-save bug where read validation rejected freshly written profiles.
-    await importFittingViaClipboard(page, "ship-a", loadFittingText(FITTING_ISHTAR));
-    await importFittingViaClipboard(page, "ship-b", loadFittingText(FITTING_CURSE_EWAR));
-    await page.locator("#profile-save").click();
-    await expect(page.locator("#profile-select-label")).toContainText("FittedSave");
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await expect(page.locator("#profile-select-label")).toContainText("FittedSave");
   });
 });

@@ -18,12 +18,9 @@ test.describe.serial("fitting export", () => {
     await page.context().close();
   });
 
-  test("export button is disabled without a fitting", async () => {
+  test("export copies the imported fitting to the clipboard", async () => {
     await expect(page.locator("#ship-a-export-fitting")).toBeDisabled();
     await expect(page.locator("#ship-b-export-fitting")).toBeDisabled();
-  });
-
-  test("export copies the imported fitting to the clipboard", async () => {
     await setClipboardText(page, THRASHER_TEXT);
     await page.locator("#import-profile").click();
     await page.locator("#import-side-ship-a").click();

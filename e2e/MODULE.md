@@ -20,14 +20,15 @@ Rules that keep chaining sound:
   raw `Object.defineProperty(navigator, "clipboard", ...)` in a test; it leaks into
   later tests that use the real clipboard.
 - Sim-timing assertions must be state-based (`expect.poll` with generous timeouts),
-  never single reads after fixed sleeps.
+  never single reads after fixed sleeps. Exception: a fixed window that bounds
+  movement from below (sim must NOT have moved far) is the measurement itself.
 
 ## Concurrency
 
-`workers: 2` is fixed in playwright.config.ts. Each file is one serial scenario, so
-throughput comes from 2 files running concurrently. Higher counts throttle the
-wall-clock sim tests in canvas-playback.e2e.ts (rAF-driven; CPU contention slows the
-sim and breaks timing assertions). Do not raise via CLI in CI.
+`workers: 4` is fixed in playwright.config.ts. Each file is one serial scenario, so
+throughput comes from 4 files running concurrently. 4 is the measured optimum on
+an 8-CPU box: higher counts stretch the rAF-driven sim tests beyond the
+parallelism gain, lower counts underuse the CPU. Do not change via CLI in CI.
 
 ## Infrastructure
 
@@ -35,4 +36,10 @@ sim and breaks timing assertions). Do not raise via CLI in CI.
   reuses an already-running server and rebuilds only when sources are newer than dist.
 - `fixtures.ts` exports `test`/`expect`, fitting text paths (`FITTING_*`),
   clipboard helpers, and the import helpers. `BASE_URL` is the app origin.
-- `trace: "retain-on-failure"` captures traces for intermittent failures.
+  `pauseIfPlaying`/`resetSim` (fixtures.ts) stop the sim safely: a kill flips the
+  play button to "Restart", and reset does NOT stop a running sim, so always pause
+  via the helpers before resetting.
+- `trace: "off"` — trace recording roughly doubles per-action cost across the
+  suite. On failure Playwright still attaches the `error-context.md` page
+  snapshot to the report; reproduce deeper failures locally with
+  `npx playwright test --trace on`.
