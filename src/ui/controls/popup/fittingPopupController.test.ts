@@ -72,6 +72,7 @@ function createController(options: { panel?: Partial<FittingPopupHost>; applyFit
 
   const fittingImport = vi.mocked<FittingImport>({
     importFitting: vi.fn(() => (options.invalid ? undefined : IMPORTED_RIFTER)),
+    resolveCapacitorStats: vi.fn(),
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
     propulsionStatsById: vi.fn(),

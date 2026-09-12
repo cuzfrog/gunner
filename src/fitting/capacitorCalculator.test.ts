@@ -67,10 +67,10 @@ interface DrainLoadouts {
   readonly sensorBoosts?: SensorBoostLoadout;
 }
 
-function resolve(entries: readonly FittingModuleEntry[], conditions: StatConditions = emptyConditions, turrets: readonly ImportedTurret[] = [], loadouts: DrainLoadouts = {}): ReturnType<CapacitorCalculatorImpl["resolve"]> {
+function resolve(entries: readonly FittingModuleEntry[], conditions: StatConditions = emptyConditions, turrets: readonly ImportedTurret[] = [], loadouts: DrainLoadouts = {}, propulsionModuleId: TypeId | undefined = undefined): ReturnType<CapacitorCalculatorImpl["resolve"]> {
   const state = factory.create(profile, [] as readonly HullBonus[], entries, [], [] as readonly CargoEntry[]);
   const defense = defenseCalculator.resolve(state, conditions);
-  const sources: CapacitorDrainSources = { defense, turrets, ewar: loadouts.ewar ?? EMPTY_EWAR_LOADOUT, boosts: loadouts.boosts ?? EMPTY_BOOST_LOADOUT, missileBoosts: loadouts.missileBoosts ?? EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: loadouts.sensorBoosts ?? EMPTY_SENSOR_BOOST_LOADOUT };
+  const sources: CapacitorDrainSources = { defense, turrets, ewar: loadouts.ewar ?? EMPTY_EWAR_LOADOUT, boosts: loadouts.boosts ?? EMPTY_BOOST_LOADOUT, missileBoosts: loadouts.missileBoosts ?? EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: loadouts.sensorBoosts ?? EMPTY_SENSOR_BOOST_LOADOUT, propulsionModuleId };
   return calculator.resolve(state, conditions, sources);
 }
 
@@ -128,7 +128,8 @@ describe("capacitorCalculator", () => {
   });
 
   test("MWD capacity penalty applies to peak recharge but not the exported spec", () => {
-    const result = resolve([moduleEntry("50MN Microwarpdrive I")]);
+    const mwd = moduleEntry("50MN Microwarpdrive I");
+    const result = resolve([mwd], emptyConditions, [], {}, mwd.moduleId);
     expect(result.spec.capacity).toBeCloseTo(6375, 3);
     expect(result.peakRecharge).toBeCloseTo((2.5 * 6375 * 0.75) / 1250, 6);
     const row = result.rows.find((candidate) => candidate.moduleName === "50MN Microwarpdrive I");
@@ -136,6 +137,36 @@ describe("capacitorCalculator", () => {
     expect(row?.amount).toBeCloseTo(180, 3);
     expect(row?.cycleTime).toBeCloseTo(10, 3);
     expect(row?.count).toBe(1);
+  });
+
+  test("propulsion usage follows the drain source instead of the fitting state", () => {
+    const mwd = moduleEntry("50MN Microwarpdrive I");
+    const disabled = resolve([mwd]);
+    expect(disabled.rows.find((candidate) => candidate.moduleName === "50MN Microwarpdrive I")).toBeUndefined();
+    expect(disabled.peakRecharge).toBeCloseTo(12.75, 6);
+    expect(disabled.usagePerSecond).toBe(0);
+    const variant = resolve([mwd], emptyConditions, [], {}, mwd.moduleId);
+    expect(variant.rows.find((candidate) => candidate.moduleName === "50MN Microwarpdrive I")).toBeDefined();
+    expect(variant.peakRecharge).toBeCloseTo((2.5 * 6375 * 0.75) / 1250, 6);
+  });
+
+  test("propulsion row derives from the source id without a fitted propulsion module", () => {
+    const ab = moduleEntry("1MN Afterburner I");
+    const result = resolve([], emptyConditions, [], {}, ab.moduleId);
+    const row = result.rows.find((candidate) => candidate.moduleId === ab.moduleId);
+    expect(row).toBeDefined();
+    expect(row?.amount).toBeCloseTo(20, 3);
+    expect(row?.cycleTime).toBeCloseTo(10, 3);
+    expect(result.peakRecharge).toBeCloseTo(12.75, 6);
+  });
+
+  test("propulsion variant swap changes the row stats and the capacity multiplier", () => {
+    const base = resolve([], emptyConditions, [], {}, moduleEntry("50MN Microwarpdrive I").moduleId);
+    expect(base.rows.find((candidate) => candidate.moduleId === moduleEntry("50MN Microwarpdrive I").moduleId)?.amount).toBeCloseTo(180, 3);
+    expect(base.peakRecharge).toBeCloseTo((2.5 * 6375 * 0.75) / 1250, 6);
+    const upgraded = resolve([], emptyConditions, [], {}, moduleEntry("50MN Microwarpdrive II").moduleId);
+    expect(upgraded.rows.find((candidate) => candidate.moduleId === moduleEntry("50MN Microwarpdrive II").moduleId)?.amount).toBeCloseTo(160, 3);
+    expect(upgraded.peakRecharge).toBeCloseTo((2.5 * 6375 * 0.8) / 1250, 6);
   });
 
   test("two PDS stack both capacity and recharge multipliers", () => {
@@ -335,7 +366,8 @@ describe("capacitorCalculator", () => {
   });
 
   test("propulsion row interval matches the simulated propulsion cycle", () => {
-    const result = resolve([moduleEntry("50MN Microwarpdrive I")]);
+    const mwd = moduleEntry("50MN Microwarpdrive I");
+    const result = resolve([mwd], emptyConditions, [], {}, mwd.moduleId);
     const row = result.rows.find((candidate) => candidate.moduleName === "50MN Microwarpdrive I");
     expect(row?.cycleTime).toBe(PROPULSION_CYCLE_SECONDS);
   });

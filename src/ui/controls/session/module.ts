@@ -4,6 +4,7 @@ import type { ControlsCradle } from "../cradle";
 import { HullDatalistImpl } from "./hullDatalist";
 import { SessionCodecImpl } from "./sessionCodec";
 import { SimConfigSourceImpl } from "./simConfigSource";
+import { CapacitorStatsSourceImpl } from "./capacitorStatsSource";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 type SessionCodecEls = ConstructorParameters<typeof SessionCodecImpl>[0]["els"];
@@ -35,6 +36,7 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       sensorBoosterController: proxy.sensorBoosterController,
       defenseController: proxy.defenseController,
       capacitorController: proxy.capacitorController,
+      capacitorStatsSource: proxy.capacitorStatsSource,
       targetingController: proxy.targetingController,
       fittingImport: proxy.fittingImport,
       parser: proxy.parser,
@@ -53,6 +55,15 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       droneControllers: proxy.droneControllers,
       defenseController: proxy.defenseController,
       capacitorController: proxy.capacitorController,
+    })).singleton(),
+    capacitorStatsSource: asFunction((proxy) => new CapacitorStatsSourceImpl({
+      events: proxy.uiEvents,
+      fittingImport: proxy.fittingImport,
+      sides: { shipA: proxy.shipASide, shipB: proxy.shipBSide },
+      ewarController: proxy.ewarController,
+      boosterController: proxy.boosterController,
+      missileBoosterController: proxy.missileBoosterController,
+      sensorBoosterController: proxy.sensorBoosterController,
     })).singleton(),
   });
 }

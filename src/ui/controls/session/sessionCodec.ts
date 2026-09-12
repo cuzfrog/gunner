@@ -1,4 +1,4 @@
-import type { ChargeCatalog, DroneGroup, FittingImport } from "../../../fitting";
+import type { ChargeCatalog, DroneGroup, FittingImport, ImportedFitting } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
@@ -75,6 +75,7 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly missileBoosterController: MissileBoosterController;
   private readonly sensorBoosterController: SensorBoosterController;
   private readonly capacitorController: CapacitorController;
+  private readonly capacitorStatsSource: CapacitorStatsSourceRegistrar;
   private readonly defenseController: DefenseController;
   private readonly targetingController: TargetingController;
   private readonly fittingImport: FittingImport;
@@ -103,6 +104,7 @@ export class SessionCodecImpl implements SessionCodec {
     sensorBoosterController: SensorBoosterController;
     defenseController: DefenseController;
     capacitorController: CapacitorController;
+    capacitorStatsSource: CapacitorStatsSourceRegistrar;
     targetingController: TargetingController;
     fittingImport: FittingImport;
     parser: SettingsParser;
@@ -128,6 +130,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.sensorBoosterController = deps.sensorBoosterController;
     this.defenseController = deps.defenseController;
     this.capacitorController = deps.capacitorController;
+    this.capacitorStatsSource = deps.capacitorStatsSource;
     this.targetingController = deps.targetingController;
     this.fittingImport = deps.fittingImport;
     this.parser = deps.parser;
@@ -275,7 +278,7 @@ export class SessionCodecImpl implements SessionCodec {
   private restoreCapacitor(side: Side, fitting: string | undefined, infinite: boolean, modes: readonly StoredCapBoosterMode[], charges: readonly StoredCapBoosterCharge[]): void {
     const panel = side === "shipA" ? this.shipASide : this.shipBSide;
     const imported = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions()) : undefined;
-    if (imported) this.capacitorController.setCapacitorStats(side, imported.capacitor);
+    if (imported) this.capacitorStatsSource.register(side, imported);
     this.capacitorController.restore(side, infinite, modes, charges);
   }
 
@@ -444,4 +447,9 @@ function sidePanelStateOf(combatant: CombatantSettings): SidePanelState {
     fittedHull: combatant.fittedHull,
     sig: combatant.sig,
   };
+}
+
+/** Narrow view of the session CapacitorStatsSource; SessionCodec only registers the restore-time fitting skeleton. */
+interface CapacitorStatsSourceRegistrar {
+  register(side: Side, imported: ImportedFitting): void;
 }

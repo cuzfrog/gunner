@@ -340,6 +340,9 @@ const NAME_FOR_ID: Record<string, string> = {
 export function makeFittingImport() {
   return vi.mocked<FittingImport>({
     importFitting: vi.fnUntracked(() => undefined),
+    resolveCapacitorStats: vi.fnUntracked(() => {
+      throw new Error("resolveCapacitorStats not stubbed");
+    }),
     propulsionVariantNames: vi.fnUntracked(() => []),
     propulsionStats: vi.fnUntracked(() => undefined),
     propulsionStatsById: vi.fnUntracked(() => undefined),

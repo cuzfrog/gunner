@@ -103,6 +103,29 @@ test.describe.serial("Capacitor popup", () => {
     await newPage.close();
   });
 
+  test("toggling propulsion off drops its capacitor usage row", async () => {
+    await importFittingViaPaste(page, "ship-a", KILLMAIL_HARBINGER);
+    const trigger = page.locator("#ship-a-capacitor-trigger");
+    await trigger.click();
+    const usageRows = page.locator(`${SECTION} .capacitor-usage-row`);
+    const propulsionRow = usageRows.filter({ hasText: "100MN Y-S8 Compact Afterburner" });
+    await expect(propulsionRow).toHaveCount(1);
+    await page.locator("body").click({ position: { x: 0, y: 0 } });
+    await expect(page.locator("#ship-a-capacitor-popup")).toBeHidden();
+    const activeButton = page.locator("#ship-a-propulsion-options button[aria-pressed='true']");
+    const propulsionId = await activeButton.getAttribute("data-value");
+    expect(propulsionId).toBeTruthy();
+    await activeButton.click();
+    await expect(page.locator("#ship-a-propulsion-options button[aria-pressed='true']")).toHaveCount(0);
+    await trigger.click();
+    await expect(propulsionRow).toHaveCount(0);
+    await page.locator("body").click({ position: { x: 0, y: 0 } });
+    await page.locator(`#ship-a-propulsion-options button[data-value='${propulsionId}']`).click();
+    await trigger.click();
+    await expect(propulsionRow).toHaveCount(1);
+    await page.locator("body").click({ position: { x: 0, y: 0 } });
+  });
+
   test("manual inject enables only in manual mode and consumes a charge", async () => {
     await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_ABADDON));
     await page.locator("#ship-a-capacitor-trigger").click();

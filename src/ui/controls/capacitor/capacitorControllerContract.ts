@@ -19,7 +19,6 @@ export interface CapacitorReadout {
 }
 
 export interface CapacitorController extends CapacitorReadout {
-  setCapacitorStats(side: Side, stats: CapacitorStats): void;
   render(): void;
   infiniteCapacitor(side: Side): boolean;
   setInfiniteCapacitor(side: Side, infinite: boolean): void;

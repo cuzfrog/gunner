@@ -52,6 +52,7 @@ const NAME_FOR_ID: Record<string, string> = {
 export function mockFittingImport(): FittingImport {
   return {
     importFitting: vi.fn(() => undefined),
+    resolveCapacitorStats: vi.fn(),
     propulsionVariantNames: vi.fn(() => []),
     propulsionStats: vi.fn(() => undefined),
     propulsionStatsById: vi.fn(() => undefined),

@@ -13,6 +13,11 @@ import { IconActionImpl, PopupField, ScriptSection, SectionBlockImpl, spriteIcon
 import type { Side } from "../side";
 import type { CapacitorController, CapacitorEls } from "./capacitorControllerContract";
 
+/** Narrow view of the session-level CapacitorStatsSource; the controller only pulls stats from it. */
+interface CapacitorStatsView {
+  stats(side: Side): CapacitorStats | undefined;
+}
+
 const LOW_PERCENT = 33;
 const CRITICAL_PERCENT = 25;
 const GJ = "GJ";
@@ -52,7 +57,7 @@ export class CapacitorControllerImpl implements CapacitorController {
   private readonly i18n: I18n;
   private readonly events: UiEvents;
   private readonly popupGroup: PopupGroup;
-  private readonly statsBySide = new Map<Side, CapacitorStats>();
+  private readonly statsSource: CapacitorStatsView;
   private readonly runtimeViews: Record<Side, CapacitorView | undefined> = { shipA: undefined, shipB: undefined };
   private readonly infiniteState: Record<Side, boolean> = { shipA: false, shipB: false };
   private readonly boosterModes: Record<Side, Map<TypeId, CapBoosterMode>> = { shipA: new Map(), shipB: new Map() };
@@ -66,11 +71,12 @@ export class CapacitorControllerImpl implements CapacitorController {
   private readonly summaryRefs: Record<Side, SummaryRefs | undefined> = { shipA: undefined, shipB: undefined };
   private playing = false;
 
-  constructor(deps: { els: CapacitorEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents; itemNameCatalog: ItemNameCatalog }) {
+  constructor(deps: { els: CapacitorEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents; itemNameCatalog: ItemNameCatalog; statsSource: CapacitorStatsView }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.popupGroup = deps.popupGroup;
+    this.statsSource = deps.statsSource;
     this.itemNameCatalog = deps.itemNameCatalog;
     this.sectionBlock = new SectionBlockImpl();
     this.injectAction = new IconActionImpl({
@@ -86,15 +92,9 @@ export class CapacitorControllerImpl implements CapacitorController {
       shipA: this.buildChargeSection("shipA"),
       shipB: this.buildChargeSection("shipB"),
     };
-    this.events.onFittingImported((side, imported) => this.setCapacitorStats(side, imported.capacitor));
+    this.events.onConfigInvalidated(() => this.render());
     this.events.onLanguageChanged(() => this.render());
     this.render();
-  }
-
-  setCapacitorStats(side: Side, stats: CapacitorStats): void {
-    if (stats.spec.capacity <= 0) this.statsBySide.delete(side);
-    else this.statsBySide.set(side, stats);
-    this.renderSide(side);
   }
 
   updateRuntime(view: Record<Side, CapacitorView>): void {
@@ -143,7 +143,7 @@ export class CapacitorControllerImpl implements CapacitorController {
   }
 
   capBoosterSpecs(side: Side): readonly CapBoosterSimSpec[] {
-    const stats = this.statsBySide.get(side);
+    const stats = this.statsSource.stats(side);
     if (!stats) return [];
     const specs: CapBoosterSimSpec[] = [];
     for (const booster of stats.boosters) {
@@ -213,7 +213,7 @@ export class CapacitorControllerImpl implements CapacitorController {
   }
 
   private boosterFor(side: Side, moduleId: TypeId): CapacitorBoosterStats | undefined {
-    return this.statsBySide.get(side)?.boosters.find((booster) => booster.moduleId === moduleId);
+    return this.statsSource.stats(side)?.boosters.find((booster) => booster.moduleId === moduleId);
   }
 
   private fittedCharge(side: Side, moduleId: TypeId): TypeId | undefined {
@@ -223,7 +223,7 @@ export class CapacitorControllerImpl implements CapacitorController {
   private renderSide(side: Side): void {
     const field = this.fields[side];
     const section = field.clearSection();
-    const stats = this.statsBySide.get(side);
+    const stats = this.statsSource.stats(side);
     const label = this.i18n.t("label.capacitor");
     field.applyLabel(label);
     this.liveRefs[side] = undefined;
@@ -357,6 +357,12 @@ export class CapacitorControllerImpl implements CapacitorController {
     const view = this.runtimeViews[side];
     if (!view) return STATE_RUNNING;
     if (view.starvedModuleIds.includes(moduleId)) return STATE_STARVED;
+    const propulsion = view.propulsion;
+    if (propulsion && propulsion.moduleId === moduleId) {
+      if (propulsion.starved) return STATE_STARVED;
+      if (!propulsion.running) return STATE_OFF;
+      return STATE_RUNNING;
+    }
     const drain = view.drains.find((candidate) => candidate.moduleId === moduleId);
     if (drain) {
       if (!drain.running) return STATE_OFF;
@@ -470,7 +476,7 @@ export class CapacitorControllerImpl implements CapacitorController {
 
   private renderSummaryValue(side: Side): void {
     const refs = this.summaryRefs[side];
-    const stats = this.statsBySide.get(side);
+    const stats = this.statsSource.stats(side);
     if (!refs || !stats) return;
     const view = this.runtimeViews[side];
     const live = this.playing && view !== undefined;

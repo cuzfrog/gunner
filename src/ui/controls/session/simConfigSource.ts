@@ -103,6 +103,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
       maxSpeed: state.speed,
       baseMaxSpeed: state.baseMaxSpeed ?? state.speed,
       propulsionKind: state.fittedHull?.propulsionKind,
+      propulsionModuleId: state.fittedHull?.propulsionModuleId,
       mass: state.mass,
       inertiaModifier: state.inertia,
       mode: state.mode,

@@ -122,6 +122,7 @@ export function buildLauncher(
   });
   const fittingImport = vi.mocked<FittingImport>({
     importFitting: vi.fn(() => undefined),
+    resolveCapacitorStats: vi.fn(),
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
     propulsionStatsById: vi.fn(),

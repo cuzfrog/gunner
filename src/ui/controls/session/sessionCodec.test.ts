@@ -437,6 +437,7 @@ function buildCodec(options: {
   const sensorBoosterController = { ...mockSensorBoosterController(), ...options.sensorBoosterController } as unknown as SensorBoosterController;
   const defenseController = { ...mockDefenseController(), ...options.defenseController } as unknown as DefenseController;
   const capacitorController = { ...mockCapacitorController(), ...options.capacitorController } as unknown as CapacitorController;
+  const capacitorStatsSource = { register: vi.fn() };
   const targetingController = { ...mockTargetingController(), ...options.targetingController } as unknown as TargetingController;
   const fittingImport = { ...mockFittingImport(), ...options.fittingImport } as unknown as FittingImport;
   const parser = { ...mockParser(), ...options.parser } as unknown as SettingsParser;
@@ -465,11 +466,12 @@ function buildCodec(options: {
     sensorBoosterController,
     defenseController,
     capacitorController,
+    capacitorStatsSource,
     targetingController,
     fittingImport,
     parser,
   });
-  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, sensorBoosterController, defenseController, capacitorController, targetingController, fittingImport, parser };
+  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, sensorBoosterController, defenseController, capacitorController, capacitorStatsSource, targetingController, fittingImport, parser };
 }
 
 function makeProfile(): ProfileSettings {

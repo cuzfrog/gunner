@@ -41,7 +41,7 @@ export interface CapacitorStats {
   readonly depletesInSeconds?: number; // seconds until the pool depletes, when unstable
 }
 
-/** Resolved products the capacitor rows and the runtime drains both derive from. */
+/** Resolved products the capacitor rows and the runtime drains both derive from. The propulsion item id is the live selection (variant or base); undefined disables the propulsion drain. */
 export interface CapacitorDrainSources {
   readonly defense: DefenseSpec;
   readonly turrets: readonly ImportedTurret[];
@@ -49,6 +49,7 @@ export interface CapacitorDrainSources {
   readonly boosts: BoostLoadout;
   readonly missileBoosts: MissileBoosterLoadout;
   readonly sensorBoosts: SensorBoostLoadout;
+  readonly propulsionModuleId: TypeId | undefined;
 }
 
 export interface CapacitorCalculator {
@@ -72,9 +73,9 @@ export class CapacitorCalculatorImpl implements CapacitorCalculator {
   resolve(fitting: FittingState, conditions: StatConditions, sources: CapacitorDrainSources): CapacitorStats {
     const skills = conditions.capacitorSkills ?? defaultCapacitorSkills(conditions.skillLevel);
     const spec = resolveSpec(this.db, fitting, skills, this.stacking);
-    const propulsion = fitting.propulsionModule ? this.db.modules[fitting.propulsionModule.moduleId]?.propulsion : undefined;
+    const propulsion = sources.propulsionModuleId !== undefined ? this.db.modules[sources.propulsionModuleId]?.propulsion : undefined;
     const effective = multiplyCapacity(spec, propulsion?.capacitorCapacityMultiplier);
-    const rows = buildUsageRows(this.db, fitting, conditions, sources);
+    const rows = buildUsageRows(this.db, conditions, sources);
     const injectors = buildInjectorDrains(fitting, this.db);
     const usagePerSecond = rows.reduce((sum, row) => sum + row.perSecond * row.count, 0);
     const drains: readonly StaticDrain[] = [...rows.map((row) => ({ amount: row.amount, interval: row.cycleTime, count: row.count })), ...injectors];
@@ -123,7 +124,7 @@ function multiplyCapacity(spec: CapacitorSpec, multiplier: number | undefined): 
   return { capacity: spec.capacity * multiplier, rechargeTime: spec.rechargeTime };
 }
 
-function buildUsageRows(db: FittingDb, fitting: FittingState, conditions: StatConditions, sources: CapacitorDrainSources): readonly CapacitorUsageRow[] {
+function buildUsageRows(db: FittingDb, conditions: StatConditions, sources: CapacitorDrainSources): readonly CapacitorUsageRow[] {
   const rows: CapacitorUsageRow[] = [];
 
   for (const turret of sources.turrets) {
@@ -147,10 +148,10 @@ function buildUsageRows(db: FittingDb, fitting: FittingState, conditions: StatCo
     rows.push(buildRow(rah.moduleId, moduleNameFor(db, rah.moduleId), rah.capacitorNeed ?? 0, rah.cycleTime * overloadCycle, 1));
   }
 
-  const propulsionModule = fitting.propulsionModule;
-  const propulsion = propulsionModule ? db.modules[propulsionModule.moduleId]?.propulsion : undefined;
-  if (propulsionModule && propulsion && propulsion.capacitorNeed > 0) {
-    rows.push(buildRow(propulsionModule.moduleId, moduleNameFor(db, propulsionModule.moduleId), propulsion.capacitorNeed, PROPULSION_CYCLE_SECONDS, 1));
+  const propulsionModuleId = sources.propulsionModuleId;
+  const propulsion = propulsionModuleId !== undefined ? db.modules[propulsionModuleId]?.propulsion : undefined;
+  if (propulsionModuleId !== undefined && propulsion && propulsion.capacitorNeed > 0) {
+    rows.push(buildRow(propulsionModuleId, moduleNameFor(db, propulsionModuleId), propulsion.capacitorNeed, PROPULSION_CYCLE_SECONDS, 1));
   }
 
   return rows;

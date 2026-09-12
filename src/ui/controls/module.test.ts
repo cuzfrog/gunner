@@ -60,6 +60,7 @@ const controlsCradleKeys = {
   shipBFittingPopup: "shipBFittingPopup",
   sessionCodec: "sessionCodec",
   simConfigSource: "simConfigSource",
+  capacitorStatsSource: "capacitorStatsSource",
   importController: "importController",
   exportController: "exportController",
   ewarController: "ewarController",

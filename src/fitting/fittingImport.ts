@@ -25,7 +25,7 @@ import type { DroneSkillModel } from "./droneStats";
 import { FittingStateFactory, type FittingState, type FittingModuleEntry, type CargoEntry } from "./fittingState";
 import { FittingCalculatorImpl, type FittingCalculator } from "./fittingCalculator";
 import { DefenseCalculatorImpl, type DefenseCalculator } from "./defenseCalculator";
-import { CapacitorCalculatorImpl, type CapacitorStats } from "./capacitorCalculator";
+import { CapacitorCalculatorImpl, type CapacitorDrainSources, type CapacitorStats } from "./capacitorCalculator";
 import type { FittingDb, FittingModuleStats, HullBonus } from "../gamedata/fittingDb";
 import type { DefenseSpec } from "../sim";
 
@@ -91,6 +91,8 @@ export interface PropulsionVariant {
 
 export interface FittingImport {
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined;
+  /** Re-resolves the capacitor preview from the imported skeleton with live drain sources (propulsion selection, loadout projections, skills). */
+  resolveCapacitorStats(imported: ImportedFitting, conditions: StatConditions, sources: CapacitorDrainSources): CapacitorStats;
   propulsionVariantNames(module: PropulsionModule): readonly PropulsionVariant[];
   propulsionStats(name: string): PropulsionStats | undefined;
   propulsionStatsById(id: TypeId): PropulsionStats | undefined;
@@ -179,6 +181,10 @@ export class FittingImportImpl implements FittingImport {
     return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom, capacitorNeed: stats.capacitorNeed, ...(stats.capacitorCapacityMultiplier !== undefined ? { capacitorCapacityMultiplier: stats.capacitorCapacityMultiplier } : {}) };
   }
 
+  resolveCapacitorStats(imported: ImportedFitting, conditions: StatConditions, sources: CapacitorDrainSources): CapacitorStats {
+    return this.capacitorCalculator.resolve(imported.fittingState, conditions, sources);
+  }
+
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined {
     const parsed = parseEft(text);
     if (!parsed) return undefined;
@@ -202,7 +208,7 @@ export class FittingImportImpl implements FittingImport {
     const sensorSpec = this.calculator.resolveSensorSpec(fittingState, conditions);
     const sensorBoosts = this.calculator.resolveSensorBoosts(fittingState);
     const defense = this.defenseCalculator.resolve(fittingState, conditions);
-    const capacitor = this.capacitorCalculator.resolve(fittingState, conditions, { defense, turrets, ewar, boosts, missileBoosts, sensorBoosts });
+    const capacitor = this.capacitorCalculator.resolve(fittingState, conditions, { defense, turrets, ewar, boosts, missileBoosts, sensorBoosts, propulsionModuleId: fittingState.propulsionModule?.moduleId });
 
     return {
       profile: resolved.profile,

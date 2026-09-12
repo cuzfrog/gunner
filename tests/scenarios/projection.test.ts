@@ -33,7 +33,7 @@ describe("capacitor starvation end to end", () => {
       id, maxSpeed: 1000, baseMaxSpeed: 200, propulsionKind: "microwarpdrive",
       mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1, sig: 100,
       capacitor: { capacity: 500, rechargeTime: 1250 },
-      propulsionCapNeed: 180, propulsionCapacityMultiplier: 0.75,
+      propulsionCapNeed: 180, propulsionCapacityMultiplier: 0.75, propulsionModuleId: toTypeId("20850"),
     };
   }
 

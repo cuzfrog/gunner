@@ -37,6 +37,7 @@ function createManager(options: {
   const events = new UiEventsImpl();
   const fittingImport = vi.mocked<FittingImport>({
     importFitting: vi.fn(),
+    resolveCapacitorStats: vi.fn(),
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
     propulsionStatsById: vi.fn(),

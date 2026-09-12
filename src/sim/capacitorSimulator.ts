@@ -36,9 +36,16 @@ export interface CapacitorBoosterState {
 }
 
 export interface CapacitorPropulsionState {
+  readonly moduleId: TypeId;
   readonly amount: number;
   readonly interval: number;
   readonly timer: number;
+  readonly running: boolean;
+  readonly starved: boolean;
+}
+
+export interface CapacitorPropulsionView {
+  readonly moduleId: TypeId;
   readonly running: boolean;
   readonly starved: boolean;
 }
@@ -53,11 +60,12 @@ export interface CapacitorView {
   readonly starved: boolean;
   // Module ids denied a debit during the current engine frame (weapons, repairers, drains).
   readonly starvedModuleIds: readonly TypeId[];
-  readonly propulsionStarved: boolean;
   readonly drains: readonly CapacitorDrainState[];
   // Projected cap-warfare debits from the opponent (neutralizers/nosferatu), keyed by module id.
   readonly incoming: readonly IncomingDrainState[];
   readonly boosters: readonly CapacitorBoosterState[];
+  /** Live propulsion drain state, for usage-row attribution in the popup. Absent = no propulsion module configured. */
+  readonly propulsion: CapacitorPropulsionView | undefined;
 }
 
 export interface CapacitorGate {
@@ -119,6 +127,7 @@ interface BoosterRuntime {
 }
 
 interface PropulsionRuntime {
+  moduleId: TypeId;
   amount: number;
   interval: number;
   timer: number;
@@ -167,14 +176,14 @@ export class CapacitorSimulatorImpl implements CapacitorSimulator {
   reset(config: CapacitorSimConfig): void {
     this.time = 0;
     this.sides = {
-      shipA: sideFromConfig(config.sim.shipA.capacitor, config.sim.shipA.propulsionCapNeed, config.sim.shipA.propulsionCapacityMultiplier, config.sides.shipA),
-      shipB: sideFromConfig(config.sim.shipB.capacitor, config.sim.shipB.propulsionCapNeed, config.sim.shipB.propulsionCapacityMultiplier, config.sides.shipB),
+      shipA: sideFromConfig(config.sim.shipA.capacitor, config.sim.shipA.propulsionCapNeed, config.sim.shipA.propulsionModuleId, config.sim.shipA.propulsionCapacityMultiplier, config.sides.shipA),
+      shipB: sideFromConfig(config.sim.shipB.capacitor, config.sim.shipB.propulsionCapNeed, config.sim.shipB.propulsionModuleId, config.sim.shipB.propulsionCapacityMultiplier, config.sides.shipB),
     };
   }
 
   update(config: CapacitorSimConfig): void {
-    mergeSide(this.sides.shipA, config.sim.shipA.capacitor, config.sim.shipA.propulsionCapNeed, config.sim.shipA.propulsionCapacityMultiplier, config.sides.shipA);
-    mergeSide(this.sides.shipB, config.sim.shipB.capacitor, config.sim.shipB.propulsionCapNeed, config.sim.shipB.propulsionCapacityMultiplier, config.sides.shipB);
+    mergeSide(this.sides.shipA, config.sim.shipA.capacitor, config.sim.shipA.propulsionCapNeed, config.sim.shipA.propulsionModuleId, config.sim.shipA.propulsionCapacityMultiplier, config.sides.shipA);
+    mergeSide(this.sides.shipB, config.sim.shipB.capacitor, config.sim.shipB.propulsionCapNeed, config.sim.shipB.propulsionModuleId, config.sim.shipB.propulsionCapacityMultiplier, config.sides.shipB);
   }
 
   step(dt: number, propulsionSuppressed: Record<Side, boolean>): void {
@@ -266,7 +275,7 @@ function emptySide(): SideRuntime {
   return { spec: undefined, infinite: false, cap: 0, drains: [], incoming: [], boosters: [], propulsion: undefined, propulsionSuppressed: false, anyStarved: false, starvedModuleIds: [], drainedThisStep: 0, lastDt: 0 };
 }
 
-function sideFromConfig(spec: CapacitorSpec | undefined, propulsionCapNeed: number | undefined, capacityMultiplier: number | undefined, config: CapacitorSideConfig): SideRuntime {
+function sideFromConfig(spec: CapacitorSpec | undefined, propulsionCapNeed: number | undefined, propulsionModuleId: TypeId | undefined, capacityMultiplier: number | undefined, config: CapacitorSideConfig): SideRuntime {
   const runtime = emptySide();
   const effective = multiplyCapacity(spec, capacityMultiplier);
   runtime.spec = effective;
@@ -274,11 +283,11 @@ function sideFromConfig(spec: CapacitorSpec | undefined, propulsionCapNeed: numb
   runtime.cap = effective && effective.capacity > 0 ? effective.capacity : 0;
   runtime.drains = config.drains.filter((drain) => drain.interval > 0).map((drain) => ({ moduleId: drain.moduleId, amount: drain.amount, interval: drain.interval, active: drain.active, running: false, starved: false, timer: 0 }));
   runtime.boosters = config.boosters.map((booster) => ({ ...booster, charges: booster.clipSize, cycleTimer: 0, reloading: false, reloadTimer: 0 }));
-  runtime.propulsion = propulsionCapNeed && propulsionCapNeed > 0 ? { amount: propulsionCapNeed, interval: PROPULSION_CYCLE_SECONDS, timer: 0, running: false, starved: false } : undefined;
+  runtime.propulsion = propulsionRuntime(propulsionModuleId, propulsionCapNeed);
   return runtime;
 }
 
-function mergeSide(runtime: SideRuntime, spec: CapacitorSpec | undefined, propulsionCapNeed: number | undefined, capacityMultiplier: number | undefined, config: CapacitorSideConfig): void {
+function mergeSide(runtime: SideRuntime, spec: CapacitorSpec | undefined, propulsionCapNeed: number | undefined, propulsionModuleId: TypeId | undefined, capacityMultiplier: number | undefined, config: CapacitorSideConfig): void {
   const effective = multiplyCapacity(spec, capacityMultiplier);
   const specChanged = runtime.spec?.capacity !== effective?.capacity || runtime.spec?.rechargeTime !== effective?.rechargeTime;
   runtime.spec = effective;
@@ -286,7 +295,7 @@ function mergeSide(runtime: SideRuntime, spec: CapacitorSpec | undefined, propul
   if (specChanged && effective && effective.capacity > 0) runtime.cap = effective.capacity;
   mergeDrains(runtime, config.drains);
   mergeBoosters(runtime, config.boosters);
-  mergePropulsion(runtime, propulsionCapNeed);
+  mergePropulsion(runtime, propulsionModuleId, propulsionCapNeed);
 }
 
 /** Propulsion capacity penalty (e.g. MWD 0.75) composes the effective pool from the propulsion-independent spec. */
@@ -338,13 +347,20 @@ function sameBoosterSpec(existing: BoosterRuntime, booster: CapBoosterSimSpec): 
   return existing.amount === booster.amount && existing.cycleTime === booster.cycleTime && existing.clipSize === booster.clipSize && existing.reloadTime === booster.reloadTime;
 }
 
-function mergePropulsion(runtime: SideRuntime, propulsionCapNeed: number | undefined): void {
-  if (!propulsionCapNeed || propulsionCapNeed <= 0) {
+/** Builds the propulsion runtime, or undefined when no module is configured or the debit is non-positive. */
+function propulsionRuntime(propulsionModuleId: TypeId | undefined, propulsionCapNeed: number | undefined): PropulsionRuntime | undefined {
+  if (propulsionModuleId === undefined || !propulsionCapNeed || propulsionCapNeed <= 0) return undefined;
+  return { moduleId: propulsionModuleId, amount: propulsionCapNeed, interval: PROPULSION_CYCLE_SECONDS, timer: 0, running: false, starved: false };
+}
+
+function mergePropulsion(runtime: SideRuntime, propulsionModuleId: TypeId | undefined, propulsionCapNeed: number | undefined): void {
+  const next = propulsionRuntime(propulsionModuleId, propulsionCapNeed);
+  if (!next) {
     runtime.propulsion = undefined;
     return;
   }
-  if (runtime.propulsion && runtime.propulsion.amount === propulsionCapNeed) return;
-  runtime.propulsion = { amount: propulsionCapNeed, interval: PROPULSION_CYCLE_SECONDS, timer: 0, running: false, starved: false };
+  if (runtime.propulsion && runtime.propulsion.moduleId === next.moduleId && runtime.propulsion.amount === next.amount) return;
+  runtime.propulsion = next;
 }
 
 function stepSide(sides: Record<Side, SideRuntime>, side: Side, dt: number, suppressed: boolean): void {
@@ -578,19 +594,19 @@ function regen(runtime: SideRuntime, dt: number): void {
 }
 
 function sideView(runtime: SideRuntime): CapacitorView {
+  const propulsion = propulsionView(runtime);
   if (!runtime.spec || runtime.spec.capacity <= 0) {
     return {
       cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0,
       incomingDrainPerSecond: drainRate(runtime), starved: runtime.anyStarved,
-      starvedModuleIds: [], propulsionStarved: false,
-      drains: runtime.drains.map(drainState), incoming: runtime.incoming.map(incomingState), boosters: runtime.boosters.map(boosterState),
+      starvedModuleIds: [], propulsion, drains: runtime.drains.map(drainState), incoming: runtime.incoming.map(incomingState), boosters: runtime.boosters.map(boosterState),
     };
   }
   if (runtime.infinite) {
     const incoming = drainRate(runtime);
     return {
       cap: runtime.spec.capacity, capacity: runtime.spec.capacity, percentage: 100, regenPerSecond: 0, netPerSecond: -incoming,
-      incomingDrainPerSecond: incoming, starved: false, starvedModuleIds: [], propulsionStarved: false,
+      incomingDrainPerSecond: incoming, starved: false, starvedModuleIds: [], propulsion,
       drains: runtime.drains.map((drain) => drainState({ ...drain, running: drain.active, starved: false })),
       incoming: runtime.incoming.map(incomingState),
       boosters: runtime.boosters.map(boosterState),
@@ -604,9 +620,16 @@ function sideView(runtime: SideRuntime): CapacitorView {
     cap: runtime.cap, capacity: runtime.spec.capacity, percentage: (runtime.cap / runtime.spec.capacity) * 100,
     regenPerSecond, netPerSecond: regenPerSecond - incoming, incomingDrainPerSecond: incoming,
     starved: runtime.anyStarved,
-    starvedModuleIds: [...runtime.starvedModuleIds], propulsionStarved: runtime.propulsion?.starved ?? false,
+    starvedModuleIds: [...runtime.starvedModuleIds], propulsion,
     drains: runtime.drains.map(drainState), incoming: runtime.incoming.map(incomingState), boosters: runtime.boosters.map(boosterState),
   };
+}
+
+/** Free and infinite sides never starve; running mirrors the last step's flags. */
+function propulsionView(runtime: SideRuntime): CapacitorPropulsionView | undefined {
+  const propulsion = runtime.propulsion;
+  if (!propulsion) return undefined;
+  return { moduleId: propulsion.moduleId, running: propulsion.running, starved: propulsion.starved };
 }
 
 function drainRate(runtime: SideRuntime): number {

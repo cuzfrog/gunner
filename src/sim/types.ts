@@ -75,6 +75,9 @@ export interface ShipConfig {
   // Propulsion capacitor need in GJ per 10 s cycle. When the capacitor cannot
   // afford the debit, the module is treated as suppressed (no MWD speed/bloom).
   readonly propulsionCapNeed?: number;
+  // Item id of the active propulsion module (variant or base), for drain
+  // attribution in the capacitor view. Absent = no propulsion module.
+  readonly propulsionModuleId?: TypeId;
   // Propulsion capacitor capacity multiplier (e.g. MWD 0.75). Composes the
   // effective pool from the propulsion-independent CapacitorSpec capacity.
   readonly propulsionCapacityMultiplier?: number;

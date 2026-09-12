@@ -4,6 +4,7 @@ import type { CapacitorSideConfig, CapacitorSpec, CombatantConfig, IncomingDrain
 
 const SPEC: CapacitorSpec = { capacity: 6375, rechargeTime: 1250 };
 const SMALL_SPEC: CapacitorSpec = { capacity: 1000, rechargeTime: 1250 };
+const PROPULSION_MODULE = toTypeId("20850");
 
 function regenClosedForm(cap: number, dt: number, spec: CapacitorSpec = SPEC): number {
   const tau = spec.rechargeTime / 5;
@@ -23,7 +24,7 @@ function sideConfig(overrides: Partial<CapacitorSideConfig> = {}): CapacitorSide
 }
 
 function combatant(id: "shipA" | "shipB", spec: CapacitorSpec | undefined, propulsionCapNeed?: number, capacityMultiplier?: number): CombatantConfig {
-  return { id, maxSpeed: 100, mass: 1, inertiaModifier: 1, mode: "orbit", desiredRange: 1000, aggressivity: 1, capacitor: spec, propulsionCapNeed, propulsionCapacityMultiplier: capacityMultiplier };
+  return { id, maxSpeed: 100, mass: 1, inertiaModifier: 1, mode: "orbit", desiredRange: 1000, aggressivity: 1, capacitor: spec, propulsionCapNeed, propulsionModuleId: propulsionCapNeed !== undefined ? PROPULSION_MODULE : undefined, propulsionCapacityMultiplier: capacityMultiplier };
 }
 
 function makeConfig(shipA: Partial<CapacitorSideConfig> = {}, shipB: Partial<CapacitorSideConfig> = {}, specA: CapacitorSpec | undefined = SPEC, specB: CapacitorSpec | undefined = SPEC, propulsionA?: number, capacityMultiplierA?: number): CapacitorSimConfig {

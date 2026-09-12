@@ -1,5 +1,5 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser, SettingsStore } from "../../appstate";
-import type { ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
+import type { CapacitorStats, ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, ImportedFitting, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
 import type { EwarResolver, HitChance, SensorBoosterResolver, SimValueParser, DefenseAssessor, WeaponDamageAssessor } from "../../sim";
 import type { Ships } from "../../ships";
 import type { ItemNameCatalog, ItemNameLoader } from "../../gamedata";
@@ -126,6 +126,10 @@ export interface ControlsCradle {
   readonly sensorBoosterResolver: SensorBoosterResolver;
   readonly sessionCodec: SessionCodec;
   readonly simConfigSource: SimConfigSource;
+  readonly capacitorStatsSource: {
+    stats(side: Side): CapacitorStats | undefined;
+    register(side: Side, imported: ImportedFitting): void;
+  };
   readonly importController: ImportController;
   readonly exportController: ExportController;
   readonly shareController: ShareController;
