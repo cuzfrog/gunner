@@ -15,20 +15,9 @@ test.describe.serial("share URL", () => {
     await page.context().close();
   });
 
-  test("share URL restores profile on navigation", async () => {
+  test("share URL restores profile without display preferences", async () => {
     await page.locator("#initial-distance").fill("18000");
     await page.locator("#initial-distance").dispatchEvent("input");
-    await page.locator("#share-link").click();
-    await page.locator("#share-copy-url").click();
-    const shareUrl = await getClipboardText(page);
-    expect(shareUrl).toContain("?c=");
-    const newPage = await page.context().newPage();
-    await newPage.goto(shareUrl, { waitUntil: "domcontentloaded" });
-    await expect(newPage.locator("#initial-distance")).toHaveValue("18000");
-    await newPage.close();
-  });
-
-  test("share URL does not include display preferences", async () => {
     await page.locator("#lang-zh").click();
     await page.locator("#canvas-settings-trigger").click();
     await page.locator("#grid-brightness-slider").fill("0.9");
@@ -37,6 +26,7 @@ test.describe.serial("share URL", () => {
     await page.locator("#share-link").click();
     await page.locator("#share-copy-url").click();
     const shareUrl = await getClipboardText(page);
+    expect(shareUrl).toContain("?c=");
     const url = new URL(shareUrl);
     const encoded = url.searchParams.get("c");
     expect(encoded).toBeTruthy();
@@ -47,6 +37,7 @@ test.describe.serial("share URL", () => {
     expect(settings.autoZoom).toBeUndefined();
     const newPage = await page.context().newPage();
     await newPage.goto(shareUrl, { waitUntil: "domcontentloaded" });
+    await expect(newPage.locator("#initial-distance")).toHaveValue("18000");
     const lang = await newPage.locator("html").getAttribute("lang");
     expect(lang).not.toBe("zh");
     await newPage.close();

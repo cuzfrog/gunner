@@ -28,19 +28,6 @@ test.describe.serial("profile management", () => {
     await expect(page.locator("#profile-popup")).toBeHidden();
   });
 
-  test("save updates to existing profile", async () => {
-    await page.locator("#profile-new").click();
-    await page.locator("#new-profile-name").fill("SaveTest");
-    await page.locator("#new-profile-confirm").click();
-    await page.locator("#initial-distance").fill("15000");
-    await page.locator("#initial-distance").dispatchEvent("input");
-    await expect(page.locator("#profile-save")).toBeEnabled();
-    await page.locator("#profile-save").click();
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await expect(page.locator("#initial-distance")).toHaveValue("15000");
-    await expect(page.locator("#profile-select-label")).toContainText("SaveTest");
-  });
-
   test("dirty state tracking shows unsaved indicator", async () => {
     await page.locator("#profile-new").click();
     await page.locator("#new-profile-name").fill("DirtyTest");

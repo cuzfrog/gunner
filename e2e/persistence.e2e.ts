@@ -27,24 +27,20 @@ test.describe.serial("persistence", () => {
     await expect(page.locator("#initial-distance")).toHaveValue("25000");
   });
 
-  test("preferences persist across page reload", async () => {
+  test("preferences and saved fittings persist across page reload", async () => {
     await page.locator("#lang-zh").click();
     await expect(page.locator("html")).toHaveAttribute("lang", "zh");
     await page.locator("#canvas-settings-trigger").click();
     await page.locator("#grid-brightness-slider").fill("0.3");
     await page.locator("#grid-brightness-slider").dispatchEvent("input");
     await page.locator("#canvas-settings-trigger").click();
+    await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_THRASHER));
     await page.reload({ waitUntil: "domcontentloaded" });
     await expect(page.locator("html")).toHaveAttribute("lang", "zh");
     await page.locator("#canvas-settings-trigger").click();
     await expect(page.locator("#grid-brightness-slider")).toHaveValue("0.3");
     await expect(page.locator("#grid-brightness-value")).toContainText("30%");
     await page.locator("#canvas-settings-trigger").click();
-  });
-
-  test("saved fitting persists across reload", async () => {
-    await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_THRASHER));
-    await page.reload({ waitUntil: "domcontentloaded" });
     await page.locator("#ship-a-ship-select-trigger").click();
     await page.locator("#ship-a-hull").fill("Thrasher");
     await expect(page.locator("#ship-a-fitting-saved-list .fitting-item")).toHaveCount(1, { min: 1 });

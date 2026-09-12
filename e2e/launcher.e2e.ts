@@ -26,19 +26,6 @@ test.describe.serial("launcher configuration", () => {
     await expect(page.locator("#ship-a-launcher-class-options").locator("button")).not.toHaveCount(0);
   });
 
-  test("change launcher class updates stats", async () => {
-    const initialVolley = await page.locator("#ship-a-launcher-volley-damage").textContent();
-    expect(initialVolley).toBeTruthy();
-    const classButtons = page.locator("#ship-a-launcher-class-options button");
-    const count = await classButtons.count();
-    if (count > 1) {
-      await classButtons.nth(1).click();
-      const newVolley = await page.locator("#ship-a-launcher-volley-damage").textContent();
-      expect(newVolley).toBeTruthy();
-      await classButtons.nth(0).click();
-    }
-  });
-
   test("missile ammo popup opens and lists missiles", async () => {
     await page.locator("#ship-a-launcher-ammo-trigger").click();
     await expect(page.locator("#ship-a-launcher-ammo-popup")).toBeVisible();

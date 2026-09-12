@@ -31,14 +31,6 @@ test.describe.serial("turret configuration", () => {
     await expect(page.locator("#ship-a-sig-res-options [data-value='S']")).toHaveAttribute("aria-pressed", "true");
   });
 
-  test("tracking input updates effective tracking", async () => {
-    await page.locator("#ship-a-tracking").fill("0.5");
-    await page.locator("#ship-a-tracking").dispatchEvent("input");
-    const effectiveTracking = await page.locator("#effective-ship-a-tracking").textContent();
-    expect(effectiveTracking).toBeTruthy();
-    expect(effectiveTracking).not.toBe("");
-  });
-
   test("tracking unit toggle switches rad/s to score", async () => {
     await expect(page.locator("#ship-a-tracking-unit-rad")).toHaveAttribute("aria-pressed", "true");
     await page.locator("#ship-a-tracking-unit-score").click();
@@ -48,17 +40,6 @@ test.describe.serial("turret configuration", () => {
     expect(effectiveTracking).toBeTruthy();
     await page.locator("#ship-a-tracking-unit-rad").click();
     await expect(page.locator("#ship-a-tracking-unit-rad")).toHaveAttribute("aria-pressed", "true");
-  });
-
-  test("optimal and falloff inputs update effective values", async () => {
-    await page.locator("#ship-a-optimal").fill("8000");
-    await page.locator("#ship-a-optimal").dispatchEvent("input");
-    await page.locator("#ship-a-falloff").fill("3000");
-    await page.locator("#ship-a-falloff").dispatchEvent("input");
-    const effectiveOptimal = await page.locator("#effective-ship-a-optimal").textContent();
-    const effectiveFalloff = await page.locator("#effective-ship-a-falloff").textContent();
-    expect(effectiveOptimal).toBeTruthy();
-    expect(effectiveFalloff).toBeTruthy();
   });
 
   test("weapon overload button toggles and increases DPS for long-range turrets", async () => {

@@ -202,6 +202,13 @@ describe("CapacitorControllerImpl stats rendering", () => {
     expect(statRows.some((t) => t.includes("Stable @ 87.3%"))).toBe(true);
   });
 
+  test("renders no booster rows when the stats have none", () => {
+    const els = buildEls();
+    buildController(els);
+    const section = els.shipA.section as unknown as FakeElement;
+    expect(findByClass(section, "capacitor-booster-row")).toHaveLength(0);
+  });
+
   test("updates runtime values and colors the bar by charge thresholds", () => {
     const els = buildEls();
     const { controller } = buildController(els);

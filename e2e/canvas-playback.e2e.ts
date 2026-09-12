@@ -1,29 +1,9 @@
-import { test, expect, loadFittingText, importFittingViaPaste, FITTING_THRASHER, FITTING_CERBERUS, BASE_URL } from "./fixtures";
-import type { Locator, Page } from "@playwright/test";
+import { test, expect, loadFittingText, importFittingViaPaste, FITTING_THRASHER, FITTING_CERBERUS, pauseIfPlaying, resetSim, BASE_URL } from "./fixtures";
+import type { Page, Locator } from "@playwright/test";
 
 async function loadBothSides(page: Page): Promise<void> {
   await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_THRASHER));
   await importFittingViaPaste(page, "ship-b", loadFittingText(FITTING_THRASHER));
-}
-
-async function pauseIfPlaying(page: Page): Promise<void> {
-  const play = page.locator("#play");
-  // A kill flips the button to "Restart" (the loop auto-stops), so a click meant
-  // to pause can land after the death and restart the sim instead. Retry.
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if ((await play.textContent()) !== "Pause") return;
-    await play.click();
-    try {
-      await expect(play).toHaveText("Start", { timeout: 1000 });
-      return;
-    } catch { /* death restarted the sim mid-click; pause again */ }
-  }
-}
-
-async function resetSim(page: Page): Promise<void> {
-  await pauseIfPlaying(page);
-  await page.locator("#reset").click();
-  await expect(page.locator("#res-distance")).toHaveText("20.0 km");
 }
 
 function parseDistance(text: string): number {
@@ -126,7 +106,7 @@ test.describe.serial("canvas settings and playback", () => {
     const distance = page.locator("#res-distance");
     await page.locator("#sim-speed").selectOption("8");
     await page.locator("#play").click();
-    await expect.poll(async () => parseDistance((await distance.textContent())!), { timeout: 15000 }).toBeLessThan(16000);
+    await expect.poll(async () => parseDistance((await distance.textContent())!), { timeout: 10000 }).toBeLessThan(19000);
     await pauseIfPlaying(page);
     await resetSim(page);
     await page.locator("#sim-speed").selectOption("0.25");

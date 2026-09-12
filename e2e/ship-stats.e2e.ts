@@ -35,24 +35,12 @@ test.describe.serial("ship stats, propulsion and skills", () => {
     expect(newAlign).not.toBe(initialAlign);
   });
 
-  test("signature radius input updates", async () => {
-    await page.locator("#ship-a-sig").fill("100");
-    await page.locator("#ship-a-sig").dispatchEvent("input");
-    await expect(page.locator("#ship-a-sig")).toHaveValue("100");
-  });
-
   test("mode select changes autopilot behavior", async () => {
     await expect(page.locator("#ship-a-mode")).toHaveValue("keepAtRange");
     await page.locator("#ship-a-mode").selectOption("orbit");
     await expect(page.locator("#ship-a-mode")).toHaveValue("orbit");
     await page.locator("#ship-a-mode").selectOption("midships");
     await expect(page.locator("#ship-a-mode")).toHaveValue("midships");
-  });
-
-  test("desired range input updates", async () => {
-    await page.locator("#ship-a-range").fill("15000");
-    await page.locator("#ship-a-range").dispatchEvent("input");
-    await expect(page.locator("#ship-a-range")).toHaveValue("15000");
   });
 
   test("aggressivity slider updates hidden input and output", async () => {

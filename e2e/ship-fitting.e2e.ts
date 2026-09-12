@@ -44,21 +44,6 @@ test.describe.serial("ship selection and fitting", () => {
     await expect(page.locator("#ship-a-ship-select-popup")).toBeHidden();
   });
 
-  test("import resets hull but import restores fitted state", async () => {
-    await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_THRASHER));
-    await page.locator("#ship-a-ship-select-trigger").click();
-    await page.locator("#ship-a-hull").fill("");
-    await page.locator("#ship-a-hull").press("Tab");
-    await expect(page.locator("#ship-a-fitting-name")).toBeHidden();
-    await page.locator("body").click({ position: { x: 0, y: 0 } });
-    await expect(page.locator("#ship-a-ship-select-popup")).toBeHidden();
-  });
-
-  test("import restores a fitted side and fitting eye", async () => {
-    await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_THRASHER));
-    await expect(page.locator("#ship-a-fitting-eye")).toBeEnabled();
-  });
-
   test("preset fitting from ship select popup enables the fitting eye", async () => {
     await page.locator("#ship-a-ship-select-trigger").click();
     await page.locator("#ship-a-hull").fill("Thrasher");

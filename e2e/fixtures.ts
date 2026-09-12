@@ -90,3 +90,23 @@ export async function importFittingViaPaste(page: Page, side: "ship-a" | "ship-b
     });
   }
 }
+
+// A kill flips the button to "Restart" (the loop auto-stops), so a click meant
+// to pause can land after the death and restart the sim instead. Retry.
+export async function pauseIfPlaying(page: Page): Promise<void> {
+  const play = page.locator("#play");
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if ((await play.textContent()) !== "Pause") return;
+    await play.click();
+    try {
+      await expect(play).toHaveText("Start", { timeout: 1000 });
+      return;
+    } catch { /* death restarted the sim mid-click; pause again */ }
+  }
+}
+
+export async function resetSim(page: Page, expectedDistance = "20.0 km"): Promise<void> {
+  await pauseIfPlaying(page);
+  await page.locator("#reset").click();
+  await expect(page.locator("#res-distance")).toHaveText(expectedDistance);
+}

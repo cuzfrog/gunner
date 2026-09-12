@@ -53,7 +53,7 @@ test.describe.serial("share and import", () => {
     await expect(page.locator("#import-side-popup")).toBeHidden();
   });
 
-  test("import to ship A applies fitting", async () => {
+  test("import applies the fitting to the selected side", async () => {
     const eftText = loadFittingText(FITTING_THRASHER);
     await setClipboardText(page, eftText);
     await page.locator("#import-profile").click();
@@ -61,10 +61,6 @@ test.describe.serial("share and import", () => {
     await expect(page.locator("#ship-a-fitting-name")).toBeVisible();
     await expect(page.locator("#ship-a-turret-panel")).toBeVisible();
     await expect(page.locator("#ship-a-ammo-summary")).not.toHaveText("");
-  });
-
-  test("import to ship B applies fitting", async () => {
-    const eftText = loadFittingText(FITTING_THRASHER);
     await setClipboardText(page, eftText);
     await page.locator("#import-profile").click();
     await page.locator("#import-side-ship-b").click();
