@@ -12,6 +12,7 @@ import type { TurretController } from "../turret";
 import type { WeaponSystemSwitch } from "../sidePanel";
 import type { Side } from "../side";
 import type { SidePanelState } from "../sidePanel";
+import type { CapacitorStatsSource } from "./capacitorStatsSource";
 
 export interface SimConfigSource {
   getConfig(): SimConfig;
@@ -32,6 +33,7 @@ interface SimConfigSourceDeps {
   readonly droneControllers: Record<Side, DroneController>;
   readonly defenseController: DefenseController;
   readonly capacitorController: CapacitorController;
+  readonly capacitorStatsSource: CapacitorStatsSource;
 }
 
 export class SimConfigSourceImpl implements SimConfigSource {
@@ -48,6 +50,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
   private readonly droneControllers: Record<Side, DroneController>;
   private readonly defenseController: DefenseController;
   private readonly capacitorController: CapacitorController;
+  private readonly capacitorStatsSource: CapacitorStatsSource;
 
   constructor(deps: SimConfigSourceDeps) {
     this.shipASide = deps.shipASide;
@@ -63,6 +66,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
     this.droneControllers = deps.droneControllers;
     this.defenseController = deps.defenseController;
     this.capacitorController = deps.capacitorController;
+    this.capacitorStatsSource = deps.capacitorStatsSource;
   }
 
   getConfig(): SimConfig {
@@ -85,6 +89,12 @@ export class SimConfigSourceImpl implements SimConfigSource {
   }
 
   private capacitorSide(side: Side): EngineConfig["capacitor"][Side] {
+    const state = this.sideFor(side).capture();
+    // Same gate as the capacitor popup: the summary keeps the module id after toggle-off as
+    // variant-selection memory; a drain requires an active module. The row carries the
+    // skill-modified amount and interval, so the runtime cannot diverge from the preview.
+    const propulsionModuleId = state.fittedHull?.propulsionId !== undefined ? state.fittedHull.propulsionModuleId : undefined;
+    const row = propulsionModuleId !== undefined ? this.capacitorStatsSource.stats(side)?.rows.find((candidate) => candidate.moduleId === propulsionModuleId) : undefined;
     return {
       infinite: this.capacitorController.infiniteCapacitor(side),
       drains: scheduledDrainsFromProjections(
@@ -94,6 +104,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
         this.sensorBoosterController.projection(side) ?? { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: undefined },
       ),
       boosters: this.capacitorController.capBoosterSpecs(side),
+      ...(row ? { propulsion: { moduleId: row.moduleId, amount: row.amount, interval: row.cycleTime } } : {}),
     };
   }
 
@@ -103,7 +114,6 @@ export class SimConfigSourceImpl implements SimConfigSource {
       maxSpeed: state.speed,
       baseMaxSpeed: state.baseMaxSpeed ?? state.speed,
       propulsionKind: state.fittedHull?.propulsionKind,
-      propulsionModuleId: state.fittedHull?.propulsionModuleId,
       mass: state.mass,
       inertiaModifier: state.inertia,
       mode: state.mode,
@@ -114,7 +124,6 @@ export class SimConfigSourceImpl implements SimConfigSource {
       sigPenalty: this.defenseController.spec(side)?.signaturePenalty ?? 0,
       capacitor: state.capacitor,
       energyWarfareResistancePercent: state.energyWarfareResistancePercent,
-      propulsionCapNeed: state.propulsionCapNeed,
       propulsionCapacityMultiplier: state.propulsionCapacityMultiplier,
       orbitDirection: "cw",
       ewar: this.ewarController.projection(side),

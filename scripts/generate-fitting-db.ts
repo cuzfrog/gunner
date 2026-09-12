@@ -431,6 +431,7 @@ function resolveSkillBonusAttribute(
     return { kind: "mapped", bonusType: base };
   }
   if (base === "turretTracking" || base === "turretFalloff") return { kind: "mapped", bonusType: base };
+  if (base === "capUse" || base === "duration") return { kind: "mapped", bonusType: base };
   if (base === "missileDamage" || base === "missileFlightTime" || base === "missileExplosionRadius" || base === "missileExplosionVelocity") return { kind: "mapped", bonusType: base };
   return { kind: "skip", reason: "attribute not applicable as a skill bonus" };
 }
@@ -486,6 +487,8 @@ interface FittingPropulsionStats {
   readonly massAddition: number;
   readonly sigBloom: number;
   readonly capacitorNeed: number;
+  readonly cycleTime: number;
+  readonly requiredSkillIds: readonly TypeId[];
   readonly capacitorCapacityMultiplier?: number;
 }
 
@@ -551,6 +554,7 @@ interface ChargeStats {
   readonly explosiveDamage?: number;
   readonly capacitorBonus?: number;
   readonly volume?: number;
+  readonly capacitorNeedMultiplier?: number;
   readonly chargeGroup: number;
   readonly chargeSize: number;
 }
@@ -589,6 +593,7 @@ export interface StasisWebStats {
   readonly overloadRangeBonusPercent: number;
   readonly capacitorNeed: number;
   readonly cycleTime: number;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 export interface StasisGrapplerStats {
@@ -598,6 +603,7 @@ export interface StasisGrapplerStats {
   readonly overloadOptimalBonusPercent: number;
   readonly capacitorNeed: number;
   readonly cycleTime: number;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 export interface TrackingDisruptorStats {
@@ -607,6 +613,7 @@ export interface TrackingDisruptorStats {
   readonly overloadStrengthBonusPercent: number;
   readonly capacitorNeed: number;
   readonly cycleTime: number;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 export interface DisruptionScriptStats {
@@ -620,6 +627,8 @@ export interface WarpScramblerStats {
   readonly overloadRangeBonusPercent: number;
   readonly capacitorNeed: number;
   readonly cycleTime: number;
+  readonly propulsionBlock: boolean;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 export interface TrackingComputerStats {
@@ -628,6 +637,7 @@ export interface TrackingComputerStats {
   readonly falloffBonusPercent: number;
   readonly capacitorNeed: number;
   readonly cycleTime: number;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 export interface TargetPainterStats {
@@ -637,6 +647,7 @@ export interface TargetPainterStats {
   readonly overloadStrengthBonusPercent: number;
   readonly capacitorNeed: number;
   readonly cycleTime: number;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 export interface MissileGuidanceComputerStats {
@@ -647,6 +658,7 @@ export interface MissileGuidanceComputerStats {
   readonly overloadStrengthBonusPercent: number;
   readonly capacitorNeed: number;
   readonly cycleTime: number;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 export interface MissileGuidanceEnhancerStats {
@@ -686,6 +698,7 @@ interface SensorDampenerStats {
   readonly overloadStrengthBonusPercent: number;
   readonly capacitorNeed: number;
   readonly cycleTime: number;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 interface SensorBoosterStats {
@@ -694,6 +707,7 @@ interface SensorBoosterStats {
   readonly overloadStrengthBonusPercent: number;
   readonly capacitorNeed: number;
   readonly cycleTime: number;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 interface SignalAmplifierStats {
@@ -740,7 +754,7 @@ function optionalNumber(value: number | undefined): number | undefined {
   return value;
 }
 
-function buildPropulsionStats(values: Map<string, number>, type: SdeType): FittingModuleStats {
+function buildPropulsionStats(values: Map<string, number>, type: SdeType, requiredSkillIds: readonly TypeId[]): FittingModuleStats {
   const massAddition = values.get("massAddition") ?? 0;
   const speedFactor = values.get("speedFactor") ?? 0;
   const speedBoostFactor = values.get("speedBoostFactor") ?? 0;
@@ -755,6 +769,8 @@ function buildPropulsionStats(values: Map<string, number>, type: SdeType): Fitti
       massAddition,
       sigBloom,
       capacitorNeed: values.get("capacitorNeed") ?? 0,
+      cycleTime: (values.get("duration") ?? 0) / 1000,
+      requiredSkillIds,
       ...(values.get("capacitorCapacityMultiplier") !== undefined ? { capacitorCapacityMultiplier: values.get("capacitorCapacityMultiplier") } : {}),
     },
   };
@@ -833,7 +849,7 @@ function buildDefenseStats(
   return buildDefenseStatsFromIntents({ values, effects, groupId, typeDogma, dogmaEffects });
 }
 
-export function buildStasisWebStats(values: Map<string, number>): StasisWebStats | undefined {
+export function buildStasisWebStats(values: Map<string, number>, requiredSkillIds: readonly TypeId[]): StasisWebStats | undefined {
   const speedFactor = values.get("speedFactor");
   const maxRange = values.get("maxRange");
   if (speedFactor === undefined || maxRange === undefined) return undefined;
@@ -843,10 +859,11 @@ export function buildStasisWebStats(values: Map<string, number>): StasisWebStats
     overloadRangeBonusPercent: values.get("overloadRangeBonus") ?? 0,
     capacitorNeed: values.get("capacitorNeed") ?? 0,
     cycleTime: (values.get("duration") ?? 0) / 1000,
+    requiredSkillIds,
   };
 }
 
-export function buildStasisGrapplerStats(values: Map<string, number>): StasisGrapplerStats | undefined {
+export function buildStasisGrapplerStats(values: Map<string, number>, requiredSkillIds: readonly TypeId[]): StasisGrapplerStats | undefined {
   const speedFactor = values.get("speedFactor");
   const maxRange = values.get("maxRange");
   if (speedFactor === undefined || maxRange === undefined) return undefined;
@@ -857,10 +874,11 @@ export function buildStasisGrapplerStats(values: Map<string, number>): StasisGra
     overloadOptimalBonusPercent: values.get("overloadRangeBonus") ?? 0,
     capacitorNeed: values.get("capacitorNeed") ?? 0,
     cycleTime: (values.get("duration") ?? 0) / 1000,
+    requiredSkillIds,
   };
 }
 
-export function buildTrackingComputerStats(values: Map<string, number>): TrackingComputerStats | undefined {
+export function buildTrackingComputerStats(values: Map<string, number>, requiredSkillIds: readonly TypeId[]): TrackingComputerStats | undefined {
   const trackingBonus = values.get("trackingSpeedBonus");
   if (trackingBonus === undefined) return undefined;
   return {
@@ -869,10 +887,11 @@ export function buildTrackingComputerStats(values: Map<string, number>): Trackin
     falloffBonusPercent: values.get("falloffBonus") ?? 0,
     capacitorNeed: values.get("capacitorNeed") ?? 0,
     cycleTime: (values.get("duration") ?? 0) / 1000,
+    requiredSkillIds,
   };
 }
 
-export function buildTargetPainterStats(values: Map<string, number>): TargetPainterStats | undefined {
+export function buildTargetPainterStats(values: Map<string, number>, requiredSkillIds: readonly TypeId[]): TargetPainterStats | undefined {
   const signatureRadiusBonus = values.get("signatureRadiusBonus");
   const maxRange = values.get("maxRange");
   if (signatureRadiusBonus === undefined || maxRange === undefined) return undefined;
@@ -883,10 +902,11 @@ export function buildTargetPainterStats(values: Map<string, number>): TargetPain
     overloadStrengthBonusPercent: values.get("overloadPainterStrengthBonus") ?? 0,
     capacitorNeed: values.get("capacitorNeed") ?? 0,
     cycleTime: (values.get("duration") ?? 0) / 1000,
+    requiredSkillIds,
   };
 }
 
-export function buildMissileGuidanceComputerStats(values: Map<string, number>): MissileGuidanceComputerStats | undefined {
+export function buildMissileGuidanceComputerStats(values: Map<string, number>, requiredSkillIds: readonly TypeId[]): MissileGuidanceComputerStats | undefined {
   const explosionRadiusBonus = values.get("aoeCloudSizeBonus");
   if (explosionRadiusBonus === undefined) return undefined;
   return {
@@ -897,6 +917,7 @@ export function buildMissileGuidanceComputerStats(values: Map<string, number>): 
     overloadStrengthBonusPercent: values.get("overloadTrackingModuleStrengthBonus") ?? 0,
     capacitorNeed: values.get("capacitorNeed") ?? 0,
     cycleTime: (values.get("duration") ?? 0) / 1000,
+    requiredSkillIds,
   };
 }
 
@@ -922,7 +943,7 @@ export function buildMissileScriptStats(values: Map<string, number>): MissileScr
   };
 }
 
-export function buildTrackingDisruptorStats(values: Map<string, number>): TrackingDisruptorStats | undefined {
+export function buildTrackingDisruptorStats(values: Map<string, number>, requiredSkillIds: readonly TypeId[]): TrackingDisruptorStats | undefined {
   const disruptionPercent = values.get("trackingSpeedBonus");
   if (disruptionPercent === undefined) return undefined;
   return {
@@ -932,18 +953,23 @@ export function buildTrackingDisruptorStats(values: Map<string, number>): Tracki
     overloadStrengthBonusPercent: values.get("overloadTrackingModuleStrengthBonus") ?? 0,
     capacitorNeed: values.get("capacitorNeed") ?? 0,
     cycleTime: (values.get("duration") ?? 0) / 1000,
+    requiredSkillIds,
   };
 }
 
-export function buildWarpScramblerStats(values: Map<string, number>): WarpScramblerStats | undefined {
-  const propulsionBlock = values.get("activationBlockedStrenght");
+export function buildWarpScramblerStats(values: Map<string, number>, requiredSkillIds: readonly TypeId[]): WarpScramblerStats | undefined {
+  const warpScrambleStrength = values.get("warpScrambleStrength");
   const maxRange = values.get("maxRange");
-  if (propulsionBlock === undefined || propulsionBlock <= 0 || maxRange === undefined) return undefined;
+  // Warp disruptors share group 52 but only modify attr 105 (no attr 1350), so they drain
+  // capacitor without suppressing propulsion (no MWD/AB shutdown in the sim).
+  if (warpScrambleStrength === undefined || warpScrambleStrength <= 0 || maxRange === undefined) return undefined;
   return {
     maxRange,
     overloadRangeBonusPercent: values.get("overloadRangeBonus") ?? 0,
     capacitorNeed: values.get("capacitorNeed") ?? 0,
     cycleTime: (values.get("duration") ?? 0) / 1000,
+    propulsionBlock: (values.get("activationBlockedStrenght") ?? 0) > 0,
+    requiredSkillIds,
   };
 }
 
@@ -955,7 +981,7 @@ export function buildDisruptionScriptStats(values: Map<string, number>): Disrupt
   };
 }
 
-export function buildSensorDampenerStats(values: Map<string, number>): SensorDampenerStats | undefined {
+export function buildSensorDampenerStats(values: Map<string, number>, requiredSkillIds: readonly TypeId[]): SensorDampenerStats | undefined {
   const scanResolutionBonus = values.get("scanResolutionBonus");
   const maxTargetRangeBonus = values.get("maxTargetRangeBonus");
   if (scanResolutionBonus === undefined && maxTargetRangeBonus === undefined) return undefined;
@@ -967,10 +993,11 @@ export function buildSensorDampenerStats(values: Map<string, number>): SensorDam
     overloadStrengthBonusPercent: values.get("overloadSensorModuleStrengthBonus") ?? 0,
     capacitorNeed: values.get("capacitorNeed") ?? 0,
     cycleTime: (values.get("duration") ?? 0) / 1000,
+    requiredSkillIds,
   };
 }
 
-export function buildSensorBoosterStats(values: Map<string, number>): SensorBoosterStats | undefined {
+export function buildSensorBoosterStats(values: Map<string, number>, requiredSkillIds: readonly TypeId[]): SensorBoosterStats | undefined {
   const scanResolutionBonus = values.get("scanResolutionBonus");
   const maxTargetRangeBonus = values.get("maxTargetRangeBonus");
   if (scanResolutionBonus === undefined && maxTargetRangeBonus === undefined) return undefined;
@@ -980,6 +1007,7 @@ export function buildSensorBoosterStats(values: Map<string, number>): SensorBoos
     overloadStrengthBonusPercent: values.get("overloadSensorModuleStrengthBonus") ?? 0,
     capacitorNeed: values.get("capacitorNeed") ?? 0,
     cycleTime: (values.get("duration") ?? 0) / 1000,
+    requiredSkillIds,
   };
 }
 
@@ -1072,6 +1100,9 @@ function resolveHullBonusAttribute(
   if (base === "maxVelocity" && func === "OwnerRequiredSkillModifier" && skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return { kind: "mapped", attribute: "missileVelocity" };
   if (base === "turretDamage" && func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return { kind: "mapped", attribute: "droneDamage" };
   if (base === "turretOptimal" && modifier.groupID === WARP_SCRAMBLER_GROUP) return { kind: "skip", reason: "warp scrambler maxRange is not a turret bonus" };
+  // capacitorNeed hull bonuses only apply to turret groups/skills (e.g. Harbinger effect 5332).
+  if (base === "capUse" && !((skillId !== undefined && TURRET_SKILL_IDS.has(skillId)) || (modifier.groupID !== undefined && TURRET_GROUPS.has(modifier.groupID)))) return { kind: "skip", reason: "capacitorNeed bonus outside turret skills/groups" };
+  if (base === "duration") return { kind: "skip", reason: "module duration is not a hull bonus" };
   // Skip maxRange bonuses filtered by non-turret skills (e.g. Leadership for command bursts).
   if (base === "turretOptimal" && skillId !== undefined && !TURRET_SKILL_IDS.has(skillId)) return { kind: "skip", reason: "maxRange bonus for non-turret skill" };
   // Skip turret attribute bonuses for non-turret module groups (tractor beams, remote repairers, etc.).
@@ -1405,6 +1436,7 @@ async function main() {
       if (hasRangeMods || hasDamage) {
         const chargeSize = values.get("chargeSize");
         if (chargeSize === undefined) throw new Error(`Charge "${enName}" is missing chargeSize`);
+        const capacitorNeedMultiplier = values.get("capNeedBonus");
         charges[id] = {
           id,
           name: enName,
@@ -1415,6 +1447,7 @@ async function main() {
           thermalDamage,
           kineticDamage,
           explosiveDamage,
+          ...(capacitorNeedMultiplier !== undefined ? { capacitorNeedMultiplier: 1 + capacitorNeedMultiplier / 100 } : {}),
           chargeGroup: type.groupID,
           chargeSize,
         };
@@ -1478,7 +1511,7 @@ async function main() {
     }
 
     if (type.groupID === STASIS_WEB_GROUP) {
-      const stats = buildStasisWebStats(values);
+      const stats = buildStasisWebStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         stasisWebs[id] = { ...stats, id, name: enName };
         fittingModules[id] = { stasisWeb: stats, id, name: enName };
@@ -1488,7 +1521,7 @@ async function main() {
     }
 
     if (type.groupID === STASIS_GRAPPLER_GROUP) {
-      const stats = buildStasisGrapplerStats(values);
+      const stats = buildStasisGrapplerStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         stasisGrapplers[id] = { ...stats, id, name: enName };
         fittingModules[id] = { stasisGrappler: stats, id, name: enName };
@@ -1498,7 +1531,7 @@ async function main() {
     }
 
     if (type.groupID === WEAPON_DISRUPTOR_GROUP) {
-      const stats = buildTrackingDisruptorStats(values);
+      const stats = buildTrackingDisruptorStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         trackingDisruptors[id] = { ...stats, id, name: enName };
         fittingModules[id] = { trackingDisruptor: stats, id, name: enName };
@@ -1508,7 +1541,7 @@ async function main() {
     }
 
     if (type.groupID === TRACKING_COMPUTER_GROUP) {
-      const stats = buildTrackingComputerStats(values);
+      const stats = buildTrackingComputerStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         trackingComputers[id] = { ...stats, id, name: enName };
         addItemName(itemNames, id, type);
@@ -1517,7 +1550,7 @@ async function main() {
     }
 
     if (type.groupID === WARP_SCRAMBLER_GROUP) {
-      const stats = buildWarpScramblerStats(values);
+      const stats = buildWarpScramblerStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         warpScramblers[id] = { ...stats, id, name: enName };
         fittingModules[id] = { warpScrambler: stats, id, name: enName };
@@ -1527,7 +1560,7 @@ async function main() {
     }
 
     if (type.groupID === TARGET_PAINTER_GROUP) {
-      const stats = buildTargetPainterStats(values);
+      const stats = buildTargetPainterStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         targetPainters[id] = { ...stats, id, name: enName };
         fittingModules[id] = { targetPainter: stats, id, name: enName };
@@ -1537,7 +1570,7 @@ async function main() {
     }
 
     if (type.groupID === MISSILE_GUIDANCE_COMPUTER_GROUP) {
-      const stats = buildMissileGuidanceComputerStats(values);
+      const stats = buildMissileGuidanceComputerStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         missileGuidanceComputers[id] = { ...stats, id, name: enName };
         addItemName(itemNames, id, type);
@@ -1582,7 +1615,7 @@ async function main() {
     }
 
     if (type.groupID === SENSOR_DAMPENER_GROUP) {
-      const stats = buildSensorDampenerStats(values);
+      const stats = buildSensorDampenerStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         sensorDampeners[id] = { ...stats, id, name: enName };
         fittingModules[id] = { sensorDampener: stats, id, name: enName };
@@ -1592,7 +1625,7 @@ async function main() {
     }
 
     if (type.groupID === SENSOR_BOOSTER_GROUP) {
-      const stats = buildSensorBoosterStats(values);
+      const stats = buildSensorBoosterStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         sensorBoosters[id] = { ...stats, id, name: enName };
         fittingModules[id] = { sensorBooster: stats, id, name: enName };
@@ -1632,13 +1665,13 @@ async function main() {
     if (MODULE_GROUPS.has(type.groupID)) {
       const effects = buildEffectSet(typeDogma);
       if (type.groupID === 46) {
-        fittingModules[id] = { ...buildPropulsionStats(values, type), id, name: enName };
+        fittingModules[id] = { ...buildPropulsionStats(values, type, buildRequiredSkillIds(requiredSkills, type.typeID)), id, name: enName };
         addItemName(itemNames, id, type);
       } else {
         const stats = buildModuleStats(values, effects, type.groupID, typeDogma, dogmaEffects);
         const defense = buildDefenseStats(values, effects, type.groupID, typeDogma, dogmaEffects);
         const capacitor = buildCapacitorStatsFromIntents({ values, effects, groupId: type.groupID, dogmaEffects, chargeCapacity: type.capacity ?? 0 });
-        const warfare = buildCapWarfareStatsFromIntents({ values, effects, groupId: type.groupID, dogmaEffects });
+        const warfare = buildCapWarfareStatsFromIntents({ values, effects, groupId: type.groupID, dogmaEffects, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID) });
         if (stats || defense || capacitor || warfare) {
           fittingModules[id] = { ...stats, defense, capacitor, neutralizer: warfare?.neutralizer, nosferatu: warfare?.nosferatu, id, name: enName };
           addItemName(itemNames, id, type);
@@ -2110,7 +2143,7 @@ async function writeI18nFiles(
   await writeFile(collisionJaFile, collisionJaContent);
 }
 
-export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses };
+export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses, buildPropulsionStats as _buildPropulsionStats };
 
 if (import.meta.main) {
   main().catch((error) => {

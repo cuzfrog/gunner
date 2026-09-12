@@ -1,5 +1,5 @@
 import { type CapacitorDrainSources, type CapacitorStats, type FittingImport, type ImportedFitting } from "../../../fitting";
-import { type BoostLoadout, type EwarLoadout, type MissileBoosterLoadout, type SensorBoostLoadout } from "../../../sim";
+import { type BoostLoadout, type EwarLoadout, type MissileBoosterLoadout, type SensorBoostLoadout, type TurretSpec } from "../../../sim";
 import type { SidePanelState } from "../sidePanel";
 import type { Side } from "../side";
 import type { UiEvents } from "../../events";
@@ -24,6 +24,7 @@ interface CapacitorStatsSourceDeps {
   readonly boosterController: BoostProjectionSource;
   readonly missileBoosterController: MissileBoostProjectionSource;
   readonly sensorBoosterController: SensorBoostProjectionSource;
+  readonly turretControllers: Record<Side, TurretDrainSource>;
 }
 
 interface PanelConfigSource {
@@ -45,6 +46,10 @@ interface MissileBoostProjectionSource {
 
 interface SensorBoostProjectionSource {
   projection(side: Side): { readonly loadout: SensorBoostLoadout } | undefined;
+}
+
+interface TurretDrainSource {
+  currentTurretSpecs(): readonly TurretSpec[];
 }
 
 export class CapacitorStatsSourceImpl implements CapacitorStatsSource {
@@ -70,7 +75,9 @@ export class CapacitorStatsSourceImpl implements CapacitorStatsSource {
   private drainSources(side: Side, imported: ImportedFitting, state: SidePanelState): CapacitorDrainSources {
     return {
       defense: imported.defense,
-      turrets: imported.turrets ?? [],
+      // Live turret specs: identical source the runtime weapon clocks drain, including user overrides.
+      // Projectile turrets carry no capacitor need; 0 keeps the drain shape total and is skipped downstream.
+      turretDrains: this.deps.turretControllers[side].currentTurretSpecs().map((turret) => ({ moduleId: turret.moduleId, capacitorNeed: turret.capacitorNeed ?? 0, cycleTime: turret.cycleTime, count: turret.turretCount })),
       ewar: this.deps.ewarController.projection(side)?.loadout ?? imported.ewar,
       boosts: this.deps.boosterController.projection(side)?.loadout ?? imported.boosts,
       missileBoosts: this.deps.missileBoosterController.projection(side)?.loadout ?? imported.missileBoosts,

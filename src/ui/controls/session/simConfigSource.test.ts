@@ -1,5 +1,6 @@
 import { EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, type EwarProjection, type MissileBoosterProjection, type MissileSpec, type SensorBoostProjection, type TurretBoostProjection, type TurretSpec, type WeaponSpec } from "../../../sim";
 import { toTypeId } from "../../../gamedata/ids";
+import type { CapacitorStats } from "../../../fitting";
 import type { FittedHullSummary } from "../../../appstate";
 import type { SidePanelState } from "../sidePanel";
 import type { EwarController } from "../ewar";
@@ -12,6 +13,7 @@ import type { DroneController } from "../drone";
 import type { LauncherController } from "../launcher";
 import type { TurretController } from "../turret";
 import type { WeaponSystemSwitch } from "../sidePanel";
+import type { CapacitorStatsSource } from "./capacitorStatsSource";
 import { SimConfigSourceImpl } from "./simConfigSource";
 
 function baseShipAState(): SidePanelState {
@@ -149,7 +151,8 @@ function build() {
     infiniteCapacitor: vi.fn(() => false),
     capBoosterSpecs: vi.fn(() => []),
   } as unknown as CapacitorController;
-  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, defenseController, capacitorController, turretSpec, missileSpec };
+  const capacitorStatsSource = { stats: vi.fn((_side: "shipA" | "shipB") => undefined as CapacitorStats | undefined) } as unknown as CapacitorStatsSource & { stats: ReturnType<typeof vi.fn> };
+  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, defenseController, capacitorController, capacitorStatsSource, turretSpec, missileSpec };
 }
 
 function makeSource(deps: ReturnType<typeof build>) {
@@ -167,6 +170,7 @@ function makeSource(deps: ReturnType<typeof build>) {
     droneControllers: deps.droneControllers,
     defenseController: deps.defenseController,
     capacitorController: deps.capacitorController,
+    capacitorStatsSource: deps.capacitorStatsSource,
   });
 }
 
@@ -249,15 +253,28 @@ describe("SimConfigSourceImpl", () => {
     expect(engineConfig.overloaded).toEqual({ shipA: true, shipB: true });
   });
 
-  test("getEngineConfig carries capacitor spec, propulsion cap need, and multiplier from side state", () => {
+  test("getEngineConfig carries capacitor spec, capacity multiplier, and composes the propulsion drain from the stats source", () => {
     const deps = build();
     const base = deps.shipASide.capture();
-    deps.shipASide.capture = vi.fn(() => ({ ...base, capacitor: { capacity: 6375, rechargeTime: 1250 }, propulsionCapNeed: 180, propulsionCapacityMultiplier: 0.75 }));
+    const PROPULSION_MODULE = toTypeId("439");
+    const statsWithRow: CapacitorStats = { spec: { capacity: 4375, rechargeTime: 656.25 }, peakRecharge: 16.67, rows: [{ moduleId: PROPULSION_MODULE, moduleName: "1MN Afterburner I", amount: 320, cycleTime: 10, perSecond: 32, count: 1 }], usagePerSecond: 32, boosters: [] };
+    deps.shipASide.capture = vi.fn(() => ({ ...base, capacitor: { capacity: 6375, rechargeTime: 1250 }, fittedHull: { ...fittedHull("afterburner"), propulsionId: "ab-1mn", propulsionModuleId: PROPULSION_MODULE }, propulsionCapacityMultiplier: 0.75 }));
+    deps.capacitorStatsSource.stats = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? statsWithRow : undefined));
     const engineConfig = makeSource(deps).getEngineConfig();
     expect(engineConfig.sim.shipA.capacitor).toEqual({ capacity: 6375, rechargeTime: 1250 });
-    expect(engineConfig.sim.shipA.propulsionCapNeed).toBe(180);
     expect(engineConfig.sim.shipA.propulsionCapacityMultiplier).toBe(0.75);
     expect(engineConfig.sim.shipB.capacitor).toBeUndefined();
+    expect(engineConfig.capacitor.shipA.propulsion).toEqual({ moduleId: PROPULSION_MODULE, amount: 320, interval: 10 });
+    expect(engineConfig.capacitor.shipB.propulsion).toBeUndefined();
+  });
+
+  test("getEngineConfig omits the propulsion drain when the module is toggled off", () => {
+    const deps = build();
+    const base = deps.shipASide.capture();
+    // Variant-selection memory: propulsionModuleId survives toggle-off (propulsionId cleared).
+    deps.shipASide.capture = vi.fn(() => ({ ...base, fittedHull: { ...fittedHull("afterburner"), propulsionModuleId: toTypeId("439") } }));
+    const engineConfig = makeSource(deps).getEngineConfig();
+    expect(engineConfig.capacitor.shipA.propulsion).toBeUndefined();
   });
 
   test("getEngineConfig builds drains from active ewar and booster modules only", () => {

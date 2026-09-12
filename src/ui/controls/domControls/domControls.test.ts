@@ -372,7 +372,7 @@ describe("DomControls", () => {
   });
 
   test("getConfig uses a manually derived baseMaxSpeed for shipB and includes an active scrambler projection", () => {
-    const SCRAMBLER: WarpScramblerSpec = { moduleId: toTypeId("448"), moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 };
+    const SCRAMBLER: WarpScramblerSpec = { moduleId: toTypeId("448"), moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20, propulsionBlock: true };
     const mwd5 = {
       id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN Microwarpdrive I",
       iconId: toTypeId("434"), defaultModuleId: toTypeId("434"),

@@ -32,7 +32,7 @@ const DISRUPTOR2: TrackingDisruptorSpec = {
   moduleName: "Tracking Disruptor II", moduleId: toTypeId("2109"), optimal: 12000, falloff: 35000,
   disruption: -0.25, defaultScript: OPTIMAL_SCRIPT, overloadStrengthBonusPercent: 20,
 };
-const SCRAMBLER: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 };
+const SCRAMBLER: WarpScramblerSpec = { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 };
 const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: toTypeId("41040"), optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
 const PAINTER: TargetPainterSpec = { moduleName: "Target Painter II", moduleId: toTypeId("12275"), maxRange: 36000, falloff: 90000, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 20 };
 const SCAN_RES_SCRIPT: SensorDampenerScriptSpec & { readonly moduleId: TypeId } = {

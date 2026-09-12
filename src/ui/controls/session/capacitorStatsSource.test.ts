@@ -1,5 +1,5 @@
 import { type CapacitorDrainSources, type CapacitorStats, type FittingImport, type ImportedFitting } from "../../../fitting";
-import type { BoostLoadout, EwarLoadout } from "../../../sim";
+import type { BoostLoadout, EwarLoadout, TurretSpec } from "../../../sim";
 import { toTypeId } from "../../../gamedata/ids";
 import type { SidePanelState } from "../sidePanel";
 import type { UiEvents } from "../../events";
@@ -49,6 +49,8 @@ function panelState(fittedHull: SidePanelState["fittedHull"]): SidePanelState {
   };
 }
 
+const TURRET_SPEC: TurretSpec = { kind: "turret", moduleId: toTypeId("28"), tracking: 0.03, sigResolution: 40, optimal: 9000, falloff: 6000, damagePerShot: { em: 12, thermal: 8, kinetic: 0, explosive: 0 }, cycleTime: 3, turretCount: 2, capacitorNeed: 7 };
+
 function build(overriddenImport?: Partial<ImportedFitting>) {
   const listeners: { fittingImported: (side: "shipA" | "shipB", imported: ImportedFitting) => void }[] = [];
   const events = {
@@ -62,12 +64,14 @@ function build(overriddenImport?: Partial<ImportedFitting>) {
   const boosterController = { projection: vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? { loadout: emptyBoost(), activation: undefined } : undefined)) };
   const missileBoosterController = { projection: vi.fn((_side: "shipA" | "shipB") => undefined) };
   const sensorBoosterController = { projection: vi.fn((_side: "shipA" | "shipB") => undefined) };
+  const turretControllers = { shipA: { currentTurretSpecs: vi.fn(() => [TURRET_SPEC]) }, shipB: { currentTurretSpecs: vi.fn(() => []) } };
   const source = new CapacitorStatsSourceImpl({
     events, fittingImport,
     sides: { shipA: shipASide, shipB: shipBSide },
     ewarController, boosterController, missileBoosterController, sensorBoosterController,
+    turretControllers,
   } as never);
-  return { source, listeners, fittingImport, shipASide, ewarController, boosterController, missileBoosterController, sensorBoosterController, imported };
+  return { source, listeners, fittingImport, shipASide, ewarController, boosterController, missileBoosterController, sensorBoosterController, turretControllers, imported };
 }
 
 describe("capacitorStatsSource", () => {
@@ -86,7 +90,7 @@ describe("capacitorStatsSource", () => {
     expect(fittingArg).toBe(imported);
     expect(conditionsArg.skillLevel).toBe(5);
     expect(sourcesArg.defense).toBe(imported.defense);
-    expect(sourcesArg.turrets).toEqual([]);
+    expect(sourcesArg.turretDrains).toEqual([{ moduleId: TURRET_SPEC.moduleId, capacitorNeed: 7, cycleTime: 3, count: 2 }]);
     expect(sourcesArg.ewar.webs).toHaveLength(2);
     expect(sourcesArg.boosts).toEqual(emptyBoost());
     expect(sourcesArg.propulsionModuleId).toBe(PROPULSION_MODULE);
@@ -122,6 +126,18 @@ describe("capacitorStatsSource", () => {
     source.stats("shipA");
     const [, , sourcesArg] = fittingImport.resolveCapacitorStats.mock.calls[0] as unknown as [ImportedFitting, unknown, CapacitorDrainSources];
     expect(sourcesArg.propulsionModuleId).toBeUndefined();
+  });
+
+  test("turret drains follow the live turret controller specs", () => {
+    const { source, listeners, fittingImport, imported, turretControllers } = build();
+    listeners[0]?.fittingImported("shipA", imported);
+    source.stats("shipA");
+    expect(turretControllers.shipA.currentTurretSpecs).toHaveBeenCalled();
+    turretControllers.shipA.currentTurretSpecs.mockReturnValue([]);
+    fittingImport.resolveCapacitorStats.mockClear();
+    source.stats("shipA");
+    const [, , sourcesArg] = fittingImport.resolveCapacitorStats.mock.calls[0] as unknown as [ImportedFitting, unknown, CapacitorDrainSources];
+    expect(sourcesArg.turretDrains).toEqual([]);
   });
 
   test("register overwrites the skeleton for re-import and restore", () => {

@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { toTypeId } from "../src/gamedata/ids";
-import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses } from "./generate-fitting-db";
+import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses } from "./generate-fitting-db";
 import type { UnmappedAttribute } from "./generate-fitting-db";
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./fittingDb/dogmaTypes";
 
@@ -54,36 +54,41 @@ function sdeType(metaLevel = 0, metaGroupID = 1, volume?: number): { typeID: num
   return { typeID: 0, "typeName_en-us": "", groupID: 0, published: 1, metaLevel, metaGroupID, volume };
 }
 
+const WEB_SKILLS = ["3435"].map((id) => toTypeId(id));
+const TURRET_MODULE_SKILLS = ["3300", "3306"].map((id) => toTypeId(id));
+
 describe("buildStasisWebStats", () => {
   test("returns undefined when required attributes are missing", () => {
-    expect(buildStasisWebStats(values({ maxRange: 10000 }))).toBeUndefined();
-    expect(buildStasisWebStats(values({ speedFactor: -50 }))).toBeUndefined();
+    expect(buildStasisWebStats(values({ maxRange: 10000 }), WEB_SKILLS)).toBeUndefined();
+    expect(buildStasisWebStats(values({ speedFactor: -50 }), WEB_SKILLS)).toBeUndefined();
   });
 
   test("builds a web from speed factor and range", () => {
-    expect(buildStasisWebStats(values({ maxRange: 10000, speedFactor: -55, capacitorNeed: 8, duration: 5000 }))).toEqual({
+    expect(buildStasisWebStats(values({ maxRange: 10000, speedFactor: -55, capacitorNeed: 8, duration: 5000 }), WEB_SKILLS)).toEqual({
       maxRange: 10000,
       speedFactorPercent: -55,
       overloadRangeBonusPercent: 0,
       capacitorNeed: 8,
       cycleTime: 5,
+      requiredSkillIds: WEB_SKILLS,
     });
   });
 
   test("preserves overload range bonus when present", () => {
-    expect(buildStasisWebStats(values({ maxRange: 10000, speedFactor: -60, overloadRangeBonus: 30, capacitorNeed: 8, duration: 5000 }))).toEqual({
+    expect(buildStasisWebStats(values({ maxRange: 10000, speedFactor: -60, overloadRangeBonus: 30, capacitorNeed: 8, duration: 5000 }), WEB_SKILLS)).toEqual({
       maxRange: 10000,
       speedFactorPercent: -60,
       overloadRangeBonusPercent: 30,
       capacitorNeed: 8,
       cycleTime: 5,
+      requiredSkillIds: WEB_SKILLS,
     });
   });
 });
 
 describe("buildTrackingDisruptorStats", () => {
   test("returns undefined for guidance disruptors without trackingSpeedBonus", () => {
-    expect(buildTrackingDisruptorStats(values({ maxRange: 48000, falloffEffectiveness: 24000 }))).toBeUndefined();
+    expect(buildTrackingDisruptorStats(values({ maxRange: 48000, falloffEffectiveness: 24000 }), WEB_SKILLS)).toBeUndefined();
   });
 
   test("builds a tracking disruptor from weapon disruptor attributes", () => {
@@ -94,13 +99,14 @@ describe("buildTrackingDisruptorStats", () => {
       overloadTrackingModuleStrengthBonus: 20,
       capacitorNeed: 8,
       duration: 5000,
-    }))).toEqual({
+    }), WEB_SKILLS)).toEqual({
       optimal: 48000,
       falloff: 24000,
       disruptionPercent: -17.19,
       overloadStrengthBonusPercent: 20,
       capacitorNeed: 8,
       cycleTime: 5,
+      requiredSkillIds: WEB_SKILLS,
     });
   });
 });
@@ -173,57 +179,92 @@ describe("_filterItemNames", () => {
 });
 
 describe("buildWarpScramblerStats", () => {
-  test("returns undefined when propulsion block attribute is missing or non-positive", () => {
-    expect(buildWarpScramblerStats(values({ maxRange: 9000 }))).toBeUndefined();
-    expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 0, maxRange: 9000 }))).toBeUndefined();
+  test("returns undefined when warp scramble strength is missing or non-positive", () => {
+    expect(buildWarpScramblerStats(values({ maxRange: 9000 }), WEB_SKILLS)).toBeUndefined();
+    expect(buildWarpScramblerStats(values({ warpScrambleStrength: 0, maxRange: 9000 }), WEB_SKILLS)).toBeUndefined();
   });
 
-  test("builds a warp scrambler from propulsion block, range, and overload bonus", () => {
-    expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 1, maxRange: 9000, overloadRangeBonus: 20, capacitorNeed: 8, duration: 2000 }))).toEqual({
+  test("builds a warp scrambler with propulsionBlock from attr 1350", () => {
+    expect(buildWarpScramblerStats(values({ warpScrambleStrength: 2, activationBlockedStrenght: 1, maxRange: 9000, overloadRangeBonus: 20, capacitorNeed: 8, duration: 2000 }), WEB_SKILLS)).toEqual({
       maxRange: 9000,
       overloadRangeBonusPercent: 20,
       capacitorNeed: 8,
       cycleTime: 2,
+      propulsionBlock: true,
+      requiredSkillIds: WEB_SKILLS,
     });
   });
 
-  test("defaults missing overload range bonus to zero", () => {
-    expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 1, maxRange: 7500, capacitorNeed: 8, duration: 2000 }))).toEqual({
-      maxRange: 7500,
+  test("builds a warp disruptor without propulsion block (attr 105 only, no attr 1350)", () => {
+    expect(buildWarpScramblerStats(values({ warpScrambleStrength: 1, maxRange: 20000, capacitorNeed: 25, duration: 5000 }), WEB_SKILLS)).toEqual({
+      maxRange: 20000,
       overloadRangeBonusPercent: 0,
-      capacitorNeed: 8,
-      cycleTime: 2,
+      capacitorNeed: 25,
+      cycleTime: 5,
+      propulsionBlock: false,
+      requiredSkillIds: WEB_SKILLS,
     });
   });
 
   test("returns undefined when range is missing", () => {
-    expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 1 }))).toBeUndefined();
+    expect(buildWarpScramblerStats(values({ warpScrambleStrength: 2 }), WEB_SKILLS)).toBeUndefined();
   });
 });
 
 describe("buildTrackingComputerStats", () => {
   test("returns undefined when tracking bonus is missing", () => {
-    expect(buildTrackingComputerStats(values({}))).toBeUndefined();
+    expect(buildTrackingComputerStats(values({}), WEB_SKILLS)).toBeUndefined();
   });
 
   test("builds a tracking computer from bonus attributes", () => {
-    expect(buildTrackingComputerStats(values({ trackingSpeedBonus: 10, maxRangeBonus: 5, falloffBonus: 10, capacitorNeed: 8, duration: 10000 }))).toEqual({
+    expect(buildTrackingComputerStats(values({ trackingSpeedBonus: 10, maxRangeBonus: 5, falloffBonus: 10, capacitorNeed: 8, duration: 10000 }), WEB_SKILLS)).toEqual({
       trackingBonusPercent: 10,
       optimalBonusPercent: 5,
       falloffBonusPercent: 10,
       capacitorNeed: 8,
       cycleTime: 10,
+      requiredSkillIds: WEB_SKILLS,
     });
   });
 
   test("defaults missing range and falloff bonuses to zero", () => {
-    expect(buildTrackingComputerStats(values({ trackingSpeedBonus: 15, capacitorNeed: 8, duration: 10000 }))).toEqual({
+    expect(buildTrackingComputerStats(values({ trackingSpeedBonus: 15, capacitorNeed: 8, duration: 10000 }), WEB_SKILLS)).toEqual({
       trackingBonusPercent: 15,
       optimalBonusPercent: 0,
       falloffBonusPercent: 0,
       capacitorNeed: 8,
       cycleTime: 10,
+      requiredSkillIds: WEB_SKILLS,
     });
+  });
+});
+
+describe("_buildPropulsionStats", () => {
+  test("builds afterburner stats with cycle time and required skills", () => {
+    const type = { ...sdeType(), "typeName_en-us": "100MN Y-S8 Compact Afterburner", typeID: 35657 };
+    expect(_buildPropulsionStats(values({ capacitorNeed: 320, duration: 10000, speedFactor: 100, speedBoostFactor: 107500000, massAddition: 1000000, signatureRadiusBonus: 0 }), type, TURRET_MODULE_SKILLS)).toEqual({
+      propulsion: {
+        kind: "afterburner",
+        sizeTier: "large",
+        thrust: 107500000,
+        speedBonus: 1,
+        massAddition: 1000000,
+        sigBloom: 0,
+        capacitorNeed: 320,
+        cycleTime: 10,
+        requiredSkillIds: TURRET_MODULE_SKILLS,
+      },
+    });
+  });
+
+  test("builds microwarpdrive kind and capacitor capacity multiplier from the name and attributes", () => {
+    const type = { ...sdeType(), "typeName_en-us": "10MN Microwarpdrive II", typeID: 35659 };
+    const propulsion = _buildPropulsionStats(values({ capacitorNeed: 180, duration: 10000, speedFactor: 500, speedBoostFactor: 81000000, massAddition: 1000000, signatureRadiusBonus: 500, capacitorCapacityMultiplier: -25 }), type, WEB_SKILLS).propulsion;
+    expect(propulsion?.kind).toBe("microwarpdrive");
+    expect(propulsion?.sizeTier).toBe("medium");
+    expect(propulsion?.capacitorCapacityMultiplier).toBe(-25);
+    expect(propulsion?.cycleTime).toBe(10);
+    expect(propulsion?.requiredSkillIds).toBe(WEB_SKILLS);
   });
 });
 
@@ -577,11 +618,11 @@ describe("buildDroneStats", () => {
 
 describe("_buildTargetPainterStats", () => {
   test("returns undefined when signatureRadiusBonus is missing", () => {
-    expect(_buildTargetPainterStats(values({ maxRange: 36000 }))).toBeUndefined();
+    expect(_buildTargetPainterStats(values({ maxRange: 36000 }), WEB_SKILLS)).toBeUndefined();
   });
 
   test("returns undefined when maxRange is missing", () => {
-    expect(_buildTargetPainterStats(values({ signatureRadiusBonus: 30 }))).toBeUndefined();
+    expect(_buildTargetPainterStats(values({ signatureRadiusBonus: 30 }), WEB_SKILLS)).toBeUndefined();
   });
 
   test("builds a target painter from SDE attributes", () => {
@@ -592,31 +633,33 @@ describe("_buildTargetPainterStats", () => {
       overloadPainterStrengthBonus: 20,
       capacitorNeed: 8,
       duration: 5000,
-    }))).toEqual({
+    }), WEB_SKILLS)).toEqual({
       maxRange: 36000,
       falloff: 90000,
       signatureRadiusBonusPercent: 30,
       overloadStrengthBonusPercent: 20,
       capacitorNeed: 8,
       cycleTime: 5,
+      requiredSkillIds: WEB_SKILLS,
     });
   });
 
   test("defaults falloff and overload bonus to zero when missing", () => {
-    expect(_buildTargetPainterStats(values({ maxRange: 30000, signatureRadiusBonus: 25, capacitorNeed: 8, duration: 5000 }))).toEqual({
+    expect(_buildTargetPainterStats(values({ maxRange: 30000, signatureRadiusBonus: 25, capacitorNeed: 8, duration: 5000 }), WEB_SKILLS)).toEqual({
       maxRange: 30000,
       falloff: 0,
       signatureRadiusBonusPercent: 25,
       overloadStrengthBonusPercent: 0,
       capacitorNeed: 8,
       cycleTime: 5,
+      requiredSkillIds: WEB_SKILLS,
     });
   });
 });
 
 describe("_buildMissileGuidanceComputerStats", () => {
   test("returns undefined when aoeCloudSizeBonus is missing", () => {
-    expect(_buildMissileGuidanceComputerStats(values({ aoeVelocityBonus: 8.25 }))).toBeUndefined();
+    expect(_buildMissileGuidanceComputerStats(values({ aoeVelocityBonus: 8.25 }), WEB_SKILLS)).toBeUndefined();
   });
 
   test("builds an MGC II from SDE attributes", () => {
@@ -628,7 +671,7 @@ describe("_buildMissileGuidanceComputerStats", () => {
       overloadTrackingModuleStrengthBonus: 15,
       capacitorNeed: 8,
       duration: 10000,
-    }))).toEqual({
+    }), WEB_SKILLS)).toEqual({
       explosionRadiusBonusPercent: -8.25,
       explosionVelocityBonusPercent: 8.25,
       missileVelocityBonusPercent: 5.5,
@@ -636,11 +679,12 @@ describe("_buildMissileGuidanceComputerStats", () => {
       overloadStrengthBonusPercent: 15,
       capacitorNeed: 8,
       cycleTime: 10,
+      requiredSkillIds: WEB_SKILLS,
     });
   });
 
   test("defaults missing bonuses to zero", () => {
-    expect(_buildMissileGuidanceComputerStats(values({ aoeCloudSizeBonus: -5.5, capacitorNeed: 8, duration: 10000 }))).toEqual({
+    expect(_buildMissileGuidanceComputerStats(values({ aoeCloudSizeBonus: -5.5, capacitorNeed: 8, duration: 10000 }), WEB_SKILLS)).toEqual({
       explosionRadiusBonusPercent: -5.5,
       explosionVelocityBonusPercent: 0,
       missileVelocityBonusPercent: 0,
@@ -648,6 +692,7 @@ describe("_buildMissileGuidanceComputerStats", () => {
       overloadStrengthBonusPercent: 0,
       capacitorNeed: 8,
       cycleTime: 10,
+      requiredSkillIds: WEB_SKILLS,
     });
   });
 });
@@ -1075,6 +1120,30 @@ describe("_resolveHullBonusAttribute", () => {
     const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 554, modifyingAttributeID: 568, operation: 4, skillTypeID: 3454 }, attrNames({ 554: "signatureRadiusBonus" }));
     expect(result.kind).toBe("mapped");
     if (result.kind === "mapped") expect(result.attribute).toBe("mwdSigBloom");
+  });
+
+  test("returns mapped capUse for a turret skill filter (Harbinger energy turret capacitor bonus)", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 6, modifyingAttributeID: 795, operation: 6, skillTypeID: 3306 }, attrNames({ 6: "capacitorNeed" }));
+    expect(result.kind).toBe("mapped");
+    if (result.kind === "mapped") expect(result.attribute).toBe("capUse");
+  });
+
+  test("returns mapped capUse for a turret module group filter", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationGroupModifier", modifiedAttributeID: 6, modifyingAttributeID: 795, operation: 6, groupID: 53 }, attrNames({ 6: "capacitorNeed" }));
+    expect(result.kind).toBe("mapped");
+    if (result.kind === "mapped") expect(result.attribute).toBe("capUse");
+  });
+
+  test("returns skip capUse for non-turret skills and unfiltered modifiers", () => {
+    const skillResult = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 6, modifyingAttributeID: 795, operation: 6, skillTypeID: 3435 }, attrNames({ 6: "capacitorNeed" }));
+    expect(skillResult.kind).toBe("skip");
+    const unfilteredResult = _resolveHullBonusAttribute({ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 6, modifyingAttributeID: 795, operation: 6 }, attrNames({ 6: "capacitorNeed" }));
+    expect(unfilteredResult.kind).toBe("skip");
+  });
+
+  test("returns skip duration (module cycle duration is not a hull bonus)", () => {
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 73, modifyingAttributeID: 66, operation: 6, skillTypeID: 3450 }, attrNames({ 73: "duration" }));
+    expect(result.kind).toBe("skip");
   });
 });
 

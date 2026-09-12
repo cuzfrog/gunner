@@ -246,7 +246,6 @@ class TraceParamsParserImpl implements TraceParamsParser {
       orbitDirection: overrides.orbitDirection,
       capacitor: imported.capacitor.spec,
       energyWarfareResistancePercent: imported.energyWarfareResistancePercent,
-      propulsionCapNeed: imported.propulsion?.capacitorNeed,
       propulsionCapacityMultiplier: imported.propulsion?.capacitorCapacityMultiplier,
       ewar: buildEwarProjection(imported.ewar, false),
       boosts: boostProjectionFrom(imported.boosts),
@@ -344,10 +343,13 @@ function capacitorSideFrom(imported: ImportedFitting | undefined, infinite: bool
   const boosts = boostProjectionFrom(imported.boosts) ?? { loadout: EMPTY_BOOST_LOADOUT, activation: undefined };
   const missileBoosts = missileBoostProjectionFrom(imported.missileBoosts) ?? { loadout: EMPTY_MISSILE_BOOSTER_LOADOUT, activation: undefined };
   const sensorBoosts = sensorBoostProjectionFrom(imported.sensorBoosts) ?? { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: [] };
+  const propulsion = imported.propulsion;
+  const propulsionRow = propulsion ? imported.capacitor.rows.find((row) => row.moduleId === propulsion.propulsionModuleId) : undefined;
   return {
     infinite,
     drains: scheduledDrainsFromProjections(buildEwarProjection(imported.ewar, false), boosts, missileBoosts, sensorBoosts),
     boosters: capBoosterSpecsFrom(imported.capacitor.boosters),
+    ...(propulsionRow ? { propulsion: { moduleId: propulsionRow.moduleId, amount: propulsionRow.amount, interval: propulsionRow.cycleTime } } : {}),
   };
 }
 

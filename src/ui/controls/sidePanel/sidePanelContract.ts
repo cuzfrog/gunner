@@ -88,7 +88,6 @@ export interface SidePanelState {
   readonly sensorSpec?: SensorSpec;
   readonly capacitor?: CapacitorSpec;
   readonly energyWarfareResistancePercent?: number;
-  readonly propulsionCapNeed?: number;
   readonly propulsionCapacityMultiplier?: number;
 }
 

@@ -1,5 +1,6 @@
 import { buildCapWarfareStatsFromIntents, type BuildCapWarfareStatsContext } from "./buildCapWarfareStats";
 import type { SdeDogmaEffect } from "./dogmaTypes";
+import { toTypeId } from "../../src/gamedata/ids";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
@@ -15,6 +16,7 @@ function makeCtx(opts: Partial<BuildCapWarfareStatsContext>): BuildCapWarfareSta
     effects: opts.effects ?? new Set(),
     groupId: opts.groupId ?? 0,
     dogmaEffects: opts.dogmaEffects ?? {},
+    requiredSkillIds: opts.requiredSkillIds ?? [toTypeId("3423")],
   };
 }
 
@@ -33,7 +35,7 @@ describe("buildCapWarfareStatsFromIntents", () => {
       dogmaEffects,
     }));
     expect(result).toEqual({
-      neutralizer: { amount: 600, cycleTime: 24, capacitorNeed: 500, maxRange: 20000, falloff: 10000 },
+      neutralizer: { amount: 600, cycleTime: 24, capacitorNeed: 500, maxRange: 20000, falloff: 10000, requiredSkillIds: [toTypeId("3423")] },
     });
   });
 

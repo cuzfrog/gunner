@@ -201,14 +201,15 @@ export class FittingImportImpl implements FittingImport {
     const launcher = this.calculator.resolveLauncher(fittingState, conditions);
     const drones = this.calculator.resolveDrones(fittingState, conditions);
     const cargoCharges = this.calculator.resolveCargoCharges(fittingState);
-    const ewar = this.calculator.resolveEwar(fittingState);
+    const ewar = this.calculator.resolveEwar(fittingState, conditions);
     const energyWarfareResistancePercent = this.calculator.resolveEnergyWarfareResistance(fittingState);
-    const boosts = this.calculator.resolveBoosts(fittingState);
-    const missileBoosts = this.calculator.resolveMissileBoosts(fittingState);
+    const boosts = this.calculator.resolveBoosts(fittingState, conditions);
+    const missileBoosts = this.calculator.resolveMissileBoosts(fittingState, conditions);
     const sensorSpec = this.calculator.resolveSensorSpec(fittingState, conditions);
-    const sensorBoosts = this.calculator.resolveSensorBoosts(fittingState);
+    const sensorBoosts = this.calculator.resolveSensorBoosts(fittingState, conditions);
     const defense = this.defenseCalculator.resolve(fittingState, conditions);
-    const capacitor = this.capacitorCalculator.resolve(fittingState, conditions, { defense, turrets, ewar, boosts, missileBoosts, sensorBoosts, propulsionModuleId: fittingState.propulsionModule?.moduleId });
+    const turretDrains = turrets.map((turret) => ({ moduleId: turret.moduleId, capacitorNeed: turret.capacitorNeed, cycleTime: turret.cycleTime, count: turret.turretCount }));
+    const capacitor = this.capacitorCalculator.resolve(fittingState, conditions, { defense, turretDrains, ewar, boosts, missileBoosts, sensorBoosts, propulsionModuleId: fittingState.propulsionModule?.moduleId });
 
     return {
       profile: resolved.profile,

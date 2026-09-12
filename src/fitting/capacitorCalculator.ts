@@ -1,10 +1,10 @@
 import type { ChargeStats, FittingDb } from "../gamedata/fittingDb";
 import type { TypeId } from "../gamedata/ids";
 import { type CapacitorSkills, type StatConditions, defaultCapacitorSkills } from "../ships";
-import { type BoostLoadout, type CapacitorSpec, type DefenseSpec, type EwarLoadout, type MissileBoosterLoadout, PROPULSION_CYCLE_SECONDS, scheduledDrainsFromProjections, type ScheduledDrain, type SensorBoostLoadout, type StackingPenalty } from "../sim";
+import { type BoostLoadout, type CapacitorSpec, type DefenseSpec, type EwarLoadout, type MissileBoosterLoadout, scheduledDrainsFromProjections, type ScheduledDrain, type SensorBoostLoadout, type StackingPenalty } from "../sim";
 import { runCapSim, type StaticDrain } from "./capacitorSim";
 import type { FittingState } from "./fittingState";
-import type { ImportedTurret } from "./chargeCatalog";
+import { moduleSkillMultiplier } from "./skillMultiplier";
 
 export interface CapacitorUsageRow {
   readonly moduleId: TypeId;
@@ -41,10 +41,17 @@ export interface CapacitorStats {
   readonly depletesInSeconds?: number; // seconds until the pool depletes, when unstable
 }
 
+export interface CapacitorTurretDrain {
+  readonly moduleId: TypeId;
+  readonly capacitorNeed: number; // GJ per cycle per turret (charge/skill/hull modified)
+  readonly cycleTime: number; // seconds
+  readonly count: number;
+}
+
 /** Resolved products the capacitor rows and the runtime drains both derive from. The propulsion item id is the live selection (variant or base); undefined disables the propulsion drain. */
 export interface CapacitorDrainSources {
   readonly defense: DefenseSpec;
-  readonly turrets: readonly ImportedTurret[];
+  readonly turretDrains: readonly CapacitorTurretDrain[];
   readonly ewar: EwarLoadout;
   readonly boosts: BoostLoadout;
   readonly missileBoosts: MissileBoosterLoadout;
@@ -127,9 +134,9 @@ function multiplyCapacity(spec: CapacitorSpec, multiplier: number | undefined): 
 function buildUsageRows(db: FittingDb, conditions: StatConditions, sources: CapacitorDrainSources): readonly CapacitorUsageRow[] {
   const rows: CapacitorUsageRow[] = [];
 
-  for (const turret of sources.turrets) {
+  for (const turret of sources.turretDrains) {
     if (turret.capacitorNeed <= 0) continue;
-    rows.push(buildRow(turret.moduleId, turretNameFor(db, turret.moduleId), turret.capacitorNeed, turret.cycleTime, turret.turretCount));
+    rows.push(buildRow(turret.moduleId, turretNameFor(db, turret.moduleId), turret.capacitorNeed, turret.cycleTime, turret.count));
   }
 
   // Same extraction the runtime uses for its scheduled drains: the static rows cannot diverge from the sim.
@@ -151,7 +158,9 @@ function buildUsageRows(db: FittingDb, conditions: StatConditions, sources: Capa
   const propulsionModuleId = sources.propulsionModuleId;
   const propulsion = propulsionModuleId !== undefined ? db.modules[propulsionModuleId]?.propulsion : undefined;
   if (propulsionModuleId !== undefined && propulsion && propulsion.capacitorNeed > 0) {
-    rows.push(buildRow(propulsionModuleId, moduleNameFor(db, propulsionModuleId), propulsion.capacitorNeed, PROPULSION_CYCLE_SECONDS, 1));
+    const capMultiplier = moduleSkillMultiplier(db.skillBonuses, propulsion.requiredSkillIds, "capUse", conditions.skillLevel);
+    const durationMultiplier = moduleSkillMultiplier(db.skillBonuses, propulsion.requiredSkillIds, "duration", conditions.skillLevel);
+    rows.push(buildRow(propulsionModuleId, moduleNameFor(db, propulsionModuleId), propulsion.capacitorNeed * capMultiplier, propulsion.cycleTime * durationMultiplier, 1));
   }
 
   return rows;

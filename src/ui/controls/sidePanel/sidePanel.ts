@@ -213,7 +213,6 @@ export class SidePanelImpl implements SidePanel {
       sensorSpec: this.sensorSpecValue,
       capacitor: this.fittedHull?.capacitor,
       energyWarfareResistancePercent: this.fittedHull?.energyWarfareResistancePercent,
-      propulsionCapNeed: this.fittedHull?.propulsion?.capacitorNeed,
       propulsionCapacityMultiplier: this.fittedHull?.propulsion?.capacitorCapacityMultiplier,
     };
   }

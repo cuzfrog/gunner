@@ -64,7 +64,11 @@ test.describe.serial("Capacitor", () => {
     await expect(statRows).not.toHaveCount(0);
     await expect(statRows.filter({ hasText: "GJ" }).first()).toBeVisible();
     await expect(statRows.filter({ hasText: "GJ/s" }).first()).toBeVisible();
-    await expect(page.locator(`${SECTION_A} .capacitor-usage-row`).first()).toBeVisible();
+    const usageRows = page.locator(`${SECTION_A} .capacitor-usage-row`);
+    await expect(usageRows.first()).toBeVisible();
+    // Non-blocking warp disruptors drain capacitor and appear as usage rows (regression: they
+    // used to be absent from the fitting DB, silently under-reporting capacitor usage).
+    await expect(usageRows.filter({ hasText: "Initiated Compact Warp Disruptor" })).toHaveCount(1);
     await expect(page.locator(`${SECTION_A} .capacitor-booster-row`)).toHaveCount(0);
     await page.locator("body").click({ position: { x: 0, y: 0 } });
     await expect(page.locator("#ship-a-capacitor-popup")).toBeHidden();

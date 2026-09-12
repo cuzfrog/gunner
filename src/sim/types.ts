@@ -72,12 +72,6 @@ export interface ShipConfig {
   // Flat signature radius penalty from shield extenders, in meters.
   // Applied additively before bloom: `(sig + sigPenalty) * (1 + sigBloom)`.
   readonly sigPenalty?: number;
-  // Propulsion capacitor need in GJ per 10 s cycle. When the capacitor cannot
-  // afford the debit, the module is treated as suppressed (no MWD speed/bloom).
-  readonly propulsionCapNeed?: number;
-  // Item id of the active propulsion module (variant or base), for drain
-  // attribution in the capacitor view. Absent = no propulsion module.
-  readonly propulsionModuleId?: TypeId;
   // Propulsion capacitor capacity multiplier (e.g. MWD 0.75). Composes the
   // effective pool from the propulsion-independent CapacitorSpec capacity.
   readonly propulsionCapacityMultiplier?: number;
@@ -332,6 +326,8 @@ export interface WarpScramblerSpec {
   readonly overloadRangeBonusPercent: number;
   readonly capacitorNeed?: number;
   readonly cycleTime?: number;
+  // Attr 1350 > 0: scramblers suppress MWD/AB; pure disruptors only drain capacitor.
+  readonly propulsionBlock: boolean;
 }
 
 export interface TargetPainterSpec {
@@ -797,6 +793,14 @@ export interface CapacitorSideConfig {
   readonly infinite: boolean;
   readonly drains: readonly ScheduledDrain[];
   readonly boosters: readonly CapBoosterSimSpec[];
+  // Active propulsion module drain (skill-modified amount and interval). Absent = no debit.
+  readonly propulsion?: CapacitorPropulsionDrain;
+}
+
+export interface CapacitorPropulsionDrain {
+  readonly moduleId: TypeId;
+  readonly amount: number; // GJ per cycle
+  readonly interval: number; // seconds between debits
 }
 
 export const ZERO_RESISTS: DamageResists = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };

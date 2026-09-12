@@ -33,7 +33,7 @@ describe("capacitor starvation end to end", () => {
       id, maxSpeed: 1000, baseMaxSpeed: 200, propulsionKind: "microwarpdrive",
       mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1, sig: 100,
       capacitor: { capacity: 500, rechargeTime: 1250 },
-      propulsionCapNeed: 180, propulsionCapacityMultiplier: 0.75, propulsionModuleId: toTypeId("20850"),
+      propulsionCapacityMultiplier: 0.75,
     };
   }
 
@@ -41,14 +41,14 @@ describe("capacitor starvation end to end", () => {
     const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("34"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 2, turretCount: 1, capacitorNeed: 36 };
     const sim: SimConfig = { shipA: starvingHull("shipA"), shipB: stationaryHull("shipB"), initialDistance: 5000 };
     const engine = makeEngine(sim, [turret]);
-    engine.reset(engineConfig(sim, [turret]));
+    engine.reset(engineConfig(sim, [turret], { shipA: { infinite: false, drains: [], boosters: [], propulsion: { moduleId: toTypeId("20850"), amount: 180, interval: 10 } }, shipB: { infinite: false, drains: [], boosters: [] } }));
     for (let i = 0; i < 60; i++) engine.step(0.5);
     const view = engine.view();
     expect(view.capacitorRuntime.shipA.starved).toBe(true);
     expect(view.snapshot.shipA.maxSpeed).toBe(200);
     const starvedEngine = engine;
     const unlimited = makeEngine(sim, [turret]);
-    unlimited.reset(engineConfig(sim, [turret], { shipA: { infinite: true, drains: [], boosters: [] }, shipB: { infinite: false, drains: [], boosters: [] } }));
+    unlimited.reset(engineConfig(sim, [turret], { shipA: { infinite: true, drains: [], boosters: [], propulsion: { moduleId: toTypeId("20850"), amount: 180, interval: 10 } }, shipB: { infinite: false, drains: [], boosters: [] } }));
     for (let i = 0; i < 60; i++) unlimited.step(0.5);
     const starvedTotal = starvedEngine.view().inflicted.shipB.total;
     const unlimitedTotal = unlimited.view().inflicted.shipB.total;
@@ -60,7 +60,7 @@ describe("capacitor starvation end to end", () => {
     const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("34"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 2, turretCount: 1, capacitorNeed: 36 };
     const sim: SimConfig = { shipA: starvingHull("shipA"), shipB: stationaryHull("shipB"), initialDistance: 5000 };
     const engine = makeEngine(sim, [turret]);
-    engine.reset(engineConfig(sim, [turret], { shipA: { infinite: true, drains: [], boosters: [] }, shipB: { infinite: false, drains: [], boosters: [] } }));
+    engine.reset(engineConfig(sim, [turret], { shipA: { infinite: true, drains: [], boosters: [], propulsion: { moduleId: toTypeId("20850"), amount: 180, interval: 10 } }, shipB: { infinite: false, drains: [], boosters: [] } }));
     for (let i = 0; i < 60; i++) engine.step(0.5);
     const view = engine.view();
     expect(view.capacitorRuntime.shipA.starved).toBe(false);

@@ -9,7 +9,7 @@ const OUT_DIR = join(import.meta.dir, "fittingDb", "classification");
 
 async function main(): Promise<void> {
   const projection = await buildProjection(SDE_DIR);
-  const contextDependentAttributeIds = new Set([37, 51, 54, 64, 554]);
+  const contextDependentAttributeIds = new Set([6, 37, 51, 54, 64, 73, 554]);
   const rigDrawbackEffectIds = new Map<number, RigDrawbackKind>([
     [2716, "signature"],
     [2717, "agility"],

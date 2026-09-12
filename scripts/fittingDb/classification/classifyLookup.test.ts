@@ -7,9 +7,14 @@ describe("classifyLookup", () => {
     expect(semanticAttributeToHullBonus(554)).toBe("mwdSigBloom");
   });
 
+  test("semanticAttributeToHullBonus returns capUse and duration for capacitor attributes", () => {
+    expect(semanticAttributeToHullBonus(6)).toBe("capUse");
+    expect(semanticAttributeToHullBonus(73)).toBe("duration");
+  });
+
   test("semanticAttributeToHullBonus returns undefined for out-of-scope attributes", () => {
     expect(semanticAttributeToHullBonus(552)).toBeUndefined();
-    expect(semanticAttributeToHullBonus(6)).toBeUndefined();
+    expect(semanticAttributeToHullBonus(1137)).toBeUndefined();
   });
 
   test("semanticAttributeToHullBonus returns undefined for unknown attributes", () => {

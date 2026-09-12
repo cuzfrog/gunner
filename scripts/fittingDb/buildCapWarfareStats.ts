@@ -1,21 +1,10 @@
 import type { SdeDogmaEffect } from "./dogmaTypes";
 import { classifyCapacitorEffects, type CapacitorIntent } from "./effectClassifier";
 import { CAP_WARFARE_GROUPS } from "./combatAttributes";
+import type { EnergyNeutralizerStats, NosferatuStats } from "../../src/gamedata/fittingDb/types";
+import type { TypeId } from "../../src/gamedata/ids";
 
-export interface EnergyNeutralizerStats {
-  readonly amount: number; // GJ drained from the target per cycle
-  readonly cycleTime: number; // seconds
-  readonly capacitorNeed: number; // GJ consumed by the user per cycle
-  readonly maxRange: number; // m
-  readonly falloff: number; // m
-}
-
-export interface NosferatuStats {
-  readonly amount: number; // GJ transferred per cycle
-  readonly cycleTime: number; // seconds
-  readonly maxRange: number; // m
-  readonly falloff: number; // m
-}
+export type { EnergyNeutralizerStats, NosferatuStats };
 
 export interface BuildCapWarfareStatsResult {
   readonly neutralizer?: EnergyNeutralizerStats;
@@ -27,6 +16,7 @@ export interface BuildCapWarfareStatsContext {
   readonly effects: Set<number>;
   readonly groupId: number;
   readonly dogmaEffects: Readonly<Record<string, SdeDogmaEffect>>;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 export function buildCapWarfareStatsFromIntents(ctx: BuildCapWarfareStatsContext): BuildCapWarfareStatsResult | undefined {
@@ -34,14 +24,14 @@ export function buildCapWarfareStatsFromIntents(ctx: BuildCapWarfareStatsContext
   const effects = resolveEffects(ctx.effects, ctx.dogmaEffects);
   const intents = classifyCapacitorEffects(effects);
   if (ctx.groupId === 71) {
-    const neutralizer = buildNeutralizerStats(intents, ctx.values);
+    const neutralizer = buildNeutralizerStats(intents, ctx.values, ctx.requiredSkillIds);
     return neutralizer ? { neutralizer } : undefined;
   }
   const nosferatu = buildNosferatuStats(intents, ctx.values);
   return nosferatu ? { nosferatu } : undefined;
 }
 
-function buildNeutralizerStats(intents: readonly { intent: CapacitorIntent }[], values: Map<string, number>): EnergyNeutralizerStats | undefined {
+function buildNeutralizerStats(intents: readonly { intent: CapacitorIntent }[], values: Map<string, number>, requiredSkillIds: readonly TypeId[]): EnergyNeutralizerStats | undefined {
   if (!hasIntent(intents, "energyNeutralizer")) return undefined;
   const amount = optionalNumber(values.get("energyNeutralizerAmount"));
   const duration = optionalNumber(values.get("duration"));
@@ -52,6 +42,7 @@ function buildNeutralizerStats(intents: readonly { intent: CapacitorIntent }[], 
     capacitorNeed: values.get("capacitorNeed") ?? 0,
     maxRange: values.get("maxRange") ?? 0,
     falloff: values.get("falloffEffectiveness") ?? 0,
+    requiredSkillIds,
   };
 }
 

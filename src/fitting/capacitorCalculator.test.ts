@@ -1,7 +1,7 @@
 import { type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import { FITTING_DB, type HullBonus } from "../gamedata/fittingDb";
 import { type ShipProfile, type SkillLevel, type StatConditions, defaultCapacitorSkills } from "../ships";
-import { EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, PROPULSION_CYCLE_SECONDS, StackingPenaltyImpl, type BoostLoadout, type EwarLoadout, type EnergyNeutralizerSpec, type MissileBoosterLoadout, type SensorBoostLoadout, type StasisWebSpec, type TrackingBoosterSpec } from "../sim";
+import { EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, StackingPenaltyImpl, type BoostLoadout, type EwarLoadout, type EnergyNeutralizerSpec, type MissileBoosterLoadout, type SensorBoostLoadout, type StasisWebSpec, type TrackingBoosterSpec } from "../sim";
 import { FittingStateFactory, type CargoEntry, type FittingModuleEntry } from "./fittingState";
 import { DefenseCalculatorImpl } from "./defenseCalculator";
 import { CapacitorCalculatorImpl, buildInjectorDrains, type CapacitorDrainSources } from "./capacitorCalculator";
@@ -70,7 +70,8 @@ interface DrainLoadouts {
 function resolve(entries: readonly FittingModuleEntry[], conditions: StatConditions = emptyConditions, turrets: readonly ImportedTurret[] = [], loadouts: DrainLoadouts = {}, propulsionModuleId: TypeId | undefined = undefined): ReturnType<CapacitorCalculatorImpl["resolve"]> {
   const state = factory.create(profile, [] as readonly HullBonus[], entries, [], [] as readonly CargoEntry[]);
   const defense = defenseCalculator.resolve(state, conditions);
-  const sources: CapacitorDrainSources = { defense, turrets, ewar: loadouts.ewar ?? EMPTY_EWAR_LOADOUT, boosts: loadouts.boosts ?? EMPTY_BOOST_LOADOUT, missileBoosts: loadouts.missileBoosts ?? EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: loadouts.sensorBoosts ?? EMPTY_SENSOR_BOOST_LOADOUT, propulsionModuleId };
+  const turretDrains = turrets.map((turret) => ({ moduleId: turret.moduleId, capacitorNeed: turret.capacitorNeed, cycleTime: turret.cycleTime, count: turret.turretCount }));
+  const sources: CapacitorDrainSources = { defense, turretDrains, ewar: loadouts.ewar ?? EMPTY_EWAR_LOADOUT, boosts: loadouts.boosts ?? EMPTY_BOOST_LOADOUT, missileBoosts: loadouts.missileBoosts ?? EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: loadouts.sensorBoosts ?? EMPTY_SENSOR_BOOST_LOADOUT, propulsionModuleId };
   return calculator.resolve(state, conditions, sources);
 }
 
@@ -365,11 +366,14 @@ describe("capacitorCalculator", () => {
     expect(result.usagePerSecond).toBeCloseTo(6 / 5 + 36 / 7.875, 3);
   });
 
-  test("propulsion row interval matches the simulated propulsion cycle", () => {
-    const mwd = moduleEntry("50MN Microwarpdrive I");
-    const result = resolve([mwd], emptyConditions, [], {}, mwd.moduleId);
-    const row = result.rows.find((candidate) => candidate.moduleName === "50MN Microwarpdrive I");
-    expect(row?.cycleTime).toBe(PROPULSION_CYCLE_SECONDS);
+  test("propulsion row applies cap use and duration skill multipliers at all-fives", () => {
+    const ab = moduleEntry("1MN Afterburner I");
+    const conditions: StatConditions = { ...emptyConditions, skillLevel: 5 as SkillLevel };
+    const result = resolve([ab], conditions, [], {}, ab.moduleId);
+    const row = result.rows.find((candidate) => candidate.moduleId === ab.moduleId);
+    // Afterburner -10% and Fuel Conservation -10% cap per level; Afterburner -5% duration per level.
+    expect(row?.amount).toBeCloseTo(20 * 0.25, 3);
+    expect(row?.cycleTime).toBeCloseTo(10 * 0.75, 3);
   });
 
   test("light drain is cap stable with a watermark percent", () => {

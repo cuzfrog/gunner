@@ -10,7 +10,7 @@ import type { RangeOverlayController, RangeOverlayEls } from "./rangeOverlayCont
 
 const WEB = { moduleId: toTypeId("527"), moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 15 };
 const WEB2 = { moduleId: toTypeId("527"), moduleName: "Stasis Webifier II", maxRange: 12000, speedFactor: -0.55, overloadRangeBonusPercent: 15 };
-const SCRAMBLER = { moduleId: toTypeId("448"), moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 };
+const SCRAMBLER = { moduleId: toTypeId("448"), moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20, propulsionBlock: true };
 const GRAPPLER = { moduleId: toTypeId("41040"), moduleName: "Heavy Stasis Grappler I", optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
 const DISRUPTOR = { moduleId: toTypeId("2109"), moduleName: "Tracking Disruptor I", optimal: 10000, falloff: 30000, disruption: -0.2, defaultScript: undefined, overloadStrengthBonusPercent: 20 };
 

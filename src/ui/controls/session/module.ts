@@ -55,6 +55,7 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       droneControllers: proxy.droneControllers,
       defenseController: proxy.defenseController,
       capacitorController: proxy.capacitorController,
+      capacitorStatsSource: proxy.capacitorStatsSource,
     })).singleton(),
     capacitorStatsSource: asFunction((proxy) => new CapacitorStatsSourceImpl({
       events: proxy.uiEvents,
@@ -64,6 +65,7 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       boosterController: proxy.boosterController,
       missileBoosterController: proxy.missileBoosterController,
       sensorBoosterController: proxy.sensorBoosterController,
+      turretControllers: proxy.turretControllers,
     })).singleton(),
   });
 }

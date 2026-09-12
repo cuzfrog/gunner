@@ -1,6 +1,6 @@
 import { CapacitorSimulatorImpl, type CapacitorSimConfig, type CapacitorSimulatorState } from "./capacitorSimulator";
 import { toTypeId } from "../gamedata/ids";
-import type { CapacitorSideConfig, CapacitorSpec, CombatantConfig, IncomingDrain, ScheduledDrain } from "./types";
+import type { CapacitorPropulsionDrain, CapacitorSideConfig, CapacitorSpec, CombatantConfig, IncomingDrain, ScheduledDrain } from "./types";
 
 const SPEC: CapacitorSpec = { capacity: 6375, rechargeTime: 1250 };
 const SMALL_SPEC: CapacitorSpec = { capacity: 1000, rechargeTime: 1250 };
@@ -23,15 +23,19 @@ function sideConfig(overrides: Partial<CapacitorSideConfig> = {}): CapacitorSide
   return { infinite: false, drains: [], boosters: [], ...overrides };
 }
 
-function combatant(id: "shipA" | "shipB", spec: CapacitorSpec | undefined, propulsionCapNeed?: number, capacityMultiplier?: number): CombatantConfig {
-  return { id, maxSpeed: 100, mass: 1, inertiaModifier: 1, mode: "orbit", desiredRange: 1000, aggressivity: 1, capacitor: spec, propulsionCapNeed, propulsionModuleId: propulsionCapNeed !== undefined ? PROPULSION_MODULE : undefined, propulsionCapacityMultiplier: capacityMultiplier };
+function combatant(id: "shipA" | "shipB", spec: CapacitorSpec | undefined, capacityMultiplier?: number): CombatantConfig {
+  return { id, maxSpeed: 100, mass: 1, inertiaModifier: 1, mode: "orbit", desiredRange: 1000, aggressivity: 1, capacitor: spec, propulsionCapacityMultiplier: capacityMultiplier };
 }
 
-function makeConfig(shipA: Partial<CapacitorSideConfig> = {}, shipB: Partial<CapacitorSideConfig> = {}, specA: CapacitorSpec | undefined = SPEC, specB: CapacitorSpec | undefined = SPEC, propulsionA?: number, capacityMultiplierA?: number): CapacitorSimConfig {
+function makeConfig(shipA: Partial<CapacitorSideConfig> = {}, shipB: Partial<CapacitorSideConfig> = {}, specA: CapacitorSpec | undefined = SPEC, specB: CapacitorSpec | undefined = SPEC, propulsionA?: CapacitorPropulsionDrain, capacityMultiplierA?: number): CapacitorSimConfig {
   return {
-    sim: { shipA: combatant("shipA", specA, propulsionA, capacityMultiplierA), shipB: combatant("shipB", specB), initialDistance: 1000 },
-    sides: { shipA: sideConfig(shipA), shipB: sideConfig(shipB) },
+    sim: { shipA: combatant("shipA", specA, capacityMultiplierA), shipB: combatant("shipB", specB), initialDistance: 1000 },
+    sides: { shipA: sideConfig({ ...shipA, ...(propulsionA ? { propulsion: propulsionA } : {}) }), shipB: sideConfig(shipB) },
   };
+}
+
+function propulsionDrain(amount: number, interval = 10): CapacitorPropulsionDrain {
+  return { moduleId: PROPULSION_MODULE, amount, interval };
 }
 
 describe("CapacitorSimulatorImpl", () => {
@@ -152,7 +156,7 @@ describe("CapacitorSimulatorImpl", () => {
 
   test("propulsion debit starvation is reported and recovers", () => {
     const sim = new CapacitorSimulatorImpl();
-    sim.reset(makeConfig({}, {}, { capacity: 1000, rechargeTime: 100 }, SPEC, 150));
+    sim.reset(makeConfig({}, {}, { capacity: 1000, rechargeTime: 100 }, SPEC, propulsionDrain(150)));
     sim.attemptDebit("shipA", 900); // leave only 100 GJ in the pool
     sim.step(2, { shipA: false, shipB: false });
     expect(sim.propulsionStarved("shipA")).toBe(true);
@@ -161,9 +165,19 @@ describe("CapacitorSimulatorImpl", () => {
     expect(sim.propulsionStarved("shipA")).toBe(false);
   });
 
+  test("propulsion drain interval change rebuilds the runtime and resets the cycle", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({ propulsion: propulsionDrain(100, 10) }));
+    sim.step(5, { shipA: false, shipB: false }); // debit at t=0, timer at 5
+    sim.update(makeConfig({ propulsion: propulsionDrain(100, 3) }));
+    sim.step(3, { shipA: false, shipB: false }); // rebuilt timer debits immediately
+    const expected = regenClosedForm(regenClosedForm(SPEC.capacity - 100, 5) - 100, 3);
+    expect(sim.view().shipA.cap).toBeCloseTo(expected, 6);
+  });
+
   test("propulsion suppression pauses the drain and reactivation debits immediately", () => {
     const sim = new CapacitorSimulatorImpl();
-    sim.reset(makeConfig({}, {}, SPEC, SPEC, 100));
+    sim.reset(makeConfig({}, {}, SPEC, SPEC, propulsionDrain(100)));
     sim.step(10, { shipA: true, shipB: false });
     expect(sim.view().shipA.cap).toBeCloseTo(SPEC.capacity, 6);
     sim.step(10, { shipA: false, shipB: false });

@@ -64,6 +64,8 @@ export class EwarResolverImpl implements EwarResolver {
     if (!projection) return undefined;
     for (let i = 0; i < projection.loadout.scramblers.length; i++) {
       const spec = projection.loadout.scramblers[i];
+      // Pure disruptors drain capacitor but do not suppress propulsion (no attr 1350).
+      if (!spec.propulsionBlock) continue;
       const activation = projection.activation?.scramblers[i];
       if (activation && !activation.active) continue;
       const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
@@ -75,7 +77,8 @@ export class EwarResolverImpl implements EwarResolver {
 
   propulsionSuppressedIgnoringRange(projection: EwarProjection | undefined): boolean {
     if (!projection) return false;
-    for (const [i, _] of projection.loadout.scramblers.entries()) {
+    for (const [i, spec] of projection.loadout.scramblers.entries()) {
+      if (!spec.propulsionBlock) continue;
       const activation = projection.activation?.scramblers[i];
       if (activation && !activation.active) continue;
       return true;

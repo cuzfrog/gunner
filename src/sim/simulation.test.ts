@@ -17,7 +17,7 @@ const scram: EwarProjection = {
     webs: [],
     grapplers: [],
     disruptors: [],
-    scramblers: [{ moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 }],
+    scramblers: [{ propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 }],
     painters: [],
     dampeners: [],
     scripts: [],

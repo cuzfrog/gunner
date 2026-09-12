@@ -3,6 +3,9 @@ import { EwarResolverImpl } from "./ewarResolver";
 import { toTypeId } from "../gamedata/ids";
 import {
   EMPTY_EWAR_LOADOUT,
+  EMPTY_BOOST_LOADOUT,
+  EMPTY_MISSILE_BOOSTER_LOADOUT,
+  EMPTY_SENSOR_BOOST_LOADOUT,
   type AppliedEwarEffect,
   type DampenerActivation,
   type DisruptionBreakdown,
@@ -23,6 +26,7 @@ import {
   type WarpScramblerSpec,
   ZERO_DAMAGE,
 } from "./types";
+import { scheduledDrainsFromProjections } from "./scheduledDrains";
 
 const stacking = new StackingPenaltyImpl();
 const resolver = new EwarResolverImpl({ stackingPenalty: stacking });
@@ -30,6 +34,7 @@ const resolver = new EwarResolverImpl({ stackingPenalty: stacking });
 const WEB_I_ID = toTypeId("526");
 const WEB_II_ID = toTypeId("527");
 const SCRAM_II_ID = toTypeId("448");
+const DISRUPTOR_II_ID = toTypeId("3244");
 const GRAPPLER_I_ID = toTypeId("41040");
 const TD_I_ID = toTypeId("2108");
 const TD_II_ID = toTypeId("2109");
@@ -401,13 +406,23 @@ describe("EwarResolverImpl", () => {
 
   describe("propulsionSuppressedIgnoringRange", () => {
     test("returns true when any scrambler is active", () => {
-      const projection = scramblerProjection([{ moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 }]);
+      const projection = scramblerProjection([{ propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 }]);
       expect(resolver.propulsionSuppressedIgnoringRange(projection)).toBe(true);
     });
 
     test("returns false when all scramblers are inactive", () => {
-      const projection = scramblerProjection([{ moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 }], false, false);
+      const projection = scramblerProjection([{ propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 }], false, false);
       expect(resolver.propulsionSuppressedIgnoringRange(projection)).toBe(false);
+    });
+
+    test("non-blocking warp disruptor drains capacitor but does not suppress propulsion", () => {
+      const disruptor: WarpScramblerSpec = { propulsionBlock: false, moduleName: "Warp Disruptor II", moduleId: DISRUPTOR_II_ID, maxRange: 24000, overloadRangeBonusPercent: 20, capacitorNeed: 30, cycleTime: 5 };
+      const projection = scramblerProjection([disruptor]);
+      expect(resolver.propulsionSuppressedIgnoringRange(projection)).toBe(false);
+      expect(resolver.propulsionSuppressed(projection, 1000)).toBe(false);
+      expect(scheduledDrainsFromProjections(projection, { loadout: EMPTY_BOOST_LOADOUT, activation: undefined }, { loadout: EMPTY_MISSILE_BOOSTER_LOADOUT, activation: undefined }, { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: [] })).toEqual([
+        { moduleId: DISRUPTOR_II_ID, amount: 30, interval: 5, active: true },
+      ]);
     });
   });
 
@@ -417,25 +432,25 @@ describe("EwarResolverImpl", () => {
     });
 
     test("single T2 scram suppresses inside range", () => {
-      const projection = scramblerProjection([{ moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 }]);
+      const projection = scramblerProjection([{ propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 }]);
       expect(resolver.propulsionSuppressed(projection, 8999)).toBe(true);
       expect(resolver.propulsionSuppressed(projection, 9000)).toBe(true);
       expect(resolver.propulsionSuppressed(projection, 9001)).toBe(false);
     });
 
     test("overload extends scram range by 20%", () => {
-      const projection = scramblerProjection([{ moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 }], true);
+      const projection = scramblerProjection([{ propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 }], true);
       expect(resolver.propulsionSuppressed(projection, 10_799)).toBe(true);
       expect(resolver.propulsionSuppressed(projection, 10_801)).toBe(false);
     });
 
     test("inactive scrambler does not suppress", () => {
-      const projection = scramblerProjection([{ moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 }], false, false);
+      const projection = scramblerProjection([{ propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 }], false, false);
       expect(resolver.propulsionSuppressed(projection, 5000)).toBe(false);
     });
 
     test("a scrambler missing from a partial activation array is treated as active", () => {
-      const scrambler: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
+      const scrambler: WarpScramblerSpec = { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
       const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [scrambler], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [] } };
       expect(resolver.propulsionSuppressed(projection, 5000)).toBe(true);
     });
@@ -470,20 +485,20 @@ describe("EwarResolverImpl", () => {
     });
 
     test("scrambler applies at and within max range and not beyond", () => {
-      const scrambler: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
+      const scrambler: WarpScramblerSpec = { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
       const projection = scramblerProjection([scrambler]);
       expect(resolver.appliedEffects(projection, 9000)).toEqual([{ family: "scrambler", moduleId: SCRAM_II_ID }]);
       expect(resolver.appliedEffects(projection, 9001)).toEqual([]);
     });
 
     test("inactive scrambler is skipped", () => {
-      const scrambler: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
+      const scrambler: WarpScramblerSpec = { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
       const projection = scramblerProjection([scrambler], false, false);
       expect(resolver.appliedEffects(projection, 5000)).toEqual([]);
     });
 
     test("overloaded scrambler extends range by bonus percent", () => {
-      const scrambler: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
+      const scrambler: WarpScramblerSpec = { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
       const projection = scramblerProjection([scrambler], true);
       expect(resolver.appliedEffects(projection, 10800)).toEqual([{ family: "scrambler", moduleId: SCRAM_II_ID }]);
       expect(resolver.appliedEffects(projection, 10801)).toEqual([]);
@@ -551,7 +566,7 @@ describe("EwarResolverImpl", () => {
     test("output order is web, grappler, scrambler, disruptor", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 50000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
       const grappler: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: GRAPPLER_I_ID, optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
-      const scrambler: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 50000, overloadRangeBonusPercent: 20 };
+      const scrambler: WarpScramblerSpec = { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 50000, overloadRangeBonusPercent: 20 };
       const disruptor: TrackingDisruptorSpec = { moduleName: "Tracking Disruptor II", moduleId: TD_II_ID, optimal: 48000, falloff: 24000, disruption: 0.1719, defaultScript: undefined, overloadStrengthBonusPercent: 20 };
       const loadout = { webs: [web], grapplers: [grappler], disruptors: [disruptor], scramblers: [scrambler], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], };
       const activation = {
@@ -703,7 +718,7 @@ describe("EwarResolverImpl", () => {
     });
 
     test("propulsionSuppressed mirrors the existing method", () => {
-      const scrambler: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
+      const scrambler: WarpScramblerSpec = { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
       expect(resolver.speedBreakdown(scramblerProjection([scrambler]), 9000).propulsionSuppressed).toBe(true);
       expect(resolver.speedBreakdown(scramblerProjection([scrambler], false, false), 5000).propulsionSuppressed).toBe(false);
       expect(resolver.speedBreakdown(undefined, 5000).propulsionSuppressed).toBe(false);
@@ -735,6 +750,7 @@ describe("EwarResolverImpl", () => {
         overloadRangeBonusPercent: 30,
       };
       const scrambler: WarpScramblerSpec = {
+        propulsionBlock: true,
         moduleName: "Warp Scrambler II",
         moduleId: SCRAM_II_ID,
         maxRange: 9000,
@@ -1056,7 +1072,7 @@ describe("EwarResolverImpl", () => {
     });
 
     test("scrambler reach is the furthest maxRange, scaled by overload range bonus", () => {
-      const scram: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
+      const scram: WarpScramblerSpec = { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
       const projection = scramblerProjection([scram], true);
       expect(resolver.reach(projection).scrambler).toBe(10800);
     });
@@ -1122,7 +1138,7 @@ describe("EwarResolverImpl", () => {
     });
 
     test("propulsionSuppressed matches propulsionSuppressedIgnoringRange", () => {
-      const scram: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
+      const scram: WarpScramblerSpec = { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
       const projection = scramblerProjection([scram]);
       expect(resolver.potentials(projection).propulsionSuppressed).toBe(resolver.propulsionSuppressedIgnoringRange(projection));
     });
