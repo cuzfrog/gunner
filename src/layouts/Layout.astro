@@ -54,6 +54,9 @@ const appSchema = {
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-JFVYDV0Z8P');
+    if (new URLSearchParams(location.search).has("c")) {
+      gtag('event', 'deep_link_load');
+    }
   }
 </script>
 <body>
