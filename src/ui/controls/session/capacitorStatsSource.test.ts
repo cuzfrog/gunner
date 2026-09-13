@@ -5,7 +5,7 @@ import type { SidePanelState } from "../sidePanel";
 import type { UiEvents } from "../../events";
 import { CapacitorStatsSourceImpl } from "./capacitorStatsSource";
 
-const STATS: CapacitorStats = { spec: { capacity: 4375, rechargeTime: 656.25 }, peakRecharge: 16.67, rows: [], usagePerSecond: 0, boosters: [] };
+const STATS: CapacitorStats = { spec: { capacity: 4375, rechargeTime: 656.25 }, peakRecharge: 16.67, rows: [], usagePerSecond: 0, weaponsPerSecond: 0, boosters: [] };
 
 const EWAR_MODULE = toTypeId("12271");
 const PROPULSION_MODULE = toTypeId("439");

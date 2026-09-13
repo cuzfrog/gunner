@@ -36,6 +36,8 @@ export interface CapacitorStats {
   readonly peakRecharge: number; // GJ/s at 25% capacity: 2.5 * capacity / rechargeTime
   readonly rows: readonly CapacitorUsageRow[];
   readonly usagePerSecond: number;
+  /** The lock-gated weapons subset of usagePerSecond (turrets; missiles and drones cost nothing). */
+  readonly weaponsPerSecond: number;
   readonly boosters: readonly CapacitorBoosterStats[];
   readonly stablePercent?: number; // pyfa watermark average, when cap-stable
   readonly depletesInSeconds?: number; // seconds until the pool depletes, when unstable
@@ -85,6 +87,7 @@ export class CapacitorCalculatorImpl implements CapacitorCalculator {
     const rows = buildUsageRows(this.db, conditions, sources);
     const injectors = buildInjectorDrains(fitting, this.db);
     const usagePerSecond = rows.reduce((sum, row) => sum + row.perSecond * row.count, 0);
+    const weaponsPerSecond = weaponsDrainPerSecond(sources.turretDrains);
     const drains: readonly StaticDrain[] = [...rows.map((row) => ({ amount: row.amount, interval: row.cycleTime, count: row.count })), ...injectors];
     const sim = runCapSim({ spec: effective, drains });
     const stablePercent = sim.stable ? ((sim.stableLow + sim.stableHigh) / 2 / effective.capacity) * 100 : undefined;
@@ -94,6 +97,7 @@ export class CapacitorCalculatorImpl implements CapacitorCalculator {
       peakRecharge: (2.5 * effective.capacity) / effective.rechargeTime,
       rows,
       usagePerSecond,
+      weaponsPerSecond,
       boosters: buildBoosterStats(this.db, fitting),
       ...(stablePercent !== undefined ? { stablePercent } : {}),
       ...(depletesInSeconds !== undefined ? { depletesInSeconds } : {}),
@@ -101,8 +105,7 @@ export class CapacitorCalculatorImpl implements CapacitorCalculator {
   }
 }
 
-function resolveSpec(db: FittingDb, fitting: FittingState, skills: CapacitorSkills, stacking: StackingPenalty): CapacitorSpec {
-  const profile = fitting.profile;
+function resolveSpec(db: FittingDb, fitting: FittingState, skills: CapacitorSkills, stacking: StackingPenalty): CapacitorSpec {  const profile = fitting.profile;
   const capacityMultipliers: number[] = [];
   const rechargeMultipliers: number[] = [];
   const capacityAdds: number[] = [];
@@ -174,6 +177,11 @@ function drainRows(db: FittingDb, drains: readonly ScheduledDrain[]): readonly C
     else grouped.set(drain.moduleId, { amount: drain.amount, interval: drain.interval, count: 1 });
   }
   return [...grouped.entries()].map(([moduleId, group]) => buildRow(moduleId, moduleNameFor(db, moduleId), group.amount, group.interval, group.count));
+}
+
+/** Exact weapons subset of usagePerSecond: the turret rows' per-second figure, from the same specs the rows are built from. */
+function weaponsDrainPerSecond(turrets: readonly CapacitorTurretDrain[]): number {
+  return turrets.reduce((sum, turret) => (turret.capacitorNeed > 0 && turret.cycleTime > 0 ? sum + (turret.capacitorNeed * turret.count) / turret.cycleTime : sum), 0);
 }
 
 function buildRow(moduleId: TypeId, moduleName: string, amount: number, cycleTime: number, count: number): CapacitorUsageRow {

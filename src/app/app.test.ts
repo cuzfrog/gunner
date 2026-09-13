@@ -47,7 +47,7 @@ const engineConfig: EngineConfig = {
     rahActivation: { shipA: undefined, shipB: undefined },
   },
   overloaded: { shipA: false, shipB: false },
-  capacitor: { shipA: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0 }, shipB: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0 } },
+  capacitor: { shipA: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 }, shipB: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 } },
 };
 
 function baseView(): EngineView {

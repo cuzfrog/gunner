@@ -771,6 +771,14 @@ export interface ScheduledDrain {
   readonly active: boolean;
 }
 
+/** Per-frame engagement facts the engine derives from geometry and lock state: modules unable to act on the target are excluded from cap consumption. */
+export interface CapacitorEngagement {
+  readonly propulsionSuppressed: boolean;
+  readonly weaponsEngaged: boolean;
+  /** Module ids of this side's own hard-range modules currently applying nothing to the target (family granularity). */
+  readonly disengagedModuleIds: readonly TypeId[];
+}
+
 /** Projected cap-warfare debit on one side, built by the engine from the opponent's applied effects. */
 export interface IncomingDrain {
   readonly moduleId: TypeId;
@@ -795,6 +803,8 @@ export interface CapacitorSideConfig {
   readonly boosters: readonly CapBoosterSimSpec[];
   /** Deterministic fitted cost in GJ/s (the stat-side usage: every fitted active module's amount/interval). Readout basis for the net, pyfa capUsed semantics. */
   readonly fittedDrainPerSecond: number;
+  /** The lock-gated weapons subset of fittedDrainPerSecond (turrets; missiles and drones cost nothing). Subtracted from the net while no target lock is held. */
+  readonly weaponsDrainPerSecond: number;
   // Active propulsion module drain (skill-modified amount and interval). Absent = no debit.
   readonly propulsion?: CapacitorPropulsionDrain;
 }

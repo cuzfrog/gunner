@@ -93,6 +93,7 @@ function capacitorStats(overrides: Partial<CapacitorStats> = {}): CapacitorStats
     peakRecharge: 24.59,
     rows: [],
     usagePerSecond: 10,
+    weaponsPerSecond: 0,
     boosters: [],
     stablePercent: 87.3,
     ...overrides,

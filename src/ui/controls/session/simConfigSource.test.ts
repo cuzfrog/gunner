@@ -257,7 +257,7 @@ describe("SimConfigSourceImpl", () => {
     const deps = build();
     const base = deps.shipASide.capture();
     const PROPULSION_MODULE = toTypeId("439");
-    const statsWithRow: CapacitorStats = { spec: { capacity: 4375, rechargeTime: 656.25 }, peakRecharge: 16.67, rows: [{ moduleId: PROPULSION_MODULE, moduleName: "1MN Afterburner I", amount: 320, cycleTime: 10, perSecond: 32, count: 1 }], usagePerSecond: 32, boosters: [] };
+    const statsWithRow: CapacitorStats = { spec: { capacity: 4375, rechargeTime: 656.25 }, peakRecharge: 16.67, rows: [{ moduleId: PROPULSION_MODULE, moduleName: "1MN Afterburner I", amount: 320, cycleTime: 10, perSecond: 32, count: 1 }], usagePerSecond: 32, weaponsPerSecond: 20, boosters: [] };
     deps.shipASide.capture = vi.fn(() => ({ ...base, capacitor: { capacity: 6375, rechargeTime: 1250 }, fittedHull: { ...fittedHull("afterburner"), propulsionId: "ab-1mn", propulsionModuleId: PROPULSION_MODULE }, propulsionCapacityMultiplier: 0.75 }));
     deps.capacitorStatsSource.stats = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? statsWithRow : undefined));
     const engineConfig = makeSource(deps).getEngineConfig();
@@ -267,7 +267,9 @@ describe("SimConfigSourceImpl", () => {
     expect(engineConfig.capacitor.shipA.propulsion).toEqual({ moduleId: PROPULSION_MODULE, amount: 320, interval: 10 });
     expect(engineConfig.capacitor.shipB.propulsion).toBeUndefined();
     expect(engineConfig.capacitor.shipA.fittedDrainPerSecond).toBe(32);
+    expect(engineConfig.capacitor.shipA.weaponsDrainPerSecond).toBe(20);
     expect(engineConfig.capacitor.shipB.fittedDrainPerSecond).toBe(0);
+    expect(engineConfig.capacitor.shipB.weaponsDrainPerSecond).toBe(0);
   });
 
   test("getEngineConfig omits the propulsion drain when the module is toggled off", () => {

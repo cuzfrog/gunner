@@ -339,7 +339,7 @@ function buildEwarProjection(loadout: EwarProjection["loadout"], overloaded: boo
 }
 
 function capacitorSideFrom(imported: ImportedFitting | undefined, infinite: boolean): EngineConfig["capacitor"][Side] {
-  if (!imported) return { infinite, drains: [], boosters: [], fittedDrainPerSecond: 0 };
+  if (!imported) return { infinite, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 };
   const boosts = boostProjectionFrom(imported.boosts) ?? { loadout: EMPTY_BOOST_LOADOUT, activation: undefined };
   const missileBoosts = missileBoostProjectionFrom(imported.missileBoosts) ?? { loadout: EMPTY_MISSILE_BOOSTER_LOADOUT, activation: undefined };
   const sensorBoosts = sensorBoostProjectionFrom(imported.sensorBoosts) ?? { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: [] };
@@ -350,6 +350,7 @@ function capacitorSideFrom(imported: ImportedFitting | undefined, infinite: bool
     drains: scheduledDrainsFromProjections(buildEwarProjection(imported.ewar, false), boosts, missileBoosts, sensorBoosts),
     boosters: capBoosterSpecsFrom(imported.capacitor.boosters),
     fittedDrainPerSecond: imported.capacitor.usagePerSecond,
+    weaponsDrainPerSecond: imported.capacitor.weaponsPerSecond,
     ...(propulsionRow ? { propulsion: { moduleId: propulsionRow.moduleId, amount: propulsionRow.amount, interval: propulsionRow.cycleTime } } : {}),
   };
 }

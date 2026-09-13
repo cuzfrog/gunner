@@ -1,5 +1,5 @@
 import type { CapacitorSimConfig, CapacitorView } from "./capacitorSimulator";
-import type { AppliedEwarEffect, DamageEvent, DroneRuntimeState, DroneSpec, InflictedDps, IncomingDrain, LayerDamage, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec, CapacitorSideConfig } from "./types";
+import type { AppliedEwarEffect, CapacitorEngagement, DamageEvent, DroneRuntimeState, DroneSpec, EwarProjection, InflictedDps, IncomingDrain, LayerDamage, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec, CapacitorSideConfig } from "./types";
 import type { TypeId } from "../gamedata/ids";
 import type { DefenseSimConfig, DefenseView } from "./defenseSimulator";
 import type { DroneSimConfig } from "./droneSimulator";
@@ -214,9 +214,10 @@ export class EngagementEngineImpl implements EngagementEngine {
     const preDistance = preSnapshot.shipB.position.sub(preSnapshot.shipA.position).len();
     world.capacitorSimulator.incomingDrains("shipA", incomingDrains(this.ewarResolver.appliedEffects(preSnapshot.shipB.ewar, preDistance), config.sim.shipA.energyWarfareResistancePercent ?? 0));
     world.capacitorSimulator.incomingDrains("shipB", incomingDrains(this.ewarResolver.appliedEffects(preSnapshot.shipA.ewar, preDistance), config.sim.shipB.energyWarfareResistancePercent ?? 0));
+    const locksBeforeStep = world.lockClock.states();
     world.capacitorSimulator.step(dt, {
-      shipA: this.ewarResolver.propulsionSuppressed(preSnapshot.shipB.ewar, preDistance),
-      shipB: this.ewarResolver.propulsionSuppressed(preSnapshot.shipA.ewar, preDistance),
+      shipA: this.capacitorEngagement(preSnapshot, "shipA", preDistance, locksBeforeStep),
+      shipB: this.capacitorEngagement(preSnapshot, "shipB", preDistance, locksBeforeStep),
     });
     world.simulation.step(dt, {
       propulsionStarved: {
@@ -241,6 +242,16 @@ export class EngagementEngineImpl implements EngagementEngine {
     const snapshot = this.live.simulation.snapshot();
     const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
     this.live.lockClock.step(0, this.lockStepInput(snapshot, distance));
+  }
+
+  /** Engagement facts for the capacitor: own hard-range modules that apply nothing, own lock state, opponent suppression. Uses the pre-step snapshot, one frame of latency like the incoming-drain inputs. */
+  private capacitorEngagement(snapshot: SimSnapshot, side: Side, distance: number, locks: Record<Side, LockState>): CapacitorEngagement {
+    const opponent = side === "shipA" ? "shipB" : "shipA";
+    return {
+      propulsionSuppressed: this.ewarResolver.propulsionSuppressed(snapshot[opponent].ewar, distance),
+      weaponsEngaged: locks[side].status === "locked",
+      disengagedModuleIds: disengagedModuleIds(snapshot[side].ewar, distance, this.ewarResolver),
+    };
   }
 
   private lockStepInput(snapshot: SimSnapshot, distance: number): LockStepInput {
@@ -364,6 +375,23 @@ function incomingDrains(effects: readonly AppliedEwarEffect[], resistancePercent
     }
   }
   return [...byModule.values()];
+}
+
+/** Own hard-range modules that apply nothing at this distance: the ewar families minus the ids with an applied effect. Boosters never apply and are never listed. */
+function disengagedModuleIds(projection: EwarProjection | undefined, distance: number, resolver: EwarResolver): readonly TypeId[] {
+  if (!projection) return [];
+  const applied = new Set(resolver.appliedEffects(projection, distance).map((effect) => effect.moduleId));
+  const loadout = projection.loadout;
+  const families: readonly (readonly { readonly moduleId: TypeId }[])[] = [
+    loadout.webs, loadout.grapplers, loadout.disruptors, loadout.scramblers, loadout.painters, loadout.dampeners, loadout.neutralizers, loadout.nosferatu,
+  ];
+  const ids: TypeId[] = [];
+  for (const family of families) {
+    for (const spec of family) {
+      if (!applied.has(spec.moduleId)) ids.push(spec.moduleId);
+    }
+  }
+  return ids;
 }
 
 export { projectionHorizonSeconds as _projectionHorizonSeconds };

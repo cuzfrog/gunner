@@ -127,7 +127,7 @@ function capacitorSimulatorState(): CapacitorSimulatorState {
 }
 
 function emptyCapacitorSnapshot(): import("./capacitorSimulator").SideCapacitorSnapshot {
-  return { spec: undefined, infinite: false, cap: 0, drains: [], boosters: [], incoming: [], propulsion: undefined, fittedDrainPerSecond: 0 };
+  return { spec: undefined, infinite: false, cap: 0, drains: [], boosters: [], incoming: [], propulsion: undefined, fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 };
 }
 
 const emptyCapacitorView: Record<"shipA" | "shipB", CapacitorView> = {
@@ -135,7 +135,7 @@ const emptyCapacitorView: Record<"shipA" | "shipB", CapacitorView> = {
   shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, drainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] },
   };
 
-const EMPTY_CAPACITOR_SIDE: CapacitorSideConfig = { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0 };;
+const EMPTY_CAPACITOR_SIDE: CapacitorSideConfig = { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 };;
 
 function makeEngine() {
   const live = mockWorld();
@@ -231,8 +231,46 @@ describe("EngagementEngineImpl", () => {
     deps.ewarResolver.propulsionSuppressed = vi.fnUntracked(() => true);
     deps.engine.reset(engineConfig());
     deps.engine.step(0.1);
-    expect(deps.live.capacitorSimulator.step).toHaveBeenCalledWith(0.1, { shipA: true, shipB: true });
+    expect(deps.live.capacitorSimulator.step).toHaveBeenCalledWith(0.1, {
+      shipA: { propulsionSuppressed: true, weaponsEngaged: true, disengagedModuleIds: [] },
+      shipB: { propulsionSuppressed: true, weaponsEngaged: true, disengagedModuleIds: [] },
+    });
     expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: false, shipB: false } });
+  });
+
+  test("capacitor.step receives disengaged ids for own ewar modules without an applied effect and weapons engagement from the lock", () => {
+    const deps = makeEngine();
+    const webId = toTypeId("4027");
+    const painterId = toTypeId("12709");
+    const projection: EwarProjection = {
+      loadout: {
+        webs: [{ moduleName: "Web", moduleId: webId, maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 0, capacitorNeed: 6, cycleTime: 5 }], grapplers: [], disruptors: [], scramblers: [],
+        painters: [{ moduleName: "Painter", moduleId: painterId, maxRange: 30000, falloff: 7500, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 0, capacitorNeed: 8, cycleTime: 5 }],
+        dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [],
+      },
+      activation: undefined,
+    };
+    const withEwar: SimSnapshot = { ...snapshot, shipA: { ...snapshot.shipA, ewar: projection } };
+    deps.live.simulation.snapshot = vi.fnUntracked(() => withEwar);
+    deps.ewarResolver.appliedEffects = vi.fnUntracked(() => [{ family: "web", moduleId: webId, speedMultiplier: 0.6 }]);
+    deps.engine.reset(engineConfig());
+    deps.engine.step(0.1);
+    expect(deps.live.capacitorSimulator.step).toHaveBeenCalledWith(0.1, {
+      shipA: { propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [painterId] },
+      shipB: { propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
+    });
+  });
+
+  test("capacitor.step marks weapons disengaged while the lock is not established", () => {
+    const deps = makeEngine();
+    const locking: LockState = { status: "locking", progress: 0.5, remaining: 5, lockTime: 10, inRange: true };
+    deps.live.lockClock.states = vi.fnUntracked(() => ({ shipA: locking, shipB: LOCKED_STATE }));
+    deps.engine.reset(engineConfig());
+    deps.engine.step(0.1);
+    expect(deps.live.capacitorSimulator.step).toHaveBeenCalledWith(0.1, {
+      shipA: { propulsionSuppressed: false, weaponsEngaged: false, disengagedModuleIds: [] },
+      shipB: { propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
+    });
   });
 
   test("capacitor starvation from the simulator suppresses propulsion in simulation.step", () => {

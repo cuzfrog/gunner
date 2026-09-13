@@ -366,6 +366,14 @@ describe("capacitorCalculator", () => {
     expect(result.usagePerSecond).toBeCloseTo(6 / 5 + 36 / 7.875, 3);
   });
 
+  test("weapons per second is the turret subset of the usage", () => {
+    const turretEntry = moduleEntry("Mega Pulse Laser II");
+    const result = resolve([moduleEntry("Stasis Webifier II"), turretEntry], emptyConditions, [resolvedTurret(turretEntry, 7.875, 1)], { ewar: { ...EMPTY_EWAR_LOADOUT, webs: [webSpec("Stasis Webifier II")] } });
+    expect(result.weaponsPerSecond).toBeCloseTo(36 / 7.875, 6);
+    const noTurret = resolve([moduleEntry("Stasis Webifier II")], emptyConditions, [], { ewar: { ...EMPTY_EWAR_LOADOUT, webs: [webSpec("Stasis Webifier II")] } });
+    expect(noTurret.weaponsPerSecond).toBe(0);
+  });
+
   test("propulsion row applies cap use and duration skill multipliers at all-fives", () => {
     const ab = moduleEntry("1MN Afterburner I");
     const conditions: StatConditions = { ...emptyConditions, skillLevel: 5 as SkillLevel };
