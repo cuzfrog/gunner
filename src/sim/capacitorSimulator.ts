@@ -156,8 +156,6 @@ interface SideRuntime {
   propulsionSuppressed: boolean;
   anyStarved: boolean;
   starvedModuleIds: TypeId[];
-  drainedThisStep: number;
-  lastDt: number;
 }
 
 const TAU_DENOMINATOR = 5; // EVE recharge tau = rechargeTime / 5
@@ -197,7 +195,6 @@ export class CapacitorSimulatorImpl implements CapacitorSimulator {
     if (!hasPool(runtime)) return true;
     if (runtime.cap + capacityEpsilon(runtime.spec) >= amount) {
       runtime.cap -= amount;
-      runtime.drainedThisStep += amount;
       return true;
     }
     runtime.anyStarved = true;
@@ -271,7 +268,7 @@ function capacityEpsilon(spec: CapacitorSpec | undefined): number {
 }
 
 function emptySide(): SideRuntime {
-  return { spec: undefined, infinite: false, cap: 0, drains: [], incoming: [], boosters: [], propulsion: undefined, propulsionSuppressed: false, anyStarved: false, starvedModuleIds: [], drainedThisStep: 0, lastDt: 0 };
+  return { spec: undefined, infinite: false, cap: 0, drains: [], incoming: [], boosters: [], propulsion: undefined, propulsionSuppressed: false, anyStarved: false, starvedModuleIds: [] };
 }
 
 function sideFromConfig(spec: CapacitorSpec | undefined, capacityMultiplier: number | undefined, config: CapacitorSideConfig): SideRuntime {
@@ -366,8 +363,6 @@ function stepSide(sides: Record<Side, SideRuntime>, side: Side, dt: number, supp
   const runtime = sides[side];
   runtime.anyStarved = false;
   runtime.starvedModuleIds = [];
-  runtime.drainedThisStep = 0;
-  runtime.lastDt = dt;
   if (!hasPool(runtime) || runtime.infinite) {
     stepFreeSide(runtime, dt);
     return;
@@ -495,7 +490,6 @@ function walkEvents(sides: Record<Side, SideRuntime>, side: Side, dt: number): v
 function applyDrainEvent(runtime: SideRuntime, drain: DrainRuntime): number {
   if (runtime.cap + capacityEpsilon(runtime.spec) >= drain.amount) {
     runtime.cap -= drain.amount;
-    runtime.drainedThisStep += drain.amount;
     drain.running = true;
     drain.starved = false;
     return drain.interval;
@@ -515,7 +509,6 @@ function applyIncomingEvent(sides: Record<Side, SideRuntime>, side: Side, entry:
   if (entry.transfer) return transferIncoming(runtime, opponent, entry);
   const drained = Math.min(entry.amount, runtime.cap);
   runtime.cap -= drained;
-  runtime.drainedThisStep += drained;
   return entry.interval;
 }
 
@@ -527,14 +520,12 @@ function transferIncoming(runtime: SideRuntime, opponent: SideRuntime, entry: In
   if (transfer <= 0) return entry.interval;
   runtime.cap -= transfer;
   opponent.cap = Math.min(opponent.cap + transfer, capacityOf(opponent.spec));
-  runtime.drainedThisStep += transfer;
   return entry.interval;
 }
 
 function applyPropulsionEvent(runtime: SideRuntime, propulsion: PropulsionRuntime): number {
   if (runtime.cap + capacityEpsilon(runtime.spec) >= propulsion.amount) {
     runtime.cap -= propulsion.amount;
-    runtime.drainedThisStep += propulsion.amount;
     propulsion.running = true;
     propulsion.starved = false;
     return propulsion.interval;
@@ -597,12 +588,12 @@ function sideView(runtime: SideRuntime): CapacitorView {
   if (!runtime.spec || runtime.spec.capacity <= 0) {
     return {
       cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0,
-      incomingDrainPerSecond: drainRate(runtime), starved: runtime.anyStarved,
+      incomingDrainPerSecond: averageDrainRate(runtime), starved: runtime.anyStarved,
       starvedModuleIds: [], propulsion, drains: runtime.drains.map(drainState), incoming: runtime.incoming.map(incomingState), boosters: runtime.boosters.map(boosterState),
     };
   }
   if (runtime.infinite) {
-    const incoming = drainRate(runtime);
+    const incoming = averageDrainRate(runtime);
     return {
       cap: runtime.spec.capacity, capacity: runtime.spec.capacity, percentage: 100, regenPerSecond: 0, netPerSecond: -incoming,
       incomingDrainPerSecond: incoming, starved: false, starvedModuleIds: [], propulsion,
@@ -614,7 +605,7 @@ function sideView(runtime: SideRuntime): CapacitorView {
   const tau = runtime.spec.rechargeTime / TAU_DENOMINATOR;
   const root = Math.sqrt(runtime.cap / runtime.spec.capacity);
   const regenPerSecond = (2 * runtime.spec.capacity * root * (1 - root)) / tau;
-  const incoming = runtime.lastDt > 0 ? runtime.drainedThisStep / runtime.lastDt : 0;
+  const incoming = averageDrainRate(runtime);
   return {
     cap: runtime.cap, capacity: runtime.spec.capacity, percentage: (runtime.cap / runtime.spec.capacity) * 100,
     regenPerSecond, netPerSecond: regenPerSecond - incoming, incomingDrainPerSecond: incoming,
@@ -631,9 +622,18 @@ function propulsionView(runtime: SideRuntime): CapacitorPropulsionView | undefin
   return { moduleId: propulsion.moduleId, running: propulsion.running, starved: propulsion.starved };
 }
 
-function drainRate(runtime: SideRuntime): number {
-  if (runtime.lastDt <= 0) return 0;
-  return runtime.drainedThisStep / runtime.lastDt;
+/** Deterministic average drain: every active debit cycles a fixed amount over a fixed interval, so the per-second cost is exact. */
+function averageDrainRate(runtime: SideRuntime): number {
+  let rate = 0;
+  for (const drain of runtime.drains) {
+    if (drain.active) rate += drain.amount / drain.interval;
+  }
+  for (const entry of runtime.incoming) {
+    rate += entry.amount / entry.interval;
+  }
+  const propulsion = runtime.propulsion;
+  if (propulsion && !runtime.propulsionSuppressed) rate += propulsion.amount / propulsion.interval;
+  return rate;
 }
 
 function drainState(drain: DrainRuntime): CapacitorDrainState {
@@ -672,7 +672,5 @@ function sideFromSnapshot(snapshot: SideCapacitorSnapshot): SideRuntime {
     propulsionSuppressed: false,
     anyStarved: false,
     starvedModuleIds: [],
-    drainedThisStep: 0,
-    lastDt: 0,
   };
 }

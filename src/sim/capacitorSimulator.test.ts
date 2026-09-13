@@ -233,13 +233,36 @@ describe("CapacitorSimulatorImpl", () => {
     expect(sim.view().shipA.boosters[0].charges).toBe(0); // blocked: reloading
   });
 
-  test("view reports regen per second and drain rates", () => {
+  test("view reports regen per second and the deterministic average drain rate", () => {
     const sim = new CapacitorSimulatorImpl();
-    sim.reset(makeConfig({ drains: [drain("1", 100, 10)] }));
-    sim.step(0.001, { shipA: false, shipB: false }); // debit at t=0, cap near full
+    sim.reset(makeConfig({ drains: [drain("1", 100, 10)] }, {}, SPEC, SPEC, propulsionDrain(50, 10)));
+    sim.incomingDrains("shipA", [incoming("5", 30, 5)]);
+    sim.step(0.001, { shipA: false, shipB: false }); // t=0 debits fire immediately, cap near full
     const view = sim.view().shipA;
-    expect(view.incomingDrainPerSecond).toBeCloseTo(100 / 0.001, 3);
-    expect(view.netPerSecond).toBeLessThan(0);
+    expect(view.incomingDrainPerSecond).toBeCloseTo(100 / 10 + 50 / 10 + 30 / 5, 6);
+    expect(view.netPerSecond).toBeCloseTo(view.regenPerSecond - 21, 6);
+    sim.step(0.037, { shipA: false, shipB: false }); // no debit event inside this frame
+    const after = sim.view().shipA;
+    expect(after.incomingDrainPerSecond).toBeCloseTo(21, 6);
+    expect(after.netPerSecond).toBeCloseTo(after.regenPerSecond - 21, 6);
+  });
+
+  test("average drain rate counts active drains even while starved", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({ drains: [drain("1", 2000, 10)] }, {}, SMALL_SPEC));
+    sim.step(0.001, { shipA: false, shipB: false });
+    const view = sim.view().shipA;
+    expect(view.starved).toBe(true);
+    expect(view.incomingDrainPerSecond).toBeCloseTo(200, 6);
+  });
+
+  test("infinite pool reports the average drain as negative net", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({ drains: [drain("1", 100, 10)], infinite: true }));
+    sim.step(0.001, { shipA: false, shipB: false });
+    const view = sim.view().shipA;
+    expect(view.incomingDrainPerSecond).toBeCloseTo(10, 6);
+    expect(view.netPerSecond).toBeCloseTo(-10, 6);
   });
 
   test("restored state reports percentage and peak regen at 25 percent", () => {
