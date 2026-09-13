@@ -357,6 +357,7 @@ export const JA: LanguageSlice<"ja"> = {
   "dpsHint.factor.module": { ja: "モジュール" },
   "dpsHint.factor.skill": { ja: "スキル" },
   "dpsHint.factor.hull": { ja: "船体" },
+  "dpsHint.factor.subsystem": { ja: "サブシステム" },
   "dpsHint.factor.overload": { ja: "オーバーロード" },
   "dpsHint.spool": { ja: "スプール" },
   "dpsHint.volley": { ja: "ボレー" },

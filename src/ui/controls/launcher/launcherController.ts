@@ -1,7 +1,6 @@
 import type { FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, FittingState, LauncherClass, LauncherClasses, MissileCatalog, MissileOption } from "../../../fitting";
 import { applyFittingOverrides } from "../../../fitting";
 import type { ImportedFitting, ImportedLauncher } from "../../../fitting";
-import type { HullBonus } from "../../../gamedata/fittingDb";
 import type { TypeId } from "../../../gamedata/ids";
 import type { MissileSpec } from "../../../sim";
 import { damageVectorSum } from "../../../sim";
@@ -42,7 +41,6 @@ export class LauncherControllerImpl implements LauncherController {
   private selectedLauncher?: ImportedLauncher;
   private currentAmmoId: TypeId | undefined;
   private hullProfile: ShipProfile | undefined;
-  private hullBonuses: readonly HullBonus[] = [];
   private skillLevel: SkillLevel = 5;
   private ammoPopupOpen = false;
   private attributesPopupOpen = false;
@@ -123,7 +121,6 @@ export class LauncherControllerImpl implements LauncherController {
   applyImported(imported: ImportedFitting, conditions: StatConditions): void {
     this.skillLevel = conditions.skillLevel;
     this.conditions = conditions;
-    this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
     this.fittingState = imported.fittingState;
     this.fittingOverrides.clear();
     this.selectedLauncher = imported.launcher;
@@ -142,7 +139,6 @@ export class LauncherControllerImpl implements LauncherController {
       if (imported?.launcher) {
         this.conditions = conditions;
         this.fittingState = imported.fittingState;
-        this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
         this.fittingOverrides.clear();
         this.selectedLauncher = imported.launcher;
         this.currentAmmoId = imported.launcher.chargeId;

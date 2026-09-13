@@ -355,6 +355,7 @@ export const EN: LanguageSlice<"en"> = {
   "dpsHint.factor.module": { en: "Module" },
   "dpsHint.factor.skill": { en: "Skill" },
   "dpsHint.factor.hull": { en: "Hull" },
+  "dpsHint.factor.subsystem": { en: "Subsystem" },
   "dpsHint.factor.overload": { en: "Overload" },
   "dpsHint.spool": { en: "Spool" },
   "dpsHint.volley": { en: "Volley" },
