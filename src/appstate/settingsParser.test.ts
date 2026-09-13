@@ -23,7 +23,7 @@ import {
   type UserSettings,
   type ProfileSettings,
 } from "./localSettingsStore.testSupport";
-import { USER_SETTINGS_VERSION } from "./userSettings";
+import { USER_SETTINGS_VERSION, PROPULSION_NONE } from "./userSettings";
 import { stripDisplayPreferences } from "./validators";
 import { toShipId, toTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { DisplayPreferences } from "./userSettings";
@@ -571,11 +571,37 @@ describe("SettingsParser", () => {
       propulsionKind: "microwarpdrive",
       fitted: IMPORTED_RIFTER.fitted,
       propulsion: RIFTER_MODULE,
-      baseMaxSpeed: RIFTER_MWD_STATS.baseMaxSpeed,
+      capacitor: { capacity: 0, rechargeTime: 0 },
+      energyWarfareResistancePercent: 0,
     });
     expect(decoded!.shipA.mass).toBe(1_500_000);
     expect(decoded!.shipA.speed).toBe(4_649.72);
     expect(decoded!.shipA.sig).toBe(RIFTER_MWD_STATS.sigRadius);
+  });
+
+  test("decodeUrlSettings rebuild keeps propulsion inactive when the selection is none", () => {
+    fittingImport.importFitting = vi.fn(() => ({ ...IMPORTED_RIFTER, propulsion: RIFTER_PROPULSION }));
+    ships.fittedStats = vi.fn(() => RIFTER_BASE_STATS);
+    ships.maxSpeedForFittedMass = vi.fn(() => RIFTER_BASE_STATS.maxSpeed);
+
+    const settings: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAPropulsion: PROPULSION_NONE,
+      shipAFittedHull: { fittingName: "Previous", propulsionModuleId: toTypeId("20310"), propulsionName: "Compact MWD", fitted: IMPORTED_RIFTER.fitted, capacitor: { capacity: 0, rechargeTime: 0 }, energyWarfareResistancePercent: 0 },
+    };
+    const parser = makeParser();
+    const decoded = parser.decodeUrlSettings(urlFor(settings).split("c=")[1]);
+    expect(decoded).not.toBeNull();
+    const fittedHull = decoded!.shipA.fittedHull!;
+    expect(fittedHull.propulsionId).toBeUndefined();
+    expect(fittedHull.propulsionKind).toBeUndefined();
+    expect(fittedHull.propulsion).toBeUndefined();
+    expect(fittedHull.propulsionModuleId).toBe(toTypeId("20310"));
+    expect(fittedHull.propulsionName).toBe("Compact MWD");
+    expect(decoded!.shipA.propulsion).toBe(PROPULSION_NONE);
+    expect(decoded!.shipA.mass).toBe(RIFTER_BASE_STATS.mass);
+    expect(decoded!.shipA.speed).toBe(RIFTER_BASE_STATS.maxSpeed);
   });
 
   test("decodeUrlSettings defaults missing display preferences", () => {
@@ -711,43 +737,6 @@ describe("SettingsParser", () => {
     expect(first!.shipA.ammo).toBe("12608" as TypeId);
     const second = parser.parseUserSettings(parser.serialize(first!));
     expect(second).toEqual(first);
-  });
-
-  test("decodeUrlSettings scales fitted baseMaxSpeed proportionally when shipASpeed is overridden", () => {
-    fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
-    const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
-    registerGameDataModule(realShips);
-    registerShipsModule(realShips);
-    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, missileCatalog: stubMissileCatalog, itemNameResolver: realShips.cradle.itemNameResolver, simValueParser });
-    const override = 2000;
-    const settings: UserSettings = {
-      ...DEFAULT_SETTINGS,
-      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
-      shipAOverrides: { shipASpeed: override },
-    };
-    const decoded = parser.decodeUrlSettings(urlFor(settings).split("c=")[1]);
-    expect(decoded).not.toBeNull();
-    expect(decoded!.shipA.speed).toBe(override);
-    const conditions = { skillLevel: settings.shipASkillLevel ?? 5, overloaded: settings.shipAOverload ?? true, weaponOverloaded: false };
-    const expected = realShips.cradle.ships.fittedStats(RIFTER_PROFILE, IMPORTED_RIFTER.fitted, RIFTER_PROPULSION, conditions, override).baseMaxSpeed;
-    expect(decoded!.shipA.fittedHull?.baseMaxSpeed).toBeCloseTo(expected, 6);
-  });
-
-  test("decodeUrlSettings keeps baseMaxSpeed unscaled when shipASpeed is not overridden", () => {
-    fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
-    const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
-    registerGameDataModule(realShips);
-    registerShipsModule(realShips);
-    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, missileCatalog: stubMissileCatalog, itemNameResolver: realShips.cradle.itemNameResolver, simValueParser });
-    const settings: UserSettings = {
-      ...DEFAULT_SETTINGS,
-      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
-    };
-    const decoded = parser.decodeUrlSettings(urlFor(settings).split("c=")[1]);
-    expect(decoded).not.toBeNull();
-    const conditions = { skillLevel: settings.shipASkillLevel ?? 5, overloaded: settings.shipAOverload ?? true, weaponOverloaded: false };
-    const expected = realShips.cradle.ships.fittedStats(RIFTER_PROFILE, IMPORTED_RIFTER.fitted, RIFTER_PROPULSION, conditions).baseMaxSpeed;
-    expect(decoded!.shipA.fittedHull?.baseMaxSpeed).toBeCloseTo(expected, 6);
   });
 
   test("golden localStorage round-trip preserves DEFAULT_SETTINGS", () => {

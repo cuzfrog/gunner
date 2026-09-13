@@ -252,8 +252,9 @@ describe("LocalSettingsStore", () => {
     expect(loaded!.shipA.propulsion).toBe("none");
     expect(loaded!.shipA.speed).toBe(456.25);
     expect(loaded!.shipA.mass).toBe(1_000_000);
-    expect(loaded!.shipA.fittedHull!.propulsionId).toBe("mwd-5mn");
-    expect(loaded!.shipA.fittedHull!.propulsion).toEqual(RIFTER_PROPULSION);
+    expect(loaded!.shipA.fittedHull!.propulsionId).toBeUndefined();
+    expect(loaded!.shipA.fittedHull!.propulsion).toBeUndefined();
+    expect(loaded!.shipA.fittedHull!.propulsionModuleId).toBe(RIFTER_PROPULSION.propulsionModuleId);
   });
 
   test("loadStartupState rejects an empty hull id", () => {
@@ -695,7 +696,8 @@ describe("LocalSettingsStore", () => {
       propulsionKind: "microwarpdrive",
       fitted: RIFTER_FITTED,
       propulsion: RIFTER_MODULE,
-      baseMaxSpeed: RIFTER_MWD_STATS.baseMaxSpeed,
+      capacitor: { capacity: 0, rechargeTime: 0 },
+      energyWarfareResistancePercent: 0,
     });
     expect(loaded!.shipA.mass).toBe(2_000_000);
     expect(loaded!.shipA.inertia).toBe(2);

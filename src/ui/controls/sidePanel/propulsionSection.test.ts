@@ -1,6 +1,6 @@
 import type { FittingImport } from "../../../fitting";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
-import type { PropulsionId, PropulsionModule, ShipProfile, Ships } from "../../../ships";
+import type { PropulsionId, PropulsionModule, PropulsionKind, PropulsionStats, ShipProfile, Ships } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { PROPULSION_NONE, type FittedHullSummary } from "../../../appstate";
@@ -29,6 +29,7 @@ const AB_MODULE: PropulsionModule = {
   speedBonus: 1.5,
   massAddition: 0,
   sigBloom: 0,
+  capacitorNeed: 20,
 };
 
 const MWD_MODULE: PropulsionModule = {
@@ -42,6 +43,7 @@ const MWD_MODULE: PropulsionModule = {
   speedBonus: 5,
   massAddition: 500_000,
   sigBloom: 5,
+  capacitorNeed: 45,
 };
 
 function fittingForPropulsion(): FittingImport {
@@ -53,9 +55,9 @@ function fittingForPropulsion(): FittingImport {
   });
   fitting.propulsionStats = vi.fn(() => AB_MODULE);
   fitting.propulsionStatsById = vi.fn((id: TypeId) => {
-    if (id === AB_VARIANT_II_ID) return { thrust: 150, speedBonus: 1.675, massAddition: 0, sigBloom: 0 };
-    if (id === AB_DEFAULT_ID) return { thrust: 150, speedBonus: 1.5, massAddition: 0, sigBloom: 0 };
-    if (id === MWD_DEFAULT_ID) return { thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5 };
+    if (id === AB_VARIANT_II_ID) return { thrust: 150, speedBonus: 1.675, massAddition: 0, sigBloom: 0, capacitorNeed: 20 };
+    if (id === AB_DEFAULT_ID) return { thrust: 150, speedBonus: 1.5, massAddition: 0, sigBloom: 0, capacitorNeed: 20 };
+    if (id === MWD_DEFAULT_ID) return { thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5, capacitorNeed: 45 };
     return undefined;
   });
   fitting.itemNameForId = vi.fn(() => "1MN加力燃烧器 I");
@@ -114,7 +116,19 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
   };
 
   const sections = vi.mocked<ISidePanelSections>({
-    hull: {} as unknown as ISidePanelSections["hull"],
+    hull: {
+      buildManualSummary: vi.fn((_profile: ShipProfile, selection: { propulsionId: PropulsionId; propulsionModuleId?: TypeId; propulsionName?: string; kind: PropulsionKind; propulsion: PropulsionStats }) => ({
+        fittingName: "",
+        propulsionId: selection.propulsionId,
+        propulsionModuleId: selection.propulsionModuleId,
+        propulsionName: selection.propulsionName,
+        propulsionKind: selection.kind,
+        fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 },
+        propulsion: selection.propulsion,
+        capacitor: { capacity: 0, rechargeTime: 0 },
+        energyWarfareResistancePercent: 0,
+      })),
+    } as unknown as ISidePanelSections["hull"],
     stats: {
       updateShipStats: vi.fn(),
       updateSpeedFromMass: vi.fn(),
@@ -179,6 +193,15 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
   return { document, panel, section, host, imageCatalog, popupGroup, selectionSession };
 }
 
+function importedSummary(): FittedHullSummary {
+  return {
+    fittingName: "Brawler",
+    fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 },
+    capacitor: { capacity: 4375, rechargeTime: 656.25 },
+    energyWarfareResistancePercent: 35,
+  };
+}
+
 describe("PropulsionSection", () => {
   test("renderPropulsionOptions creates options and buttons", () => {
     const { document, panel, section } = buildPropulsionSection();
@@ -211,6 +234,52 @@ describe("PropulsionSection", () => {
     const group = getFake(document, "ship-a-propulsion-options");
     const firstButton = group.children[0];
     expect(firstButton.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  test("onPropulsionChange preserves the imported capacitor and ewar resistance", () => {
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    panel.fittedHull = importedSummary();
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.capacitor).toEqual({ capacity: 4375, rechargeTime: 656.25 });
+    expect(panel.fittedHull?.energyWarfareResistancePercent).toBe(35);
+    expect(panel.fittedHull?.fittingName).toBe("Brawler");
+  });
+
+  test("toggle off preserves the imported capacitor and ewar resistance", () => {
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    panel.fittedHull = importedSummary();
+    getFake(document, "ship-a-propulsion").value = PROPULSION_NONE;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.capacitor).toEqual({ capacity: 4375, rechargeTime: 656.25 });
+    expect(panel.fittedHull?.energyWarfareResistancePercent).toBe(35);
+  });
+
+  test("selecting a variant preserves the imported capacitor and ewar resistance", () => {
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    panel.fittedHull = importedSummary();
+    section.renderPropulsionOptions();
+    section.popup.open();
+    const variants = getFake(document, "ship-a-propulsion-variants");
+    const variantII = variants.children[1] as unknown as FakeElement;
+    variantII.trigger("click");
+    expect(panel.fittedHull?.propulsionModuleId).toBe(AB_VARIANT_II_ID);
+    expect(panel.fittedHull?.capacitor).toEqual({ capacity: 4375, rechargeTime: 656.25 });
+    expect(panel.fittedHull?.energyWarfareResistancePercent).toBe(35);
+  });
+
+  test("onPropulsionChange without a fitting builds a manual summary with the hull capacitor", () => {
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.fittingName).toBe("");
+    expect(panel.fittedHull?.capacitor).toEqual({ capacity: RIFTER.capacitorCapacity, rechargeTime: RIFTER.capacitorRechargeTime });
+    expect(panel.fittedHull?.energyWarfareResistancePercent).toBe(0);
+    expect(panel.fittedHull?.fitted).toEqual({ mass: RIFTER.mass, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 });
   });
 
   test("onPropulsionChange fits a propulsion to the hull", () => {
@@ -442,7 +511,7 @@ describe("PropulsionSection", () => {
   test("resolvePropulsionVariant preserves fitted variant id", () => {
     const { panel, section } = buildPropulsionSection();
     panel.profile = RIFTER;
-    const fitted: FittedHullSummary = { fittingName: "Test", propulsionModuleId: AB_VARIANT_II_ID, fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } };
+    const fitted: FittedHullSummary = { fittingName: "Test", propulsionModuleId: AB_VARIANT_II_ID, fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 }, capacitor: { capacity: 4375, rechargeTime: 656.25 }, energyWarfareResistancePercent: 0 };
     const variant = section.resolvePropulsionVariant(AB_MODULE, fitted);
     expect(variant?.id).toBe(AB_VARIANT_II_ID);
   });
@@ -450,7 +519,7 @@ describe("PropulsionSection", () => {
   test("resolvePropulsionVariant falls back to name when module id is stale", () => {
     const { panel, section } = buildPropulsionSection();
     panel.profile = RIFTER;
-    const fitted: FittedHullSummary = { fittingName: "Test", propulsionModuleId: toTypeId("999"), propulsionName: "1MN Afterburner II", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } };
+    const fitted: FittedHullSummary = { fittingName: "Test", propulsionModuleId: toTypeId("999"), propulsionName: "1MN Afterburner II", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 }, capacitor: { capacity: 4375, rechargeTime: 656.25 }, energyWarfareResistancePercent: 0 };
     const variant = section.resolvePropulsionVariant(AB_MODULE, fitted);
     expect(variant?.id).toBe(AB_VARIANT_II_ID);
   });

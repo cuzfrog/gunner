@@ -29,7 +29,18 @@ export interface IHullSection {
   setHullValidation(isInvalid: boolean): void;
   updateHullHint(module?: PropulsionModule): void;
   refreshHullInputs(): void;
-  applyImportedFitting(summary: FittedHullSummary): void;
+  applyImportedFitting(imported: ImportedFitting): void;
+  buildFittedSummary(imported: ImportedFitting): FittedHullSummary;
+  buildManualSummary(
+    profile: ShipProfile,
+    selection: {
+      readonly propulsionId: PropulsionId;
+      readonly propulsionModuleId?: TypeId;
+      readonly propulsionName?: string;
+      readonly kind: PropulsionKind;
+      readonly propulsion: PropulsionStats;
+    },
+  ): FittedHullSummary;
   restoreFittingSummary(summary: FittedHullSummary): void;
 }
 
@@ -75,12 +86,12 @@ export interface IPropulsionSection {
   currentPropulsionModule(): PropulsionModule | undefined;
   renderPropulsionOptions(selectedId?: PropulsionSelection): void;
   onPropulsionChange(): void;
+  applyPropulsionVariant(id: TypeId): void;
   setPropulsionActive(propulsionId: string): void;
   resolvePropulsionVariant(module: PropulsionModule, fitted: FittedHullSummary | undefined): { readonly id: TypeId; readonly name: string } | undefined;
   notePropulsionVariant(kind: PropulsionKind, moduleId: TypeId): void;
   seedPropulsionMemory(): void;
   defaultPropulsionName(module: PropulsionModule): string;
-  nakedFitted(profile: ShipProfile): FittedHull;
 }
 
 export interface IPasteImportSection {

@@ -3,7 +3,7 @@ import type { Autopilot } from "./autopilot";
 import { integrateShip } from "./dynamics";
 import type { EwarResolver } from "./ewarResolver";
 import type { Restorable } from "./restorable";
-import type { CombatantConfig, ShipState, SimConfig, SimSnapshot } from "./types";
+import type { CombatantConfig, ShipState, Side, SimConfig, SimSnapshot } from "./types";
 
 export interface SimulationState {
   readonly time: number;
@@ -12,7 +12,7 @@ export interface SimulationState {
 }
 
 export interface Simulation extends Restorable<SimulationState> {
-  step(dt: number): void;
+  step(dt: number, context?: { readonly propulsionStarved: Record<Side, boolean> }): void;
   snapshot(): SimSnapshot;
   reset(config: SimConfig): void;
   update(config: SimConfig): void;
@@ -25,6 +25,7 @@ export class SimulationImpl implements Simulation {
   private time: number;
   private shipA: ShipState;
   private shipB: ShipState;
+  private propulsionStarved: Record<Side, boolean>;
 
   constructor({ shipASteering, shipBSteering, ewarResolver, simConfig }: {
     shipASteering: Autopilot;
@@ -36,11 +37,13 @@ export class SimulationImpl implements Simulation {
     this.shipBSteering = shipBSteering;
     this.ewarResolver = ewarResolver;
     this.time = 0;
+    this.propulsionStarved = { shipA: false, shipB: false };
     this.shipA = asState(simConfig.shipA, new Vec2(0, 0));
     this.shipB = asState(simConfig.shipB, new Vec2(0, simConfig.initialDistance));
   }
 
-  step(dt: number): void {
+  step(dt: number, context?: { readonly propulsionStarved: Record<Side, boolean> }): void {
+    if (context) this.propulsionStarved = context.propulsionStarved;
     const frame = this.computeFrame();
     this.shipA = { ...this.shipA, ...integrateShip(frame.shipA, frame.commands.shipA, dt) };
     this.shipB = { ...this.shipB, ...integrateShip(frame.shipB, frame.commands.shipB, dt) };
@@ -59,6 +62,7 @@ export class SimulationImpl implements Simulation {
 
   reset(config: SimConfig): void {
     this.time = 0;
+    this.propulsionStarved = { shipA: false, shipB: false };
     this.shipA = asState(config.shipA, new Vec2(0, 0));
     this.shipB = asState(config.shipB, new Vec2(0, config.initialDistance));
   }
@@ -80,8 +84,8 @@ export class SimulationImpl implements Simulation {
 
   private computeFrame(): { shipA: ShipState; shipB: ShipState; commands: { shipA: Vec2; shipB: Vec2 } } {
     const distance = this.shipB.position.sub(this.shipA.position).len();
-    const shipA = effectiveState(this.ewarResolver, this.shipA, this.shipB, distance);
-    const shipB = effectiveState(this.ewarResolver, this.shipB, this.shipA, distance);
+    const shipA = effectiveState(this.ewarResolver, this.shipA, this.shipB, distance, this.propulsionStarved.shipA);
+    const shipB = effectiveState(this.ewarResolver, this.shipB, this.shipA, distance, this.propulsionStarved.shipB);
     const commands = {
       shipA: this.shipASteering.computeVelocity(shipA, shipB, this.time),
       shipB: this.shipBSteering.computeVelocity(shipB, shipA, this.time),
@@ -90,9 +94,9 @@ export class SimulationImpl implements Simulation {
   }
 }
 
-function effectiveState(resolver: EwarResolver, ship: ShipState, opponent: ShipState, distance: number): ShipState {
+function effectiveState(resolver: EwarResolver, ship: ShipState, opponent: ShipState, distance: number, propulsionStarved: boolean): ShipState {
   const multiplier = resolver.speedMultiplier(opponent.ewar, distance);
-  const suppressed = resolver.propulsionSuppressed(opponent.ewar, distance);
+  const suppressed = resolver.propulsionSuppressed(opponent.ewar, distance) || propulsionStarved;
   const baseSpeed = suppressed ? suppressedSpeed(ship) : ship.maxSpeed;
   const sig = effectiveSig(ship, suppressed);
   if (multiplier === 1 && baseSpeed === ship.maxSpeed && sig === ship.sig) return ship;

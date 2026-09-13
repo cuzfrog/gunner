@@ -55,6 +55,17 @@
   cursor: not-allowed;
 }
 
+.ewar-row-state {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--warn-yellow-85);
+}
+
+.ewar-row-starved .ewar-module-name {
+  color: var(--warn-yellow-85);
+}
+
 .ewar-overload-button[aria-pressed="true"]:not(:disabled) {
   border-color: var(--accent-orange);
   color: var(--accent-orange);

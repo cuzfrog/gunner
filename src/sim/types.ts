@@ -72,6 +72,12 @@ export interface ShipConfig {
   // Flat signature radius penalty from shield extenders, in meters.
   // Applied additively before bloom: `(sig + sigPenalty) * (1 + sigBloom)`.
   readonly sigPenalty?: number;
+  // Propulsion capacitor capacity multiplier (e.g. MWD 0.75). Composes the
+  // effective pool from the propulsion-independent CapacitorSpec capacity.
+  readonly propulsionCapacityMultiplier?: number;
+  // Energy warfare resistance from fitted cap batteries, positive percent
+  // (e.g. 25 scales incoming neutralizer/nosferatu amounts by 0.75).
+  readonly energyWarfareResistancePercent?: number;
   readonly orbitDirection?: OrbitDirection;
 }
 
@@ -123,6 +129,8 @@ export interface TurretSpec extends TrackingApplicationSpec {
   readonly cycleTime: number; // seconds
   readonly turretCount: number;
   readonly spool?: TurretSpoolSpec; // absent for non-spooling turrets
+  // GJ per module instance per cycle; the group debits capacitorNeed * turretCount at each activation.
+  readonly capacitorNeed?: number;
 }
 
 export interface MissileSpec {
@@ -284,6 +292,8 @@ export interface StasisWebSpec {
   readonly maxRange: number;
   readonly speedFactor: number;
   readonly overloadRangeBonusPercent: number;
+  readonly capacitorNeed?: number;
+  readonly cycleTime?: number;
 }
 
 export interface StasisGrapplerSpec {
@@ -293,6 +303,8 @@ export interface StasisGrapplerSpec {
   readonly falloff: number;
   readonly speedFactor: number;
   readonly overloadOptimalBonusPercent: number;
+  readonly capacitorNeed?: number;
+  readonly cycleTime?: number;
 }
 
 export interface TrackingDisruptorSpec {
@@ -303,6 +315,8 @@ export interface TrackingDisruptorSpec {
   readonly disruption: number;
   readonly defaultScript: DisruptionScriptSpec | undefined;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed?: number;
+  readonly cycleTime?: number;
 }
 
 export interface WarpScramblerSpec {
@@ -310,6 +324,10 @@ export interface WarpScramblerSpec {
   readonly moduleId: TypeId;
   readonly maxRange: number;
   readonly overloadRangeBonusPercent: number;
+  readonly capacitorNeed?: number;
+  readonly cycleTime?: number;
+  // Attr 1350 > 0: scramblers suppress MWD/AB; pure disruptors only drain capacitor.
+  readonly propulsionBlock: boolean;
 }
 
 export interface TargetPainterSpec {
@@ -319,6 +337,8 @@ export interface TargetPainterSpec {
   readonly falloff: number;
   readonly signatureRadiusBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed?: number;
+  readonly cycleTime?: number;
 }
 
 export interface SensorDampenerScriptSpec {
@@ -337,6 +357,8 @@ export interface SensorDampenerSpec {
   readonly maxTargetRangeBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
   readonly defaultScript: SensorDampenerScriptSpec | undefined;
+  readonly capacitorNeed?: number;
+  readonly cycleTime?: number;
 }
 
 export interface SensorBoosterScriptSpec {
@@ -353,6 +375,8 @@ export interface SensorBoosterSpec {
   readonly maxTargetRangeBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
   readonly defaultScript: SensorBoosterScriptSpec | undefined;
+  readonly capacitorNeed?: number;
+  readonly cycleTime?: number;
 }
 
 export interface SignalAmplifierSpec {
@@ -407,6 +431,8 @@ export interface TrackingBoosterSpec {
   readonly optimalBonusPercent: number;
   readonly falloffBonusPercent: number;
   readonly defaultScript: TurretScriptSpec | undefined;
+  readonly capacitorNeed?: number;
+  readonly cycleTime?: number;
 }
 
 export interface MissileScriptSpec {
@@ -427,6 +453,8 @@ export interface MissileBoosterSpec {
   readonly flightTimeBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
   readonly defaultScript: MissileScriptSpec | undefined;
+  readonly capacitorNeed?: number;
+  readonly cycleTime?: number;
 }
 
 export interface MissileEnhancerSpec {
@@ -453,6 +481,25 @@ export interface MissileBoosterLoadout {
 
 export const EMPTY_MISSILE_BOOSTER_LOADOUT: MissileBoosterLoadout = { computers: [], enhancers: [], scripts: [] };
 
+export interface EnergyNeutralizerSpec {
+  readonly moduleName: string;
+  readonly moduleId: TypeId;
+  readonly amount: number; // GJ drained from the target per cycle
+  readonly cycleTime: number;
+  readonly capacitorNeed: number; // GJ consumed by the user per cycle
+  readonly maxRange: number;
+  readonly falloff: number;
+}
+
+export interface NosferatuSpec {
+  readonly moduleName: string;
+  readonly moduleId: TypeId;
+  readonly amount: number; // GJ transferred per cycle
+  readonly cycleTime: number;
+  readonly maxRange: number;
+  readonly falloff: number;
+}
+
 export interface EwarLoadout {
   readonly webs: readonly StasisWebSpec[];
   readonly grapplers: readonly StasisGrapplerSpec[];
@@ -460,11 +507,13 @@ export interface EwarLoadout {
   readonly scramblers: readonly WarpScramblerSpec[];
   readonly painters: readonly TargetPainterSpec[];
   readonly dampeners: readonly SensorDampenerSpec[];
+  readonly neutralizers: readonly EnergyNeutralizerSpec[];
+  readonly nosferatu: readonly NosferatuSpec[];
   readonly scripts: readonly DisruptionScriptSpec[];
   readonly dampenerScripts: readonly SensorDampenerScriptSpec[];
 }
 
-export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [] };
+export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], scripts: [], dampenerScripts: [] };
 
 export interface WebActivation {
   readonly active: boolean;
@@ -498,6 +547,14 @@ export interface DampenerActivation {
   readonly script: SensorDampenerScriptSpec | undefined;
 }
 
+export interface NeutralizerActivation {
+  readonly active: boolean;
+}
+
+export interface NosferatuActivation {
+  readonly active: boolean;
+}
+
 export interface EwarActivation {
   readonly webs: readonly WebActivation[];
   readonly grapplers: readonly GrapplerActivation[];
@@ -505,6 +562,8 @@ export interface EwarActivation {
   readonly scramblers: readonly ScramblerActivation[];
   readonly painters: readonly PainterActivation[];
   readonly dampeners: readonly DampenerActivation[];
+  readonly neutralizers: readonly NeutralizerActivation[];
+  readonly nosferatu: readonly NosferatuActivation[];
 }
 
 export interface EwarProjection {
@@ -519,6 +578,8 @@ export interface EwarReach {
   readonly disruptor: number;
   readonly painter: number;
   readonly dampener: number;
+  readonly neutralizer: number;
+  readonly nosferatu: number;
 }
 
 export interface EwarEffectPotentials {
@@ -532,7 +593,7 @@ export interface EwarEffectPotentials {
   readonly targetingRangeMultiplier: number;
 }
 
-export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener" | "painter";
+export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener" | "painter" | "neutralizer" | "nosferatu";
 
 export type AppliedEwarEffect =
   | { readonly family: "web"; readonly moduleId: TypeId; readonly speedMultiplier: number }
@@ -540,7 +601,9 @@ export type AppliedEwarEffect =
   | { readonly family: "scrambler"; readonly moduleId: TypeId }
   | { readonly family: "disruptor"; readonly moduleId: TypeId; readonly trackingMultiplier: number; readonly optimalMultiplier: number; readonly falloffMultiplier: number }
   | { readonly family: "dampener"; readonly moduleId: TypeId; readonly scanResolutionMultiplier: number; readonly maxTargetRangeMultiplier: number }
-  | { readonly family: "painter"; readonly moduleId: TypeId; readonly signatureMultiplier: number };
+  | { readonly family: "painter"; readonly moduleId: TypeId; readonly signatureMultiplier: number }
+  | { readonly family: "neutralizer"; readonly moduleId: TypeId; readonly amountPerCycle: number; readonly cycleTime: number }
+  | { readonly family: "nosferatu"; readonly moduleId: TypeId; readonly amountPerCycle: number; readonly cycleTime: number };
 
 export type ActiveOffensiveModule =
   | { readonly category: "weapon"; readonly weaponKind: WeaponKind; readonly moduleId: TypeId }
@@ -655,6 +718,8 @@ export interface CombatantConfig extends ShipConfig {
   readonly missileBoosts?: MissileBoosterProjection;
   readonly sensorBoosts?: SensorBoostProjection;
   readonly sensorSpec?: SensorSpec;
+  // Capacitor pool spec. Absent = the combatant never starves (legacy fixtures).
+  readonly capacitor?: CapacitorSpec;
 }
 
 export interface DefenseLayerSpec {
@@ -679,6 +744,7 @@ export interface RahSpec {
   readonly baseResists: DamageResists;
   readonly overloadCycleTimeMultiplier: number;
   readonly armorResistsWithoutRah: DamageResists;
+  readonly capacitorNeed?: number;
   readonly moduleId?: TypeId;
 }
 
@@ -689,6 +755,64 @@ export interface DefenseSpec {
   readonly signaturePenalty: number;
   readonly rah?: RahSpec;
   readonly shieldUniformity: number; // 0..0.25, bleed-through threshold from TSM skill
+}
+
+export interface CapacitorSpec {
+  readonly capacity: number; // GJ
+  readonly rechargeTime: number; // seconds, 0 -> 98.7% advertised recharge time
+}
+
+export type CapBoosterMode = "auto" | "manual";
+
+export interface ScheduledDrain {
+  readonly moduleId: TypeId;
+  readonly amount: number; // GJ per cycle
+  readonly interval: number; // seconds between debits
+  readonly active: boolean;
+}
+
+/** Per-frame engagement facts the engine derives from geometry and lock state: modules unable to act on the target are excluded from cap consumption. */
+export interface CapacitorEngagement {
+  readonly propulsionSuppressed: boolean;
+  readonly weaponsEngaged: boolean;
+  /** Module ids of this side's own hard-range modules currently applying nothing to the target (family granularity). */
+  readonly disengagedModuleIds: readonly TypeId[];
+}
+
+/** Projected cap-warfare debit on one side, built by the engine from the opponent's applied effects. */
+export interface IncomingDrain {
+  readonly moduleId: TypeId;
+  readonly amount: number; // GJ per cycle, falloff and target resistance already applied
+  readonly interval: number; // seconds between debits
+  readonly transfer: boolean; // nosferatu: debit credits the opponent pool
+  readonly count: number; // aggregated module instances represented by this entry
+}
+
+export interface CapBoosterSimSpec {
+  readonly moduleId: TypeId;
+  readonly amount: number; // GJ per charge
+  readonly cycleTime: number; // seconds between injections
+  readonly clipSize: number;
+  readonly reloadTime: number; // seconds
+  readonly mode: CapBoosterMode;
+}
+
+export interface CapacitorSideConfig {
+  readonly infinite: boolean;
+  readonly drains: readonly ScheduledDrain[];
+  readonly boosters: readonly CapBoosterSimSpec[];
+  /** Deterministic fitted cost in GJ/s (the stat-side usage: every fitted active module's amount/interval). Readout basis for the net, pyfa capUsed semantics. */
+  readonly fittedDrainPerSecond: number;
+  /** The lock-gated weapons subset of fittedDrainPerSecond (turrets; missiles and drones cost nothing). Subtracted from the net while no target lock is held. */
+  readonly weaponsDrainPerSecond: number;
+  // Active propulsion module drain (skill-modified amount and interval). Absent = no debit.
+  readonly propulsion?: CapacitorPropulsionDrain;
+}
+
+export interface CapacitorPropulsionDrain {
+  readonly moduleId: TypeId;
+  readonly amount: number; // GJ per cycle
+  readonly interval: number; // seconds between debits
 }
 
 export const ZERO_RESISTS: DamageResists = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };

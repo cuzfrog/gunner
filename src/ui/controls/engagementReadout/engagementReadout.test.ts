@@ -1,10 +1,12 @@
-import { IDLE_LOCK, Vec2, ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, type AttackAssessment, type DamageAssessment, type DroneSpec, type EngineView, type InflictedDps, type LockState, type MissileSpec, type ShipState, type TurretSpec } from "../../../sim";
+import { IDLE_LOCK, Vec2, ZERO_DAMAGE, EMPTY_DEFENSE_ASSESSMENT, type AttackAssessment, type CapacitorView, type DamageAssessment, type DroneSpec, type EngineView, type InflictedDps, type LockState, type MissileSpec, type ShipState, type TurretSpec } from "../../../sim";
+import type { TypeId } from "../../../gamedata/ids";
 import { toTypeId } from "../../../gamedata/ids";
 import { EngagementReadoutImpl, type EngagementReadout, type ReadoutEls } from "./engagementReadout";
 
 function fakeSideEls(): ReadoutEls["shipA"] {
   const make = (): HTMLElement => {
     const classes: string[] = [];
+    const attrs = new Map<string, string>();
     return {
       textContent: "",
       hidden: false,
@@ -19,6 +21,8 @@ function fakeSideEls(): ReadoutEls["shipA"] {
         },
         contains: (name: string): boolean => classes.includes(name),
       },
+      setAttribute: (name: string, value: string): void => { attrs.set(name, value); },
+      getAttribute: (name: string): string | null => attrs.get(name) ?? null,
     } as unknown as HTMLElement;
   };
   return {
@@ -80,11 +84,16 @@ const DUMMY_DRONE: DroneSpec = { kind: "drone", moduleId: toTypeId("3"), trackin
 
 const ZERO_INFLICTED: InflictedDps = { total: 0, byLayer: { shield: 0, armor: 0, hull: 0 } };
 
+function capacitorRuntime(shipAStarved: readonly TypeId[] = [], shipBStarved: readonly TypeId[] = []): Record<"shipA" | "shipB", CapacitorView> {
+  const view = (starvedModuleIds: readonly TypeId[]): CapacitorView => ({ starvedModuleIds }) as unknown as CapacitorView;
+  return { shipA: view(shipAStarved), shipB: view(shipBStarved) };
+}
+
 function makeInflicted(total: number): InflictedDps {
   return { total, byLayer: { shield: 0, armor: 0, hull: 0 } };
 }
 
-function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipALock?: LockState; shipBInflictedDps?: number }) {
+function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipALock?: LockState; shipBInflictedDps?: number; shipAStarved?: readonly TypeId[] }) {
   const ship = fakeShipState();
   const frame = {
     time: 0, shipA: ship, shipB: ship,
@@ -109,7 +118,7 @@ function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: num
   const shipALock = overrides.shipALock ?? IDLE_LOCK;
   const defenses = { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT };
   const inflicted = { shipA: ZERO_INFLICTED, shipB: makeInflicted(overrides.shipBInflictedDps ?? 1.5) };
-  return { frame, attacks: { shipA: shipAAttack, shipB: shipBAttack }, effectiveWeapons: { shipA: DUMMY_TURRET, shipB: DUMMY_TURRET }, defenses, inflicted, locks: { shipA: shipALock, shipB: IDLE_LOCK } } as unknown as EngineView;
+  return { frame, attacks: { shipA: shipAAttack, shipB: shipBAttack }, effectiveWeapons: { shipA: DUMMY_TURRET, shipB: DUMMY_TURRET }, defenses, inflicted, locks: { shipA: shipALock, shipB: IDLE_LOCK }, capacitorRuntime: capacitorRuntime(overrides.shipAStarved) } as unknown as EngineView;
 }
 
 function makeMissileView(overrides: { distance?: number; shipADamage?: DamageAssessment; shipAMissile?: { application: number; signatureTerm: number; velocityTerm: number; inRange: boolean; timeToImpact: number }; shipBInflictedDps?: number }) {
@@ -130,7 +139,7 @@ function makeMissileView(overrides: { distance?: number; shipADamage?: DamageAss
   };
   const defenses = { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT };
   const inflicted = { shipA: ZERO_INFLICTED, shipB: makeInflicted(overrides.shipBInflictedDps ?? 24) };
-  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_MISSILE, shipB: undefined }, defenses, inflicted, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK } } as unknown as EngineView;
+  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_MISSILE, shipB: undefined }, defenses, inflicted, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK }, capacitorRuntime: capacitorRuntime() } as unknown as EngineView;
 }
 
 function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipBInflictedDps?: number }) {
@@ -151,7 +160,7 @@ function makeDroneView(overrides: { distance?: number; shipAHit?: { chance: numb
   };
   const defenses = { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT };
   const inflicted = { shipA: ZERO_INFLICTED, shipB: makeInflicted(overrides.shipBInflictedDps ?? 15) };
-  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_DRONE, shipB: undefined }, defenses, inflicted, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK } } as unknown as EngineView;
+  return { frame, attacks: { shipA: shipAAttack, shipB: undefined }, effectiveWeapons: { shipA: DUMMY_DRONE, shipB: undefined }, defenses, inflicted, locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK }, capacitorRuntime: capacitorRuntime() } as unknown as EngineView;
 }
 
 function makeNoWeaponView(distance: number = 1000): EngineView {
@@ -168,6 +177,7 @@ function makeNoWeaponView(distance: number = 1000): EngineView {
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
     inflicted: { shipA: ZERO_INFLICTED, shipB: ZERO_INFLICTED },
     locks: { shipA: IDLE_LOCK, shipB: IDLE_LOCK },
+    capacitorRuntime: capacitorRuntime(),
   } as unknown as EngineView;
 }
 
@@ -341,5 +351,28 @@ describe("EngagementReadout", () => {
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeDroneView({ distance: 1000, shipADamage: { nominalDps: 25, appliedDps: 0, application: 0, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE } }), T);
     expect(els.shipA.resAppliedDpsApplication.classList.contains("is-danger")).toBe(true);
+  });
+});
+
+describe("EngagementReadout starvation", () => {
+  test("dims the applied DPS readout with the insufficient-capacitor hint while the turret is starved", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeTurretView({ shipAStarved: [DUMMY_TURRET.moduleId] }), T);
+    expect(els.shipA.resAppliedDps.classList.contains("is-dim")).toBe(true);
+    expect(els.shipA.resAppliedDps.getAttribute("data-hint")).toBe("capacitor.insufficient");
+    readout.update(makeTurretView({}), T);
+    expect(els.shipA.resAppliedDps.classList.contains("is-dim")).toBe(false);
+    expect(els.shipA.resAppliedDps.getAttribute("data-hint")).toBe("");
+  });
+
+  test("missile and drone attacks are never marked capacitor-starved", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeMissileView({}), T);
+    expect(els.shipA.resAppliedDps.classList.contains("is-dim")).toBe(false);
+    expect(els.shipA.resAppliedDps.getAttribute("data-hint")).toBe("");
+    readout.update(makeDroneView({}), T);
+    expect(els.shipA.resAppliedDps.classList.contains("is-dim")).toBe(false);
   });
 });

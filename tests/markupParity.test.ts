@@ -1,12 +1,13 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { TAG_BY_ID } from "../src/ui/controls";
 import pkg from "../package.json";
 
 const DIST_HTML = "dist/index.html";
 const BASELINE_PATH = "tests/markup-parity-baseline.json";
-const SRC_DIRS = ["src/components", "src/layouts", "src/pages"];
+// Any build input being newer than dist invalidates the parity checks; src/ui and package.json
+// feed the built page (contract ids, i18n keys, version), so they must be watched too.
+const STALE_SOURCES = ["src", "public", "package.json", "astro.config.mjs", "tsconfig.json"];
 
 interface Baseline {
   readonly ids: readonly string[];
@@ -14,24 +15,14 @@ interface Baseline {
   readonly i18nKeys: readonly string[];
 }
 
-function newestMtime(dir: string): number {
-  let newest = 0;
-  for (const entry of readdirSync(dir)) {
-    const path = join(dir, entry);
-    const stat = statSync(path);
-    if (stat.isDirectory()) newest = Math.max(newest, newestMtime(path));
-    else newest = Math.max(newest, stat.mtimeMs);
-  }
-  return newest;
+function isDistStale(): boolean {
+  if (!existsSync(DIST_HTML)) return true;
+  const result = spawnSync("find", [...STALE_SOURCES.filter((path) => existsSync(path)), "-newer", DIST_HTML, "-print", "-quit"], { encoding: "utf8" });
+  return result.stdout.trim().length > 0;
 }
 
 function ensureBuild(): void {
-  if (existsSync(DIST_HTML)) {
-    const distMtime = statSync(DIST_HTML).mtimeMs;
-    const srcNewest = Math.max(...SRC_DIRS.filter(existsSync).map(newestMtime));
-    if (distMtime > srcNewest) return;
-  }
-  spawnSync("bun", ["run", "build"], { stdio: "inherit" });
+  if (isDistStale()) spawnSync("bun", ["run", "build"], { stdio: "inherit" });
 }
 
 function extractIds(html: string): Map<string, number> {
@@ -61,7 +52,10 @@ function loadBaseline(): Baseline {
 }
 
 describe("markup parity", () => {
-  beforeAll(ensureBuild, 30000);
+  // A stale dist is normally rebuilt by the e2e server before an e2e run; this rebuild covers
+  // `bun test` directly after markup-affecting changes. Generous timeout: under load a cold
+  // full build can exceed 30s, which made this hook flake.
+  beforeAll(ensureBuild, 120000);
 
   test("every contract element id appears exactly once", () => {
     const html = readFileSync(DIST_HTML, "utf-8");

@@ -44,6 +44,8 @@ import {
   isOptionalPositive,
   isOptionalProfileParamOverrides,
   isOptionalRahActivation,
+  isOptionalCapBoosterModes,
+  isOptionalCapBoosterCharges,
   isOptionalRepairMode,
   isOptionalRepairerActivations,
   isOptionalSkillLevel,
@@ -243,6 +245,9 @@ export class SettingsParser {
       isOptionalRepairMode(s[`${p}RepMode`]) &&
       isOptionalRepairerActivations(s[`${p}RepairerActivation`]) &&
       isOptionalRahActivation(s[`${p}RahActivation`]) &&
+      isOptionalBoolean(s[`${p}InfiniteCapacitor`]) &&
+      isOptionalCapBoosterModes(s[`${p}CapBoosterModes`]) &&
+      isOptionalCapBoosterCharges(s[`${p}CapBoosterCharges`]) &&
       isOptionalWeaponKind(s[`${p}WeaponKind`]) &&
       isOptionalNonEmptyString(s[`${p}MissileAmmo`]) &&
       isOptionalDroneGroups(s[`${p}DroneGroups`]) &&
@@ -538,6 +543,9 @@ function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSetti
   if (combatant.repMode !== undefined) wire[`${p}RepMode` as const] = combatant.repMode;
   if (combatant.repairerActivation !== undefined) wire[`${p}RepairerActivation` as const] = combatant.repairerActivation;
   if (combatant.rahActivation !== undefined) wire[`${p}RahActivation` as const] = combatant.rahActivation;
+  if (combatant.infiniteCapacitor !== undefined) wire[`${p}InfiniteCapacitor` as const] = combatant.infiniteCapacitor;
+  if (combatant.capBoosterModes !== undefined) wire[`${p}CapBoosterModes` as const] = combatant.capBoosterModes;
+  if (combatant.capBoosterCharges !== undefined) wire[`${p}CapBoosterCharges` as const] = combatant.capBoosterCharges;
   if (combatant.weaponKind !== undefined) wire[`${p}WeaponKind` as const] = combatant.weaponKind;
   if (combatant.missileAmmo !== undefined) wire[`${p}MissileAmmo` as const] = combatant.missileAmmo;
   if (combatant.droneGroups !== undefined) wire[`${p}DroneGroups` as const] = combatant.droneGroups;
@@ -573,6 +581,9 @@ function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"
     repMode: sideValue(side, settings.shipARepMode, settings.shipBRepMode),
     repairerActivation: sideValue(side, settings.shipARepairerActivation, settings.shipBRepairerActivation),
     rahActivation: sideValue(side, settings.shipARahActivation, settings.shipBRahActivation),
+    infiniteCapacitor: sideValue(side, settings.shipAInfiniteCapacitor, settings.shipBInfiniteCapacitor),
+    capBoosterModes: sideValue(side, settings.shipACapBoosterModes, settings.shipBCapBoosterModes),
+    capBoosterCharges: sideValue(side, settings.shipACapBoosterCharges, settings.shipBCapBoosterCharges),
     sig,
     tracking: sideValue(side, settings.shipATracking, settings.shipBTracking) ?? settings.tracking ?? 0,
     sigRes: sideValue(side, settings.shipASigRes, settings.shipBSigRes) ?? settings.sigRes ?? "S",

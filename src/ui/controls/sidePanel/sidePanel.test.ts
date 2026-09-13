@@ -1,7 +1,10 @@
 import { createContainer, InjectionMode } from "awilix";
 import { registerGameDataModule } from "../../../gamedata";
-import { registerShipsModule, type DefenseSkills, type ShipsCradle, defaultDefenseSkills, defaultTargetingSkills } from "../../../ships";
-import { RIFTER, buildSidePanel, getFake, mockShips } from "../testSupport";
+import { registerShipsModule, type DefenseSkills, type PropulsionStats, type ShipsCradle, defaultDefenseSkills, defaultTargetingSkills } from "../../../ships";
+import { FITTED, IMPORTED_RIFTER, mockFittingImport } from "../../testing";
+import { PROPULSION_NONE, type FittedHullSummary } from "../../../appstate";
+import { toTypeId, type ShipId, type TypeId } from "../../../gamedata/ids";
+import { FakeElement, RIFTER, buildSidePanel, getFake, mockShips } from "../testSupport";
 
 function realShips() {
   const cradle = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
@@ -17,6 +20,8 @@ function shipsWithHull() {
   ships.hullView = vi.fn((profile) => ({ name: profile.name, hullType: "Frigate", faction: "Minmatar Republic" }));
   return ships;
 }
+
+const MWD: PropulsionStats & { readonly propulsionId: "mwd-5mn"; readonly propulsionModuleId: TypeId } = { propulsionId: "mwd-5mn", propulsionModuleId: toTypeId("434"), thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5, capacitorNeed: 45 };
 
 describe("SidePanel", () => {
   test("capture returns the current side panel inputs", () => {
@@ -64,6 +69,83 @@ describe("SidePanel", () => {
     expect(getFake(document, "ship-a-mass").value).toBe("1200000");
   });
 
+  test("restore re-derives the fitted hull summary from the fitting text", () => {
+    const fittingImport = mockFittingImport();
+    const imported = { ...IMPORTED_RIFTER, capacitor: { ...IMPORTED_RIFTER.capacitor, spec: { capacity: 200, rechargeTime: 180 } } };
+    fittingImport.importFitting = vi.fn(() => imported);
+    const { panel } = buildSidePanel("shipA", shipsWithHull(), fittingImport);
+    panel.profile = RIFTER;
+    panel.fittingText = "[Rifter, Brawler]";
+    const state = panel.capture();
+    panel.restore({ ...state, fittedHull: { fittingName: "Stale", fitted: FITTED, capacitor: { capacity: 4375, rechargeTime: 656.25 }, energyWarfareResistancePercent: 0 } });
+    expect(panel.fittedHull?.fittingName).toBe("Brawler");
+    expect(panel.fittedHull?.capacitor?.capacity).toBe(200);
+  });
+
+  test("restore keeps the saved summary when the fitting text fails to import", () => {
+    const fittingImport = mockFittingImport();
+    const { panel } = buildSidePanel("shipA", shipsWithHull(), fittingImport);
+    panel.profile = RIFTER;
+    panel.fittingText = "[Rifter, Brawler]";
+    const state = panel.capture();
+    const stale: FittedHullSummary = { fittingName: "Stale", fitted: FITTED, capacitor: { capacity: 111, rechargeTime: 100 }, energyWarfareResistancePercent: 0 };
+    panel.restore({ ...state, fittedHull: stale });
+    expect(panel.fittedHull?.fittingName).toBe("Stale");
+    expect(panel.fittedHull?.capacitor?.capacity).toBe(111);
+  });
+
+  test("restore keeps no fitted summary when the saved hull differs from the imported fitting hull", () => {
+    const fittingImport = mockFittingImport();
+    fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
+    const { panel } = buildSidePanel("shipA", shipsWithHull(), fittingImport);
+    panel.profile = RIFTER;
+    panel.fittingText = "[Rifter, Brawler]";
+    const state = panel.capture();
+    panel.restore({ ...state, hull: "999" as ShipId, fittedHull: undefined });
+    expect(panel.fittedHull).toBeUndefined();
+  });
+
+  test("restore keeps propulsion inactive when the saved selection is none", () => {
+    const fittingImport = mockFittingImport();
+    fittingImport.importFitting = vi.fn(() => ({ ...IMPORTED_RIFTER, propulsion: MWD }));
+    const { panel } = buildSidePanel("shipA", shipsWithHull(), fittingImport);
+    panel.profile = RIFTER;
+    panel.fittingText = "[Rifter, Brawler]";
+    const state = panel.capture();
+    panel.restore({
+      ...state,
+      propulsion: PROPULSION_NONE,
+      fittedHull: { fittingName: "Brawler", propulsionModuleId: toTypeId("20310"), propulsionName: "Compact MWD", fitted: FITTED, capacitor: { capacity: 4375, rechargeTime: 656.25 }, energyWarfareResistancePercent: 0 },
+    });
+    expect(panel.fittedHull?.propulsionId).toBeUndefined();
+    expect(panel.fittedHull?.propulsionKind).toBeUndefined();
+    expect(panel.fittedHull?.propulsion).toBeUndefined();
+    expect(panel.fittedHull?.propulsionModuleId).toBe(toTypeId("20310"));
+    expect(panel.fittedHull?.propulsionName).toBe("Compact MWD");
+    expect(panel.fittedHull?.fittingName).toBe("Brawler");
+  });
+
+  test("restore applies the saved propulsion variant when the selection is active", () => {
+    const fittingImport = mockFittingImport();
+    fittingImport.importFitting = vi.fn(() => ({ ...IMPORTED_RIFTER, propulsion: MWD }));
+    const { panel } = buildSidePanel("shipA", shipsWithHull(), fittingImport);
+    panel.profile = RIFTER;
+    panel.fittingText = "[Rifter, Brawler]";
+    const state = panel.capture();
+    const savedStats: PropulsionStats = { thrust: 1_450_000, speedBonus: 5.05, massAddition: 500_000, sigBloom: 4.75, capacitorNeed: 43 };
+    panel.restore({
+      ...state,
+      propulsion: "ab-1mn",
+      fittedHull: { fittingName: "Brawler", propulsionId: "ab-1mn", propulsionModuleId: toTypeId("20311"), propulsionName: "Fleet AB", propulsionKind: "afterburner", propulsion: savedStats, fitted: FITTED, capacitor: { capacity: 4375, rechargeTime: 656.25 }, energyWarfareResistancePercent: 0 },
+    });
+    expect(panel.fittedHull?.propulsionId).toBe("ab-1mn");
+    expect(panel.fittedHull?.propulsionModuleId).toBe(toTypeId("20311"));
+    expect(panel.fittedHull?.propulsionName).toBe("Fleet AB");
+    expect(panel.fittedHull?.propulsionKind).toBe("afterburner");
+    expect(panel.fittedHull?.propulsion).toBe(savedStats);
+    expect(panel.fittedHull?.capacitor?.capacity).toBe(IMPORTED_RIFTER.capacitor.spec.capacity);
+  });
+
   test("state accessors round-trip values", () => {
     const { panel } = buildSidePanel("shipA");
     panel.profile = RIFTER;
@@ -75,6 +157,26 @@ describe("SidePanel", () => {
     expect(panel.fittingText).toBe("fit");
     expect(panel.isOverridden("shipAMass")).toBe(true);
     expect(panel.lastCommittedHull).toBe(RIFTER.id);
+  });
+
+  test("fittingText updates the export button state", () => {
+    const { document, panel } = buildSidePanel("shipA");
+    const exportButton = getFake(document, "ship-a-export-fitting");
+    expect(exportButton.disabled).toBe(true);
+    panel.fittingText = "[Rifter, tackle]";
+    expect(exportButton.disabled).toBe(false);
+    expect(exportButton.getAttribute("aria-disabled")).toBe("false");
+    panel.fittingText = undefined;
+    expect(exportButton.disabled).toBe(true);
+    expect(exportButton.getAttribute("aria-disabled")).toBe("true");
+  });
+
+  test("export button click delegates to the exporter with the panel side", () => {
+    const { document, panel } = buildSidePanel("shipA");
+    const copyFitting = vi.fn(() => Promise.resolve());
+    panel.setExporter({ copyFitting });
+    (getFake(document, "ship-a-export-fitting") as unknown as FakeElement).trigger("click");
+    expect(copyFitting).toHaveBeenCalledWith("shipA");
   });
 
   test("shipA record lands in the turret overrides store", () => {

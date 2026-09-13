@@ -26,6 +26,8 @@ const ALLOWED_ORPHAN = new Set<string>([
   "range-overlay-grappler",
   "range-overlay-scrambler",
   "range-overlay-disruptor",
+  "range-overlay-neutralizer",
+  "range-overlay-nosferatu",
   // Astro components generate per-side class names from `prefix-${side}` at build time.
   // The literal scanner sees only the prefix (ending with `-`, which is skipped); the
   // full names appear only in dist/index.html which may not exist when the test runs in CI.
@@ -98,6 +100,7 @@ const APPROVED_PREFIXES = [
   "choice-selector",
   "ewar",
   "defense",
+  "capacitor",
   "targeting",
   "booster",
   "profile",

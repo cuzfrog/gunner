@@ -1,7 +1,8 @@
-import type { Ships } from "../../../ships";
+import type { Ships, PropulsionId, PropulsionModule } from "../../../ships";
+import { toTypeId, type ShipId } from "../../../gamedata/ids";
 import type { I18n, Language } from "../../i18n";
-import type { ShipId } from "../../../gamedata/ids";
-import { PROPULSION_NONE, type FittedHullSummary } from "../../../appstate";
+import { PROPULSION_NONE } from "../../../appstate";
+import { IMPORTED_RIFTER } from "../../testing";
 import { fakeDocument, getFake, FakeElement, mockShips, RIFTER } from "../testSupport";
 import { HullSection, type HullSectionEls } from "./hullSection";
 import type { Popup } from "../popup";
@@ -13,6 +14,36 @@ function shipsWithHull(): Ships {
   ships.findHull = vi.fn((name: string) => (name === "Rifter" ? RIFTER : undefined));
   ships.hullView = vi.fn((profile) => ({ name: profile.name, hullType: "Frigate", faction: "Minmatar Republic" }));
   return ships;
+}
+
+const MOCK_AB_1MN: PropulsionModule = {
+  id: "ab-1mn" as PropulsionId,
+  kind: "afterburner",
+  sizeTier: "small",
+  label: "1MN Afterburner I",
+  iconId: toTypeId("439"),
+  defaultModuleId: toTypeId("439"),
+  thrust: 1.5e6,
+  massAddition: 500_000,
+  speedBonus: 1.15,
+  sigBloom: 0,
+  capacitorNeed: 20,
+};
+
+function importedRifterWithPropulsion(): typeof IMPORTED_RIFTER {
+  return {
+    ...IMPORTED_RIFTER,
+    propulsion: {
+      thrust: 1.5e6,
+      speedBonus: 1.15,
+      massAddition: 500_000,
+      sigBloom: 0,
+      capacitorNeed: 20,
+      propulsionId: "ab-1mn" as PropulsionId,
+      propulsionModuleId: MOCK_AB_1MN.defaultModuleId,
+      propulsionName: "1MN Afterburner I",
+    },
+  };
 }
 
 function mockI18n(): I18n {
@@ -82,7 +113,6 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
       notePropulsionVariant: vi.fn(),
       seedPropulsionMemory: vi.fn(),
       defaultPropulsionName: vi.fn(),
-      nakedFitted: vi.fn(),
       popup: {} as unknown as Popup,
     } as unknown as ISidePanelSections["propulsion"],
     paste: {
@@ -236,15 +266,31 @@ describe("HullSection", () => {
 
   test("applyImportedFitting with no propulsion passes PROPULSION_NONE to renderPropulsionOptions", () => {
     const { panel, section } = buildHullSection();
-    const summary: FittedHullSummary = { fittingName: "Brawler", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } };
-    section.applyImportedFitting(summary);
+    section.applyImportedFitting(IMPORTED_RIFTER);
+    expect(panel.fittedHull?.fittingName).toBe(IMPORTED_RIFTER.fittingName);
+    expect(panel.fittedHull?.capacitor).toEqual(IMPORTED_RIFTER.capacitor.spec);
     expect(panel.sections.propulsion.renderPropulsionOptions).toHaveBeenCalledWith(PROPULSION_NONE);
   });
 
   test("applyImportedFitting with propulsion passes the propulsionId to renderPropulsionOptions", () => {
     const { panel, section } = buildHullSection();
-    const summary: FittedHullSummary = { fittingName: "Brawler", propulsionId: "ab-1mn", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } };
-    section.applyImportedFitting(summary);
+    section.applyImportedFitting(importedRifterWithPropulsion());
     expect(panel.sections.propulsion.renderPropulsionOptions).toHaveBeenCalledWith("ab-1mn");
+  });
+
+  test("buildFittedSummary resolves the propulsion kind through the ships catalog", () => {
+    const ships = shipsWithHull();
+    ships.fittingOption = vi.fn(() => MOCK_AB_1MN);
+    const { section } = buildHullSection(ships);
+    const summary = section.buildFittedSummary(importedRifterWithPropulsion());
+    expect(summary.propulsionKind).toBe("afterburner");
+    expect(summary.propulsionModuleId).toBe(MOCK_AB_1MN.defaultModuleId);
+  });
+
+  test("buildFittedSummary leaves the propulsion kind undefined without a fitted propulsion", () => {
+    const { section } = buildHullSection();
+    const summary = section.buildFittedSummary(IMPORTED_RIFTER);
+    expect(summary.propulsionId).toBeUndefined();
+    expect(summary.propulsionKind).toBeUndefined();
   });
 });

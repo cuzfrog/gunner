@@ -24,6 +24,8 @@ const profile: ShipProfile = {
   shieldRechargeTime: 1250,
   armorHp: 9350,
   hullHp: 7000,
+  capacitorCapacity: 6000,
+  capacitorRechargeTime: 1000,
   shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
   armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -54,6 +56,8 @@ const rokhProfile: ShipProfile = {
   shieldRechargeTime: 2500,
   armorHp: 7700,
   hullHp: 8250,
+  capacitorCapacity: 6000,
+  capacitorRechargeTime: 1000,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
   hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
@@ -235,6 +239,7 @@ describe("DefenseCalculatorImpl", () => {
     expect(eanmPlusRah.rah?.baseResists.em).toBeCloseTo(0.15, 5);
     expect(eanmPlusRah.rah?.shiftAmount).toBeCloseTo(0.06, 5);
     expect(eanmPlusRah.rah?.cycleTime).toBeGreaterThan(0);
+    expect(eanmPlusRah.rah?.capacitorNeed).toBeCloseTo(42, 5);
     expect(eanmPlusRah.rah?.armorResistsWithoutRah.em).toBeCloseTo(eanmOnly.layers.armor.resists.em, 5);
   });
 

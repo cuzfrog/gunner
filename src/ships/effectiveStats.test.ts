@@ -22,6 +22,8 @@ const frigate: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -46,6 +48,8 @@ const battleship: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -123,11 +127,13 @@ describe("naked hull", () => {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
     };
-    const compactAB10: PropulsionStats = { thrust: 15_000_000, speedBonus: 1.25, massAddition: 5_000_000, sigBloom: 0 };
+    const compactAB10: PropulsionStats = { thrust: 15_000_000, speedBonus: 1.25, massAddition: 5_000_000, sigBloom: 0, capacitorNeed: 80 };
     const stats = fittedStats(thrasher, undefined, compactAB10, conditions(5));
     expect(stats.maxSpeed).toBeCloseTo(1536.01, 2);
     expect(stats.mass).toBe(6_600_000);
@@ -174,6 +180,8 @@ describe("naked hull", () => {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },

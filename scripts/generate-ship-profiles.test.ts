@@ -1,4 +1,4 @@
-import { _buildAttributeNameMap, _buildShipNameToType, _extractDefenseData, _parseDroneLimits, _parseProfile, _resolveShipIds, _slugify } from "./generate-ship-profiles";
+import { _buildAttributeNameMap, _buildShipNameToType, _extractCapacitorData, _extractDefenseData, _parseDroneLimits, _parseProfile, _resolveShipIds, _slugify } from "./generate-ship-profiles";
 import type { SdeDogmaAttribute, SdeGroup, SdeType, SdeTypeDogma } from "./generate-ship-profiles";
 
 describe("_slugify", () => {
@@ -137,7 +137,7 @@ describe("_parseProfile", () => {
 
   test("extracts defense data from typedogma when ship is matched", () => {
     const attributeNames = new Map<number, string>([
-      [263, "shieldCapacity"], [479, "shieldRechargeRate"], [265, "armorHP"], [9, "hp"],
+      [263, "shieldCapacity"], [479, "shieldRechargeRate"], [265, "armorHP"], [9, "hp"], [482, "capacitorCapacity"], [55, "rechargeRate"],
       [267, "armorEmDamageResonance"], [270, "armorThermalDamageResonance"], [269, "armorKineticDamageResonance"], [268, "armorExplosiveDamageResonance"],
       [271, "shieldEmDamageResonance"], [274, "shieldThermalDamageResonance"], [273, "shieldKineticDamageResonance"], [272, "shieldExplosiveDamageResonance"],
       [113, "emDamageResonance"], [110, "thermalDamageResonance"], [109, "kineticDamageResonance"], [111, "explosiveDamageResonance"],
@@ -145,7 +145,7 @@ describe("_parseProfile", () => {
     const typedogmas: Record<string, SdeTypeDogma> = {
       "587": {
         dogmaAttributes: [
-          { attributeID: 263, value: 375 }, { attributeID: 479, value: 625000 }, { attributeID: 265, value: 250 }, { attributeID: 9, value: 400 },
+          { attributeID: 263, value: 375 }, { attributeID: 479, value: 625000 }, { attributeID: 265, value: 250 }, { attributeID: 9, value: 400 }, { attributeID: 482, value: 6375 }, { attributeID: 55, value: 1250000 },
           { attributeID: 267, value: 0.5 }, { attributeID: 270, value: 0.35 }, { attributeID: 269, value: 0.25 }, { attributeID: 268, value: 0.2 },
           { attributeID: 271, value: 0.5 }, { attributeID: 274, value: 0.6 }, { attributeID: 273, value: 0.7 }, { attributeID: 272, value: 0.75 },
           { attributeID: 113, value: 0.67 }, { attributeID: 110, value: 0.67 }, { attributeID: 109, value: 0.67 }, { attributeID: 111, value: 0.67 },
@@ -168,6 +168,8 @@ describe("_parseProfile", () => {
     expect(profile.shieldResists).toEqual({ em: 0.5, thermal: 0.4, kinetic: 0.3, explosive: 0.25 });
     expect(profile.armorResists).toEqual({ em: 0.5, thermal: 0.65, kinetic: 0.75, explosive: 0.8 });
     expect(profile.hullResists).toEqual({ em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 });
+    expect(profile.capacitorCapacity).toBe(6375);
+    expect(profile.capacitorRechargeTime).toBe(1250);
   });
 
   test("defaults defense to zero when typedogma is missing", () => {
@@ -187,6 +189,24 @@ describe("_parseProfile", () => {
     expect(profile.shieldResists).toEqual({ em: 0, thermal: 0, kinetic: 0, explosive: 0 });
     expect(profile.armorResists).toEqual({ em: 0, thermal: 0, kinetic: 0, explosive: 0 });
     expect(profile.hullResists).toEqual({ em: 0, thermal: 0, kinetic: 0, explosive: 0 });
+  });
+
+  test("carries capacitor data from typedogma into the profile", () => {
+    const attributeNames = new Map<number, string>([[482, "capacitorCapacity"], [55, "rechargeRate"]]);
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      "587": { dogmaAttributes: [{ attributeID: 482, value: 450 }, { attributeID: 55, value: 250000 }] },
+    };
+    const raw = {
+      name: "Rifter",
+      faction: "Minmatar Republic",
+      hullType: "Standard Frigates",
+      navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
+      structure: { mass: "1,067,000 kg" },
+      targeting: { sigRadius: "35 m", scanResolution: "200 mm", maxTargetingRange: "30 km", maxLockedTargets: 4 },
+    };
+    const profile = _parseProfile(raw, 0, shipNameToType, typedogmas, attributeNames);
+    expect(profile.capacitorCapacity).toBe(450);
+    expect(profile.capacitorRechargeTime).toBe(250);
   });
 
   test("throws for a non-object entry", () => {
@@ -256,6 +276,41 @@ describe("_buildAttributeNameMap", () => {
     const attrs: Record<string, SdeDogmaAttribute> = { "1": makeAttr(263, "shieldCapacity"), "2": makeAttr(263, "duplicate") };
     const map = _buildAttributeNameMap(attrs);
     expect(map.get(263)).toBe("shieldCapacity");
+  });
+});
+
+describe("_extractCapacitorData", () => {
+  function makeAttributeNames(): Map<number, string> {
+    return new Map<number, string>([[482, "capacitorCapacity"], [55, "rechargeRate"]]);
+  }
+
+  test("extracts capacitor capacity and recharge time in seconds", () => {
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      "24692": { dogmaAttributes: [{ attributeID: 482, value: 6375 }, { attributeID: 55, value: 1250000 }] },
+    };
+    const capacitor = _extractCapacitorData("24692", typedogmas, makeAttributeNames());
+    expect(capacitor.capacitorCapacity).toBe(6375);
+    expect(capacitor.capacitorRechargeTime).toBe(1250);
+  });
+
+  test("returns zeros for legacy entries without SDE typedogma", () => {
+    const capacitor = _extractCapacitorData("99999", {}, makeAttributeNames());
+    expect(capacitor.capacitorCapacity).toBe(0);
+    expect(capacitor.capacitorRechargeTime).toBe(0);
+  });
+
+  test("throws when the typedogma lacks capacitorCapacity", () => {
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      "587": { dogmaAttributes: [{ attributeID: 55, value: 1250000 }] },
+    };
+    expect(() => _extractCapacitorData("587", typedogmas, makeAttributeNames())).toThrow("587: missing capacitorCapacity dogma attribute");
+  });
+
+  test("throws when the typedogma lacks rechargeRate", () => {
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      "587": { dogmaAttributes: [{ attributeID: 482, value: 6375 }] },
+    };
+    expect(() => _extractCapacitorData("587", typedogmas, makeAttributeNames())).toThrow("587: missing rechargeRate dogma attribute");
   });
 });
 

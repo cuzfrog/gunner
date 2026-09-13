@@ -1,8 +1,10 @@
-import { Vec2, type EngineView, type DefenseView, type EngagementView, EMPTY_DEFENSE_ASSESSMENT, } from "../../../sim";
+import { Vec2, type EngineView, type DefenseView, type EngagementView, type CapacitorView, EMPTY_DEFENSE_ASSESSMENT, } from "../../../sim";
+import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { EffectiveReadouts } from "../controlsContract";
 import type { EngagementReadout } from "../engagementReadout";
 import type { EffectiveReadout } from "../effectiveReadout";
 import type { DefenseReadout, ReadoutPresenter } from "./readoutPresenter";
+import type { CapacitorReadout } from "../capacitor";
 import { ReadoutPresenterImpl } from "./readoutPresenter";
 import type { I18n } from "../../i18n";
 import type { ViewStream } from "../../viewStream";
@@ -51,25 +53,35 @@ function makeView(): EngagementView {
   return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } }, incomingOffensiveModules: { shipA: [], shipB: [] } };
 }
 
-function makeEngineView(sigs?: { shipA: number; shipB: number }): EngineView {
+function makeEngineView(sigs?: { shipA: number; shipB: number }, shipAStarved: readonly TypeId[] = []): EngineView {
   const view = makeView();
   const shipAState = { ...view.frame.shipA, sig: sigs?.shipA ?? 1 };
   const shipBState = { ...view.frame.shipB, sig: sigs?.shipB ?? 1 };
   const snapshot = { time: view.frame.time, shipA: shipAState, shipB: shipBState, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
-  return { ...view, readouts: { shipA: { kind: "none", speed: 0 } as unknown as EffectiveReadouts["shipA"], shipB: { kind: "none", speed: 0 } as unknown as EffectiveReadouts["shipB"] }, defenseRuntime: mockDefenseView(), snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
+  return { ...view, readouts: { shipA: { kind: "none", speed: 0 } as unknown as EffectiveReadouts["shipA"], shipB: { kind: "none", speed: 0 } as unknown as EffectiveReadouts["shipB"] }, defenseRuntime: mockDefenseView(), capacitorRuntime: emptyCapacitorView(shipAStarved), snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
+}
+
+function emptyCapacitorView(shipAStarved: readonly TypeId[] = []): Record<"shipA" | "shipB", CapacitorView> {
+  const side: CapacitorView = { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, drainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] };
+  return { shipA: { ...side, starvedModuleIds: [...shipAStarved] }, shipB: { ...side } };
 }
 
 function buildDeps() {
   const viewStream = createTestViewStream();
-  const engagementReadout = { update: vi.fn() } as unknown as EngagementReadout;
-  const effectiveReadout = { update: vi.fn() } as unknown as EffectiveReadout;
+  const engagementReadout = { update: vi.fnUntracked() } as unknown as EngagementReadout;
+  const effectiveReadout = { update: vi.fnUntracked() } as unknown as EffectiveReadout;
   const defenseReadout: DefenseReadout = {
-    updateAssessments: vi.fn(),
-    updateDefenseView: vi.fn(),
-    updateEffectiveSig: vi.fn(),
+    updateAssessments: vi.fnUntracked(),
+    updateDefenseView: vi.fnUntracked(),
+    updateEffectiveSig: vi.fnUntracked(),
   };
+  const capacitorReadout: CapacitorReadout = {
+    updateRuntime: vi.fnUntracked(),
+    setPlaying: vi.fnUntracked(),
+  };
+  const starvedReadout = { updateStarvedModules: vi.fnUntracked() };
   let fakeNow = 0;
-  const deps = { viewStream, engagementReadout, effectiveReadout, defenseReadout, i18n: mockI18n(), now: () => fakeNow };
+  const deps = { viewStream, engagementReadout, effectiveReadout, defenseReadout, capacitorReadout, starvedReadout, i18n: mockI18n(), now: () => fakeNow };
   return { ...deps, setNow: (n: number) => { fakeNow = n; } };
 }
 
@@ -84,6 +96,24 @@ describe("ReadoutPresenterImpl", () => {
     expect(d.defenseReadout.updateAssessments).toHaveBeenCalledTimes(1);
     expect(d.defenseReadout.updateEffectiveSig).toHaveBeenCalledWith("shipA", 100);
     expect(d.defenseReadout.updateEffectiveSig).toHaveBeenCalledWith("shipB", 200);
+  });
+
+  test("forwards capacitor runtime and playing state to the capacitor readout", () => {
+    const d = buildDeps();
+    const presenter: ReadoutPresenter = new ReadoutPresenterImpl(d);
+    presenter.setPlaying(true);
+    const view = makeEngineView({ shipA: 100, shipB: 200 });
+    d.viewStream.emit(view);
+    expect(d.capacitorReadout.setPlaying).toHaveBeenCalledWith(true);
+    expect(d.capacitorReadout.updateRuntime).toHaveBeenCalledWith(view.capacitorRuntime);
+  });
+
+  test("forwards per-side starved module ids to the starved readout", () => {
+    const d = buildDeps();
+    const presenter: ReadoutPresenter = new ReadoutPresenterImpl(d);
+    const view = makeEngineView({ shipA: 100, shipB: 200 }, [toTypeId("3025")]);
+    d.viewStream.emit(view);
+    expect(d.starvedReadout.updateStarvedModules).toHaveBeenCalledWith({ shipA: [toTypeId("3025")], shipB: [] });
   });
 
   test("throttles readouts while playing and resumes after interval", () => {
@@ -135,9 +165,9 @@ describe("ReadoutPresenterImpl", () => {
     const firstAssessArgs = assessMock.mock.calls.map((c) => [...c]);
     const firstEffArgs = effMock.mock.calls.map((c) => [...c]);
     const mutatedDefenseReadout: DefenseReadout = {
-      updateAssessments: vi.fn(),
-      updateDefenseView: vi.fn(),
-      updateEffectiveSig: vi.fn(),
+      updateAssessments: vi.fnUntracked(),
+      updateDefenseView: vi.fnUntracked(),
+      updateEffectiveSig: vi.fnUntracked(),
     };
     Object.assign(d.defenseReadout, mutatedDefenseReadout);
     d.viewStream.emit(view);

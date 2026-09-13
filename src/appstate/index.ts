@@ -1,4 +1,4 @@
-export { USER_SETTINGS_VERSION, PROPULSION_NONE } from "./userSettings";
+export { USER_SETTINGS_VERSION, PROPULSION_NONE, deactivatePropulsion } from "./userSettings";
 export type { ProfileEquality } from "./profileEquality";
 export type {
   DisplayPreferences,
@@ -8,6 +8,8 @@ export type {
   ProfileSettings,
   PropulsionSelection,
   StoredBoosterActivation,
+  StoredCapBoosterCharge,
+  StoredCapBoosterMode,
   StoredDisruptionScript,
   StoredEwarActivation,
   StoredMissileBoosterActivation,

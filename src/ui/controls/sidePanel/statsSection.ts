@@ -43,9 +43,6 @@ export class StatsSection implements IStatsSection {
     const speedOverride = this.isOverridden(speedKey) ? num(this.els.speed) : undefined;
     if (updateMass || updateInertia || updateSig) {
       const stats = this.ships.fittedStats(this.panel.profile, fitted?.fitted, propulsion, conditions, speedOverride);
-      if (fitted) {
-        this.panel.fittedHull = { ...fitted, baseMaxSpeed: stats.baseMaxSpeed };
-      }
       if (updateMass && !this.isOverridden(massKey)) {
         mass = stats.mass;
         this.els.mass.value = String(mass);

@@ -64,6 +64,8 @@ export class EwarResolverImpl implements EwarResolver {
     if (!projection) return undefined;
     for (let i = 0; i < projection.loadout.scramblers.length; i++) {
       const spec = projection.loadout.scramblers[i];
+      // Pure disruptors drain capacitor but do not suppress propulsion (no attr 1350).
+      if (!spec.propulsionBlock) continue;
       const activation = projection.activation?.scramblers[i];
       if (activation && !activation.active) continue;
       const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
@@ -75,7 +77,8 @@ export class EwarResolverImpl implements EwarResolver {
 
   propulsionSuppressedIgnoringRange(projection: EwarProjection | undefined): boolean {
     if (!projection) return false;
-    for (const [i, _] of projection.loadout.scramblers.entries()) {
+    for (const [i, spec] of projection.loadout.scramblers.entries()) {
+      if (!spec.propulsionBlock) continue;
       const activation = projection.activation?.scramblers[i];
       if (activation && !activation.active) continue;
       return true;
@@ -98,6 +101,7 @@ export class EwarResolverImpl implements EwarResolver {
     if (dampenerEffect) effects.push(dampenerEffect);
     const painterEffect = this.painterAppliedEffect(projection, distance);
     if (painterEffect) effects.push(painterEffect);
+    effects.push(...this.capWarfareAppliedEffects(projection, distance));
     return effects;
   }
 
@@ -164,7 +168,7 @@ export class EwarResolverImpl implements EwarResolver {
   }
 
   reach(projection: EwarProjection | undefined): EwarReach {
-    if (!projection) return { web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 };
+    if (!projection) return { web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0 };
     return {
       web: this.webReach(projection),
       grappler: this.grapplerReach(projection),
@@ -172,6 +176,8 @@ export class EwarResolverImpl implements EwarResolver {
       disruptor: this.disruptorReach(projection),
       painter: this.painterReach(projection),
       dampener: this.dampenerReach(projection),
+      neutralizer: this.capWarfareReach(projection.loadout.neutralizers, projection.activation?.neutralizers),
+      nosferatu: this.capWarfareReach(projection.loadout.nosferatu, projection.activation?.nosferatu),
     };
   }
 
@@ -288,6 +294,44 @@ export class EwarResolverImpl implements EwarResolver {
       return { family: "painter", moduleId: spec.moduleId, signatureMultiplier };
     }
     return undefined;
+  }
+
+  private capWarfareAppliedEffects(projection: EwarProjection, distance: number): readonly AppliedEwarEffect[] {
+    const effects: AppliedEwarEffect[] = [];
+    for (let i = 0; i < projection.loadout.neutralizers.length; i++) {
+      const effect = this.capWarfareEffect(projection.loadout.neutralizers[i], projection.activation?.neutralizers[i], distance, "neutralizer");
+      if (effect) effects.push(effect);
+    }
+    for (let i = 0; i < projection.loadout.nosferatu.length; i++) {
+      const effect = this.capWarfareEffect(projection.loadout.nosferatu[i], projection.activation?.nosferatu[i], distance, "nosferatu");
+      if (effect) effects.push(effect);
+    }
+    return effects;
+  }
+
+  private capWarfareEffect(
+    spec: { readonly moduleId: TypeId; readonly amount: number; readonly cycleTime: number; readonly maxRange: number; readonly falloff: number },
+    activation: { readonly active: boolean } | undefined,
+    distance: number,
+    family: "neutralizer" | "nosferatu",
+  ): AppliedEwarEffect | undefined {
+    if (activation && !activation.active) return undefined;
+    const effectiveness = this.falloffEffectiveness(distance, spec.maxRange, spec.falloff);
+    if (effectiveness < MIN_APPLIED_EFFECTIVENESS) return undefined;
+    return { family, moduleId: spec.moduleId, amountPerCycle: spec.amount * effectiveness, cycleTime: spec.cycleTime };
+  }
+
+  private capWarfareReach(
+    specs: readonly { readonly maxRange: number; readonly falloff: number }[],
+    activations: readonly { readonly active: boolean }[] | undefined,
+  ): number {
+    let max = 0;
+    for (let i = 0; i < specs.length; i++) {
+      const activation = activations?.[i];
+      if (activation && !activation.active) continue;
+      max = Math.max(max, specs[i].maxRange + specs[i].falloff);
+    }
+    return max;
   }
 
   private speedMultipliers(projection: EwarProjection | undefined, distance: number, ignoreRange: boolean): number[] {

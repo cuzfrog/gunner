@@ -321,9 +321,11 @@ export class DefenseControllerImpl implements DefenseController {
         if (repairerView.cycling) statusParts.push(this.i18n.t("defense.module.cycling"));
         if (repairerView.reloading) statusParts.push(this.i18n.t("defense.module.reloading"));
         if (repairerSpecHasAncillary(repairer)) statusParts.push(`${this.i18n.t("defense.module.charges")} ${repairerView.ancillaryCharges}`);
+        if (repairerView.starved) statusParts.push(this.i18n.t("capacitor.insufficient"));
       }
       const statusSpan = statusParts.length > 0 ? html`<span class="defense-module-status">${statusParts.join(" · ")}</span>` : "";
-      const row = html`<div class="defense-module-row"><span class="defense-module-name">${this.i18n.t(layerLabelKey(repairer.layer))}</span>${statusSpan}<span class="defense-module-controls">${activeButton}${overloadButton}</span></div>`;
+      const row = html`<div class="defense-module-row"><span class="defense-module-name">${this.i18n.t(layerLabelKey(repairer.layer))}</span>${statusSpan}<span class="defense-module-controls">${activeButton}${overloadButton}</span></div>` as unknown as HTMLDivElement;
+      if (repairerView?.starved) row.className = "defense-module-row is-starved";
       rows.push(row);
     }
     const block = this.sectionBlock.create(this.i18n.t("defense.repairers"), rows);
@@ -337,7 +339,11 @@ export class DefenseControllerImpl implements DefenseController {
     const activeButton = html`<button class="btn btn-toggle defense-module-toggle" aria-pressed=${activation.active ? "true" : "false"} disabled=${autoMode ? "" : false}>${this.i18n.t(activation.active ? "defense.module.active" : "defense.module.inactive")}</button>`;
     const overloadButton = this.createOverloadButton(autoMode, activation.overloaded, this.i18n.t("defense.rah"), () => { this.setRahActivation(side, activation.active, !activation.overloaded); this.renderSide(side); });
     activeButton.addEventListener("click", () => { this.setRahActivation(side, !activation.active, activation.overloaded); this.renderSide(side); });
-    const row = html`<div class="defense-module-row"><span class="defense-module-name">${this.i18n.t("defense.rah")}</span><span class="defense-module-controls">${activeButton}${overloadButton}</span></div>`;
+    const rahView = this.defenseView?.rah[side];
+    const rahStarved = rahView?.starved ?? false;
+    const rahStatus = rahStarved ? html`<span class="defense-module-status">${this.i18n.t("capacitor.insufficient")}</span>` : "";
+    const row = html`<div class="defense-module-row"><span class="defense-module-name">${this.i18n.t("defense.rah")}</span>${rahStatus}<span class="defense-module-controls">${activeButton}${overloadButton}</span></div>` as unknown as HTMLDivElement;
+    if (rahStarved) row.className = "defense-module-row is-starved";
     const block = this.sectionBlock.create(this.i18n.t("defense.rah"), [row]);
     section.appendChild(block);
   }

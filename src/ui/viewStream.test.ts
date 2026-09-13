@@ -10,7 +10,7 @@ function makeEngine(): { engine: EngagementEngine; events: EngineEvents; emit: (
     offShipDestroyed: vi.fn(),
   };
   const engine = vi.mocked<EngagementEngine>({
-    reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(), events: vi.fn(() => events),
+    reset: vi.fn(), update: vi.fn(), step: vi.fn(), view: vi.fn(), injectCapBooster: vi.fn(), events: vi.fn(() => events),
   });
   return { engine, events, emit: (view) => { for (const l of Array.from(viewUpdated)) l(view); } };
 }

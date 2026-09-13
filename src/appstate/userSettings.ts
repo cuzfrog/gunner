@@ -1,4 +1,4 @@
-import type { AutopilotMode, SigResolutionClass, WeaponKind } from "../sim";
+import type { AutopilotMode, CapacitorSpec, SigResolutionClass, WeaponKind } from "../sim";
 import type { DefenseSkills, FittedHull, PropulsionId, PropulsionKind, PropulsionStats, SkillLevel, TargetingSkills } from "../ships";
 import type { ShipId, TypeId } from "../gamedata/ids";
 import type { DroneGroup } from "../fitting";
@@ -24,6 +24,8 @@ export interface StoredEwarActivation {
   readonly scramblers?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
   readonly painters?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
   readonly dampeners?: readonly { readonly active: boolean; readonly overloaded: boolean; readonly script: StoredDisruptionScript }[];
+  readonly neutralizers?: readonly { readonly active: boolean }[];
+  readonly nosferatu?: readonly { readonly active: boolean }[];
 }
 
 export interface StoredMissileBoosterActivation {
@@ -50,6 +52,16 @@ export interface StoredRahActivation {
   readonly overloaded: boolean;
 }
 
+export interface StoredCapBoosterMode {
+  readonly moduleId: TypeId;
+  readonly mode: "auto" | "manual";
+}
+
+export interface StoredCapBoosterCharge {
+  readonly moduleId: TypeId;
+  readonly chargeId: TypeId;
+}
+
 export interface FittedHullSummary {
   readonly fittingName: string;
   readonly propulsionId?: PropulsionId;
@@ -58,7 +70,13 @@ export interface FittedHullSummary {
   readonly propulsionKind?: PropulsionKind;
   readonly fitted: FittedHull;
   readonly propulsion?: PropulsionStats;
-  readonly baseMaxSpeed?: number;
+  readonly capacitor: CapacitorSpec;
+  readonly energyWarfareResistancePercent: number;
+}
+
+/** Canonical propulsion-off summary shape: no active module; module id/name stay as variant memory for re-enable. */
+export function deactivatePropulsion(summary: FittedHullSummary): FittedHullSummary {
+  return { ...summary, propulsionId: undefined, propulsionKind: undefined, propulsion: undefined };
 }
 
 export interface ProfileParamOverrides {
@@ -150,6 +168,12 @@ export interface UserSettings {
   shipBRepairerActivation?: readonly StoredRepairerActivation[];
   shipARahActivation?: StoredRahActivation;
   shipBRahActivation?: StoredRahActivation;
+  shipAInfiniteCapacitor?: boolean;
+  shipBInfiniteCapacitor?: boolean;
+  shipACapBoosterModes?: readonly StoredCapBoosterMode[];
+  shipBCapBoosterModes?: readonly StoredCapBoosterMode[];
+  shipACapBoosterCharges?: readonly StoredCapBoosterCharge[];
+  shipBCapBoosterCharges?: readonly StoredCapBoosterCharge[];
   shipAAmmo: TypeId;
   shipBAmmo: TypeId;
   shipAWeaponKind?: WeaponKind;

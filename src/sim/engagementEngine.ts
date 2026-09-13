@@ -1,4 +1,6 @@
-import type { DamageEvent, DroneRuntimeState, DroneSpec, InflictedDps, LayerDamage, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec } from "./types";
+import type { CapacitorSimConfig, CapacitorView } from "./capacitorSimulator";
+import type { AppliedEwarEffect, CapacitorEngagement, DamageEvent, DroneRuntimeState, DroneSpec, EwarProjection, InflictedDps, IncomingDrain, LayerDamage, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec, CapacitorSideConfig } from "./types";
+import type { TypeId } from "../gamedata/ids";
 import type { DefenseSimConfig, DefenseView } from "./defenseSimulator";
 import type { DroneSimConfig } from "./droneSimulator";
 import type { EngagementFrameComposer, EngagementInput, EngagementView } from "./engagementFrameComposer";
@@ -12,11 +14,13 @@ export interface EngineConfig {
   readonly weapons: Record<Side, readonly WeaponSpec[]>;
   readonly defense: DefenseSimConfig;
   readonly overloaded: Record<Side, boolean>;
+  readonly capacitor: Record<Side, CapacitorSideConfig>;
 }
 
 export interface EngineView extends EngagementView {
   readonly snapshot: SimSnapshot;
   readonly defenseRuntime: DefenseView;
+  readonly capacitorRuntime: Record<Side, CapacitorView>;
   readonly inflicted: Record<Side, InflictedDps>;
   readonly drones: Record<Side, readonly DroneRuntimeState[]>;
   readonly droneSpecs: Record<Side, readonly DroneSpec[]>;
@@ -35,6 +39,7 @@ export interface EngagementEngine {
   update(config: EngineConfig): EngineView;
   step(dt: number): EngineView;
   view(): EngineView;
+  injectCapBooster(side: Side, boosterIndex: number): EngineView;
   events(): EngineEvents;
 }
 
@@ -81,6 +86,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     this.live.weaponClock.reset();
     this.live.lockClock.reset();
     this.live.defenseSimulator.reset(config.defense);
+    this.live.capacitorSimulator.reset(capacitorSimConfigFrom(config));
     this.initializeLocks();
     this.projectionDirty = true;
     this.lastView = this.composeView();
@@ -94,6 +100,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     this.live.droneSimulator.update(droneSimConfigFrom(config));
     this.live.missileSimulator.update(missileSimConfigFrom(config));
     this.live.defenseSimulator.update(config.defense);
+    this.live.capacitorSimulator.update(capacitorSimConfigFrom(config));
     this.projectionDirty = true;
     this.lastView = this.composeView();
     this.publishView(this.lastView);
@@ -115,6 +122,15 @@ export class EngagementEngineImpl implements EngagementEngine {
   }
 
   events(): EngineEvents { return this; }
+
+  injectCapBooster(side: Side, boosterIndex: number): EngineView {
+    if (!this.config || !this.lastView) throw new Error("EngagementEngine.injectCapBooster called before reset");
+    this.live.capacitorSimulator.injectBooster(side, boosterIndex);
+    this.projectionDirty = true;
+    this.lastView = { ...this.lastView, capacitorRuntime: this.live.capacitorSimulator.view() };
+    this.publishView(this.lastView);
+    return this.lastView;
+  }
 
   onViewUpdated(listener: (view: EngineView) => void): void { this.viewUpdatedListeners.add(listener); }
   offViewUpdated(listener: (view: EngineView) => void): void { this.viewUpdatedListeners.delete(listener); }
@@ -154,6 +170,7 @@ export class EngagementEngineImpl implements EngagementEngine {
       ...composed,
       snapshot,
       defenseRuntime,
+      capacitorRuntime: this.live.capacitorSimulator.view(),
       inflicted: this.projectedInflicted(snapshot.time),
       drones: { shipA: this.live.droneSimulator.states("shipA"), shipB: this.live.droneSimulator.states("shipB") },
       droneSpecs: { shipA: droneSpecsFrom(config.weapons.shipA), shipB: droneSpecsFrom(config.weapons.shipB) },
@@ -180,19 +197,34 @@ export class EngagementEngineImpl implements EngagementEngine {
     world.missileSimulator.restore(this.live.missileSimulator.capture());
     world.weaponClock.restore(this.live.weaponClock.capture());
     world.defenseSimulator.restore(this.live.defenseSimulator.capture());
-    world.defenseSimulator.flushPendingDamage();
+    world.capacitorSimulator.restore(this.live.capacitorSimulator.capture());
+    world.defenseSimulator.flushPendingDamage(world.capacitorSimulator);
     const before = world.defenseSimulator.inflictedTotals();
     const horizon = projectionHorizonSeconds(config.weapons.shipA, config.weapons.shipB);
     for (let elapsed = 0; elapsed < horizon; elapsed += PROJECTION_STEP_SECONDS) {
       this.runStep(world, config, Math.min(PROJECTION_STEP_SECONDS, horizon - elapsed));
     }
-    world.defenseSimulator.flushPendingDamage();
+    world.defenseSimulator.flushPendingDamage(world.capacitorSimulator);
     const after = world.defenseSimulator.inflictedTotals();
     return { shipA: inflictedDps(before.shipA, after.shipA, horizon), shipB: inflictedDps(before.shipB, after.shipB, horizon) };
   }
 
   private runStep(world: SimWorld, config: EngineConfig, dt: number): { composed: EngagementView; snapshot: SimSnapshot } {
-    world.simulation.step(dt);
+    const preSnapshot = world.simulation.snapshot();
+    const preDistance = preSnapshot.shipB.position.sub(preSnapshot.shipA.position).len();
+    world.capacitorSimulator.incomingDrains("shipA", incomingDrains(this.ewarResolver.appliedEffects(preSnapshot.shipB.ewar, preDistance), config.sim.shipA.energyWarfareResistancePercent ?? 0));
+    world.capacitorSimulator.incomingDrains("shipB", incomingDrains(this.ewarResolver.appliedEffects(preSnapshot.shipA.ewar, preDistance), config.sim.shipB.energyWarfareResistancePercent ?? 0));
+    const locksBeforeStep = world.lockClock.states();
+    world.capacitorSimulator.step(dt, {
+      shipA: this.capacitorEngagement(preSnapshot, "shipA", preDistance, locksBeforeStep),
+      shipB: this.capacitorEngagement(preSnapshot, "shipB", preDistance, locksBeforeStep),
+    });
+    world.simulation.step(dt, {
+      propulsionStarved: {
+        shipA: world.capacitorSimulator.propulsionStarved("shipA"),
+        shipB: world.capacitorSimulator.propulsionStarved("shipB"),
+      },
+    });
     const snapshot = world.simulation.snapshot();
     const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
     const locks = world.lockClock.step(dt, this.lockStepInput(snapshot, distance));
@@ -200,9 +232,9 @@ export class EngagementEngineImpl implements EngagementEngine {
     const composed = this.engagementFrameComposer.compose(snapshot, input);
     world.droneSimulator.step(dt, composed.frame);
     const missileEvents = world.missileSimulator.step(dt, composed.frame, this.missileLaunchSpecs(composed, locks));
-    const weaponEvents = world.weaponClock.step(dt, composed);
+    const weaponEvents = world.weaponClock.step(dt, composed, world.capacitorSimulator);
     const events: DamageEvent[] = [...missileEvents, ...weaponEvents];
-    world.defenseSimulator.step(dt, events);
+    world.defenseSimulator.step(dt, events, world.capacitorSimulator);
     return { composed, snapshot };
   }
 
@@ -210,6 +242,16 @@ export class EngagementEngineImpl implements EngagementEngine {
     const snapshot = this.live.simulation.snapshot();
     const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
     this.live.lockClock.step(0, this.lockStepInput(snapshot, distance));
+  }
+
+  /** Engagement facts for the capacitor: own hard-range modules that apply nothing, own lock state, opponent suppression. Uses the pre-step snapshot, one frame of latency like the incoming-drain inputs. */
+  private capacitorEngagement(snapshot: SimSnapshot, side: Side, distance: number, locks: Record<Side, LockState>): CapacitorEngagement {
+    const opponent = side === "shipA" ? "shipB" : "shipA";
+    return {
+      propulsionSuppressed: this.ewarResolver.propulsionSuppressed(snapshot[opponent].ewar, distance),
+      weaponsEngaged: locks[side].status === "locked",
+      disengagedModuleIds: disengagedModuleIds(snapshot[side].ewar, distance, this.ewarResolver),
+    };
   }
 
   private lockStepInput(snapshot: SimSnapshot, distance: number): LockStepInput {
@@ -294,6 +336,10 @@ function missileSimConfigFrom(config: EngineConfig): MissileSimConfig {
   return { shipA: missileSpecsFrom(config.weapons.shipA), shipB: missileSpecsFrom(config.weapons.shipB) };
 }
 
+function capacitorSimConfigFrom(config: EngineConfig): CapacitorSimConfig {
+  return { sim: config.sim, sides: config.capacitor };
+}
+
 function droneSpecsFrom(weapons: readonly WeaponSpec[]): readonly DroneSpec[] {
   return weapons.filter((w): w is DroneSpec => w.kind === "drone");
 }
@@ -314,6 +360,38 @@ function inflictedDps(before: LayerDamage, after: LayerDamage, horizon: number):
     hull: (after.hull - before.hull) / horizon,
   };
   return { total: byLayer.shield + byLayer.armor + byLayer.hull, byLayer };
+}
+
+function incomingDrains(effects: readonly AppliedEwarEffect[], resistancePercent: number): readonly IncomingDrain[] {
+  const byModule = new Map<TypeId, IncomingDrain>();
+  for (const effect of effects) {
+    if (effect.family !== "neutralizer" && effect.family !== "nosferatu") continue;
+    const amount = effect.amountPerCycle * (1 - resistancePercent / 100);
+    const existing = byModule.get(effect.moduleId);
+    if (existing) {
+      byModule.set(effect.moduleId, { ...existing, amount: existing.amount + amount, count: existing.count + 1 });
+    } else {
+      byModule.set(effect.moduleId, { moduleId: effect.moduleId, amount, interval: effect.cycleTime, transfer: effect.family === "nosferatu", count: 1 });
+    }
+  }
+  return [...byModule.values()];
+}
+
+/** Own hard-range modules that apply nothing at this distance: the ewar families minus the ids with an applied effect. Boosters never apply and are never listed. */
+function disengagedModuleIds(projection: EwarProjection | undefined, distance: number, resolver: EwarResolver): readonly TypeId[] {
+  if (!projection) return [];
+  const applied = new Set(resolver.appliedEffects(projection, distance).map((effect) => effect.moduleId));
+  const loadout = projection.loadout;
+  const families: readonly (readonly { readonly moduleId: TypeId }[])[] = [
+    loadout.webs, loadout.grapplers, loadout.disruptors, loadout.scramblers, loadout.painters, loadout.dampeners, loadout.neutralizers, loadout.nosferatu,
+  ];
+  const ids: TypeId[] = [];
+  for (const family of families) {
+    for (const spec of family) {
+      if (!applied.has(spec.moduleId)) ids.push(spec.moduleId);
+    }
+  }
+  return ids;
 }
 
 export { projectionHorizonSeconds as _projectionHorizonSeconds };

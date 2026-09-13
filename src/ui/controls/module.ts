@@ -11,6 +11,7 @@ import { registerEffectiveReadoutModule } from "./effectiveReadout";
 import { registerEngagementReadoutModule } from "./engagementReadout";
 import { registerHintsModule } from "./hints";
 import { registerImportModule, type ImportController } from "./import";
+import { registerExportModule } from "./export";
 import { registerLauncherModule } from "./launcher";
 import { registerDroneModule } from "./drone";
 import { registerPopupModule } from "./popup";
@@ -23,6 +24,7 @@ import { registerSidePanelModule } from "./sidePanel";
 import { registerTurretModule } from "./turret";
 import { registerSelectionSessionModule } from "../selectionSession";
 import { registerEwarModule } from "./ewar";
+import { registerCapacitorModule } from "./capacitor";
 import { registerModulesPopupModule } from "./modulesPopup";
 import { registerDefenseModule } from "./defense";
 import { registerTargetingModule } from "./targeting";
@@ -53,6 +55,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerModulesPopupModule(cradle);
   registerEwarModule(cradle);
   registerDefenseModule(cradle);
+  registerCapacitorModule(cradle);
   registerTargetingModule(cradle);
   registerBoosterModule(cradle);
   registerMissileBoosterModule(cradle);
@@ -64,6 +67,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerAmmoHintModule(cradle);
   registerPopupModule(cradle);
   registerImportModule(cradle);
+  registerExportModule(cradle);
   registerShareModule(cradle);
   registerConfirmModule(cradle);
   registerEngagementReadoutModule(cradle);
@@ -97,6 +101,7 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
       popupGroup: c.popupGroup,
       host,
       importer: sideImporterFor(combatant.side, c.importController, c.savedFittings, c.presetFittings),
+      exporter: c.exportController,
     })
   );
   c.controls.wireControls();

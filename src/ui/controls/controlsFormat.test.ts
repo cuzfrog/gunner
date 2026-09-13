@@ -59,6 +59,7 @@ describe("propulsion label", () => {
       massAddition: 500_000,
       speedBonus: 1.15,
       sigBloom: 0,
+      capacitorNeed: 20,
     };
     expect(propulsionOptionLabel(module)).toBe("1MN");
   });

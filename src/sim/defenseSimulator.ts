@@ -1,4 +1,5 @@
 import { type DamageEvent, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type LayerDamage, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS } from "./types";
+import type { CapacitorGate } from "./capacitorSimulator";
 import type { Restorable } from "./restorable";
 
 export type RepairMode = "auto" | "manual";
@@ -18,6 +19,7 @@ export interface RepairerViewState {
   readonly active: boolean;
   readonly overloaded: boolean;
   readonly hpPerSecond: number;
+  readonly starved: boolean;
 }
 
 export interface RahViewState {
@@ -26,6 +28,7 @@ export interface RahViewState {
   readonly cycleProgress: number;
   readonly active: boolean;
   readonly overloaded: boolean;
+  readonly starved: boolean;
 }
 
 export interface DefenseView {
@@ -112,8 +115,8 @@ export interface DefenseSimulatorState {
 export interface DefenseSimulator extends Restorable<DefenseSimulatorState> {
   reset(config: DefenseSimConfig): void;
   update(config: DefenseSimConfig): void;
-  step(dt: number, events: readonly DamageEvent[]): void;
-  flushPendingDamage(): void;
+  step(dt: number, events: readonly DamageEvent[], capacitor?: CapacitorGate): void;
+  flushPendingDamage(capacitor?: CapacitorGate): void;
   view(): DefenseView;
   inflictedTotals(): Record<Side, LayerDamage>;
 }
@@ -133,6 +136,7 @@ interface RepairerState {
   active: boolean;
   overloaded: boolean;
   hpThisCycle: number;
+  starved: boolean;
 }
 
 interface RahState {
@@ -141,6 +145,7 @@ interface RahState {
   inCycle: boolean;
   active: boolean;
   overloaded: boolean;
+  starved: boolean;
   armorDamageAccumulator: MutableDamageVector;
 }
 
@@ -195,21 +200,21 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     };
   }
 
-  step(dt: number, events: readonly DamageEvent[]): void {
+  step(dt: number, events: readonly DamageEvent[], capacitor?: CapacitorGate): void {
     this.time += dt;
     for (const event of events) {
       this.eventBuffer.push(event);
     }
     const released = this.collectReleasedEvents();
-    this.stepSide("shipA", dt, released.shipA);
-    this.stepSide("shipB", dt, released.shipB);
+    this.stepSide("shipA", dt, released.shipA, capacitor);
+    this.stepSide("shipB", dt, released.shipB, capacitor);
   }
 
-  flushPendingDamage(): void {
+  flushPendingDamage(capacitor?: CapacitorGate): void {
     const buffered = this.eventBuffer;
     this.eventBuffer = [];
-    this.stepSide("shipA", 0, buffered.filter((event) => event.target === "shipA"));
-    this.stepSide("shipB", 0, buffered.filter((event) => event.target === "shipB"));
+    this.stepSide("shipA", 0, buffered.filter((event) => event.target === "shipA"), capacitor);
+    this.stepSide("shipB", 0, buffered.filter((event) => event.target === "shipB"), capacitor);
   }
 
   view(): DefenseView {
@@ -278,12 +283,12 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     return { shipA: shipAEvents, shipB: shipBEvents };
   }
 
-  private stepSide(side: Side, dt: number, events: readonly DamageEvent[]): void {
-    stepSidePools(this.sides[side], dt, events, this.time);
+  private stepSide(side: Side, dt: number, events: readonly DamageEvent[], capacitor?: CapacitorGate): void {
+    stepSidePools(this.sides[side], dt, events, this.time, side, capacitor);
   }
 }
 
-function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEvent[], time: number): void {
+function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEvent[], time: number, side: Side, capacitor: CapacitorGate | undefined): void {
   if (pools.dead) return;
   if (!pools.damageEnabled) {
     pools.shield = pools.shieldMax;
@@ -294,8 +299,8 @@ function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEven
   updateRahResists(pools);
   applyShieldRegen(pools, dt);
   const armorDamageByType = applyEvents(pools, events);
-  stepRepairers(pools, dt);
-  stepRah(pools, dt, armorDamageByType);
+  stepRepairers(pools, dt, side, capacitor);
+  stepRah(pools, dt, armorDamageByType, side, capacitor);
   if (pools.hullMax > 0 && pools.hull <= 0) {
     pools.hull = 0;
     pools.dead = true;
@@ -395,6 +400,7 @@ function createRepairerStates(specs: readonly RepairerSpec[], activation: readon
       active: saved?.active ?? true,
       overloaded: saved?.overloaded ?? true,
       hpThisCycle: 0,
+      starved: false,
     };
   });
 }
@@ -406,6 +412,7 @@ function createRahState(rahSpec: RahSpec, activation: RahActivationEntry | undef
     inCycle: false,
     active: activation?.active ?? true,
     overloaded: activation?.overloaded ?? true,
+    starved: false,
     armorDamageAccumulator: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   };
 }
@@ -421,6 +428,7 @@ function mergeRahState(prev: RahState | undefined, rahSpec: RahSpec, activation:
     inCycle: prev.inCycle,
     active,
     overloaded,
+    starved: prev.starved,
     armorDamageAccumulator: { ...prev.armorDamageAccumulator },
   };
 }
@@ -439,6 +447,7 @@ function mergeRepairerStates(prev: RepairerState[], specs: readonly RepairerSpec
       active: saved?.active ?? true,
       overloaded: saved?.overloaded ?? true,
       hpThisCycle: 0,
+      starved: false,
     };
   });
 }
@@ -549,13 +558,14 @@ function shieldBleedFraction(pools: SidePools): number {
   return 1 - pools.shield / threshold;
 }
 
-function stepRepairers(pools: SidePools, dt: number): void {
+function stepRepairers(pools: SidePools, dt: number, side: Side, capacitor: CapacitorGate | undefined): void {
   for (let i = 0; i < pools.repairers.length; i++) {
-    stepRepairer(pools, pools.repairers[i], pools.repairerStates[i], dt);
+    stepRepairer(pools, side, pools.repairers[i], pools.repairerStates[i], dt, capacitor);
   }
 }
 
-function stepRepairer(pools: SidePools, spec: RepairerSpec, state: RepairerState, dt: number): void {
+function stepRepairer(pools: SidePools, side: Side, spec: RepairerSpec, state: RepairerState, dt: number, capacitor: CapacitorGate | undefined): void {
+  state.starved = false;
   if (state.reloading) {
     state.reloadTimer -= dt;
     if (state.reloadTimer <= 0) {
@@ -566,7 +576,7 @@ function stepRepairer(pools: SidePools, spec: RepairerSpec, state: RepairerState
     return;
   }
   if (!state.inCycle && shouldStartCycle(pools, spec, state)) {
-    startCycle(pools, spec, state);
+    startCycle(pools, side, spec, state, capacitor);
   }
   if (state.inCycle) {
     state.cycleTimer -= dt;
@@ -582,7 +592,12 @@ function shouldStartCycle(pools: SidePools, spec: RepairerSpec, state: RepairerS
   return layerPoolAmount(pools, spec.layer) < layerPoolMax(pools, spec.layer);
 }
 
-function startCycle(pools: SidePools, spec: RepairerSpec, state: RepairerState): void {
+function startCycle(pools: SidePools, side: Side, spec: RepairerSpec, state: RepairerState, capacitor: CapacitorGate | undefined): void {
+  if (capacitor && spec.capacitorNeed > 0 && !capacitor.attemptDebit(side, spec.capacitorNeed, spec.moduleId)) {
+    // Starved: the module stays off until the capacitor recovers; retried next frame.
+    state.starved = true;
+    return;
+  }
   state.inCycle = true;
   state.cycleTimer = effectiveCycleTime(spec, state);
   const amount = effectiveAmount(spec, state);
@@ -640,15 +655,21 @@ function layerPoolMax(pools: SidePools, layer: DefenseLayer): number {
   return pools.hullMax;
 }
 
-function stepRah(pools: SidePools, dt: number, armorDamageByType: MutableDamageVector): void {
+function stepRah(pools: SidePools, dt: number, armorDamageByType: MutableDamageVector, side: Side, capacitor: CapacitorGate | undefined): void {
   const rah = pools.rahState;
   const rahSpec = pools.rahSpec;
   if (!rah || !rahSpec) return;
   for (const type of DAMAGE_TYPES) {
     rah.armorDamageAccumulator[type] += armorDamageByType[type];
   }
+  rah.starved = false;
   if (!rah.active) return;
   if (!rah.inCycle) {
+    if (capacitor && (rahSpec.capacitorNeed ?? 0) > 0 && !capacitor.attemptDebit(side, rahSpec.capacitorNeed ?? 0, rahSpec.moduleId)) {
+      // Starved: the module stays off until the capacitor recovers; retried next frame.
+      rah.starved = true;
+      return;
+    }
     rah.inCycle = true;
     rah.cycleTimer = rahCycleTime(rahSpec, rah);
   }
@@ -709,6 +730,7 @@ function repairerViews(pools: SidePools): readonly RepairerViewState[] {
       active: state.active,
       overloaded: state.overloaded,
       hpPerSecond,
+      starved: state.starved,
     };
   });
 }
@@ -724,6 +746,7 @@ function rahView(pools: SidePools): RahViewState | undefined {
     cycleProgress: rah.inCycle && rah.active ? 1 - rah.cycleTimer / cycleTime : 0,
     active: rah.active,
     overloaded: rah.overloaded,
+    starved: rah.starved,
   };
 }
 
@@ -787,7 +810,7 @@ function snapshotRepairerState(state: RepairerState): RepairerStateSnapshot {
 function materializeRepairerState(snapshot: RepairerStateSnapshot): RepairerState {
   return {
     cycleTimer: snapshot.cycleTimer, inCycle: snapshot.inCycle, ancillaryCharges: snapshot.ancillaryCharges, reloading: snapshot.reloading,
-    reloadTimer: snapshot.reloadTimer, active: snapshot.active, overloaded: snapshot.overloaded, hpThisCycle: snapshot.hpThisCycle,
+    reloadTimer: snapshot.reloadTimer, active: snapshot.active, overloaded: snapshot.overloaded, hpThisCycle: snapshot.hpThisCycle, starved: false,
   };
 }
 
@@ -801,6 +824,6 @@ function snapshotRahState(state: RahState): RahStateSnapshot {
 function materializeRahState(snapshot: RahStateSnapshot): RahState {
   return {
     resists: { ...snapshot.resists }, cycleTimer: snapshot.cycleTimer, inCycle: snapshot.inCycle,
-    active: snapshot.active, overloaded: snapshot.overloaded, armorDamageAccumulator: { ...snapshot.armorDamageAccumulator },
+    active: snapshot.active, overloaded: snapshot.overloaded, starved: false, armorDamageAccumulator: { ...snapshot.armorDamageAccumulator },
   };
 }

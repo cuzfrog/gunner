@@ -137,6 +137,7 @@ export function buildImportController(document: Document) {
   const clipboard = { readText: vi.fn(async () => ""), writeText: vi.fn(async (text: string) => {}) };
   const fittingImport = vi.mocked<FittingImport>({
     importFitting: vi.fn((text: string) => (text.startsWith("[Rifter") ? IMPORTED_RIFTER : undefined)),
+    resolveCapacitorStats: vi.fn(),
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
     propulsionStatsById: vi.fn(),

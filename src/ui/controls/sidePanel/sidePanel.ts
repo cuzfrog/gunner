@@ -3,12 +3,15 @@ import type { ShipId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
 import type { AutopilotMode, SensorSpec } from "../../../sim";
 import {
+  PROPULSION_NONE,
+  deactivatePropulsion,
   type FittedHullSummary,
   type ProfileParamOverrides,
   type PropulsionSelection,
 } from "../../../appstate";
 import { num } from "../controlsDom";
 import { formatNumber } from "../controlsFormat";
+import type { ExportController } from "../export";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { Timer } from "../../timer";
@@ -70,6 +73,7 @@ export class SidePanelImpl implements SidePanel {
   private fittingTextValue?: string;
   private lastCommittedHullValue?: ShipId;
   private importerValue?: SideImporter;
+  private exporterValue?: ExportController;
   private sensorSpecValue?: SensorSpec;
   readonly sections: ISidePanelSections;
   private fittingPopup?: FittingPopupControl;
@@ -97,10 +101,12 @@ export class SidePanelImpl implements SidePanel {
     const propulsion = new PropulsionSection({ panel: this, els, ships, fittingImport, imageCatalog, i18n, popupGroup, propulsionSelection });
     const paste = new PasteImportSection({ panel: this, els, i18n, timer });
     this.sections = { hull, nav, stats, skill, propulsion, paste };
+    this.syncExportButton();
     this.els.speed.addEventListener("input", () => this.onShipInput("speed"));
     this.els.mass.addEventListener("input", () => this.onShipInput("mass"));
     this.els.inertia.addEventListener("input", () => this.onShipInput("inertia"));
     this.els.shipSig.addEventListener("input", () => this.onShipSigInput());
+    els.exportFitting.addEventListener("click", () => void this.exporter.copyFitting(this.side));
     popupGroup.register(skill.popup);
     popupGroup.register(paste.popup);
     popupGroup.register(propulsion.popup);
@@ -120,7 +126,10 @@ export class SidePanelImpl implements SidePanel {
   get fittedHull(): FittedHullSummary | undefined { return this.fittedHullValue; }
   set fittedHull(value: FittedHullSummary | undefined) { this.fittedHullValue = value; }
   get fittingText(): string | undefined { return this.fittingTextValue; }
-  set fittingText(value: string | undefined) { this.fittingTextValue = value; }
+  set fittingText(value: string | undefined) {
+    this.fittingTextValue = value;
+    this.syncExportButton();
+  }
   get lastCommittedHull(): ShipId | undefined { return this.lastCommittedHullValue; }
   set lastCommittedHull(value: ShipId | undefined) { this.lastCommittedHullValue = value; }
   setSensorData(spec: SensorSpec | undefined): void {
@@ -129,6 +138,11 @@ export class SidePanelImpl implements SidePanel {
   get importer(): SideImporter {
     if (!this.importerValue) throw new Error("SidePanel importer not set");
     return this.importerValue;
+  }
+
+  get exporter(): ExportController {
+    if (!this.exporterValue) throw new Error("SidePanel exporter not set");
+    return this.exporterValue;
   }
 
   getSkillPopup(): Popup { return this.sections.skill.popup; }
@@ -173,6 +187,7 @@ export class SidePanelImpl implements SidePanel {
   }
 
   setImporter(importer: SideImporter): void { this.importerValue = importer; }
+  setExporter(exporter: ExportController): void { this.exporterValue = exporter; }
   renderFittingPopupIfOpen(): void { this.fittingPopup?.renderIfOpen(); }
   closeFittingPopupIfOpen(): void { this.fittingPopup?.closeIfOpen(); }
   hideFittingPreview(): void { this.fittingPreview?.hide(this.side); }
@@ -198,6 +213,9 @@ export class SidePanelImpl implements SidePanel {
       sig: Math.max(num(this.els.shipSig), 1),
       sigBloomFactor: this.sections.stats.currentSigBloomFactor(),
       sensorSpec: this.sensorSpecValue,
+      capacitor: this.fittedHull?.capacitor,
+      energyWarfareResistancePercent: this.fittedHull?.energyWarfareResistancePercent,
+      propulsionCapacityMultiplier: this.fittedHull?.propulsion?.capacitorCapacityMultiplier,
     };
   }
 
@@ -217,15 +235,38 @@ export class SidePanelImpl implements SidePanel {
     this.sections.skill.setOverloadActive(state.overload);
     this.sections.skill.setWeaponOverloaded(state.weaponOverload);
     this.sections.skill.setOverloadDisabled();
-    if (state.fittedHull) this.sections.hull.restoreFittingSummary(state.fittedHull);
+    this.restoreFittedSummary(state);
     if (state.sig !== undefined) this.els.shipSig.value = String(state.sig);
     this.sections.stats.updateShipStats({ updateInertia: true, updateMass: false, updateSig: true });
     this.sections.stats.updateAlignTime();
   }
 
+  /** The saved summary can predate newer derived fields (e.g. capacitor), so the fitting text is the source of truth. */
+  private restoreFittedSummary(state: SidePanelState): void {
+    const reimported = state.fitting ? this.fittingImport.importFitting(state.fitting, this.skillConditions()) : undefined;
+    const summary = reimported && reimported.profile.id === state.hull ? this.sections.hull.buildFittedSummary(reimported) : this.legacySummary(state);
+    if (summary) this.sections.hull.restoreFittingSummary(applyPropulsionSelection(summary, state));
+  }
+
+  /** Old persisted summaries may predate required fit-derived fields; fill those from the saved hull. */
+  private legacySummary(state: SidePanelState): FittedHullSummary | undefined {
+    const saved = state.fittedHull;
+    if (!saved) return undefined;
+    const profile = state.hull ? this.ships.findHullById(state.hull) : undefined;
+    return {
+      ...saved,
+      capacitor: saved.capacitor ?? (profile ? { capacity: profile.capacitorCapacity, rechargeTime: profile.capacitorRechargeTime } : { capacity: 0, rechargeTime: 0 }),
+      energyWarfareResistancePercent: saved.energyWarfareResistancePercent ?? 0,
+    };
+  }
+
   private setButtonDisabled(button: HTMLButtonElement, enabled: boolean): void {
     button.disabled = !enabled;
     button.setAttribute("aria-disabled", String(!enabled));
+  }
+
+  private syncExportButton(): void {
+    this.setButtonDisabled(this.els.exportFitting, this.fittingTextValue !== undefined);
   }
 
   isOverridden(key: keyof ProfileParamOverrides): boolean {
@@ -277,4 +318,20 @@ export class SidePanelImpl implements SidePanel {
   }
 
   skillConditions(): StatConditions { return this.sections.skill.skillConditions(); }
+}
+
+/** The persisted propulsion selection, not the fitting text, decides whether a module is active on restore. */
+function applyPropulsionSelection(summary: FittedHullSummary, state: SidePanelState): FittedHullSummary {
+  const saved = state.fittedHull;
+  if (state.propulsion === PROPULSION_NONE) {
+    return deactivatePropulsion({
+      ...summary,
+      propulsionModuleId: saved?.propulsionModuleId ?? summary.propulsionModuleId,
+      propulsionName: saved?.propulsionName ?? summary.propulsionName,
+    });
+  }
+  if (state.propulsion !== undefined && saved?.propulsionId === state.propulsion && saved.propulsion !== undefined) {
+    return { ...summary, propulsionId: saved.propulsionId, propulsionModuleId: saved.propulsionModuleId, propulsionName: saved.propulsionName, propulsionKind: saved.propulsionKind, propulsion: saved.propulsion };
+  }
+  return summary;
 }

@@ -32,6 +32,7 @@ export interface SidePanelElements {
   readonly pastePopup: HTMLElement;
   readonly pasteInput: HTMLTextAreaElement;
   readonly importFitting: HTMLButtonElement;
+  readonly exportFitting: HTMLButtonElement;
   readonly propulsion: HTMLSelectElement;
   readonly propulsionOptions: HTMLElement;
   readonly propulsionGear: HTMLButtonElement;
@@ -69,6 +70,7 @@ export function collectSideEls(els: ControlsElements, side: Side): SidePanelElem
     pastePopup: combatant.pastePopup,
     pasteInput: combatant.pasteInput,
     importFitting: combatant.importFitting,
+    exportFitting: combatant.exportFitting,
     propulsion: combatant.propulsion,
     propulsionOptions: combatant.propulsionOptions,
     propulsionGear: combatant.propulsionGear,

@@ -14,6 +14,9 @@ export interface UiEvents {
   onFittingImported(listener: (side: "shipA" | "shipB", imported: ImportedFitting) => void): void;
   offFittingImported(listener: (side: "shipA" | "shipB", imported: ImportedFitting) => void): void;
   emitFittingImported(side: "shipA" | "shipB", imported: ImportedFitting): void;
+  onCapBoosterInject(listener: (side: "shipA" | "shipB", boosterIndex: number) => void): void;
+  offCapBoosterInject(listener: (side: "shipA" | "shipB", boosterIndex: number) => void): void;
+  emitCapBoosterInject(side: "shipA" | "shipB", boosterIndex: number): void;
   onProfileLoaded(listener: (name: string) => void): void;
   offProfileLoaded(listener: (name: string) => void): void;
   emitProfileLoaded(name: string): void;
@@ -42,6 +45,7 @@ export class UiEventsImpl implements UiEvents {
   private readonly configInvalidated = new Set<() => void>();
   private readonly displayInvalidated = new Set<() => void>();
   private readonly fittingImported = new Set<(side: "shipA" | "shipB", imported: ImportedFitting) => void>();
+  private readonly capBoosterInject = new Set<(side: "shipA" | "shipB", boosterIndex: number) => void>();
   private readonly profileLoaded = new Set<(name: string) => void>();
   private readonly newProfile = new Set<() => void>();
   private readonly profileDeleted = new Set<() => void>();
@@ -70,6 +74,18 @@ export class UiEventsImpl implements UiEvents {
   }
   emitFittingImported(side: "shipA" | "shipB", imported: ImportedFitting): void {
     for (const listener of Array.from(this.fittingImported)) listener(side, imported);
+  }
+
+  onCapBoosterInject(listener: (side: "shipA" | "shipB", boosterIndex: number) => void): void {
+    this.capBoosterInject.add(listener);
+  }
+
+  offCapBoosterInject(listener: (side: "shipA" | "shipB", boosterIndex: number) => void): void {
+    this.capBoosterInject.delete(listener);
+  }
+
+  emitCapBoosterInject(side: "shipA" | "shipB", boosterIndex: number): void {
+    for (const listener of Array.from(this.capBoosterInject)) listener(side, boosterIndex);
   }
 
   onProfileLoaded(listener: (name: string) => void): void { this.profileLoaded.add(listener); }

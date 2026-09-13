@@ -282,15 +282,26 @@ describe("fittingDb", () => {
     expect(rowByName(COMBAT_DRONES, "Salvage Drone I")).toBeUndefined();
   });
 
-  test("includes warp scramblers and excludes long warp disruptors", () => {
+  test("includes warp scramblers with propulsion block and non-blocking long warp disruptors", () => {
     const warpScrambler = rowByName(WARP_SCRAMBLERS, "Warp Scrambler II");
     expect(warpScrambler).toMatchObject({
       maxRange: 9000,
       overloadRangeBonusPercent: 20,
+      capacitorNeed: 6,
+      cycleTime: 5,
+      propulsionBlock: true,
+      requiredSkillIds: ["3435", "3449"],
     });
     expect(moduleByName("Warp Scrambler II")?.warpScrambler).toMatchObject(baseStats(warpScrambler!));
-    expect(rowByName(WARP_SCRAMBLERS, "Warp Disruptor II")).toBeUndefined();
-    expect(moduleByName("Warp Disruptor II")).toBeUndefined();
+    const warpDisruptor = rowByName(WARP_SCRAMBLERS, "Warp Disruptor II");
+    expect(warpDisruptor).toMatchObject({
+      maxRange: 24000,
+      capacitorNeed: 30,
+      cycleTime: 5,
+      propulsionBlock: false,
+      requiredSkillIds: ["3435"],
+    });
+    expect(moduleByName("Warp Disruptor II")?.warpScrambler).toMatchObject(baseStats(warpDisruptor!));
   });
 
   test("includes heavy stasis grapplers with optimal, falloff and overload bonus", () => {

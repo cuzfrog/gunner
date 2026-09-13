@@ -28,8 +28,8 @@ const shipA: ShipState = {
   position: new Vec2(0, 0),
   velocity: new Vec2(0, 0),
   ewar: {
-    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
-    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [] },
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
+    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
   },
 };
 
@@ -126,7 +126,7 @@ function makeEvaluator(): {
     dampenedSensorSpec: vi.fn((spec) => spec),
     dampenedSensorSpecIgnoringRange: vi.fn((spec) => spec),
     dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
-    reach: vi.fn(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0 })),
+    reach: vi.fn(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, })),
     potentials: vi.fn(() => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 })),
   });
   const turretBoosterResolver = vi.mocked<TurretBoosterResolver>({ boostedTurret: vi.fn(() => boostedTurret) });

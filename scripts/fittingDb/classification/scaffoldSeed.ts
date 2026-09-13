@@ -4,6 +4,8 @@ export const COMBAT_ATTRIBUTE_MAP: Readonly<Record<number, HullBonusAttribute>> 
   114: "missileDamage", 116: "missileDamage", 117: "missileDamage", 118: "missileDamage",
   64: "turretDamage",
   51: "turretRoF",
+  6: "capUse",
+  73: "duration",
   2734: "turretSpoolMax",
   160: "turretTracking", 204: "turretTracking",
   54: "turretOptimal",
@@ -24,7 +26,7 @@ export const COMBAT_ATTRIBUTE_MAP: Readonly<Record<number, HullBonusAttribute>> 
 };
 
 export const OUT_OF_SCOPE_ATTRIBUTE_IDS: ReadonlySet<number> = new Set([
-  6, 20, 21, 30, 38, 50, 55, 67, 68, 73, 77, 83, 84, 90, 97, 103, 104, 105, 126, 306, 552, 669, 714, 763, 796, 983, 1045, 1131, 1164, 1267, 1270, 1795, 1945, 2044, 3115,
+  20, 21, 30, 38, 50, 55, 67, 68, 77, 83, 84, 90, 97, 103, 104, 105, 126, 306, 552, 669, 714, 763, 796, 983, 1045, 1131, 1164, 1267, 1270, 1795, 1945, 2044, 3115,
   109, 110, 111, 113,
   142, 150, 153, 600,
   238, 239, 240, 241, 309, 359, 560, 565, 566, 1371, 1372, 2822, 2397, 2398, 2399, 2400, 2451,

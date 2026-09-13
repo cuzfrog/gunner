@@ -7,6 +7,7 @@ import type {
   ShipNameLanguage,
   ShipProfile,
   Ships,
+  SkillLevel,
   StatConditions,
 } from "../ships";
 import { type BoostLoadout, type EwarLoadout, type MissileBoosterLoadout, type SensorBoostLoadout, type SensorSpec, type StackingPenalty } from "../sim";
@@ -24,6 +25,7 @@ import type { DroneSkillModel } from "./droneStats";
 import { FittingStateFactory, type FittingState, type FittingModuleEntry, type CargoEntry } from "./fittingState";
 import { FittingCalculatorImpl, type FittingCalculator } from "./fittingCalculator";
 import { DefenseCalculatorImpl, type DefenseCalculator } from "./defenseCalculator";
+import { CapacitorCalculatorImpl, type CapacitorDrainSources, type CapacitorStats } from "./capacitorCalculator";
 import type { FittingDb, FittingModuleStats, HullBonus } from "../gamedata/fittingDb";
 import type { DefenseSpec } from "../sim";
 
@@ -50,6 +52,14 @@ export interface FittingSummary {
   readonly hullName: string;
   readonly fittingName: string;
   readonly sections: readonly FittingSection[];
+  // Static capacitor readout for the preview, at level-5-skill conditions.
+  readonly capacitor?: {
+    readonly capacity: number;
+    readonly rechargeTime: number;
+    readonly usagePerSecond: number;
+    readonly stablePercent?: number;
+    readonly depletesInSeconds?: number;
+  };
 }
 
 export interface ImportedFitting {
@@ -64,12 +74,14 @@ export interface ImportedFitting {
   readonly drones: readonly ImportedDrone[];
   readonly cargoCharges: readonly CargoCharge[];
   readonly ewar: EwarLoadout;
+  readonly energyWarfareResistancePercent: number;
   readonly boosts: BoostLoadout;
   readonly missileBoosts: MissileBoosterLoadout;
   readonly sensorSpec: SensorSpec;
   readonly sensorBoosts: SensorBoostLoadout;
   readonly hullBonuses: readonly HullBonus[];
   readonly defense: DefenseSpec;
+  readonly capacitor: CapacitorStats;
 }
 
 export interface PropulsionVariant {
@@ -79,6 +91,8 @@ export interface PropulsionVariant {
 
 export interface FittingImport {
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined;
+  /** Re-resolves the capacitor preview from the imported skeleton with live drain sources (propulsion selection, loadout projections, skills). */
+  resolveCapacitorStats(imported: ImportedFitting, conditions: StatConditions, sources: CapacitorDrainSources): CapacitorStats;
   propulsionVariantNames(module: PropulsionModule): readonly PropulsionVariant[];
   propulsionStats(name: string): PropulsionStats | undefined;
   propulsionStatsById(id: TypeId): PropulsionStats | undefined;
@@ -97,6 +111,7 @@ export class FittingImportImpl implements FittingImport {
   private readonly fittingStateFactory: FittingStateFactory;
   private readonly calculator: FittingCalculator;
   private readonly defenseCalculator: DefenseCalculator;
+  private readonly capacitorCalculator: CapacitorCalculatorImpl;
 
   constructor({
     ships,
@@ -133,6 +148,7 @@ export class FittingImportImpl implements FittingImport {
     this.fittingStateFactory = new FittingStateFactory(fittingDb);
     this.calculator = new FittingCalculatorImpl({ fittingDb, ships, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog });
     this.defenseCalculator = new DefenseCalculatorImpl({ fittingDb, stackingPenalty });
+    this.capacitorCalculator = new CapacitorCalculatorImpl({ fittingDb, stackingPenalty });
   }
 
   propulsionVariantNames(module: PropulsionModule): readonly PropulsionVariant[] {
@@ -156,13 +172,17 @@ export class FittingImportImpl implements FittingImport {
   propulsionStats(name: string): PropulsionStats | undefined {
     const stats = moduleByName(this.db, name)?.propulsion;
     if (!stats) return undefined;
-    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom };
+    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom, capacitorNeed: stats.capacitorNeed, ...(stats.capacitorCapacityMultiplier !== undefined ? { capacitorCapacityMultiplier: stats.capacitorCapacityMultiplier } : {}) };
   }
 
   propulsionStatsById(id: TypeId): PropulsionStats | undefined {
     const stats = this.db.modules[id]?.propulsion;
     if (!stats) return undefined;
-    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom };
+    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom, capacitorNeed: stats.capacitorNeed, ...(stats.capacitorCapacityMultiplier !== undefined ? { capacitorCapacityMultiplier: stats.capacitorCapacityMultiplier } : {}) };
+  }
+
+  resolveCapacitorStats(imported: ImportedFitting, conditions: StatConditions, sources: CapacitorDrainSources): CapacitorStats {
+    return this.capacitorCalculator.resolve(imported.fittingState, conditions, sources);
   }
 
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined {
@@ -181,12 +201,15 @@ export class FittingImportImpl implements FittingImport {
     const launcher = this.calculator.resolveLauncher(fittingState, conditions);
     const drones = this.calculator.resolveDrones(fittingState, conditions);
     const cargoCharges = this.calculator.resolveCargoCharges(fittingState);
-    const ewar = this.calculator.resolveEwar(fittingState);
-    const boosts = this.calculator.resolveBoosts(fittingState);
-    const missileBoosts = this.calculator.resolveMissileBoosts(fittingState);
+    const ewar = this.calculator.resolveEwar(fittingState, conditions);
+    const energyWarfareResistancePercent = this.calculator.resolveEnergyWarfareResistance(fittingState);
+    const boosts = this.calculator.resolveBoosts(fittingState, conditions);
+    const missileBoosts = this.calculator.resolveMissileBoosts(fittingState, conditions);
     const sensorSpec = this.calculator.resolveSensorSpec(fittingState, conditions);
-    const sensorBoosts = this.calculator.resolveSensorBoosts(fittingState);
+    const sensorBoosts = this.calculator.resolveSensorBoosts(fittingState, conditions);
     const defense = this.defenseCalculator.resolve(fittingState, conditions);
+    const turretDrains = turrets.map((turret) => ({ moduleId: turret.moduleId, capacitorNeed: turret.capacitorNeed, cycleTime: turret.cycleTime, count: turret.turretCount }));
+    const capacitor = this.capacitorCalculator.resolve(fittingState, conditions, { defense, turretDrains, ewar, boosts, missileBoosts, sensorBoosts, propulsionModuleId: fittingState.propulsionModule?.moduleId });
 
     return {
       profile: resolved.profile,
@@ -200,12 +223,14 @@ export class FittingImportImpl implements FittingImport {
       drones,
       cargoCharges,
       ewar,
+      energyWarfareResistancePercent,
       boosts,
       missileBoosts,
       sensorSpec,
       sensorBoosts,
       hullBonuses,
       defense,
+      capacitor,
     };
   }
 
@@ -216,10 +241,13 @@ export class FittingImportImpl implements FittingImport {
     const resolved = this.resolveEftDocument(parsed);
     if (!resolved) return undefined;
 
+    const imported = this.importFitting(text, PREVIEW_CONDITIONS);
+    const capacitor = imported ? capacitorSummaryFrom(imported.capacitor) : undefined;
     return {
       hullName: resolved.profile.name,
       fittingName: resolved.fittingName,
       sections: buildSections(resolved),
+      ...(capacitor ? { capacitor } : {}),
     };
   }
 
@@ -523,4 +551,16 @@ function collectCargoEntries(items: readonly ResolvedQuantity[]): readonly Cargo
     if (item.kind === "resolved") entries.push({ id: item.id, quantity: item.quantity });
   }
   return entries;
+}
+
+const PREVIEW_CONDITIONS: StatConditions = { skillLevel: 5 as SkillLevel, overloaded: false, weaponOverloaded: false };
+
+function capacitorSummaryFrom(stats: CapacitorStats): NonNullable<FittingSummary["capacitor"]> {
+  return {
+    capacity: stats.spec.capacity,
+    rechargeTime: stats.spec.rechargeTime,
+    usagePerSecond: stats.usagePerSecond,
+    ...(stats.stablePercent !== undefined ? { stablePercent: stats.stablePercent } : {}),
+    ...(stats.depletesInSeconds !== undefined ? { depletesInSeconds: stats.depletesInSeconds } : {}),
+  };
 }

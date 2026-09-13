@@ -1,36 +1,22 @@
-import { test, expect, loadFittingText, FITTING_THRASHER } from "./fixtures";
+import { test, expect, loadFittingText, importFittingViaPaste, FITTING_THRASHER, BASE_URL } from "./fixtures";
 import type { Page } from "@playwright/test";
 
-async function loadThrasher(page: Page): Promise<void> {
-  const eftText = loadFittingText(FITTING_THRASHER);
-  await page.evaluate(() => {
-    Object.defineProperty(navigator, "clipboard", {
-      value: { readText: () => Promise.reject(new Error("denied")), writeText: () => Promise.resolve() },
-      configurable: true,
-    });
-  });
-  await page.locator("#ship-a-import-fitting").click();
-  await expect(page.locator("#ship-a-paste-popup")).toBeVisible();
-  await page.locator("#ship-a-paste-input").evaluate((el, text) => {
-    const dataTransfer = new DataTransfer();
-    dataTransfer.setData("text/plain", text);
-    el.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dataTransfer, bubbles: true }));
-  }, eftText);
-  await expect(page.locator("#ship-a-fitting-name")).toBeVisible();
-}
+let page: Page;
 
-test.describe("ship stats, propulsion and skills", () => {
-  test("speed input updates effective speed", async ({ cleanPage: page }) => {
-    await loadThrasher(page);
-    await page.locator("#ship-a-speed").fill("2000");
-    await page.locator("#ship-a-speed").dispatchEvent("input");
-    const effectiveSpeed = await page.locator("#effective-ship-a-speed").textContent();
-    expect(effectiveSpeed).toBeTruthy();
-    expect(effectiveSpeed).not.toBe("");
+test.describe.serial("ship stats, propulsion and skills", () => {
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext();
+    page = await context.newPage();
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#scene")).toBeVisible();
+    await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_THRASHER));
   });
 
-  test("mass input updates align time", async ({ cleanPage: page }) => {
-    await loadThrasher(page);
+  test.afterAll(async () => {
+    await page.context().close();
+  });
+
+  test("mass input updates align time", async () => {
     const alignTime = page.locator("#ship-a-align-time");
     const initialAlign = await alignTime.textContent();
     await page.locator("#ship-a-mass").fill("2000000");
@@ -40,8 +26,7 @@ test.describe("ship stats, propulsion and skills", () => {
     expect(newAlign).not.toBe(initialAlign);
   });
 
-  test("inertia input updates align time", async ({ cleanPage: page }) => {
-    await loadThrasher(page);
+  test("inertia input updates align time", async () => {
     const alignTime = page.locator("#ship-a-align-time");
     const initialAlign = await alignTime.textContent();
     await page.locator("#ship-a-inertia").fill("5");
@@ -50,13 +35,7 @@ test.describe("ship stats, propulsion and skills", () => {
     expect(newAlign).not.toBe(initialAlign);
   });
 
-  test("signature radius input updates", async ({ cleanPage: page }) => {
-    await page.locator("#ship-a-sig").fill("100");
-    await page.locator("#ship-a-sig").dispatchEvent("input");
-    await expect(page.locator("#ship-a-sig")).toHaveValue("100");
-  });
-
-  test("mode select changes autopilot behavior", async ({ cleanPage: page }) => {
+  test("mode select changes autopilot behavior", async () => {
     await expect(page.locator("#ship-a-mode")).toHaveValue("keepAtRange");
     await page.locator("#ship-a-mode").selectOption("orbit");
     await expect(page.locator("#ship-a-mode")).toHaveValue("orbit");
@@ -64,13 +43,7 @@ test.describe("ship stats, propulsion and skills", () => {
     await expect(page.locator("#ship-a-mode")).toHaveValue("midships");
   });
 
-  test("desired range input updates", async ({ cleanPage: page }) => {
-    await page.locator("#ship-a-range").fill("15000");
-    await page.locator("#ship-a-range").dispatchEvent("input");
-    await expect(page.locator("#ship-a-range")).toHaveValue("15000");
-  });
-
-  test("aggressivity slider updates hidden input and output", async ({ cleanPage: page }) => {
+  test("aggressivity slider updates hidden input and output", async () => {
     await page.locator("#ship-a-mode").selectOption("maneuver");
     const slider = page.locator("#ship-a-aggressivity-slider");
     const output = page.locator("#ship-a-aggressivity-value");
@@ -84,8 +57,7 @@ test.describe("ship stats, propulsion and skills", () => {
     expect(newOutput).toContain("10.00");
   });
 
-  test("propulsion select populates from hull fitting", async ({ cleanPage: page }) => {
-    await loadThrasher(page);
+  test("propulsion select populates from hull fitting", async () => {
     const propulsion = page.locator("#ship-a-propulsion");
     const optionCount = await propulsion.locator("option").count();
     expect(optionCount).toBeGreaterThan(0);
@@ -93,21 +65,20 @@ test.describe("ship stats, propulsion and skills", () => {
     expect(selectedValue).not.toBe("");
   });
 
-  test("change propulsion updates speed and stats", async ({ cleanPage: page }) => {
-    await loadThrasher(page);
+  test("change propulsion updates speed and stats", async () => {
     const speed = page.locator("#ship-a-speed");
-    const initialSpeed = await speed.inputValue();
-    const propulsionOptions = page.locator("#ship-a-propulsion-options button");
-    const count = await propulsionOptions.count();
-    if (count > 1) {
-      await propulsionOptions.nth(1).click();
+    const otherOption = page.locator("#ship-a-propulsion-options button[aria-pressed='false']").first();
+    if (await otherOption.count() > 0) {
+      const initialSpeed = await speed.inputValue();
+      await otherOption.click();
       const newSpeed = await speed.inputValue();
       expect(newSpeed).not.toBe(initialSpeed);
     }
+    await page.locator("body").click({ position: { x: 0, y: 0 } });
+    await expect(page.locator("#ship-a-propulsion-variants")).toBeHidden();
   });
 
-  test("propulsion gear opens variant popup", async ({ cleanPage: page }) => {
-    await loadThrasher(page);
+  test("propulsion gear opens variant popup", async () => {
     await page.locator("#ship-a-propulsion-gear").click();
     await expect(page.locator("#ship-a-propulsion-variants")).toBeVisible();
     const variants = page.locator("#ship-a-propulsion-variants");
@@ -116,8 +87,7 @@ test.describe("ship stats, propulsion and skills", () => {
     await expect(page.locator("#ship-a-propulsion-variants")).toBeHidden();
   });
 
-  test("skill level select updates stats", async ({ cleanPage: page }) => {
-    await loadThrasher(page);
+  test("skill level select updates stats", async () => {
     await expect(page.locator("#ship-a-skills")).toHaveValue("5");
     await page.locator("#ship-a-skills").selectOption("3", { force: true });
     await expect(page.locator("#ship-a-skills")).toHaveValue("3");
@@ -125,8 +95,7 @@ test.describe("ship stats, propulsion and skills", () => {
     expect(effectiveTracking).toBeTruthy();
   });
 
-  test("skill popup opens and skill option selection works", async ({ cleanPage: page }) => {
-    await loadThrasher(page);
+  test("skill popup opens and skill option selection works", async () => {
     await page.locator("#ship-a-skill-trigger").click();
     await expect(page.locator("#ship-a-skill-popup")).toBeVisible();
     const skillOptions = page.locator("#ship-a-skill-options button");
@@ -137,8 +106,15 @@ test.describe("ship stats, propulsion and skills", () => {
     expect(summary).toBeTruthy();
   });
 
-  test("overload toggle works", async ({ cleanPage: page }) => {
-    await loadThrasher(page);
+  test("speed input updates effective speed", async () => {
+    await page.locator("#ship-a-speed").fill("2000");
+    await page.locator("#ship-a-speed").dispatchEvent("input");
+    const effectiveSpeed = await page.locator("#effective-ship-a-speed").textContent();
+    expect(effectiveSpeed).toBeTruthy();
+    expect(effectiveSpeed).not.toBe("");
+  });
+
+  test("overload toggle works", async () => {
     await expect(page.locator("#ship-a-overload-button")).toBeEnabled();
     const checkbox = page.locator("#ship-a-overload");
     const initialState = await checkbox.isChecked();

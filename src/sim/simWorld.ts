@@ -1,4 +1,6 @@
 import { ReactiveAutopilot } from "./autopilot";
+import { CapacitorSimulatorImpl } from "./capacitorSimulator";
+import type { CapacitorSimulator } from "./capacitorSimulator";
 import { DefenseSimulatorImpl } from "./defenseSimulator";
 import type { DefenseSimulator } from "./defenseSimulator";
 import { DroneSimulatorImpl } from "./droneSimulator";
@@ -26,6 +28,7 @@ export interface SimWorld {
   readonly missileSimulator: MissileSimulator;
   readonly weaponClock: WeaponClock;
   readonly defenseSimulator: DefenseSimulator;
+  readonly capacitorSimulator: CapacitorSimulator;
 }
 
 export interface SimWorldFactory {
@@ -67,6 +70,7 @@ export class SimWorldFactoryImpl implements SimWorldFactory {
       missileSimulator: new MissileSimulatorImpl({ missileApplication: this.missileApplication }),
       weaponClock: new WeaponClockImpl({ rngFactory: this.rngFactory, hitRoll }),
       defenseSimulator: new DefenseSimulatorImpl(),
+      capacitorSimulator: new CapacitorSimulatorImpl(),
     };
   }
 }

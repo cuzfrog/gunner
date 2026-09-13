@@ -2,7 +2,7 @@ import { Vec2, ZERO_DAMAGE, type EngagementFrame, type ShipState, type SimSnapsh
 import { toTypeId } from "../gamedata/ids";
 import type { WeaponRangeVisibility } from "../appstate";
 import type { I18n } from "./i18n";
-import { CanvasRenderer, type RangeOverlay } from "./renderer";
+import { CanvasRenderer, type RangeOverlay, type WeaponRange, type WeaponRanges } from "./renderer";
 
 function fakeI18n(): I18n {
   return {
@@ -117,6 +117,9 @@ const frame: EngagementFrame = {
 
 const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 
+const zeroRange: WeaponRange = { kind: "turret", optimal: 0, falloff: 0 };
+const zeroRanges: WeaponRanges = { shipA: zeroRange, shipB: zeroRange };
+
 function gridColorOf(renderer: CanvasRenderer, canvas: HTMLCanvasElement): string {
   renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, undefined);
   return (canvas.getContext("2d") as unknown as { strokeStyles: string[] }).strokeStyles[0];
@@ -126,16 +129,21 @@ function shipAt(position: Vec2, id: ShipState["id"] = "shipB", desiredRange = 50
   return { ...ship, id, position, desiredRange };
 }
 
-function cameraScaleFor(shipA: ShipState, shipB: ShipState, clientWidth = 1000, clientHeight = 1000): number {
-  const canvas = fakeCanvas(clientWidth, clientHeight);
+interface CameraOptions {
+  readonly clientWidth?: number;
+  readonly clientHeight?: number;
+  readonly cameraRanges?: WeaponRanges;
+  readonly displayRanges?: WeaponRanges;
+  readonly visibility?: WeaponRangeVisibility;
+}
+
+function cameraScaleFor(shipA: ShipState, shipB: ShipState, options: CameraOptions = {}): number {
+  const canvas = fakeCanvas(options.clientWidth ?? 1000, options.clientHeight ?? 1000);
   const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
-  const testSnapshot: SimSnapshot = {
-    time: 0,
-    shipA,
-    shipB,
-    commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
-  };
-  renderer.draw(testSnapshot, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, undefined);
+  if (options.visibility) renderer.setWeaponRangeVisibility(options.visibility);
+  renderer.setCameraRanges(options.cameraRanges ?? zeroRanges);
+  const displayRanges = options.displayRanges ?? { shipA: turret, shipB: turret };
+  renderer.draw({ ...snapshot, shipA, shipB }, frame, displayRanges, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, undefined);
   return (renderer as unknown as { camera: { scale: number } }).camera.scale;
 }
 
@@ -195,39 +203,135 @@ describe("CanvasRenderer", () => {
   });
 
   describe("updateCamera", () => {
-    test("caps zoom in at 3x farScale when ships are very close", () => {
-      const shipA = shipAt(new Vec2(0, 0), "shipA");
-      const shipB = shipAt(new Vec2(0, 10), "shipB");
-      const scale = cameraScaleFor(shipA, shipB);
-      expect(scale).toBe(0.12);
+    const ringRange: WeaponRange = { kind: "turret", optimal: 6000, falloff: 0 };
+    const ringRanges: WeaponRanges = { shipA: ringRange, shipB: ringRange };
+
+    test("zooms in until the ships fill the canvas when no weapon is configured", () => {
+      const scale = cameraScaleFor(shipAt(new Vec2(0, 0), "shipA"), shipAt(new Vec2(0, 5000), "shipB"));
+      expect(scale).toBeCloseTo(840 / 5000, 10);
     });
 
-    test("uses farScale as baseline at the normal separation", () => {
-      const shipA = shipAt(new Vec2(0, 0), "shipA");
-      const shipB = shipAt(new Vec2(0, 3500), "shipB");
-      const scale = cameraScaleFor(shipA, shipB);
-      expect(scale).toBe(0.04);
+    test("frames the widest configured ring when it fits inside the ships-fit bound", () => {
+      const scale = cameraScaleFor(shipAt(new Vec2(0, 0), "shipA"), shipAt(new Vec2(0, 5000), "shipB"), { cameraRanges: ringRanges });
+      expect(scale).toBeCloseTo(1000 / (2 * 6000 * 1.25), 10);
     });
 
-    test("stays at farScale while ships still fit inside the margin", () => {
-      const shipA = shipAt(new Vec2(0, 0), "shipA");
-      const shipB = shipAt(new Vec2(0, 10000), "shipB");
-      const scale = cameraScaleFor(shipA, shipB);
-      expect(scale).toBe(0.04);
+    test("keeps the minimum ship separation and lets wide rings clip", () => {
+      const scale = cameraScaleFor(shipAt(new Vec2(0, 0), "shipA"), shipAt(new Vec2(0, 1000), "shipB"), { cameraRanges: ringRanges });
+      expect(scale).toBeCloseTo(140 / 1000, 10);
     });
 
-    test("zooms out below farScale when ships reach the canvas margin", () => {
-      const shipA = shipAt(new Vec2(0, 0), "shipA");
-      const shipB = shipAt(new Vec2(0, 30000), "shipB");
-      const scale = cameraScaleFor(shipA, shipB);
-      expect(scale).toBeCloseTo(0.028, 10);
+    test("ignores configured rings for framing when ring visibility is none", () => {
+      const scale = cameraScaleFor(shipAt(new Vec2(0, 0), "shipA"), shipAt(new Vec2(0, 5000), "shipB"), { cameraRanges: ringRanges, visibility: "none" });
+      expect(scale).toBeCloseTo(840 / 5000, 10);
     });
 
-    test("caps zoom out at farScale / 3 when ships are very far apart", () => {
+    test("falls back to the minimum view radius when the ships coincide", () => {
+      const scale = cameraScaleFor(shipAt(new Vec2(0, 0), "shipA"), shipAt(new Vec2(0, 0), "shipB"));
+      expect(scale).toBeCloseTo(1000 / (2 * 250), 10);
+    });
+
+    test("does not steer the camera from the disrupted display ranges", () => {
       const shipA = shipAt(new Vec2(0, 0), "shipA");
-      const shipB = shipAt(new Vec2(0, 100000), "shipB");
-      const scale = cameraScaleFor(shipA, shipB);
-      expect(scale).toBeCloseTo(0.04 / 3, 10);
+      const shipB = shipAt(new Vec2(0, 5000), "shipB");
+      const disrupted: WeaponRanges = { shipA: { kind: "turret", optimal: 2000, falloff: 0 }, shipB: { kind: "turret", optimal: 2000, falloff: 0 } };
+      const boosted = cameraScaleFor(shipA, shipB, { cameraRanges: ringRanges, displayRanges: ringRanges });
+      const disruptedScale = cameraScaleFor(shipA, shipB, { cameraRanges: ringRanges, displayRanges: disrupted });
+      expect(disruptedScale).toBe(boosted);
+    });
+
+    test("reframes when the configured camera ranges change", () => {
+      const shipA = shipAt(new Vec2(0, 0), "shipA");
+      const shipB = shipAt(new Vec2(0, 5000), "shipB");
+      const wide = cameraScaleFor(shipA, shipB, { cameraRanges: ringRanges });
+      const narrowRanges: WeaponRanges = { shipA: { kind: "turret", optimal: 12000, falloff: 0 }, shipB: { kind: "turret", optimal: 12000, falloff: 0 } };
+      const narrow = cameraScaleFor(shipA, shipB, { cameraRanges: narrowRanges });
+      expect(narrow).not.toBe(wide);
+      expect(narrow).toBeCloseTo(1000 / (2 * 12000 * 1.25), 10);
+    });
+  });
+
+  describe("manual zoom anchoring", () => {
+    function zoomRenderer(): CanvasRenderer {
+      const renderer = new CanvasRenderer({ canvas: fakeCanvas(1000, 1000), i18n: fakeI18n() });
+      renderer.setCameraRanges(zeroRanges);
+      return renderer;
+    }
+
+    function drawShips(renderer: CanvasRenderer, shipB: ShipState): void {
+      renderer.draw({ ...snapshot, shipB }, frame, { shipA: turret, shipB: turret }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, undefined);
+    }
+
+    function zoomFactorOf(renderer: CanvasRenderer): number {
+      return (renderer as unknown as { zoomFactor: number }).zoomFactor;
+    }
+
+    const shipA = shipAt(new Vec2(0, 0), "shipA");
+    const at5000 = shipAt(new Vec2(0, 5000), "shipB");
+    const at10000 = shipAt(new Vec2(0, 10000), "shipB");
+    const at20000 = shipAt(new Vec2(0, 20000), "shipB");
+
+    test("toggling auto zoom off keeps the current scale", () => {
+      const renderer = zoomRenderer();
+      drawShips(renderer, at5000);
+      const before = scaleOf(renderer);
+      renderer.setManualZoom(false, 1);
+      drawShips(renderer, at10000);
+      expect(scaleOf(renderer)).toBe(before);
+    });
+
+    test("manual zoom factor multiplies the anchored scale", () => {
+      const renderer = zoomRenderer();
+      renderer.setManualZoom(false, 1);
+      drawShips(renderer, at5000);
+      const anchored = scaleOf(renderer);
+      renderer.setManualZoom(false, 2);
+      drawShips(renderer, at5000);
+      expect(scaleOf(renderer)).toBeCloseTo(anchored * 2, 10);
+    });
+
+    test("manual scale stays constant while distance and camera ranges change", () => {
+      const renderer = zoomRenderer();
+      renderer.setManualZoom(false, 1);
+      drawShips(renderer, at5000);
+      const anchored = scaleOf(renderer);
+      renderer.setCameraRanges({ shipA: { kind: "turret", optimal: 12000, falloff: 0 }, shipB: { kind: "turret", optimal: 12000, falloff: 0 } });
+      drawShips(renderer, at20000);
+      expect(scaleOf(renderer)).toBe(anchored);
+    });
+
+    test("re-enabling manual zoom re-anchors at the current auto scale", () => {
+      const renderer = zoomRenderer();
+      renderer.setManualZoom(false, 1);
+      drawShips(renderer, at5000);
+      const first = scaleOf(renderer);
+      renderer.setManualZoom(true, 1);
+      drawShips(renderer, at20000);
+      const auto = scaleOf(renderer);
+      expect(auto).not.toBe(first);
+      renderer.setManualZoom(false, 1);
+      drawShips(renderer, at20000);
+      expect(scaleOf(renderer)).toBe(auto);
+    });
+
+    test("a fresh manual session anchors on the first frame's auto scale", () => {
+      const autoRenderer = zoomRenderer();
+      drawShips(autoRenderer, at5000);
+      const autoScale = scaleOf(autoRenderer);
+      const manualRenderer = zoomRenderer();
+      manualRenderer.setManualZoom(false, 2);
+      drawShips(manualRenderer, at5000);
+      expect(scaleOf(manualRenderer)).toBeCloseTo(autoScale, 10);
+      drawShips(manualRenderer, at20000);
+      expect(scaleOf(manualRenderer)).toBeCloseTo(autoScale, 10);
+    });
+
+    test("manual zoom factor stays clamped to [0.25, 4]", () => {
+      const renderer = zoomRenderer();
+      renderer.setManualZoom(false, 10);
+      expect(zoomFactorOf(renderer)).toBe(4);
+      renderer.setManualZoom(false, 0.1);
+      expect(zoomFactorOf(renderer)).toBe(0.25);
     });
   });
 

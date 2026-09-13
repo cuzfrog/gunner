@@ -13,6 +13,8 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
       engagementReadout: proxy.engagementReadout,
       effectiveReadout: proxy.effectiveReadout,
       defenseReadout: proxy.defenseController,
+      capacitorReadout: proxy.capacitorController,
+      starvedReadout: proxy.ewarController,
       i18n: proxy.i18n,
       now: proxy.now,
     })).singleton(),

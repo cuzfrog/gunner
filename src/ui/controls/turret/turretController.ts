@@ -262,6 +262,7 @@ export class TurretControllerImpl implements TurretController {
       optimal: num(this.els.optimal), falloff: num(this.els.falloff),
       damagePerShot: this.selectedTurret.damagePerShot,
       cycleTime: this.selectedTurret.cycleTime,
+      capacitorNeed: this.selectedTurret.capacitorNeed,
       turretCount: this.selectedTurret.turretCount,
       spool: this.selectedTurret.spool,
     };
@@ -284,6 +285,7 @@ export class TurretControllerImpl implements TurretController {
       falloff,
       damagePerShot: turret.damagePerShot,
       cycleTime: turret.cycleTime,
+      capacitorNeed: turret.capacitorNeed,
       turretCount: turret.turretCount,
       spool: turret.spool,
     }));

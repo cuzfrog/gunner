@@ -3,7 +3,7 @@ import type { TypeId } from "../../../gamedata/ids";
 import type { FittedHull, PropulsionId, PropulsionKind, PropulsionModule, ShipProfile, Ships } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import { PROPULSION_NONE, type FittedHullSummary, type PropulsionSelection } from "../../../appstate";
+import { PROPULSION_NONE, deactivatePropulsion, type FittedHullSummary, type PropulsionSelection } from "../../../appstate";
 import { propulsionOptionLabel } from "../controlsFormat";
 import { ChoiceGroupImpl, type ChoiceGroupOption } from "../choiceGroup";
 import type { Popup, PopupGroup } from "../popup";
@@ -125,33 +125,48 @@ export class PropulsionSection implements IPropulsionSection {
     if (!profile) return;
     const propulsionId = this.currentPropulsionId();
     const fitted = this.panel.fittedHull;
-    let updated: FittedHullSummary | undefined;
-    if (propulsionId) {
-      const module = this.ships.fittingOption(profile, propulsionId);
-      if (module) {
-        const variant = this.resolvePropulsionVariantWithMemory(module, fitted);
-        const propulsionModuleId = variant?.id;
-        const propulsionName = variant?.name ?? module.label;
-        const propulsion = (propulsionModuleId ? this.fittingImport.propulsionStatsById(propulsionModuleId) : undefined) ?? module;
-        updated = {
-          fittingName: fitted?.fittingName ?? "",
-          fitted: fitted?.fitted ?? this.nakedFitted(profile),
-          propulsionId,
-          propulsionModuleId,
-          propulsionName,
-          propulsionKind: module.kind,
-          propulsion,
-        };
-        if (propulsionModuleId) {
-          this.propulsionSelection.noteApplied({ kind: module.kind, module }, { moduleId: propulsionModuleId });
-        }
+    if (!propulsionId) {
+      if (fitted) this.panel.fittedHull = deactivatePropulsion(fitted);
+      this.afterPropulsionChange();
+      return;
+    }
+    const module = this.ships.fittingOption(profile, propulsionId);
+    if (module) {
+      const variant = this.resolvePropulsionVariantWithMemory(module, fitted);
+      this.panel.fittedHull = this.updatedSummary(profile, propulsionId, module, variant ? { id: variant.id, name: variant.name } : undefined);
+      if (variant) {
+        this.propulsionSelection.noteApplied({ kind: module.kind, module }, { moduleId: variant.id });
       }
-    } else if (fitted) {
-      updated = { ...fitted, propulsionId: undefined, propulsionKind: undefined, propulsion: undefined };
     }
-    if (updated) {
-      this.panel.fittedHull = updated;
+    this.afterPropulsionChange();
+  }
+
+  applyPropulsionVariant(id: TypeId): void {
+    const profile = this.panel.profile;
+    const module = this.currentPropulsionModule();
+    const propulsionId = this.currentPropulsionId();
+    if (!profile || !module || !propulsionId || !this.fittingImport.propulsionStatsById(id)) return;
+    const name = this.fittingImport.itemNameForId(id, "en") ?? module.label;
+    this.panel.fittedHull = this.updatedSummary(profile, propulsionId, module, { id, name });
+    this.propulsionSelection.noteApplied({ kind: module.kind, module }, { moduleId: id });
+    this.afterPropulsionChange();
+  }
+
+  private updatedSummary(
+    profile: ShipProfile,
+    propulsionId: PropulsionId,
+    module: PropulsionModule,
+    variant: { readonly id: TypeId; readonly name: string } | undefined,
+  ): FittedHullSummary {
+    const propulsion = (variant ? this.fittingImport.propulsionStatsById(variant.id) : undefined) ?? module;
+    const fitted = this.panel.fittedHull;
+    if (fitted) {
+      return { ...fitted, propulsionId, propulsionModuleId: variant?.id, propulsionName: variant?.name ?? module.label, propulsionKind: module.kind, propulsion };
     }
+    return this.panel.sections.hull.buildManualSummary(profile, { propulsionId, propulsionModuleId: variant?.id, propulsionName: variant?.name ?? module.label, kind: module.kind, propulsion });
+  }
+
+  private afterPropulsionChange(): void {
     this.panel.sections.stats.updateShipStats({ updateInertia: false, updateMass: true, updateSig: true });
     this.panel.sections.skill.setOverloadDisabled();
     this.variants.updateUI();
@@ -221,10 +236,6 @@ export class PropulsionSection implements IPropulsionSection {
 
   defaultPropulsionName(module: PropulsionModule): string {
     return this.defaultPropulsionVariant(module)?.name ?? module.label;
-  }
-
-  nakedFitted(profile: ShipProfile): FittedHull {
-    return { mass: profile.mass, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 };
   }
 
 }

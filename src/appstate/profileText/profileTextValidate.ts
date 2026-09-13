@@ -11,7 +11,11 @@ import {
   isDefenseSkills,
   isNonNegative,
   isOptionalBoosterActivations,
+  isOptionalCapBoosterCharges,
+  isOptionalCapBoosterModes,
   isOptionalFittedHullSummary,
+  isOptionalRahActivation,
+  isOptionalRepairerActivations,
   isPositive,
   isSkillLevel,
   isTargetingSkills,
@@ -34,8 +38,13 @@ export function parseScalarValue(
   if (value === "") return undefined;
 
   if (field === "version") return value === String(USER_SETTINGS_VERSION) ? USER_SETTINGS_VERSION : undefined;
-  if (field === "shipAOverload" || field === "shipBOverload" || field === "shipAWeaponOverload" || field === "shipBWeaponOverload" || field === "shipADamageEnabled" || field === "shipBDamageEnabled") return value === "true" ? true : value === "false" ? false : undefined;
+  if (field === "shipAOverload" || field === "shipBOverload" || field === "shipAWeaponOverload" || field === "shipBWeaponOverload" || field === "shipADamageEnabled" || field === "shipBDamageEnabled" || field === "shipAInfiniteCapacitor" || field === "shipBInfiniteCapacitor") return value === "true" ? true : value === "false" ? false : undefined;
   if (field === "shipAMode" || field === "shipBMode") return simValueParser.parseAutopilotMode(value);
+  if (field === "shipARepMode" || field === "shipBRepMode") return value === "auto" || value === "manual" ? value : undefined;
+  if (field === "shipARepairerActivation" || field === "shipBRepairerActivation") return parseJsonGuarded(value, isOptionalRepairerActivations);
+  if (field === "shipARahActivation" || field === "shipBRahActivation") return parseJsonGuarded(value, isOptionalRahActivation);
+  if (field === "shipACapBoosterModes" || field === "shipBCapBoosterModes") return parseJsonGuarded(value, isOptionalCapBoosterModes);
+  if (field === "shipACapBoosterCharges" || field === "shipBCapBoosterCharges") return parseJsonGuarded(value, isOptionalCapBoosterCharges);
   if (field === "shipASkillLevel" || field === "shipBSkillLevel") {
     const num = Number(value);
     return isSkillLevel(num) ? num : undefined;
@@ -179,6 +188,15 @@ export function parseFittedHullSummary(value: string): FittedHullSummary | undef
   }
 }
 
+function parseJsonGuarded<T>(value: string, guard: (parsed: unknown) => parsed is T): T | undefined {
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return guard(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, unknown> {
   const fields: Record<string, unknown> = {
     shipASig: raw.shipASig,
@@ -197,6 +215,12 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
     shipABoosterActivation: raw.shipABoosterActivation,
     shipAMissileBoosterActivation: raw.shipAMissileBoosterActivation,
     shipASensorBoosterActivation: raw.shipASensorBoosterActivation,
+    shipARepMode: raw.shipARepMode,
+    shipARepairerActivation: raw.shipARepairerActivation,
+    shipARahActivation: raw.shipARahActivation,
+    shipAInfiniteCapacitor: raw.shipAInfiniteCapacitor,
+    shipACapBoosterModes: raw.shipACapBoosterModes,
+    shipACapBoosterCharges: raw.shipACapBoosterCharges,
     shipAAmmo: raw.shipAAmmo,
     shipAWeaponKind: raw.shipAWeaponKind,
     shipAMissileAmmo: raw.shipAMissileAmmo,
@@ -220,6 +244,12 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
     shipBBoosterActivation: raw.shipBBoosterActivation,
     shipBMissileBoosterActivation: raw.shipBMissileBoosterActivation,
     shipBSensorBoosterActivation: raw.shipBSensorBoosterActivation,
+    shipBRepMode: raw.shipBRepMode,
+    shipBRepairerActivation: raw.shipBRepairerActivation,
+    shipBRahActivation: raw.shipBRahActivation,
+    shipBInfiniteCapacitor: raw.shipBInfiniteCapacitor,
+    shipBCapBoosterModes: raw.shipBCapBoosterModes,
+    shipBCapBoosterCharges: raw.shipBCapBoosterCharges,
   };
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(fields)) {

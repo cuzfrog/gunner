@@ -1,5 +1,5 @@
 import type { App } from "./app";
-import type { Controls, Loop, Renderer } from "../ui";
+import type { Controls, Loop, Renderer, UiEvents } from "../ui";
 import type { EngagementEngine } from "../sim";
 
 export interface AppCradle {
@@ -8,4 +8,5 @@ export interface AppCradle {
   readonly engine: EngagementEngine;
   readonly renderer: Renderer;
   readonly loop: Loop;
+  readonly uiEvents: UiEvents;
 }

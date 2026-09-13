@@ -21,6 +21,7 @@ export interface ImportedTurret {
   readonly damageMultiplier: number;
   readonly damagePerShot: DamageVector;
   readonly cycleTime: number;
+  readonly capacitorNeed: number; // GJ per module instance per cycle, debited by the runtime capacitor gate
   readonly turretCount: number;
   readonly spool?: TurretSpoolSpec; // resolved spool (per-cycle + hull-adjusted max), absent for non-spooling turrets
   readonly damageBreakdown: DamageBreakdown;

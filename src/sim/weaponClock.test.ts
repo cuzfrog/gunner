@@ -1,11 +1,12 @@
 import { WeaponClockImpl } from "./weaponClock";
+import type { CapacitorGate } from "./capacitorSimulator";
 import { expectedHitRoll, sampledHitRoll } from "./hitRoll";
 import { Mulberry32RngFactory } from "./rng";
 import { EMPTY_DEFENSE_ASSESSMENT, Vec2 } from "./index";
 import { toTypeId } from "../gamedata/ids";
 import type { AttackAssessment } from "./fireControl";
 import type { EngagementView, WeaponAttack } from "./engagementFrameComposer";
-import type { EngagementFrame, HitChanceBreakdown, ShipState, TurretSpec, WeaponSpec } from "./types";
+import type { EngagementFrame, HitChanceBreakdown, ShipState, Side, TurretSpec, WeaponSpec } from "./types";
 import { ZERO_DAMAGE } from "./types";
 
 const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
@@ -51,12 +52,23 @@ function turretAttack(expectedMultiplier: number, volley: { em: number; thermal:
 
 const spoolingTurret: TurretSpec = { ...turret, falloff: 0, spool: { perCycle: 0.1, max: 0.5 } };
 
-function spoolingAttack(volley: { em: number; thermal: number; kinetic: number; explosive: number }, inOptimal = true): WeaponAttack {
+interface DebitRecord {
+  readonly side: Side;
+  readonly amount: number;
+}
+
+function recordingGate(allow: boolean): { gate: CapacitorGate; debits: DebitRecord[] } {
+  const debits: DebitRecord[] = [];
+  return { debits, gate: { attemptDebit: (side: Side, amount: number) => { debits.push({ side, amount }); return allow; } } };
+}
+
+function spoolingAttack(volley: { em: number; thermal: number; kinetic: number; explosive: number }, inOptimal = true, capacitorNeed?: number): WeaponAttack {
+  const weapon: TurretSpec = capacitorNeed === undefined ? spoolingTurret : { ...spoolingTurret, capacitorNeed };
   return {
-    weapon: spoolingTurret,
+    weapon,
     assessment: {
-      boostedWeapon: spoolingTurret,
-      effectiveWeapon: spoolingTurret,
+      boostedWeapon: weapon,
+      effectiveWeapon: weapon,
       damage: { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: volley },
       turret: { hit, expectedMultiplier: 1, spoolFactor: 1, inOptimal },
     },
@@ -302,6 +314,35 @@ describe("WeaponClockImpl", () => {
     expect(clock.spoolCycles("shipA", 0)).toBe(1);
   });
 
+  test("capacitor-gated spooling turret pays one activation, no debits while deactivated, one on re-entry", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const { gate, debits } = recordingGate(true);
+    const volley = { em: 0, thermal: 0, kinetic: 100, explosive: 0 };
+    const inOptimal = makeView([spoolingAttack(volley, true, 36)]);
+    const outOfOptimal = makeView([spoolingAttack(volley, false, 36)]);
+    clock.step(1, inOptimal, gate);
+    expect(debits).toEqual([{ side: "shipA", amount: 36 }]);
+    expect(clock.spoolCycles("shipA", 0)).toBe(0);
+    for (let frame = 0; frame < 60; frame++) clock.step(1, outOfOptimal, gate);
+    expect(debits).toEqual([{ side: "shipA", amount: 36 }]);
+    expect(clock.spoolCycles("shipA", 0)).toBe(0);
+    clock.step(1, inOptimal, gate);
+    expect(debits).toEqual([{ side: "shipA", amount: 36 }, { side: "shipA", amount: 36 }]);
+    expect(clock.spoolCycles("shipA", 0)).toBe(0);
+  });
+
+  test("capacitor-gated spooling turret completes cycles while in optimal", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const { gate, debits } = recordingGate(true);
+    const volley = { em: 0, thermal: 0, kinetic: 100, explosive: 0 };
+    const view = makeView([spoolingAttack(volley, true, 36)]);
+    expect(clock.step(5, view, gate)).toHaveLength(1);
+    expect(debits).toEqual([{ side: "shipA", amount: 36 }, { side: "shipA", amount: 36 }]);
+    expect(clock.step(5, view, gate)).toHaveLength(1);
+    expect(clock.spoolCycles("shipA", 0)).toBe(2);
+    expect(debits).toEqual([{ side: "shipA", amount: 36 }, { side: "shipA", amount: 36 }, { side: "shipA", amount: 36 }]);
+  });
+
   test("non-spooling turret keeps firing beyond optimal", () => {
     const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
     const view = makeView([turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, false)]);
@@ -332,5 +373,41 @@ describe("WeaponClockImpl", () => {
     expect(second.spoolCycles("shipA", 0)).toBe(2);
     expect(second.step(5, view)).toHaveLength(1);
     expect(second.spoolCycles("shipA", 0)).toBe(3);
+  });
+
+  test("turret capacitorNeed debits at activation and each re-activation", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
+    const gun: TurretSpec = { ...turret, capacitorNeed: 36, turretCount: 2 };
+    const view = makeView([{ weapon: gun, assessment: makeAssessment(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 }) }]);
+    const { gate, debits } = recordingGate(true);
+    clock.step(1, view, gate);
+    expect(debits).toEqual([{ side: "shipA", amount: 72 }]);
+    const events = clock.step(4, view, gate);
+    expect(events).toHaveLength(1);
+    expect(debits).toHaveLength(2);
+    expect(debits[1]).toEqual({ side: "shipA", amount: 72 });
+  });
+
+  test("starved turret does not fire and retries the debit", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
+    const gun: TurretSpec = { ...turret, capacitorNeed: 36 };
+    const view = makeView([{ weapon: gun, assessment: makeAssessment(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 }) }]);
+    const { gate, debits } = recordingGate(false);
+    let totalEvents = 0;
+    for (let i = 0; i < 10; i++) {
+      totalEvents += clock.step(1, view, gate).length;
+    }
+    expect(totalEvents).toBe(0);
+    expect(debits.length).toBeGreaterThanOrEqual(10);
+  });
+
+  test("turret without capacitorNeed fires without debiting", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
+    const view = makeView([turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);
+    const { gate, debits } = recordingGate(true);
+    clock.step(1, view, gate);
+    const events = clock.step(4, view, gate);
+    expect(events).toHaveLength(1);
+    expect(debits).toHaveLength(0);
   });
 });

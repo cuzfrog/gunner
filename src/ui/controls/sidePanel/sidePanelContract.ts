@@ -1,9 +1,10 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 import type { DefenseSkills, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../../../ships";
-import type { AutopilotMode, SensorSpec, SimValueParser } from "../../../sim";
+import type { AutopilotMode, CapacitorSpec, SensorSpec, SimValueParser } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting } from "../../../appstate";
+import type { ExportController } from "../export";
 import type { ShipId } from "../../../gamedata/ids";
 import type { Popup, PopupGroup } from "../popup";
 import type { Timer } from "../../timer";
@@ -31,6 +32,7 @@ export interface SidePanel {
   fittingText: string | undefined;
   lastCommittedHull: ShipId | undefined;
   importer: SideImporter;
+  exporter: ExportController;
   getSkillPopup(): Popup;
   getPastePopup(): Popup;
   getPropulsionVariantPopup(): Popup;
@@ -40,6 +42,7 @@ export interface SidePanel {
   setFittingEyeEnabled(enabled: boolean): void;
   setConfigInputsEnabled(enabled: boolean): void;
   setImporter(importer: SideImporter): void;
+  setExporter(exporter: ExportController): void;
   isOverridden(key: keyof ProfileParamOverrides): boolean;
   recordOverride<K extends keyof ProfileParamOverrides>(key: K, value: ProfileParamOverrides[K]): void;
   clearOverrides(): void;
@@ -83,6 +86,9 @@ export interface SidePanelState {
   readonly sig?: number;
   readonly sigBloomFactor?: number;
   readonly sensorSpec?: SensorSpec;
+  readonly capacitor?: CapacitorSpec;
+  readonly energyWarfareResistancePercent?: number;
+  readonly propulsionCapacityMultiplier?: number;
 }
 
 export interface FittingPopupControl {

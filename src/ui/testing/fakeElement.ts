@@ -14,7 +14,7 @@ export class FakeElement {
   dataset: Record<string, string> = {};
   children: FakeElement[] = [];
   parent: FakeElement | null = null;
-  classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn(), contains: vi.fn(() => false) };
+  classList = { add: vi.fnUntracked(), remove: vi.fnUntracked(), toggle: vi.fnUntracked(), contains: vi.fnUntracked(() => false) };
   style: Record<string, string | number> & { setProperty(this: Record<string, string | number>, name: string, value: string): void; removeProperty(this: Record<string, string | number>, name: string): string } = Object.assign(Object.create(null), {
     setProperty(this: Record<string, string | number>, name: string, value: string) { this[name] = value; },
     removeProperty(this: Record<string, string | number>, name: string) { const v = this[name]; delete this[name]; return String(v ?? ""); },
@@ -25,8 +25,8 @@ export class FakeElement {
   private _innerHTML = "";
   private attributes: Record<string, string | null> = {};
   private handlers: Record<string, Array<(event?: unknown) => void>> = {};
-  focus = vi.fn();
-  blur = vi.fn();
+  focus = vi.fnUntracked();
+  blur = vi.fnUntracked();
 
   getBoundingClientRect(): { left: number; top: number; right: number; bottom: number; width: number; height: number; x: number; y: number } {
     return { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0 };

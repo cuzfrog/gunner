@@ -1,5 +1,5 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
-import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type SensorDampenerScriptSpec, type SensorDampenerSpec, type StasisGrapplerSpec, type TargetPainterSpec, type WarpScramblerSpec } from "../../../sim";
+import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type EnergyNeutralizerSpec, type NosferatuSpec, type SensorDampenerScriptSpec, type SensorDampenerSpec, type StasisGrapplerSpec, type TargetPainterSpec, type WarpScramblerSpec } from "../../../sim";
 import type { StoredDisruptionScript, StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
@@ -21,11 +21,22 @@ interface MutableEwarActivation {
   scramblers: { active: boolean; overloaded: boolean }[];
   painters: { active: boolean; overloaded: boolean }[];
   dampeners: { active: boolean; overloaded: boolean; script: SensorDampenerScriptSpec | undefined }[];
+  neutralizers: { active: boolean }[];
+  nosferatu: { active: boolean }[];
 }
 
 interface EwarState {
   loadout: EwarLoadout;
   activation: MutableEwarActivation;
+}
+
+interface EwarRowRef {
+  readonly family: keyof MutableEwarActivation;
+  readonly index: number;
+  readonly moduleId: TypeId;
+  readonly row: HTMLDivElement;
+  readonly stateLabel: HTMLSpanElement;
+  readonly isActive: () => boolean;
 }
 
 type EwarScriptKey = { kind: "disruptor" | "dampener"; index: number };
@@ -40,6 +51,8 @@ export class EwarControllerImpl implements EwarController {
   private readonly ewarEffectDescriber: EwarEffectDescriber;
   private readonly events: UiEvents;
   private readonly states = new Map<Side, EwarState>();
+  private readonly rowRefs = new Map<Side, EwarRowRef[]>();
+  private starvedModuleIds: Record<Side, readonly TypeId[]> = { shipA: [], shipB: [] };
   private readonly scriptSections: Record<Side, ScriptSection<EwarScriptKey>>;
   private readonly disruptorNameSpans = new Map<Side, HTMLSpanElement[]>();
   private readonly dampenerNameSpans = new Map<Side, HTMLSpanElement[]>();
@@ -117,6 +130,8 @@ export class EwarControllerImpl implements EwarController {
         overloaded: d.overloaded,
         script: d.script?.moduleId ?? "none",
       })),
+      ...(state.activation.neutralizers.length > 0 ? { neutralizers: state.activation.neutralizers.map((n) => ({ active: n.active })) } : {}),
+      ...(state.activation.nosferatu.length > 0 ? { nosferatu: state.activation.nosferatu.map((n) => ({ active: n.active })) } : {}),
     };
   }
 
@@ -128,6 +143,12 @@ export class EwarControllerImpl implements EwarController {
   updateSummaries(): void {
     this.updateSummary("shipA");
     this.updateSummary("shipB");
+  }
+
+  updateStarvedModules(starved: Record<"shipA" | "shipB", readonly TypeId[]>): void {
+    this.starvedModuleIds = starved;
+    this.updateRowStates("shipA");
+    this.updateRowStates("shipB");
   }
 
   private buildScriptSection(side: Side): ScriptSection<EwarScriptKey> {
@@ -153,6 +174,7 @@ export class EwarControllerImpl implements EwarController {
     this.scriptSections[side].close();
     this.disruptorNameSpans.delete(side);
     this.dampenerNameSpans.delete(side);
+    this.rowRefs.set(side, []);
     section.innerHTML = "";
     if (!state || this.isEmpty(state.loadout)) {
       section.hidden = true;
@@ -181,11 +203,18 @@ export class EwarControllerImpl implements EwarController {
     if (state.loadout.dampeners.length > 0) {
       this.renderSection(section, "label.ewar.dampener", (container) => this.renderDampeners(side, state, container));
     }
+    if (state.loadout.neutralizers.length > 0) {
+      this.renderSection(section, "label.ewar.neutralizer", (container) => this.renderNeutralizers(side, state, container));
+    }
+    if (state.loadout.nosferatu.length > 0) {
+      this.renderSection(section, "label.ewar.nosferatu", (container) => this.renderNosferatu(side, state, container));
+    }
+    this.updateRowStates(side);
   }
 
   private renderSection(
     parent: HTMLElement,
-    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler" | "label.ewar.painter" | "label.ewar.dampener",
+    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler" | "label.ewar.painter" | "label.ewar.dampener" | "label.ewar.neutralizer" | "label.ewar.nosferatu",
     renderRows: (container: HTMLElement) => void,
   ): void {
     const rowContainer = html`<div></div>` as unknown as HTMLDivElement;
@@ -226,6 +255,14 @@ export class EwarControllerImpl implements EwarController {
     const dampenerActive = state.activation.dampeners.filter((d) => d.active).length;
     const dampenerTitle = dampenerTotal > 0 ? this.ewarEffectDescriber.dampenerHint(projection) : "";
     if (dampenerTotal > 0) this.appendSummaryItem(summary, state.loadout.dampeners[0].moduleId, dampenerActive, dampenerTotal, dampenerTitle);
+    const neutralizerTotal = state.loadout.neutralizers.length;
+    const neutralizerActive = state.activation.neutralizers.filter((n) => n.active).length;
+    const neutralizerTitle = neutralizerTotal > 0 ? this.ewarEffectDescriber.neutralizerHint(projection) : "";
+    if (neutralizerTotal > 0) this.appendSummaryItem(summary, state.loadout.neutralizers[0].moduleId, neutralizerActive, neutralizerTotal, neutralizerTitle);
+    const nosferatuTotal = state.loadout.nosferatu.length;
+    const nosferatuActive = state.activation.nosferatu.filter((n) => n.active).length;
+    const nosferatuTitle = nosferatuTotal > 0 ? this.ewarEffectDescriber.nosferatuHint(projection) : "";
+    if (nosferatuTotal > 0) this.appendSummaryItem(summary, state.loadout.nosferatu[0].moduleId, nosferatuActive, nosferatuTotal, nosferatuTitle);
   }
 
   private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, hint: string): void {
@@ -237,7 +274,7 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private isEmpty(loadout: EwarLoadout): boolean {
-    return loadout.webs.length === 0 && loadout.grapplers.length === 0 && loadout.disruptors.length === 0 && loadout.scramblers.length === 0 && loadout.painters.length === 0 && loadout.dampeners.length === 0;
+    return loadout.webs.length === 0 && loadout.grapplers.length === 0 && loadout.disruptors.length === 0 && loadout.scramblers.length === 0 && loadout.painters.length === 0 && loadout.dampeners.length === 0 && loadout.neutralizers.length === 0 && loadout.nosferatu.length === 0;
   }
 
   private clampActivation(loadout: EwarLoadout, saved?: StoredEwarActivation): MutableEwarActivation {
@@ -300,32 +337,28 @@ export class EwarControllerImpl implements EwarController {
         }
         return { active: savedDampener?.active ?? true, overloaded: savedDampener?.overloaded ?? false, script };
       }),
+      neutralizers: loadout.neutralizers.map((_, i) => ({ active: saved?.neutralizers?.[i]?.active ?? true })),
+      nosferatu: loadout.nosferatu.map((_, i) => ({ active: saved?.nosferatu?.[i]?.active ?? true })),
     };
   }
 
   private renderWebs(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.webs.length; i++) {
       const web = state.loadout.webs[i];
-      const active = state.activation.webs[i].active;
-      const overloaded = state.activation.webs[i].overloaded;
-      const { button } = this.createModuleButton(active, web, this.ewarEffectDescriber.webModuleEffect(web));
-      const overloadButton = this.createOverloadButton(active, overloaded, i, web, () => this.toggleWebOverload(side, i, overloadButton));
-      button.addEventListener("click", () => this.toggleWeb(side, i, button, row));
-      const row = html`<div class=${active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton]}</div>` as unknown as HTMLDivElement;
-      section.appendChild(row);
+      const { button } = this.createModuleButton(state.activation.webs[i].active, web, this.ewarEffectDescriber.webModuleEffect(web));
+      const overloadButton = this.createOverloadButton(state.activation.webs[i].active, state.activation.webs[i].overloaded, i, web, () => this.toggleWebOverload(side, i, overloadButton));
+      button.addEventListener("click", () => this.toggleWeb(side, i, button));
+      section.appendChild(this.createRow(side, "webs", i, web.moduleId, () => state.activation.webs[i].active, [button, overloadButton]));
     }
   }
 
   private renderGrapplers(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.grapplers.length; i++) {
       const grappler: StasisGrapplerSpec = state.loadout.grapplers[i];
-      const activation = state.activation.grapplers[i];
-      const { button } = this.createModuleButton(activation.active, grappler, this.ewarEffectDescriber.grapplerModuleEffect(grappler));
-      const onToggle = () => this.toggleGrapplerOverload(side, i, overloadButton);
-      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, grappler, onToggle);
-      button.addEventListener("click", () => this.toggleGrappler(side, i, button, row));
-      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton]}</div>` as unknown as HTMLDivElement;
-      section.appendChild(row);
+      const { button } = this.createModuleButton(state.activation.grapplers[i].active, grappler, this.ewarEffectDescriber.grapplerModuleEffect(grappler));
+      const overloadButton = this.createOverloadButton(state.activation.grapplers[i].active, state.activation.grapplers[i].overloaded, i, grappler, () => this.toggleGrapplerOverload(side, i, overloadButton));
+      button.addEventListener("click", () => this.toggleGrappler(side, i, button));
+      section.appendChild(this.createRow(side, "grapplers", i, grappler.moduleId, () => state.activation.grapplers[i].active, [button, overloadButton]));
     }
   }
 
@@ -338,15 +371,14 @@ export class EwarControllerImpl implements EwarController {
       nameSpans.push(nameSpan);
       const onToggle = () => this.toggleDisruptorOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, disruptor, onToggle);
-      button.addEventListener("click", () => this.toggleDisruptor(side, i, button, row));
       const key: EwarScriptKey = { kind: "disruptor", index: i };
       const gear = this.scriptSections[side].createGear(key, {
         hint: this.gearHintForSide(side, key),
         disabled: !activation.active,
         dataIndex: i,
       });
-      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton, gear]}</div>` as unknown as HTMLDivElement;
-      section.appendChild(row);
+      button.addEventListener("click", () => this.toggleDisruptor(side, i, button));
+      section.appendChild(this.createRow(side, "disruptors", i, disruptor.moduleId, () => state.activation.disruptors[i].active, [button, overloadButton, gear]));
     }
     this.disruptorNameSpans.set(side, nameSpans);
   }
@@ -354,26 +386,20 @@ export class EwarControllerImpl implements EwarController {
   private renderScramblers(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.scramblers.length; i++) {
       const scrambler: WarpScramblerSpec = state.loadout.scramblers[i];
-      const activation = state.activation.scramblers[i];
-      const { button } = this.createModuleButton(activation.active, scrambler, this.ewarEffectDescriber.scramblerModuleEffect());
-      const onToggle = () => this.toggleScramblerOverload(side, i, overloadButton);
-      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, scrambler, onToggle);
-      button.addEventListener("click", () => this.toggleScrambler(side, i, button, row));
-      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton]}</div>` as unknown as HTMLDivElement;
-      section.appendChild(row);
+      const { button } = this.createModuleButton(state.activation.scramblers[i].active, scrambler, this.ewarEffectDescriber.scramblerModuleEffect());
+      const overloadButton = this.createOverloadButton(state.activation.scramblers[i].active, state.activation.scramblers[i].overloaded, i, scrambler, () => this.toggleScramblerOverload(side, i, overloadButton));
+      button.addEventListener("click", () => this.toggleScrambler(side, i, button));
+      section.appendChild(this.createRow(side, "scramblers", i, scrambler.moduleId, () => state.activation.scramblers[i].active, [button, overloadButton]));
     }
   }
 
   private renderPainters(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.painters.length; i++) {
       const painter: TargetPainterSpec = state.loadout.painters[i];
-      const activation = state.activation.painters[i];
-      const { button } = this.createModuleButton(activation.active, painter, this.ewarEffectDescriber.painterModuleEffect(painter));
-      const onToggle = () => this.togglePainterOverload(side, i, overloadButton);
-      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, painter, onToggle);
-      button.addEventListener("click", () => this.togglePainter(side, i, button, row));
-      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton]}</div>` as unknown as HTMLDivElement;
-      section.appendChild(row);
+      const { button } = this.createModuleButton(state.activation.painters[i].active, painter, this.ewarEffectDescriber.painterModuleEffect(painter));
+      const overloadButton = this.createOverloadButton(state.activation.painters[i].active, state.activation.painters[i].overloaded, i, painter, () => this.togglePainterOverload(side, i, overloadButton));
+      button.addEventListener("click", () => this.togglePainter(side, i, button));
+      section.appendChild(this.createRow(side, "painters", i, painter.moduleId, () => state.activation.painters[i].active, [button, overloadButton]));
     }
   }
 
@@ -386,17 +412,63 @@ export class EwarControllerImpl implements EwarController {
       nameSpans.push(nameSpan);
       const onToggle = () => this.toggleDampenerOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, dampener, onToggle);
-      button.addEventListener("click", () => this.toggleDampener(side, i, button, row));
       const key: EwarScriptKey = { kind: "dampener", index: i };
       const gear = this.scriptSections[side].createGear(key, {
         hint: this.gearHintForSide(side, key),
         disabled: !activation.active,
         dataIndex: i,
       });
-      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton, gear]}</div>` as unknown as HTMLDivElement;
-      section.appendChild(row);
+      button.addEventListener("click", () => this.toggleDampener(side, i, button));
+      section.appendChild(this.createRow(side, "dampeners", i, dampener.moduleId, () => state.activation.dampeners[i].active, [button, overloadButton, gear]));
     }
     this.dampenerNameSpans.set(side, nameSpans);
+  }
+
+  private renderNeutralizers(side: Side, state: EwarState, section: HTMLElement): void {
+    for (let i = 0; i < state.loadout.neutralizers.length; i++) {
+      const neutralizer: EnergyNeutralizerSpec = state.loadout.neutralizers[i];
+      const { button } = this.createModuleButton(state.activation.neutralizers[i].active, neutralizer, this.ewarEffectDescriber.neutralizerModuleEffect(neutralizer));
+      button.addEventListener("click", () => this.toggleNeutralizer(side, i, button));
+      section.appendChild(this.createRow(side, "neutralizers", i, neutralizer.moduleId, () => state.activation.neutralizers[i].active, [button]));
+    }
+  }
+
+  private renderNosferatu(side: Side, state: EwarState, section: HTMLElement): void {
+    for (let i = 0; i < state.loadout.nosferatu.length; i++) {
+      const nosferatu: NosferatuSpec = state.loadout.nosferatu[i];
+      const { button } = this.createModuleButton(state.activation.nosferatu[i].active, nosferatu, this.ewarEffectDescriber.nosferatuModuleEffect(nosferatu));
+      button.addEventListener("click", () => this.toggleNosferatu(side, i, button));
+      section.appendChild(this.createRow(side, "nosferatu", i, nosferatu.moduleId, () => state.activation.nosferatu[i].active, [button]));
+    }
+  }
+
+  private createRow(side: Side, family: keyof MutableEwarActivation, index: number, moduleId: TypeId, isActive: () => boolean, controls: (Element | DocumentFragment)[]): HTMLDivElement {
+    const stateLabel = html`<span class="ewar-row-state" hidden></span>` as unknown as HTMLSpanElement;
+    const row = html`<div class="ewar-row">${[...controls, stateLabel]}</div>` as unknown as HTMLDivElement;
+    this.rowRefs.get(side)!.push({ family, index, moduleId, row, stateLabel, isActive });
+    return row;
+  }
+
+  private refreshRow(side: Side, family: keyof MutableEwarActivation, index: number): void {
+    const ref = this.rowRefs.get(side)?.find((candidate) => candidate.family === family && candidate.index === index);
+    if (!ref) return;
+    this.applyRowState(side, ref);
+    const active = ref.isActive();
+    for (const child of ref.row.children) {
+      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) child.disabled = !active;
+    }
+  }
+
+  private updateRowStates(side: Side): void {
+    for (const ref of this.rowRefs.get(side) ?? []) this.applyRowState(side, ref);
+  }
+
+  private applyRowState(side: Side, ref: EwarRowRef): void {
+    const active = ref.isActive();
+    const starved = active && this.starvedModuleIds[side].includes(ref.moduleId);
+    ref.row.className = !active ? "ewar-row ewar-row-inactive" : starved ? "ewar-row ewar-row-starved" : "ewar-row";
+    ref.stateLabel.hidden = !starved;
+    ref.stateLabel.textContent = starved ? this.i18n.t("capacitor.insufficient") : "";
   }
 
   private moduleDisplayName(spec: { readonly moduleId: TypeId }): string {
@@ -512,18 +584,13 @@ export class EwarControllerImpl implements EwarController {
     return this.moduleDisplayName(spec);
   }
 
-  private toggleWeb(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
+  private toggleWeb(side: Side, index: number, button: HTMLButtonElement): void {
     const state = this.states.get(side);
     if (!state) return;
     const active = !state.activation.webs[index].active;
     state.activation.webs[index].active = active;
     button.setAttribute("aria-pressed", String(active));
-    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
-    for (const child of row.children) {
-      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
-        child.disabled = !active;
-      }
-    }
+    this.refreshRow(side, "webs", index);
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }
@@ -539,18 +606,13 @@ export class EwarControllerImpl implements EwarController {
     this.events.emitConfigInvalidated();
   }
 
-  private toggleDisruptor(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
+  private toggleDisruptor(side: Side, index: number, button: HTMLButtonElement): void {
     const state = this.states.get(side);
     if (!state) return;
     const active = !state.activation.disruptors[index].active;
     state.activation.disruptors[index].active = active;
     button.setAttribute("aria-pressed", String(active));
-    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
-    for (const child of row.children) {
-      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
-        child.disabled = !active;
-      }
-    }
+    this.refreshRow(side, "disruptors", index);
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }
@@ -566,18 +628,13 @@ export class EwarControllerImpl implements EwarController {
     this.events.emitConfigInvalidated();
   }
 
-  private toggleScrambler(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
+  private toggleScrambler(side: Side, index: number, button: HTMLButtonElement): void {
     const state = this.states.get(side);
     if (!state) return;
     const active = !state.activation.scramblers[index].active;
     state.activation.scramblers[index].active = active;
     button.setAttribute("aria-pressed", String(active));
-    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
-    for (const child of row.children) {
-      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
-        child.disabled = !active;
-      }
-    }
+    this.refreshRow(side, "scramblers", index);
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }
@@ -593,18 +650,13 @@ export class EwarControllerImpl implements EwarController {
     this.events.emitConfigInvalidated();
   }
 
-  private toggleGrappler(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
+  private toggleGrappler(side: Side, index: number, button: HTMLButtonElement): void {
     const state = this.states.get(side);
     if (!state) return;
     const active = !state.activation.grapplers[index].active;
     state.activation.grapplers[index].active = active;
     button.setAttribute("aria-pressed", String(active));
-    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
-    for (const child of row.children) {
-      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
-        child.disabled = !active;
-      }
-    }
+    this.refreshRow(side, "grapplers", index);
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }
@@ -620,18 +672,13 @@ export class EwarControllerImpl implements EwarController {
     this.events.emitConfigInvalidated();
   }
 
-  private togglePainter(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
+  private togglePainter(side: Side, index: number, button: HTMLButtonElement): void {
     const state = this.states.get(side);
     if (!state) return;
     const active = !state.activation.painters[index].active;
     state.activation.painters[index].active = active;
     button.setAttribute("aria-pressed", String(active));
-    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
-    for (const child of row.children) {
-      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
-        child.disabled = !active;
-      }
-    }
+    this.refreshRow(side, "painters", index);
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }
@@ -647,18 +694,13 @@ export class EwarControllerImpl implements EwarController {
     this.events.emitConfigInvalidated();
   }
 
-  private toggleDampener(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
+  private toggleDampener(side: Side, index: number, button: HTMLButtonElement): void {
     const state = this.states.get(side);
     if (!state) return;
     const active = !state.activation.dampeners[index].active;
     state.activation.dampeners[index].active = active;
     button.setAttribute("aria-pressed", String(active));
-    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
-    for (const child of row.children) {
-      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
-        child.disabled = !active;
-      }
-    }
+    this.refreshRow(side, "dampeners", index);
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }
@@ -670,6 +712,28 @@ export class EwarControllerImpl implements EwarController {
     state.activation.dampeners[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
 
+    this.updateSummary(side);
+    this.events.emitConfigInvalidated();
+  }
+
+  private toggleNeutralizer(side: Side, index: number, button: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const active = !state.activation.neutralizers[index].active;
+    state.activation.neutralizers[index].active = active;
+    button.setAttribute("aria-pressed", String(active));
+    this.refreshRow(side, "neutralizers", index);
+    this.updateSummary(side);
+    this.events.emitConfigInvalidated();
+  }
+
+  private toggleNosferatu(side: Side, index: number, button: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const active = !state.activation.nosferatu[index].active;
+    state.activation.nosferatu[index].active = active;
+    button.setAttribute("aria-pressed", String(active));
+    this.refreshRow(side, "nosferatu", index);
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }

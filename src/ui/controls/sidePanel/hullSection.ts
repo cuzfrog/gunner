@@ -1,6 +1,6 @@
 import type { ImportedFitting } from "../../../fitting";
-import type { ShipId } from "../../../gamedata/ids";
-import type { ShipProfile, PropulsionModule, Ships } from "../../../ships";
+import type { ShipId, TypeId } from "../../../gamedata/ids";
+import type { ShipProfile, PropulsionModule, PropulsionKind, PropulsionId, PropulsionStats, FittedHull, Ships } from "../../../ships";
 import type { I18n } from "../../i18n";
 import { PROPULSION_NONE, type FittedHullSummary, type PropulsionSelection } from "../../../appstate";
 import { setText } from "../controlsDom";
@@ -158,9 +158,9 @@ export class HullSection implements IHullSection {
     if (this.panel.profile) this.els.hull.value = this.ships.hullView(this.panel.profile, this.i18n.current()).name;
   }
 
-  applyImportedFitting(summary: FittedHullSummary): void {
-    this.panel.fittedHull = summary;
-    this.panel.sections.propulsion.renderPropulsionOptions(summary.propulsionId ?? PROPULSION_NONE);
+  applyImportedFitting(imported: ImportedFitting): void {
+    this.panel.fittedHull = this.buildFittedSummary(imported);
+    this.panel.sections.propulsion.renderPropulsionOptions(this.panel.fittedHull.propulsionId ?? PROPULSION_NONE);
     this.panel.sections.propulsion.seedPropulsionMemory();
     this.panel.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
   }
@@ -172,4 +172,46 @@ export class HullSection implements IHullSection {
     this.panel.sections.paste.clearImportHint();
     this.updateHullHint(this.panel.sections.stats.currentFittedPropulsionModule(summary));
   }
+
+  buildFittedSummary(imported: ImportedFitting): FittedHullSummary {
+    const propulsionId = imported.propulsion?.propulsionId;
+    return {
+      fittingName: imported.fittingName,
+      propulsionId,
+      propulsionModuleId: imported.propulsion?.propulsionModuleId,
+      propulsionName: imported.propulsion?.propulsionName,
+      propulsionKind: propulsionId !== undefined ? this.ships.fittingOption(imported.profile, propulsionId)?.kind : undefined,
+      fitted: imported.fitted,
+      propulsion: imported.propulsion,
+      capacitor: imported.capacitor.spec,
+      energyWarfareResistancePercent: imported.energyWarfareResistancePercent,
+    };
+  }
+
+  buildManualSummary(profile: ShipProfile, selection: ManualPropulsionSelection): FittedHullSummary {
+    return {
+      fittingName: "",
+      propulsionId: selection.propulsionId,
+      propulsionModuleId: selection.propulsionModuleId,
+      propulsionName: selection.propulsionName,
+      propulsionKind: selection.kind,
+      fitted: nakedFitted(profile),
+      propulsion: selection.propulsion,
+      capacitor: { capacity: profile.capacitorCapacity, rechargeTime: profile.capacitorRechargeTime },
+      energyWarfareResistancePercent: 0,
+    };
+  }
+}
+
+/** Propulsion picked by the user on a hull without an imported fitting. */
+interface ManualPropulsionSelection {
+  readonly propulsionId: PropulsionId;
+  readonly propulsionModuleId?: TypeId;
+  readonly propulsionName?: string;
+  readonly kind: PropulsionKind;
+  readonly propulsion: PropulsionStats;
+}
+
+function nakedFitted(profile: ShipProfile): FittedHull {
+  return { mass: profile.mass, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 };
 }

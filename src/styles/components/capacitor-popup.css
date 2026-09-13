@@ -1,0 +1,170 @@
+@layer components {
+.capacitor-popup {
+  --capacitor-bar-height: 10px;
+}
+
+.capacitor-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px;
+}
+
+.capacitor-bar-track {
+  flex: 0 0 130px;
+  height: var(--capacitor-bar-height);
+  border-radius: 5px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  overflow: hidden;
+}
+
+.capacitor-bar-fill {
+  width: var(--fill, 100%);
+  height: 100%;
+  background: var(--optimal-green);
+  transition: width 120ms linear;
+}
+
+.capacitor-bar-fill.is-low {
+  background: var(--warn-yellow);
+}
+
+.capacitor-bar-fill.is-critical,
+.capacitor-bar-fill.is-empty {
+  background: var(--danger-red);
+}
+
+.capacitor-bar-value {
+  flex: 1 1 auto;
+  font-size: 12px;
+  color: var(--text-primary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.capacitor-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px;
+}
+
+.capacitor-stat-label {
+  flex: 0 0 96px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.capacitor-value {
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: var(--text-primary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.capacitor-usage-row,
+.capacitor-incoming-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px;
+}
+
+.capacitor-usage-name,
+.capacitor-incoming-name {
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.capacitor-usage-row.is-starved .capacitor-usage-name {
+  color: var(--warn-yellow-85);
+}
+
+.capacitor-usage-value,
+.capacitor-incoming-value {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.capacitor-row-state {
+  flex-shrink: 0;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.capacitor-usage-row.is-starved .capacitor-row-state {
+  color: var(--warn-yellow-85);
+}
+
+.capacitor-usage-row.is-off .capacitor-row-state {
+  color: var(--text-dim);
+}
+
+.capacitor-usage-row.is-off .capacitor-usage-name,
+.capacitor-usage-row.is-off .capacitor-row-state {
+  color: var(--text-dim);
+}
+
+.capacitor-incoming-row.is-off .capacitor-incoming-name,
+.capacitor-incoming-row.is-off .capacitor-incoming-value,
+.capacitor-incoming-row.is-off .capacitor-row-state {
+  color: var(--text-dim);
+}
+
+.capacitor-booster-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px;
+}
+
+.capacitor-booster-name {
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.capacitor-booster-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+
+.capacitor-booster-status {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.capacitor-inject-button {
+  flex-shrink: 0;
+  padding: 2px 6px;
+}
+
+.capacitor-inject-button svg {
+  display: block;
+}
+
+.capacitor-charge-option .capacitor-charge-name {
+  font-size: 13px;
+}
+
+.trigger-summary-count.is-critical,
+.trigger-summary-count.is-empty {
+  color: var(--danger-red);
+}
+}

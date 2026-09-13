@@ -1,6 +1,6 @@
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./dogmaTypes";
 import { EFFECT_CATEGORY_ACTIVE, EFFECT_CATEGORY_ONLINE, EFFECT_CATEGORY_REMOTE, FUNC_ITEM_MODIFIER, FUNC_LOCATION_GROUP, FUNC_LOCATION_REQUIRED_SKILL, OPERATION_ADD, OPERATION_POST_PERCENT, OPERATION_POST_PERCENT_DIV, OPERATION_PRE_ASSIGN } from "./dogmaTypes";
-import { ARMOR_DAMAGE_AMOUNT, DURATION, RESISTANCE_SHIFT_AMOUNT, REPAIR_SKILL_IDS, SHIELD_BONUS, SHIELD_RECHARGE_RATE, STRUCTURE_DAMAGE_AMOUNT, TURRET_DAMAGE_MULTIPLIER, TURRET_SPEED, MISSILE_DAMAGE_MULTIPLIER, MISSILE_LAUNCHER_OPERATION_SKILL, TURRET_WEAPON_GROUP_IDS, DefenseLayer, TurretWeaponGroupName, hpLayerForAttr, resistLayerForAttr, turretWeaponGroupForGroupId } from "./combatAttributes";
+import { ARMOR_DAMAGE_AMOUNT, CAPACITOR_BONUS, CAPACITOR_CAPACITY, CAPACITOR_CAPACITY_MULTIPLIER, CAPACITOR_RECHARGE_RATE, CAPACITOR_RECHARGE_RATE_MULTIPLIER, DURATION, ENERGY_WARFARE_RESISTANCE, ENERGY_WARFARE_RESISTANCE_BONUS, RESISTANCE_SHIFT_AMOUNT, REPAIR_SKILL_IDS, SHIELD_BONUS, SHIELD_RECHARGE_RATE, STRUCTURE_DAMAGE_AMOUNT, TURRET_DAMAGE_MULTIPLIER, TURRET_SPEED, MISSILE_DAMAGE_MULTIPLIER, MISSILE_LAUNCHER_OPERATION_SKILL, TURRET_WEAPON_GROUP_IDS, DefenseLayer, TurretWeaponGroupName, hpLayerForAttr, resistLayerForAttr, turretWeaponGroupForGroupId } from "./combatAttributes";
 
 export type DefenseIntent =
   | { readonly tag: "resist"; readonly layer: DefenseLayer; readonly active: boolean; readonly compensationApplies: boolean }
@@ -24,6 +24,59 @@ export type MissileIntent =
   | { readonly tag: "missileSpeed" };
 
 export type CombatIntent = DefenseIntent | TurretIntent | MissileIntent;
+
+export type CapacitorIntent =
+  | { readonly tag: "capCapacityAdd" }
+  | { readonly tag: "capCapacityMultiplier" }
+  | { readonly tag: "capRecharge" }
+  | { readonly tag: "capEnergyWarfareResistance" }
+  | { readonly tag: "capBooster" }
+  | { readonly tag: "energyNeutralizer" }
+  | { readonly tag: "energyNosferatu" };
+
+export interface ClassifiedCapacitorEffect {
+  readonly effectId: number;
+  readonly intent: CapacitorIntent;
+}
+
+const CAP_BOOSTER_EFFECT_ID = 48;
+const ENERGY_NEUTRALIZER_FALLOFF_EFFECT_ID = 6187;
+const ENERGY_NOSFERATU_FALLOFF_EFFECT_ID = 6197;
+
+export function classifyCapacitorEffects(effects: readonly SdeDogmaEffect[]): readonly ClassifiedCapacitorEffect[] {
+  const classified: ClassifiedCapacitorEffect[] = [];
+  for (const effect of effects) {
+    const intent = classifyCapacitorEffect(effect);
+    if (intent) classified.push({ effectId: effect.effectID, intent });
+  }
+  return classified;
+}
+
+function classifyCapacitorEffect(effect: SdeDogmaEffect): CapacitorIntent | undefined {
+  const modifiers = effect.modifierInfo;
+  if (modifiers && modifiers.length > 0) return classifyCapacitorModifiers(modifiers);
+  return classifyCapacitorActionEffect(effect.effectID);
+}
+
+function classifyCapacitorModifiers(modifiers: readonly SdeDogmaEffectModifier[]): CapacitorIntent | undefined {
+  for (const m of modifiers) {
+    if (m.func !== FUNC_ITEM_MODIFIER) continue;
+    if (m.modifiedAttributeID === CAPACITOR_CAPACITY) {
+      if (m.modifyingAttributeID === CAPACITOR_BONUS) return { tag: "capCapacityAdd" };
+      if (m.modifyingAttributeID === CAPACITOR_CAPACITY_MULTIPLIER) return { tag: "capCapacityMultiplier" };
+    }
+    if (m.modifiedAttributeID === CAPACITOR_RECHARGE_RATE && m.modifyingAttributeID === CAPACITOR_RECHARGE_RATE_MULTIPLIER) return { tag: "capRecharge" };
+    if (m.modifiedAttributeID === ENERGY_WARFARE_RESISTANCE && m.modifyingAttributeID === ENERGY_WARFARE_RESISTANCE_BONUS) return { tag: "capEnergyWarfareResistance" };
+  }
+  return undefined;
+}
+
+function classifyCapacitorActionEffect(effectId: number): CapacitorIntent | undefined {
+  if (effectId === CAP_BOOSTER_EFFECT_ID) return { tag: "capBooster" };
+  if (effectId === ENERGY_NEUTRALIZER_FALLOFF_EFFECT_ID) return { tag: "energyNeutralizer" };
+  if (effectId === ENERGY_NOSFERATU_FALLOFF_EFFECT_ID) return { tag: "energyNosferatu" };
+  return undefined;
+}
 
 export interface ClassifiedDefenseEffect {
   readonly effectId: number;

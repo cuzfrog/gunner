@@ -1,5 +1,5 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser, SettingsStore } from "../../appstate";
-import type { ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
+import type { CapacitorStats, ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, ImportedFitting, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
 import type { EwarResolver, HitChance, SensorBoosterResolver, SimValueParser, DefenseAssessor, WeaponDamageAssessor } from "../../sim";
 import type { Ships } from "../../ships";
 import type { ItemNameCatalog, ItemNameLoader } from "../../gamedata";
@@ -21,8 +21,10 @@ import type { SensorBoosterController } from "./sensorBooster";
 import type { EwarController } from "./ewar";
 import type { ModulesPopup } from "./modulesPopup";
 import type { DefenseController } from "./defense";
+import type { CapacitorController } from "./capacitor";
 import type { TargetingController } from "./targeting";
 import type { ImportController } from "./import";
+import type { ExportController } from "./export";
 import type { ConfirmController } from "./confirm";
 import type { FittingPopupController, FittingPreview, FittingPreviewManager, PopupGroup } from "./popup";
 import type { PreferencesController } from "./preferences";
@@ -112,6 +114,7 @@ export interface ControlsCradle {
   readonly ewarController: EwarController;
   readonly modulesPopup: ModulesPopup;
   readonly defenseController: DefenseController;
+  readonly capacitorController: CapacitorController;
   readonly targetingController: TargetingController;
   readonly boosterController: BoosterController;
   readonly missileBoosterController: MissileBoosterController;
@@ -123,7 +126,12 @@ export interface ControlsCradle {
   readonly sensorBoosterResolver: SensorBoosterResolver;
   readonly sessionCodec: SessionCodec;
   readonly simConfigSource: SimConfigSource;
+  readonly capacitorStatsSource: {
+    stats(side: Side): CapacitorStats | undefined;
+    register(side: Side, imported: ImportedFitting): void;
+  };
   readonly importController: ImportController;
+  readonly exportController: ExportController;
   readonly shareController: ShareController;
   readonly rangeOverlayController: RangeOverlayController;
   readonly controls: Controls & DomControlsHost;

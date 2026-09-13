@@ -1,6 +1,6 @@
 {
   "name": "gunner",
-  "version": "0.27.1",
+  "version": "0.31.15",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "preview": "astro preview",
     "postinstall": "astro sync",
     "typecheck": "tsc --noEmit",
-    "test": "bun test src tests scripts",
+    "test": "bun run scripts/test-parallel.ts",
     "e2e": "playwright test",
     "lint:css": "stylelint \"src/styles/**/*.css\"",
     "trace": "bun run scripts/sim-trace.ts",

@@ -13,6 +13,8 @@ export type { EngineConfig, EngineEvents, EngineView, EngagementEngine } from ".
 export type { DefenseAssessor, DefenseAssessment, LayerEhp } from "./defenseAssessment";
 export { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
 export type { DefenseSimulator, DefenseView, DefensePoolState, DefenseSimConfig, RepairerViewState, RahViewState, RepairMode } from "./defenseSimulator";
+export type { CapacitorSimulator, CapacitorSimConfig, CapacitorSimulatorState, CapacitorGate, CapacitorView, CapacitorDrainState, CapacitorBoosterState, CapacitorPropulsionState, SideCapacitorSnapshot, IncomingDrainState } from "./capacitorSimulator";
+export { CapacitorSimulatorImpl } from "./capacitorSimulator";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { DroneApplication } from "./droneApplication";
 export type { DroneSimulator, DroneSimConfig } from "./droneSimulator";
@@ -21,6 +23,7 @@ export type { Rng, RngFactory } from "./rng";
 export type { WeaponDamageAssessor } from "./weaponDamageAssessor";
 export type { WeaponClock } from "./weaponClock";
 export { StackingPenaltyImpl } from "./stackingPenalty";
+export { scheduledDrainsFromProjections } from "./scheduledDrains";
 export { EwarResolverImpl } from "./ewarResolver";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
@@ -43,6 +46,11 @@ export type {
   DefenseSpec,
   RahSpec,
   RepairerSpec,
+  CapacitorSpec,
+  CapBoosterMode,
+  CapBoosterSimSpec,
+  CapacitorSideConfig,
+  ScheduledDrain,
   DampenerActivation,
   DampenerBreakdown,
   DisruptionBreakdown,
@@ -91,6 +99,8 @@ export type {
   SensorDampenerScriptSpec,
   SensorDampenerSpec,
   SensorSpec,
+  EnergyNeutralizerSpec,
+  NosferatuSpec,
   ShipConfig,
   ShipState,
   Side,

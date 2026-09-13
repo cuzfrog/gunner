@@ -1,5 +1,5 @@
 import { join } from "path";
-import type { PropulsionModule, ShipNameLanguage, ShipProfile, Ships, StatConditions } from "../ships";
+import type { PropulsionModule, ShipNameLanguage, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import { StackingPenaltyImpl, type DisruptionScriptSpec } from "../sim";
 import { damageVectorSum } from "../sim";
@@ -103,6 +103,8 @@ const profile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -127,6 +129,8 @@ const frigateProfile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -151,6 +155,8 @@ const bonusProfile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -175,6 +181,8 @@ const roleBonusProfile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -199,10 +207,71 @@ const abaddonProfile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
+
+const harbingerProfile: ShipProfile = {
+  id: "24696" as ShipId,
+  name: "Harbinger",
+  factionId: "amarr-empire" as FactionId,
+  hullTypeId: "419" as HullTypeId,
+  mass: 15_500_000,
+  inertiaModifier: 0.45,
+  baseSpeed: 165,
+  sigRadius: 270,
+  scanResolution: 200,
+  maxTargetingRange: 30000,
+  maxLockedTargets: 4,
+  droneBandwidth: 75,
+  droneCapacity: 75,
+  maxActiveDrones: 5,
+  shieldHp: 0,
+  shieldRechargeTime: 0,
+  armorHp: 0,
+  hullHp: 0,
+  capacitorCapacity: 3500,
+  capacitorRechargeTime: 875,
+  shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+};
+
+const KILLMAIL_HARBINGER = `[Harbinger, Killmail 137572701]
+
+Damage Control II
+Heat Sink II
+Heat Sink II
+Mark I Compact Reinforced Bulkheads
+Reinforced Bulkheads II
+Reinforced Bulkheads II
+
+100MN Y-S8 Compact Afterburner
+Fleeting Compact Stasis Webifier
+Initiated Compact Warp Disruptor
+Fleeting Compact Stasis Webifier
+
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+[Empty High slot]
+
+Medium Transverse Bulkhead II
+Medium Transverse Bulkhead II
+Medium Transverse Bulkhead II
+
+
+Infiltrator II x5
+
+Scorch M x6
+Imperial Navy Gamma M x6
+Imperial Navy Multifrequency M x6`;
 
 const kestrelProfile: ShipProfile = {
   id: "602" as ShipId,
@@ -223,6 +292,8 @@ const kestrelProfile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -247,16 +318,18 @@ const stilettoProfile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
 };
 
 const propulsionModules: readonly PropulsionModule[] = [
-  { id: "ab-1mn", kind: "afterburner", sizeTier: "small", label: "1MN Afterburner I", iconId: toTypeId("439"), defaultModuleId: toTypeId("439"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 1.15, sigBloom: 0 },
-  { id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN MWD", iconId: toTypeId("434"), defaultModuleId: toTypeId("434"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 5, sigBloom: 5 },
-  { id: "ab-10mn", kind: "afterburner", sizeTier: "medium", label: "10MN AB", iconId: toTypeId("12056"), defaultModuleId: toTypeId("12056"), thrust: 15e6, massAddition: 5_000_000, speedBonus: 1.15, sigBloom: 0 },
-  { id: "ab-100mn", kind: "afterburner", sizeTier: "large", label: "100MN AB", iconId: toTypeId("12066"), defaultModuleId: toTypeId("12066"), thrust: 150e6, massAddition: 50_000_000, speedBonus: 1.15, sigBloom: 0 },
+  { id: "ab-1mn", kind: "afterburner", sizeTier: "small", label: "1MN Afterburner I", iconId: toTypeId("439"), defaultModuleId: toTypeId("439"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 1.15, sigBloom: 0, capacitorNeed: 20 },
+  { id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN MWD", iconId: toTypeId("434"), defaultModuleId: toTypeId("434"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 5, sigBloom: 5, capacitorNeed: 45 },
+  { id: "ab-10mn", kind: "afterburner", sizeTier: "medium", label: "10MN AB", iconId: toTypeId("12056"), defaultModuleId: toTypeId("12056"), thrust: 15e6, massAddition: 5_000_000, speedBonus: 1.15, sigBloom: 0, capacitorNeed: 80 },
+  { id: "ab-100mn", kind: "afterburner", sizeTier: "large", label: "100MN AB", iconId: toTypeId("12066"), defaultModuleId: toTypeId("12066"), thrust: 150e6, massAddition: 50_000_000, speedBonus: 1.15, sigBloom: 0, capacitorNeed: 320 },
 ];
 
 const ships = vi.mocked<Ships>({
@@ -288,6 +361,9 @@ const db: FittingDb = {
         speedBonus: 5,
         massAddition: 500_000,
         sigBloom: 5,
+        capacitorNeed: 45,
+        cycleTime: 10,
+        requiredSkillIds: [],
       },
     }),
     "100MN Y-S8 Compact Afterburner": row("100MN Y-S8 Compact Afterburner", "100MN Y-S8 Compact Afterburner", {
@@ -298,6 +374,9 @@ const db: FittingDb = {
         speedBonus: 1.25,
         massAddition: 50_000_000,
         sigBloom: 0,
+        capacitorNeed: 91,
+        cycleTime: 10,
+        requiredSkillIds: [],
       },
     }),
     "Inertial Stabilizers II": row("Inertial Stabilizers II", "Inertial Stabilizers II", { agilityMultiplier: 0.8, sigBonusPercent: 11 }),
@@ -314,8 +393,8 @@ const db: FittingDb = {
     "Gyrostabilizer II": row("Gyrostabilizer II", "Gyrostabilizer II", { turretDamageMultiplier: 1.15, turretSpeedMultiplier: 0.89, turretWeaponGroup: "Projectile Weapon" }),
   },
   turrets: {
-    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, chargeGroups: [86, 375], damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", requiredSkillIds: [toTypeId("3300"), toTypeId("3306"), toTypeId("12214")], groupID: 53, metaLevel: 5, metaGroupID: 2 }),
-    "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, chargeGroups: [83, 372], damageMultiplier: 3, cycleTime: 5, turretSkill: "Small Projectile Turret", requiredSkillIds: [toTypeId("3300"), toTypeId("3302"), toTypeId("11079")], groupID: 55, metaLevel: 5, metaGroupID: 2 }),
+    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, chargeGroups: [86, 375], damageMultiplier: 3, cycleTime: 5, capacitorNeed: 36, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", requiredSkillIds: [toTypeId("3300"), toTypeId("3306"), toTypeId("12214")], groupID: 53, metaLevel: 5, metaGroupID: 2 }),
+    "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, chargeGroups: [83, 372], damageMultiplier: 3, cycleTime: 5, capacitorNeed: 0, turretSkill: "Small Projectile Turret", requiredSkillIds: [toTypeId("3300"), toTypeId("3302"), toTypeId("11079")], groupID: 55, metaLevel: 5, metaGroupID: 2 }),
   },
   charges: {
     "Conflagration M": row("Conflagration M", "Conflagration M", { trackingMultiplier: 0.7, rangeMultiplier: 0.5, chargeGroup: 375, chargeSize: 2 }),
@@ -628,12 +707,14 @@ describe("FittingImportImpl", () => {
       speedBonus: 5,
       massAddition: 500_000,
       sigBloom: 5,
+      capacitorNeed: 45,
     });
     expect(importer.propulsionStats("100MN Y-S8 Compact Afterburner")).toEqual({
       thrust: 150_000_000,
       speedBonus: 1.25,
       massAddition: 50_000_000,
       sigBloom: 0,
+      capacitorNeed: 91,
     });
   });
 
@@ -650,6 +731,7 @@ describe("FittingImportImpl", () => {
       speedBonus: 1.25,
       massAddition: 50_000_000,
       sigBloom: 0,
+      capacitorNeed: 91,
     });
     expect(importer.propulsionStatsById("1600mm Steel Plates II" as TypeId)).toBeUndefined();
   });
@@ -678,6 +760,7 @@ describe("FittingImportImpl", () => {
     expect(result!.turret!.optimal).toBe(12_600 * 0.5);
     expect(result!.turret!.falloff).toBe(5_000);
     expect(result!.turret!.sigResolutionClass).toBe("M");
+    expect(result!.turret!.capacitorNeed).toBe(36);
     expect(result!.turret!.tracking).toBeCloseTo((26 * 0.7 * 125) / 40_000, 10);
     expect(result!.turret!.base.optimal).toBe(12_600);
     expect(result!.turret!.base.falloff).toBe(5_000);
@@ -1127,6 +1210,37 @@ Tracking Disruptor II, Optimal Range Disruption Script`,
     ]);
   });
 
+  test("capacitor rows derive from the resolved turrets, ewar loadout, and defense spec", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Cap Sources]
+Heavy Pulse Laser II, Conflagration M
+Stasis Webifier II
+Stasis Webifier II
+Reactive Armor Hardener`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    const rows = result!.capacitor.rows;
+    const webRow = rows.find((candidate) => candidate.moduleName === "Stasis Webifier II");
+    expect(webRow?.count).toBe(2);
+    expect(webRow?.amount).toBeCloseTo(6, 6);
+    expect(webRow?.cycleTime).toBeCloseTo(5, 6);
+    const rahRow = rows.find((candidate) => candidate.moduleName === "Reactive Armor Hardener");
+    expect(rahRow?.amount).toBeCloseTo(42, 6);
+    expect(rahRow?.cycleTime).toBeCloseTo(10, 6);
+    const laser = result!.turrets![0];
+    const turretRow = rows.find((candidate) => candidate.moduleId === laser.moduleId);
+    expect(turretRow?.amount).toBe(laser.capacitorNeed);
+    expect(turretRow?.cycleTime).toBe(laser.cycleTime);
+    expect(turretRow?.count).toBe(1);
+    expect(rows).toHaveLength(3);
+    const usage = rows.reduce((sum, row) => sum + row.perSecond * row.count, 0);
+    expect(result!.capacitor.usagePerSecond).toBeCloseTo(usage, 9);
+  });
+
   test("ignores offline ewar and returns empty ewar loadout when none are fitted", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
@@ -1142,6 +1256,45 @@ Stasis Webifier II/OFFLINE`,
     expect(result!.ewar.grapplers).toEqual([]);
     expect(result!.ewar.disruptors).toEqual([]);
     expect(result!.ewar.scramblers).toEqual([]);
+  });
+
+  test("resolves energy neutralizers and nosferatu into the ewar loadout", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Cap Warfare]
+Heavy Energy Neutralizer II
+Medium Energy Nosferatu II`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.ewar.neutralizers).toEqual([
+      expect.objectContaining({ moduleName: "Heavy Energy Neutralizer II", amount: 600, cycleTime: 24, capacitorNeed: 500, maxRange: 20000, falloff: 10000 }),
+    ]);
+    expect(result!.ewar.nosferatu).toEqual([
+      expect.objectContaining({ moduleName: "Medium Energy Nosferatu II", amount: 36, cycleTime: 5, maxRange: 10000, falloff: 5000 }),
+    ]);
+  });
+
+  test("cap batteries raise the energy warfare resistance percent with stacking penalties", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const none = importer.importFitting(`[Rifter, Bare]`, conditions);
+    expect(none!.energyWarfareResistancePercent).toBe(0);
+    const one = importer.importFitting(`[Rifter, Battery]
+Medium Cap Battery II`, conditions);
+    expect(one!.energyWarfareResistancePercent).toBe(25);
+    const two = importer.importFitting(`[Rifter, Batteries]
+Medium Cap Battery II
+Small Cap Battery II`, conditions);
+    expect(two!.energyWarfareResistancePercent).toBeCloseTo(41.296, 3);
+    const three = importer.importFitting(`[Rifter, Three batteries]
+Medium Cap Battery II
+Small Cap Battery II
+Large Cap Battery II`, conditions);
+    expect(three!.energyWarfareResistancePercent).toBeCloseTo(49.670, 3);
   });
 
   test("preserves duplicate ewar instances and mixed variants", () => {
@@ -1189,7 +1342,7 @@ Tracking Disruptor II`,
     expect(result!.ewar.scripts).toEqual(DISRUPTION_SCRIPT_CATALOG);
   });
 
-  test("resolves warp scramblers and ignores long warp disruptors", () => {
+  test("resolves warp scramblers and non-blocking long warp disruptors", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
     const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
@@ -1200,8 +1353,10 @@ Warp Disruptor II`,
       conditions,
     );
     expect(result).toBeDefined();
+    // The disruptor resolves through the parser's default bank, so it precedes the scrambler in loadout order.
     expect(result!.ewar.scramblers).toEqual([
-      expect.objectContaining({ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }),
+      expect.objectContaining({ moduleName: "Warp Disruptor II", maxRange: 24000, overloadRangeBonusPercent: 20, propulsionBlock: false }),
+      expect.objectContaining({ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20, propulsionBlock: true }),
     ]);
     expect(result!.ewar.webs).toEqual([]);
     expect(result!.ewar.grapplers).toEqual([]);
@@ -1537,6 +1692,40 @@ Heat Sink II`,
     expect(names).toContain("Scorch L");
   });
 
+  test("killmail Harbinger reproduces pyfa capacitor ground truth at all-fives", () => {
+    ships.findHullByName.mockReturnValue(harbingerProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const allFives: StatConditions = { skillLevel: 5 as SkillLevel, overloaded: false, weaponOverloaded: false };
+    const result = importer.importFitting(KILLMAIL_HARBINGER, allFives);
+    expect(result).toBeDefined();
+    // pyfa ground truth: pool 4375 GJ (3500 x energy management V), recharge 656.25s, peak 16.67 GJ/s.
+    expect(result!.capacitor.spec.capacity).toBeCloseTo(4375, 1);
+    expect(result!.capacitor.spec.rechargeTime).toBeCloseTo(656.25, 1);
+    expect(result!.capacitor.peakRecharge).toBeCloseTo(16.667, 1);
+    // pyfa drain tuples: AB 80/7.5s, webs 3.75/5s x2, disruptor 18.75/5s, 6x lasers 6.248/3.074s.
+    expect(result!.capacitor.usagePerSecond).toBeCloseTo(28.111, 1);
+    expect(result!.capacitor.depletesInSeconds).toBeDefined();
+    // pyfa simulates 276.7s; the discrete gunner sim deviates by ~1s.
+    expect(result!.capacitor.depletesInSeconds!).toBeGreaterThan(272);
+    expect(result!.capacitor.depletesInSeconds!).toBeLessThan(282);
+  });
+
+  test("killmail Harbinger capacitor at all-zero skills matches pyfa", () => {
+    ships.findHullByName.mockReturnValue(harbingerProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(KILLMAIL_HARBINGER, conditions);
+    expect(result).toBeDefined();
+    // pyfa ground truth at all-zero: raw drains, no skill or pool bonuses.
+    expect(result!.capacitor.spec.capacity).toBeCloseTo(3500, 1);
+    expect(result!.capacitor.spec.rechargeTime).toBeCloseTo(875, 1);
+    expect(result!.capacitor.usagePerSecond).toBeCloseTo(62.414, 1);
+    expect(result!.capacitor.depletesInSeconds).toBeDefined();
+    // pyfa simulates 60.0s.
+    expect(result!.capacitor.depletesInSeconds!).toBeCloseTo(60, 0);
+  });
+
   test("classifies charges in a first quantity block as cargo", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
@@ -1763,6 +1952,7 @@ function summarizeDb(): FittingDb {
 describe("FittingImportImpl.summarize", () => {
   beforeEach(() => {
     ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue([]);
   });
 
   test("parses hull and fitting names", () => {
@@ -1791,6 +1981,16 @@ describe("FittingImportImpl.summarize", () => {
     expect(high!.rows[1].charge).toBe("Hail S");
     expect(high!.rows[1].chargeId).toBeDefined();
     expect(high!.rows[1].id).toBeDefined();
+  });
+
+  test("includes the capacitor block from the imported stats", () => {
+    ships.findHullByName.mockReturnValue({ ...frigateProfile, capacitorCapacity: 6375, capacitorRechargeTime: 1250 });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const summary = importer.summarize(RIFTER_BRAWLER);
+    expect(summary?.capacitor).toBeDefined();
+    expect(summary!.capacitor!.capacity).toBeCloseTo(6375 * 1.25, 3); // Energy Management V
+    expect(summary!.capacitor!.rechargeTime).toBeCloseTo(1250 * 0.75, 3); // Energy Systems Operations V
+    expect(summary!.capacitor!.usagePerSecond).toBeGreaterThan(0); // 5MN Microwarpdrive I drain
   });
 
   test("captures cargo quantities with resolved ids", () => {

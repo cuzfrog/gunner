@@ -248,7 +248,7 @@ function resolveRahSpec(modules: readonly DefenseModuleEntry[], skills: DefenseS
   const phasingReduction = 1 - ARMOR_RESISTANCE_PHASING_BONUS * skills.armorResistancePhasing;
   const cycleTime = rawCycleTime * phasingReduction;
   const overloadCycleTimeMultiplier = stats.overloadCycleTimeMultiplier ?? 1;
-  return { cycleTime, shiftAmount, baseResists, overloadCycleTimeMultiplier, armorResistsWithoutRah, moduleId: rahModule.moduleId };
+  return { cycleTime, shiftAmount, baseResists, overloadCycleTimeMultiplier, armorResistsWithoutRah, ...(stats.capacitorNeed !== undefined ? { capacitorNeed: stats.capacitorNeed } : {}), moduleId: rahModule.moduleId };
 }
 
 function hullBonusMultiplier(hullBonuses: readonly HullBonus[], attribute: DefenseBonusAttribute, skillLevel: number): number {

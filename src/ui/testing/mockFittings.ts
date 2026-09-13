@@ -52,6 +52,7 @@ const NAME_FOR_ID: Record<string, string> = {
 export function mockFittingImport(): FittingImport {
   return {
     importFitting: vi.fn(() => undefined),
+    resolveCapacitorStats: vi.fn(),
     propulsionVariantNames: vi.fn(() => []),
     propulsionStats: vi.fn(() => undefined),
     propulsionStatsById: vi.fn(() => undefined),
@@ -134,6 +135,8 @@ export const RIFTER: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -153,6 +156,7 @@ export const TURRET: ImportedTurret = {
   damageMultiplier: 3,
   damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 },
   cycleTime: 5,
+  capacitorNeed: 36,
   turretCount: 1,
   damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
 };
@@ -181,16 +185,18 @@ const RIFTER_FITTING_STATE: FittingState = {
 export const IMPORTED_RIFTER: ImportedFitting = {
   profile: RIFTER,
   fittingName: "Brawler",
+  energyWarfareResistancePercent: 0,
   fitted: FITTED,
   fittingState: RIFTER_FITTING_STATE,
   propulsion: undefined,
   turret: TURRET,
   drones: [],
   cargoCharges: [],
-  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
+  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
   defense: EMPTY_DEFENSE_SPEC,
+  capacitor: { spec: { capacity: 0, rechargeTime: 0 }, peakRecharge: 0, rows: [], usagePerSecond: 0, weaponsPerSecond: 0, boosters: [], stablePercent: 100 },
   sensorSpec: { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4 },
   sensorBoosts: EMPTY_SENSOR_BOOST_LOADOUT,
 };

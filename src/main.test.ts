@@ -46,7 +46,7 @@ class FakeElement {
   nodeType = 1;
   dataset: Record<string, string> = {};
   style: Record<string, string> = {};
-  classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn() };
+  classList = { add: vi.fnUntracked(), remove: vi.fnUntracked(), toggle: vi.fnUntracked() };
   children: FakeElement[] = [];
   get options(): FakeElement[] { return this.children; }
   private readonly handlers: Record<string, Array<() => void>> = {};
@@ -77,7 +77,7 @@ class FakeElement {
     this.children.push(child as FakeElement);
   }
 
-  focus = vi.fn();
+  focus = vi.fnUntracked();
 
   closest(): FakeElement | null {
     return null;
@@ -143,7 +143,7 @@ class FakeCanvas extends FakeElement {
   clientWidth = 0;
   clientHeight = 0;
   ctx: FakeContext = fakeRenderingContext();
-  getContext = vi.fn((_: string) => this.ctx as unknown as CanvasRenderingContext2D);
+  getContext = vi.fnUntracked((_: string) => this.ctx as unknown as CanvasRenderingContext2D);
 }
 
 function fakeRenderingContext(): FakeContext {
@@ -154,23 +154,23 @@ function fakeRenderingContext(): FakeContext {
     font: "",
     textAlign: "",
     textBaseline: "",
-    fillRect: vi.fn(),
-    strokeRect: vi.fn(),
-    clearRect: vi.fn(),
-    beginPath: vi.fn(),
-    closePath: vi.fn(),
-    moveTo: vi.fn(),
-    lineTo: vi.fn(),
-    arc: vi.fn(),
-    stroke: vi.fn(),
-    fill: vi.fn(),
-    save: vi.fn(),
-    restore: vi.fn(),
-    translate: vi.fn(),
-    rotate: vi.fn(),
-    setLineDash: vi.fn(),
-    fillText: vi.fn(),
-    measureText: vi.fn(() => ({ width: 0 })),
+    fillRect: vi.fnUntracked(),
+    strokeRect: vi.fnUntracked(),
+    clearRect: vi.fnUntracked(),
+    beginPath: vi.fnUntracked(),
+    closePath: vi.fnUntracked(),
+    moveTo: vi.fnUntracked(),
+    lineTo: vi.fnUntracked(),
+    arc: vi.fnUntracked(),
+    stroke: vi.fnUntracked(),
+    fill: vi.fnUntracked(),
+    save: vi.fnUntracked(),
+    restore: vi.fnUntracked(),
+    translate: vi.fnUntracked(),
+    rotate: vi.fnUntracked(),
+    setLineDash: vi.fnUntracked(),
+    fillText: vi.fnUntracked(),
+    measureText: vi.fnUntracked(() => ({ width: 0 })),
   };
 }
 
@@ -246,12 +246,12 @@ function fakeDocument(): Document {
 
 function fakeLocalStorage(): Storage {
   return {
-    getItem: vi.fn((key: string) => {
+    getItem: vi.fnUntracked((key: string) => {
       if (key === "gunner-settings-v5") return JSON.stringify(DEFAULT_SETTINGS);
       return null;
     }),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
+    setItem: vi.fnUntracked(),
+    removeItem: vi.fnUntracked(),
   } as unknown as Storage;
 }
 
@@ -260,8 +260,8 @@ function fakeWindow(): Window {
     innerWidth: 1024,
     innerHeight: 768,
     location: { href: "http://localhost/" },
-    history: { replaceState: vi.fn() },
-    navigator: { clipboard: { readText: vi.fn(), writeText: vi.fn(async () => {}) } },
+    history: { replaceState: vi.fnUntracked() },
+    navigator: { clipboard: { readText: vi.fnUntracked(), writeText: vi.fnUntracked(async () => {}) } },
   } as unknown as Window;
 }
 
@@ -280,8 +280,8 @@ function installGlobals(): void {
   (globalThis as Record<string, unknown>).window = fakeWindow();
   globalThis.HTMLCanvasElement = FakeCanvas as unknown as typeof HTMLCanvasElement;
   globalThis.Element = FakeElement as unknown as typeof Element;
-  globalThis.performance = { now: vi.fn(() => 0) } as unknown as Performance;
-  globalThis.requestAnimationFrame = vi.fn(() => 0);
+  globalThis.performance = { now: vi.fnUntracked(() => 0) } as unknown as Performance;
+  globalThis.requestAnimationFrame = vi.fnUntracked(() => 0);
 }
 
 function restoreGlobals(): void {

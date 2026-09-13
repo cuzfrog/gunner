@@ -22,6 +22,8 @@ const profile: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -137,6 +139,19 @@ describe("FittingStateFactory", () => {
     ], [], []);
     expect(state.ewarModules.length).toBe(1);
     expect(state.ewarModules[0].moduleId).toBe(moduleId("Target Painter II"));
+    expect(state.supportModules.length).toBe(1);
+  });
+
+  test("classifies energy neutralizer and nosferatu as ewar modules", () => {
+    const factory = new FittingStateFactory(FITTING_DB);
+    const state = factory.create(profile, hullBonuses, [
+      entry("Heavy Energy Neutralizer II"),
+      entry("Medium Energy Nosferatu II"),
+      entry("Heat Sink II"),
+    ], [], []);
+    expect(state.ewarModules.length).toBe(2);
+    expect(state.ewarModules[0].moduleId).toBe(moduleId("Heavy Energy Neutralizer II"));
+    expect(state.ewarModules[1].moduleId).toBe(moduleId("Medium Energy Nosferatu II"));
     expect(state.supportModules.length).toBe(1);
   });
 

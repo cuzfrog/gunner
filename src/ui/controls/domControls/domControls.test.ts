@@ -1,7 +1,7 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import { EMPTY_DEFENSE_ASSESSMENT, Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type EngineView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, Vec2, type CapacitorView, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView, type EngineView, type DefenseView, type TurretSpec, type MissileSpec, type DroneSpec } from "../../../sim";
 import type { Ships } from "../../../ships";
 import type { EffectiveReadouts } from "../controlsContract";
 import type { InflictedDps, Side } from "../../../sim";
@@ -87,7 +87,12 @@ function makeEngineView(view: EngagementView, effective: EffectiveReadouts, defe
   const shipAState = { ...view.frame.shipA, sig: sigs?.shipA ?? 1 };
   const shipBState = { ...view.frame.shipB, sig: sigs?.shipB ?? 1 };
   const snapshot = { time: view.frame.time, shipA: shipAState, shipB: shipBState, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
-  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView, inflicted: ZERO_INFLICTED, snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
+  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView, capacitorRuntime: emptyCapacitorView(), inflicted: ZERO_INFLICTED, snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
+}
+
+function emptyCapacitorView(): Record<Side, CapacitorView> {
+  const side: CapacitorView = { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, drainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] };
+  return { shipA: side, shipB: { ...side } };
 }
 
 function baseSettings(): UserSettings {
@@ -321,13 +326,13 @@ describe("DomControls", () => {
       painters: [],
       dampeners: [],
       scripts: [],
-      dampenerScripts: [],
+      dampenerScripts: [], neutralizers: [], nosferatu: [],
     };
     cradle.cradle.ewarController.setLoadout("shipA", shipAEwar);
     const config = controls.getConfig();
     expect(config.shipA.ewar?.loadout.webs).toHaveLength(1);
     expect(config.shipA.ewar).not.toHaveProperty("overloaded");
-    expect(config.shipA.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] , painters: [], dampeners: [] });
+    expect(config.shipA.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] , painters: [], dampeners: [], neutralizers: [], nosferatu: [], });
     expect(config.shipB.ewar).toBeUndefined();
   });
 
@@ -344,7 +349,7 @@ describe("DomControls", () => {
       painters: [],
       dampeners: [],
       scripts: [],
-      dampenerScripts: [],
+      dampenerScripts: [], neutralizers: [], nosferatu: [],
     };
     cradle.cradle.ewarController.setLoadout("shipB", shipBEwar);
     const config = controls.getConfig();
@@ -367,11 +372,11 @@ describe("DomControls", () => {
   });
 
   test("getConfig uses a manually derived baseMaxSpeed for shipB and includes an active scrambler projection", () => {
-    const SCRAMBLER: WarpScramblerSpec = { moduleId: toTypeId("448"), moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 };
+    const SCRAMBLER: WarpScramblerSpec = { moduleId: toTypeId("448"), moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20, propulsionBlock: true };
     const mwd5 = {
       id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN Microwarpdrive I",
       iconId: toTypeId("434"), defaultModuleId: toTypeId("434"),
-      thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5,
+      thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5, capacitorNeed: 45,
     } as const;
     const ships = vi.mocked<Ships>({
       ...mockShips(),
@@ -386,7 +391,7 @@ describe("DomControls", () => {
     shipBSide.profile = RIFTER;
     shipBSide.sections.propulsion.setPropulsionActive("mwd-5mn");
     shipBSide.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
-    cradle.cradle.ewarController.setLoadout("shipB", { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: [], dampenerScripts: [], });
+    cradle.cradle.ewarController.setLoadout("shipB", { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], });
 
     const config = controls.getConfig();
     expect(config.shipB.maxSpeed).toBe(1800);

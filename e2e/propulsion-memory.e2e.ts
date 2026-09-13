@@ -1,7 +1,21 @@
-import { test, expect, loadFittingText, importFittingViaPaste, FITTING_THRASHER } from "./fixtures";
+import { test, expect, loadFittingText, importFittingViaPaste, FITTING_THRASHER, BASE_URL } from "./fixtures";
+import type { Page } from "@playwright/test";
 
-test.describe("propulsion selection memory", () => {
-  test("switching AB -> MWD -> AB restores the previously selected AB variant", async ({ cleanPage: page }) => {
+let page: Page;
+
+test.describe.serial("propulsion selection memory", () => {
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext();
+    page = await context.newPage();
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#scene")).toBeVisible();
+  });
+
+  test.afterAll(async () => {
+    await page.context().close();
+  });
+
+  test("switching AB -> MWD -> AB restores the previously selected AB variant", async () => {
     const eftText = loadFittingText(FITTING_THRASHER);
     await importFittingViaPaste(page, "ship-a", eftText);
 

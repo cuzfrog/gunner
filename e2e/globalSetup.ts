@@ -32,6 +32,15 @@ function pollPort(): Promise<void> {
 }
 
 export default async function globalSetup(_config: FullConfig): Promise<void> {
+  const up = await fetch(BASE_URL, { method: "HEAD", signal: AbortSignal.timeout(500) })
+    .then(() => true)
+    .catch(() => false);
+  if (up) {
+    console.log(`reusing e2e server already running at ${BASE_URL}`);
+    globalThis.__e2eServer = undefined;
+    return;
+  }
+
   const child = spawn("bun", ["run", "scripts/e2e-server.ts"], {
     stdio: "inherit",
     env: { ...process.env, E2E_PORT: String(PORT) },

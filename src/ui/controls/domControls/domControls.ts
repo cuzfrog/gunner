@@ -228,7 +228,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.preferencesController.savePreferences();
     this.profileController.updateActionBarState();
     this.updatePlayEnabled();
-    if (notify) this.notifyConfigChange();
+    if (notify) this.deps.events.emitConfigInvalidated();
   }
 
   getWeapon(side: Side): WeaponSpec | undefined {

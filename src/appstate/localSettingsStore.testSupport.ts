@@ -103,6 +103,7 @@ export const FITTED_PROPULSION = {
   speedBonus: 1.15,
   massAddition: 500_000,
   sigBloom: 0,
+  capacitorNeed: 20,
 };
 export const FITTED_HULL_SUMMARY: FittedHullSummary = {
   fittingName: "Brawler",
@@ -112,7 +113,8 @@ export const FITTED_HULL_SUMMARY: FittedHullSummary = {
   propulsionKind: "afterburner",
   fitted: FITTED_HULL,
   propulsion: FITTED_PROPULSION,
-  baseMaxSpeed: 456.25,
+  capacitor: { capacity: 4375, rechargeTime: 656.25 },
+  energyWarfareResistancePercent: 0,
 };
 export const RIFTER_PROFILE: ShipProfile = {
   id: toShipId("587"),
@@ -133,6 +135,8 @@ export const RIFTER_PROFILE: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -157,6 +161,8 @@ const THRASHER_PROFILE: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -181,6 +187,8 @@ const BRUTIX_PROFILE: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -205,6 +213,8 @@ const WRAITH_PROFILE: ShipProfile = {
   shieldRechargeTime: 0,
   armorHp: 0,
   hullHp: 0,
+  capacitorCapacity: 0,
+  capacitorRechargeTime: 0,
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
@@ -230,9 +240,10 @@ export const RIFTER_MODULE: PropulsionModule = {
   speedBonus: 5,
   massAddition: 500_000,
   sigBloom: 5,
+  capacitorNeed: 45,
 };
 export const RIFTER_PROPULSION: PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionModuleId: TypeId } = { ...RIFTER_MODULE, propulsionId: "mwd-5mn", propulsionModuleId: toTypeId("434") };
-export const COMPACT_MWD: PropulsionStats = { thrust: 1_500_000, speedBonus: 5.05, massAddition: 500_000, sigBloom: 5 };
+export const COMPACT_MWD: PropulsionStats = { thrust: 1_500_000, speedBonus: 5.05, massAddition: 500_000, sigBloom: 5, capacitorNeed: 45 };
 export const RIFTER_BASE_STATS: ShipStats = {
   mass: 1_000_000,
   inertiaModifier: 2,
@@ -272,6 +283,7 @@ const EMPTY_FITTING_STATE: FittingState = {
 export const IMPORTED_RIFTER: ImportedFitting = {
   profile: RIFTER_PROFILE,
   fittingName: "Brawler",
+  energyWarfareResistancePercent: 0,
   fitted: RIFTER_FITTED,
   fittingState: EMPTY_FITTING_STATE,
   propulsion: RIFTER_PROPULSION,
@@ -287,15 +299,17 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     damageMultiplier: 3,
     damagePerShot: { em: 0, thermal: 0, kinetic: 12, explosive: 0 },
     cycleTime: 5,
+    capacitorNeed: 36,
     turretCount: 1,
     damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
   },
   drones: [],
   cargoCharges: [],
-  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
+  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
   defense: EMPTY_DEFENSE_SPEC,
+  capacitor: { spec: { capacity: 0, rechargeTime: 0 }, peakRecharge: 0, rows: [], usagePerSecond: 0, weaponsPerSecond: 0, boosters: [], stablePercent: 100 },
   sensorSpec: { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4 },
   sensorBoosts: EMPTY_SENSOR_BOOST_LOADOUT,
 };
@@ -325,51 +339,54 @@ const NAME_FOR_ID: Record<string, string> = {
 
 export function makeFittingImport() {
   return vi.mocked<FittingImport>({
-    importFitting: vi.fn(() => undefined),
-    propulsionVariantNames: vi.fn(() => []),
-    propulsionStats: vi.fn(() => undefined),
-    propulsionStatsById: vi.fn(() => undefined),
-    summarize: vi.fn(() => undefined),
-    canonicalEftText: vi.fn(() => undefined),
-    itemNameForId: vi.fn((id) => NAME_FOR_ID[id] ?? id),
-    detectLanguageFromText: vi.fn(() => undefined),
+    importFitting: vi.fnUntracked(() => undefined),
+    resolveCapacitorStats: vi.fnUntracked(() => {
+      throw new Error("resolveCapacitorStats not stubbed");
+    }),
+    propulsionVariantNames: vi.fnUntracked(() => []),
+    propulsionStats: vi.fnUntracked(() => undefined),
+    propulsionStatsById: vi.fnUntracked(() => undefined),
+    summarize: vi.fnUntracked(() => undefined),
+    canonicalEftText: vi.fnUntracked(() => undefined),
+    itemNameForId: vi.fnUntracked((id) => NAME_FOR_ID[id] ?? id),
+    detectLanguageFromText: vi.fnUntracked(() => undefined),
   });
 }
 export function makeChargeCatalog(): ChargeCatalog {
   const hail = toTypeId("12608");
   const republic = toTypeId("21898");
   const catalog = vi.mocked<ChargeCatalog>({
-    usualForChargeSize: vi.fn(() => hail),
-    usualForTurret: vi.fn(() => hail),
-    chargesForSize: vi.fn(() => []),
-    chargesForTurret: vi.fn(() => []),
-    withCharge: vi.fn((turret, charge) => ({ ...turret, chargeId: charge })),
-    idForName: vi.fn((name: string) => (name === "Hail S" ? hail : name === "Republic Fleet EMP S" ? republic : undefined)),
-    has: vi.fn((id: TypeId) => id === hail || id === republic),
-    equivalentInSize: vi.fn(() => undefined),
+    usualForChargeSize: vi.fnUntracked(() => hail),
+    usualForTurret: vi.fnUntracked(() => hail),
+    chargesForSize: vi.fnUntracked(() => []),
+    chargesForTurret: vi.fnUntracked(() => []),
+    withCharge: vi.fnUntracked((turret, charge) => ({ ...turret, chargeId: charge })),
+    idForName: vi.fnUntracked((name: string) => (name === "Hail S" ? hail : name === "Republic Fleet EMP S" ? republic : undefined)),
+    has: vi.fnUntracked((id: TypeId) => id === hail || id === republic),
+    equivalentInSize: vi.fnUntracked(() => undefined),
   });
-  catalog.chargesForTurret = vi.fn((turret) => catalog.chargesForSize(turret.chargeSize));
+  catalog.chargesForTurret = vi.fnUntracked((turret) => catalog.chargesForSize(turret.chargeSize));
   return catalog;
 }
 export function makeShips() {
   return vi.mocked<Ships>({
-    hulls: vi.fn(),
-    hullView: vi.fn(),
-    findHull: vi.fn((name: string) => HULL_BY_NAME.get(name.trim().toLowerCase())),
-    findHullById: vi.fn((id: ShipId) => HULL_BY_ID.get(id)),
-    findHullByName: vi.fn(),
-    parsePropulsionId: vi.fn((value: unknown) => {
+    hulls: vi.fnUntracked(),
+    hullView: vi.fnUntracked(),
+    findHull: vi.fnUntracked((name: string) => HULL_BY_NAME.get(name.trim().toLowerCase())),
+    findHullById: vi.fnUntracked((id: ShipId) => HULL_BY_ID.get(id)),
+    findHullByName: vi.fnUntracked(),
+    parsePropulsionId: vi.fnUntracked((value: unknown) => {
       if (typeof value !== "string") return undefined;
       return VALID_PROPULSION_IDS.includes(value) ? (value as PropulsionId) : undefined;
     }),
-    fittingOptions: vi.fn(),
-    allFittingOptions: vi.fn(() => []),
-    fittingOption: vi.fn(),
-    turretSizeOptions: vi.fn(),
-    shipTier: vi.fn(),
-    fittedStats: vi.fn(),
-    maxSpeedForFittedMass: vi.fn(),
-    alignTime: vi.fn(),
+    fittingOptions: vi.fnUntracked(),
+    allFittingOptions: vi.fnUntracked(() => []),
+    fittingOption: vi.fnUntracked(),
+    turretSizeOptions: vi.fnUntracked(),
+    shipTier: vi.fnUntracked(),
+    fittedStats: vi.fnUntracked(),
+    maxSpeedForFittedMass: vi.fnUntracked(),
+    alignTime: vi.fnUntracked(),
   });
 }
 export function resetMocks(): void {
@@ -409,11 +426,11 @@ export function makeStore(options: {
 
 function mockMissileCatalog(): MissileCatalog {
   return {
-    missilesForLauncher: vi.fn(() => []),
-    usualForLauncher: vi.fn(() => undefined),
-    withCharge: vi.fn(),
-    has: vi.fn(() => false),
-    idForName: vi.fn(() => undefined),
-    equivalentInGroups: vi.fn(() => undefined),
+    missilesForLauncher: vi.fnUntracked(() => []),
+    usualForLauncher: vi.fnUntracked(() => undefined),
+    withCharge: vi.fnUntracked(),
+    has: vi.fnUntracked(() => false),
+    idForName: vi.fnUntracked(() => undefined),
+    equivalentInGroups: vi.fnUntracked(() => undefined),
   };
 }

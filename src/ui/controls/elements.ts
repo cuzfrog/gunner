@@ -16,6 +16,7 @@ import {
   type CombatantElementDefinitionMap,
 } from "./elementContract";
 import type { DefenseFieldEls } from "./defense";
+import type { CapacitorFieldEls } from "./capacitor";
 import type { TargetingFieldEls } from "./targeting";
 
 interface ModulesFieldEls {
@@ -68,6 +69,7 @@ interface CombatantEls {
   readonly fittingPresetList: HTMLElement;
   readonly fittingEmpty: HTMLElement;
   readonly importFitting: HTMLButtonElement;
+  readonly exportFitting: HTMLButtonElement;
   readonly pastePopup: HTMLElement;
   readonly pasteInput: HTMLTextAreaElement;
   readonly propulsion: HTMLSelectElement;
@@ -85,6 +87,7 @@ interface CombatantEls {
   readonly overload: HTMLInputElement;
   readonly overloadButton: HTMLButtonElement;
   readonly defense: DefenseFieldEls;
+  readonly capacitor: CapacitorFieldEls;
   readonly ewar: ModulesFieldEls;
   readonly targeting: TargetingFieldEls;
   readonly boosterSection: HTMLElement;
@@ -310,6 +313,7 @@ function createCombatantEls(side: Side): CombatantEls {
     fittingPresetList: el(combatantElementId("fittingPresetList", side)),
     fittingEmpty: el(combatantElementId("fittingEmpty", side)),
     importFitting: elOf(combatantElementId("importFitting", side), isHtmlButtonElement),
+    exportFitting: elOf(combatantElementId("exportFitting", side), isHtmlButtonElement),
     pastePopup: el(combatantElementId("pastePopup", side)),
     pasteInput: elOf(combatantElementId("pasteInput", side), isHtmlTextAreaElement),
     propulsion: elOf(combatantElementId("propulsion", side), isHtmlSelectElement),
@@ -333,6 +337,13 @@ function createCombatantEls(side: Side): CombatantEls {
       section: el(combatantElementId("defenseSection", side)),
       summary: el(combatantElementId("defenseSummary", side)),
       effectiveSig: el(combatantElementId("effectiveSig", side)),
+    },
+    capacitor: {
+      field: el(combatantElementId("capacitorField", side)),
+      trigger: elOf(combatantElementId("capacitorTrigger", side), isHtmlButtonElement),
+      popup: el(combatantElementId("capacitorPopup", side)),
+      section: el(combatantElementId("capacitorSection", side)),
+      summary: el(combatantElementId("capacitorSummary", side)),
     },
     ewar: {
       field: el(combatantElementId("ewarField", side)),

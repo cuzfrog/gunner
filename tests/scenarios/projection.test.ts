@@ -1,5 +1,5 @@
 import { asValue, createContainer, InjectionMode } from "awilix";
-import { registerSimModule, ZERO_RESISTS, type DefenseSpec, type EngineConfig, type EngagementEngine, type MissileSpec, type ShipConfig, type SimCradle, type SimConfig, type TurretSpec } from "../../src/sim";
+import { registerSimModule, ZERO_RESISTS, type CombatantConfig, type DefenseSpec, type EngineConfig, type EngagementEngine, type MissileSpec, type ShipConfig, type SimCradle, type SimConfig, type TurretSpec } from "../../src/sim";
 import { toTypeId } from "../../src/gamedata/ids";
 
 function stationaryHull(id: "shipA" | "shipB"): ShipConfig {
@@ -10,12 +10,13 @@ function tankedDefense(hp: number): DefenseSpec {
   return { layers: { shield: { hp, resists: ZERO_RESISTS }, armor: { hp, resists: ZERO_RESISTS }, hull: { hp, resists: ZERO_RESISTS } }, shieldRechargeTime: 0, repairers: [], signaturePenalty: 0, shieldUniformity: 0.25 };
 }
 
-function engineConfig(sim: SimConfig, shipAWeapons: EngineConfig["weapons"]["shipA"]): EngineConfig {
+function engineConfig(sim: SimConfig, shipAWeapons: EngineConfig["weapons"]["shipA"], capacitor?: EngineConfig["capacitor"]): EngineConfig {
   return {
     sim,
     weapons: { shipA: shipAWeapons, shipB: [] },
     defense: { shipA: tankedDefense(1_000_000), shipB: tankedDefense(1_000_000), damageEnabled: { shipA: true, shipB: true }, repairMode: { shipA: "auto", shipB: "auto" }, repairerActivation: { shipA: [], shipB: [] }, rahActivation: { shipA: undefined, shipB: undefined } },
     overloaded: { shipA: false, shipB: false },
+    capacitor: capacitor ?? { shipA: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 }, shipB: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 } },
   };
 }
 
@@ -25,6 +26,48 @@ function makeEngine(sim: SimConfig, shipAWeapons: EngineConfig["weapons"]["shipA
   registerSimModule(container);
   return container.resolve("engine");
 }
+
+describe("capacitor starvation end to end", () => {
+  function starvingHull(id: "shipA" | "shipB"): CombatantConfig {
+    return {
+      id, maxSpeed: 1000, baseMaxSpeed: 200, propulsionKind: "microwarpdrive",
+      mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1, sig: 100,
+      capacitor: { capacity: 500, rechargeTime: 1250 },
+      propulsionCapacityMultiplier: 0.75,
+    };
+  }
+
+  test("empty pool with an MWD starves propulsion and weapons: speed collapses to base and damage trickles", () => {
+    const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("34"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 2, turretCount: 1, capacitorNeed: 36 };
+    const sim: SimConfig = { shipA: starvingHull("shipA"), shipB: stationaryHull("shipB"), initialDistance: 5000 };
+    const engine = makeEngine(sim, [turret]);
+    engine.reset(engineConfig(sim, [turret], { shipA: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0, propulsion: { moduleId: toTypeId("20850"), amount: 180, interval: 10 } }, shipB: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 } }));
+    for (let i = 0; i < 60; i++) engine.step(0.5);
+    const view = engine.view();
+    expect(view.capacitorRuntime.shipA.starved).toBe(true);
+    expect(view.snapshot.shipA.maxSpeed).toBe(200);
+    const starvedEngine = engine;
+    const unlimited = makeEngine(sim, [turret]);
+    unlimited.reset(engineConfig(sim, [turret], { shipA: { infinite: true, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0, propulsion: { moduleId: toTypeId("20850"), amount: 180, interval: 10 } }, shipB: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 } }));
+    for (let i = 0; i < 60; i++) unlimited.step(0.5);
+    const starvedTotal = starvedEngine.view().inflicted.shipB.total;
+    const unlimitedTotal = unlimited.view().inflicted.shipB.total;
+    expect(unlimitedTotal).toBeGreaterThan(0);
+    expect(starvedTotal).toBeLessThan(unlimitedTotal / 4);
+  });
+
+  test("infinite capacitor keeps the same fit running at full MWD speed and landing damage", () => {
+    const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("34"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 2, turretCount: 1, capacitorNeed: 36 };
+    const sim: SimConfig = { shipA: starvingHull("shipA"), shipB: stationaryHull("shipB"), initialDistance: 5000 };
+    const engine = makeEngine(sim, [turret]);
+    engine.reset(engineConfig(sim, [turret], { shipA: { infinite: true, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0, propulsion: { moduleId: toTypeId("20850"), amount: 180, interval: 10 } }, shipB: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 } }));
+    for (let i = 0; i < 60; i++) engine.step(0.5);
+    const view = engine.view();
+    expect(view.capacitorRuntime.shipA.starved).toBe(false);
+    expect(view.snapshot.shipA.maxSpeed).toBe(1000);
+    expect(view.inflicted.shipB.total).toBeGreaterThan(0);
+  });
+});
 
 describe("inflicted DPS projection", () => {
   test("turret projection converges to the applied DPS of the live view", () => {

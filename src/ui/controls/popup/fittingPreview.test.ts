@@ -129,11 +129,16 @@ function createDocument(): Document {
   } as unknown as Document;
 }
 
+const TEMPLATES: Record<string, string> = {
+  "capacitor.stable": "Stable @ {percent}%",
+  "capacitor.depletes": "Depletes in {time}",
+};
+
 function createI18n(): I18n {
   return {
     current: () => "en",
     setLanguage: () => {},
-    t: (key: string) => key,
+    t: (key: string) => TEMPLATES[key] ?? key,
     translateDocument: () => {},
   };
 }
@@ -411,5 +416,46 @@ describe("DomFittingPreview", () => {
     expect(container.hidden).toBe(true);
     expect(container.getAttribute("aria-hidden")).toBe("true");
     expect(container.children.length).toBe(0);
+  });
+
+  function findCapacitorSection(container: FakeElement): FakeElement | undefined {
+    return container.children.find((child) => child.children[0]?.textContent === "fitting.preview.capacitor");
+  }
+
+  test("renders the capacitor section with stats and stable watermark", () => {
+    const { container, anchor, preview } = buildPreview();
+    const summary: FittingSummary = {
+      ...SUMMARY,
+      capacitor: { capacity: 6375, rechargeTime: 1250, usagePerSecond: 5.25, stablePercent: 87.3 },
+    };
+    preview.show(anchor as unknown as HTMLElement, summary);
+    const section = findCapacitorSection(container);
+    expect(section).toBeDefined();
+    const valueRow = section!.children[1];
+    const value = valueRow.children.find((child) => child.className.includes("preview-capacitor-value"));
+    expect(value?.textContent).toContain("6,375 GJ");
+    expect(value?.textContent).toContain("1,250.0s");
+    expect(value?.textContent).toContain("5.25 GJ/s");
+    expect(value?.textContent).toContain("87.3");
+    expect(value?.textContent).toContain("Stable @ 87.3%");
+  });
+
+  test("renders the depletion time when the fit is not cap stable", () => {
+    const { container, anchor, preview } = buildPreview();
+    const summary: FittingSummary = {
+      ...SUMMARY,
+      capacitor: { capacity: 6375, rechargeTime: 1250, usagePerSecond: 12, depletesInSeconds: 95 },
+    };
+    preview.show(anchor as unknown as HTMLElement, summary);
+    const section = findCapacitorSection(container)!;
+    const value = section.children[1].children.find((child) => child.className.includes("preview-capacitor-value"));
+    expect(value?.textContent).toContain("Depletes in 1:35");
+    expect(value?.textContent).toContain("1:35");
+  });
+
+  test("omits the capacitor section when the summary has no capacitor stats", () => {
+    const { container, anchor, preview } = buildPreview();
+    preview.show(anchor as unknown as HTMLElement, SUMMARY);
+    expect(findCapacitorSection(container)).toBeUndefined();
   });
 });

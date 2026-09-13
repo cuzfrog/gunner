@@ -18,6 +18,8 @@ export type { LauncherClass, LauncherClasses } from "./launcherClasses";
 export type { FittingState, FittedModule, TurretGroup, LauncherGroup, DroneGroup, CargoEntry, FittingModuleEntry } from "./fittingState";
 export type { FittingCalculator, HullSideAggregation, PropulsionResult } from "./fittingCalculator";
 export type { DefenseCalculator } from "./defenseCalculator";
+export type { CapacitorBoosterChargeOption, CapacitorBoosterStats, CapacitorCalculator, CapacitorDrainSources, CapacitorStats, CapacitorUsageRow } from "./capacitorCalculator";
+export type { CapacitorSpec } from "../sim";
 export type { FittingOverrides, FittingOverridesStore } from "./fittingOverrides";
 export { applyFittingOverrides, FittingOverridesStoreImpl } from "./fittingOverrides";
 export type { FittingCradle } from "./cradle";

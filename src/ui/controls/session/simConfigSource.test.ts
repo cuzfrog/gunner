@@ -1,5 +1,6 @@
-import { EMPTY_DEFENSE_SPEC, type EwarProjection, type MissileBoosterProjection, type MissileSpec, type SensorBoostProjection, type TurretBoostProjection, type TurretSpec, type WeaponSpec } from "../../../sim";
+import { EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, type EwarProjection, type MissileBoosterProjection, type MissileSpec, type SensorBoostProjection, type TurretBoostProjection, type TurretSpec, type WeaponSpec } from "../../../sim";
 import { toTypeId } from "../../../gamedata/ids";
+import type { CapacitorStats } from "../../../fitting";
 import type { FittedHullSummary } from "../../../appstate";
 import type { SidePanelState } from "../sidePanel";
 import type { EwarController } from "../ewar";
@@ -7,10 +8,12 @@ import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
 import type { SensorBoosterController } from "../sensorBooster";
 import type { DefenseController } from "../defense";
+import type { CapacitorController } from "../capacitor";
 import type { DroneController } from "../drone";
 import type { LauncherController } from "../launcher";
 import type { TurretController } from "../turret";
 import type { WeaponSystemSwitch } from "../sidePanel";
+import type { CapacitorStatsSource } from "./capacitorStatsSource";
 import { SimConfigSourceImpl } from "./simConfigSource";
 
 function baseShipAState(): SidePanelState {
@@ -57,8 +60,8 @@ function baseShipBState(): SidePanelState {
 
 function ewarProjection(): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], },
-    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [] },
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
+    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
   };
 }
 
@@ -71,6 +74,8 @@ function fittedHull(propulsionKind: "afterburner" | "microwarpdrive" | undefined
     fittingName: "Brawler",
     fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 },
     propulsionKind,
+    capacitor: { capacity: 4375, rechargeTime: 656.25 },
+    energyWarfareResistancePercent: 0,
   };
 }
 
@@ -86,6 +91,7 @@ function build() {
     capture: vi.fn(),
     render: vi.fn(),
     updateSummaries: vi.fn(),
+    updateStarvedModules: vi.fn(),
   });
   const boosterController = vi.mocked<BoosterController>({
     setLoadout: vi.fn(),
@@ -141,7 +147,12 @@ function build() {
     repairerActivation: vi.fn(() => []),
     rahActivation: vi.fn(() => undefined),
   } as unknown as DefenseController;
-  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, defenseController, turretSpec, missileSpec };
+  const capacitorController = {
+    infiniteCapacitor: vi.fn(() => false),
+    capBoosterSpecs: vi.fn(() => []),
+  } as unknown as CapacitorController;
+  const capacitorStatsSource = { stats: vi.fn((_side: "shipA" | "shipB") => undefined as CapacitorStats | undefined) } as unknown as CapacitorStatsSource & { stats: ReturnType<typeof vi.fn> };
+  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, defenseController, capacitorController, capacitorStatsSource, turretSpec, missileSpec };
 }
 
 function makeSource(deps: ReturnType<typeof build>) {
@@ -158,6 +169,8 @@ function makeSource(deps: ReturnType<typeof build>) {
     launcherControllers: deps.launcherControllers,
     droneControllers: deps.droneControllers,
     defenseController: deps.defenseController,
+    capacitorController: deps.capacitorController,
+    capacitorStatsSource: deps.capacitorStatsSource,
   });
 }
 
@@ -238,6 +251,91 @@ describe("SimConfigSourceImpl", () => {
     expect(engineConfig.defense.damageEnabled).toEqual({ shipA: true, shipB: true });
     expect(engineConfig.defense.repairMode).toEqual({ shipA: "auto", shipB: "auto" });
     expect(engineConfig.overloaded).toEqual({ shipA: true, shipB: true });
+  });
+
+  test("getEngineConfig carries capacitor spec, capacity multiplier, and composes the propulsion drain from the stats source", () => {
+    const deps = build();
+    const base = deps.shipASide.capture();
+    const PROPULSION_MODULE = toTypeId("439");
+    const statsWithRow: CapacitorStats = { spec: { capacity: 4375, rechargeTime: 656.25 }, peakRecharge: 16.67, rows: [{ moduleId: PROPULSION_MODULE, moduleName: "1MN Afterburner I", amount: 320, cycleTime: 10, perSecond: 32, count: 1 }], usagePerSecond: 32, weaponsPerSecond: 20, boosters: [] };
+    deps.shipASide.capture = vi.fn(() => ({ ...base, capacitor: { capacity: 6375, rechargeTime: 1250 }, fittedHull: { ...fittedHull("afterburner"), propulsionId: "ab-1mn", propulsionModuleId: PROPULSION_MODULE }, propulsionCapacityMultiplier: 0.75 }));
+    deps.capacitorStatsSource.stats = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? statsWithRow : undefined));
+    const engineConfig = makeSource(deps).getEngineConfig();
+    expect(engineConfig.sim.shipA.capacitor).toEqual({ capacity: 6375, rechargeTime: 1250 });
+    expect(engineConfig.sim.shipA.propulsionCapacityMultiplier).toBe(0.75);
+    expect(engineConfig.sim.shipB.capacitor).toBeUndefined();
+    expect(engineConfig.capacitor.shipA.propulsion).toEqual({ moduleId: PROPULSION_MODULE, amount: 320, interval: 10 });
+    expect(engineConfig.capacitor.shipB.propulsion).toBeUndefined();
+    expect(engineConfig.capacitor.shipA.fittedDrainPerSecond).toBe(32);
+    expect(engineConfig.capacitor.shipA.weaponsDrainPerSecond).toBe(20);
+    expect(engineConfig.capacitor.shipB.fittedDrainPerSecond).toBe(0);
+    expect(engineConfig.capacitor.shipB.weaponsDrainPerSecond).toBe(0);
+  });
+
+  test("getEngineConfig omits the propulsion drain when the module is toggled off", () => {
+    const deps = build();
+    const base = deps.shipASide.capture();
+    // Variant-selection memory: propulsionModuleId survives toggle-off (propulsionId cleared).
+    deps.shipASide.capture = vi.fn(() => ({ ...base, fittedHull: { ...fittedHull("afterburner"), propulsionModuleId: toTypeId("439") } }));
+    const engineConfig = makeSource(deps).getEngineConfig();
+    expect(engineConfig.capacitor.shipA.propulsion).toBeUndefined();
+  });
+
+  test("getEngineConfig builds drains from active ewar and booster modules only", () => {
+    const deps = build();
+    const web: import("../../../sim").StasisWebSpec = { moduleName: "Web", moduleId: toTypeId("526"), maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 0, capacitorNeed: 6, cycleTime: 5 };
+    const painter: import("../../../sim").TargetPainterSpec = { moduleName: "Painter", moduleId: toTypeId("12709"), maxRange: 30000, falloff: 7500, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 0, capacitorNeed: 8, cycleTime: 5 };
+    const computer: import("../../../sim").TrackingBoosterSpec = { moduleName: "Computer", moduleId: toTypeId("1978"), trackingBonusPercent: 15, optimalBonusPercent: 7.5, falloffBonusPercent: 15, defaultScript: undefined, capacitorNeed: 10, cycleTime: 10 };
+    const sensor: import("../../../sim").SensorBoosterSpec = { moduleName: "Booster", moduleId: toTypeId("1952"), scanResolutionBonusPercent: 30, maxTargetRangeBonusPercent: 30, overloadStrengthBonusPercent: 15, defaultScript: undefined, capacitorNeed: 12, cycleTime: 10 };
+    const ewar: EwarProjection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [painter], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [{ active: false, overloaded: false }], dampeners: [], neutralizers: [], nosferatu: [] } };
+    const boost: TurretBoostProjection = { loadout: { computers: [computer], scripts: [] }, activation: { computers: [{ active: true, overloaded: false, script: undefined }] } };
+    deps.ewarController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? ewar : undefined));
+    deps.boosterController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? boost : undefined));
+    deps.sensorBoosterController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? { loadout: { boosters: [sensor], amplifiers: [], boosterScripts: [] }, activation: [{ active: false, overloaded: false, script: undefined }] } : undefined));
+    const engineConfig = makeSource(deps).getEngineConfig();
+    expect(engineConfig.capacitor.shipA.drains).toEqual([
+      { moduleId: web.moduleId, amount: 6, interval: 5, active: true },
+      { moduleId: painter.moduleId, amount: 8, interval: 5, active: false },
+      { moduleId: computer.moduleId, amount: 10, interval: 10, active: true },
+      { moduleId: sensor.moduleId, amount: 12, interval: 10, active: false },
+    ]);
+    expect(engineConfig.capacitor.shipB.drains).toEqual([]);
+    expect(engineConfig.capacitor.shipA.fittedDrainPerSecond).toBe(0);
+    expect(engineConfig.capacitor.shipA.boosters).toEqual([]);
+    expect(engineConfig.capacitor.shipA.infinite).toBe(false);
+  });
+
+  test("getEngineConfig builds drains when activation is absent (defaults to active)", () => {
+    const deps = build();
+    const web: import("../../../sim").StasisWebSpec = { moduleName: "Web", moduleId: toTypeId("526"), maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 0, capacitorNeed: 6, cycleTime: 5 };
+    const ewar: EwarProjection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [] } };
+    deps.ewarController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? ewar : undefined));
+    const engineConfig = makeSource(deps).getEngineConfig();
+    expect(engineConfig.capacitor.shipA.drains).toEqual([{ moduleId: web.moduleId, amount: 6, interval: 5, active: true }]);
+  });
+
+  test("getEngineConfig drops drains for specs without capacitor data", () => {
+    const deps = build();
+    const computer: import("../../../sim").TrackingBoosterSpec = { moduleName: "Computer", moduleId: toTypeId("1978"), trackingBonusPercent: 15, optimalBonusPercent: 7.5, falloffBonusPercent: 15, defaultScript: undefined };
+    const boost: TurretBoostProjection = { loadout: { computers: [computer], scripts: [] }, activation: { computers: [] } };
+    deps.boosterController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? boost : undefined));
+    const engineConfig = makeSource(deps).getEngineConfig();
+    expect(engineConfig.capacitor.shipA.drains).toEqual([]);
+  });
+
+  test("getEngineConfig builds a scheduled drain for each active neutralizer", () => {
+    const deps = build();
+    const neutralizer: import("../../../sim").EnergyNeutralizerSpec = { moduleName: "Neut", moduleId: toTypeId("12271"), amount: 600, cycleTime: 24, capacitorNeed: 500, maxRange: 20000, falloff: 10000 };
+    const ewar: EwarProjection = { loadout: { ...EMPTY_EWAR_LOADOUT, neutralizers: [neutralizer] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [{ active: true }], nosferatu: [] } };
+    deps.ewarController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? ewar : undefined));
+    const engineConfig = makeSource(deps).getEngineConfig();
+    expect(engineConfig.capacitor.shipA.drains).toEqual([{ moduleId: neutralizer.moduleId, amount: 500, interval: 24, active: true }]);
+  });
+
+  test("getConfig carries the side's energy warfare resistance percent into the combatant config", () => {
+    const deps = build();
+    deps.shipASide.capture = vi.fn(() => ({ ...baseShipAState(), energyWarfareResistancePercent: 25 }));
+    expect(makeSource(deps).getConfig().shipA.energyWarfareResistancePercent).toBe(25);
   });
 
   test("getEngineConfig weapons reflect the active weapon system switch kind", () => {

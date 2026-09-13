@@ -3,7 +3,7 @@ import { toTypeId } from "../gamedata/ids";
 import type { DroneGroup } from "../fitting";
 import type { Language } from "./language";
 import type { SimValueParser } from "../sim";
-import type { FittedHullSummary, HpValueDisplay, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation, StoredRahActivation, StoredRepairMode, StoredRepairerActivation, StoredSensorBoosterActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
+import type { FittedHullSummary, HpValueDisplay, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredCapBoosterCharge, StoredCapBoosterMode, StoredEwarActivation, StoredMissileBoosterActivation, StoredRahActivation, StoredRepairMode, StoredRepairerActivation, StoredSensorBoosterActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
 
 export function isLanguage(value: unknown): value is Language {
   return value === "en" || value === "zh" || value === "ja";
@@ -27,6 +27,8 @@ export function isOptionalEwarActivation(value: unknown): boolean {
   }
   if (s.scramblers !== undefined && (!Array.isArray(s.scramblers) || !s.scramblers.every(isStoredScramblerActivation))) return false;
   if (s.painters !== undefined && (!Array.isArray(s.painters) || !s.painters.every(isStoredWebActivation))) return false;
+  if (s.neutralizers !== undefined && (!Array.isArray(s.neutralizers) || !s.neutralizers.every(isStoredToggleActivation))) return false;
+  if (s.nosferatu !== undefined && (!Array.isArray(s.nosferatu) || !s.nosferatu.every(isStoredToggleActivation))) return false;
   if (s.dampeners !== undefined) {
     if (!Array.isArray(s.dampeners)) return false;
     for (const item of s.dampeners) {
@@ -34,6 +36,12 @@ export function isOptionalEwarActivation(value: unknown): boolean {
     }
   }
   return true;
+}
+
+function isStoredToggleActivation(value: unknown): boolean {
+  if (typeof value === "boolean") return true;
+  if (!isRecord(value)) return false;
+  return typeof value.active === "boolean";
 }
 
 export function isOptionalBoosterActivation(value: unknown): boolean {
@@ -78,6 +86,18 @@ export function isOptionalRahActivation(value: unknown): value is StoredRahActiv
   return typeof item.active === "boolean" && typeof item.overloaded === "boolean";
 }
 
+export function isOptionalCapBoosterModes(value: unknown): value is readonly StoredCapBoosterMode[] | undefined {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every(isStoredCapBoosterMode);
+}
+
+export function isOptionalCapBoosterCharges(value: unknown): value is readonly StoredCapBoosterCharge[] | undefined {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every(isStoredCapBoosterCharge);
+}
+
 function isStoredMissileBoosterActivation(value: unknown): value is StoredMissileBoosterActivation {
   if (!isRecord(value)) return false;
   const item = value;
@@ -94,6 +114,18 @@ function isStoredRepairerActivation(value: unknown): value is StoredRepairerActi
   if (!isRecord(value)) return false;
   const item = value;
   return typeof item.active === "boolean" && (item.overloaded === undefined || typeof item.overloaded === "boolean");
+}
+
+function isStoredCapBoosterMode(value: unknown): value is StoredCapBoosterMode {
+  if (!isRecord(value)) return false;
+  const item = value;
+  return typeof item.moduleId === "string" && (item.mode === "auto" || item.mode === "manual");
+}
+
+function isStoredCapBoosterCharge(value: unknown): value is StoredCapBoosterCharge {
+  if (!isRecord(value)) return false;
+  const item = value;
+  return typeof item.moduleId === "string" && typeof item.chargeId === "string";
 }
 
 function isTypeIdString(value: string): boolean {
@@ -288,7 +320,6 @@ export function isOptionalFittedHullSummary(value: unknown): value is FittedHull
   if (s.propulsionModuleId !== undefined && typeof s.propulsionModuleId !== "string") return false;
   if (s.propulsionName !== undefined && typeof s.propulsionName !== "string") return false;
   if (s.propulsionKind !== undefined && !isPropulsionKind(s.propulsionKind)) return false;
-  if (s.baseMaxSpeed !== undefined && !isNonNegative(s.baseMaxSpeed)) return false;
   return true;
 }
 
