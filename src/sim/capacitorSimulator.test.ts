@@ -265,6 +265,18 @@ describe("CapacitorSimulatorImpl", () => {
     expect(view.netPerSecond).toBeCloseTo(-10, 6);
   });
 
+  test("external drain rate joins the average and resets on restore", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({ drains: [drain("1", 100, 10)] }));
+    sim.setExternalDrainPerSecond({ shipA: 7, shipB: 0 });
+    sim.step(0.001, { shipA: false, shipB: false });
+    const view = sim.view().shipA;
+    expect(view.incomingDrainPerSecond).toBeCloseTo(17, 6);
+    expect(view.netPerSecond).toBeCloseTo(view.regenPerSecond - 17, 6);
+    sim.restore(sim.capture());
+    expect(sim.view().shipA.incomingDrainPerSecond).toBeCloseTo(10, 6);
+  });
+
   test("restored state reports percentage and peak regen at 25 percent", () => {
     const sim = new CapacitorSimulatorImpl();
     sim.reset(makeConfig());

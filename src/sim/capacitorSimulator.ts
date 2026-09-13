@@ -101,6 +101,8 @@ export interface CapacitorSimulator extends CapacitorGate, Restorable<CapacitorS
   injectBooster(side: Side, boosterIndex: number): void;
   /** Merges the engine's projected cap-warfare debits for one side (timer-preserving by module id). */
   incomingDrains(side: Side, drains: readonly IncomingDrain[]): void;
+  /** Per-frame input: deterministic drain rate of gate-initiated debits managed outside this simulator (weapon and repairer cycles). */
+  setExternalDrainPerSecond(rates: Record<Side, number>): void;
 }
 
 interface DrainRuntime {
@@ -156,6 +158,7 @@ interface SideRuntime {
   propulsionSuppressed: boolean;
   anyStarved: boolean;
   starvedModuleIds: TypeId[];
+  externalDrainPerSecond: number;
 }
 
 const TAU_DENOMINATOR = 5; // EVE recharge tau = rechargeTime / 5
@@ -238,6 +241,11 @@ export class CapacitorSimulatorImpl implements CapacitorSimulator {
     runtime.incoming = merged;
   }
 
+  setExternalDrainPerSecond(rates: Record<Side, number>): void {
+    this.sides.shipA.externalDrainPerSecond = rates.shipA;
+    this.sides.shipB.externalDrainPerSecond = rates.shipB;
+  }
+
   view(): Record<Side, CapacitorView> {
     return { shipA: sideView(this.sides.shipA), shipB: sideView(this.sides.shipB) };
   }
@@ -268,7 +276,7 @@ function capacityEpsilon(spec: CapacitorSpec | undefined): number {
 }
 
 function emptySide(): SideRuntime {
-  return { spec: undefined, infinite: false, cap: 0, drains: [], incoming: [], boosters: [], propulsion: undefined, propulsionSuppressed: false, anyStarved: false, starvedModuleIds: [] };
+  return { spec: undefined, infinite: false, cap: 0, drains: [], incoming: [], boosters: [], propulsion: undefined, propulsionSuppressed: false, anyStarved: false, starvedModuleIds: [], externalDrainPerSecond: 0 };
 }
 
 function sideFromConfig(spec: CapacitorSpec | undefined, capacityMultiplier: number | undefined, config: CapacitorSideConfig): SideRuntime {
@@ -633,7 +641,7 @@ function averageDrainRate(runtime: SideRuntime): number {
   }
   const propulsion = runtime.propulsion;
   if (propulsion && !runtime.propulsionSuppressed) rate += propulsion.amount / propulsion.interval;
-  return rate;
+  return rate + runtime.externalDrainPerSecond;
 }
 
 function drainState(drain: DrainRuntime): CapacitorDrainState {
@@ -672,5 +680,6 @@ function sideFromSnapshot(snapshot: SideCapacitorSnapshot): SideRuntime {
     propulsionSuppressed: false,
     anyStarved: false,
     starvedModuleIds: [],
+    externalDrainPerSecond: 0,
   };
 }

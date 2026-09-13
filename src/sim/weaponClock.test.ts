@@ -50,6 +50,10 @@ function turretAttack(expectedMultiplier: number, volley: { em: number; thermal:
   return { weapon: turret, assessment: makeAssessment(expectedMultiplier, volley, inOptimal) };
 }
 
+function attackWith(weapon: TurretSpec): WeaponAttack {
+  return { weapon, assessment: makeAssessment(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 }) };
+}
+
 const spoolingTurret: TurretSpec = { ...turret, falloff: 0, spool: { perCycle: 0.1, max: 0.5 } };
 
 interface DebitRecord {
@@ -76,6 +80,33 @@ function spoolingAttack(volley: { em: number; thermal: number; kinetic: number; 
 }
 
 describe("WeaponClockImpl", () => {
+  test("capacitor drain per second sums the active turret cycles", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
+    const weapon: TurretSpec = { ...turret, capacitorNeed: 30, turretCount: 2 };
+    const view = makeView([attackWith(weapon)]);
+    clock.step(0.001, view);
+    expect(clock.capacitorDrainPerSecond("shipA", view.weaponAttacks.shipA)).toBeCloseTo(60 / 5, 6);
+    expect(clock.capacitorDrainPerSecond("shipB", view.weaponAttacks.shipB)).toBeCloseTo(0, 6);
+  });
+
+  test("capacitor drain per second drops when the weapon deactivates or is cleared", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
+    const weapon: TurretSpec = { ...turret, capacitorNeed: 30 };
+    const view = makeView([attackWith(weapon)]);
+    clock.step(0.001, view);
+    expect(clock.capacitorDrainPerSecond("shipA", view.weaponAttacks.shipA)).toBeCloseTo(6, 6);
+    const cleared = makeView([]);
+    clock.step(0.001, cleared);
+    expect(clock.capacitorDrainPerSecond("shipA", cleared.weaponAttacks.shipA)).toBeCloseTo(0, 6);
+  });
+
+  test("capacitor drain per second ignores an out-of-optimal spooling turret", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
+    const view = makeView([spoolingAttack({ em: 0, thermal: 0, kinetic: 100, explosive: 0 }, false, 30)]);
+    clock.step(0.001, view);
+    expect(clock.capacitorDrainPerSecond("shipA", view.weaponAttacks.shipA)).toBeCloseTo(0, 6);
+  });
+
   test("no event before cycle completion", () => {
     const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const view = makeView([turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 })]);

@@ -26,6 +26,7 @@ export interface WeaponClock extends Restorable<WeaponClockState> {
   reset(): void;
   step(dt: number, view: EngagementView, capacitor?: CapacitorGate): readonly DamageEvent[];
   spoolCycles(side: Side, weaponIndex: number): number;
+  capacitorDrainPerSecond(side: Side, attacks: readonly WeaponAttack[]): number;
 }
 
 interface WeaponCooldown {
@@ -151,6 +152,10 @@ export class WeaponClockImpl implements WeaponClock {
     return events;
   }
 
+  capacitorDrainPerSecond(side: Side, attacks: readonly WeaponAttack[]): number {
+    return weaponDrainPerSecond(this.sides[side], attacks);
+  }
+
   private rollEvent(source: Side, target: Side, weaponIndex: number, kind: WeaponKind, attack: WeaponAttack, hitChance: number, expectedMultiplier: number, rng: Rng): DamageEvent | undefined {
     // The assessment damage is already spool-inclusive (fireControl scales it via spoolMultiplier),
     // so events only carry the hit-quality roll on top of it.
@@ -196,4 +201,15 @@ function weaponSignature(attacks: readonly WeaponAttack[]): string {
 function turretCapacitorNeed(weapon: WeaponSpec): number {
   if (weapon.kind !== "turret" || weapon.capacitorNeed === undefined) return 0;
   return weapon.capacitorNeed * weapon.turretCount;
+}
+
+/** Deterministic average: every cycling weapon debits a fixed capNeed per fixed cycleTime. */
+function weaponDrainPerSecond(clock: SideClock, attacks: readonly WeaponAttack[]): number {
+  let rate = 0;
+  for (let i = 0; i < attacks.length; i++) {
+    if (!clock.cooldowns.has(i)) continue;
+    const capNeed = turretCapacitorNeed(attacks[i].weapon);
+    if (capNeed > 0) rate += capNeed / attacks[i].weapon.cycleTime;
+  }
+  return rate;
 }
