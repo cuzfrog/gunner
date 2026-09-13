@@ -1,17 +1,15 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import pkg from "../../package.json";
-import AppHeader from "../components/app-shell/AppHeader.astro";
-import AppFooter from "../components/app-shell/AppFooter.astro";
-import ProfileBar from "../components/profile-bar/ProfileBar.astro";
-import ResultGrid from "../components/result-grid/ResultGrid.astro";
-import ShipPanel from "../components/side-panel/ShipPanel.astro";
-import CanvasFrame from "../components/canvas-frame/CanvasFrame.astro";
+import { AppHeader, AppFooter, ProfileBar, ResultGrid, ShipPanel, CanvasFrame } from "../components";
 
 const version = pkg.version;
 ---
 
-<Layout title="Gunner - EVE Tactic Simulator">
+<Layout
+  title="EVE Online Fight & Combat Simulator — Gunner"
+  description="Free EVE Online 2D fight simulator. Simulate ship-vs-ship combat with real-time movement, tracking, damage application and capacitor warfare in your browser."
+>
   <div class="app-container">
     <AppHeader version={version} />
     <ProfileBar />

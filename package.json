@@ -19,6 +19,7 @@
     "generate:fitting-db": "bun run scripts/generate-fitting-db.ts"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
     "awilix": "13.0.5"
   },
   "devDependencies": {

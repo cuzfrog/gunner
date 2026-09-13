@@ -3,8 +3,23 @@ import "../styles/styles.css";
 
 interface Props {
   readonly title: string;
+  readonly description?: string;
 }
-const { title } = Astro.props;
+const DEFAULT_DESCRIPTION =
+  "Free EVE Online 2D fight simulator. Simulate ship-vs-ship combat with real-time movement, tracking, damage application and capacitor warfare in your browser.";
+const { title, description = DEFAULT_DESCRIPTION } = Astro.props;
+const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.href;
+const ogImageUrl = Astro.site ? new URL("/og-image.png", Astro.site).href : "/og-image.png";
+const appSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Gunner",
+  url: canonicalUrl,
+  description,
+  applicationCategory: "GameApplication",
+  operatingSystem: "Web",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+};
 ---
 
 <!DOCTYPE html>
@@ -13,6 +28,19 @@ const { title } = Astro.props;
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
+  <meta name="description" content={description}>
+  <link rel="canonical" href={canonicalUrl}>
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Gunner">
+  <meta property="og:title" content={title}>
+  <meta property="og:description" content={description}>
+  <meta property="og:url" content={canonicalUrl}>
+  <meta property="og:image" content={ogImageUrl}>
+  <meta property="og:image:width" content="2400">
+  <meta property="og:image:height" content="1260">
+  <meta property="og:image:alt" content="Gunner — EVE Online 2D fight simulator">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json" set:html={JSON.stringify(appSchema)} is:inline></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Saira:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -30,6 +58,9 @@ const { title } = Astro.props;
 </script>
 <body>
   <slot />
+  <noscript>
+    <p>Gunner is a free browser-based EVE Online 2D fight simulator. It simulates ship-vs-ship combat with real-time movement, turret tracking, damage application and capacitor warfare. Please enable JavaScript to run the simulator.</p>
+  </noscript>
   <div id="hover-hint" class="hover-hint" role="tooltip" hidden></div>
   <script>
     import "../main";
