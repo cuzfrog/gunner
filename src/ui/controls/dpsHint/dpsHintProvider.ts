@@ -151,7 +151,7 @@ function buildFactorRows(factors: readonly DamageFactor[], itemNameCatalog: Item
   let cumulative = 1;
   for (const factor of factors) {
     cumulative *= factor.multiplier;
-    rows.push({ kind: factor.kind, multiplier: factor.multiplier, cumulative, sources: factorSources(factor, itemNameCatalog, language) });
+    rows.push({ kind: factor.kind, multiplier: factor.multiplier, cumulative, sources: factorSources(factor, itemNameCatalog, language), ...(factor.damageType !== undefined ? { damageType: factor.damageType } : {}) });
   }
   return rows;
 }

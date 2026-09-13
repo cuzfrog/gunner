@@ -11,7 +11,10 @@ export interface DroneSkillOutput {
   readonly orbitSpeed: number;
   readonly skillDamageMultiplier: number;
   readonly skillDamageIds: readonly TypeId[];
+  // Ship hull multiplier from droneDamage bonuses (subsystem contributions are separate).
   readonly hullDamageMultiplier: number;
+  // Damage multipliers contributed by individual subsystems, for factor attribution.
+  readonly subsystemDamageMultipliers?: readonly { readonly sourceId: TypeId; readonly multiplier: number }[];
 }
 
 export interface DroneSkillModel {
@@ -40,9 +43,11 @@ export class DroneSkillModelImpl implements DroneSkillModel {
     if (sizeSkillId !== undefined) skillDamageIds.push(sizeSkillId);
 
     const droneHullBonuses = hullBonuses.filter((b) => isDroneBonusAttribute(b.attribute) && b.attribute === "droneDamage" && (b.chargeSkillId === undefined || b.chargeSkillId === sizeSkillId || b.chargeSkillId === DRONES_SKILL_ID));
-    const hullDamageMultiplier = droneHullBonuses.length > 0 ? droneHullBonuses.reduce((acc, b) => acc * (1 + (b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1)) / 100), 1) : 1;
+    const shipBonuses = droneHullBonuses.filter((b) => b.sourceId === undefined);
+    const hullDamageMultiplier = shipBonuses.length > 0 ? shipBonuses.reduce((acc, b) => acc * (1 + (b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1)) / 100), 1) : 1;
+    const subsystemDamageMultipliers = subsystemDamageMultipliersFrom(droneHullBonuses, skillLevel);
 
-    const totalDamageMultiplier = drone.damageMultiplier * skillDamageMultiplier * hullDamageMultiplier;
+    const totalDamageMultiplier = drone.damageMultiplier * skillDamageMultiplier * hullDamageMultiplier * subsystemDamageMultipliers.reduce((acc, s) => acc * s.multiplier, 1);
     const navigationMultiplier = 1 + DRONE_NAVIGATION_BONUS * skillLevel;
     const sharpshootingMultiplier = 1 + DRONE_SHARPSHOOTING_BONUS * skillLevel;
 
@@ -56,8 +61,19 @@ export class DroneSkillModelImpl implements DroneSkillModel {
       skillDamageMultiplier,
       skillDamageIds,
       hullDamageMultiplier,
+      ...(subsystemDamageMultipliers.length > 0 ? { subsystemDamageMultipliers } : {}),
     };
   }
+}
+
+function subsystemDamageMultipliersFrom(bonuses: readonly HullBonus[], skillLevel: SkillLevel): readonly { readonly sourceId: TypeId; readonly multiplier: number }[] {
+  const bySource = new Map<TypeId, number>();
+  for (const bonus of bonuses) {
+    if (bonus.sourceId === undefined) continue;
+    const multiplier = 1 + (bonus.magnitude * (bonus.scalesWithHullSkill ? skillLevel : 1)) / 100;
+    bySource.set(bonus.sourceId, (bySource.get(bonus.sourceId) ?? 1) * multiplier);
+  }
+  return [...bySource.entries()].map(([sourceId, multiplier]) => ({ sourceId, multiplier }));
 }
 
 function sizeSkillIdForClass(sizeClass: DroneSizeClass): TypeId | undefined {

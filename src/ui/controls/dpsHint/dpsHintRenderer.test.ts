@@ -1,4 +1,5 @@
 import { type FakeElement, fakeDocument } from "../../testing";
+import { DAMAGE_ICON_URLS } from "../damageTypeIcons";
 import type { DpsHintModel } from "./dpsHintRenderer";
 import { DpsHintRendererImpl } from "./dpsHintRenderer";
 
@@ -124,6 +125,21 @@ describe("DpsHintRendererImpl", () => {
     expect(mainChildren[0].textContent).toBe("dpsHint.factor.base");
     expect(mainChildren[1].textContent).toBe("x3");
     expect(mainChildren[2].textContent).toBe("(x3)");
+  });
+
+  test("renders a damage type icon on a factor row carrying damageType", () => {
+    const renderer = new DpsHintRendererImpl({ t: (key) => key });
+    const model = makeModel();
+    const group = model.groups[0];
+    const typed: DpsHintModel = { groups: [{ ...group, factors: [{ kind: "subsystem", multiplier: 1.25, cumulative: 1.25, sources: ["Tengu Offensive - Accelerated Ejection Bay"], damageType: "kinetic" }] }] };
+    const container = globalThis.document.createElement("div") as unknown as FakeElement;
+    renderer.render(typed, container as unknown as HTMLElement);
+    const groupEl = elementChildren(container.children[0] as FakeElement)[0];
+    const factor = elementChildren(groupEl)[4];
+    const mainChildren = elementChildren(elementChildren(factor)[0]);
+    const kindSpan = mainChildren[0];
+    expect(kindSpan.children.some((c) => c.tagName === "#text" && c.textContent === "dpsHint.factor.subsystem")).toBe(true);
+    expect(kindSpan.children.find((c) => c.tagName === "IMG")!.getAttribute("src")).toBe(DAMAGE_ICON_URLS.kinetic);
   });
 
   test("renders module factor with source name", () => {

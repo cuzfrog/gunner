@@ -2,7 +2,7 @@ import type { TypeId } from "../gamedata/ids";
 import type { ChargeStats, DroneStats, MissileStats } from "../gamedata/fittingDb";
 import type { DamageType } from "../sim";
 
-export type DamageFactorKind = "base" | "module" | "skill" | "hull" | "overload";
+export type DamageFactorKind = "base" | "module" | "skill" | "hull" | "subsystem" | "overload";
 
 export interface DamageFactor {
   readonly kind: DamageFactorKind;
@@ -10,6 +10,8 @@ export interface DamageFactor {
   readonly moduleIds?: readonly TypeId[];
   readonly skillIds?: readonly TypeId[];
   readonly hullName?: string;
+  // Set when the multiplier only applies to this damage type (per-type damage bonuses).
+  readonly damageType?: DamageType;
 }
 
 export interface DamageBreakdown {

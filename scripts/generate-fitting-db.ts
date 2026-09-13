@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { ShipId, TypeId } from "../src/gamedata/ids";
+import type { DamageResists, DamageType } from "../src/sim";
 import {
   TURRET_WEAPON_GROUP_BY_ID,
   type HullBonusAttribute,
@@ -11,7 +12,6 @@ import {
 } from "../src/gamedata/fittingDb/types";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 import type { ShipNameLanguage } from "../src/ships";
-import type { DamageResists } from "../src/sim";
 import { buildDefenseStatsFromIntents, type DefenseModuleStats } from "./fittingDb/buildDefenseStats";
 import { buildCapacitorStatsFromIntents, type CapacitorModuleStats } from "./fittingDb/buildCapacitorStats";
 import { buildCapWarfareStatsFromIntents, type EnergyNeutralizerStats, type NosferatuStats } from "./fittingDb/buildCapWarfareStats";
@@ -100,7 +100,66 @@ interface HullBonus {
   readonly chargeSkillId?: TypeId;
   readonly moduleSkillId?: TypeId;
   readonly moduleGroupId?: number;
+  readonly damageType?: DamageType;
+  readonly sourceId?: TypeId;
 }
+
+// Missile damage attributes 114/116/117/118 are per-type multipliers; whole-vector missileDamage rows must stay untyped.
+const DAMAGE_TYPE_BY_ATTRIBUTE: Readonly<Record<number, DamageType>> = { 114: "em", 116: "explosive", 117: "kinetic", 118: "thermal" };
+
+// Strategic cruiser subsystem groups (category 32): Electronic, Offensive, Defensive, Propulsion.
+const SUBSYSTEM_GROUP_IDS = new Set([954, 956, 957, 958]);
+// Afterburner, High Speed Maneuvering (MWD) skills used by propulsion subsystem bonuses.
+const PROPULSION_SKILL_IDS = new Set([3450, 3454]);
+
+// Per-level percent ship-stat bonuses emitted directly by ItemModifier effects (op 6, subsystemBonus* source).
+const SUBSYSTEM_SHIP_STAT_ATTRIBUTES: Readonly<Record<number, HullBonusAttribute>> = {
+  37: "maxVelocity", 70: "agility", 263: "shieldHpPercent", 265: "armorHpPercent", 554: "mwdSigBloom",
+};
+
+const SUBSYSTEM_FLAT_ADDITION_REASONS: Readonly<Record<number, string>> = {
+  9: "flat structure HP addition", 11: "flat powergrid addition", 38: "flat cargo capacity addition",
+  48: "flat CPU addition", 70: "flat inertia addition", 76: "flat targeting range addition",
+  192: "flat max locked targets addition", 263: "flat shield HP addition", 265: "flat armor HP addition",
+  283: "flat drone capacity addition", 482: "flat capacitor capacity addition", 552: "flat signature radius addition",
+  1271: "flat drone bandwidth addition", 3320: "black ops jump system access flag", 3322: "black ops jump drive flag",
+};
+
+const SUBSYSTEM_PERCENT_SKIP_REASONS: Readonly<Record<number, string>> = {
+  11: "powergrid output percent bonus is a fitting stat", 48: "CPU output percent bonus is a fitting stat",
+  55: "capacitor recharge rate bonus is not modeled", 76: "max targeting range bonus is not modeled",
+  153: "warp capacitor need bonus is not modeled", 2045: "capacitor warfare resistance bonus is not modeled",
+  208: "RADAR sensor strength bonus is not modeled", 209: "LADAR sensor strength bonus is not modeled",
+  210: "magnetometric sensor strength bonus is not modeled", 211: "gravimetric sensor strength bonus is not modeled",
+  482: "capacitor capacity percent bonus is not modeled", 564: "scan resolution bonus is not modeled",
+  600: "warp speed bonus is not modeled",
+};
+
+const SUBSYSTEM_SKILL_FILTERED_SKIP_REASONS: Readonly<Record<number, string>> = {
+  20: "propulsion module speed factor is not modeled", 30: "powergrid usage reduction is a fitting stat",
+  50: "CPU usage reduction is a fitting stat", 68: "armor repair amount bonus is not modeled",
+  84: "shield transfer amount bonus is not modeled", 90: "energy transfer amount bonus is not modeled",
+  97: "energy neutralizer amount bonus is not modeled", 669: "module reactivation delay bonus is not modeled",
+  1211: "heat damage bonus is not modeled", 1371: "scan probe strength bonus is not modeled",
+  1870: "covert cloak CPU reduction is a fitting stat", 1882: "warfare link CPU reduction is a fitting stat",
+  1910: "electronic attack virus strength bonus is not modeled", 2044: "remote repair falloff bonus is not modeled",
+  238: "ECM gravimetric strength bonus is not modeled", 239: "ECM magnetometric strength bonus is not modeled",
+  240: "ECM LADAR strength bonus is not modeled", 241: "ECM RADAR strength bonus is not modeled",
+  2469: "information warfare strength bonus is not modeled", 2471: "mining warfare strength bonus is not modeled",
+  2473: "skirmish warfare strength bonus is not modeled", 2535: "siege warfare strength bonus is not modeled",
+  2537: "armor warfare strength bonus is not modeled", 2691: "remote repair fitting reduction is a fitting stat",
+  1206: "turret overheat bonus is not modeled", 1208: "launcher overheat bonus is not modeled",
+  1222: "afterburner overheat bonus is not modeled", 1223: "propulsion module overheat bonus is not modeled",
+  1225: "shield booster overheat bonus is not modeled",
+  1230: "shield transporter overheat bonus is not modeled", 1231: "armor repairer overheat bonus is not modeled",
+  309: "interdiction nullification is not modeled", 3115: "bubble immunity chance is not modeled",
+  565: "warp scramble immunity is not modeled", 796: "mass addition bonus is not modeled",
+};
+
+// Structural effects without modifierInfo that mark subsystem slots/hardpoints.
+const SUBSYSTEM_SLOT_MARKER_EFFECTS: Readonly<Record<number, string>> = {
+  3772: "subsystem slot marker effect", 3773: "hardpoint modifier marker effect", 3774: "slot modifier marker effect",
+};
 
 const MODULE_GROUPS = new Set([
   38, // Shield Extender
@@ -232,9 +291,16 @@ function stringifyHullBonuses(value: Record<ShipId, readonly HullBonus[]>): stri
   return `{${entries}}`;
 }
 
+function stringifySubsystemBonuses(value: Record<string, readonly HullBonus[]>): string {
+  const entries = Object.entries(value)
+    .map(([typeId, bonuses]) => `[${JSON.stringify(typeId)}]:${stringifyHullBonusArray(bonuses)}`)
+    .join(",");
+  return `{${entries}}`;
+}
+
 function stringifyHullBonusArray(bonuses: readonly HullBonus[]): string {
   const json = JSON.stringify(bonuses);
-  return json.replace(/"(chargeSkillId|moduleSkillId)":"(\d+)"/g, '"$1":"$2" as TypeId');
+  return json.replace(/"(chargeSkillId|moduleSkillId|sourceId)":"(\d+)"/g, '"$1":"$2" as TypeId');
 }
 
 function stringifySkillBonuses(bonuses: readonly RawSkillBonus[]): string {
@@ -1074,10 +1140,12 @@ function buildHullBonuses(
       if (!filter) continue;
       const modifyingAttrName = attributeNames.get(modifier.modifyingAttributeID) ?? "";
       const scalesWithHullSkill = !effectNonScaling && !isNonScalingAttribute(modifyingAttrName);
-      const key = `${attribute}:${filter.chargeSkillId ?? ""}:${filter.moduleSkillId ?? ""}:${filter.moduleGroupId ?? ""}:${scalesWithHullSkill}`;
+      const damageType = DAMAGE_TYPE_BY_ATTRIBUTE[modifier.modifiedAttributeID];
+      const key = `${attribute}:${damageType ?? ""}:${filter.chargeSkillId ?? ""}:${filter.moduleSkillId ?? ""}:${filter.moduleGroupId ?? ""}:${scalesWithHullSkill}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      bonuses.push({ attribute, magnitude, scalesWithHullSkill, ...filter });
+      const bonus: HullBonus = { attribute, magnitude, scalesWithHullSkill, ...filter };
+      bonuses.push(damageType !== undefined ? { ...bonus, damageType } : bonus);
     }
   }
   return bonuses;
@@ -1094,6 +1162,8 @@ function resolveHullBonusAttribute(
   }
   const skillId = modifier.skillTypeID;
   const func = modifier.func;
+  // Drone-skill modifiers only contribute damage (attr 64); drone velocity/tracking/HP bonuses are not modeled.
+  if (skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId) && modifier.modifiedAttributeID !== 64) return { kind: "skip", reason: "drone context outside damage is not modeled" };
   // Disambiguate context-dependent attributes.
   if (base === "turretRoF" && skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return { kind: "mapped", attribute: "missileRoF" };
   if (base === "turretRoF" && modifier.groupID !== undefined && LAUNCHER_GROUP_IDS.has(modifier.groupID)) return { kind: "mapped", attribute: "missileRoF" };
@@ -1132,6 +1202,122 @@ function resolveHullBonusFilter(modifier: SdeDogmaEffectModifier): { chargeSkill
 
 function isNonScalingAttribute(attrName: string): boolean {
   return attrName.startsWith("shipBonusRole") || attrName.startsWith("roleBonus") || attrName.startsWith("shipRoleBonus") || attrName.startsWith("battleship");
+}
+
+type SubsystemModifierResolution =
+  | { kind: "mapped"; attribute: HullBonusAttribute; damageType?: DamageType }
+  | { kind: "skip"; reason: string }
+  | { kind: "unmapped"; attributeId: number };
+
+function buildSubsystemBonuses(
+  attributeNames: Map<number, string>,
+  typeDogma: SdeTypeDogma,
+  dogmaEffects: Readonly<Record<string, SdeDogmaEffect>>,
+  subsystemTypeId: number,
+  subsystemName: string,
+  unmappedCollector: UnmappedAttribute[],
+): readonly HullBonus[] {
+  const attributeValues = buildAttributeValueMap(typeDogma);
+  const bonuses: HullBonus[] = [];
+  const seen = new Set<string>();
+  for (const effectID of buildEffectSet(typeDogma)) {
+    const effect = dogmaEffects[String(effectID)];
+    if (!effect?.modifierInfo || effect.modifierInfo.length === 0) {
+      if (!SUBSYSTEM_SLOT_MARKER_EFFECTS[effectID]) {
+        unmappedCollector.push({ shipTypeId: subsystemTypeId, shipName: subsystemName, effectId: effectID, attributeId: effectID, attributeName: attributeNames.get(effectID) ?? "unknown", func: "no-modifiers" });
+      }
+      continue;
+    }
+    for (const modifier of effect.modifierInfo) {
+      const resolution = resolveSubsystemModifier(modifier, attributeNames);
+      if (resolution.kind === "skip") continue;
+      if (resolution.kind === "unmapped") {
+        unmappedCollector.push({ shipTypeId: subsystemTypeId, shipName: subsystemName, effectId: effectID, attributeId: resolution.attributeId, attributeName: attributeNames.get(resolution.attributeId) ?? "unknown", func: modifier.func });
+        continue;
+      }
+      const magnitude = attributeValues.get(modifier.modifyingAttributeID);
+      if (magnitude === undefined || !Number.isFinite(magnitude) || magnitude === 0) continue;
+      const filter = resolveHullBonusFilter(modifier);
+      if (!filter) continue;
+      const key = `${resolution.attribute}:${resolution.damageType ?? ""}:${filter.chargeSkillId ?? ""}:${filter.moduleSkillId ?? ""}:${filter.moduleGroupId ?? ""}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const bonus: HullBonus = { attribute: resolution.attribute, magnitude, scalesWithHullSkill: true, sourceId: String(subsystemTypeId) as TypeId, ...filter };
+      bonuses.push(resolution.damageType !== undefined ? { ...bonus, damageType: resolution.damageType } : bonus);
+    }
+  }
+  return bonuses;
+}
+
+function resolveSubsystemModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>): SubsystemModifierResolution {
+  if (modifier.func === "ItemModifier") return resolveSubsystemItemModifier(modifier, attributeNames);
+  if (modifier.func === "LocationRequiredSkillModifier" || modifier.func === "OwnerRequiredSkillModifier") {
+    if (modifier.skillTypeID !== undefined && PROPULSION_SKILL_IDS.has(modifier.skillTypeID)) return resolveSubsystemPropulsionModifier(modifier);
+    return resolveSubsystemSkillModifier(modifier, attributeNames);
+  }
+  if (modifier.func === "LocationGroupModifier") return resolveSubsystemGroupModifier(modifier, attributeNames);
+  if (modifier.func === "LocationModifier") return resolveSubsystemLocationModifier(modifier);
+  return { kind: "unmapped", attributeId: modifier.modifiedAttributeID };
+}
+
+function resolveSubsystemItemModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>): SubsystemModifierResolution {
+  const attributeId = modifier.modifiedAttributeID;
+  if (modifier.operation !== 6) {
+    const reason = SUBSYSTEM_FLAT_ADDITION_REASONS[attributeId];
+    return reason ? { kind: "skip", reason } : { kind: "unmapped", attributeId };
+  }
+  const percentReason = SUBSYSTEM_PERCENT_SKIP_REASONS[attributeId];
+  if (percentReason) return { kind: "skip", reason: percentReason };
+  const modifyingAttrName = attributeNames.get(modifier.modifyingAttributeID) ?? "";
+  const isPerLevel = modifyingAttrName.startsWith("subsystemBonus");
+  const shipStat = SUBSYSTEM_SHIP_STAT_ATTRIBUTES[attributeId];
+  if (shipStat) {
+    if (!isPerLevel) return { kind: "skip", reason: "non-per-level subsystem fitting bonus" };
+    return { kind: "mapped", attribute: shipStat };
+  }
+  const base = resolveHullBonusAttribute(modifier, attributeNames);
+  if (base.kind === "skip") return base;
+  if (base.kind === "unmapped") return { kind: "unmapped", attributeId };
+  if (!isPerLevel) return { kind: "skip", reason: "non-per-level subsystem fitting bonus" };
+  const damageType = DAMAGE_TYPE_BY_ATTRIBUTE[attributeId];
+  return { kind: "mapped", attribute: base.attribute, ...(damageType !== undefined ? { damageType } : {}) };
+}
+
+function resolveSubsystemPropulsionModifier(modifier: SdeDogmaEffectModifier): SubsystemModifierResolution {
+  const attributeId = modifier.modifiedAttributeID;
+  if (attributeId === 554) return { kind: "mapped", attribute: "mwdSigBloom" };
+  const reason = SUBSYSTEM_SKILL_FILTERED_SKIP_REASONS[attributeId];
+  if (reason) return { kind: "skip", reason };
+  return { kind: "unmapped", attributeId };
+}
+
+function resolveSubsystemSkillModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>): SubsystemModifierResolution {
+  const attributeId = modifier.modifiedAttributeID;
+  const base = resolveHullBonusAttribute(modifier, attributeNames);
+  if (base.kind === "mapped") {
+    const damageType = DAMAGE_TYPE_BY_ATTRIBUTE[attributeId];
+    return { kind: "mapped", attribute: base.attribute, ...(damageType !== undefined ? { damageType } : {}) };
+  }
+  if (base.kind === "skip") return base;
+  const reason = SUBSYSTEM_SKILL_FILTERED_SKIP_REASONS[attributeId];
+  if (reason) return { kind: "skip", reason };
+  return { kind: "unmapped", attributeId };
+}
+
+function resolveSubsystemGroupModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>): SubsystemModifierResolution {
+  const attributeId = modifier.modifiedAttributeID;
+  if (attributeId === 51 && modifier.groupID !== undefined && LAUNCHER_GROUP_IDS.has(modifier.groupID)) return { kind: "mapped", attribute: "missileRoF" };
+  const reason = SUBSYSTEM_SKILL_FILTERED_SKIP_REASONS[attributeId];
+  if (reason) return { kind: "skip", reason };
+  const base = resolveHullBonusAttribute(modifier, attributeNames);
+  if (base.kind === "skip") return base;
+  return { kind: "unmapped", attributeId };
+}
+
+function resolveSubsystemLocationModifier(modifier: SdeDogmaEffectModifier): SubsystemModifierResolution {
+  const reason = SUBSYSTEM_SKILL_FILTERED_SKIP_REASONS[modifier.modifiedAttributeID];
+  if (reason) return { kind: "skip", reason };
+  return { kind: "unmapped", attributeId: modifier.modifiedAttributeID };
 }
 
 function turretSkillFromRequired(
@@ -1348,6 +1534,7 @@ async function main() {
   const sensorBoosterScripts: Record<string, Row<SensorBoosterScriptStats>> = {};
   const sensorDampenerScripts: Record<string, Row<SensorDampenerScriptStats>> = {};
   const hullBonuses: Record<ShipId, readonly HullBonus[]> = {};
+  const subsystemBonuses: Record<string, readonly HullBonus[]> = {};
   const drones: Record<string, DroneEntry> = {};
   const combatDrones: Record<string, Row<DroneStats>> = {};
   const itemNames: Record<string, LocalizedName> = {};
@@ -1368,6 +1555,14 @@ async function main() {
       const bonuses = buildHullBonuses(attributeNames, attributeValueMap, typeDogma, dogmaEffects, type.typeID, enName ?? String(type.typeID), unmappedHullAttributes);
       const shipId = resolveShipId(enName, type, shipNameToId);
       if (bonuses.length > 0) hullBonuses[shipId] = bonuses;
+      continue;
+    }
+
+    if (SUBSYSTEM_GROUP_IDS.has(type.groupID)) {
+      if (typeDogma) {
+        const bonuses = buildSubsystemBonuses(attributeNames, typeDogma, dogmaEffects, type.typeID, enName ?? String(type.typeID), unmappedHullAttributes);
+        if (bonuses.length > 0) subsystemBonuses[id] = bonuses;
+      }
       continue;
     }
 
@@ -1758,6 +1953,8 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     ``,
     `export const HULL_BONUSES: Readonly<Record<ShipId, readonly HullBonus[]>> = ${stringifyHullBonuses(hullBonuses)};`,
     ``,
+    `export const SUBSYSTEM_BONUSES: Readonly<Record<string, readonly HullBonus[]>> = ${stringifySubsystemBonuses(subsystemBonuses)};`,
+    ``,
     `export const SKILL_BONUSES: readonly SkillBonus[] = ${stringifySkillBonuses(skillBonuses)};`,
     ``,
     `export const RIG_DRAWBACK_REDUCTIONS: readonly RigDrawbackReduction[] = ${stringifyRigDrawbackReductions(rigDrawbackReductions)};`,
@@ -2141,7 +2338,7 @@ async function writeI18nFiles(
   await writeFile(collisionJaFile, collisionJaContent);
 }
 
-export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses, buildPropulsionStats as _buildPropulsionStats };
+export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses, buildSubsystemBonuses as _buildSubsystemBonuses, buildPropulsionStats as _buildPropulsionStats };
 
 if (import.meta.main) {
   main().catch((error) => {

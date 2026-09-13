@@ -348,6 +348,32 @@ describe("DpsHintProviderImpl", () => {
     expect(catalog.nameForId).toHaveBeenCalledWith("123", "en");
   });
 
+  test("carries subsystem factor kind, sources, and damageType into the row", () => {
+    const breakdown: DamageBreakdown = {
+      damageByType: { kinetic: 100 },
+      factors: [
+        { kind: "base", multiplier: 1 },
+        { kind: "subsystem", multiplier: 1.25, moduleIds: [toTypeId("45601")], damageType: "kinetic" },
+      ],
+    };
+    const launcher = makeLauncher(breakdown);
+    const catalog = makeItemNameCatalog();
+    const provider = new DpsHintProviderImpl(makeDeps({
+      launcherControllers: { shipA: makeLauncherController(launcher), shipB: makeLauncherController() },
+      itemNameCatalog: catalog,
+    }));
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div") as unknown as FakeElement;
+    provider.render(anchor, container as unknown as HTMLElement);
+    const root = container.children[0] as unknown as FakeElement;
+    const group = elementChildren(root)[0];
+    const groupChildren = elementChildren(group);
+    const subsystemFactor = groupChildren[4];
+    const kindSpan = elementChildren(elementChildren(subsystemFactor)[0])[0];
+    expect(kindSpan.children.some((c) => c.tagName === "#text" && c.textContent === "dpsHint.factor.subsystem")).toBe(true);
+    expect(elementChildren(subsystemFactor)[1].textContent).toBe("Item-45601");
+  });
+
   test("deduplicates duplicate modules with xN suffix", () => {
     const breakdown: DamageBreakdown = {
       damageByType: { em: 30 },

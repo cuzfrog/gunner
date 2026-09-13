@@ -71,9 +71,16 @@ export class FittingStateFactory {
     const sensorAmplifierModules: FittedModule[] = [];
     let propulsionModule: FittedModule | undefined;
     let order = 0;
+    const mergedHullBonuses = [...hullBonuses];
 
     for (const mod of modules) {
       if (mod.offline) continue;
+
+      const subsystemBonuses = this.db.subsystemBonuses[mod.moduleId];
+      if (subsystemBonuses !== undefined) {
+        mergedHullBonuses.push(...subsystemBonuses);
+        continue;
+      }
 
       if (this.db.turrets[mod.moduleId]) {
         const existing = turretCounts.get(mod.moduleId);
@@ -162,7 +169,7 @@ export class FittingStateFactory {
 
     return {
       profile,
-      hullBonuses,
+      hullBonuses: mergedHullBonuses,
       supportModules,
       defenseModules,
       turretGroups: [...turretCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([moduleId, e]) => ({ moduleId, chargeId: e.chargeId, count: e.count })),

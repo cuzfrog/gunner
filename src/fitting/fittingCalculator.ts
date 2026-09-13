@@ -33,12 +33,13 @@ import {
   type DisruptionScriptStats,
 } from "../gamedata/fittingDb";
 import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../ships";
+import type { DamageType } from "../sim";
 import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec, EnergyNeutralizerSpec, NosferatuSpec } from "../sim";
 import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, damageVectorFromPartial, damageVectorScale } from "../sim";
 import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher } from "./chargeCatalog";
 import type { GunFamily, GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
-import type { MissileSkillModel } from "./missileStats";
+import type { MissileSkillModel, MissileSkillOutput } from "./missileStats";
 import type { DroneCatalog, ImportedDrone } from "./droneCatalog";
 import type { DroneSkillModel } from "./droneStats";
 import { sigResolutionClassFromChargeSize, toTrackingRadPerSecond } from "./turretStats";
@@ -141,7 +142,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const hullTrackingPercents: number[] = [];
       const hullOptimalPercents: number[] = [];
       const hullFalloffPercents: number[] = [];
-      const hullDamagePercents: number[] = [];
+      const hullDamageEntries: { percent: number; sourceId?: TypeId }[] = [];
       const hullRoFPercents: number[] = [];
       const hullSpoolMaxPercents: number[] = [];
       const hullCapPercents: number[] = [];
@@ -159,7 +160,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
           case "turretTracking": hullTrackingPercents.push(percent); break;
           case "turretOptimal": hullOptimalPercents.push(percent); break;
           case "turretFalloff": hullFalloffPercents.push(percent); break;
-          case "turretDamage": hullDamagePercents.push(percent); break;
+          case "turretDamage": hullDamageEntries.push({ percent, sourceId: bonus.sourceId }); break;
           case "turretRoF": hullRoFPercents.push(percent); break;
           case "turretSpoolMax": hullSpoolMaxPercents.push(percent); break;
         }
@@ -173,7 +174,8 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const moduleSpeedMultipliers = weaponGroup ? (speedMultipliersByGroup.get(weaponGroup) ?? []) : [];
       const moduleDamageBonus = this.stacking.apply(moduleDamageModifiers.map((m) => m.multiplier));
       const moduleSpeedBonus = this.stacking.apply(moduleSpeedMultipliers);
-      const hullDamageMultiplier = hullDamagePercents.reduce((acc, p) => acc * (1 + p / 100), 1);
+      const hullDamageMultiplier = hullDamageEntries.filter((e) => e.sourceId === undefined).reduce((acc, e) => acc * (1 + e.percent / 100), 1);
+      const subsystemDamageMultipliers = subsystemDamageMultipliersFromEntries(hullDamageEntries);
       const hullRoFMultiplier = hullRoFPercents.reduce((acc, p) => acc * (1 + p / 100), 1);
       const hullSpoolMaxMultiplier = hullSpoolMaxPercents.reduce((acc, p) => acc * (1 + p / 100), 1);
       const spool = turret.spoolPerCycle !== undefined && turret.spoolMax !== undefined
@@ -193,7 +195,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const finalDamageMultiplier = modifiedDamageMultiplier * overloadDamage;
       const finalCycleTime = modifiedCycleTime * overloadCycle;
 
-      const factors = buildTurretDamageFactors(turret.damageMultiplier, moduleDamageBonus, moduleDamageModifiers, activeSkillEntries, skillDamageMultiplier, hullDamageMultiplier, fitting.profile.name, overloadDamage);
+      const factors = buildTurretDamageFactors(turret.damageMultiplier, moduleDamageBonus, moduleDamageModifiers, activeSkillEntries, skillDamageMultiplier, hullDamageMultiplier, fitting.profile.name, subsystemDamageMultipliers, overloadDamage);
 
       const sigResClass = sigResolutionClassFromChargeSize(turret.chargeSize);
       const sigRes = SIG_RESOLUTIONS[sigResClass];
@@ -275,7 +277,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
 
     const output = this.missileSkillModel.compute(launcherStats, missileStats, fitting.hullBonuses, conditions.skillLevel);
     const launcherOverloadCycle = conditions.weaponOverloaded ? WEAPON_OVERLOAD_ROF_MULTIPLIER : 1;
-    const missileFactors = buildMissileDamageFactors(output.skillDamageMultiplier, output.skillDamageIds, output.hullDamageMultiplier, fitting.profile.name, bcsDamageBonus, bcsDamageModifiers);
+    const missileFactors = buildMissileDamageFactors(output, missileStats.damageType, fitting.profile.name, bcsDamageBonus, bcsDamageModifiers);
     return {
       moduleId: bestGroup.moduleId,
       name: launcherStats.name,
@@ -567,7 +569,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const finalOptimal = skillOutput.optimal * optimalBonus;
       const finalFalloff = skillOutput.falloff * falloffBonus;
 
-      const factors = buildDroneDamageFactors(stats.damageMultiplier, ddaDamageBonus, ddaModifiers, skillOutput.skillDamageMultiplier, skillOutput.skillDamageIds, skillOutput.hullDamageMultiplier, fitting.profile.name);
+      const factors = buildDroneDamageFactors(stats.damageMultiplier, ddaDamageBonus, ddaModifiers, skillOutput.skillDamageMultiplier, skillOutput.skillDamageIds, skillOutput.hullDamageMultiplier, fitting.profile.name, skillOutput.subsystemDamageMultipliers ?? []);
 
       result.push({
         typeId: group.typeId,
@@ -759,7 +761,7 @@ interface TurretDamageModifier {
   readonly multiplier: number;
 }
 
-function buildTurretDamageFactors(baseMultiplier: number, moduleDamageBonus: number, moduleModifiers: readonly TurretDamageModifier[], activeSkillEntries: readonly SkillDamageEntry[], skillDamageMultiplier: number, hullDamageMultiplier: number, hullName: string, overloadDamage: number): readonly DamageFactor[] {
+function buildTurretDamageFactors(baseMultiplier: number, moduleDamageBonus: number, moduleModifiers: readonly TurretDamageModifier[], activeSkillEntries: readonly SkillDamageEntry[], skillDamageMultiplier: number, hullDamageMultiplier: number, hullName: string, subsystemDamageMultipliers: readonly SubsystemDamageMultiplier[], overloadDamage: number): readonly DamageFactor[] {
   const factors: DamageFactor[] = [{ kind: "base", multiplier: baseMultiplier }];
   if (moduleDamageBonus !== 1) factors.push({ kind: "module", multiplier: moduleDamageBonus, moduleIds: moduleModifiers.map((m) => m.moduleId) });
   if (activeSkillEntries.length > 0) {
@@ -767,6 +769,7 @@ function buildTurretDamageFactors(baseMultiplier: number, moduleDamageBonus: num
     factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillIds });
   }
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
+  for (const subsystem of subsystemDamageMultipliers) factors.push({ kind: "subsystem", multiplier: subsystem.multiplier, moduleIds: [subsystem.sourceId] });
   if (overloadDamage !== 1) factors.push({ kind: "overload", multiplier: overloadDamage });
   return factors;
 }
@@ -784,20 +787,44 @@ function deduplicateSkillIds(ids: readonly TypeId[]): readonly TypeId[] {
   return result;
 }
 
-function buildMissileDamageFactors(skillDamageMultiplier: number, skillIds: readonly TypeId[], hullDamageMultiplier: number, hullName: string, moduleDamageBonus: number, moduleModifiers: readonly { moduleId: TypeId; multiplier: number }[]): readonly DamageFactor[] {
+interface SubsystemDamageMultiplier {
+  readonly sourceId: TypeId;
+  readonly multiplier: number;
+}
+
+function subsystemDamageMultipliersFromEntries(entries: readonly { readonly percent: number; readonly sourceId?: TypeId }[]): readonly SubsystemDamageMultiplier[] {
+  const bySource = new Map<TypeId, number>();
+  for (const entry of entries) {
+    if (entry.sourceId === undefined) continue;
+    bySource.set(entry.sourceId, (bySource.get(entry.sourceId) ?? 1) * (1 + entry.percent / 100));
+  }
+  return [...bySource.entries()].map(([sourceId, multiplier]) => ({ sourceId, multiplier }));
+}
+
+function buildMissileDamageFactors(output: MissileSkillOutput, missileDamageType: DamageType, hullName: string, moduleDamageBonus: number, moduleModifiers: readonly { moduleId: TypeId; multiplier: number }[]): readonly DamageFactor[] {
   const factors: DamageFactor[] = [{ kind: "base", multiplier: 1 }];
   if (moduleDamageBonus !== 1) factors.push({ kind: "module", multiplier: moduleDamageBonus, moduleIds: moduleModifiers.map((m) => m.moduleId) });
-  if (skillDamageMultiplier !== 1 && skillIds.length > 0) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillIds: skillIds });
-  if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
+  if (output.skillDamageMultiplier !== 1 && output.skillDamageIds.length > 0) factors.push({ kind: "skill", multiplier: output.skillDamageMultiplier, skillIds: output.skillDamageIds });
+  if (output.hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: output.hullDamageMultiplier, hullName });
+  if (output.hullTypedDamageMultiplier !== undefined && output.hullTypedDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: output.hullTypedDamageMultiplier, hullName, damageType: missileDamageType });
+  for (const subsystem of output.subsystemDamageMultipliers ?? []) {
+    factors.push({ kind: "subsystem", multiplier: subsystem.multiplier, moduleIds: [subsystem.sourceId], ...(subsystem.typed ? { damageType: missileDamageType } : {}) });
+  }
   return factors;
 }
 
-function buildDroneDamageFactors(baseMultiplier: number, moduleDamageBonus: number, moduleModifiers: readonly { moduleId: TypeId; bonus: number }[], skillDamageMultiplier: number, skillDamageIds: readonly TypeId[], hullDamageMultiplier: number, hullName: string): readonly DamageFactor[] {
+function buildDroneDamageFactors(baseMultiplier: number, moduleDamageBonus: number, moduleModifiers: readonly { moduleId: TypeId; bonus: number }[], skillDamageMultiplier: number, skillDamageIds: readonly TypeId[], hullDamageMultiplier: number, hullName: string, subsystemDamageMultipliers: readonly SubsystemDamageMultiplier[]): readonly DamageFactor[] {
   const factors: DamageFactor[] = [{ kind: "base", multiplier: baseMultiplier }];
   if (moduleDamageBonus !== 1) factors.push({ kind: "module", multiplier: moduleDamageBonus, moduleIds: moduleModifiers.map((m) => m.moduleId) });
   if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillIds: skillDamageIds });
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
+  for (const subsystem of subsystemDamageMultipliers) factors.push({ kind: "subsystem", multiplier: subsystem.multiplier, moduleIds: [subsystem.sourceId] });
   return factors;
+}
+
+interface SubsystemDamageMultiplier {
+  readonly sourceId: TypeId;
+  readonly multiplier: number;
 }
 
 function applyRigDrawbackReduction(drawback: RigDrawback, reductions: readonly RigDrawbackReduction[], skillLevel: SkillLevel): number {

@@ -2,6 +2,7 @@ import type { DamageFactorKind, DamageType } from "../../../fitting";
 import type { WeaponKind } from "../../../sim";
 import { formatWithCommas } from "../../format";
 import { formatMultiplier } from "../controlsFormat";
+import { DAMAGE_ICON_URLS } from "../damageTypeIcons";
 import { html } from "../markup";
 
 export interface DpsHintTypeRow {
@@ -16,6 +17,8 @@ export interface DpsHintFactorRow {
   readonly multiplier: number;
   readonly cumulative: number;
   readonly sources: readonly string[];
+  // Set when the multiplier only applies to this damage type.
+  readonly damageType?: DamageType;
 }
 
 export interface DpsHintSummary {
@@ -98,9 +101,10 @@ function renderAmmoRow(ammo: number, t: (key: string) => string): HTMLElement {
 
 function renderFactorRow(factor: DpsHintFactorRow, t: (key: string) => string): HTMLElement {
   const kindLabel = t(`dpsHint.factor.${factor.kind}`);
+  const typeIcon = factor.damageType !== undefined ? html`<img class="dps-hint-type-icon" src=${DAMAGE_ICON_URLS[factor.damageType]} alt="">` : "";
   const el = html`<div class="dps-hint-factor-row">
     <div class="dps-hint-factor-main">
-      <span class="dps-hint-factor-kind">${kindLabel}</span>
+      <span class="dps-hint-factor-kind">${kindLabel}${typeIcon}</span>
       <span class="dps-hint-factor-multi">x${formatMultiplier(factor.multiplier)}</span>
       <span class="dps-hint-factor-cumulative">(x${formatMultiplier(factor.cumulative)})</span>
     </div>

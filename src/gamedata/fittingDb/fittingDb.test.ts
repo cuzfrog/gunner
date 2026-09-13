@@ -429,8 +429,8 @@ describe("fittingDb", () => {
   });
 
   test("includes Kestrel missile damage hull bonus for light missiles", () => {
-    expect(HULL_BONUSES["602" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3320") });
-    expect(HULL_BONUSES["602" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3321") });
+    expect(HULL_BONUSES["602" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3320"), damageType: "explosive" });
+    expect(HULL_BONUSES["602" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3321"), damageType: "explosive" });
   });
 
   test("includes Raven missile ROF hull bonuses for cruise, torpedo, and rapid heavy launchers", () => {
@@ -443,8 +443,8 @@ describe("fittingDb", () => {
 
   test("includes Drake missile damage hull bonuses for heavy and heavy assault missiles", () => {
     expect(HULL_BONUSES["24698" as ShipId]).toContainEqual({ attribute: "shieldResist", magnitude: -4, scalesWithHullSkill: true });
-    expect(HULL_BONUSES["24698" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 10, scalesWithHullSkill: true, chargeSkillId: toTypeId("25719") });
-    expect(HULL_BONUSES["24698" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 10, scalesWithHullSkill: true, chargeSkillId: toTypeId("3324") });
+    expect(HULL_BONUSES["24698" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 10, scalesWithHullSkill: true, chargeSkillId: toTypeId("25719"), damageType: "kinetic" });
+    expect(HULL_BONUSES["24698" as ShipId]).toContainEqual({ attribute: "missileDamage", magnitude: 10, scalesWithHullSkill: true, chargeSkillId: toTypeId("3324"), damageType: "kinetic" });
   });
 
   test("includes Heat Sink II with damage and speed multipliers for energy weapons", () => {
@@ -514,6 +514,7 @@ describe("fittingDb", () => {
       magnitude: 25,
       scalesWithHullSkill: true,
       chargeSkillId: toTypeId("3319"),
+      damageType: "kinetic",
     });
     expect(HULL_BONUSES["33816" as ShipId]).toContainEqual({
       attribute: "missileVelocity",
