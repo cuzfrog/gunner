@@ -3,6 +3,8 @@ import type { ShipId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
 import type { AutopilotMode, SensorSpec } from "../../../sim";
 import {
+  PROPULSION_NONE,
+  deactivatePropulsion,
   type FittedHullSummary,
   type ProfileParamOverrides,
   type PropulsionSelection,
@@ -243,7 +245,7 @@ export class SidePanelImpl implements SidePanel {
   private restoreFittedSummary(state: SidePanelState): void {
     const reimported = state.fitting ? this.fittingImport.importFitting(state.fitting, this.skillConditions()) : undefined;
     const summary = reimported && reimported.profile.id === state.hull ? this.sections.hull.buildFittedSummary(reimported) : this.legacySummary(state);
-    if (summary) this.sections.hull.restoreFittingSummary(summary);
+    if (summary) this.sections.hull.restoreFittingSummary(applyPropulsionSelection(summary, state));
   }
 
   /** Old persisted summaries may predate required fit-derived fields; fill those from the saved hull. */
@@ -316,4 +318,20 @@ export class SidePanelImpl implements SidePanel {
   }
 
   skillConditions(): StatConditions { return this.sections.skill.skillConditions(); }
+}
+
+/** The persisted propulsion selection, not the fitting text, decides whether a module is active on restore. */
+function applyPropulsionSelection(summary: FittedHullSummary, state: SidePanelState): FittedHullSummary {
+  const saved = state.fittedHull;
+  if (state.propulsion === PROPULSION_NONE) {
+    return deactivatePropulsion({
+      ...summary,
+      propulsionModuleId: saved?.propulsionModuleId ?? summary.propulsionModuleId,
+      propulsionName: saved?.propulsionName ?? summary.propulsionName,
+    });
+  }
+  if (state.propulsion !== undefined && saved?.propulsionId === state.propulsion && saved.propulsion !== undefined) {
+    return { ...summary, propulsionId: saved.propulsionId, propulsionModuleId: saved.propulsionModuleId, propulsionName: saved.propulsionName, propulsionKind: saved.propulsionKind, propulsion: saved.propulsion };
+  }
+  return summary;
 }

@@ -1,7 +1,7 @@
 import type { ChargeCatalog, FittingImport, MissileCatalog } from "../fitting";
 import type { TypeId } from "../gamedata/ids";
 import type { PropulsionId, PropulsionStats, Ships } from "../ships";
-import { PROPULSION_NONE, type FittedHullSummary, type UserSettings } from "./userSettings";
+import { PROPULSION_NONE, deactivatePropulsion, type FittedHullSummary, type UserSettings } from "./userSettings";
 
 export class FittingBasis {
   private readonly ships: Ships;
@@ -105,11 +105,21 @@ export class FittingBasis {
     const mass = massOverride ?? stats.mass;
     const speed = speedOverride ?? this.ships.maxSpeedForFittedMass(profile, fittedHull.fitted, mass, activePropulsion, conditions);
 
+    // An explicit "none" selection is user state, not derivable from the fitting text: the summary keeps the
+    // module id/name as variant memory but no active module, matching the live toggle-off shape.
+    const summary = explicitNone
+      ? deactivatePropulsion({
+          ...fittedHull,
+          propulsionModuleId: storedFittedHull?.propulsionModuleId ?? fittedHull.propulsionModuleId,
+          propulsionName: storedFittedHull?.propulsionName ?? fittedHull.propulsionName,
+        })
+      : fittedHull;
+
     const result: Partial<UserSettings> = {};
     if (side === "shipA") {
       result.shipAHullId = imported.profile.id;
       result.shipAPropulsion = explicitNone ? PROPULSION_NONE : activePropulsionId;
-      result.shipAFittedHull = fittedHull;
+      result.shipAFittedHull = summary;
       result.shipAMass = mass;
       result.shipAInertia = override.shipAInertia ?? stats.inertiaModifier;
       result.shipASpeed = speed;
@@ -117,7 +127,7 @@ export class FittingBasis {
     } else {
       result.shipBHullId = imported.profile.id;
       result.shipBPropulsion = explicitNone ? PROPULSION_NONE : activePropulsionId;
-      result.shipBFittedHull = fittedHull;
+      result.shipBFittedHull = summary;
       result.shipBMass = mass;
       result.shipBInertia = override.shipBInertia ?? stats.inertiaModifier;
       result.shipBSpeed = speed;

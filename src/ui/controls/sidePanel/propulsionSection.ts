@@ -3,7 +3,7 @@ import type { TypeId } from "../../../gamedata/ids";
 import type { FittedHull, PropulsionId, PropulsionKind, PropulsionModule, ShipProfile, Ships } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import { PROPULSION_NONE, type FittedHullSummary, type PropulsionSelection } from "../../../appstate";
+import { PROPULSION_NONE, deactivatePropulsion, type FittedHullSummary, type PropulsionSelection } from "../../../appstate";
 import { propulsionOptionLabel } from "../controlsFormat";
 import { ChoiceGroupImpl, type ChoiceGroupOption } from "../choiceGroup";
 import type { Popup, PopupGroup } from "../popup";
@@ -126,7 +126,7 @@ export class PropulsionSection implements IPropulsionSection {
     const propulsionId = this.currentPropulsionId();
     const fitted = this.panel.fittedHull;
     if (!propulsionId) {
-      if (fitted) this.panel.fittedHull = { ...fitted, propulsionId: undefined, propulsionKind: undefined, propulsion: undefined };
+      if (fitted) this.panel.fittedHull = deactivatePropulsion(fitted);
       this.afterPropulsionChange();
       return;
     }

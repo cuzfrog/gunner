@@ -23,7 +23,7 @@ import {
   type UserSettings,
   type ProfileSettings,
 } from "./localSettingsStore.testSupport";
-import { USER_SETTINGS_VERSION } from "./userSettings";
+import { USER_SETTINGS_VERSION, PROPULSION_NONE } from "./userSettings";
 import { stripDisplayPreferences } from "./validators";
 import { toShipId, toTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { DisplayPreferences } from "./userSettings";
@@ -577,6 +577,31 @@ describe("SettingsParser", () => {
     expect(decoded!.shipA.mass).toBe(1_500_000);
     expect(decoded!.shipA.speed).toBe(4_649.72);
     expect(decoded!.shipA.sig).toBe(RIFTER_MWD_STATS.sigRadius);
+  });
+
+  test("decodeUrlSettings rebuild keeps propulsion inactive when the selection is none", () => {
+    fittingImport.importFitting = vi.fn(() => ({ ...IMPORTED_RIFTER, propulsion: RIFTER_PROPULSION }));
+    ships.fittedStats = vi.fn(() => RIFTER_BASE_STATS);
+    ships.maxSpeedForFittedMass = vi.fn(() => RIFTER_BASE_STATS.maxSpeed);
+
+    const settings: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAPropulsion: PROPULSION_NONE,
+      shipAFittedHull: { fittingName: "Previous", propulsionModuleId: toTypeId("20310"), propulsionName: "Compact MWD", fitted: IMPORTED_RIFTER.fitted, capacitor: { capacity: 0, rechargeTime: 0 }, energyWarfareResistancePercent: 0 },
+    };
+    const parser = makeParser();
+    const decoded = parser.decodeUrlSettings(urlFor(settings).split("c=")[1]);
+    expect(decoded).not.toBeNull();
+    const fittedHull = decoded!.shipA.fittedHull!;
+    expect(fittedHull.propulsionId).toBeUndefined();
+    expect(fittedHull.propulsionKind).toBeUndefined();
+    expect(fittedHull.propulsion).toBeUndefined();
+    expect(fittedHull.propulsionModuleId).toBe(toTypeId("20310"));
+    expect(fittedHull.propulsionName).toBe("Compact MWD");
+    expect(decoded!.shipA.propulsion).toBe(PROPULSION_NONE);
+    expect(decoded!.shipA.mass).toBe(RIFTER_BASE_STATS.mass);
+    expect(decoded!.shipA.speed).toBe(RIFTER_BASE_STATS.maxSpeed);
   });
 
   test("decodeUrlSettings defaults missing display preferences", () => {

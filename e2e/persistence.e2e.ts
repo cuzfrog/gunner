@@ -33,6 +33,23 @@ test.describe.serial("persistence", () => {
     await expect(page.locator("#ship-a-mass")).not.toHaveValue("1200000");
   });
 
+  test("propulsion turned off stays off and uncounted after page reload", async () => {
+    // Ship A carries the Ishtar fit (100MN Afterburner) from the previous test.
+    await expect(page.locator("#ship-a-propulsion-options button[aria-pressed='true']")).toHaveCount(1);
+    await page.locator("#ship-a-propulsion-options button[aria-pressed='true']").click();
+    await expect(page.locator("#ship-a-propulsion-options button[aria-pressed='true']")).toHaveCount(0);
+    await page.locator("#profile-save").click();
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.locator("#ship-a-propulsion-options button[aria-pressed='true']")).toHaveCount(0);
+    await page.locator("#ship-a-capacitor-trigger").click();
+    await expect(page.locator("#ship-a-capacitor-popup")).toBeVisible();
+    const usageRows = page.locator("#ship-a-capacitor-section .capacitor-usage-row");
+    await expect(usageRows.first()).toBeVisible();
+    await expect(usageRows.filter({ hasText: "Afterburner" })).toHaveCount(0);
+    await page.locator("body").click({ position: { x: 0, y: 0 } });
+    await expect(page.locator("#ship-a-capacitor-popup")).toBeHidden();
+  });
+
   test("preferences and saved fittings persist across page reload", async () => {
     await page.locator("#lang-zh").click();
     await expect(page.locator("html")).toHaveAttribute("lang", "zh");

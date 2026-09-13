@@ -74,6 +74,11 @@ export interface FittedHullSummary {
   readonly energyWarfareResistancePercent: number;
 }
 
+/** Canonical propulsion-off summary shape: no active module; module id/name stay as variant memory for re-enable. */
+export function deactivatePropulsion(summary: FittedHullSummary): FittedHullSummary {
+  return { ...summary, propulsionId: undefined, propulsionKind: undefined, propulsion: undefined };
+}
+
 export interface ProfileParamOverrides {
   shipAMass?: number;
   shipAInertia?: number;
