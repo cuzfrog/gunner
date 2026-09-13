@@ -818,10 +818,11 @@ describe("_writeI18nFiles", () => {
       C: { en: "C", zh: "c-zh", ja: "c-ja" },
     };
     const paths = filePaths();
-    await _writeI18nFiles(itemNames, "2026-08-24", paths);
+    await _writeI18nFiles(itemNames, paths);
     const en = parseExport(paths.enFile, "ITEM_NAMES_EN");
     const zh = parseExport(paths.zhFile, "ITEM_NAMES_ZH");
     const ja = parseExport(paths.jaFile, "ITEM_NAMES_JA");
+    expect(readFileSync(paths.enFile, "utf8")).toContain("// Generated from EVE Online SDE via Pyfa staticdata. Do not edit by hand.");
     expect(en).toEqual({ A: "A", B: "B", C: "C" });
     expect(zh).toEqual({ A: "a-zh", B: "b-zh", C: "c-zh" });
     expect(ja).toEqual({ A: "a-ja", B: "b-ja", C: "c-ja" });
@@ -834,7 +835,7 @@ describe("_writeI18nFiles", () => {
       C: { en: "C", ja: "c-ja" },
     };
     const paths = filePaths();
-    await _writeI18nFiles(itemNames, "2026-08-24", paths);
+    await _writeI18nFiles(itemNames, paths);
     const en = parseExport(paths.enFile, "ITEM_NAMES_EN");
     const zh = parseExport(paths.zhFile, "ITEM_NAMES_ZH");
     const ja = parseExport(paths.jaFile, "ITEM_NAMES_JA");
@@ -849,7 +850,7 @@ describe("_writeI18nFiles", () => {
       B: { en: "B", zh: "same-zh", ja: "same-ja" },
     };
     const paths = filePaths();
-    await _writeI18nFiles(itemNames, "2026-08-24", paths);
+    await _writeI18nFiles(itemNames, paths);
     const enCollisions = parseExport(paths.collisionEnFile, "ITEM_NAME_COLLISIONS_EN");
     const zhCollisions = parseExport(paths.collisionZhFile, "ITEM_NAME_COLLISIONS_ZH");
     const jaCollisions = parseExport(paths.collisionJaFile, "ITEM_NAME_COLLISIONS_JA");
@@ -861,7 +862,7 @@ describe("_writeI18nFiles", () => {
   test("does not write collision tables in the item-name pack files", async () => {
     const itemNames = { A: { en: "A", zh: "a-zh", ja: "a-ja" } };
     const paths = filePaths();
-    await _writeI18nFiles(itemNames, "2026-08-24", paths);
+    await _writeI18nFiles(itemNames, paths);
     const zhContent = readFileSync(paths.zhFile, "utf8");
     expect(zhContent).not.toContain("COLLISIONS");
   });
@@ -870,21 +871,21 @@ describe("_writeI18nFiles", () => {
     const itemNames = { A: { en: "A", zh: "same-zh", ja: "same-ja" }, B: { en: "B", zh: "same-zh", ja: "same-ja" } };
     const paths = filePaths();
     paths.canonicalOverrides.zh = { "same-zh": "Unknown" };
-    await expect(_writeI18nFiles(itemNames, "2026-08-24", paths)).rejects.toThrow(/same-zh/);
+    await expect(_writeI18nFiles(itemNames, paths)).rejects.toThrow(/same-zh/);
   });
 
   test("throws when a collision override matches a non-colliding name", async () => {
     const itemNames = { A: { en: "A", zh: "a-zh", ja: "a-ja" } };
     const paths = filePaths();
     paths.canonicalOverrides.zh = { "a-zh": "A" };
-    await expect(_writeI18nFiles(itemNames, "2026-08-24", paths)).rejects.toThrow(/a-zh/);
+    await expect(_writeI18nFiles(itemNames, paths)).rejects.toThrow(/a-zh/);
   });
 
   test("puts the override target id first in the emitted collision table", async () => {
     const itemNames = { A: { en: "A", zh: "same-zh", ja: "same-ja" }, B: { en: "B", zh: "same-zh", ja: "same-ja" } };
     const paths = filePaths();
     paths.canonicalOverrides.zh = { "same-zh": "B" };
-    await _writeI18nFiles(itemNames, "2026-08-24", paths);
+    await _writeI18nFiles(itemNames, paths);
     const zhCollisions = parseExport(paths.collisionZhFile, "ITEM_NAME_COLLISIONS_ZH");
     expect(zhCollisions).toEqual({ "same-zh": "B" });
   });

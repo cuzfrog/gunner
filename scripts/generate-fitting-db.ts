@@ -1692,9 +1692,8 @@ async function main() {
   const skillBonuses = buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, unmappedHullAttributes);
   const rigDrawbackReductions = buildRigDrawbackReductions(typedogmas, types, dogmaEffects);
 
-  const date = new Date().toISOString().split("T")[0];
   const header =
-    `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n` +
+    `// Generated from EVE Online SDE via Pyfa staticdata. Do not edit by hand.\n` +
     `/* eslint-disable */\n\n` +
     `import type { ShipId, TypeId } from "../../ids";\n` +
     `import type {\n` +
@@ -1820,7 +1819,7 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
 
   await mkdir(dirname(OUT_FILE), { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
-  await writeI18nFiles(filteredItemNames, date);
+  await writeI18nFiles(filteredItemNames);
   const counts = [
     `${Object.keys(fittingModules).length} modules`,
     `${Object.keys(turrets).length} turrets`,
@@ -2098,7 +2097,6 @@ interface WriteI18nOptions {
 
 async function writeI18nFiles(
   itemNames: Record<string, LocalizedName>,
-  date: string,
   {
     enFile = I18N_EN_FILE,
     zhFile = I18N_ZH_FILE,
@@ -2118,7 +2116,7 @@ async function writeI18nFiles(
     zh[id] = names.zh?.trim() || names.en;
     ja[id] = names.ja?.trim() || names.en;
   }
-  const header = `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n/* eslint-disable */\n\n`;
+  const header = `// Generated from EVE Online SDE via Pyfa staticdata. Do not edit by hand.\n/* eslint-disable */\n\n`;
   const recordType = "Readonly<Record<string, string>>";
   const enContent = `${header}export const ITEM_NAMES_EN: ${recordType} = ${JSON.stringify(en)};\n`;
   const zhContent = `${header}export const ITEM_NAMES_ZH: ${recordType} = ${JSON.stringify(zh)};\n`;
