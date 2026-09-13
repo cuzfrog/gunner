@@ -1,0 +1,55 @@
+@layer components {
+.app-intro {
+  margin-top: 8px;
+  padding: 5px 4px 2px;
+  border-top: 1px solid var(--border-dim);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.app-intro-heading {
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin: 0 0 7px;
+}
+
+.app-intro-lede {
+  margin: 0 0 13px;
+  max-width: 130ch;
+}
+
+.app-intro-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 13px 26px;
+  max-width: 130ch;
+}
+
+.app-intro-feature {
+  min-width: 0;
+}
+
+.app-intro-feature-heading {
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.app-intro-feature-text {
+  margin: 0;
+  color: var(--text-dim);
+}
+
+.app-intro-note {
+  margin: 13px 0 0;
+  color: var(--text-dim);
+}
+
+}
