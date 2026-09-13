@@ -1,25 +1,29 @@
 import { buildProjection } from "./projection";
+import type { SdeProjection } from "./projectionTypes";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import { existsSync, rmSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 
 const SDE_DIR = process.env.SDE_DIR ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const hasSde = existsSync(join(SDE_DIR, "dogmaattributes.0.json"));
 
 const runOrSkip = hasSde ? describe : describe.skip;
 
-const projectionPromise = hasSde ? buildProjection(SDE_DIR) : Promise.reject(new Error("SDE missing"));
+// Lazy: only built when a test actually runs, otherwise a module-level rejected
+// promise becomes an unhandled rejection and fails the whole run on CI (no SDE).
+let projectionPromise: Promise<SdeProjection> | undefined;
+const getProjection = (): Promise<SdeProjection> => (projectionPromise ??= buildProjection(SDE_DIR));
 
 runOrSkip("buildProjection", () => {
   test("produces complete projection with all SDE attributes and effects", async () => {
-    const projection = await projectionPromise;
+    const projection = await getProjection();
     expect(Object.keys(projection.attributes).length).toBeGreaterThan(2000);
     expect(Object.keys(projection.effects).length).toBeGreaterThan(3000);
     expect(Object.keys(projection.types).length).toBeGreaterThan(10000);
   });
 
   test("projection attributes have required fields", async () => {
-    const projection = await projectionPromise;
+    const projection = await getProjection();
     const attr = Object.values(projection.attributes)[0];
     expect(attr).toHaveProperty("id");
     expect(attr).toHaveProperty("name");
@@ -29,13 +33,13 @@ runOrSkip("buildProjection", () => {
   });
 
   test("projection effects carry modifier info", async () => {
-    const projection = await projectionPromise;
+    const projection = await getProjection();
     const effectsWithModifiers = Object.values(projection.effects).filter((e) => e.modifiers.length > 0);
     expect(effectsWithModifiers.length).toBeGreaterThan(1000);
   });
 
   test("projection types have attributes and effectIds", async () => {
-    const projection = await projectionPromise;
+    const projection = await getProjection();
     const publishedTypes = Object.values(projection.types).filter((t) => t.published);
     const withAttrs = publishedTypes.filter((t) => t.attributes.length > 0);
     expect(withAttrs.length).toBeGreaterThan(1000);
