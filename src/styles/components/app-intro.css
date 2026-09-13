@@ -52,4 +52,18 @@
   color: var(--text-dim);
 }
 
+.app-intro-ships {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+}
+
+.app-intro-ships-link {
+  color: var(--accent-teal);
+  text-decoration: none;
+}
+
+.app-intro-ships-link:hover {
+  text-decoration: underline;
+}
+
 }

@@ -1,0 +1,105 @@
+---
+import ContentLayout from "../../layouts/ContentLayout.astro";
+import {
+  buildShipPages,
+  eftTextFor,
+  factionNameFor,
+  groupNameFor,
+  matchupSlug,
+  presetFitTexts,
+  shipProfileCatalog,
+  shipStatRows,
+  shipWire,
+  simulatorDeepLink,
+  type ShipPageData,
+} from "../_seo";
+
+interface Props {
+  readonly page: ShipPageData;
+  readonly matchupSlugs: readonly { readonly slug: string; readonly opponentName: string }[];
+}
+
+export function getStaticPaths() {
+  const pages = buildShipPages(shipProfileCatalog(), presetFitTexts());
+  return pages.map((page) => ({
+    params: { slug: page.slug },
+    props: {
+      page,
+      matchupSlugs: pages
+        .filter((other) => other.presets.length > 0 && other.profile.id !== page.profile.id && other.profile.hullTypeId === page.profile.hullTypeId)
+        .map((other) => ({ slug: matchupSlug(page.slug, other.slug), opponentName: other.profile.name })),
+    },
+  }));
+}
+
+const { page, matchupSlugs } = Astro.props;
+const { profile } = page;
+const shipName = profile.name;
+const className = groupNameFor(profile.hullTypeId);
+const factionName = factionNameFor(profile.factionId);
+const firstFit = page.presets[0];
+const title = `${shipName} (${className}) — EVE Online Ship Stats & Fittings — Gunner`;
+const description = firstFit === undefined
+  ? `${shipName} ${className.toLowerCase()} combat stats — mass, velocity, capacitor, shield, armor and hull hit points. Open the ${shipName} in the Gunner EVE Online combat simulator.`
+  : `${shipName} ${className.toLowerCase()} stats and preset fittings. Load a ${shipName} fit into the Gunner EVE Online combat simulator and fight it 1v1 in real time.`;
+const stats = shipStatRows(profile);
+const firstDeepLink = simulatorDeepLink(shipWire(profile, firstFit === undefined ? undefined : eftTextFor(shipName, firstFit)));
+---
+
+<ContentLayout title={title} description={description}>
+  <nav class="content-crumbs" aria-label="Breadcrumb">
+    <a href="/">Simulator</a> / <a href="/ships/">Ships</a> / {shipName}
+  </nav>
+  <h1 class="content-title">{shipName} — {className}</h1>
+  <p class="content-lede">
+    The {shipName} is a {factionName} {className.toLowerCase()}. Open it in the Gunner combat simulator to see how it moves, tracks and applies damage against
+    another hull in a real-time 2D fight.
+  </p>
+
+  <section class="content-section">
+    <h2 class="content-section-title">Fly the {shipName}</h2>
+    <a class="btn content-cta" href={firstDeepLink}>Load the {shipName} in the combat simulator</a>
+    <p class="content-text">
+      {page.presets.length > 0
+        ? `The simulator opens with a preset ${shipName} fitting; switch fits or tune skills, propulsion and ammo once it is loaded.`
+        : `The simulator opens with the ${shipName} hull selected; fit it from the in-app presets or import an EFT text.`}
+    </p>
+  </section>
+
+  <section class="content-section">
+    <h2 class="content-section-title">{shipName} stats</h2>
+    <table class="content-stats">
+      <tbody>
+        {stats.map((row) => (
+          <tr>
+            <th class="content-stats-name" scope="row">{row.label}</th>
+            <td class="content-stats-value">{row.value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+
+  {page.presets.length > 0 && (
+    <section class="content-section">
+      <h2 class="content-section-title">{shipName} preset fittings</h2>
+      {page.presets.map((fit) => (
+        <article class="content-fitting">
+          <h3 class="content-fitting-title">{fit.name}</h3>
+          <a class="btn content-cta" href={simulatorDeepLink(shipWire(profile, eftTextFor(shipName, fit)))}>Load this {shipName} fit</a>
+          <pre class="content-eft"><code>{eftTextFor(shipName, fit)}</code></pre>
+        </article>
+      ))}
+    </section>
+  )}
+
+  <section class="content-section">
+    <h2 class="content-section-title">{shipName} 1v1 matchups</h2>
+    <p class="content-text">Same-hull-class matchups simulated from preset fittings — every fight starts at 20 km with both ships under AI control.</p>
+    <ul class="content-links">
+      {matchupSlugs.map((matchup) => (
+        <li><a href={`/matchup/${matchup.slug}/`}>{shipName} vs {matchup.opponentName}</a></li>
+      ))}
+    </ul>
+  </section>
+</ContentLayout>
