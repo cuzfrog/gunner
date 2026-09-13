@@ -191,7 +191,21 @@ describe("FittingStateFactory", () => {
     const factory = new FittingStateFactory(FITTING_DB);
     const state = factory.create(profile, hullBonuses, [], [], []);
     expect(state.profile).toBe(profile);
-    expect(state.hullBonuses).toBe(hullBonuses);
+    expect(state.hullBonuses).toEqual(hullBonuses);
+  });
+
+  test("merges subsystem bonuses into hull bonuses", () => {
+    const factory = new FittingStateFactory(FITTING_DB);
+    const subsystemBonuses = FITTING_DB.subsystemBonuses["45601"] ?? [];
+    expect(subsystemBonuses.length).toBeGreaterThan(0);
+    const state = factory.create(profile, hullBonuses, [{ moduleId: toTypeId("45601"), offline: false }], [], []);
+    expect(state.hullBonuses).toEqual([...hullBonuses, ...subsystemBonuses]);
+  });
+
+  test("skips offline subsystem bonuses", () => {
+    const factory = new FittingStateFactory(FITTING_DB);
+    const state = factory.create(profile, hullBonuses, [{ moduleId: toTypeId("45601"), offline: true }], [], []);
+    expect(state.hullBonuses).toEqual(hullBonuses);
   });
 
   test("skips offline modules", () => {

@@ -86,6 +86,21 @@ describe("DroneSkillModelImpl", () => {
     expect(result.damageMultiplier).toBeCloseTo(1.92 * expectedSkill * expectedHull, 6);
   });
 
+  test("subsystem droneDamage bonuses are attributed per source id", () => {
+    const bonuses: HullBonus[] = [
+      { attribute: "droneDamage", magnitude: 10, scalesWithHullSkill: true, chargeSkillId: toTypeId("3436"), sourceId: toTypeId("45605") },
+      { attribute: "droneDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3436"), sourceId: toTypeId("45599") },
+    ];
+    const result = new DroneSkillModelImpl().compute(drone(), bonuses, 4);
+    const expectedSkill = (1 + 0.1 * 4) * (1 + 0.05 * 4);
+    expect(result.hullDamageMultiplier).toBe(1);
+    expect(result.subsystemDamageMultipliers).toEqual([
+      { sourceId: toTypeId("45605"), multiplier: 1.4 },
+      { sourceId: toTypeId("45599"), multiplier: 1.2 },
+    ]);
+    expect(result.damageMultiplier).toBeCloseTo(1.92 * expectedSkill * 1.4 * 1.2, 6);
+  });
+
   test("non-droneDamage hull bonuses are ignored", () => {
     const bonuses: HullBonus[] = [hullBonus("turretDamage", 10, true)];
     const result = new DroneSkillModelImpl().compute(drone(), bonuses, 5);

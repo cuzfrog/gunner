@@ -228,7 +228,7 @@ export class FittingImportImpl implements FittingImport {
       missileBoosts,
       sensorSpec,
       sensorBoosts,
-      hullBonuses,
+      hullBonuses: fittingState.hullBonuses,
       defense,
       capacitor,
     };
@@ -388,6 +388,7 @@ function isModuleRole(id: TypeId, db: FittingDb): boolean {
     db.modules[id] !== undefined ||
     db.turrets[id] !== undefined ||
     db.launchers[id] !== undefined ||
+    db.subsystemBonuses[id] !== undefined ||
     db.stasisWebs[id] !== undefined ||
     db.stasisGrapplers[id] !== undefined ||
     db.trackingComputers[id] !== undefined ||

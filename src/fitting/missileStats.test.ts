@@ -151,6 +151,62 @@ describe("MissileSkillModelImpl", () => {
     expect(result.cycleTime).toBeCloseTo(16 * skillRof, 6);
   });
 
+  test("typed hull damage bonus applies only to missiles of the matching damage type", () => {
+    const bonuses: readonly HullBonus[] = [
+      { attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: LIGHT_MISSILES_ID, damageType: "kinetic" },
+    ];
+    stacking.apply.mockReturnValue(1.25);
+    const result = model().compute(launcher(16, 509), missile({ damageType: "kinetic" }), bonuses, 5);
+    const skillDamageMultiplier = (1 + 0.05 * 5) * (1 + 0.02 * 5);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * skillDamageMultiplier * 1.25, 6);
+    expect(result.hullTypedDamageMultiplier).toBe(1.25);
+    expect(result.hullDamageMultiplier).toBe(1);
+  });
+
+  test("typed hull damage bonus of another damage type is ignored", () => {
+    const bonuses: readonly HullBonus[] = [
+      { attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: LIGHT_MISSILES_ID, damageType: "explosive" },
+    ];
+    const result = model().compute(launcher(16, 509), missile({ damageType: "kinetic" }), bonuses, 5);
+    const skillDamageMultiplier = (1 + 0.05 * 5) * (1 + 0.02 * 5);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * skillDamageMultiplier, 6);
+    expect(result.hullTypedDamageMultiplier).toBeUndefined();
+  });
+
+  test("typed and whole hull damage bonuses stack in separate pools", () => {
+    const bonuses: readonly HullBonus[] = [
+      { attribute: "missileDamage", magnitude: 10, scalesWithHullSkill: false },
+      { attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, damageType: "kinetic" },
+    ];
+    stacking.apply.mockImplementation((multipliers: readonly number[]) => multipliers.reduce((p, m) => p * m, 1));
+    const result = model().compute(launcher(16, 509), missile({ damageType: "kinetic" }), bonuses, 5);
+    const skillDamageMultiplier = (1 + 0.05 * 5) * (1 + 0.02 * 5);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * skillDamageMultiplier * 1.1 * 1.25, 6);
+    expect(stacking.apply).toHaveBeenCalledTimes(2);
+  });
+
+  test("subsystem damage bonuses are attributed per source id", () => {
+    const bonuses: readonly HullBonus[] = [
+      { attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: LIGHT_MISSILES_ID, damageType: "kinetic", sourceId: toTypeId("45601") },
+      { attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: LIGHT_MISSILES_ID, damageType: "kinetic", sourceId: toTypeId("45599") },
+    ];
+    const result = model().compute(launcher(16, 509), missile({ damageType: "kinetic" }), bonuses, 4);
+    const skillDamageMultiplier = (1 + 0.05 * 4) * (1 + 0.02 * 4);
+    expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * skillDamageMultiplier * 1.2 * 1.2, 6);
+    expect(result.subsystemDamageMultipliers).toEqual([
+      { sourceId: toTypeId("45601"), multiplier: 1.2, typed: true },
+      { sourceId: toTypeId("45599"), multiplier: 1.2, typed: true },
+    ]);
+  });
+
+  test("subsystem bonuses of a foreign damage type are ignored", () => {
+    const bonuses: readonly HullBonus[] = [
+      { attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: LIGHT_MISSILES_ID, damageType: "explosive", sourceId: toTypeId("45601") },
+    ];
+    const result = model().compute(launcher(16, 509), missile({ damageType: "kinetic" }), bonuses, 4);
+    expect(result.subsystemDamageMultipliers).toBeUndefined();
+  });
+
   test("damageReductionFactor is passed through unchanged", () => {
     const result = model().compute(launcher(16, 509), missile({ damageReductionFactor: 3.2 }), [], 5);
     expect(result.damageReductionFactor).toBe(3.2);

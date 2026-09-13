@@ -14,7 +14,12 @@ export interface MissileSkillOutput {
   readonly flightTime: number;
   readonly skillDamageMultiplier: number;
   readonly skillDamageIds: readonly TypeId[];
+  // Whole-volley ship hull multiplier (damage bonuses not restricted to a damage type).
   readonly hullDamageMultiplier: number;
+  // Ship hull multiplier restricted to the missile's damage type; undefined when no typed bonus applies.
+  readonly hullTypedDamageMultiplier?: number;
+  // Damage multipliers contributed by individual subsystems, for factor attribution.
+  readonly subsystemDamageMultipliers?: readonly { readonly sourceId: TypeId; readonly multiplier: number; readonly typed: boolean }[];
 }
 
 export interface MissileSkillModel {
@@ -46,14 +51,17 @@ export class MissileSkillModelImpl implements MissileSkillModel {
     const skillDamageIds = matchingSkillBonuses.filter((b) => b.bonusType === "missileDamage" && b.magnitudePerLevel !== 0).map((b) => b.skillId);
 
     const matchingHullBonuses = hullBonuses.filter((b) => hullBonusMatchesLauncher(b, launcher, missile));
-    const hullDamageMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileDamage", skillLevel);
+    const shipBonuses = matchingHullBonuses.filter((b) => b.sourceId === undefined);
+    const hullDamageMultiplier = hullStackingMultiplier(this.stacking, shipBonuses.filter((b) => b.damageType === undefined), "missileDamage", skillLevel);
+    const hullTypedDamageMultiplier = hullStackingMultiplier(this.stacking, shipBonuses.filter((b) => b.damageType !== undefined), "missileDamage", skillLevel);
+    const subsystemDamageMultipliers = subsystemDamageMultipliersFrom(matchingHullBonuses, skillLevel);
     const hullRofMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileRoF", skillLevel);
     const hullVelocityMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileVelocity", skillLevel);
     const hullFlightTimeMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileFlightTime", skillLevel);
     const hullExplosionRadiusMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileExplosionRadius", skillLevel);
     const hullExplosionVelocityMultiplier = hullStackingMultiplier(this.stacking, matchingHullBonuses, "missileExplosionVelocity", skillLevel);
 
-    const damageMultiplier = skillDamageMultiplier * hullDamageMultiplier;
+    const damageMultiplier = skillDamageMultiplier * hullDamageMultiplier * hullTypedDamageMultiplier * subsystemDamageMultipliers.reduce((acc, s) => acc * s.multiplier, 1);
     return {
       damagePerMissile: damageVectorScale(damageVectorFromPartial(missileDamageByType(missile)), damageMultiplier),
       cycleTime: launcher.rateOfFire * skillRofMultiplier * hullRofMultiplier,
@@ -65,6 +73,8 @@ export class MissileSkillModelImpl implements MissileSkillModel {
       skillDamageMultiplier,
       skillDamageIds,
       hullDamageMultiplier,
+      ...(hullTypedDamageMultiplier !== 1 ? { hullTypedDamageMultiplier } : {}),
+      ...(subsystemDamageMultipliers.length > 0 ? { subsystemDamageMultipliers } : {}),
     };
   }
 }
@@ -93,9 +103,26 @@ function hullStackingMultiplier(stacking: StackingPenalty, bonuses: readonly Hul
   return percents.length > 0 ? stacking.apply(percents.map((p) => 1 + p)) : 1;
 }
 
+function subsystemDamageMultipliersFrom(bonuses: readonly HullBonus[], skillLevel: SkillLevel): readonly { readonly sourceId: TypeId; readonly multiplier: number; readonly typed: boolean }[] {
+  const bySource = new Map<TypeId, { multiplier: number; typed: boolean }>();
+  for (const bonus of bonuses) {
+    if (bonus.sourceId === undefined || bonus.attribute !== "missileDamage") continue;
+    const percent = (bonus.magnitude * (bonus.scalesWithHullSkill ? skillLevel : 1)) / 100;
+    const existing = bySource.get(bonus.sourceId);
+    if (existing) {
+      existing.multiplier *= 1 + percent;
+      existing.typed = existing.typed || bonus.damageType !== undefined;
+    } else {
+      bySource.set(bonus.sourceId, { multiplier: 1 + percent, typed: bonus.damageType !== undefined });
+    }
+  }
+  return [...bySource.entries()].map(([sourceId, entry]) => ({ sourceId, multiplier: entry.multiplier, typed: entry.typed }));
+}
+
 function hullBonusMatchesLauncher(bonus: HullBonus, launcher: LauncherStats, missile: MissileStats): boolean {
   if (bonus.moduleGroupId !== undefined && bonus.moduleGroupId !== launcher.launcherGroup) return false;
   if (bonus.moduleSkillId !== undefined && !launcher.requiredSkillIds.includes(bonus.moduleSkillId)) return false;
   if (bonus.chargeSkillId !== undefined && !missile.requiredSkillIds.includes(bonus.chargeSkillId)) return false;
+  if (bonus.damageType !== undefined && bonus.damageType !== missile.damageType) return false;
   return true;
 }
