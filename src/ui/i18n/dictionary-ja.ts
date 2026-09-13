@@ -1,7 +1,7 @@
 import type { LanguageSlice } from "./dictionaryTypes";
 
 export const JA: LanguageSlice<"ja"> = {
-  "app.subtitle": { ja: "EVE Online 2D 戦術シミュレーター" },
+  "app.subtitle": { ja: "EVE Online コンバットシミュレーター" },
   "lang.en": { ja: "English" },
   "lang.zh": { ja: "中文" },
   "lang.ja": { ja: "日本語" },

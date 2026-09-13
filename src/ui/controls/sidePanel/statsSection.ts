@@ -51,7 +51,7 @@ export class StatsSection implements IStatsSection {
         this.els.inertia.value = formatNumber(stats.inertiaModifier, 6);
       }
       if (updateSig && !this.isOverridden(sigKey)) {
-        this.els.shipSig.value = String(Math.max(1, stats.sigRadius));
+        this.els.shipSig.value = String(Math.max(1, Math.round(stats.sigRadius)));
       }
     }
 

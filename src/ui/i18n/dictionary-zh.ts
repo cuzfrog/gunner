@@ -1,7 +1,7 @@
 import type { LanguageSlice } from "./dictionaryTypes";
 
 export const ZH: LanguageSlice<"zh"> = {
-  "app.subtitle": { zh: "EVE Online 2D 战术模拟器" },
+  "app.subtitle": { zh: "EVE Online 战斗模拟器" },
   "lang.en": { zh: "English" },
   "lang.zh": { zh: "中文" },
   "lang.ja": { zh: "日本語" },

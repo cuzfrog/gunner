@@ -96,6 +96,18 @@ describe("StatsSection", () => {
     expect(getFake(document, "ship-a-sig").value).toBe("30");
   });
 
+  test("updateShipStats rounds signature radius to whole meters", () => {
+    const ships = vi.mocked<Ships>(mockShips());
+    ships.fittedStats = vi.fn(() => ({ mass: 1_000_000, inertiaModifier: 2, sigRadius: 50.39892475, sigBloomFactor: 0, maxSpeed: 0, baseMaxSpeed: 0, alignTime: 0 }));
+    const { document, panel, section } = buildStatsSection(ships);
+    panel.profile = RIFTER;
+    getFake(document, "ship-a-mass").value = "0";
+    getFake(document, "ship-a-inertia").value = "0";
+    getFake(document, "ship-a-speed").value = "0";
+    section.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
+    expect(getFake(document, "ship-a-sig").value).toBe("50");
+  });
+
   test("updateShipStats respects mass override", () => {
     const { document, panel, section, overrides } = buildStatsSection();
     panel.profile = RIFTER;
@@ -142,7 +154,7 @@ describe("StatsSection", () => {
 
       const sigInput = Number(getFake(document, "ship-a-sig").value);
       const baseSig = ships.fittedStats(rifter, undefined, mwd5, { skillLevel: 5, overloaded: true, weaponOverloaded: false }).sigRadius;
-      expect(sigInput).toBeCloseTo(baseSig, 6);
+      expect(sigInput).toBe(Math.round(baseSig));
       expect(section.currentSigBloomFactor()).toBeGreaterThan(0);
       expect(sigInput).toBeLessThan(baseSig * (1 + section.currentSigBloomFactor()));
     });
