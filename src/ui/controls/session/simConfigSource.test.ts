@@ -266,6 +266,8 @@ describe("SimConfigSourceImpl", () => {
     expect(engineConfig.sim.shipB.capacitor).toBeUndefined();
     expect(engineConfig.capacitor.shipA.propulsion).toEqual({ moduleId: PROPULSION_MODULE, amount: 320, interval: 10 });
     expect(engineConfig.capacitor.shipB.propulsion).toBeUndefined();
+    expect(engineConfig.capacitor.shipA.fittedDrainPerSecond).toBe(32);
+    expect(engineConfig.capacitor.shipB.fittedDrainPerSecond).toBe(0);
   });
 
   test("getEngineConfig omits the propulsion drain when the module is toggled off", () => {
@@ -296,6 +298,7 @@ describe("SimConfigSourceImpl", () => {
       { moduleId: sensor.moduleId, amount: 12, interval: 10, active: false },
     ]);
     expect(engineConfig.capacitor.shipB.drains).toEqual([]);
+    expect(engineConfig.capacitor.shipA.fittedDrainPerSecond).toBe(0);
     expect(engineConfig.capacitor.shipA.boosters).toEqual([]);
     expect(engineConfig.capacitor.shipA.infinite).toBe(false);
   });

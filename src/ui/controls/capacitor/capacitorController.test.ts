@@ -101,7 +101,7 @@ function capacitorStats(overrides: Partial<CapacitorStats> = {}): CapacitorStats
 
 function capacitorView(overrides: Partial<CapacitorView> = {}): CapacitorView {
   return {
-    cap: 1000, capacity: 6375, percentage: 15.7, regenPerSecond: 10, netPerSecond: -5.25, incomingDrainPerSecond: 0,
+    cap: 1000, capacity: 6375, percentage: 15.7, regenPerSecond: 10, netPerSecond: -5.25, drainPerSecond: 0,
     starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [],
     ...overrides,
   };

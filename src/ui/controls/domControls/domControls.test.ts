@@ -91,7 +91,7 @@ function makeEngineView(view: EngagementView, effective: EffectiveReadouts, defe
 }
 
 function emptyCapacitorView(): Record<Side, CapacitorView> {
-  const side: CapacitorView = { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] };
+  const side: CapacitorView = { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, drainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] };
   return { shipA: side, shipB: { ...side } };
 }
 

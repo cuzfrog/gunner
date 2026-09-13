@@ -47,7 +47,7 @@ const engineConfig: EngineConfig = {
     rahActivation: { shipA: undefined, shipB: undefined },
   },
   overloaded: { shipA: false, shipB: false },
-  capacitor: { shipA: { infinite: false, drains: [], boosters: [] }, shipB: { infinite: false, drains: [], boosters: [] } },
+  capacitor: { shipA: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0 }, shipB: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0 } },
 };
 
 function baseView(): EngineView {
@@ -69,8 +69,8 @@ function baseView(): EngineView {
     snapshot,
     defenseRuntime: emptyDefenseView,
     capacitorRuntime: {
-      shipA: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] },
-      shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] },
+      shipA: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, drainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] },
+      shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, drainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] },
     },
     inflicted: ZERO_INFLICTED,
     drones: { shipA: [], shipB: [] },

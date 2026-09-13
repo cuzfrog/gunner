@@ -793,6 +793,8 @@ export interface CapacitorSideConfig {
   readonly infinite: boolean;
   readonly drains: readonly ScheduledDrain[];
   readonly boosters: readonly CapBoosterSimSpec[];
+  /** Deterministic fitted cost in GJ/s (the stat-side usage: every fitted active module's amount/interval). Readout basis for the net, pyfa capUsed semantics. */
+  readonly fittedDrainPerSecond: number;
   // Active propulsion module drain (skill-modified amount and interval). Absent = no debit.
   readonly propulsion?: CapacitorPropulsionDrain;
 }

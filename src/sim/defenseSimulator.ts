@@ -119,7 +119,6 @@ export interface DefenseSimulator extends Restorable<DefenseSimulatorState> {
   flushPendingDamage(capacitor?: CapacitorGate): void;
   view(): DefenseView;
   inflictedTotals(): Record<Side, LayerDamage>;
-  capacitorDrainPerSecond(side: Side): number;
 }
 
 const RAH_TOTAL_BUDGET = 0.6;
@@ -216,10 +215,6 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     this.eventBuffer = [];
     this.stepSide("shipA", 0, buffered.filter((event) => event.target === "shipA"), capacitor);
     this.stepSide("shipB", 0, buffered.filter((event) => event.target === "shipB"), capacitor);
-  }
-
-  capacitorDrainPerSecond(side: Side): number {
-    return poolsDrainPerSecond(this.sides[side]);
   }
 
   view(): DefenseView {
@@ -595,22 +590,6 @@ function shouldStartCycle(pools: SidePools, spec: RepairerSpec, state: RepairerS
   if (pools.repairMode === "manual") return state.active;
   if (!state.active) return false;
   return layerPoolAmount(pools, spec.layer) < layerPoolMax(pools, spec.layer);
-}
-
-/** Deterministic average: a cycling repairer or active rah debits a fixed capNeed per fixed cycleTime. */
-function poolsDrainPerSecond(pools: SidePools): number {
-  let rate = 0;
-  for (let i = 0; i < pools.repairers.length; i++) {
-    const spec = pools.repairers[i];
-    const state = pools.repairerStates[i];
-    if (spec.capacitorNeed <= 0) continue;
-    if (!state.inCycle && !shouldStartCycle(pools, spec, state)) continue;
-    rate += spec.capacitorNeed / effectiveCycleTime(spec, state);
-  }
-  const rah = pools.rahState;
-  const rahSpec = pools.rahSpec;
-  if (rah && rahSpec && rah.active && (rahSpec.capacitorNeed ?? 0) > 0) rate += (rahSpec.capacitorNeed ?? 0) / rahCycleTime(rahSpec, rah);
-  return rate;
 }
 
 function startCycle(pools: SidePools, side: Side, spec: RepairerSpec, state: RepairerState, capacitor: CapacitorGate | undefined): void {

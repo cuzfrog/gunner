@@ -1229,23 +1229,4 @@ describe("DefenseSimulatorImpl", () => {
     const repairer = second.view().repairers.shipA[0];
     expect(repairer.cycling).toBe(false);
   });
-
-  test("capacitor drain per second counts cycling repairers and an active rah", () => {
-    const rahSpec: RahSpec = { cycleTime: 9, shiftAmount: 0.3, baseResists: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, overloadCycleTimeMultiplier: 1, armorResistsWithoutRah: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, capacitorNeed: 42 };
-    const repairers: readonly RepairerSpec[] = [{ layer: "armor", amount: 100, cycleTime: 2, capacitorNeed: 60, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }];
-    const sim = new DefenseSimulatorImpl();
-    sim.reset({ ...config(spec({ shieldHp: 0, armorHp: 1000, repairers, rah: rahSpec })), rahActivation: { shipA: { active: true, overloaded: false }, shipB: undefined } });
-    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
-    expect(sim.capacitorDrainPerSecond("shipA")).toBeCloseTo(60 / 2 + 42 / 9, 6);
-    expect(sim.capacitorDrainPerSecond("shipB")).toBeCloseTo(0, 6);
-  });
-
-  test("capacitor drain per second excludes idle repairers and an inactive rah", () => {
-    const rahSpec: RahSpec = { cycleTime: 9, shiftAmount: 0.3, baseResists: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, overloadCycleTimeMultiplier: 1, armorResistsWithoutRah: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, capacitorNeed: 42 };
-    const repairers: readonly RepairerSpec[] = [{ layer: "armor", amount: 100, cycleTime: 2, capacitorNeed: 60, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }];
-    const sim = new DefenseSimulatorImpl();
-    sim.reset({ ...config(spec({ armorHp: 1000, repairers, rah: rahSpec })), rahActivation: { shipA: { active: false, overloaded: false }, shipB: undefined } } as never);
-    sim.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE));
-    expect(sim.capacitorDrainPerSecond("shipA")).toBeCloseTo(0, 6);
-  });
 });

@@ -95,8 +95,11 @@ export class SimConfigSourceImpl implements SimConfigSource {
     // skill-modified amount and interval, so the runtime cannot diverge from the preview.
     const propulsionModuleId = state.fittedHull?.propulsionId !== undefined ? state.fittedHull.propulsionModuleId : undefined;
     const row = propulsionModuleId !== undefined ? this.capacitorStatsSource.stats(side)?.rows.find((candidate) => candidate.moduleId === propulsionModuleId) : undefined;
+    // The net readout's drain basis is the same stat usage the popup renders (pyfa capUsed semantics),
+    // so net + usage - incoming equals the regen curve at any pool level.
     return {
       infinite: this.capacitorController.infiniteCapacitor(side),
+      fittedDrainPerSecond: this.capacitorStatsSource.stats(side)?.usagePerSecond ?? 0,
       drains: scheduledDrainsFromProjections(
         this.ewarController.projection(side) ?? { loadout: EMPTY_EWAR_LOADOUT, activation: undefined },
         this.boosterController.projection(side) ?? { loadout: EMPTY_BOOST_LOADOUT, activation: undefined },

@@ -20,7 +20,7 @@ function incoming(moduleId: string, amount: number, interval: number, transfer =
 }
 
 function sideConfig(overrides: Partial<CapacitorSideConfig> = {}): CapacitorSideConfig {
-  return { infinite: false, drains: [], boosters: [], ...overrides };
+  return { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, ...overrides };
 }
 
 function combatant(id: "shipA" | "shipB", spec: CapacitorSpec | undefined, capacityMultiplier?: number): CombatantConfig {
@@ -233,48 +233,49 @@ describe("CapacitorSimulatorImpl", () => {
     expect(sim.view().shipA.boosters[0].charges).toBe(0); // blocked: reloading
   });
 
-  test("view reports regen per second and the deterministic average drain rate", () => {
+  test("view reports regen per second and the deterministic drain rate", () => {
+    // fitted covers every fitted module's amount/interval (stat-side usage); the scheduled drain and
+    // propulsion only drive the pool debits and are expected to be included in the fitted figure.
     const sim = new CapacitorSimulatorImpl();
-    sim.reset(makeConfig({ drains: [drain("1", 100, 10)] }, {}, SPEC, SPEC, propulsionDrain(50, 10)));
+    sim.reset(makeConfig({ drains: [drain("1", 100, 10)], fittedDrainPerSecond: 21 }, {}, SPEC, SPEC, propulsionDrain(50, 10)));
     sim.incomingDrains("shipA", [incoming("5", 30, 5)]);
     sim.step(0.001, { shipA: false, shipB: false }); // t=0 debits fire immediately, cap near full
     const view = sim.view().shipA;
-    expect(view.incomingDrainPerSecond).toBeCloseTo(100 / 10 + 50 / 10 + 30 / 5, 6);
-    expect(view.netPerSecond).toBeCloseTo(view.regenPerSecond - 21, 6);
+    expect(view.drainPerSecond).toBeCloseTo(21 + 30 / 5, 6);
+    expect(view.netPerSecond).toBeCloseTo(view.regenPerSecond - 27, 6);
     sim.step(0.037, { shipA: false, shipB: false }); // no debit event inside this frame
     const after = sim.view().shipA;
-    expect(after.incomingDrainPerSecond).toBeCloseTo(21, 6);
-    expect(after.netPerSecond).toBeCloseTo(after.regenPerSecond - 21, 6);
+    expect(after.drainPerSecond).toBeCloseTo(27, 6);
+    expect(after.netPerSecond).toBeCloseTo(after.regenPerSecond - 27, 6);
   });
 
-  test("average drain rate counts active drains even while starved", () => {
+  test("drain rate keeps counting the fitted usage while starved", () => {
     const sim = new CapacitorSimulatorImpl();
-    sim.reset(makeConfig({ drains: [drain("1", 2000, 10)] }, {}, SMALL_SPEC));
+    sim.reset(makeConfig({ drains: [drain("1", 2000, 10)], fittedDrainPerSecond: 200 }, {}, SMALL_SPEC));
     sim.step(0.001, { shipA: false, shipB: false });
     const view = sim.view().shipA;
     expect(view.starved).toBe(true);
-    expect(view.incomingDrainPerSecond).toBeCloseTo(200, 6);
+    expect(view.drainPerSecond).toBeCloseTo(200, 6);
   });
 
-  test("infinite pool reports the average drain as negative net", () => {
+  test("infinite pool reports the drain rate as negative net", () => {
     const sim = new CapacitorSimulatorImpl();
-    sim.reset(makeConfig({ drains: [drain("1", 100, 10)], infinite: true }));
+    sim.reset(makeConfig({ drains: [drain("1", 100, 10)], infinite: true, fittedDrainPerSecond: 10 }));
     sim.step(0.001, { shipA: false, shipB: false });
     const view = sim.view().shipA;
-    expect(view.incomingDrainPerSecond).toBeCloseTo(10, 6);
+    expect(view.drainPerSecond).toBeCloseTo(10, 6);
     expect(view.netPerSecond).toBeCloseTo(-10, 6);
   });
 
-  test("external drain rate joins the average and resets on restore", () => {
+  test("fitted drain rate feeds the net and survives restore", () => {
     const sim = new CapacitorSimulatorImpl();
-    sim.reset(makeConfig({ drains: [drain("1", 100, 10)] }));
-    sim.setExternalDrainPerSecond({ shipA: 7, shipB: 0 });
+    sim.reset(makeConfig({ fittedDrainPerSecond: 7 }));
     sim.step(0.001, { shipA: false, shipB: false });
     const view = sim.view().shipA;
-    expect(view.incomingDrainPerSecond).toBeCloseTo(17, 6);
-    expect(view.netPerSecond).toBeCloseTo(view.regenPerSecond - 17, 6);
+    expect(view.drainPerSecond).toBeCloseTo(7, 6);
+    expect(view.netPerSecond).toBeCloseTo(view.regenPerSecond - 7, 6);
     sim.restore(sim.capture());
-    expect(sim.view().shipA.incomingDrainPerSecond).toBeCloseTo(10, 6);
+    expect(sim.view().shipA.drainPerSecond).toBeCloseTo(7, 6);
   });
 
   test("restored state reports percentage and peak regen at 25 percent", () => {
@@ -283,8 +284,8 @@ describe("CapacitorSimulatorImpl", () => {
     const state: CapacitorSimulatorState = {
       time: 0,
       sides: {
-        shipA: { spec: SPEC, infinite: false, cap: SPEC.capacity * 0.25, drains: [], incoming: [], boosters: [], propulsion: undefined },
-        shipB: { spec: SPEC, infinite: false, cap: SPEC.capacity, drains: [], incoming: [], boosters: [], propulsion: undefined },
+        shipA: { spec: SPEC, infinite: false, cap: SPEC.capacity * 0.25, drains: [], incoming: [], boosters: [], propulsion: undefined, fittedDrainPerSecond: 0 },
+        shipB: { spec: SPEC, infinite: false, cap: SPEC.capacity, drains: [], incoming: [], boosters: [], propulsion: undefined, fittedDrainPerSecond: 0 },
       },
     };
     sim.restore(state);

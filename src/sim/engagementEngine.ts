@@ -234,10 +234,6 @@ export class EngagementEngineImpl implements EngagementEngine {
     const weaponEvents = world.weaponClock.step(dt, composed, world.capacitorSimulator);
     const events: DamageEvent[] = [...missileEvents, ...weaponEvents];
     world.defenseSimulator.step(dt, events, world.capacitorSimulator);
-    world.capacitorSimulator.setExternalDrainPerSecond({
-      shipA: world.weaponClock.capacitorDrainPerSecond("shipA", composed.weaponAttacks.shipA) + world.defenseSimulator.capacitorDrainPerSecond("shipA"),
-      shipB: world.weaponClock.capacitorDrainPerSecond("shipB", composed.weaponAttacks.shipB) + world.defenseSimulator.capacitorDrainPerSecond("shipB"),
-    });
     return { composed, snapshot };
   }
 

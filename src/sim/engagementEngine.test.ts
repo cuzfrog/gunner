@@ -116,9 +116,9 @@ function mockWorld() {
     lockClock: vi.mocked<LockClock>({ reset: vi.fnUntracked(), step: vi.fnUntracked(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), states: vi.fnUntracked(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), capture: vi.fnUntracked(lockClockState), restore: vi.fnUntracked() }),
     droneSimulator: vi.mocked<DroneSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), states: vi.fnUntracked(() => []), capture: vi.fnUntracked(droneSimulatorState), restore: vi.fnUntracked() }),
     missileSimulator: vi.mocked<MissileSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(() => []), states: vi.fnUntracked(() => []), facts: vi.fnUntracked(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })), capture: vi.fnUntracked(missileSimulatorState), restore: vi.fnUntracked() }),
-    weaponClock: vi.mocked<WeaponClock>({ reset: vi.fnUntracked(), step: vi.fnUntracked(() => []), capture: vi.fnUntracked(weaponClockState), restore: vi.fnUntracked(), spoolCycles: vi.fnUntracked(() => 0), capacitorDrainPerSecond: vi.fnUntracked(() => 0) }),
-    defenseSimulator: vi.mocked<DefenseSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), flushPendingDamage: vi.fnUntracked(), view: vi.fnUntracked(() => emptyDefenseView), inflictedTotals: vi.fnUntracked(zeroTotals), capture: vi.fnUntracked(defenseSimulatorState), restore: vi.fnUntracked(), capacitorDrainPerSecond: vi.fnUntracked(() => 0) }),
-    capacitorSimulator: vi.mocked<CapacitorSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), view: vi.fnUntracked(() => emptyCapacitorView), attemptDebit: vi.fnUntracked(() => true), incomingDrains: vi.fnUntracked(), propulsionStarved: vi.fnUntracked(() => false), injectBooster: vi.fnUntracked(), capture: vi.fnUntracked(capacitorSimulatorState), restore: vi.fnUntracked(), setExternalDrainPerSecond: vi.fnUntracked() }),
+    weaponClock: vi.mocked<WeaponClock>({ reset: vi.fnUntracked(), step: vi.fnUntracked(() => []), capture: vi.fnUntracked(weaponClockState), restore: vi.fnUntracked(), spoolCycles: vi.fnUntracked(() => 0) }),
+    defenseSimulator: vi.mocked<DefenseSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), flushPendingDamage: vi.fnUntracked(), view: vi.fnUntracked(() => emptyDefenseView), inflictedTotals: vi.fnUntracked(zeroTotals), capture: vi.fnUntracked(defenseSimulatorState), restore: vi.fnUntracked() }),
+    capacitorSimulator: vi.mocked<CapacitorSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), view: vi.fnUntracked(() => emptyCapacitorView), attemptDebit: vi.fnUntracked(() => true), incomingDrains: vi.fnUntracked(), propulsionStarved: vi.fnUntracked(() => false), injectBooster: vi.fnUntracked(), capture: vi.fnUntracked(capacitorSimulatorState), restore: vi.fnUntracked() }),
   };
 }
 
@@ -127,15 +127,15 @@ function capacitorSimulatorState(): CapacitorSimulatorState {
 }
 
 function emptyCapacitorSnapshot(): import("./capacitorSimulator").SideCapacitorSnapshot {
-  return { spec: undefined, infinite: false, cap: 0, drains: [], boosters: [], incoming: [], propulsion: undefined };
+  return { spec: undefined, infinite: false, cap: 0, drains: [], boosters: [], incoming: [], propulsion: undefined, fittedDrainPerSecond: 0 };
 }
 
 const emptyCapacitorView: Record<"shipA" | "shipB", CapacitorView> = {
-  shipA: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] },
-  shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, incomingDrainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] },
+  shipA: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, drainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] },
+  shipB: { cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0, drainPerSecond: 0, starved: false, starvedModuleIds: [], propulsion: undefined, drains: [], boosters: [], incoming: [] },
   };
 
-const EMPTY_CAPACITOR_SIDE: CapacitorSideConfig = { infinite: false, drains: [], boosters: [], };
+const EMPTY_CAPACITOR_SIDE: CapacitorSideConfig = { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0 };;
 
 function makeEngine() {
   const live = mockWorld();

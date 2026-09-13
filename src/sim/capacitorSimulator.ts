@@ -56,7 +56,8 @@ export interface CapacitorView {
   readonly percentage: number;
   readonly regenPerSecond: number;
   readonly netPerSecond: number;
-  readonly incomingDrainPerSecond: number;
+  /** Deterministic drain rate the net subtracts: fitted usage plus the incoming average. */
+  readonly drainPerSecond: number;
   readonly starved: boolean;
   // Module ids denied a debit during the current engine frame (weapons, repairers, drains).
   readonly starvedModuleIds: readonly TypeId[];
@@ -85,6 +86,7 @@ export interface SideCapacitorSnapshot {
   readonly incoming: readonly IncomingDrainState[];
   readonly boosters: readonly CapacitorBoosterState[];
   readonly propulsion: CapacitorPropulsionState | undefined;
+  readonly fittedDrainPerSecond: number;
 }
 
 export interface CapacitorSimulatorState {
@@ -101,8 +103,6 @@ export interface CapacitorSimulator extends CapacitorGate, Restorable<CapacitorS
   injectBooster(side: Side, boosterIndex: number): void;
   /** Merges the engine's projected cap-warfare debits for one side (timer-preserving by module id). */
   incomingDrains(side: Side, drains: readonly IncomingDrain[]): void;
-  /** Per-frame input: deterministic drain rate of gate-initiated debits managed outside this simulator (weapon and repairer cycles). */
-  setExternalDrainPerSecond(rates: Record<Side, number>): void;
 }
 
 interface DrainRuntime {
@@ -158,7 +158,7 @@ interface SideRuntime {
   propulsionSuppressed: boolean;
   anyStarved: boolean;
   starvedModuleIds: TypeId[];
-  externalDrainPerSecond: number;
+  fittedDrainPerSecond: number;
 }
 
 const TAU_DENOMINATOR = 5; // EVE recharge tau = rechargeTime / 5
@@ -241,11 +241,6 @@ export class CapacitorSimulatorImpl implements CapacitorSimulator {
     runtime.incoming = merged;
   }
 
-  setExternalDrainPerSecond(rates: Record<Side, number>): void {
-    this.sides.shipA.externalDrainPerSecond = rates.shipA;
-    this.sides.shipB.externalDrainPerSecond = rates.shipB;
-  }
-
   view(): Record<Side, CapacitorView> {
     return { shipA: sideView(this.sides.shipA), shipB: sideView(this.sides.shipB) };
   }
@@ -276,7 +271,7 @@ function capacityEpsilon(spec: CapacitorSpec | undefined): number {
 }
 
 function emptySide(): SideRuntime {
-  return { spec: undefined, infinite: false, cap: 0, drains: [], incoming: [], boosters: [], propulsion: undefined, propulsionSuppressed: false, anyStarved: false, starvedModuleIds: [], externalDrainPerSecond: 0 };
+  return { spec: undefined, infinite: false, cap: 0, drains: [], incoming: [], boosters: [], propulsion: undefined, propulsionSuppressed: false, anyStarved: false, starvedModuleIds: [], fittedDrainPerSecond: 0 };
 }
 
 function sideFromConfig(spec: CapacitorSpec | undefined, capacityMultiplier: number | undefined, config: CapacitorSideConfig): SideRuntime {
@@ -288,6 +283,7 @@ function sideFromConfig(spec: CapacitorSpec | undefined, capacityMultiplier: num
   runtime.drains = config.drains.filter((drain) => drain.interval > 0).map((drain) => ({ moduleId: drain.moduleId, amount: drain.amount, interval: drain.interval, active: drain.active, running: false, starved: false, timer: 0 }));
   runtime.boosters = config.boosters.map((booster) => ({ ...booster, charges: booster.clipSize, cycleTimer: 0, reloading: false, reloadTimer: 0 }));
   runtime.propulsion = propulsionRuntime(config.propulsion);
+  runtime.fittedDrainPerSecond = config.fittedDrainPerSecond;
   return runtime;
 }
 
@@ -297,6 +293,7 @@ function mergeSide(runtime: SideRuntime, spec: CapacitorSpec | undefined, capaci
   runtime.spec = effective;
   runtime.infinite = config.infinite;
   if (specChanged && effective && effective.capacity > 0) runtime.cap = effective.capacity;
+  runtime.fittedDrainPerSecond = config.fittedDrainPerSecond;
   mergeDrains(runtime, config.drains);
   mergeBoosters(runtime, config.boosters);
   mergePropulsion(runtime, config.propulsion);
@@ -596,7 +593,7 @@ function sideView(runtime: SideRuntime): CapacitorView {
   if (!runtime.spec || runtime.spec.capacity <= 0) {
     return {
       cap: 0, capacity: 0, percentage: 100, regenPerSecond: 0, netPerSecond: 0,
-      incomingDrainPerSecond: averageDrainRate(runtime), starved: runtime.anyStarved,
+      drainPerSecond: averageDrainRate(runtime), starved: runtime.anyStarved,
       starvedModuleIds: [], propulsion, drains: runtime.drains.map(drainState), incoming: runtime.incoming.map(incomingState), boosters: runtime.boosters.map(boosterState),
     };
   }
@@ -604,7 +601,7 @@ function sideView(runtime: SideRuntime): CapacitorView {
     const incoming = averageDrainRate(runtime);
     return {
       cap: runtime.spec.capacity, capacity: runtime.spec.capacity, percentage: 100, regenPerSecond: 0, netPerSecond: -incoming,
-      incomingDrainPerSecond: incoming, starved: false, starvedModuleIds: [], propulsion,
+      drainPerSecond: incoming, starved: false, starvedModuleIds: [], propulsion,
       drains: runtime.drains.map((drain) => drainState({ ...drain, running: drain.active, starved: false })),
       incoming: runtime.incoming.map(incomingState),
       boosters: runtime.boosters.map(boosterState),
@@ -616,7 +613,7 @@ function sideView(runtime: SideRuntime): CapacitorView {
   const incoming = averageDrainRate(runtime);
   return {
     cap: runtime.cap, capacity: runtime.spec.capacity, percentage: (runtime.cap / runtime.spec.capacity) * 100,
-    regenPerSecond, netPerSecond: regenPerSecond - incoming, incomingDrainPerSecond: incoming,
+    regenPerSecond, netPerSecond: regenPerSecond - incoming, drainPerSecond: incoming,
     starved: runtime.anyStarved,
     starvedModuleIds: [...runtime.starvedModuleIds], propulsion,
     drains: runtime.drains.map(drainState), incoming: runtime.incoming.map(incomingState), boosters: runtime.boosters.map(boosterState),
@@ -631,17 +628,13 @@ function propulsionView(runtime: SideRuntime): CapacitorPropulsionView | undefin
 }
 
 /** Deterministic average drain: every active debit cycles a fixed amount over a fixed interval, so the per-second cost is exact. */
+/** Deterministic drain side of the net: the producer's fitted usage plus the incoming average. Debit timing is irrelevant — every term is amount/interval. */
 function averageDrainRate(runtime: SideRuntime): number {
-  let rate = 0;
-  for (const drain of runtime.drains) {
-    if (drain.active) rate += drain.amount / drain.interval;
-  }
+  let rate = runtime.fittedDrainPerSecond;
   for (const entry of runtime.incoming) {
     rate += entry.amount / entry.interval;
   }
-  const propulsion = runtime.propulsion;
-  if (propulsion && !runtime.propulsionSuppressed) rate += propulsion.amount / propulsion.interval;
-  return rate + runtime.externalDrainPerSecond;
+  return rate;
 }
 
 function drainState(drain: DrainRuntime): CapacitorDrainState {
@@ -665,6 +658,7 @@ function sideSnapshot(runtime: SideRuntime): SideCapacitorSnapshot {
     incoming: runtime.incoming.map(incomingState),
     boosters: runtime.boosters.map(boosterState),
     propulsion: runtime.propulsion ? { ...runtime.propulsion } : undefined,
+    fittedDrainPerSecond: runtime.fittedDrainPerSecond,
   };
 }
 
@@ -680,6 +674,6 @@ function sideFromSnapshot(snapshot: SideCapacitorSnapshot): SideRuntime {
     propulsionSuppressed: false,
     anyStarved: false,
     starvedModuleIds: [],
-    externalDrainPerSecond: 0,
+    fittedDrainPerSecond: snapshot.fittedDrainPerSecond,
   };
 }
