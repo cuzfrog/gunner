@@ -1,6 +1,6 @@
 import type { ShipId, TypeId } from "../ids";
 import type { HullTier } from "../../ships";
-import type { DamageResists } from "../../sim";
+import type { DamageResists, DamageType } from "../../sim";
 
 export interface FittingPropulsionStats {
   readonly kind: "afterburner" | "microwarpdrive";
@@ -190,6 +190,10 @@ export interface HullBonus {
   readonly chargeSkillId?: TypeId;
   readonly moduleSkillId?: TypeId;
   readonly moduleGroupId?: number;
+  // Per-type damage bonus (from missile damage attrs 114/116/117/118); undefined = whole volley.
+  readonly damageType?: DamageType;
+  // Subsystem item the bonus originates from; undefined = ship hull bonus.
+  readonly sourceId?: TypeId;
 }
 
 export type SkillBonusType = "turretDamage" | "turretRoF" | "turretTracking" | "turretOptimal" | "turretFalloff" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity" | ModuleBonusAttribute;
@@ -477,6 +481,7 @@ export interface FittingDbData {
   readonly sensorBoosterScripts: Readonly<Record<string, SensorBoosterScriptStats>>;
   readonly sensorDampenerScripts: Readonly<Record<string, SensorDampenerScriptStats>>;
   readonly hullBonuses: Readonly<Record<ShipId, readonly HullBonus[]>>;
+  readonly subsystemBonuses: Readonly<Record<string, readonly HullBonus[]>>;
   readonly skillBonuses: readonly SkillBonus[];
   readonly rigDrawbackReductions: readonly RigDrawbackReduction[];
   readonly drones: Readonly<Record<string, { readonly id: TypeId; readonly name: string }>>;

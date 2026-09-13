@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { toTypeId } from "../src/gamedata/ids";
-import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses } from "./generate-fitting-db";
+import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses, _buildSubsystemBonuses } from "./generate-fitting-db";
 import type { UnmappedAttribute } from "./generate-fitting-db";
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./fittingDb/dogmaTypes";
 
@@ -20,6 +20,10 @@ function itemMod(modifiedAttr: number, modifyingAttr: number, operation: number)
 
 function skillMod(modifiedAttr: number, modifyingAttr: number, operation: number, skillId: number): SdeDogmaEffectModifier {
   return { domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: modifiedAttr, modifyingAttributeID: modifyingAttr, operation, skillTypeID: skillId };
+}
+
+function ownerSkillMod(modifiedAttr: number, modifyingAttr: number, operation: number, skillId: number): SdeDogmaEffectModifier {
+  return { domain: "shipID", func: "OwnerRequiredSkillModifier", modifiedAttributeID: modifiedAttr, modifyingAttributeID: modifyingAttr, operation, skillTypeID: skillId };
 }
 
 function dogmaEffectsMap(effects: readonly SdeDogmaEffect[]): Record<string, SdeDogmaEffect> {
@@ -415,7 +419,7 @@ describe("assertTurretChargeCoverage", () => {
 });
 
 describe("buildLauncherStats", () => {
-  const skillIds = [toTypeId("3319"), toTypeId("3321")];
+  const skillIds = [toTypeId("3319"), toTypeId(toTypeId("3321"))];
 
   test("returns undefined when speed attribute is missing", () => {
     expect(buildLauncherStats(values({ chargeGroup1: 384 }), 509, sdeType(), skillIds)).toBeUndefined();
@@ -473,7 +477,7 @@ describe("buildLauncherStats", () => {
 });
 
 describe("buildMissileStats", () => {
-  const skillIds = [toTypeId("3319"), toTypeId("3321")];
+  const skillIds = [toTypeId("3319"), toTypeId(toTypeId("3321"))];
 
   test("returns undefined when all damage attributes are zero or missing", () => {
     expect(buildMissileStats(values({
@@ -1183,5 +1187,137 @@ describe("_buildHullBonuses audit", () => {
     const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 12345, "TestShip", unmapped);
     expect(bonuses.length).toBe(0);
     expect(unmapped.length).toBe(0);
+  });
+
+  test("skips drone velocity and tracking bonuses on ships", () => {
+    const names = attrNames({ 793: "droneVelocityBonus", 462: "roleBonus" });
+    const vals = attrValues({ 793: 5, 462: 10 });
+    const typeDogma: SdeTypeDogma = { dogmaAttributes: [{ attributeID: 793, value: 5 }, { attributeID: 462, value: 10 }], dogmaEffects: [{ effectID: 5165 }, { effectID: 5111 }, { effectID: 9002 }] };
+    const effects = dogmaEffectsMap([
+      combatEffect(5165, 4, [ownerSkillMod(37, 793, 6, 3436)]),
+      combatEffect(5111, 4, [ownerSkillMod(160, 462, 6, 3436)]),
+      combatEffect(9002, 4, [ownerSkillMod(64, 462, 6, 3436)]),
+    ]);
+    const unmapped: UnmappedAttribute[] = [];
+    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 593, "Tristan", unmapped);
+    expect(unmapped.length).toBe(0);
+    expect(bonuses).toEqual([{ attribute: "droneDamage", magnitude: 10, scalesWithHullSkill: false, chargeSkillId: toTypeId("3436") }]);
+  });
+
+  test("attaches damageType to per-type missile damage bonuses", () => {
+    const names = attrNames({ 1510: "subsystemBonusCaldariOffensive2" });
+    const vals = attrValues({ 1510: 5 });
+    const typeDogma: SdeTypeDogma = { dogmaAttributes: [{ attributeID: 1510, value: 5 }], dogmaEffects: [{ effectID: 9001 }] };
+    const effects = dogmaEffectsMap([combatEffect(9001, 4, [
+      ownerSkillMod(117, 1510, 6, 3321),
+      skillMod(64, 1510, 6, 3302),
+    ])]);
+    const unmapped: UnmappedAttribute[] = [];
+    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 12345, "TestShip", unmapped);
+    expect(unmapped.length).toBe(0);
+    expect(bonuses).toContainEqual({ attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3321"), damageType: "kinetic" });
+    expect(bonuses).toContainEqual({ attribute: "turretDamage", magnitude: 5, scalesWithHullSkill: true, moduleSkillId: toTypeId("3302") });
+  });
+});
+
+describe("_buildSubsystemBonuses", () => {
+  function attrNames(ids: Record<number, string>): Map<number, string> {
+    return new Map(Object.entries(ids).map(([k, v]) => [Number(k), v]));
+  }
+
+  function attrVals(attrs: readonly { attributeID: number; value: number }[]): Map<number, number> {
+    return new Map(attrs.map((a) => [a.attributeID, a.value]));
+  }
+
+  function subsystemDogma(attrs: readonly { attributeID: number; value: number }[], effectIds: readonly number[]): SdeTypeDogma {
+    return { dogmaAttributes: attrs, dogmaEffects: effectIds.map((effectID) => ({ effectID })) };
+  }
+
+  test("maps Tengu offensive launcher bonuses with skill and group filters", () => {
+    const names = attrNames({ 1444: "subsystemBonusCaldariOffensive", 1533: "subsystemBonusCaldariOffensive3" });
+    const attrs = [{ attributeID: 1444, value: -7.5 }, { attributeID: 1533, value: 10 }];
+    const typeDogma = subsystemDogma(attrs, [4248, 4122, 4331]);
+    const effects = dogmaEffectsMap([
+      combatEffect(4248, 4, [ownerSkillMod(117, 1444, 6, 3321), ownerSkillMod(117, 1444, 6, 3324), ownerSkillMod(117, 1444, 6, 25719)]),
+      combatEffect(4122, 4, [groupMod(51, 1444, 6, 511), groupMod(51, 1444, 6, 771), groupMod(51, 1444, 6, 510)]),
+      combatEffect(4331, 4, [ownerSkillMod(37, 1533, 6, 3324), ownerSkillMod(37, 1533, 6, 25719)]),
+    ]);
+    const unmapped: UnmappedAttribute[] = [];
+    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45601, "Tengu Offensive - Accelerated Ejection Bay", unmapped);
+    expect(unmapped.length).toBe(0);
+    expect(bonuses).toContainEqual({ attribute: "missileDamage", magnitude: -7.5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3321"), damageType: "kinetic", sourceId: toTypeId("45601") });
+    expect(bonuses).toContainEqual({ attribute: "missileRoF", magnitude: -7.5, scalesWithHullSkill: true, moduleGroupId: 511, sourceId: toTypeId("45601") });
+    expect(bonuses).toContainEqual({ attribute: "missileVelocity", magnitude: 10, scalesWithHullSkill: true, chargeSkillId: toTypeId("3324"), sourceId: toTypeId("45601") });
+  });
+
+  test("maps turret, drone, and per-level ship stat bonuses", () => {
+    const names = attrNames({ 1444: "subsystemBonusGallenteOffensive", 1531: "subsystemBonusAmarrOffensive", 1443: "subsystemBonusCaldariDefensive", 1445: "subsystemBonusCaldariPropulsion" });
+    const attrs = [{ attributeID: 1444, value: 7.5 }, { attributeID: 1531, value: 5 }, { attributeID: 1443, value: 5 }, { attributeID: 1445, value: 5 }];
+    const typeDogma = subsystemDogma(attrs, [4104, 4327, 3976, 3859]);
+    const effects = dogmaEffectsMap([
+      combatEffect(4104, 4, [skillMod(54, 1444, 6, 3304)]),
+      combatEffect(4327, 4, [ownerSkillMod(64, 1531, 6, 3436)]),
+      combatEffect(3976, 4, [itemMod(263, 1443, 6)]),
+      combatEffect(3859, 4, [itemMod(37, 1445, 6)]),
+    ]);
+    const unmapped: UnmappedAttribute[] = [];
+    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45702, "Proteus Offensive - Drone Synthesis Projector", unmapped);
+    expect(unmapped.length).toBe(0);
+    expect(bonuses).toContainEqual({ attribute: "turretOptimal", magnitude: 7.5, scalesWithHullSkill: true, moduleSkillId: toTypeId("3304"), sourceId: toTypeId("45702") });
+    expect(bonuses).toContainEqual({ attribute: "droneDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3436"), sourceId: toTypeId("45702") });
+    expect(bonuses).toContainEqual({ attribute: "shieldHpPercent", magnitude: 5, scalesWithHullSkill: true, sourceId: toTypeId("45702") });
+    expect(bonuses).toContainEqual({ attribute: "maxVelocity", magnitude: 5, scalesWithHullSkill: true, sourceId: toTypeId("45702") });
+  });
+
+  test("skips flat additions and out-of-scope percent bonuses without unmapped entries", () => {
+    const names = attrNames({ 424: "cpuOutputBonus", 1441: "subsystemBonusCaldariCoreCapacitorCapacity", 340: "shieldCapacityBonus" });
+    const attrs = [{ attributeID: 424, value: 30 }, { attributeID: 1441, value: 5 }, { attributeID: 340, value: 100 }];
+    const typeDogma = subsystemDogma(attrs, [397, 4158, 3769]);
+    const effects = dogmaEffectsMap([
+      combatEffect(397, 4, [itemMod(48, 424, 6)]),
+      combatEffect(4158, 4, [itemMod(55, 1441, 6)]),
+      combatEffect(3769, 4, [itemMod(263, 340, 2)]),
+    ]);
+    const unmapped: UnmappedAttribute[] = [];
+    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45671, "Tengu Core - Dissolution Sequencer", unmapped);
+    expect(bonuses.length).toBe(0);
+    expect(unmapped.length).toBe(0);
+  });
+
+  test("skips drone HP and propulsion module bonuses", () => {
+    const names = attrNames({ 1432: "subsystemBonusGallenteOffensive", 1446: "subsystemBonusCaldariPropulsion" });
+    const attrs = [{ attributeID: 1432, value: 5 }, { attributeID: 1446, value: 5 }];
+    const typeDogma = subsystemDogma(attrs, [4250, 3861]);
+    const effects = dogmaEffectsMap([
+      combatEffect(4250, 4, [ownerSkillMod(263, 1432, 6, 3436)]),
+      combatEffect(3861, 4, [skillMod(20, 1446, 6, 3450)]),
+    ]);
+    const unmapped: UnmappedAttribute[] = [];
+    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45691, "Legion Offensive - Drone Synthesis Projector", unmapped);
+    expect(bonuses.length).toBe(0);
+    expect(unmapped.length).toBe(0);
+  });
+
+  test("skips non-per-level bonuses even on mapped attributes", () => {
+    const names = attrNames({ 424: "cpuOutputBonus" });
+    const attrs = [{ attributeID: 424, value: 5 }];
+    const typeDogma = subsystemDogma(attrs, [3999]);
+    const effects = dogmaEffectsMap([combatEffect(3999, 4, [itemMod(263, 424, 6)])]);
+    const unmapped: UnmappedAttribute[] = [];
+    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45671, "Tengu Core - Test Subsystem", unmapped);
+    expect(bonuses.length).toBe(0);
+    expect(unmapped.length).toBe(0);
+  });
+
+  test("collects unknown attributes as unmapped", () => {
+    const names = attrNames({ 99999: "unknownNewAttr" });
+    const attrs = [{ attributeID: 99999, value: 5 }];
+    const typeDogma = subsystemDogma(attrs, [9500]);
+    const effects = dogmaEffectsMap([combatEffect(9500, 4, [itemMod(99999, 99999, 6)])]);
+    const unmapped: UnmappedAttribute[] = [];
+    _buildSubsystemBonuses(names, typeDogma, effects, 45671, "Tengu Core - Test Subsystem", unmapped);
+    expect(unmapped.length).toBe(1);
+    expect(unmapped[0].attributeId).toBe(99999);
+    expect(unmapped[0].shipTypeId).toBe(45671);
   });
 });
