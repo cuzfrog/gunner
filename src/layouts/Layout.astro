@@ -6,7 +6,7 @@ interface Props {
   readonly description?: string;
 }
 const DEFAULT_DESCRIPTION =
-  "Free EVE Online 2D fight simulator. Simulate ship-vs-ship combat with real-time movement, tracking, damage application and capacitor warfare in your browser.";
+  "Free EVE Online combat simulator. Simulate ship-vs-ship fights in your browser with real-time movement, tracking, damage application and capacitor warfare.";
 const { title, description = DEFAULT_DESCRIPTION } = Astro.props;
 const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.href;
 const ogImageUrl = Astro.site ? new URL("/og-image.png", Astro.site).href : "/og-image.png";
@@ -38,7 +38,7 @@ const appSchema = {
   <meta property="og:image" content={ogImageUrl}>
   <meta property="og:image:width" content="2400">
   <meta property="og:image:height" content="1260">
-  <meta property="og:image:alt" content="Gunner — EVE Online 2D fight simulator">
+  <meta property="og:image:alt" content="Gunner — EVE Online 2D combat simulator">
   <meta name="twitter:card" content="summary_large_image">
   <script type="application/ld+json" set:html={JSON.stringify(appSchema)} is:inline></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
