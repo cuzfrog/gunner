@@ -31,3 +31,5 @@ no-new-exports:
 # components
 
 Astro components for static markup. Each subdirectory groups components by UI region. Components receive pure data props from `src/pages/index.astro` or parent components; element IDs are declared in `src/ui/controls/elementContract.ts`. i18n uses `data-i18n*` attributes resolved by the i18n controller at runtime. No client-side scripts run inside `.astro` files; all dynamic behavior is owned by controllers under `src/ui/controls/`.
+
+The module interface is `index.ts`; external files must import components through it.
