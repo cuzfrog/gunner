@@ -6,7 +6,7 @@ Federation Navy Multispectrum Energized Membrane
 Federation Navy Multispectrum Energized Membrane
 Damage Control II
 Heat Sink II
-[Empty Low slot]
+Heat Sink II
 
 50MN Y-T8 Compact Microwarpdrive
 Initiated Compact Warp Scrambler
@@ -21,7 +21,7 @@ Armor Command Burst II, Rapid Repair Charge
 Heavy Pulse Laser II, Conflagration M
 
 Medium Trimark Armor Pump II
-[Empty Rig slot]
+Medium Trimark Armor Pump II
 
 
 Armor Energizing Charge x288

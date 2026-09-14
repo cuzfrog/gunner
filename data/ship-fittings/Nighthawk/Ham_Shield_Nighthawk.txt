@@ -1,0 +1,33 @@
+[Nighthawk, Ham Shield Nighthawk]
+
+Damage Control II
+Ballistic Control System II
+Ballistic Control System II
+Power Diagnostic System II
+
+Republic Fleet Large Shield Extender
+Multispectrum Shield Hardener II
+Pithum A-Type EM Shield Amplifier
+50MN Quad LiF Restrained Microwarpdrive
+EM Shield Hardener II
+Warp Scrambler II
+
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Shield Command Burst II, Shield Extension Charge
+Information Command Burst II, Sensor Optimization Charge
+
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+
+
+Hobgoblin II x5
+
+
+Mjolnir Rage Heavy Assault Missile x1000
+Shield Extension Charge x300
+Shield Harmonizing Charge x300
+Sensor Optimization Charge x300

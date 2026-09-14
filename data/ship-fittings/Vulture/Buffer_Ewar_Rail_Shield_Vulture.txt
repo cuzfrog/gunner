@@ -1,4 +1,4 @@
-[Vulture, Ewar Rail Shield Vulture]
+[Vulture, Buffer Ewar Rail Shield Vulture]
 
 Damage Control II
 Power Diagnostic System II
@@ -10,18 +10,18 @@ Large Shield Extender II
 Large Shield Extender II
 Multispectrum Shield Hardener II
 50MN Cold-Gas Enduring Microwarpdrive
-[Empty Med slot]
+EM Shield Amplifier II
 
 Shield Command Burst II, Active Shielding Charge
 Shield Command Burst II, Shield Extension Charge
 Shield Command Burst II, Shield Harmonizing Charge
 Information Command Burst I, Sensor Optimization Charge
 Civilian Gatling Railgun
-[Empty High slot]
-[Empty High slot]
+Medium Energy Nosferatu II
+Medium Energy Nosferatu II
 
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
 
 
 Hobgoblin I x2

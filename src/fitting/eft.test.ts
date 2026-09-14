@@ -50,8 +50,8 @@ Nanofiber Internal Structure II /Offline`;
     const parsed = parseEft(text);
     expect(moduleLines(parsed!)).toEqual([
       { name: "Damage Control II", offline: true },
-      { name: "Nanofiber Internal Structure II", offline: true },
       { name: "200mm AutoCannon I", charge: "EMP S", offline: true },
+      { name: "Nanofiber Internal Structure II", offline: true },
     ]);
   });
 
@@ -75,17 +75,35 @@ Nanofiber Internal Structure II /Offline`;
     ]);
   });
 
-  test("sorts modules by bank using module slot metadata", () => {
-    const text = `[Rifter, Mixed]
-1MN Afterburner I
-200mm AutoCannon I
-400mm Steel Plates II
-Small Trimark Armor Pump I`;
+  test("re-banks a unanimous block past a zero-slot bank", () => {
+    // Hull without low slots (e.g. Monitor): the mid block maps to "low" by contiguous run, but every
+    // module is a known mid and the burst block is a known high, so blocks shift to their catalog banks.
+    const text = `[Monitor, Burst]
+
+50MN Microwarpdrive I
+Multispectrum Shield Hardener I
+
+Shield Command Burst II`;
     const parsed = parseEft(text);
-    expect(parsed!.banks.map((b) => b.bank)).toEqual(["low", "mid", "high", "rig"]);
-    expect(bankLines(parsed!, "mid")).toEqual([
-      { kind: "module", name: "1MN Afterburner I", offline: false },
+    expect(parsed!.banks.map((b) => b.bank)).toEqual(["mid", "high"]);
+    expect(bankLines(parsed!, "mid").map((l) => (l.kind === "module" ? l.name : ""))).toEqual([
+      "50MN Microwarpdrive I",
+      "Multispectrum Shield Hardener I",
     ]);
+    expect(bankLines(parsed!, "high").map((l) => (l.kind === "module" ? l.name : ""))).toEqual(["Shield Command Burst II"]);
+  });
+
+  test("keeps a mixed block in its positional bank instead of re-banking it", () => {
+    const text = `[Rifter, Mixed]
+
+Damage Control II
+400mm Steel Plates II
+Small Ancillary Armor Repairer
+
+1MN Afterburner I`;
+    const parsed = parseEft(text);
+    expect(parsed!.banks.map((b) => b.bank)).toEqual(["low", "mid"]);
+    expect(bankLines(parsed!, "low").length).toBe(3);
   });
 
   test("assigns unanchored blocks by contiguous run for unknown modules", () => {
@@ -137,7 +155,7 @@ Dread Guristas Capacitor Power Relay`;
     ]);
   });
 
-  test("falls back per module when an anchored block contains mixed slots", () => {
+  test("keeps anchored block lines in the anchored bank even when the catalog disagrees", () => {
     const text = `[Rifter, Contradiction]
 [Empty Low slot]
 200mm AutoCannon I
@@ -145,10 +163,8 @@ Dread Guristas Capacitor Power Relay`;
     const parsed = parseEft(text);
     expect(bankLines(parsed!, "low")).toEqual([
       { kind: "empty", label: "[Empty Low slot]" },
-      { kind: "module", name: "400mm Steel Plates II", offline: false },
-    ]);
-    expect(bankLines(parsed!, "high")).toEqual([
       { kind: "module", name: "200mm AutoCannon I", offline: false },
+      { kind: "module", name: "400mm Steel Plates II", offline: false },
     ]);
   });
 
@@ -211,9 +227,13 @@ weird [line]
 
   test("moduleLines returns all module rows in canonical bank order", () => {
     const text = `[Rifter, Order]
-200mm AutoCannon I
-1MN Afterburner I
+
 400mm Steel Plates II
+
+1MN Afterburner I
+
+200mm AutoCannon I
+
 Small Trimark Armor Pump I`;
     const parsed = parseEft(text);
     expect(moduleLines(parsed!)).toEqual([

@@ -85,7 +85,8 @@ export function parseEft(text: string): EftDocument | undefined {
       continue;
     }
 
-    const intended = intendedBanks[i];
+    let intended = intendedBanks[i];
+    if (!block.anchor) intended = consensusBank(block, intended) ?? intended;
     for (const line of block.lines) {
       if (line.kind === "empty") {
         bankLines[line.bank].push({ kind: "empty", label: line.label });
@@ -239,9 +240,22 @@ function parseModuleLine(line: string): EftModule | undefined {
 }
 
 function moduleBank(module: EftModule, intended: BankKind | undefined): BankKind | undefined {
-  const slot: ModuleSlot | undefined = MODULE_SLOTS_BY_NAME[module.name];
-  if (slot !== undefined) return slot;
-  return intended;
+  return intended ?? MODULE_SLOTS_BY_NAME[module.name];
+}
+
+/** Zero-slot banks (e.g. low on a hull without lows) shift subsequent blocks out of the contiguous run.
+ *  When every module of a non-anchored block unanimously resolves to one other bank, the block is re-banked there. */
+function consensusBank(block: Block, intended: BankKind | undefined): BankKind | undefined {
+  if (intended === undefined) return undefined;
+  let consensus: ModuleSlot | undefined;
+  for (const line of block.lines) {
+    if (line.kind !== "module") continue;
+    const slot = MODULE_SLOTS_BY_NAME[line.module.name];
+    if (slot === undefined) return undefined;
+    if (consensus !== undefined && consensus !== slot) return undefined;
+    consensus = slot;
+  }
+  return consensus !== undefined && consensus !== intended ? consensus : undefined;
 }
 
 function assignModuleBanks(blocks: Block[]): (BankKind | undefined)[] {

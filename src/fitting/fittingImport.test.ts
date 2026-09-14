@@ -1382,10 +1382,10 @@ Warp Disruptor II`,
       conditions,
     );
     expect(result).toBeDefined();
-    // The disruptor resolves through the parser's default bank, so it precedes the scrambler in loadout order.
+    // Both resolve to mid through the slot catalog, so loadout order follows line order.
     expect(result!.ewar.scramblers).toEqual([
-      expect.objectContaining({ moduleName: "Warp Disruptor II", maxRange: 24000, overloadRangeBonusPercent: 20, propulsionBlock: false }),
       expect.objectContaining({ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20, propulsionBlock: true }),
+      expect.objectContaining({ moduleName: "Warp Disruptor II", maxRange: 24000, overloadRangeBonusPercent: 20, propulsionBlock: false }),
     ]);
     expect(result!.ewar.webs).toEqual([]);
     expect(result!.ewar.grapplers).toEqual([]);

@@ -3,7 +3,7 @@
 Damage Control II
 'Chainmail' 200mm Steel Plates
 Imperial Navy Multispectrum Energized Membrane
-[Empty Low slot]
+Entropic Radiation Sink II
 
 Federation Navy 10MN Afterburner
 Dread Guristas Warp Scrambler
@@ -11,7 +11,7 @@ Federation Navy Stasis Webifier
 
 Small Ghoul Compact Energy Nosferatu
 Armor Command Burst II, Rapid Repair Charge
-[Empty High slot]
+Veles Light Entropic Disintegrator, Occult S
 
 Small Kinetic Armor Reinforcer II
 Small Ancillary Current Router II

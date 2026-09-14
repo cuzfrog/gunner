@@ -1,4 +1,4 @@
-[Stork, Support Rocket Shield Stork]
+[Stork, Sensor Support Rocket Shield Stork]
 
 Co-Processor II
 Co-Processor II
@@ -8,14 +8,14 @@ Caldari Navy Medium Shield Extender
 Sensor Booster II, Targeting Range Script
 Multispectrum Shield Hardener II
 5MN Cold-Gas Enduring Microwarpdrive
-[Empty Med slot]
+Fleeting Compact Stasis Webifier
 
 Information Command Burst II, Sensor Optimization Charge
 Rocket Launcher II, Mjolnir Rage Rocket
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Rocket Launcher II, Mjolnir Rage Rocket
+Rocket Launcher II, Mjolnir Rage Rocket
+Rocket Launcher II, Mjolnir Rage Rocket
+Small Knave Scoped Energy Nosferatu
 
 Small EM Shield Reinforcer II
 Small Processor Overclocking Unit I

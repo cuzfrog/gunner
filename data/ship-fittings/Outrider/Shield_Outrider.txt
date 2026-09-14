@@ -8,16 +8,21 @@ Small Shield Extender II
 Medium Shield Extender II
 Medium Shield Extender II
 1MN Y-S8 Compact Afterburner
-[Empty Med slot]
+Multispectrum Shield Hardener II
 
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Mining Foreman Burst II, Mining Laser Optimization Charge
+Mining Foreman Burst II, Mining Laser Field Enhancement Charge
+Skirmish Command Burst II, Evasive Maneuvers Charge
+Small Ghoul Compact Energy Nosferatu
+Small Ghoul Compact Energy Nosferatu
 
 Small Core Defense Field Extender I
 Small Ancillary Current Router I
+
+
+Mining Laser Optimization Charge x600
+Mining Laser Field Enhancement Charge x600
+Evasive Maneuvers Charge x600
 
 
 Hobgoblin II x2

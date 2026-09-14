@@ -1,0 +1,35 @@
+[Damnation, Ham Armor Damnation]
+
+1600mm Steel Plates II
+Damage Control II
+Multispectrum Energized Membrane II
+Multispectrum Energized Membrane II
+Reactive Armor Hardener
+Ballistic Control System II
+
+Sensor Booster II, Targeting Range Script
+Peripheral Compact Target Painter
+50MN Y-T8 Compact Microwarpdrive
+Medium Capacitor Booster II, Navy Cap Booster 800
+
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Armor Command Burst II, Armor Energizing Charge
+Information Command Burst II, Sensor Optimization Charge
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+
+
+Hobgoblin II x5
+Acolyte II x5
+
+
+Mjolnir Rage Heavy Assault Missile x1000
+Armor Energizing Charge x288
+Rapid Repair Charge x288
+Sensor Optimization Charge x288
+Navy Cap Booster 800 x26

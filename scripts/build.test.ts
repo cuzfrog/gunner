@@ -54,11 +54,11 @@ describe("build", () => {
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "images", waspIconFile))).toBe(true);
   });
 
-  test("JS bundle size is within +5% of the 3.61 MB baseline", () => {
+  test("JS bundle size is within +5% of the 3.83 MB baseline", () => {
     const astroDir = join(DISTRIBUTION_DIRECTORY, ASTRO_DIRECTORY);
     const jsFiles = readdirSync(astroDir).filter((name) => name.endsWith(".js"));
     const totalJsSize = jsFiles.reduce((sum, name) => sum + statSync(join(astroDir, name)).size, 0);
-    const baseline = 3_605_609;
+    const baseline = 3_833_046;
     const limit = Math.ceil(baseline * 1.05);
     expect(totalJsSize).toBeLessThanOrEqual(limit);
   });

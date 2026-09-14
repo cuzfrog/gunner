@@ -8,17 +8,17 @@ Medium Shield Extender II
 Multispectrum Shield Hardener II
 EM Shield Amplifier II
 Kinetic Shield Amplifier II
-[Empty Med slot]
+Fleeting Compact Stasis Webifier
 
 Shield Command Burst II, Shield Harmonizing Charge
 Information Command Burst II, Sensor Optimization Charge
 Shield Command Burst II, Shield Extension Charge
-'Malkuth' Rocket Launcher I
-[Empty High slot]
-[Empty High slot]
+'Malkuth' Rocket Launcher I, Scourge Rocket
+'Malkuth' Rocket Launcher I, Scourge Rocket
+'Malkuth' Rocket Launcher I, Scourge Rocket
 
-[Empty Rig slot]
-[Empty Rig slot]
+Small Core Defense Field Extender II
+Small Core Defense Field Extender II
 
 
 Scourge Rocket x5000
