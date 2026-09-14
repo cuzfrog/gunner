@@ -1,0 +1,33 @@
+[Prophecy, Neut Armor Prophecy]
+
+Damage Control II
+Reactive Armor Hardener
+Multispectrum Energized Membrane II
+1600mm Rolled Tungsten Compact Plates
+Drone Damage Amplifier II
+Explosive Energized Membrane II
+Kinetic Energized Membrane II
+
+50MN Y-T8 Compact Microwarpdrive
+Warp Scrambler II
+Stasis Webifier II
+Large Compact Pb-Acid Cap Battery
+
+Focused Medium Pulse Laser II, Multifrequency M
+Focused Medium Pulse Laser II, Multifrequency M
+Medium Gremlin Compact Energy Neutralizer
+Medium Gremlin Compact Energy Neutralizer
+Medium Remote Armor Repairer II
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+Medium Ancillary Current Router II
+
+
+Acolyte II x4
+Infiltrator II x4
+Hammerhead II x2
+
+Navy Cap Booster 400 x20
+Multifrequency M x400
+Radio M x400

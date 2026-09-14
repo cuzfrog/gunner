@@ -1,0 +1,33 @@
+[Anhinga, Rhml Shield Anhinga]
+
+Damage Control II
+Ballistic Control System II
+Power Diagnostic System II
+Ballistic Control System II
+
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Missile Guidance Computer II, Missile Precision Script
+50MN Quad LiF Restrained Microwarpdrive
+Warp Scrambler II
+Stasis Webifier II
+
+Rapid Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Rapid Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Rapid Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Rapid Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Rapid Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Rapid Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Rapid Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Rapid Heavy Missile Launcher II, Scourge Precision Heavy Missile
+
+Medium Hydraulic Bay Thrusters II
+Medium Core Defense Field Extender II
+Medium Warhead Flare Catalyst II
+
+
+Scourge Precision Heavy Missile x3000
+Scourge Fury Heavy Missile x1500
+Missile Precision Script x1
+Missile Range Script x1

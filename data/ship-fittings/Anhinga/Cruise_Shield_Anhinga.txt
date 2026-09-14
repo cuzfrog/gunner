@@ -1,0 +1,33 @@
+[Anhinga, Cruise Shield Anhinga]
+
+Damage Control II
+Ballistic Control System II
+Power Diagnostic System II
+Ballistic Control System II
+
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Missile Guidance Computer II, Missile Range Script
+100MN Y-S8 Compact Afterburner
+Warp Scrambler II
+Stasis Webifier II
+
+Cruise Missile Launcher II, Scourge Precision Cruise Missile
+Cruise Missile Launcher II, Scourge Precision Cruise Missile
+Cruise Missile Launcher II, Scourge Precision Cruise Missile
+Cruise Missile Launcher II, Scourge Precision Cruise Missile
+Cruise Missile Launcher II, Scourge Precision Cruise Missile
+Cruise Missile Launcher II, Scourge Precision Cruise Missile
+Cruise Missile Launcher II, Scourge Precision Cruise Missile
+Cruise Missile Launcher II, Scourge Precision Cruise Missile
+
+Medium Hydraulic Bay Thrusters II
+Medium Core Defense Field Extender II
+Medium Warhead Flare Catalyst II
+
+
+Scourge Precision Cruise Missile x3000
+Scourge Fury Cruise Missile x1500
+Missile Precision Script x1
+Missile Range Script x1

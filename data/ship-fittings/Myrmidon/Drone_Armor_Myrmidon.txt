@@ -1,0 +1,35 @@
+[Myrmidon, Drone Armor Myrmidon]
+
+Damage Control II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Reactive Armor Hardener
+Multispectrum Energized Membrane II
+1600mm Rolled Tungsten Compact Plates
+
+Large Compact Pb-Acid Cap Battery
+Omnidirectional Tracking Link II, Tracking Speed Script
+Warp Scrambler II
+Stasis Webifier II
+10MN Monopropellant Enduring Afterburner
+
+Drone Link Augmentor I
+Medium I-ax Enduring Remote Armor Repairer
+Medium I-ax Enduring Remote Armor Repairer
+Heavy Electron Blaster II, Void M
+Heavy Electron Blaster II, Void M
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+Medium Ancillary Current Router II
+
+
+Hobgoblin II x5
+Hammerhead II x5
+Ogre II x2
+Vespa II x5
+
+
+Void M x600
+Nanite Repair Paste x100
+Tracking Speed Script x1
