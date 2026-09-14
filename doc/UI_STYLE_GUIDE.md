@@ -34,7 +34,7 @@ All colors are CSS custom properties on `:root`. Never hardcode hex/rgba values 
 | `--bg-inset` | `#0a0f14` | Inputs, buttons wells, hover rows |
 | `--border-dim` | `rgba(92,203,203,.25)` | Default 1px borders everywhere |
 | `--accent-teal` | `#5ccbcb` | Primary accent: focus, hover, attacker side, active values |
-| `--accent-blue` | `#30b2e6` | Secondary accent: primary CTA button, hints, one footer column |
+| `--accent-blue` | `#30b2e6` | Secondary accent: primary CTA button, hints |
 | `--accent-orange` | `#f67c0f` | Target side, toggled-on states (segmented/overload/tracking-unit), falloff ring |
 | `--danger-red` | `#d81f27` | Errors, invalid input |
 | `--optimal-green` | `#9cc954` | Optimal ring (canvas), hit chance >= 90% |
@@ -97,7 +97,7 @@ Base recipe shared by all buttons: inset background, 1px dim border, radius 2px,
 
 Variants:
 
-- Toggle group buttons (`.lang-toggle`, `.segmented-control`, `.skill-tuner`, `.tracking-unit-toggle`): 10–12px uppercase; active = accent border + accent text (teal in header, orange for sim-state toggles).
+- Toggle group buttons (`.app-lang-toggle`, `.segmented-control`, `.skill-tuner`, `.tracking-unit-toggle`): 10–12px uppercase; active = accent border + accent text (teal in header, orange for sim-state toggles).
 - Standalone pressed-state toggles compose `btn btn-toggle`: teal border/text on `aria-pressed="true"`. Overload toggles compose `btn overload-button` (orange pressed state). Never hand-roll pressed-state chrome in component CSS — extend the primitive instead.
 - Primary action (`.controls button.primary`): blue border/text.
 - Icon-only buttons (`.icon-button`, `.fitting-eye`, `.propulsion-gear`): transparent bg, no border until contextual, dim icon that turns teal on hover, `line-height: 0` for svg alignment.
@@ -149,9 +149,9 @@ Keep JS-side styling minimal and token-aligned:
 ## Layout & responsive
 
 - Page: `.container` max-width 1540px centered. Main layout is a 3-column grid (attacker panel / canvas / target panel).
-- Breakpoints: `1210px` (narrower columns), `990px` (single column, results become horizontal scroller), `528px` (footer stacks and portrait offset). At viewports `991px` and wider the control bar uses a three-column grid so the zoom group is centered exactly; below that it wraps with flex.
-- Fluid alternatives replace viewport-specific component rules where possible: `.form-field-row` collapses with `auto-fit`/`minmax(min(100%, 121px), 1fr)` so two columns survive the narrowest 1210px side-panel track, `.control-bar` wraps with flex, and the zoom slider shrinks with `min-width`; the remaining 528px rules only style the page-level footer and canvas overlays.
-- Footer: 5-column info grid collapsing progressively across breakpoints.
+- Breakpoints: `1210px` (narrower columns), `990px` (single column, results become horizontal scroller), `528px` (portrait offset). At viewports `991px` and wider the control bar uses a three-column grid so the zoom group is centered exactly; below that it wraps with flex.
+- Fluid alternatives replace viewport-specific component rules where possible: `.form-field-row` collapses with `auto-fit`/`minmax(min(100%, 121px), 1fr)` so two columns survive the narrowest 1210px side-panel track, `.control-bar` wraps with flex, and the zoom slider shrinks with `min-width`; the remaining 528px rule only styles the canvas overlay portrait offset.
+- Footer: single bottom section — about with author on the first row, reference link groups below; collapses via fluid wrapping, no viewport rules.
 
 ## Checklist for new UI work
 

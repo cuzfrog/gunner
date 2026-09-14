@@ -5,6 +5,7 @@ export const EN: LanguageSlice<"en"> = {
   "lang.en": { en: "English" },
   "lang.zh": { en: "中文" },
   "lang.ja": { en: "日本語" },
+  "nav.ships": { en: "Ship list" },
   "label.shipA": { en: "Ship A" },
   "label.shipB": { en: "Ship B" },
   "label.trackingSpeed": { en: "Tracking speed" },
@@ -326,43 +327,12 @@ export const EN: LanguageSlice<"en"> = {
     en: "I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. " +
       "Just like you, I love this game.",
   },
-  "footer.mech.kinematics.heading": { en: "Kinematics" },
-  "footer.mech.kinematics.text": {
-    en: "Ships move with mass and inertia. Transversal, radial, and angular velocity describe ship motion. Acceleration is exponential.",
-  },
-  "footer.mech.kinematics.link": { en: "Velocity" },
-  "footer.mech.speed.heading": { en: "Speed" },
-  "footer.mech.speed.text": {
-    en: "Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further.",
-  },
-  "footer.mech.speed.link": { en: "Propulsion" },
-  "footer.mech.weapon.heading": { en: "Weapon" },
+  "footer.mech.flight.linkVelocity": { en: "Velocity" },
+  "footer.mech.flight.linkPropulsion": { en: "Propulsion" },
   "footer.mech.weapon.linkTurret": { en: "Turret mechanics" },
   "footer.mech.weapon.linkMissiles": { en: "Missiles" },
   "footer.mech.weapon.linkDrones": { en: "Drones" },
   "footer.mech.weapon.linkDamageTypes": { en: "Damage types" },
-  "intro.heading": { en: "EVE Online fight simulator in your browser" },
-  "intro.lede": {
-    en: "Gunner simulates ship-vs-ship combat on a 2D canvas with real motion — mass, inertia, transversal velocity and turret tracking. Import your fittings from EVE Online or Pyfa, set the initial distance, and watch the fight unfold: applied DPS, hit chance, capacitor stability and effective hitpoints are computed every tick.",
-  },
-  "intro.combat.heading": { en: "Real-time combat" },
-  "intro.combat.text": {
-    en: "Ships maneuver under orders — keep at range, orbit, approach — with microwarpdrive and afterburner physics. Transversal, radial and angular velocity update every tick, and turret tracking reacts to angular velocity and signature radius just like in space.",
-  },
-  "intro.damage.heading": { en: "Damage and defense" },
-  "intro.damage.text": {
-    en: "Turrets, missiles and drones apply their damage types against shields, armor and hull with resistances, repairers and rigs. Applied DPS, inflicted DPS and effective hitpoints update as the fight evolves.",
-  },
-  "intro.capacitor.heading": { en: "Capacitor warfare" },
-  "intro.capacitor.text": {
-    en: "Active modules drain your capacitor; energy neutralizers and nosferatus drain your enemy. See whether a fit is cap stable — and what happens when it is not.",
-  },
-  "intro.share.heading": { en: "Import, save and share" },
-  "intro.share.text": {
-    en: "Paste an EFT fitting straight from the game client or Pyfa, save profiles in your browser, and share any fight as a URL — the full simulation state travels inside the link.",
-  },
-  "intro.note": { en: "Open source, no account needed. Pick a hull, import a fit, and test your next 1v1 before you undock." },
-  "intro.ships": { en: "Browse every ship hull in the ship index — stats and preset fittings." },
   "unit.mm": { en: "mm" },
   "unit.meter": { en: "m" },
   "unit.kilometer": { en: "km" },

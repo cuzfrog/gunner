@@ -66,6 +66,18 @@
   color: var(--accent-teal);
 }
 
+.app-ships-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  min-height: 24px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.app-ships-icon { display: block; }
+
 .app-github-link {
   display: inline-flex;
   align-items: center;
