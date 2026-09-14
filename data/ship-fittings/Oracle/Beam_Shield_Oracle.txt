@@ -1,4 +1,4 @@
-[Oracle, Shield Oracle]
+[Oracle, Beam Shield Oracle]
 
 Heat Sink II
 Capacitor Power Relay II

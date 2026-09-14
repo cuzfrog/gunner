@@ -1,4 +1,4 @@
-[Drake, Missile Shield Drake]
+[Drake, Passive Missile Shield Drake]
 
 Mark I Compact Shield Power Relay
 Mark I Compact Shield Power Relay
