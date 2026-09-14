@@ -15,7 +15,7 @@ Stasis Webifier II
 150mm Railgun II, Spike M
 150mm Railgun II, Spike M
 Small Energy Neutralizer II
-[Empty High slot]
+Small Energy Neutralizer II
 
 Medium Core Defense Field Extender I
 Medium Core Defense Field Extender I

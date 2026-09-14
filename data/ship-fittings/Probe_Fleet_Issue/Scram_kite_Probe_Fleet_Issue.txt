@@ -17,9 +17,5 @@ Small EM Shield Reinforcer I
 Small Thermal Shield Reinforcer I
 [Empty rig slot]
 
-
-Hobgoblin II x3
-
-
 Nanite Repair Paste x32
 Scourge Rage Rocket x4000

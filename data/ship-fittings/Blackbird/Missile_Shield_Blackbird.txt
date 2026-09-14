@@ -2,7 +2,7 @@
 
 Damage Control II
 Signal Amplifier II
-[Empty Low slot]
+Signal Amplifier II
 
 50MN Microwarpdrive I
 Medium F-S9 Regolith Compact Shield Extender
@@ -14,7 +14,7 @@ Radar ECM I
 Rapid Light Missile Launcher I, Caldari Navy Scourge Light Missile
 Rapid Light Missile Launcher I, Caldari Navy Scourge Light Missile
 Rapid Light Missile Launcher I, Caldari Navy Scourge Light Missile
-[Empty High slot]
+Rapid Light Missile Launcher I, Caldari Navy Scourge Light Missile
 
 Medium Particle Dispersion Augmentor I
 Medium Particle Dispersion Augmentor I

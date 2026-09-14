@@ -1,4 +1,4 @@
-[Hurricane Fleet Issue, Tackle Rocket Shield Hurricane Fleet Issue]
+[Hurricane Fleet Issue, Tackle AC Shield Hurricane Fleet Issue]
 
 Damage Control II
 Fourier Compact Tracking Enhancer
@@ -7,12 +7,10 @@ Gyrostabilizer II
 Gyrostabilizer II
 Tracking Enhancer II
 
-Multispectrum Shield Hardener II
-Stasis Webifier II
 X-Large Ancillary Shield Booster, Navy Cap Booster 400
 10MN Afterburner II
 Warp Scrambler II
-Tracking Computer II, Tracking Speed Script
+Stasis Webifier II
 
 425mm AutoCannon II, Hail M
 425mm AutoCannon II, Hail M

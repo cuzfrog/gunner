@@ -20,7 +20,6 @@ Small Abyssal Energy Neutralizer
 
 Medium Polycarbon Engine Housing II
 Medium EM Shield Reinforcer II
-[Empty Rig slot]
 
 
 'Augmented' Valkyrie x5

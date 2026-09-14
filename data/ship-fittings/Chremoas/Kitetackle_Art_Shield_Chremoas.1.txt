@@ -2,7 +2,7 @@
 
 Republic Fleet Gyrostabilizer
 Republic Fleet Gyrostabilizer
-[Empty Low slot]
+Republic Fleet Gyrostabilizer
 
 Thukker Medium Shield Extender
 Pithum A-Type Multispectrum Shield Hardener
@@ -16,7 +16,6 @@ Domination Warp Disruptor
 
 Small Projectile Metastasis Adjuster II
 Small Ancillary Current Router II
-[Empty Rig slot]
 
 
 'Augmented' Warrior x3

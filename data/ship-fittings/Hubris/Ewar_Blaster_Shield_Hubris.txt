@@ -7,24 +7,21 @@ Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
-[Empty Low slot]
+Magnetic Field Stabilizer II
 
 Tracking Computer II, Tracking Speed Script
 Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
 CONCORD Capital Shield Booster
 Multispectrum Shield Hardener II
-Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
-[Empty Med slot]
 
+Ion Siege Blaster II, Void XL
 Ion Siege Blaster II, Void XL
 Ion Siege Blaster II, Void XL
 Capital Energy Neutralizer II
-Ion Siege Blaster II, Void XL
-[Empty High slot]
-[Empty High slot]
+Capital Energy Neutralizer II
+Capital Energy Neutralizer II
 
 Capital Hybrid Metastasis Adjuster I
-Capital Core Defense Field Extender I
 Capital Core Defense Field Extender I
 
 

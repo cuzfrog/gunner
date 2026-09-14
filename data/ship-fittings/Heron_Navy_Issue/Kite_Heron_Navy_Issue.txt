@@ -17,10 +17,6 @@ Small EM Shield Reinforcer I
 Small Thermal Shield Reinforcer I
 [Empty rig slot]
 
-
-Warrior II x3
-
-
 Nanite Repair Paste x32
 Navy Cap Booster 400 x8
 Caldari Navy Scourge Light Missile x4000

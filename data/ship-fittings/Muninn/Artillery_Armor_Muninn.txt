@@ -1,7 +1,8 @@
-[Muninn, Missile Armor Muninn]
+[Muninn, Artillery Armor Muninn]
 
 Damage Control II
 1600mm Steel Plates II
+Gyrostabilizer II
 Gyrostabilizer II
 Gyrostabilizer II
 Tracking Enhancer II
@@ -19,7 +20,6 @@ Medium Cap Battery II
 
 Medium Trimark Armor Pump I
 Medium Trimark Armor Pump I
-Medium Ancillary Current Router I
 
 
 Warrior II x5

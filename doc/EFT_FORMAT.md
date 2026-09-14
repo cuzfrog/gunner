@@ -47,8 +47,8 @@ Normative reference for gunner's fitting text parser and bundled fit data. Sourc
 ## Empty-slot policy
 
 - The game client omits `[Empty … slot]` lines on export; pyfa emits them.
-- Gunner's bundled data (`data/ship-fittings/`) MUST include placeholders so every bank is filled to the hull's full slot capacity. This makes bank identification purely positional and deterministic.
-- Gunner's runtime parser MUST accept placeholder-less input (game exports): see parser notes below.
+- Gunner's bundled data (`data/ship-fittings/`) fills every bank to the hull's full slot capacity. Prefer real modules: combat-ready presets leave no slot wasted. `[Empty <bank> slot]` placeholders are accepted by the parser and remain only where a slot is intentionally unfilled.
+- Placeholders (or any cataloged module) also anchor bank identification; the parser resolves placeholder-less blocks positionally (see parser notes below).
 
 ## Parser requirements
 
