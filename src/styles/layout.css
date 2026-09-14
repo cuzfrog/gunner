@@ -5,11 +5,6 @@
     grid-template-columns: minmax(286px, 308px) minmax(0, 1fr) minmax(286px, 308px);
     gap: 13px;
   }
-
-  .app-footer {
-    grid-template-columns: 1fr 1fr;
-    gap: 15px 26px;
-  }
 }
 
 @media (max-width: 990px) {
@@ -32,8 +27,6 @@
 }
 
 @media (max-width: 528px) {
-  .app-footer { grid-template-columns: 1fr; }
-
   .combatant-portrait { bottom: 167px; }
 }
 

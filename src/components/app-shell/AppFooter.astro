@@ -1,48 +1,51 @@
 ---
-import FooterMechanism from "./FooterMechanism.astro";
+import Icon from "../controls/Icon.astro";
 ---
 
 <footer class="app-footer">
-  <div>
-    <h3 class="footer-heading" data-i18n="footer.about.heading">About Gunner</h3>
-    <p class="footer-text" data-i18n="footer.about.text">I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. Just like you, I love this game.</p>
+  <div class="app-footer-about-row">
+    <div class="app-footer-about">
+      <h3 class="footer-heading" data-i18n="footer.about.heading">About Gunner</h3>
+      <p class="app-footer-about-text" data-i18n="footer.about.text">I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. Just like you, I love this game.</p>
+    </div>
+    <div class="footer-author">
+      <img src="author-portrait.jpg" alt="Keos Cuzi" class="footer-author-portrait" width="28" height="28">
+      <img src="corporation-emblem.png" alt="Ascendance Rising" class="footer-corporation-emblem" width="28" height="28">
+      <span class="footer-author-line">
+        <span class="footer-author-label" data-i18n="label.author">Author:</span>
+        <span class="footer-author-name">Keos Cuzi</span>
+      </span>
+      <span class="footer-author-line">
+        <span class="footer-corp-label" data-i18n="label.corp">Corp:</span>
+        <span class="footer-corp-name">Ascendance Rising</span>
+      </span>
+    </div>
   </div>
 
-  <FooterMechanism accent="teal"
-    headingI18n="footer.mech.kinematics.heading" heading="Kinematics"
-    textI18n="footer.mech.kinematics.text" text="Ships move with mass and inertia. Transversal, radial, and angular velocity describe ship motion. Acceleration is exponential."
-    links={[
-      { i18n: "footer.mech.kinematics.link", text: "Velocity", href: "https://wiki.eveuniversity.org/Velocity" },
-    ]} />
-
-  <FooterMechanism accent="blue"
-    headingI18n="footer.mech.speed.heading" heading="Speed"
-    textI18n="footer.mech.speed.text" text="Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further."
-    links={[
-      { i18n: "footer.mech.speed.link", text: "Propulsion", href: "https://wiki.eveuniversity.org/Propulsion_equipment" },
-    ]} />
-
-  <FooterMechanism accent="orange"
-    headingI18n="footer.mech.weapon.heading" heading="Weapon"
-    links={[
-      { i18n: "footer.mech.weapon.linkTurret", text: "Turret mechanics", href: "https://wiki.eveuniversity.org/Turret_mechanics" },
-      { i18n: "footer.mech.weapon.linkMissiles", text: "Missiles", href: "https://wiki.eveuniversity.org/Missiles" },
-      { i18n: "footer.mech.weapon.linkDrones", text: "Drones", href: "https://wiki.eveuniversity.org/Drones" },
-      { i18n: "footer.mech.weapon.linkDamageTypes", text: "Damage types", href: "https://wiki.eveuniversity.org/Damage_types" },
-    ]} />
-
-  <div class="footer-author">
-    <div class="footer-author-emblems">
-      <img src="author-portrait.jpg" alt="Keos Cuzi" class="footer-author-portrait" width="36" height="36">
-      <img src="corporation-emblem.png" alt="Ascendance Rising" class="footer-corporation-emblem" width="36" height="36">
-    </div>
-    <span class="footer-author-line">
-      <span class="footer-author-label" data-i18n="label.author">Author:</span>
-      <span class="footer-author-name">Keos Cuzi</span>
-    </span>
-    <span class="footer-author-line">
-      <span class="footer-corp-label" data-i18n="label.corp">Corp:</span>
-      <span class="footer-corp-name">Ascendance Rising</span>
-    </span>
+  <div class="app-footer-references">
+    <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Velocity" target="_blank" rel="noopener noreferrer">
+      <span data-i18n="footer.mech.flight.linkVelocity">Velocity</span>
+      <Icon name="external" size={10} fill="none" stroke="currentColor" class="icon-ext" />
+    </a>
+    <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Propulsion_equipment" target="_blank" rel="noopener noreferrer">
+      <span data-i18n="footer.mech.flight.linkPropulsion">Propulsion</span>
+      <Icon name="external" size={10} fill="none" stroke="currentColor" class="icon-ext" />
+    </a>
+    <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Turret_mechanics" target="_blank" rel="noopener noreferrer">
+      <span data-i18n="footer.mech.weapon.linkTurret">Turret mechanics</span>
+      <Icon name="external" size={10} fill="none" stroke="currentColor" class="icon-ext" />
+    </a>
+    <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Missiles" target="_blank" rel="noopener noreferrer">
+      <span data-i18n="footer.mech.weapon.linkMissiles">Missiles</span>
+      <Icon name="external" size={10} fill="none" stroke="currentColor" class="icon-ext" />
+    </a>
+    <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Drones" target="_blank" rel="noopener noreferrer">
+      <span data-i18n="footer.mech.weapon.linkDrones">Drones</span>
+      <Icon name="external" size={10} fill="none" stroke="currentColor" class="icon-ext" />
+    </a>
+    <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Damage_types" target="_blank" rel="noopener noreferrer">
+      <span data-i18n="footer.mech.weapon.linkDamageTypes">Damage types</span>
+      <Icon name="external" size={10} fill="none" stroke="currentColor" class="icon-ext" />
+    </a>
   </div>
 </footer>

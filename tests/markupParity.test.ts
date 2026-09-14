@@ -1,28 +1,15 @@
-import { existsSync, readFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { TAG_BY_ID } from "../src/ui/controls";
+import { ensureDistBuild } from "../scripts/ensure-dist-build";
 import pkg from "../package.json";
 
 const DIST_HTML = "dist/index.html";
 const BASELINE_PATH = "tests/markup-parity-baseline.json";
-// Any build input being newer than dist invalidates the parity checks; src/ui and package.json
-// feed the built page (contract ids, i18n keys, version), so they must be watched too.
-const STALE_SOURCES = ["src", "public", "package.json", "astro.config.mjs", "tsconfig.json"];
 
 interface Baseline {
   readonly ids: readonly string[];
   readonly classes: readonly string[];
   readonly i18nKeys: readonly string[];
-}
-
-function isDistStale(): boolean {
-  if (!existsSync(DIST_HTML)) return true;
-  const result = spawnSync("find", [...STALE_SOURCES.filter((path) => existsSync(path)), "-newer", DIST_HTML, "-print", "-quit"], { encoding: "utf8" });
-  return result.stdout.trim().length > 0;
-}
-
-function ensureBuild(): void {
-  if (isDistStale()) spawnSync("bun", ["run", "build"], { stdio: "inherit" });
 }
 
 function extractIds(html: string): Map<string, number> {
@@ -55,7 +42,7 @@ describe("markup parity", () => {
   // A stale dist is normally rebuilt by the e2e server before an e2e run; this rebuild covers
   // `bun test` directly after markup-affecting changes. Generous timeout: under load a cold
   // full build can exceed 30s, which made this hook flake.
-  beforeAll(ensureBuild, 120000);
+  beforeAll(ensureDistBuild, 120000);
 
   test("every contract element id appears exactly once", () => {
     const html = readFileSync(DIST_HTML, "utf-8");

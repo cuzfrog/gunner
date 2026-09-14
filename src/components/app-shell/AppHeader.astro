@@ -14,6 +14,10 @@ const { version } = Astro.props;
     <span class="app-version-text mono" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v{version}</span>
   </div>
   <div class="app-header-right">
+    <a class="btn app-ships-link" href="/ships/" target="_blank" rel="noopener">
+      <span data-i18n="nav.ships">Ship list</span>
+      <Icon name="external" size={10} fill="none" stroke="currentColor" class="app-ships-icon" />
+    </a>
     <nav class="app-lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="label.language">
       <button type="button" id="lang-en" data-lang="en" class="btn" aria-pressed="true" data-i18n="lang.en">English</button>
       <button type="button" id="lang-zh" data-lang="zh" class="btn" aria-pressed="false" data-i18n="lang.zh">中文</button>

@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import pkg from "../../package.json";
-import { AppHeader, AppFooter, AppIntro, ProfileBar, ResultGrid, ShipPanel, CanvasFrame } from "../components";
+import { AppHeader, AppFooter, ProfileBar, ResultGrid, ShipPanel, CanvasFrame } from "../components";
 
 const version = pkg.version;
 ---
@@ -19,7 +19,6 @@ const version = pkg.version;
       <CanvasFrame />
       <ShipPanel side="shipB" />
     </main>
-    <AppIntro />
     <AppFooter />
   </div>
 

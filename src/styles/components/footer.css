@@ -1,8 +1,8 @@
 @layer components {
 .app-footer {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr 1.2fr 1.2fr auto;
-  gap: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
   margin-top: 8px;
   padding: 5px 4px 2px;
   border-top: 1px solid var(--border-dim);
@@ -11,24 +11,26 @@
   color: var(--text-dim);
 }
 
-.footer-text {
-  margin: 0;
-  max-width: 40ch;
-}
-
-.app-footer-mechanism {
+.app-footer-about-row {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 9px 26px;
 }
 
-.app-footer-mechanism .footer-text { margin: 0 0 4px; }
+.app-footer-about { min-width: 0; }
 
-.app-footer-mechanism .app-footer-ref + .app-footer-ref { margin-top: 5px; }
+.app-footer-about-text {
+  margin: 0;
+  color: var(--text-secondary);
+}
 
-.app-footer-mechanism[data-accent="teal"] .footer-heading { color: var(--accent-teal); }
-.app-footer-mechanism[data-accent="blue"] .footer-heading { color: var(--accent-blue); }
-.app-footer-mechanism[data-accent="orange"] .footer-heading { color: var(--accent-orange); }
+.app-footer-references {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
 
 .app-footer-ref {
   display: inline-flex;
@@ -38,9 +40,6 @@
   text-decoration: none;
   border-bottom: 1px solid transparent;
 }
-
-.app-footer-mechanism[data-accent="blue"] > .app-footer-ref { color: var(--accent-blue); }
-.app-footer-mechanism[data-accent="orange"] > .app-footer-ref { color: var(--accent-orange); }
 
 .app-footer-ref:hover { border-bottom-color: currentColor; }
 
@@ -55,28 +54,21 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-secondary);
-  margin: 0 0 7px;
+  margin: 0;
 }
 
 .footer-author {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 4px 7px;
   color: var(--text-secondary);
   white-space: nowrap;
 }
 
-.footer-author-emblems {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
 .footer-author-portrait {
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid var(--border-dim);
@@ -84,8 +76,8 @@
 }
 
 .footer-corporation-emblem {
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
   flex: none;
 }

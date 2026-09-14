@@ -2,7 +2,6 @@
 no-new-exports:
   - app-shell/AppFooter.astro
   - app-shell/AppHeader.astro
-  - app-shell/FooterMechanism.astro
   - canvas-frame/CanvasFrame.astro
   - canvas-frame/CanvasSettingsPopup.astro
   - canvas-frame/CombatantPortrait.astro
