@@ -231,7 +231,11 @@ const MODULE_GROUPS = new Set([
   1697, // Ancillary Remote Shield Booster
   1698, // Ancillary Remote Armor Repairer
   2018, // Mutadaptive Remote Armor Repairer
+  330, // Cloaking Device
 ]);
+
+const RIG_GROUPS = new Set([773, 774, 775, 776, 777, 778, 779, 781, 782, 786, 1308]);
+const CLOAKING_DEVICE_GROUP = 330;
 
 const SCRIPT_GROUPS = new Set([907]);
 const EWAR_SCRIPT_GROUPS = new Set([909]);
@@ -1912,8 +1916,8 @@ async function main() {
         const defense = buildDefenseStats(values, effects, type.groupID, typeDogma, dogmaEffects);
         const capacitor = buildCapacitorStatsFromIntents({ values, effects, groupId: type.groupID, dogmaEffects, chargeCapacity: type.capacity ?? 0 });
         const warfare = buildCapWarfareStatsFromIntents({ values, effects, groupId: type.groupID, dogmaEffects, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID) });
-        if (stats || defense || capacitor || warfare) {
-          fittingModules[id] = { ...stats, defense, capacitor, neutralizer: warfare?.neutralizer, nosferatu: warfare?.nosferatu, id, name: enName };
+        if (stats || defense || capacitor || warfare || RIG_GROUPS.has(type.groupID) || type.groupID === CLOAKING_DEVICE_GROUP) {
+          fittingModules[id] = { ...(stats ?? {}), defense, capacitor, neutralizer: warfare?.neutralizer, nosferatu: warfare?.nosferatu, id, name: enName };
           addItemName(itemNames, id, type);
         }
       }

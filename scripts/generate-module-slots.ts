@@ -88,6 +88,7 @@ const GROUP_SLOTS: Readonly<Record<string, ModuleSlot>> = {
   "Capacitor Flux Coil": "low",
   "Capacitor Power Relay": "low",
   "Capacitor Recharger": "mid",
+  "Cloaking Device": "high",
   "Command Burst": "high",
   "Damage Control": "low",
   "Drone Control Range Module": "mid",
