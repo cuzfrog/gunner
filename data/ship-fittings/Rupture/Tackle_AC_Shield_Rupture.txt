@@ -4,6 +4,7 @@ Gyrostabilizer II
 Gyrostabilizer II
 Damage Control II
 Tracking Enhancer II
+[Empty Low slot]
 
 Fleeting Compact Stasis Webifier
 X-Large Ancillary Shield Booster, Navy Cap Booster 400

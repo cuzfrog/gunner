@@ -1,0 +1,32 @@
+[Stratios, Neut Armor Stratios]
+
+Damage Control II
+Medium Ancillary Armor Repairer
+Energized Adaptive Nano Membrane II
+Energized Adaptive Nano Membrane II
+1600mm Steel Plates II
+
+50MN Cold-Gas Enduring Microwarpdrive
+Warp Scrambler II
+Stasis Webifier II
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+Medium Cap Battery II
+
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
+Medium Energy Nosferatu II
+[Empty High slot]
+[Empty High slot]
+
+Medium Trimark Armor Pump I
+Medium Trimark Armor Pump I
+Medium Auxiliary Nano Pump I
+
+
+Ogre II x2
+Vespa II x2
+Hornet EC-300 x5
+
+
+Navy Cap Booster 800 x20
+Nanite Repair Paste x100

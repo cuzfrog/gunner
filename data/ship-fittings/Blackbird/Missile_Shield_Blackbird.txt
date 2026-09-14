@@ -2,6 +2,7 @@
 
 Damage Control II
 Signal Amplifier II
+[Empty Low slot]
 
 50MN Microwarpdrive I
 Medium F-S9 Regolith Compact Shield Extender
@@ -20,7 +21,7 @@ Medium Particle Dispersion Augmentor I
 Medium Core Defense Field Extender I
 
 
-Hornet EC-300 x5
+Hornet EC-300 x2
 
 
 Caldari Navy Scourge Light Missile x1000

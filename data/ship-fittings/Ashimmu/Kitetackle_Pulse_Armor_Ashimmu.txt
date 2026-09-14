@@ -23,13 +23,10 @@ Medium Nanobot Accelerator I
 Medium Auxiliary Nano Pump I
 
 
-Hobgoblin II x1
-Hobgoblin II x2
+Hobgoblin II x3
 
 
 Navy Cap Booster 800 x10
-Conflagration M x1
-Conflagration M x5
+Conflagration M x6
 Nanite Repair Paste x296
-Scorch M x1
-Scorch M x8
+Scorch M x9

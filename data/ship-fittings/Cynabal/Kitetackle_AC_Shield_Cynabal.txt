@@ -23,10 +23,8 @@ Medium Thermal Shield Reinforcer II
 Medium EM Shield Reinforcer II
 
 
-Hobgoblin II x3
-Hobgoblin II x2
-Republic Fleet Warrior x2
-Republic Fleet Warrior x3
+Hobgoblin II x5
+Republic Fleet Warrior x5
 
 
 Nanite Repair Paste x40

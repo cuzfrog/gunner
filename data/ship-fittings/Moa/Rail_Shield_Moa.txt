@@ -1,0 +1,31 @@
+[Moa, Rail Shield Moa]
+
+Damage Control II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Tracking Enhancer II
+
+50MN Cold-Gas Enduring Microwarpdrive
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Warp Scrambler II
+Stasis Webifier II
+
+250mm Railgun II, Javelin M
+250mm Railgun II, Javelin M
+250mm Railgun II, Javelin M
+250mm Railgun II, Javelin M
+[Empty High slot]
+
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+Medium Ancillary Current Router I
+
+
+Hobgoblin II x1
+
+
+Javelin M x2000
+Spike M x2000
+Caldari Navy Antimatter Charge M x1500
+Nanite Repair Paste x50
