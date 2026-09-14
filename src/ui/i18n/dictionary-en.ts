@@ -361,7 +361,7 @@ export const EN: LanguageSlice<"en"> = {
   "intro.share.text": {
     en: "Paste an EFT fitting straight from the game client or Pyfa, save profiles in your browser, and share any fight as a URL — the full simulation state travels inside the link.",
   },
-  "intro.note": { en: "Free and open source, no account needed. Pick a hull, import a fit, and test your next 1v1 before you undock." },
+  "intro.note": { en: "Open source, no account needed. Pick a hull, import a fit, and test your next 1v1 before you undock." },
   "intro.ships": { en: "Browse every ship hull in the ship index — stats and preset fittings." },
   "unit.mm": { en: "mm" },
   "unit.meter": { en: "m" },
