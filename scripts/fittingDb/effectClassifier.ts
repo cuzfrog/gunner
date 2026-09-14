@@ -31,6 +31,7 @@ export type CapacitorIntent =
   | { readonly tag: "capRecharge" }
   | { readonly tag: "capEnergyWarfareResistance" }
   | { readonly tag: "capBooster" }
+  | { readonly tag: "capTransfer" }
   | { readonly tag: "energyNeutralizer" }
   | { readonly tag: "energyNosferatu" };
 
@@ -40,6 +41,7 @@ export interface ClassifiedCapacitorEffect {
 }
 
 const CAP_BOOSTER_EFFECT_ID = 48;
+const CAP_TRANSFER_EFFECT_ID = 6184;
 const ENERGY_NEUTRALIZER_FALLOFF_EFFECT_ID = 6187;
 const ENERGY_NOSFERATU_FALLOFF_EFFECT_ID = 6197;
 
@@ -73,6 +75,7 @@ function classifyCapacitorModifiers(modifiers: readonly SdeDogmaEffectModifier[]
 
 function classifyCapacitorActionEffect(effectId: number): CapacitorIntent | undefined {
   if (effectId === CAP_BOOSTER_EFFECT_ID) return { tag: "capBooster" };
+  if (effectId === CAP_TRANSFER_EFFECT_ID) return { tag: "capTransfer" };
   if (effectId === ENERGY_NEUTRALIZER_FALLOFF_EFFECT_ID) return { tag: "energyNeutralizer" };
   if (effectId === ENERGY_NOSFERATU_FALLOFF_EFFECT_ID) return { tag: "energyNosferatu" };
   return undefined;
@@ -242,7 +245,9 @@ function classifyActionEffect(effect: SdeDogmaEffect, typeDogma: SdeTypeDogma | 
 }
 
 function isAncillaryEffect(effect: SdeDogmaEffect): boolean {
-  return effect.effectName?.toLowerCase().includes("fueled") ?? false;
+  const name = effect.effectName?.toLowerCase();
+  if (name === undefined) return false;
+  return name.includes("fueled") || name.includes("ancillaryremote");
 }
 
 function classifyTurretModifiers(modifiers: readonly SdeDogmaEffectModifier[]): TurretIntent | undefined {

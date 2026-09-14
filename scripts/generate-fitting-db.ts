@@ -198,7 +198,7 @@ const MODULE_GROUPS = new Set([
   328, // Armor Hardener
   338, // Shield Boost Amplifier
   40, // Shield Booster
-  41, // Shield Recharger
+  41, // Remote Shield Booster
   57, // Shield Power Relay
   1150, // Armor Resistance Shift Hardener (RAH)
   1156, // Ancillary Shield Booster
@@ -211,8 +211,14 @@ const MODULE_GROUPS = new Set([
   766, // Power Diagnostic System
   767, // Capacitor Power Relay
   768, // Capacitor Flux Coil
+  67, // Remote Capacitor Transmitter
   71, // Energy Neutralizer
   68, // Energy Nosferatu
+  // Remote repairers
+  325, // Remote Armor Repairer
+  1697, // Ancillary Remote Shield Booster
+  1698, // Ancillary Remote Armor Repairer
+  2018, // Mutadaptive Remote Armor Repairer
 ]);
 
 const SCRIPT_GROUPS = new Set([907]);

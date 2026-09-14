@@ -282,6 +282,20 @@ describe("classifyDefenseEffects - repairers (action effects)", () => {
     const result = classifyDefenseEffects([e], td);
     expect(firstIntent(result)).toEqual({ tag: "repairer", layer: "armor", ancillary: false });
   });
+
+  test("ancillary remote shield booster (effect name contains ancillaryremote) classifies as ancillary shield repairer", () => {
+    const e = effect(6652, { category: 2, name: "shipModuleAncillaryRemoteShieldBooster" });
+    const td = typeDogma([{ attributeID: 68, value: 950 }]);
+    const result = classifyDefenseEffects([e], td);
+    expect(firstIntent(result)).toEqual({ tag: "repairer", layer: "shield", ancillary: true });
+  });
+
+  test("ancillary remote armor repairer (effect name contains ancillaryremote) classifies as ancillary armor repairer", () => {
+    const e = effect(6651, { category: 2, name: "shipModuleAncillaryRemoteArmorRepairer" });
+    const td = typeDogma([{ attributeID: 84, value: 290 }]);
+    const result = classifyDefenseEffects([e], td);
+    expect(firstIntent(result)).toEqual({ tag: "repairer", layer: "armor", ancillary: true });
+  });
 });
 
 describe("classifyDefenseEffects - resist edge cases", () => {
@@ -657,6 +671,10 @@ describe("classifyCapacitorEffects", () => {
 
   test("energyNosferatuFalloff effect (6197) classifies as energyNosferatu", () => {
     expect(capacitorIntent(effect(6197, { category: 2 }))).toBe("energyNosferatu");
+  });
+
+  test("remoteCapacitorTransmitter effect (6184) classifies as capTransfer", () => {
+    expect(capacitorIntent(effect(6184, { category: 2, name: "shipModuleRemoteCapacitorTransmitter" }))).toBe("capTransfer");
   });
 
   test("unrelated modifiers produce no capacitor intent", () => {

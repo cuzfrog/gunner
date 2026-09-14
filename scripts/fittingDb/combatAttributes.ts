@@ -58,7 +58,7 @@ export const ENERGY_WARFARE_RESISTANCE = 2045;
 export const ENERGY_WARFARE_RESISTANCE_BONUS = 2267;
 
 export const CAPACITOR_STATS_GROUPS = new Set([43, 61, 76, 766, 767, 768]);
-export const CAP_WARFARE_GROUPS = new Set([68, 71]);
+export const CAP_WARFARE_GROUPS = new Set([67, 68, 71]);
 
 export const TURRET_DAMAGE_MULTIPLIER = 64;
 export const TURRET_SPEED = 51;
