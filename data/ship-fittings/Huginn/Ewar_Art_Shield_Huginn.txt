@@ -3,7 +3,7 @@
 Damage Control II
 Capacitor Power Relay II
 Capacitor Power Relay II
-[Empty Low slot]
+Power Diagnostic System II
 
 Large Shield Extender II
 Large Shield Extender II
@@ -16,7 +16,7 @@ Small EMP Smartbomb II
 720mm Howitzer Artillery II, Republic Fleet EMP M
 Small EMP Smartbomb II
 720mm Howitzer Artillery II, Republic Fleet EMP M
-[Empty High slot]
+Medium Energy Nosferatu II
 
 Medium Core Defense Field Extender II
 Medium Core Defense Field Extender II

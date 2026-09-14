@@ -4,8 +4,8 @@ Abyssal Gyrostabilizer
 Corpum A-Type Multispectrum Energized Membrane
 Abyssal Gyrostabilizer
 Medium Abyssal Armor Repairer
-[Empty Low slot]
-[Empty Low slot]
+Damage Control II
+1600mm Steel Plates II
 
 Abyssal Warp Disruptor
 Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800

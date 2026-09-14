@@ -1,4 +1,4 @@
-[Sabre, Kitetackle AC Shield Sabre]
+[Sabre, Kitetackle Dual Extender AC Shield Sabre]
 
 Nanofiber Internal Structure II
 Nanofiber Internal Structure II
@@ -14,8 +14,8 @@ Faint Epsilon Scoped Warp Scrambler
 125mm Gatling AutoCannon II, Hail S
 125mm Gatling AutoCannon II, Hail S
 125mm Gatling AutoCannon II, Hail S
-[Empty High slot]
-[Empty High slot]
+Small Energy Neutralizer II
+Small Energy Nosferatu II
 
 Small Polycarbon Engine Housing II
 Small Hyperspatial Velocity Optimizer II

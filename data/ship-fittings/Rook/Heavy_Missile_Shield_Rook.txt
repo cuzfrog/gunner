@@ -1,22 +1,22 @@
-[Rook, Missile Shield Rook]
+[Rook, Heavy Missile Shield Rook]
 
 Ballistic Control System II
-[Empty Low slot]
-[Empty Low slot]
+Ballistic Control System II
+Power Diagnostic System II
 
 Large Shield Extender II
 Large Shield Extender II
 50MN Microwarpdrive II
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Sensor Booster II, Scan Resolution Script
+Multispectrum Shield Hardener II
+Warp Scrambler II
+Fleeting Compact Stasis Webifier
 
 Heavy Missile Launcher II, Scourge Fury Heavy Missile
 Heavy Missile Launcher II, Scourge Fury Heavy Missile
 Heavy Missile Launcher II, Scourge Fury Heavy Missile
 Heavy Missile Launcher II, Scourge Fury Heavy Missile
-[Empty High slot]
+Medium Energy Neutralizer II
 
 Medium EM Shield Reinforcer II
 Medium Core Defense Field Extender II
@@ -26,5 +26,7 @@ Hobgoblin II x4
 Hobgoblin II x1
 
 
-Scourge Fury Heavy Missile x9068
-Nanite Repair Paste x200
+Scourge Fury Heavy Missile x1500
+Scourge Precision Heavy Missile x500
+Nanite Repair Paste x150
+Scan Resolution Script x1

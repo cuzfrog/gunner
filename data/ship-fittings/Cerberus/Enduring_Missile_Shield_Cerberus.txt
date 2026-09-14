@@ -1,4 +1,4 @@
-[Cerberus, Missile Shield Cerberus]
+[Cerberus, Enduring Missile Shield Cerberus]
 
 Ballistic Control System II
 Assault Damage Control II

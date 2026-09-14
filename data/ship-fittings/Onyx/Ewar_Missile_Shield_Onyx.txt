@@ -9,15 +9,15 @@ Republic Fleet Large Shield Extender
 Multispectrum Shield Hardener II
 EM Shield Hardener II
 50MN Microwarpdrive II
-[Empty Med slot]
-[Empty Med slot]
+Large Shield Extender II
+Warp Scrambler II
 
 Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
 Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
 Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
 Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
-[Empty High slot]
-[Empty High slot]
+Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
 
 Medium Core Defense Field Extender II
 Medium Core Defense Field Extender II

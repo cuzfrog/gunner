@@ -1,15 +1,16 @@
-[Rook, Kitetackle Missile Shield Rook]
+[Cobra, Missile Shield Cobra]
 
 Ballistic Control System II
 Ballistic Control System II
 Ballistic Control System II
+Damage Control II
+Power Diagnostic System II
 
 Large Shield Extender II
 Large Shield Extender II
 Multispectrum Shield Hardener II
-Multispectrum Shield Hardener II
-Stasis Webifier II
 Warp Scrambler II
+Stasis Webifier II
 50MN Cold-Gas Enduring Microwarpdrive
 
 Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
@@ -17,13 +18,16 @@ Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
 Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
 Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
 Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
 
 Medium EM Shield Reinforcer II
-[Empty Rig slot]
+Medium Core Defense Field Extender II
 
 
-Caldari Navy Scourge Heavy Assault Missile x2000
-Scourge Rage Heavy Assault Missile x1220
-Caldari Navy Nova Heavy Assault Missile x2000
-Caldari Navy Mjolnir Heavy Assault Missile x2000
-Caldari Navy Inferno Heavy Assault Missile x2000
+Vespa II x3
+
+
+Scourge Rage Heavy Assault Missile x3000
+Mjolnir Rage Heavy Assault Missile x1000
+Nanite Repair Paste x100

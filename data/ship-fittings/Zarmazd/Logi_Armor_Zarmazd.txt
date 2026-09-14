@@ -1,0 +1,31 @@
+[Zarmazd, Logi Armor Zarmazd]
+
+Damage Control II
+Imperial Navy 1600mm Steel Plates
+Multispectrum Energized Membrane II
+Centum A-Type EM Energized Membrane
+Armor Explosive Hardener II
+True Sansha Kinetic Armor Hardener
+
+Sensor Booster II, Targeting Range Script
+50MN Quad LiF Restrained Microwarpdrive
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
+Medium Capacitor Booster II, Navy Cap Booster 800
+
+Heavy Mutadaptive Remote Armor Repairer II
+Heavy Mutadaptive Remote Armor Repairer II
+Perun Heavy Mutadaptive Remote Armor Repairer
+Medium Inductive Compact Remote Capacitor Transmitter
+
+Medium Ancillary Current Router II
+Medium Trimark Armor Pump II
+
+
+Medium Armor Maintenance Bot II x3
+
+
+Navy Cap Booster 800 x20
+Navy Cap Booster 400 x20
+Nanite Repair Paste x200
+Targeting Range Script x1
+Scan Resolution Script x1

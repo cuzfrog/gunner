@@ -654,15 +654,15 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Kitetackle Blaster Armor Adrestia",
+    "body": "Reactive Armor Hardener\n1600mm Rolled Tungsten Compact Plates\nEM Armor Hardener II\nDamage Control II\nExplosive Armor Hardener II\nMultispectrum Energized Membrane II\n\nFaint Epsilon Scoped Warp Scrambler\nSmall F-RX Compact Capacitor Booster, Navy Cap Booster 400\n50MN Cold-Gas Enduring Microwarpdrive\nStasis Webifier II\n\nHeavy Neutron Blaster II, Dread Guristas Antimatter Charge M\nHeavy Neutron Blaster II, Dread Guristas Antimatter Charge M\nHeavy Neutron Blaster II, Dread Guristas Antimatter Charge M\nHeavy Neutron Blaster II, Dread Guristas Antimatter Charge M\nMedium Energy Neutralizer II\n\nMedium Ancillary Current Router II\nMedium Auxiliary Nano Pump II\n\n\n'Augmented' Hammerhead x5\n\n\nDread Guristas Antimatter Charge M x2433\nNull M x1200\nNavy Cap Booster 400 x23\nNanite Repair Paste x250\nVoid M x1200"
+   },
+   {
+    "name": "Kitetackle Plate Blaster Armor Adrestia",
     "body": "Setele's Modified Multispectrum Energized Membrane\nImperial Navy 1600mm Steel Plates\nBrynn's Modified Magnetic Field Stabilizer\nCore X-Type Explosive Armor Hardener\nBrynn's Modified Magnetic Field Stabilizer\nAhremen's Modified Multispectrum Energized Membrane\n\nRepublic Fleet Warp Disruptor\nCorelum A-Type 50MN Microwarpdrive\nTrue Sansha Warp Scrambler\nDark Blood Small Capacitor Booster, Navy Cap Booster 400\n\nHeavy Neutron Blaster II, Federation Navy Antimatter Charge M\nHeavy Neutron Blaster II, Federation Navy Antimatter Charge M\nHeavy Neutron Blaster II, Federation Navy Antimatter Charge M\nHeavy Neutron Blaster II, Federation Navy Antimatter Charge M\nHeavy Neutron Blaster II, Federation Navy Antimatter Charge M\n\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\n\n\n'Augmented' Hammerhead x2\n'Augmented' Hammerhead x2\n'Augmented' Valkyrie x1\n\n\nFederation Navy Antimatter Charge M x2035\nNull M x1140\nNavy Cap Booster 400 x29\nVoid M x1350"
    },
    {
-    "name": "Kitetackle Blaster Armor Adrestia",
-    "body": "Reactive Armor Hardener\n1600mm Rolled Tungsten Compact Plates\nEM Armor Hardener II\nDamage Control II\nExplosive Armor Hardener II\nMultispectrum Energized Membrane II\n\nFaint Epsilon Scoped Warp Scrambler\nSmall F-RX Compact Capacitor Booster, Navy Cap Booster 400\n50MN Cold-Gas Enduring Microwarpdrive\n[Empty Med slot]\n\nHeavy Neutron Blaster II, Dread Guristas Antimatter Charge M\nHeavy Neutron Blaster II, Dread Guristas Antimatter Charge M\nHeavy Neutron Blaster II, Dread Guristas Antimatter Charge M\nHeavy Neutron Blaster II, Dread Guristas Antimatter Charge M\nHeavy Neutron Blaster II, Dread Guristas Antimatter Charge M\n\n[Empty Rig slot]\n[Empty Rig slot]\n\n\n'Augmented' Hammerhead x5\n\n\nDread Guristas Antimatter Charge M x2433\nNull M x1200\nNavy Cap Booster 400 x23\nNanite Repair Paste x250\nVoid M x1200"
-   },
-   {
     "name": "Kitetackle Rail Armor Adrestia",
-    "body": "Magnetic Field Stabilizer II\nMultispectrum Energized Membrane II\nPrototype Compact Explosive Armor Hardener I\nReactive Armor Hardener\nMagnetic Field Stabilizer II\n1600mm Rolled Tungsten Compact Plates\n\n50MN Y-T8 Compact Microwarpdrive\nSmall F-RX Compact Capacitor Booster, Navy Cap Booster 400\nTracking Computer II, Optimal Range Script\nWarp Scrambler II\n\n250mm Railgun II\n250mm Railgun II\n250mm Railgun II\n250mm Railgun II\n250mm Railgun II\n\nMedium EM Armor Reinforcer I\n[Empty Rig slot]\n\n\nHornet EC-300 x5\nLight Armor Maintenance Bot I x5\n\n\nSpike M x1000\nECCM Script x1\nCaldari Navy Thorium Charge M x1200\nCaldari Navy Antimatter Charge M x1200\nNavy Cap Booster 400 x30\nScan Resolution Script x1\nNanite Repair Paste x200\nCaldari Navy Iridium Charge M x975\nTargeting Range Script x1\nTracking Speed Script x1"
+    "body": "Magnetic Field Stabilizer II\nMultispectrum Energized Membrane II\nPrototype Compact Explosive Armor Hardener I\nReactive Armor Hardener\nMagnetic Field Stabilizer II\n1600mm Rolled Tungsten Compact Plates\n\n50MN Y-T8 Compact Microwarpdrive\nSmall F-RX Compact Capacitor Booster, Navy Cap Booster 400\nTracking Computer II, Optimal Range Script\nWarp Scrambler II\n\n250mm Railgun II\n250mm Railgun II\n250mm Railgun II\n250mm Railgun II\n250mm Railgun II\n\nMedium EM Armor Reinforcer I\nMedium Ancillary Current Router II\n\n\nHornet EC-300 x5\nLight Armor Maintenance Bot I x5\n\n\nSpike M x1000\nECCM Script x1\nCaldari Navy Thorium Charge M x1200\nCaldari Navy Antimatter Charge M x1200\nNavy Cap Booster 400 x30\nScan Resolution Script x1\nNanite Repair Paste x200\nCaldari Navy Iridium Charge M x975\nTargeting Range Script x1\nTracking Speed Script x1"
    }
   ]
  },
@@ -672,6 +672,19 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
    {
     "name": "Ewar Armor Malice",
     "body": "400mm Rolled Tungsten Compact Plates\nMultispectrum Energized Membrane II\nDamage Control II\n\n5MN Y-T8 Compact Microwarpdrive\nBalmer Series Compact Tracking Disruptor I, Optimal Range Disruption Script\nSmall F-RX Compact Capacitor Booster, Navy Cap Booster 200\n\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nSmall Thermal Armor Reinforcer I\n[Empty Rig slot]\n\n\nNanite Repair Paste x250\nTracking Speed Disruption Script x1\nNavy Cap Booster 200 x29"
+   }
+  ]
+ },
+ "3518": {
+  "name": "Vangel",
+  "fittings": [
+   {
+    "name": "Laser Armor Vangel",
+    "body": "Heat Sink II\nHeat Sink II\nDamage Control II\nMultispectrum Energized Membrane II\n800mm Steel Plates II\n\n50MN Quad LiF Restrained Microwarpdrive\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\nTracking Computer II, Tracking Speed Script\nWarp Scrambler II\n\nFocused Medium Pulse Laser II, Conflagration M\nFocused Medium Pulse Laser II, Conflagration M\nFocused Medium Pulse Laser II, Conflagration M\nFocused Medium Pulse Laser II, Conflagration M\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\n\nMedium Ancillary Current Router II\nMedium Trimark Armor Pump II\n\n\nAcolyte II x5\n\n\nConflagration M x1200\nImperial Navy Multifrequency M x600\nScorch M x600\nNavy Cap Booster 800 x20\nNanite Repair Paste x200\nOptimal Range Script x1\nTracking Speed Script x1"
+   },
+   {
+    "name": "Neut Armor Vangel",
+    "body": "Multispectrum Energized Membrane II\nMultispectrum Energized Membrane II\nDamage Control II\n800mm Steel Plates II\nPower Diagnostic System II\n\n50MN Quad LiF Restrained Microwarpdrive\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\nWarp Scrambler II\nStasis Webifier II\n\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\n\nMedium Ancillary Current Router II\nMedium Trimark Armor Pump II\n\n\nAcolyte II x5\n\n\nMjolnir Rage Heavy Assault Missile x2000\nScourge Rage Heavy Assault Missile x1000\nNavy Cap Booster 800 x20\nNanite Repair Paste x200"
    }
   ]
  },
@@ -1032,20 +1045,29 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
    }
   ]
  },
+ "11957": {
+  "name": "Falcon",
+  "fittings": [
+   {
+    "name": "Ewar Shield Falcon",
+    "body": "Damage Control II\nPower Diagnostic System II\nSignal Amplifier II\n\nLarge Shield Extender II\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\n50MN Quad LiF Restrained Microwarpdrive\nWarp Scrambler II\nSensor Booster II, Scan Resolution Script\n\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Scan Resolution Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\n\nMedium Particle Dispersion Augmentor II\nMedium Particle Dispersion Augmentor II\n\n\nHornet EC-300 x2\n\n\nNanite Repair Paste x100\nTargeting Range Dampening Script x3\nScan Resolution Dampening Script x2\nScan Resolution Script x1\nECCM Script x1"
+   }
+  ]
+ },
  "11959": {
   "name": "Rook",
   "fittings": [
    {
-    "name": "Kitetackle Missile Shield Rook",
-    "body": "Ballistic Control System II\nBallistic Control System II\nBallistic Control System II\n\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nMultispectrum Shield Hardener II\nStasis Webifier II\nWarp Scrambler II\n50MN Cold-Gas Enduring Microwarpdrive\n\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\n\nMedium EM Shield Reinforcer II\n[Empty Rig slot]\n\n\nCaldari Navy Scourge Heavy Assault Missile x2000\nScourge Rage Heavy Assault Missile x1220\nCaldari Navy Nova Heavy Assault Missile x2000\nCaldari Navy Mjolnir Heavy Assault Missile x2000\nCaldari Navy Inferno Heavy Assault Missile x2000"
+    "name": "Heavy Missile Shield Rook",
+    "body": "Ballistic Control System II\nBallistic Control System II\nPower Diagnostic System II\n\nLarge Shield Extender II\nLarge Shield Extender II\n50MN Microwarpdrive II\nSensor Booster II, Scan Resolution Script\nMultispectrum Shield Hardener II\nWarp Scrambler II\nFleeting Compact Stasis Webifier\n\nHeavy Missile Launcher II, Scourge Fury Heavy Missile\nHeavy Missile Launcher II, Scourge Fury Heavy Missile\nHeavy Missile Launcher II, Scourge Fury Heavy Missile\nHeavy Missile Launcher II, Scourge Fury Heavy Missile\nMedium Energy Neutralizer II\n\nMedium EM Shield Reinforcer II\nMedium Core Defense Field Extender II\n\n\nHobgoblin II x4\nHobgoblin II x1\n\n\nScourge Fury Heavy Missile x1500\nScourge Precision Heavy Missile x500\nNanite Repair Paste x150\nScan Resolution Script x1"
+   },
+   {
+    "name": "Kitetackle HAM Shield Rook",
+    "body": "Ballistic Control System II\nBallistic Control System II\nBallistic Control System II\n\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nMultispectrum Shield Hardener II\nStasis Webifier II\nWarp Scrambler II\n50MN Cold-Gas Enduring Microwarpdrive\n\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nMedium Energy Nosferatu II\n\nMedium EM Shield Reinforcer II\nMedium Core Defense Field Extender II\n\n\nCaldari Navy Scourge Heavy Assault Missile x2000\nScourge Rage Heavy Assault Missile x1220\nCaldari Navy Nova Heavy Assault Missile x2000\nCaldari Navy Mjolnir Heavy Assault Missile x2000\nCaldari Navy Inferno Heavy Assault Missile x2000"
    },
    {
     "name": "Missile Shield Rook",
-    "body": "Ballistic Control System II\n[Empty Low slot]\n[Empty Low slot]\n\nLarge Shield Extender II\nLarge Shield Extender II\n50MN Microwarpdrive II\n[Empty Med slot]\n[Empty Med slot]\n[Empty Med slot]\n[Empty Med slot]\n\nHeavy Missile Launcher II, Scourge Fury Heavy Missile\nHeavy Missile Launcher II, Scourge Fury Heavy Missile\nHeavy Missile Launcher II, Scourge Fury Heavy Missile\nHeavy Missile Launcher II, Scourge Fury Heavy Missile\n[Empty High slot]\n\nMedium EM Shield Reinforcer II\nMedium Core Defense Field Extender II\n\n\nHobgoblin II x4\nHobgoblin II x1\n\n\nScourge Fury Heavy Missile x9068\nNanite Repair Paste x200"
-   },
-   {
-    "name": "Missile Shield Rook",
-    "body": "Damage Control II\n[Empty Low slot]\n[Empty Low slot]\n\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nMedium Capacitor Booster II, Navy Cap Booster 400\n100MN Y-S8 Compact Afterburner\n[Empty Med slot]\n[Empty Med slot]\n[Empty Med slot]\n\nLight Missile Launcher II, Caldari Navy Mjolnir Light Missile\nLight Missile Launcher II, Caldari Navy Mjolnir Light Missile\nLight Missile Launcher II, Caldari Navy Mjolnir Light Missile\nLight Missile Launcher II, Caldari Navy Mjolnir Light Missile\nLight Missile Launcher II, Caldari Navy Mjolnir Light Missile\n\nMedium Particle Dispersion Augmentor I\nMedium Particle Dispersion Projector I\n\n\nCaldari Navy Mjolnir Light Missile x535\nNavy Cap Booster 400 x17\nNanite Repair Paste x200"
+    "body": "Damage Control II\nBallistic Control System II\nPower Diagnostic System II\n\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nMedium Capacitor Booster II, Navy Cap Booster 400\n100MN Y-S8 Compact Afterburner\nSensor Booster II, Targeting Range Script\nLarge Shield Extender II\nMultispectrum Shield Hardener II\n\nLight Missile Launcher II, Caldari Navy Mjolnir Light Missile\nLight Missile Launcher II, Caldari Navy Mjolnir Light Missile\nLight Missile Launcher II, Caldari Navy Mjolnir Light Missile\nLight Missile Launcher II, Caldari Navy Mjolnir Light Missile\nLight Missile Launcher II, Caldari Navy Mjolnir Light Missile\n\nMedium Particle Dispersion Augmentor I\nMedium Particle Dispersion Projector I\n\n\nCaldari Navy Mjolnir Light Missile x1000\nScourge Fury Light Missile x1000\nNavy Cap Booster 400 x17\nNanite Repair Paste x200\nTargeting Range Script x1\nScan Resolution Script x1"
    }
   ]
  },
@@ -1054,15 +1076,15 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Ewar Art Shield Huginn",
-    "body": "Damage Control II\nCapacitor Power Relay II\nCapacitor Power Relay II\n[Empty Low slot]\n\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nMultispectrum Shield Hardener II\n10MN Afterburner II\n50MN Microwarpdrive II\n\nSmall EMP Smartbomb II\n720mm Howitzer Artillery II, Republic Fleet EMP M\nSmall EMP Smartbomb II\n720mm Howitzer Artillery II, Republic Fleet EMP M\n[Empty High slot]\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nWarrior II x3\n\n\nRepublic Fleet Phased Plasma M x1111\nRepublic Fleet Fusion M x1111\nNanite Repair Paste x222\nRepublic Fleet EMP M x1069"
+    "body": "Damage Control II\nCapacitor Power Relay II\nCapacitor Power Relay II\nPower Diagnostic System II\n\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nMultispectrum Shield Hardener II\n10MN Afterburner II\n50MN Microwarpdrive II\n\nSmall EMP Smartbomb II\n720mm Howitzer Artillery II, Republic Fleet EMP M\nSmall EMP Smartbomb II\n720mm Howitzer Artillery II, Republic Fleet EMP M\nMedium Energy Nosferatu II\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nWarrior II x3\n\n\nRepublic Fleet Phased Plasma M x1111\nRepublic Fleet Fusion M x1111\nNanite Repair Paste x222\nRepublic Fleet EMP M x1069"
    },
    {
     "name": "Kitetackle Drone Armor Huginn",
-    "body": "Imperial Navy 1600mm Steel Plates\nDomination Explosive Armor Hardener\nImperial Navy Multispectrum Energized Membrane\n[Empty Low slot]\n\nRepublic Fleet Medium Cap Battery\nAbyssal Stasis Webifier\nAbyssal Stasis Webifier\n50MN Quad LiF Restrained Microwarpdrive\n10MN Y-S8 Compact Afterburner\nWarp Disruptor II\n\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\n\n\nCaldari Navy Hornet x5\nCaldari Navy Hornet x3\n\n\nNanite Repair Paste x100"
+    "body": "Imperial Navy 1600mm Steel Plates\nDomination Explosive Armor Hardener\nImperial Navy Multispectrum Energized Membrane\nMultispectrum Energized Membrane II\n\nRepublic Fleet Medium Cap Battery\nAbyssal Stasis Webifier\nAbyssal Stasis Webifier\n50MN Quad LiF Restrained Microwarpdrive\n10MN Y-S8 Compact Afterburner\nWarp Disruptor II\n\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\nSmall Energy Nosferatu II\nSmall Energy Neutralizer II\n\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\n\n\nCaldari Navy Hornet x5\nCaldari Navy Hornet x3\n\n\nNanite Repair Paste x100"
    },
    {
     "name": "Tackle Drone Armor Huginn",
-    "body": "Centum C-Type Multispectrum Energized Membrane\nCentum C-Type Multispectrum Energized Membrane\nReactive Armor Hardener\n1600mm Steel Plates II\n\nShadow Serpentis Stasis Webifier\nShadow Serpentis Stasis Webifier\nShadow Serpentis Stasis Webifier\nTrue Sansha Warp Disruptor\n10MN Afterburner II\nShadow Serpentis Stasis Webifier\n\n650mm Medium 'Scout' Artillery I, EMP M\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nMedium Trimark Armor Pump II\nMedium Explosive Armor Reinforcer II\n\n\nECCM Script x1\nEMP M x80\nScan Resolution Script x1"
+    "body": "Centum C-Type Multispectrum Energized Membrane\nCentum C-Type Multispectrum Energized Membrane\nReactive Armor Hardener\n1600mm Steel Plates II\n\nShadow Serpentis Stasis Webifier\nShadow Serpentis Stasis Webifier\nShadow Serpentis Stasis Webifier\nTrue Sansha Warp Disruptor\n10MN Afterburner II\nShadow Serpentis Stasis Webifier\n\n650mm Medium 'Scout' Artillery I, EMP M\nMedium Energy Neutralizer II\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\nMedium Energy Nosferatu II\n\nMedium Trimark Armor Pump II\nMedium Explosive Armor Reinforcer II\n\n\nECCM Script x1\nEMP M x80\nScan Resolution Script x1"
    }
   ]
  },
@@ -1071,11 +1093,24 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Kitetackle Shield Rapier",
-    "body": "Damage Control II\nPower Diagnostic System II\nNanofiber Internal Structure II\nPower Diagnostic System II\n\nRepublic Fleet Large Shield Extender\nRepublic Fleet Medium Shield Extender\nWarp Disruptor II\nMultispectrum Shield Hardener II\nFleeting Compact Stasis Webifier\n50MN Y-T8 Compact Microwarpdrive\n\nCovert Ops Cloaking Device II\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nMedium Core Defense Field Extender I\nMedium Core Defense Field Extender I\n\n\nWarrior II x8\n\n\nSisters Combat Scanner Probe x16\nLiquid Ozone x250"
+    "body": "Damage Control II\nPower Diagnostic System II\nNanofiber Internal Structure II\nPower Diagnostic System II\n\nRepublic Fleet Large Shield Extender\nRepublic Fleet Medium Shield Extender\nWarp Disruptor II\nMultispectrum Shield Hardener II\nFleeting Compact Stasis Webifier\n50MN Y-T8 Compact Microwarpdrive\n\nCovert Ops Cloaking Device II\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\n\nMedium Core Defense Field Extender I\nMedium Core Defense Field Extender I\n\n\nWarrior II x8\n\n\nSisters Combat Scanner Probe x16\nLiquid Ozone x250"
    },
    {
     "name": "Missile Shield Rapier",
-    "body": "Power Diagnostic System II\nDamage Control II\nPower Diagnostic System II\nPower Diagnostic System II\n\nLarge F-S9 Regolith Compact Shield Extender\nLarge F-S9 Regolith Compact Shield Extender\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nX-Large Ancillary Shield Booster\nMultispectrum Shield Hardener II\n\nCovert Ops Cloaking Device II\nPrototype 'Arbalest' Rapid Light Missile Launcher\n[Empty High slot]\n[Empty High slot]\n\nMedium Core Defense Field Extender I\nMedium Core Defense Field Extender I\n\n\nHeavy Shield Maintenance Bot II x2\nHeavy Shield Maintenance Bot II x3\n\n\nLiquid Ozone x145\nCaldari Navy Inferno Light Missile x418"
+    "body": "Power Diagnostic System II\nDamage Control II\nPower Diagnostic System II\nPower Diagnostic System II\n\nLarge F-S9 Regolith Compact Shield Extender\nLarge F-S9 Regolith Compact Shield Extender\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nX-Large Ancillary Shield Booster\nMultispectrum Shield Hardener II\n\nCovert Ops Cloaking Device II\nPrototype 'Arbalest' Rapid Light Missile Launcher\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\n\nMedium Core Defense Field Extender I\nMedium Core Defense Field Extender I\n\n\nHeavy Shield Maintenance Bot II x2\nHeavy Shield Maintenance Bot II x3\n\n\nLiquid Ozone x145\nCaldari Navy Inferno Light Missile x418"
+   }
+  ]
+ },
+ "11965": {
+  "name": "Pilgrim",
+  "fittings": [
+   {
+    "name": "Drone Armor Pilgrim",
+    "body": "Drone Damage Amplifier II\nDrone Damage Amplifier II\nDamage Control II\n1600mm Steel Plates II\nMultispectrum Energized Membrane II\n\n50MN Quad LiF Restrained Microwarpdrive\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\nWarp Scrambler II\nStasis Webifier II\nDrone Link Augmentor I\n\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\nSmall Energy Nosferatu II\nSmall Energy Neutralizer II\n\nMedium Auxiliary Nano Pump II\nMedium Trimark Armor Pump II\n\n\nInfiltrator II x4\nValkyrie II x1\n\n\nNavy Cap Booster 800 x20\nNanite Repair Paste x200"
+   },
+   {
+    "name": "Neut Armor Pilgrim",
+    "body": "Multispectrum Energized Membrane II\nMultispectrum Energized Membrane II\nDamage Control II\n1600mm Steel Plates II\nPower Diagnostic System II\n\n50MN Quad LiF Restrained Microwarpdrive\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\nWarp Scrambler II\nStasis Webifier II\nTracking Disruptor II, Tracking Speed Disruption Script\n\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\nMedium Energy Nosferatu II\n\nMedium Ancillary Current Router II\nMedium Trimark Armor Pump II\n\n\nInfiltrator II x5\n\n\nNavy Cap Booster 800 x20\nNanite Repair Paste x200\nTracking Speed Disruption Script x2\nOptimal Range Disruption Script x1"
    }
   ]
  },
@@ -1084,15 +1119,15 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Kitetackle Shield Arazu",
-    "body": "Nanofiber Internal Structure II\nInertial Stabilizers II\nDamage Control II\nNanofiber Internal Structure II\n\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\n50MN Cold-Gas Enduring Microwarpdrive\nWarp Scrambler II\nMultispectrum Shield Hardener II\n\nCovert Ops Cloaking Device II\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nMedium Core Defense Field Extender I\nMedium Core Defense Field Extender I\n\n\n'Augmented' Hammerhead x4\n\n\nLiquid Ozone x712"
+    "body": "Nanofiber Internal Structure II\nInertial Stabilizers II\nDamage Control II\nNanofiber Internal Structure II\n\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\n50MN Cold-Gas Enduring Microwarpdrive\nWarp Scrambler II\nMultispectrum Shield Hardener II\n\nCovert Ops Cloaking Device II\nMedium Energy Neutralizer II\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\n\nMedium Core Defense Field Extender I\nMedium Core Defense Field Extender I\n\n\n'Augmented' Hammerhead x4\n\n\nLiquid Ozone x712"
    },
    {
     "name": "Shield Arazu",
-    "body": "1600mm Crystalline Carbonide Restrained Plates\nDamage Control II\nMultispectrum Energized Membrane II\nMultispectrum Energized Membrane II\n\nLarge F-S9 Regolith Compact Shield Extender\nMedium F-S9 Regolith Compact Shield Extender\nMultispectrum Shield Hardener II\n50MN Cold-Gas Enduring Microwarpdrive\nEM Shield Hardener II\nMultispectrum Shield Hardener II\n\nCovert Ops Cloaking Device II\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nWarrior II x8\n\n\nLiquid Ozone x737"
+    "body": "1600mm Crystalline Carbonide Restrained Plates\nDamage Control II\nMultispectrum Energized Membrane II\nMultispectrum Energized Membrane II\n\nLarge F-S9 Regolith Compact Shield Extender\nMedium F-S9 Regolith Compact Shield Extender\nMultispectrum Shield Hardener II\n50MN Cold-Gas Enduring Microwarpdrive\nEM Shield Hardener II\nMultispectrum Shield Hardener II\n\nCovert Ops Cloaking Device II\nMedium Energy Neutralizer II\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nWarrior II x8\n\n\nLiquid Ozone x737"
    },
    {
     "name": "Tackle Armor Arazu",
-    "body": "1600mm Steel Plates II\nMultispectrum Energized Membrane II\nDamage Control II\nMultispectrum Energized Membrane II\n\nStasis Webifier II\n10MN Afterburner II\nWarp Scrambler II\nStasis Webifier II\nWarp Disruptor II\nSensor Booster II\n\nCovert Ops Cloaking Device II\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nMedium Trimark Armor Pump I\nMedium Trimark Armor Pump I\n\n\nHornet EC-300 x2\n\n\nLiquid Ozone x650"
+    "body": "1600mm Steel Plates II\nMultispectrum Energized Membrane II\nDamage Control II\nMultispectrum Energized Membrane II\n\nStasis Webifier II\n10MN Afterburner II\nWarp Scrambler II\nStasis Webifier II\nWarp Disruptor II\nSensor Booster II\n\nCovert Ops Cloaking Device II\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\n\nMedium Trimark Armor Pump I\nMedium Trimark Armor Pump I\n\n\nHornet EC-300 x2\n\n\nLiquid Ozone x650"
    }
   ]
  },
@@ -1105,11 +1140,24 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
    },
    {
     "name": "Ewar Shield Lachesis",
-    "body": "Damage Control II\nPower Diagnostic System II\nPower Diagnostic System II\nPower Diagnostic System II\n\nRemote Sensor Dampener II, Targeting Range Dampening Script\n100MN Afterburner II\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\n\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\n[Empty Rig slot]\n[Empty Rig slot]\n\n\nValkyrie II x5"
+    "body": "Damage Control II\nPower Diagnostic System II\nPower Diagnostic System II\nSignal Amplifier II\n\nRemote Sensor Dampener II, Targeting Range Dampening Script\n100MN Afterburner II\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Scan Resolution Dampening Script\n\nMedium Energy Nosferatu II\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nMedium Energy Neutralizer II\n\nMedium Particle Dispersion Augmentor II\nMedium Particle Dispersion Projector II\n\n\nValkyrie II x5\n\n\nCaldari Navy Scourge Light Missile x600\nTargeting Range Dampening Script x3\nScan Resolution Dampening Script x2\nNanite Repair Paste x100"
    },
    {
     "name": "Tackle Rail Shield Lachesis",
-    "body": "Overdrive Injector System II\nDamage Control II\nOverdrive Injector System II\nPower Diagnostic System II\n\nLarge Shield Extender II\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\n100MN Monopropellant Enduring Afterburner\nRemote Sensor Dampener II, Targeting Range Dampening Script\nWarp Disruptor II\n\n200mm Railgun II, Spike M\n200mm Railgun II, Spike M\n[Empty High slot]\n[Empty High slot]\n\nMedium Core Defense Field Extender II\nMedium EM Shield Reinforcer II\n\n\nHornet EC-300 x5\nWarrior II x3\nWarrior II x2\n\n\nCore Scanner Probe I x8\nScan Resolution Dampening Script x4\nSpike M x618\nNanite Repair Paste x55\nCaldari Navy Antimatter Charge M x899\nCaldari Navy Thorium Charge M x513\nCaldari Navy Uranium Charge M x600\nJavelin M x600"
+    "body": "Overdrive Injector System II\nDamage Control II\nOverdrive Injector System II\nPower Diagnostic System II\n\nLarge Shield Extender II\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\n100MN Monopropellant Enduring Afterburner\nRemote Sensor Dampener II, Targeting Range Dampening Script\nWarp Disruptor II\n\n200mm Railgun II, Spike M\n200mm Railgun II, Spike M\nMedium Energy Neutralizer II\nSmall Energy Nosferatu II\n\nMedium Core Defense Field Extender II\nMedium EM Shield Reinforcer II\n\n\nHornet EC-300 x5\nWarrior II x3\nWarrior II x2\n\n\nCore Scanner Probe I x8\nScan Resolution Dampening Script x4\nSpike M x618\nNanite Repair Paste x55\nCaldari Navy Antimatter Charge M x899\nCaldari Navy Thorium Charge M x513\nCaldari Navy Uranium Charge M x600\nJavelin M x600"
+   }
+  ]
+ },
+ "11978": {
+  "name": "Scimitar",
+  "fittings": [
+   {
+    "name": "Logi Shield Scimitar",
+    "body": "Damage Control II\nPower Diagnostic System II\nCapacitor Power Relay II\nPower Diagnostic System II\n\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nMultispectrum Shield Hardener II\n50MN Quad LiF Restrained Microwarpdrive\nF-90 Compact Sensor Booster, ECCM Script\n\nLarge Remote Shield Booster II\nLarge Remote Shield Booster II\nMedium Remote Shield Booster II\nMedium Remote Shield Booster II\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nLight Shield Maintenance Bot II x3\n\n\nNanite Repair Paste x200\nECCM Script x1\nTargeting Range Script x1\nScan Resolution Script x1"
+   },
+   {
+    "name": "Tackle Shield Scimitar",
+    "body": "Damage Control II\nReactor Control Unit II\nPower Diagnostic System II\nPower Diagnostic System II\n\nWarp Scrambler II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\n50MN Quad LiF Restrained Microwarpdrive\nF-90 Compact Sensor Booster, Targeting Range Script\n\nLarge Remote Shield Booster II\nLarge Remote Shield Booster II\nMedium Remote Shield Booster II\nMedium Remote Shield Booster II\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nLight Shield Maintenance Bot II x3\nWarrior II x2\n\n\nNanite Repair Paste x200\nTargeting Range Script x1\nScan Resolution Script x1\nECCM Script x1"
    }
   ]
  },
@@ -1117,8 +1165,8 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "name": "Basilisk",
   "fittings": [
    {
-    "name": "Logistics Basilisk",
-    "body": "Capacitor Power Relay II\nCapacitor Power Relay II\n\n10MN Monopropellant Enduring Afterburner\nSmall Shield Booster II\nCap Recharger II\nCap Recharger II\nCap Recharger II\n\nLarge Remote Armor Repairer II\nLarge Remote Shield Booster II\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nMedium Ancillary Current Router II\nMedium Ancillary Current Router II\n\n\nHeavy Armor Maintenance Bot II x1"
+    "name": "Logi Shield Basilisk",
+    "body": "Capacitor Power Relay II\nPower Diagnostic System II\n\n10MN Monopropellant Enduring Afterburner\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nCap Recharger II\nCap Recharger II\n\nLarge Murky Compact Remote Shield Booster\nLarge Remote Shield Booster II\nLarge Remote Shield Booster II\nLarge Inductive Compact Remote Capacitor Transmitter\nLarge Inductive Compact Remote Capacitor Transmitter\nMedium Remote Shield Booster II\n\nMedium Ancillary Current Router II\nMedium Ancillary Current Router II\n\n\nLight Shield Maintenance Bot II x3\n\n\nNanite Repair Paste x200\nECCM Script x1\nTargeting Range Script x1"
    }
   ]
  },
@@ -1126,16 +1174,16 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "name": "Guardian",
   "fittings": [
    {
-    "name": "Logi Armor Guardian",
-    "body": "IFFA Compact Damage Control\nTrue Sansha Thermal Armor Hardener\n1600mm Crystalline Carbonide Restrained Plates\nTrue Sansha EM Armor Hardener\n[Empty Low slot]\n\nF-90 Compact Sensor Booster\n10MN Y-S8 Compact Afterburner\n\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\n[Empty High slot]\n[Empty High slot]\n\nMedium Ancillary Current Router II\nMedium Ancillary Current Router II\n\n\nAcolyte II x5\n\n\nECCM Script x1\nTargeting Range Script x1\nScan Resolution Script x1\nNanite Repair Paste x300"
+    "name": "Cap Logi Armor Guardian",
+    "body": "IFFA Compact Damage Control\nTrue Sansha Thermal Armor Hardener\n1600mm Crystalline Carbonide Restrained Plates\nTrue Sansha EM Armor Hardener\nDamage Control II\n\nF-90 Compact Sensor Booster, ECCM Script\n10MN Y-S8 Compact Afterburner\n\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Inductive Compact Remote Capacitor Transmitter\nMedium Inductive Compact Remote Capacitor Transmitter\n\nMedium Ancillary Current Router II\nMedium Ancillary Current Router II\n\n\nAcolyte II x5\n\n\nECCM Script x1\nTargeting Range Script x1\nScan Resolution Script x1\nNanite Repair Paste x300"
+   },
+   {
+    "name": "Fit Logi Armor Guardian",
+    "body": "Damage Control II\n1600mm Rolled Tungsten Compact Plates\nTrue Sansha Thermal Armor Hardener\nTrue Sansha EM Armor Hardener\nReactive Armor Hardener\n\n10MN Y-S8 Compact Afterburner\nAlumel-Wired Enduring Sensor Booster, ECCM Script\n\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Inductive Compact Remote Capacitor Transmitter\nLarge Inductive Compact Remote Capacitor Transmitter\n\nMedium Ancillary Current Router II\nMedium Ancillary Current Router II\n\n\nAcolyte II x5\n\n\nScan Resolution Script x1\nTargeting Range Script x1\nNanite Repair Paste x100\nECCM Script x1"
    },
    {
     "name": "Logi Armor Guardian",
-    "body": "Damage Control II\n1600mm Rolled Tungsten Compact Plates\n[Empty Low slot]\n[Empty Low slot]\n[Empty Low slot]\n\n10MN Y-S8 Compact Afterburner\nAlumel-Wired Enduring Sensor Booster, ECCM Script\n\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\n[Empty High slot]\n[Empty High slot]\n\nMedium Ancillary Current Router II\nMedium Ancillary Current Router II\n\n\nScan Resolution Script x1\nNanite Repair Paste x100"
-   },
-   {
-    "name": "Logi Armor Guardian",
-    "body": "1600mm Crystalline Carbonide Restrained Plates\nIFFA Compact Damage Control\nTrue Sansha Thermal Armor Hardener\nTrue Sansha EM Armor Hardener\n[Empty Low slot]\n\nF-90 Compact Sensor Booster, ECCM Script\n10MN Y-S8 Compact Afterburner\n\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\n[Empty High slot]\n[Empty High slot]\n\nMedium Ancillary Current Router II\nMedium Ancillary Current Router II\n\n\nAcolyte II x5\n\n\nTargeting Range Script x1\nScan Resolution Script x1\nNanite Repair Paste x300"
+    "body": "1600mm Crystalline Carbonide Restrained Plates\nIFFA Compact Damage Control\nTrue Sansha Thermal Armor Hardener\nTrue Sansha EM Armor Hardener\nDamage Control II\n\nF-90 Compact Sensor Booster, ECCM Script\n10MN Y-S8 Compact Afterburner\n\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nLarge Inductive Compact Remote Capacitor Transmitter\nLarge Inductive Compact Remote Capacitor Transmitter\n\nMedium Ancillary Current Router II\nMedium Ancillary Current Router II\n\n\nAcolyte II x5\n\n\nTargeting Range Script x1\nScan Resolution Script x1\nNanite Repair Paste x300\nECCM Script x1"
    }
   ]
  },
@@ -1144,7 +1192,7 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Logi Armor Oneiros",
-    "body": "Reactive Armor Hardener\nExplosive Armor Hardener II\n1600mm Steel Plates II\nDamage Control II\nMultispectrum Energized Membrane II\n\nLarge Compact Pb-Acid Cap Battery\n50MN Quad LiF Restrained Microwarpdrive\nCap Recharger II\nCap Recharger II\n\nMedium Remote Armor Repairer II\nMedium Remote Armor Repairer II\nMedium Remote Armor Repairer II\nMedium Remote Armor Repairer II\n\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\n\n\nLight Armor Maintenance Bot I x5"
+    "body": "Reactive Armor Hardener\nExplosive Armor Hardener II\n1600mm Steel Plates II\nDamage Control II\nMultispectrum Energized Membrane II\n\nLarge Compact Pb-Acid Cap Battery\n50MN Quad LiF Restrained Microwarpdrive\nCap Recharger II\nSensor Booster II, ECCM Script\n\nMedium Remote Armor Repairer II\nMedium Remote Armor Repairer II\nMedium Remote Armor Repairer II\nMedium Inductive Compact Remote Capacitor Transmitter\n\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\n\n\nLight Armor Maintenance Bot I x5\n\n\nNanite Repair Paste x200\nECCM Script x1\nTargeting Range Script x1\nScan Resolution Script x1"
    }
   ]
  },
@@ -1152,16 +1200,16 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "name": "Cerberus",
   "fittings": [
    {
-    "name": "Missile Shield Cerberus",
+    "name": "Enduring Missile Shield Cerberus",
     "body": "Ballistic Control System II\nAssault Damage Control II\nBallistic Control System II\nBallistic Control System II\n\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\n50MN Cold-Gas Enduring Microwarpdrive\nWarp Disruptor II\n\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\n\nMedium EM Shield Reinforcer II\nMedium Core Defense Field Extender II\n\n\nCaldari Navy Scourge Heavy Assault Missile x3000\nScourge Rage Heavy Assault Missile x2000\nMjolnir Rage Heavy Assault Missile x1500"
    },
    {
     "name": "Missile Shield Cerberus",
-    "body": "Ballistic Control System II\nBallistic Control System II\nBallistic Control System II\nDamage Control II\n\nLarge Shield Extender II\nLarge Shield Extender II\n10MN Afterburner II\nMultispectrum Shield Hardener II\nWarp Disruptor II\n\nPolarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile\nPolarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile\nPolarized Heavy Assault Missile Launcher, Scourge Javelin Heavy Assault Missile\nPolarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile\nPolarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile\nPolarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nHornet EC-300 x3\n\n\nCaldari Navy Scourge Heavy Assault Missile x2000\nScourge Rage Heavy Assault Missile x2000\nScourge Javelin Heavy Assault Missile x2000"
+    "body": "Ballistic Control System II\nAssault Damage Control II\nAbyssal Ballistic Control System\nBallistic Control System II\n\nRepublic Fleet Large Shield Extender\nRepublic Fleet Large Shield Extender\nMultispectrum Shield Hardener II\nEM Shield Hardener II\n50MN Microwarpdrive II\n\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nMjolnir Rage Heavy Assault Missile x3188\nInferno Rage Heavy Assault Missile x2924\nCaldari Navy Scourge Heavy Assault Missile x2454\nNova Rage Heavy Assault Missile x2610\nMjolnir Javelin Heavy Assault Missile x3216\nScourge Rage Heavy Assault Missile x4585\nNavy Cap Booster 400 x15\nNanite Repair Paste x99\nScourge Javelin Heavy Assault Missile x2378\nCaldari Navy Mjolnir Heavy Assault Missile x2934"
    },
    {
-    "name": "Missile Shield Cerberus",
-    "body": "Ballistic Control System II\nAssault Damage Control II\nAbyssal Ballistic Control System\nBallistic Control System II\n\nRepublic Fleet Large Shield Extender\nRepublic Fleet Large Shield Extender\nMultispectrum Shield Hardener II\nEM Shield Hardener II\n50MN Microwarpdrive II\n\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\nHeavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nMjolnir Rage Heavy Assault Missile x3188\nInferno Rage Heavy Assault Missile x2924\nCaldari Navy Scourge Heavy Assault Missile x2454\nNova Rage Heavy Assault Missile x2610\nMjolnir Javelin Heavy Assault Missile x3216\nScourge Rage Heavy Assault Missile x4585\nNavy Cap Booster 400 x15\nNanite Repair Paste x99\nScourge Javelin Heavy Assault Missile x2378\nCaldari Navy Mjolnir Heavy Assault Missile x2934"
+    "name": "Polarized Missile Shield Cerberus",
+    "body": "Ballistic Control System II\nBallistic Control System II\nBallistic Control System II\nDamage Control II\n\nLarge Shield Extender II\nLarge Shield Extender II\n10MN Afterburner II\nMultispectrum Shield Hardener II\nWarp Disruptor II\n\nPolarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile\nPolarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile\nPolarized Heavy Assault Missile Launcher, Scourge Javelin Heavy Assault Missile\nPolarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile\nPolarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile\nPolarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nHornet EC-300 x3\n\n\nCaldari Navy Scourge Heavy Assault Missile x2000\nScourge Rage Heavy Assault Missile x2000\nScourge Javelin Heavy Assault Missile x2000"
    },
    {
     "name": "Tackle Missile Shield Cerberus",
@@ -1174,11 +1222,11 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Ewar Missile Shield Onyx",
-    "body": "Damage Control II\nPower Diagnostic System II\nPower Diagnostic System II\nPower Diagnostic System II\n\nRepublic Fleet Large Shield Extender\nMultispectrum Shield Hardener II\nEM Shield Hardener II\n50MN Microwarpdrive II\n[Empty Med slot]\n[Empty Med slot]\n\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\n[Empty High slot]\n[Empty High slot]\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nMjolnir Rage Heavy Assault Missile x5000\nInferno Rage Heavy Assault Missile x5000\nScourge Rage Heavy Assault Missile x7736\nFocused Warp Disruption Script x1"
+    "body": "Damage Control II\nPower Diagnostic System II\nPower Diagnostic System II\nPower Diagnostic System II\n\nRepublic Fleet Large Shield Extender\nMultispectrum Shield Hardener II\nEM Shield Hardener II\n50MN Microwarpdrive II\nLarge Shield Extender II\nWarp Scrambler II\n\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nMjolnir Rage Heavy Assault Missile x5000\nInferno Rage Heavy Assault Missile x5000\nScourge Rage Heavy Assault Missile x7736\nFocused Warp Disruption Script x1"
    },
    {
     "name": "Missile Shield Onyx",
-    "body": "Damage Control II\nShield Power Relay II\n[Empty Low slot]\n[Empty Low slot]\n\nLarge Shield Extender II\nLarge Shield Extender II\nLarge F-S9 Regolith Compact Shield Extender\nLarge F-S9 Regolith Compact Shield Extender\n10MN Y-S8 Compact Afterburner\nMultispectrum Shield Hardener II\n\nHeavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile\n[Empty High slot]\n\nMedium Core Defense Field Purger II\nMedium Core Defense Field Purger II\n\n\nScourge Javelin Heavy Assault Missile x4625\nScourge Rage Heavy Assault Missile x4870\nFocused Warp Disruption Script x1"
+    "body": "Damage Control II\nShield Power Relay II\nShield Power Relay II\nPower Diagnostic System II\n\nLarge Shield Extender II\nLarge Shield Extender II\nLarge F-S9 Regolith Compact Shield Extender\nLarge F-S9 Regolith Compact Shield Extender\n10MN Y-S8 Compact Afterburner\nMultispectrum Shield Hardener II\n\nHeavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile\n\nMedium Core Defense Field Purger II\nMedium Core Defense Field Purger II\n\n\nScourge Javelin Heavy Assault Missile x4625\nScourge Rage Heavy Assault Missile x4870\nFocused Warp Disruption Script x1"
    }
   ]
  },
@@ -1199,7 +1247,7 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "name": "Zealot",
   "fittings": [
    {
-    "name": "Pulse Armor Zealot",
+    "name": "Kitetackle Pulse Armor Zealot",
     "body": "Domination Thermal Armor Hardener\nTrue Sansha EM Armor Hardener\nHeat Sink II\nTrue Sansha EM Armor Hardener\nTrue Sansha Thermal Armor Hardener\nMedium Armor Repairer II\nHeat Sink II\n\nTracking Computer II, Tracking Speed Script\n10MN Monopropellant Enduring Afterburner\nLarge Compact Pb-Acid Cap Battery\n\nHeavy Pulse Laser II, Conflagration M\nHeavy Pulse Laser II, Conflagration M\nHeavy Pulse Laser II, Conflagration M\nHeavy Pulse Laser II, Conflagration M\nHeavy Pulse Laser II, Conflagration M\n\nMedium Ancillary Current Router I\nMedium Ancillary Current Router II\n\n\nHornet EC-300 x4\nHornet EC-300 x1\n\n\nConflagration M x2\nConflagration M x13\nOptimal Range Script x1\nScorch M x7\nScorch M x13"
    },
    {
@@ -1217,7 +1265,7 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Drone Shield Ishtar",
-    "body": "Drone Damage Amplifier II\nDrone Damage Amplifier II\nDrone Damage Amplifier II\nEFFA Compact Assault Damage Control\nPower Diagnostic System II\nPower Diagnostic System II\n\n100MN Y-S8 Compact Afterburner\nLarge Clarity Ward Enduring Shield Booster\nMultispectrum Shield Hardener II\nLarge Compact Pb-Acid Cap Battery\n\nDrone Link Augmentor II\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nMedium EM Shield Reinforcer II\nMedium EM Shield Reinforcer II\n\n\nAcolyte II x5\nWasp II x3\nHammerhead II x5\n\n\nNanite Repair Paste x50"
+    "body": "Drone Damage Amplifier II\nDrone Damage Amplifier II\nDrone Damage Amplifier II\nEFFA Compact Assault Damage Control\nPower Diagnostic System II\nPower Diagnostic System II\n\n100MN Y-S8 Compact Afterburner\nLarge Clarity Ward Enduring Shield Booster\nMultispectrum Shield Hardener II\nLarge Compact Pb-Acid Cap Battery\n\nDrone Link Augmentor II\nDrone Link Augmentor I\nSmall Energy Neutralizer II\nSmall Energy Neutralizer II\n\nMedium EM Shield Reinforcer II\nMedium EM Shield Reinforcer II\n\n\nAcolyte II x5\nWasp II x3\nHammerhead II x5\n\n\nNanite Repair Paste x50"
    }
   ]
  },
@@ -1239,7 +1287,7 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Ewar Shield Broadsword",
-    "body": "Inertial Stabilizers II\nDamage Control II\nInertial Stabilizers II\nNanofiber Internal Structure II\n\nLarge F-S9 Regolith Compact Shield Extender\nLarge F-S9 Regolith Compact Shield Extender\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 400\n50MN Y-T8 Compact Microwarpdrive\nExplosive Shield Amplifier II\nKinetic Shield Amplifier II\n\nMedium Ghoul Compact Energy Nosferatu\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nMedium Hyperspatial Velocity Optimizer II\nMedium Hyperspatial Velocity Optimizer II\n\n\nLiquid Ozone x501\nNavy Cap Booster 400 x18\nFocused Warp Disruption Script x1"
+    "body": "Inertial Stabilizers II\nDamage Control II\nInertial Stabilizers II\nNanofiber Internal Structure II\n\nLarge F-S9 Regolith Compact Shield Extender\nLarge F-S9 Regolith Compact Shield Extender\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 400\n50MN Y-T8 Compact Microwarpdrive\nExplosive Shield Amplifier II\nKinetic Shield Amplifier II\n\nMedium Ghoul Compact Energy Nosferatu\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\nMedium Energy Nosferatu II\nMedium Energy Nosferatu II\n\nMedium Hyperspatial Velocity Optimizer II\nMedium Hyperspatial Velocity Optimizer II\n\n\nLiquid Ozone x501\nNavy Cap Booster 400 x18\nFocused Warp Disruption Script x1"
    }
   ]
  },
@@ -1261,7 +1309,7 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Armor Devoter",
-    "body": "Multispectrum Energized Membrane II\nDamage Control II\nMultispectrum Energized Membrane II\n1600mm Steel Plates II\nDark Blood Thermal Armor Hardener\nImperial Navy EM Armor Hardener\n1600mm Steel Plates II\n\n50MN Y-T8 Compact Microwarpdrive\nSensor Booster II, Scan Resolution Script\nSmall Capacitor Booster II, Navy Cap Booster 400\n\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\n\n\nWarrior II x5\n\n\nECCM Script x1\nFocused Warp Scrambling Script x1\nNavy Cap Booster 400 x20\nTargeting Range Script x1\nFocused Warp Disruption Script x2"
+    "body": "Multispectrum Energized Membrane II\nDamage Control II\nMultispectrum Energized Membrane II\n1600mm Steel Plates II\nDark Blood Thermal Armor Hardener\nImperial Navy EM Armor Hardener\n1600mm Steel Plates II\n\n50MN Y-T8 Compact Microwarpdrive\nSensor Booster II, Scan Resolution Script\nSmall Capacitor Booster II, Navy Cap Booster 400\n\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\nMedium Energy Nosferatu II\nMedium Energy Nosferatu II\nMedium Energy Nosferatu II\n\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\n\n\nWarrior II x5\n\n\nECCM Script x1\nFocused Warp Scrambling Script x1\nNavy Cap Booster 400 x20\nTargeting Range Script x1\nFocused Warp Disruption Script x2"
    }
   ]
  },
@@ -1279,15 +1327,15 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Ewar Armor Phobos",
-    "body": "Medium Ancillary Armor Repairer, Nanite Repair Paste\nMultispectrum Energized Membrane II\n1600mm Steel Plates II\nReactive Armor Hardener\nMedium Armor Repairer II\n[Empty Low slot]\n\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\nSensor Booster II, Scan Resolution Script\n50MN Quad LiF Restrained Microwarpdrive\n\nSmall Ghoul Compact Energy Nosferatu\nMedium Ghoul Compact Energy Nosferatu\nSmall Ghoul Compact Energy Nosferatu\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nMedium Ancillary Current Router II\nMedium Explosive Armor Reinforcer II\n\n\nECCM Script x1\nNavy Cap Booster 800 x9\nNanite Repair Paste x120\nTargeting Range Script x1\nFocused Warp Disruption Script x2\nFocused Warp Disruption Script x1"
+    "body": "Medium Ancillary Armor Repairer, Nanite Repair Paste\nMultispectrum Energized Membrane II\n1600mm Steel Plates II\nReactive Armor Hardener\nMedium Armor Repairer II\nSignal Amplifier II\n\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\nSensor Booster II, Scan Resolution Script\n50MN Quad LiF Restrained Microwarpdrive\n\nSmall Ghoul Compact Energy Nosferatu\nMedium Ghoul Compact Energy Nosferatu\nSmall Ghoul Compact Energy Nosferatu\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\n\nMedium Ancillary Current Router II\nMedium Explosive Armor Reinforcer II\n\n\nECCM Script x1\nNavy Cap Booster 800 x9\nNanite Repair Paste x120\nTargeting Range Script x1\nFocused Warp Disruption Script x2\nFocused Warp Disruption Script x1"
    },
    {
     "name": "Kitetackle Blaster Armor Phobos",
-    "body": "Multispectrum Energized Membrane II\nReactive Armor Hardener\nAbyssal Magnetic Field Stabilizer\nMedium Ancillary Armor Repairer\nMedium Armor Repairer II\n[Empty Low slot]\n\nMedium Cap Battery II\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\n50MN Y-T8 Compact Microwarpdrive\nFleeting Compact Stasis Webifier\n\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\n[Empty High slot]\n[Empty High slot]\n\nMedium Explosive Armor Reinforcer II\nMedium Trimark Armor Pump II\n\n\nMobile Small Warp Disruptor II x1\nNavy Cap Booster 800 x7\nCaldari Navy Antimatter Charge M x1000\nNull M x1000\nNanite Repair Paste x243\nVoid M x2000\nVoid M x384\nFocused Warp Disruption Script x1"
+    "body": "Damage Control II\nReactor Control Unit II\nMultispectrum Energized Membrane II\nReactive Armor Hardener\n1600mm Steel Plates II\n1600mm Steel Plates II\n\nStasis Webifier II\n50MN Quad LiF Restrained Microwarpdrive\nStasis Webifier II\nAlumel-Wired Enduring Sensor Booster, Scan Resolution Script\n\nHeavy Electron Blaster II, Caldari Navy Antimatter Charge M\nHeavy Electron Blaster II, Caldari Navy Antimatter Charge M\nHeavy Electron Blaster II, Caldari Navy Antimatter Charge M\nHeavy Electron Blaster II, Caldari Navy Antimatter Charge M\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\n\nMedium Ancillary Current Router II\nMedium Trimark Armor Pump II\n\n\nCaldari Navy Antimatter Charge M x1112\nNull M x2000\nVoid M x2000"
    },
    {
-    "name": "Kitetackle Blaster Armor Phobos",
-    "body": "Damage Control II\nReactor Control Unit II\nMultispectrum Energized Membrane II\nReactive Armor Hardener\n1600mm Steel Plates II\n1600mm Steel Plates II\n\nStasis Webifier II\n50MN Quad LiF Restrained Microwarpdrive\nStasis Webifier II\nAlumel-Wired Enduring Sensor Booster, Scan Resolution Script\n\nHeavy Electron Blaster II, Caldari Navy Antimatter Charge M\nHeavy Electron Blaster II, Caldari Navy Antimatter Charge M\nHeavy Electron Blaster II, Caldari Navy Antimatter Charge M\nHeavy Electron Blaster II, Caldari Navy Antimatter Charge M\n[Empty High slot]\n[Empty High slot]\n\nMedium Ancillary Current Router II\nMedium Trimark Armor Pump II\n\n\nCaldari Navy Antimatter Charge M x1112\nNull M x2000\nVoid M x2000"
+    "name": "Kitetackle Neutron Blaster Armor Phobos",
+    "body": "Multispectrum Energized Membrane II\nReactive Armor Hardener\nAbyssal Magnetic Field Stabilizer\nMedium Ancillary Armor Repairer\nMedium Armor Repairer II\n[Empty Low slot]\n\nMedium Cap Battery II\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\n50MN Y-T8 Compact Microwarpdrive\nFleeting Compact Stasis Webifier\n\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nMedium Energy Neutralizer II\nMedium Energy Nosferatu II\n\nMedium Explosive Armor Reinforcer II\nMedium Trimark Armor Pump II\n\n\nMobile Small Warp Disruptor II x1\nNavy Cap Booster 800 x7\nCaldari Navy Antimatter Charge M x1000\nNull M x1000\nNanite Repair Paste x243\nVoid M x2000\nVoid M x384\nFocused Warp Disruption Script x1"
    }
   ]
  },
@@ -1827,11 +1875,11 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Ewar Armor Curse",
-    "body": "Multispectrum Energized Membrane II\nPower Diagnostic System II\n800mm Steel Plates II\nMultispectrum Energized Membrane II\n\nTracking Disruptor II, Tracking Speed Disruption Script\nTracking Disruptor II, Optimal Range Disruption Script\nTracking Disruptor II, Tracking Speed Disruption Script\n10MN Afterburner II\n[Empty Med slot]\n[Empty Med slot]\n\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\n\nMedium Processor Overclocking Unit II\nMedium Ancillary Current Router I\n\n\nMissile Range Disruption Script x3\nTracking Speed Disruption Script x2\nNavy Cap Booster 800 x9\nOptimal Range Disruption Script x3\nMissile Precision Disruption Script x3\nTargeting Range Dampening Script x2"
+    "body": "Multispectrum Energized Membrane II\nPower Diagnostic System II\n800mm Steel Plates II\nMultispectrum Energized Membrane II\n\nTracking Disruptor II, Tracking Speed Disruption Script\nTracking Disruptor II, Optimal Range Disruption Script\nTracking Disruptor II, Tracking Speed Disruption Script\n10MN Afterburner II\nWarp Scrambler II\nFleeting Compact Stasis Webifier\n\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\n\nMedium Processor Overclocking Unit II\nMedium Ancillary Current Router I\n\n\nMissile Range Disruption Script x3\nTracking Speed Disruption Script x2\nNavy Cap Booster 800 x9\nOptimal Range Disruption Script x3\nMissile Precision Disruption Script x3\nTargeting Range Dampening Script x2"
    },
    {
     "name": "Kitetackle Armor Curse",
-    "body": "Damage Control II\nReactor Control Unit II\nMedium Ancillary Armor Repairer, Nanite Repair Paste\nMultispectrum Energized Membrane II\n\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\n50MN Y-T8 Compact Microwarpdrive\nStasis Webifier II\nWarp Disruptor II\n[Empty Med slot]\n[Empty Med slot]\n\nMedium Infectious Scoped Energy Neutralizer\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\nMedium Ghoul Compact Energy Nosferatu\nMedium Gremlin Compact Energy Neutralizer\n\n[Empty Rig slot]\n[Empty Rig slot]\n\n\nAcolyte II x1\nCaldari Navy Hornet x4\nHobgoblin II x1\nWarrior II x2\n\n\nNavy Cap Booster 800 x4\nNanite Repair Paste x368"
+    "body": "Damage Control II\nReactor Control Unit II\nMedium Ancillary Armor Repairer, Nanite Repair Paste\nMultispectrum Energized Membrane II\n\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\n50MN Y-T8 Compact Microwarpdrive\nStasis Webifier II\nWarp Disruptor II\nWarp Scrambler II\nFleeting Compact Stasis Webifier\n\nMedium Infectious Scoped Energy Neutralizer\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\nMedium Ghoul Compact Energy Nosferatu\nMedium Gremlin Compact Energy Neutralizer\n\nMedium Ancillary Current Router II\nMedium Trimark Armor Pump II\n\n\nAcolyte II x1\nCaldari Navy Hornet x4\nHobgoblin II x1\nWarrior II x2\n\n\nNavy Cap Booster 800 x4\nNanite Repair Paste x368"
    }
   ]
  },
@@ -1914,12 +1962,12 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "name": "Heretic",
   "fittings": [
    {
-    "name": "Kitetackle Rocket Armor Heretic",
-    "body": "Damage Control II\n400mm Steel Plates II\nSmall Ancillary Armor Repairer, Nanite Repair Paste\n\nJ5b Enduring Warp Scrambler\n5MN Y-T8 Compact Microwarpdrive\nX5 Enduring Stasis Webifier\n\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\n[Empty High slot]\n\n[Empty Rig slot]\n[Empty Rig slot]\n\n\nNova Rage Rocket x14\nScourge Rage Rocket x1639\nNanite Repair Paste x91\nInferno Rage Rocket x309\nWarp Disrupt Probe x17\nMjolnir Rage Rocket x4"
+    "name": "Kitetackle Rage Rocket Armor Heretic",
+    "body": "Damage Control II\n400mm Steel Plates II\nSmall Ancillary Armor Repairer, Nanite Repair Paste\n\nJ5b Enduring Warp Scrambler\n5MN Y-T8 Compact Microwarpdrive\nX5 Enduring Stasis Webifier\n\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\nSmall Energy Neutralizer II\nSmall Energy Nosferatu II\n\nSmall Trimark Armor Pump II\nSmall Polycarbon Engine Housing II\n\n\nNova Rage Rocket x14\nScourge Rage Rocket x1639\nNanite Repair Paste x91\nInferno Rage Rocket x309\nWarp Disrupt Probe x17\nMjolnir Rage Rocket x4"
    },
    {
     "name": "Kitetackle Rocket Armor Heretic",
-    "body": "400mm Steel Plates II\nDamage Control II\n[Empty Low slot]\n\n5MN Y-T8 Compact Microwarpdrive\nX5 Enduring Stasis Webifier\nFaint Epsilon Scoped Warp Scrambler\n\nRocket Launcher II, Scourge Javelin Rocket\nRocket Launcher II, Scourge Javelin Rocket\nRocket Launcher II, Scourge Javelin Rocket\nRocket Launcher II, Scourge Javelin Rocket\nRocket Launcher II, Scourge Javelin Rocket\nRocket Launcher II, Scourge Javelin Rocket\n[Empty High slot]\n[Empty High slot]\n\nSmall Trimark Armor Pump II\nSmall Trimark Armor Pump II\n\n\nInferno Javelin Rocket x2000\nScourge Javelin Rocket x1496\nScourge Rage Rocket x168\nNanite Repair Paste x200\nInferno Rage Rocket x3000\nWarp Disrupt Probe x11"
+    "body": "400mm Steel Plates II\nDamage Control II\nReactive Armor Hardener\n\n5MN Y-T8 Compact Microwarpdrive\nX5 Enduring Stasis Webifier\nFaint Epsilon Scoped Warp Scrambler\n\nRocket Launcher II, Scourge Javelin Rocket\nRocket Launcher II, Scourge Javelin Rocket\nRocket Launcher II, Scourge Javelin Rocket\nRocket Launcher II, Scourge Javelin Rocket\nRocket Launcher II, Scourge Javelin Rocket\nRocket Launcher II, Scourge Javelin Rocket\nSmall Energy Nosferatu II\nSmall Energy Neutralizer II\n\nSmall Trimark Armor Pump II\nSmall Trimark Armor Pump II\n\n\nInferno Javelin Rocket x2000\nScourge Javelin Rocket x1496\nScourge Rage Rocket x168\nNanite Repair Paste x200\nInferno Rage Rocket x3000\nWarp Disrupt Probe x11"
    }
   ]
  },
@@ -1928,19 +1976,19 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Kitetackle AC Shield Sabre",
-    "body": "Nanofiber Internal Structure II\nNanofiber Internal Structure II\n\nMedium Shield Extender II\nMedium Shield Extender II\nWarp Scrambler II\n5MN Quad LiF Restrained Microwarpdrive\n\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n[Empty High slot]\n[Empty High slot]\n\nSmall Hyperspatial Velocity Optimizer II\nSmall Hyperspatial Velocity Optimizer II\n\n\nRepublic Fleet EMP S x4\nHail S x1000\nNanite Repair Paste x50\nBarrage S x1000\nWarp Disrupt Probe x22"
+    "body": "Nanofiber Internal Structure II\nIFFA Compact Damage Control\n\nMedium Azeotropic Restrained Shield Extender\nMedium Shield Extender II\nWarp Scrambler II\n5MN Quad LiF Restrained Microwarpdrive\n\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\nSmall Energy Neutralizer II\nSmall Energy Nosferatu II\n\nSmall Hyperspatial Velocity Optimizer I\nSmall Hyperspatial Velocity Optimizer I\n\n\nSurgical Warp Disrupt Probe x3\nHail S x1000\nStasis Webification Probe x10\nWarp Disrupt Probe x29"
    },
    {
-    "name": "Kitetackle AC Shield Sabre",
-    "body": "Nanofiber Internal Structure II\nNanofiber Internal Structure II\n\nMedium Azeotropic Restrained Shield Extender\nMedium Shield Extender II\n5MN Y-T8 Compact Microwarpdrive\nFaint Epsilon Scoped Warp Scrambler\n\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n[Empty High slot]\n[Empty High slot]\n\nSmall Hyperspatial Velocity Optimizer II\nSmall Hyperspatial Velocity Optimizer II\n\n\nRepublic Fleet EMP S x4\nRepublic Fleet Depleted Uranium S x1000\nNanite Repair Paste x60\nStasis Webification Probe x15\nWarp Disrupt Probe x52"
+    "name": "Kitetackle Dual Extender AC Shield Sabre",
+    "body": "Nanofiber Internal Structure II\nNanofiber Internal Structure II\n\nMedium Azeotropic Restrained Shield Extender\nMedium Azeotropic Restrained Shield Extender\nFaint Epsilon Scoped Warp Scrambler\n5MN Quad LiF Restrained Microwarpdrive\n\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\nSmall Energy Neutralizer II\nSmall Energy Nosferatu II\n\nSmall Polycarbon Engine Housing II\nSmall Hyperspatial Velocity Optimizer II\n\n\nRepublic Fleet Phased Plasma S x2400\nRepublic Fleet EMP S x2400\nHail S x1200\nNanite Repair Paste x48\nBarrage S x1200\nWarp Disrupt Probe x23\nRepublic Fleet Fusion S x2400"
    },
    {
-    "name": "Kitetackle AC Shield Sabre",
-    "body": "Nanofiber Internal Structure II\nNanofiber Internal Structure II\n\nMedium Azeotropic Restrained Shield Extender\nMedium Azeotropic Restrained Shield Extender\nFaint Epsilon Scoped Warp Scrambler\n5MN Quad LiF Restrained Microwarpdrive\n\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n[Empty High slot]\n[Empty High slot]\n\nSmall Polycarbon Engine Housing II\nSmall Hyperspatial Velocity Optimizer II\n\n\nRepublic Fleet Phased Plasma S x2400\nRepublic Fleet EMP S x2400\nHail S x1200\nNanite Repair Paste x48\nBarrage S x1200\nWarp Disrupt Probe x23\nRepublic Fleet Fusion S x2400"
+    "name": "Kitetackle Dual MSE AC Shield Sabre",
+    "body": "Nanofiber Internal Structure II\nNanofiber Internal Structure II\n\nMedium Shield Extender II\nMedium Shield Extender II\nWarp Scrambler II\n5MN Quad LiF Restrained Microwarpdrive\n\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\nSmall Energy Neutralizer II\nSmall Energy Nosferatu II\n\nSmall Hyperspatial Velocity Optimizer II\nSmall Hyperspatial Velocity Optimizer II\n\n\nRepublic Fleet EMP S x4\nHail S x1000\nNanite Repair Paste x50\nBarrage S x1000\nWarp Disrupt Probe x22"
    },
    {
-    "name": "Kitetackle AC Shield Sabre",
-    "body": "Nanofiber Internal Structure II\nIFFA Compact Damage Control\n\nMedium Azeotropic Restrained Shield Extender\nMedium Shield Extender II\nWarp Scrambler II\n5MN Quad LiF Restrained Microwarpdrive\n\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n125mm Gatling AutoCannon II, Hail S\n[Empty High slot]\n[Empty High slot]\n\nSmall Hyperspatial Velocity Optimizer I\nSmall Hyperspatial Velocity Optimizer I\n\n\nSurgical Warp Disrupt Probe x3\nHail S x1000\nStasis Webification Probe x10\nWarp Disrupt Probe x29"
+    "name": "Kitetackle Scram AC Shield Sabre",
+    "body": "Nanofiber Internal Structure II\nNanofiber Internal Structure II\n\nMedium Azeotropic Restrained Shield Extender\nMedium Shield Extender II\n5MN Y-T8 Compact Microwarpdrive\nFaint Epsilon Scoped Warp Scrambler\n\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\n125mm Gatling AutoCannon II, Republic Fleet EMP S\nSmall Energy Neutralizer II\nSmall Energy Nosferatu II\n\nSmall Hyperspatial Velocity Optimizer II\nSmall Hyperspatial Velocity Optimizer II\n\n\nRepublic Fleet EMP S x4\nRepublic Fleet Depleted Uranium S x1000\nNanite Repair Paste x60\nStasis Webification Probe x15\nWarp Disrupt Probe x52"
    }
   ]
  },
@@ -1949,15 +1997,15 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Blaster Shield Eris",
-    "body": "Mark I Compact Power Diagnostic System\nMagnetic Field Stabilizer II\nInertial Stabilizers II\nPower Diagnostic System II\n\nMedium Shield Extender II\n5MN Y-T8 Compact Microwarpdrive\n\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\n[Empty High slot]\n\nSmall EM Shield Reinforcer II\n[Empty Rig slot]\n\n\nNanite Repair Paste x150\nWarp Disrupt Probe x57\nVoid S x5440"
+    "body": "Mark I Compact Power Diagnostic System\nMagnetic Field Stabilizer II\nInertial Stabilizers II\nPower Diagnostic System II\n\nMedium Shield Extender II\n5MN Y-T8 Compact Microwarpdrive\n\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nSmall Energy Neutralizer II\n\nSmall EM Shield Reinforcer II\nSmall Polycarbon Engine Housing II\n\n\nNanite Repair Paste x150\nWarp Disrupt Probe x57\nVoid S x5440"
    },
    {
     "name": "Kitetackle Blaster Armor Eris",
-    "body": "Small Ancillary Armor Repairer, Nanite Repair Paste\nImperial Navy 400mm Steel Plates\nDamage Control II\n[Empty Low slot]\n\nWarp Scrambler II\n5MN Quad LiF Restrained Microwarpdrive\n\nLight Electron Blaster II, Void S\nLight Electron Blaster II, Void S\nLight Electron Blaster II, Void S\nLight Electron Blaster II, Void S\nLight Electron Blaster II, Void S\nLight Electron Blaster II, Void S\n[Empty High slot]\n[Empty High slot]\n\nSmall Hyperspatial Velocity Optimizer II\nSmall Hyperspatial Velocity Optimizer II\n\n\nNull S x2000\nCaldari Navy Antimatter Charge S x2000\nNanite Repair Paste x92\nStasis Webification Probe x10\nWarp Disrupt Probe x27\nVoid S x800"
+    "body": "Small Ancillary Armor Repairer, Nanite Repair Paste\nImperial Navy 400mm Steel Plates\nDamage Control II\nMagnetic Field Stabilizer II\n\nWarp Scrambler II\n5MN Quad LiF Restrained Microwarpdrive\n\nLight Electron Blaster II, Void S\nLight Electron Blaster II, Void S\nLight Electron Blaster II, Void S\nLight Electron Blaster II, Void S\nLight Electron Blaster II, Void S\nLight Electron Blaster II, Void S\nSmall Energy Neutralizer II\nSmall Energy Nosferatu II\n\nSmall Hyperspatial Velocity Optimizer II\nSmall Hyperspatial Velocity Optimizer II\n\n\nNull S x2000\nCaldari Navy Antimatter Charge S x2000\nNanite Repair Paste x92\nStasis Webification Probe x10\nWarp Disrupt Probe x27\nVoid S x800"
    },
    {
     "name": "Kitetackle Blaster Shield Eris",
-    "body": "Magnetic Field Stabilizer II\nMagnetic Field Stabilizer II\nInertial Stabilizers II\nInertial Stabilizers II\n\nJ5b Enduring Warp Scrambler\n5MN Y-T8 Compact Microwarpdrive\n\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nSmall Hyperspatial Velocity Optimizer II\nSmall Hyperspatial Velocity Optimizer II\n\n\nNull S x5324\nWarp Disrupt Probe x50\nVoid S x3271"
+    "body": "Magnetic Field Stabilizer II\nMagnetic Field Stabilizer II\nInertial Stabilizers II\nInertial Stabilizers II\n\nJ5b Enduring Warp Scrambler\n5MN Y-T8 Compact Microwarpdrive\n\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nLight Neutron Blaster II, Void S\nSmall Energy Neutralizer II\nSmall Energy Neutralizer II\nSmall Energy Nosferatu II\n\nSmall Hyperspatial Velocity Optimizer II\nSmall Hyperspatial Velocity Optimizer II\n\n\nNull S x5324\nWarp Disrupt Probe x50\nVoid S x3271"
    }
   ]
  },
@@ -1966,15 +2014,15 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Kitetackle Missile Shield Flycatcher",
-    "body": "Co-Processor II\n\nMedium Shield Extender II\nEnduring Multispectrum Shield Hardener\nEM Shield Amplifier II\n5MN Quad LiF Restrained Microwarpdrive\nWarp Scrambler II\n\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\n[Empty High slot]\n[Empty High slot]\n\nSmall Ancillary Current Router I\n[Empty Rig slot]\n\n\nCaldari Navy Scourge Light Missile x308\nDefender Missile I x10\nWarp Disrupt Probe x26"
+    "body": "Co-Processor II\n\nMedium Shield Extender II\nEnduring Multispectrum Shield Hardener\nEM Shield Amplifier II\n5MN Quad LiF Restrained Microwarpdrive\nWarp Scrambler II\n\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nSmall Energy Neutralizer II\nSmall Energy Nosferatu II\n\nSmall Ancillary Current Router I\nSmall Polycarbon Engine Housing II\n\n\nCaldari Navy Scourge Light Missile x308\nDefender Missile I x10\nWarp Disrupt Probe x26"
    },
    {
-    "name": "Kitetackle Missile Shield Flycatcher",
-    "body": "Co-Processor II\n\nMedium Shield Extender II\nEnduring Multispectrum Shield Hardener\nEM Shield Amplifier II\n5MN Quad LiF Restrained Microwarpdrive\nFaint Epsilon Scoped Warp Scrambler\n\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\n[Empty High slot]\n\nSmall Ancillary Current Router I\n[Empty Rig slot]\n\n\nCaldari Navy Scourge Light Missile x198\nScourge Fury Light Missile x738\nNanite Repair Paste x122\nWarp Disrupt Probe x27"
+    "name": "Kitetackle Neut Missile Shield Flycatcher",
+    "body": "Co-Processor II\n\nMedium Shield Extender II\nEnduring Multispectrum Shield Hardener\nEM Shield Amplifier II\n5MN Quad LiF Restrained Microwarpdrive\nFaint Epsilon Scoped Warp Scrambler\n\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nLight Missile Launcher II, Caldari Navy Scourge Light Missile\nSmall Energy Nosferatu II\n\nSmall Ancillary Current Router I\nSmall Polycarbon Engine Housing II\n\n\nCaldari Navy Scourge Light Missile x198\nScourge Fury Light Missile x738\nNanite Repair Paste x122\nWarp Disrupt Probe x27"
    },
    {
     "name": "Kitetackle Rocket Shield Flycatcher",
-    "body": "Nanofiber Internal Structure II\n\nMedium Shield Extender II\nMedium Shield Extender II\n5MN Quad LiF Restrained Microwarpdrive\nFaint Epsilon Scoped Warp Scrambler\nEM Shield Amplifier II\n\n'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket\n'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket\n'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nSmall Hyperspatial Velocity Optimizer II\nSmall Hyperspatial Velocity Optimizer II\n\n\nStasis Webification Probe x10\nDefender Missile I x40\nCaldari Navy Scourge Rocket x405\nNanite Repair Paste x30\nWarp Disrupt Probe x37"
+    "body": "Nanofiber Internal Structure II\n\nMedium Shield Extender II\nMedium Shield Extender II\n5MN Quad LiF Restrained Microwarpdrive\nFaint Epsilon Scoped Warp Scrambler\nEM Shield Amplifier II\n\n'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket\n'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket\n'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket\nSmall Energy Neutralizer II\nSmall Energy Neutralizer II\nSmall Energy Nosferatu II\nSmall Energy Neutralizer II\nSmall Energy Nosferatu II\n\nSmall Hyperspatial Velocity Optimizer II\nSmall Polycarbon Engine Housing II\n\n\nStasis Webification Probe x10\nDefender Missile I x40\nCaldari Navy Scourge Rocket x405\nNanite Repair Paste x30\nWarp Disrupt Probe x37"
    }
   ]
  },
@@ -2213,7 +2261,7 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Kitetackle Art Armor Mimir",
-    "body": "Abyssal Gyrostabilizer\nCorpum A-Type Multispectrum Energized Membrane\nAbyssal Gyrostabilizer\nMedium Abyssal Armor Repairer\n[Empty Low slot]\n[Empty Low slot]\n\nAbyssal Warp Disruptor\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\n50MN Abyssal Microwarpdrive\n\n720mm Howitzer Artillery II, Domination Depleted Uranium M\nMedium Abyssal Energy Neutralizer\nMedium Abyssal Energy Neutralizer\n720mm Howitzer Artillery II, Domination Depleted Uranium M\n720mm Howitzer Artillery II, Domination Depleted Uranium M\n720mm Howitzer Artillery II, Domination Depleted Uranium M\n\nMedium Ancillary Current Router II\nMedium Ancillary Current Router II\n\n\nHornet EC-300 x6\n\n\nTremor M x700\nDomination Fusion M x644\nNavy Cap Booster 800 x14\nDomination Titanium Sabot M x732\nDomination EMP M x856\nDomination Phased Plasma M x700\nNanite Repair Paste x895\nDomination Depleted Uranium M x576"
+    "body": "Abyssal Gyrostabilizer\nCorpum A-Type Multispectrum Energized Membrane\nAbyssal Gyrostabilizer\nMedium Abyssal Armor Repairer\nDamage Control II\n1600mm Steel Plates II\n\nAbyssal Warp Disruptor\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\n50MN Abyssal Microwarpdrive\n\n720mm Howitzer Artillery II, Domination Depleted Uranium M\nMedium Abyssal Energy Neutralizer\nMedium Abyssal Energy Neutralizer\n720mm Howitzer Artillery II, Domination Depleted Uranium M\n720mm Howitzer Artillery II, Domination Depleted Uranium M\n720mm Howitzer Artillery II, Domination Depleted Uranium M\n\nMedium Ancillary Current Router II\nMedium Ancillary Current Router II\n\n\nHornet EC-300 x6\n\n\nTremor M x700\nDomination Fusion M x644\nNavy Cap Booster 800 x14\nDomination Titanium Sabot M x732\nDomination EMP M x856\nDomination Phased Plasma M x700\nNanite Repair Paste x895\nDomination Depleted Uranium M x576"
    }
   ]
  },
@@ -2257,6 +2305,15 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
    {
     "name": "Kitetackle Rocket Shield Cambion",
     "body": "IFFA Compact Damage Control\nBallistic Control System II\nBallistic Control System II\n\nMedium F-S9 Regolith Compact Shield Extender\nMedium Shield Extender II\nFaint Epsilon Scoped Warp Scrambler\nEM Shield Amplifier II\n5MN Y-T8 Compact Microwarpdrive\n\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\nRocket Launcher II, Scourge Rage Rocket\n\nSmall Core Defense Field Extender I\nSmall EM Shield Reinforcer I\n\n\nNova Rage Rocket x1500\nNavy Cap Booster 800 x3\nScourge Rage Rocket x2200\nDread Guristas Scourge Rocket x2000\nNanite Repair Paste x200\nInferno Rage Rocket x1500\nMjolnir Rage Rocket x1500"
+   }
+  ]
+ },
+ "32790": {
+  "name": "Etana",
+  "fittings": [
+   {
+    "name": "Logi Shield Etana",
+    "body": "Damage Control II\nCapacitor Power Relay II\nCapacitor Power Relay II\n\nLarge Shield Extender II\nMultispectrum Shield Hardener II\n50MN Quad LiF Restrained Microwarpdrive\nSensor Booster II, ECCM Script\nShield Boost Amplifier II\nShield Boost Amplifier II\n\nLarge Remote Shield Booster II\nLarge Remote Shield Booster II\nLarge Remote Shield Booster II\nLarge Remote Shield Booster II\nMedium Remote Shield Booster II\nMedium Remote Shield Booster II\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nLight Shield Maintenance Bot II x2\n\n\nNanite Repair Paste x200\nECCM Script x1\nTargeting Range Script x1\nScan Resolution Script x1"
    }
   ]
  },
@@ -2567,6 +2624,15 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
    }
   ]
  },
+ "33675": {
+  "name": "Chameleon",
+  "fittings": [
+   {
+    "name": "Ewar Shield Chameleon",
+    "body": "Damage Control II\nPower Diagnostic System II\nSignal Amplifier II\nInertial Stabilizers II\n\nLarge Shield Extender II\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\n50MN Cold-Gas Enduring Microwarpdrive\nWarp Scrambler II\nSensor Booster II, Scan Resolution Script\n\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\nRemote Sensor Dampener II, Scan Resolution Dampening Script\nRemote Sensor Dampener II, Targeting Range Dampening Script\n\nMedium Particle Dispersion Augmentor II\nMedium Particle Dispersion Augmentor II\n\n\nHornet EC-300 x4\n\n\nNanite Repair Paste x100\nTargeting Range Dampening Script x3\nScan Resolution Dampening Script x2\nScan Resolution Script x1\nECCM Script x1"
+   }
+  ]
+ },
  "33816": {
   "name": "Garmur",
   "fittings": [
@@ -2852,16 +2918,16 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "name": "Rabisu",
   "fittings": [
    {
-    "name": "Ewar Armor Rabisu",
-    "body": "EM Armor Hardener II\nMedium Ancillary Armor Repairer\nThermal Armor Hardener II\nReactive Armor Hardener\n1600mm Rolled Tungsten Compact Plates\n[Empty Low slot]\n\n10MN Afterburner II\nSmall Capacitor Booster II\nMedium Capacitor Booster II, Navy Cap Booster 400\n\nLarge Remote Armor Repairer II\nLarge Solace Scoped Remote Armor Repairer\nLarge Solace Scoped Remote Armor Repairer\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nSmall Ghoul Compact Energy Nosferatu\n\nMedium Kinetic Armor Reinforcer I\nMedium Processor Overclocking Unit I\n\n\nMedium Armor Maintenance Bot I x2\nMedium Armor Maintenance Bot I x3\n\n\nNavy Cap Booster 400 x32\nNanite Repair Paste x200"
-   },
-   {
-    "name": "Ewar Armor Rabisu",
+    "name": "Budget Ewar Armor Rabisu",
     "body": "Medium Ancillary Armor Repairer, Nanite Repair Paste\nMultispectrum Energized Membrane II\n1600mm Steel Plates II\nThermal Armor Hardener II\nEM Armor Hardener II\nReactive Armor Hardener\n\nSmall F-RX Compact Capacitor Booster\n10MN Afterburner II\nSmall F-RX Compact Capacitor Booster\n\nLarge Coaxial Compact Remote Armor Repairer\nLarge Coaxial Compact Remote Armor Repairer\nLarge Coaxial Compact Remote Armor Repairer\nLarge Coaxial Compact Remote Armor Repairer\nLarge Coaxial Compact Remote Armor Repairer\nMedium Ghoul Compact Energy Nosferatu\n\nMedium Trimark Armor Pump I\nMedium Trimark Armor Pump I\n\n\nNavy Cap Booster 400 x7\nNanite Repair Paste x200"
    },
    {
     "name": "Ewar Armor Rabisu",
-    "body": "EM Armor Hardener II\nMedium Ancillary Armor Repairer\nThermal Armor Hardener II\nReactive Armor Hardener\n1600mm Rolled Tungsten Compact Plates\n[Empty Low slot]\n\nSmall Capacitor Booster II, Navy Cap Booster 400\n10MN Afterburner II\nMedium Capacitor Booster II, Navy Cap Booster 400\n\nLarge Remote Armor Repairer II\nLarge Solace Scoped Remote Armor Repairer\nLarge Remote Armor Repairer II\nLarge Solace Scoped Remote Armor Repairer\nLarge Remote Armor Repairer II\nSmall Ghoul Compact Energy Nosferatu\n\nMedium Kinetic Armor Reinforcer I\nMedium Processor Overclocking Unit I\n\n\nNavy Cap Booster 400 x28\nNanite Repair Paste x200"
+    "body": "EM Armor Hardener II\nMedium Ancillary Armor Repairer\nThermal Armor Hardener II\nReactive Armor Hardener\n1600mm Rolled Tungsten Compact Plates\nDamage Control II\n\nSmall Capacitor Booster II, Navy Cap Booster 400\n10MN Afterburner II\nMedium Capacitor Booster II, Navy Cap Booster 400\n\nLarge Remote Armor Repairer II\nLarge Solace Scoped Remote Armor Repairer\nLarge Remote Armor Repairer II\nLarge Solace Scoped Remote Armor Repairer\nLarge Remote Armor Repairer II\nSmall Ghoul Compact Energy Nosferatu\n\nMedium Kinetic Armor Reinforcer I\nMedium Processor Overclocking Unit I\n\n\nNavy Cap Booster 400 x28\nNanite Repair Paste x200"
+   },
+   {
+    "name": "Nos Ewar Armor Rabisu",
+    "body": "EM Armor Hardener II\nMedium Ancillary Armor Repairer\nThermal Armor Hardener II\nReactive Armor Hardener\n1600mm Rolled Tungsten Compact Plates\nDamage Control II\n\n10MN Afterburner II\nSmall Capacitor Booster II\nMedium Capacitor Booster II, Navy Cap Booster 400\n\nLarge Remote Armor Repairer II\nLarge Solace Scoped Remote Armor Repairer\nLarge Solace Scoped Remote Armor Repairer\nLarge Remote Armor Repairer II\nLarge Remote Armor Repairer II\nSmall Ghoul Compact Energy Nosferatu\n\nMedium Kinetic Armor Reinforcer I\nMedium Processor Overclocking Unit I\n\n\nMedium Armor Maintenance Bot I x2\nMedium Armor Maintenance Bot I x3\n\n\nNavy Cap Booster 400 x32\nNanite Repair Paste x200"
    }
   ]
  },
@@ -2892,7 +2958,7 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Kitetackle AC Shield Enforcer",
-    "body": "Gyrostabilizer II\nDamage Control II\nGyrostabilizer II\nNanofiber Internal Structure II\nGyrostabilizer II\n\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nWarp Disruptor II\n50MN Cold-Gas Enduring Microwarpdrive\n\n220mm Vulcan AutoCannon II, Arch Angel EMP M\n220mm Vulcan AutoCannon II, Arch Angel EMP M\n220mm Vulcan AutoCannon II, Arch Angel EMP M\nCovert Ops Cloaking Device II\n220mm Vulcan AutoCannon II, Arch Angel EMP M\n220mm Vulcan AutoCannon II, Arch Angel EMP M\n[Empty High slot]\n\nMedium Core Defense Field Extender I\nMedium Core Defense Field Extender I\n\n\nCaldari Navy Vespa x2\n\n\nLiquid Ozone x300\nArch Angel Phased Plasma M x3000\nBarrage M x2717\nArch Angel EMP M x2440\nHail M x3000"
+    "body": "Gyrostabilizer II\nDamage Control II\nGyrostabilizer II\nNanofiber Internal Structure II\nGyrostabilizer II\n\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nWarp Disruptor II\n50MN Cold-Gas Enduring Microwarpdrive\n\n220mm Vulcan AutoCannon II, Arch Angel EMP M\n220mm Vulcan AutoCannon II, Arch Angel EMP M\n220mm Vulcan AutoCannon II, Arch Angel EMP M\nCovert Ops Cloaking Device II\n220mm Vulcan AutoCannon II, Arch Angel EMP M\n220mm Vulcan AutoCannon II, Arch Angel EMP M\nMedium Energy Nosferatu II\n\nMedium Core Defense Field Extender I\nMedium Core Defense Field Extender I\n\n\nCaldari Navy Vespa x2\n\n\nLiquid Ozone x300\nArch Angel Phased Plasma M x3000\nBarrage M x2717\nArch Angel EMP M x2440\nHail M x3000"
    }
   ]
  },
@@ -2959,7 +3025,7 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Kitetackle Armor Tiamat",
-    "body": "Corpum A-Type Multispectrum Energized Membrane\nCorpum A-Type Multispectrum Energized Membrane\nMedium Abyssal Armor Repairer\n[Empty Low slot]\n[Empty Low slot]\n\n50MN Abyssal Microwarpdrive\nAbyssal Warp Disruptor\nMedium 'Gattotte' Capacitor Booster, Navy Cap Booster 800\nAbyssal Stasis Webifier\nCorelum A-Type 10MN Afterburner\n\nCorpii A-Type Small Energy Neutralizer\nCorpum A-Type Medium Energy Neutralizer\n'Smokescreen' Covert Ops Cloaking Device II\nCorpum A-Type Medium Energy Neutralizer\n[Empty High slot]\n\nMedium Ancillary Current Router II\nMedium Auxiliary Nano Pump II\n\n\nRepublic Fleet Warrior x8\nRepublic Fleet Warrior x2\n\n\nNavy Cap Booster 800 x16\nOccult M x1830\nTetryon Exotic Plasma M x1000\nMystic M x1995\nNanite Repair Paste x99\nMeson Exotic Plasma M x2000\nBaryon Exotic Plasma M x2000"
+    "body": "Corpum A-Type Multispectrum Energized Membrane\nCorpum A-Type Multispectrum Energized Membrane\nMedium Abyssal Armor Repairer\nDamage Control II\n1600mm Steel Plates II\n\n50MN Abyssal Microwarpdrive\nAbyssal Warp Disruptor\nMedium 'Gattotte' Capacitor Booster, Navy Cap Booster 800\nAbyssal Stasis Webifier\nCorelum A-Type 10MN Afterburner\n\nCorpii A-Type Small Energy Neutralizer\nCorpum A-Type Medium Energy Neutralizer\n'Smokescreen' Covert Ops Cloaking Device II\nCorpum A-Type Medium Energy Neutralizer\nSmall Ghoul Compact Energy Nosferatu\n\nMedium Ancillary Current Router II\nMedium Auxiliary Nano Pump II\n\n\nRepublic Fleet Warrior x8\nRepublic Fleet Warrior x2\n\n\nNavy Cap Booster 800 x16\nOccult M x1830\nTetryon Exotic Plasma M x1000\nMystic M x1995\nNanite Repair Paste x99\nMeson Exotic Plasma M x2000\nBaryon Exotic Plasma M x2000"
    }
   ]
  },
@@ -2994,6 +3060,15 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
    }
   ]
  },
+ "49713": {
+  "name": "Zarmazd",
+  "fittings": [
+   {
+    "name": "Logi Armor Zarmazd",
+    "body": "Damage Control II\nImperial Navy 1600mm Steel Plates\nMultispectrum Energized Membrane II\nCentum A-Type EM Energized Membrane\nArmor Explosive Hardener II\nTrue Sansha Kinetic Armor Hardener\n\nSensor Booster II, Targeting Range Script\n50MN Quad LiF Restrained Microwarpdrive\nSmall F-RX Compact Capacitor Booster, Navy Cap Booster 400\nMedium Capacitor Booster II, Navy Cap Booster 800\n\nHeavy Mutadaptive Remote Armor Repairer II\nHeavy Mutadaptive Remote Armor Repairer II\nPerun Heavy Mutadaptive Remote Armor Repairer\nMedium Inductive Compact Remote Capacitor Transmitter\n\nMedium Ancillary Current Router II\nMedium Trimark Armor Pump II\n\n\nMedium Armor Maintenance Bot II x3\n\n\nNavy Cap Booster 800 x20\nNavy Cap Booster 400 x20\nNanite Repair Paste x200\nTargeting Range Script x1\nScan Resolution Script x1"
+   }
+  ]
+ },
  "52250": {
   "name": "Nergal",
   "fittings": [
@@ -3012,11 +3087,11 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
   "fittings": [
    {
     "name": "Kitetackle Armor Ikitursa",
-    "body": "Medium Ancillary Armor Repairer, Nanite Repair Paste\nSyndicate 1600mm Steel Plates\nCaldari Navy Power Diagnostic System\n[Empty Low slot]\n[Empty Low slot]\n[Empty Low slot]\n\nThukker Medium Cap Battery\nFederation Navy 50MN Microwarpdrive\nCaldari Navy Stasis Webifier\n[Empty Med slot]\n\nSmall Energy Neutralizer II\n[Empty High slot]\n[Empty High slot]\n[Empty High slot]\n\nMedium Kinetic Armor Reinforcer II\nMedium Trimark Armor Pump II\n\n\nWarrior II x4\n\n\nOccult M x5463\nMystic M x5402\nNanite Repair Paste x3000"
+    "body": "Medium Ancillary Armor Repairer, Nanite Repair Paste\nSyndicate 1600mm Steel Plates\nCaldari Navy Power Diagnostic System\nDamage Control II\nMultispectrum Energized Membrane II\n1600mm Steel Plates II\n\nThukker Medium Cap Battery\nFederation Navy 50MN Microwarpdrive\nCaldari Navy Stasis Webifier\nSensor Booster II, Scan Resolution Script\n\nSmall Energy Neutralizer II\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\nSmall Energy Nosferatu II\n\nMedium Kinetic Armor Reinforcer II\nMedium Trimark Armor Pump II\n\n\nWarrior II x4\n\n\nOccult M x5463\nMystic M x5402\nNanite Repair Paste x3000"
    },
    {
     "name": "Tackle Armor Ikitursa",
-    "body": "Multispectrum Energized Membrane II\nReactive Armor Hardener\nMedium Ancillary Armor Repairer, Nanite Repair Paste\nDark Blood Medium Armor Repairer\nDamage Control II\n[Empty Low slot]\n\n10MN Afterburner II\nMedium Capacitor Booster II, Navy Cap Booster 800\nStasis Webifier II\nWarp Scrambler II\n\nMedium Gremlin Compact Energy Neutralizer\nSmall Energy Nosferatu II\nMedium Gremlin Compact Energy Neutralizer\n[Empty High slot]\n\nMedium Auxiliary Nano Pump II\nMedium Auxiliary Nano Pump II\n\n\nValkyrie II x1\nInfiltrator II x1\n\n\nNavy Cap Booster 800 x13\nOccult M x415\nNanite Repair Paste x50"
+    "body": "Multispectrum Energized Membrane II\nReactive Armor Hardener\nMedium Ancillary Armor Repairer, Nanite Repair Paste\nDark Blood Medium Armor Repairer\nDamage Control II\nMultispectrum Energized Membrane II\n\n10MN Afterburner II\nMedium Capacitor Booster II, Navy Cap Booster 800\nStasis Webifier II\nWarp Scrambler II\n\nMedium Gremlin Compact Energy Neutralizer\nSmall Energy Nosferatu II\nMedium Gremlin Compact Energy Neutralizer\nMedium Energy Nosferatu II\n\nMedium Auxiliary Nano Pump II\nMedium Auxiliary Nano Pump II\n\n\nValkyrie II x1\nInfiltrator II x1\n\n\nNavy Cap Booster 800 x13\nOccult M x415\nNanite Repair Paste x50"
    }
   ]
  },
@@ -3286,6 +3361,19 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
    }
   ]
  },
+ "74316": {
+  "name": "Bestla",
+  "fittings": [
+   {
+    "name": "HAM Shield Bestla",
+    "body": "Ballistic Control System II\nBallistic Control System II\nDamage Control II\nPower Diagnostic System II\nPower Diagnostic System II\n\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\n50MN Quad LiF Restrained Microwarpdrive\nSensor Booster II, Scan Resolution Script\n\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nMedium Energy Neutralizer II\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nVespa II x5\n\n\nMjolnir Rage Heavy Assault Missile x3000\nScourge Rage Heavy Assault Missile x1000\nNanite Repair Paste x100"
+   },
+   {
+    "name": "Tackle HAM Armor Bestla",
+    "body": "Ballistic Control System II\nBallistic Control System II\nDamage Control II\n1600mm Steel Plates II\nMultispectrum Energized Membrane II\n\nWarp Scrambler II\nFleeting Compact Stasis Webifier\nMultispectrum Shield Hardener II\n50MN Y-T8 Compact Microwarpdrive\nSensor Booster II, Scan Resolution Script\n\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nMedium Energy Nosferatu II\n\nMedium Ancillary Current Router II\nMedium Trimark Armor Pump II\n\n\nVespa II x4\nHornet EC-300 x1\n\n\nScourge Rage Heavy Assault Missile x3000\nMjolnir Rage Heavy Assault Missile x1000\nNanite Repair Paste x100"
+   }
+  ]
+ },
  "77114": {
   "name": "Metamorphosis",
   "fittings": [
@@ -3347,6 +3435,19 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
    }
   ]
  },
+ "77726": {
+  "name": "Cybele",
+  "fittings": [
+   {
+    "name": "Blaster Armor Cybele",
+    "body": "Magnetic Field Stabilizer II\nMagnetic Field Stabilizer II\nDamage Control II\n1600mm Steel Plates II\nMultispectrum Energized Membrane II\nEnergized Adaptive Nano Membrane II\n\n50MN Quad LiF Restrained Microwarpdrive\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\nSensor Booster II, Scan Resolution Script\nWarp Scrambler II\nFleeting Compact Stasis Webifier\n\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nMedium Energy Neutralizer II\n\nMedium Ancillary Current Router II\nMedium Trimark Armor Pump II\n\n\nAcolyte II x5\n\n\nVoid M x2000\nCaldari Navy Antimatter Charge M x2000\nFederation Navy Antimatter Charge M x1000\nNavy Cap Booster 800 x20\nNanite Repair Paste x200"
+   },
+   {
+    "name": "Rail Armor Cybele",
+    "body": "Magnetic Field Stabilizer II\nMagnetic Field Stabilizer II\nDamage Control II\n1600mm Steel Plates II\nMultispectrum Energized Membrane II\nEnergized Adaptive Nano Membrane II\n\n50MN Quad LiF Restrained Microwarpdrive\nMedium F-RX Compact Capacitor Booster, Navy Cap Booster 800\nSensor Booster II, Scan Resolution Script\nWarp Scrambler II\nTracking Computer II, Optimal Range Script\n\n250mm Railgun II, Spike M\n250mm Railgun II, Spike M\n250mm Railgun II, Spike M\n250mm Railgun II, Spike M\nMedium Energy Neutralizer II\n\nMedium Ancillary Current Router II\nMedium Trimark Armor Pump II\n\n\nAcolyte II x5\n\n\nSpike M x3000\nCaldari Navy Antimatter Charge M x2000\nJavelin M x500\nNavy Cap Booster 800 x20\nNanite Repair Paste x200\nOptimal Range Script x1\nTracking Speed Script x1"
+   }
+  ]
+ },
  "78333": {
   "name": "Mekubal",
   "fittings": [
@@ -3388,6 +3489,19 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
    {
     "name": "Tackle Rocket Shield Tholos",
     "body": "Nanofiber Internal Structure II\n[Empty Low slot]\n\nMedium Ancillary Shield Booster, Navy Cap Booster 50\nMultispectrum Shield Hardener II\n10MN Y-S8 Compact Afterburner\nMedium Ancillary Shield Booster, Navy Cap Booster 50\nDread Guristas Warp Scrambler\nDread Guristas Stasis Webifier\n\nRocket Launcher II, Inferno Rage Rocket\nCovert Ops Cloaking Device II\n200mm AutoCannon II, Hail S\n200mm AutoCannon II, Hail S\nRocket Launcher II, Inferno Rage Rocket\n[Empty High slot]\n\nSmall EM Shield Reinforcer I\nSmall Ancillary Current Router II\nSmall Core Defense Operational Solidifier II\n\n\nSCARAB Breacher Pod S x1966\nNavy Cap Booster 50 x28\nHail S x2266\nBarrage S x2500\nInferno Rage Rocket x2052"
+   }
+  ]
+ },
+ "85229": {
+  "name": "Cobra",
+  "fittings": [
+   {
+    "name": "Drone Missile Shield Cobra",
+    "body": "Caldari Navy Ballistic Control System\nCaldari Navy Ballistic Control System\nDamage Control II\nPower Diagnostic System II\nDrone Damage Amplifier II\n\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nWarp Scrambler II\nStasis Webifier II\n50MN Cold-Gas Enduring Microwarpdrive\n\nRapid Light Missile Launcher II, Scourge Fury Light Missile\nRapid Light Missile Launcher II, Scourge Fury Light Missile\nRapid Light Missile Launcher II, Scourge Fury Light Missile\nRapid Light Missile Launcher II, Scourge Fury Light Missile\nMedium Energy Neutralizer II\nMedium Energy Nosferatu II\nMedium Energy Neutralizer II\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\n\n\nVespa II x3\n\n\nScourge Fury Light Missile x2000\nCaldari Navy Scourge Light Missile x1000\nNanite Repair Paste x100"
+   },
+   {
+    "name": "Missile Shield Cobra",
+    "body": "Ballistic Control System II\nBallistic Control System II\nBallistic Control System II\nDamage Control II\nPower Diagnostic System II\n\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nWarp Scrambler II\nStasis Webifier II\n50MN Cold-Gas Enduring Microwarpdrive\n\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile\nMedium Energy Neutralizer II\nMedium Energy Neutralizer II\n\nMedium EM Shield Reinforcer II\nMedium Core Defense Field Extender II\n\n\nVespa II x3\n\n\nScourge Rage Heavy Assault Missile x3000\nMjolnir Rage Heavy Assault Missile x1000\nNanite Repair Paste x100"
    }
   ]
  },

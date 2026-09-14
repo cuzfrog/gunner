@@ -3,7 +3,7 @@
 Imperial Navy 1600mm Steel Plates
 Domination Explosive Armor Hardener
 Imperial Navy Multispectrum Energized Membrane
-[Empty Low slot]
+Multispectrum Energized Membrane II
 
 Republic Fleet Medium Cap Battery
 Abyssal Stasis Webifier
@@ -12,11 +12,11 @@ Abyssal Stasis Webifier
 10MN Y-S8 Compact Afterburner
 Warp Disruptor II
 
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Medium Energy Nosferatu II
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
+Small Energy Nosferatu II
+Small Energy Neutralizer II
 
 Medium Trimark Armor Pump II
 Medium Trimark Armor Pump II

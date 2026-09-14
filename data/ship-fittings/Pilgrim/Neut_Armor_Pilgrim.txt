@@ -1,0 +1,30 @@
+[Pilgrim, Neut Armor Pilgrim]
+
+Multispectrum Energized Membrane II
+Multispectrum Energized Membrane II
+Damage Control II
+1600mm Steel Plates II
+Power Diagnostic System II
+
+50MN Quad LiF Restrained Microwarpdrive
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+Warp Scrambler II
+Stasis Webifier II
+Tracking Disruptor II, Tracking Speed Disruption Script
+
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
+Medium Energy Nosferatu II
+
+Medium Ancillary Current Router II
+Medium Trimark Armor Pump II
+
+
+Infiltrator II x5
+
+
+Navy Cap Booster 800 x20
+Nanite Repair Paste x200
+Tracking Speed Disruption Script x2
+Optimal Range Disruption Script x1

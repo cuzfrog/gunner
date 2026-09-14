@@ -19,7 +19,7 @@ Warp Scrambler II
 250mm Railgun II
 
 Medium EM Armor Reinforcer I
-[Empty Rig slot]
+Medium Ancillary Current Router II
 
 
 Hornet EC-300 x5

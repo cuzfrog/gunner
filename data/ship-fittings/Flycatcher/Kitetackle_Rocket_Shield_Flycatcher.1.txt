@@ -11,14 +11,14 @@ EM Shield Amplifier II
 'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket
 'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket
 'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Small Energy Neutralizer II
+Small Energy Neutralizer II
+Small Energy Nosferatu II
+Small Energy Neutralizer II
+Small Energy Nosferatu II
 
 Small Hyperspatial Velocity Optimizer II
-Small Hyperspatial Velocity Optimizer II
+Small Polycarbon Engine Housing II
 
 
 Stasis Webification Probe x10

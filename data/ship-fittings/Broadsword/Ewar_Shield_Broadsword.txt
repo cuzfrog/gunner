@@ -13,11 +13,11 @@ Explosive Shield Amplifier II
 Kinetic Shield Amplifier II
 
 Medium Ghoul Compact Energy Nosferatu
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
+Medium Energy Nosferatu II
+Medium Energy Nosferatu II
 
 Medium Hyperspatial Velocity Optimizer II
 Medium Hyperspatial Velocity Optimizer II

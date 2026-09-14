@@ -1,0 +1,35 @@
+[Cybele, Rail Armor Cybele]
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Damage Control II
+1600mm Steel Plates II
+Multispectrum Energized Membrane II
+Energized Adaptive Nano Membrane II
+
+50MN Quad LiF Restrained Microwarpdrive
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+Sensor Booster II, Scan Resolution Script
+Warp Scrambler II
+Tracking Computer II, Optimal Range Script
+
+250mm Railgun II, Spike M
+250mm Railgun II, Spike M
+250mm Railgun II, Spike M
+250mm Railgun II, Spike M
+Medium Energy Neutralizer II
+
+Medium Ancillary Current Router II
+Medium Trimark Armor Pump II
+
+
+Acolyte II x5
+
+
+Spike M x3000
+Caldari Navy Antimatter Charge M x2000
+Javelin M x500
+Navy Cap Booster 800 x20
+Nanite Repair Paste x200
+Optimal Range Script x1
+Tracking Speed Script x1

@@ -1,4 +1,4 @@
-[Heretic, Kitetackle Rocket Armor Heretic]
+[Heretic, Kitetackle Rage Rocket Armor Heretic]
 
 Damage Control II
 400mm Steel Plates II
@@ -14,11 +14,11 @@ Rocket Launcher II, Scourge Rage Rocket
 Rocket Launcher II, Scourge Rage Rocket
 Rocket Launcher II, Scourge Rage Rocket
 Rocket Launcher II, Scourge Rage Rocket
-Rocket Launcher II, Scourge Rage Rocket
-[Empty High slot]
+Small Energy Neutralizer II
+Small Energy Nosferatu II
 
-[Empty Rig slot]
-[Empty Rig slot]
+Small Trimark Armor Pump II
+Small Polycarbon Engine Housing II
 
 
 Nova Rage Rocket x14

@@ -1,0 +1,33 @@
+[Cobra, Drone Missile Shield Cobra]
+
+Caldari Navy Ballistic Control System
+Caldari Navy Ballistic Control System
+Damage Control II
+Power Diagnostic System II
+Drone Damage Amplifier II
+
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Warp Scrambler II
+Stasis Webifier II
+50MN Cold-Gas Enduring Microwarpdrive
+
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+Medium Energy Neutralizer II
+Medium Energy Nosferatu II
+Medium Energy Neutralizer II
+
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+
+
+Vespa II x3
+
+
+Scourge Fury Light Missile x2000
+Caldari Navy Scourge Light Missile x1000
+Nanite Repair Paste x100

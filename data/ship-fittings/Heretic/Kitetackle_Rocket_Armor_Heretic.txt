@@ -2,7 +2,7 @@
 
 400mm Steel Plates II
 Damage Control II
-[Empty Low slot]
+Reactive Armor Hardener
 
 5MN Y-T8 Compact Microwarpdrive
 X5 Enduring Stasis Webifier
@@ -14,8 +14,8 @@ Rocket Launcher II, Scourge Javelin Rocket
 Rocket Launcher II, Scourge Javelin Rocket
 Rocket Launcher II, Scourge Javelin Rocket
 Rocket Launcher II, Scourge Javelin Rocket
-[Empty High slot]
-[Empty High slot]
+Small Energy Nosferatu II
+Small Energy Neutralizer II
 
 Small Trimark Armor Pump II
 Small Trimark Armor Pump II

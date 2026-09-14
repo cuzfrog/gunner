@@ -15,8 +15,8 @@ Warp Disruptor II
 
 200mm Railgun II, Spike M
 200mm Railgun II, Spike M
-[Empty High slot]
-[Empty High slot]
+Medium Energy Neutralizer II
+Small Energy Nosferatu II
 
 Medium Core Defense Field Extender II
 Medium EM Shield Reinforcer II

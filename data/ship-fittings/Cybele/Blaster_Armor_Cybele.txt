@@ -1,0 +1,33 @@
+[Cybele, Blaster Armor Cybele]
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Damage Control II
+1600mm Steel Plates II
+Multispectrum Energized Membrane II
+Energized Adaptive Nano Membrane II
+
+50MN Quad LiF Restrained Microwarpdrive
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+Sensor Booster II, Scan Resolution Script
+Warp Scrambler II
+Fleeting Compact Stasis Webifier
+
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Medium Energy Neutralizer II
+
+Medium Ancillary Current Router II
+Medium Trimark Armor Pump II
+
+
+Acolyte II x5
+
+
+Void M x2000
+Caldari Navy Antimatter Charge M x2000
+Federation Navy Antimatter Charge M x1000
+Navy Cap Booster 800 x20
+Nanite Repair Paste x200

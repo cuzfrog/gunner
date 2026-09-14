@@ -1,11 +1,11 @@
-[Rabisu, Ewar Armor Rabisu]
+[Rabisu, Nos Ewar Armor Rabisu]
 
 EM Armor Hardener II
 Medium Ancillary Armor Repairer
 Thermal Armor Hardener II
 Reactive Armor Hardener
 1600mm Rolled Tungsten Compact Plates
-[Empty Low slot]
+Damage Control II
 
 10MN Afterburner II
 Small Capacitor Booster II

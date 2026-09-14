@@ -3,7 +3,7 @@
 Damage Control II
 Power Diagnostic System II
 Power Diagnostic System II
-Power Diagnostic System II
+Signal Amplifier II
 
 Remote Sensor Dampener II, Targeting Range Dampening Script
 100MN Afterburner II
@@ -11,15 +11,21 @@ Remote Sensor Dampener II, Targeting Range Dampening Script
 Remote Sensor Dampener II, Targeting Range Dampening Script
 Remote Sensor Dampener II, Targeting Range Dampening Script
 Remote Sensor Dampener II, Targeting Range Dampening Script
-Remote Sensor Dampener II, Targeting Range Dampening Script
+Remote Sensor Dampener II, Scan Resolution Dampening Script
 
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Medium Energy Nosferatu II
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Medium Energy Neutralizer II
 
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Particle Dispersion Augmentor II
+Medium Particle Dispersion Projector II
 
 
 Valkyrie II x5
+
+
+Caldari Navy Scourge Light Missile x600
+Targeting Range Dampening Script x3
+Scan Resolution Dampening Script x2
+Nanite Repair Paste x100

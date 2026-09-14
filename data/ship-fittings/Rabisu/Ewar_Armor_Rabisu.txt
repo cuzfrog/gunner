@@ -5,7 +5,7 @@ Medium Ancillary Armor Repairer
 Thermal Armor Hardener II
 Reactive Armor Hardener
 1600mm Rolled Tungsten Compact Plates
-[Empty Low slot]
+Damage Control II
 
 Small Capacitor Booster II, Navy Cap Booster 400
 10MN Afterburner II

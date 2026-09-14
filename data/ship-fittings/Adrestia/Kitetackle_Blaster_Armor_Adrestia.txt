@@ -10,16 +10,16 @@ Multispectrum Energized Membrane II
 Faint Epsilon Scoped Warp Scrambler
 Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
 50MN Cold-Gas Enduring Microwarpdrive
-[Empty Med slot]
+Stasis Webifier II
 
 Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
 Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
 Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
 Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
-Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
+Medium Energy Neutralizer II
 
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Ancillary Current Router II
+Medium Auxiliary Nano Pump II
 
 
 'Augmented' Hammerhead x5

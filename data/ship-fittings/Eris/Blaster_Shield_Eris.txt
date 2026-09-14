@@ -15,10 +15,10 @@ Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
-[Empty High slot]
+Small Energy Neutralizer II
 
 Small EM Shield Reinforcer II
-[Empty Rig slot]
+Small Polycarbon Engine Housing II
 
 
 Nanite Repair Paste x150

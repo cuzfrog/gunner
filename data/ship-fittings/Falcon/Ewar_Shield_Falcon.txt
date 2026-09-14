@@ -1,0 +1,31 @@
+[Falcon, Ewar Shield Falcon]
+
+Damage Control II
+Power Diagnostic System II
+Signal Amplifier II
+
+Large Shield Extender II
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+50MN Quad LiF Restrained Microwarpdrive
+Warp Scrambler II
+Sensor Booster II, Scan Resolution Script
+
+Remote Sensor Dampener II, Targeting Range Dampening Script
+Remote Sensor Dampener II, Targeting Range Dampening Script
+Remote Sensor Dampener II, Scan Resolution Dampening Script
+Remote Sensor Dampener II, Targeting Range Dampening Script
+
+Medium Particle Dispersion Augmentor II
+Medium Particle Dispersion Augmentor II
+
+
+Hornet EC-300 x2
+
+
+Nanite Repair Paste x100
+Targeting Range Dampening Script x3
+Scan Resolution Dampening Script x2
+Scan Resolution Script x1
+ECCM Script x1

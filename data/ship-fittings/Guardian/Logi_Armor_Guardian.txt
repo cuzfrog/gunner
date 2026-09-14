@@ -4,7 +4,7 @@
 IFFA Compact Damage Control
 True Sansha Thermal Armor Hardener
 True Sansha EM Armor Hardener
-[Empty Low slot]
+Damage Control II
 
 F-90 Compact Sensor Booster, ECCM Script
 10MN Y-S8 Compact Afterburner
@@ -13,8 +13,8 @@ Large Remote Armor Repairer II
 Large Remote Armor Repairer II
 Large Remote Armor Repairer II
 Large Remote Armor Repairer II
-[Empty High slot]
-[Empty High slot]
+Large Inductive Compact Remote Capacitor Transmitter
+Large Inductive Compact Remote Capacitor Transmitter
 
 Medium Ancillary Current Router II
 Medium Ancillary Current Router II
@@ -26,3 +26,4 @@ Acolyte II x5
 Targeting Range Script x1
 Scan Resolution Script x1
 Nanite Repair Paste x300
+ECCM Script x1

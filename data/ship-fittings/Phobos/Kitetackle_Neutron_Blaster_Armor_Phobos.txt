@@ -1,4 +1,4 @@
-[Phobos, Kitetackle Blaster Armor Phobos]
+[Phobos, Kitetackle Neutron Blaster Armor Phobos]
 
 Multispectrum Energized Membrane II
 Reactive Armor Hardener
@@ -16,8 +16,8 @@ Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M
-[Empty High slot]
-[Empty High slot]
+Medium Energy Neutralizer II
+Medium Energy Nosferatu II
 
 Medium Explosive Armor Reinforcer II
 Medium Trimark Armor Pump II

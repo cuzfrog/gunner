@@ -9,15 +9,21 @@ Multispectrum Energized Membrane II
 Large Compact Pb-Acid Cap Battery
 50MN Quad LiF Restrained Microwarpdrive
 Cap Recharger II
-Cap Recharger II
+Sensor Booster II, ECCM Script
 
 Medium Remote Armor Repairer II
 Medium Remote Armor Repairer II
 Medium Remote Armor Repairer II
-Medium Remote Armor Repairer II
+Medium Inductive Compact Remote Capacitor Transmitter
 
 Medium Trimark Armor Pump II
 Medium Trimark Armor Pump II
 
 
 Light Armor Maintenance Bot I x5
+
+
+Nanite Repair Paste x200
+ECCM Script x1
+Targeting Range Script x1
+Scan Resolution Script x1
