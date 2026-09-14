@@ -1,12 +1,10 @@
-import { spawn, spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { spawn } from "node:child_process";
+import { ensureDistBuild } from "./ensure-dist-build";
 
 const PORT = Number(process.env.E2E_PORT ?? 4321);
 const BASE_URL = `http://localhost:${PORT}`;
 const POLL_INTERVAL_MS = 200;
 const POLL_TIMEOUT_MS = 60_000;
-const DIST_MARKER = "dist/index.html";
-const STALE_SOURCES = ["src", "public", "package.json", "astro.config.mjs", "tsconfig.json"];
 
 function pollPort(): Promise<void> {
   const deadline = Date.now() + POLL_TIMEOUT_MS;
@@ -29,23 +27,17 @@ async function isServerUp(): Promise<boolean> {
     .catch(() => false);
 }
 
-function isDistStale(): boolean {
-  if (!existsSync(DIST_MARKER)) return true;
-  const existing = STALE_SOURCES.filter((path) => existsSync(path));
-  const result = spawnSync("find", [...existing, "-newer", DIST_MARKER, "-print", "-quit"], { encoding: "utf-8" });
-  return result.stdout.trim().length > 0;
-}
-
 async function main(): Promise<void> {
   if (await isServerUp()) {
     console.log(`e2e server already running at ${BASE_URL}; reusing it`);
     return;
   }
 
-  if (isDistStale()) {
-    console.log("dist is missing or stale; building...");
-    const buildResult = spawnSync("bun", ["run", "build"], { stdio: "inherit" });
-    if (buildResult.status !== 0) process.exit(buildResult.status ?? 1);
+  try {
+    ensureDistBuild();
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : err);
+    process.exit(1);
   }
 
   const child = spawn("bun", ["run", "preview", "--port", String(PORT)], {

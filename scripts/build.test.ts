@@ -1,8 +1,8 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { toTypeId } from "../src/gamedata/ids";
 import { TYPE_ICON_FILES } from "../src/ui/icons/typeIconFiles";
+import { ensureDistBuild } from "./ensure-dist-build";
 
 const DISTRIBUTION_DIRECTORY = "dist";
 const ASTRO_DIRECTORY = "_astro";
@@ -10,9 +10,7 @@ const CSS_LINK_PATTERN = /href="\/_astro\/[^"]+\.css"/;
 const MODULE_SCRIPT_PATTERN = /src="\/_astro\/[^"]+\.js"/;
 
 describe("build", () => {
-  beforeAll(() => {
-    spawnSync("bun", ["run", "build"], { stdio: "inherit" });
-  }, 30000);
+  beforeAll(ensureDistBuild, 120000);
 
   test("produces hashed JS, hashed CSS and updated index.html", () => {
     const distFiles = readdirSync(DISTRIBUTION_DIRECTORY);
