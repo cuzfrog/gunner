@@ -1,0 +1,72 @@
+---
+import ContentLayout from "../../layouts/ContentLayout.astro";
+import { buildShipPages, factionNameFor, groupNameFor, presetFitTexts, shipProfileCatalog, type ShipPageData } from "../_seo";
+
+const title = "EVE Online Ships — Stats & Preset Fittings — Gunner";
+const description =
+  "Browse every EVE Online ship hull with combat stats and preset fittings. Open any hull in the Gunner browser combat simulator and fight it 1v1 in real time.";
+
+interface ShipClassGroup {
+  readonly className: string;
+  readonly ships: readonly ShipPageData[];
+}
+interface FactionGroup {
+  readonly factionName: string;
+  readonly classes: readonly ShipClassGroup[];
+}
+
+const pages = [...buildShipPages(shipProfileCatalog(), presetFitTexts())].sort((a, b) => a.profile.name.localeCompare(b.profile.name));
+const byFaction = new Map<string, ShipPageData[]>();
+for (const page of pages) {
+  const list = byFaction.get(page.profile.factionId) ?? [];
+  list.push(page);
+  byFaction.set(page.profile.factionId, list);
+}
+const factionGroups: readonly FactionGroup[] = [...byFaction.entries()]
+  .map(([factionId, factionPages]) => {
+    const byClass = new Map<string, ShipPageData[]>();
+    for (const page of factionPages) {
+      const list = byClass.get(page.profile.hullTypeId) ?? [];
+      list.push(page);
+      byClass.set(page.profile.hullTypeId, list);
+    }
+    const classes = [...byClass.entries()]
+      .map(([hullTypeId, classPages]) => ({ className: groupNameFor(hullTypeId), ships: classPages }))
+      .sort((a, b) => a.className.localeCompare(b.className));
+    return { factionName: factionNameFor(factionId), classes };
+  })
+  .sort((a, b) => a.factionName.localeCompare(b.factionName));
+---
+
+<ContentLayout title={title} description={description}>
+  <nav class="content-crumbs" aria-label="Breadcrumb">
+    <a href="/">Simulator</a> / Ships
+  </nav>
+  <h1 class="content-title">EVE Online ships</h1>
+  <p class="content-lede">
+    Every ship hull in Gunner with its combat stats and preset fittings. Ships with presets load into the simulator fully fitted — open one and fight it 1v1
+    against another hull in real time.
+  </p>
+  <section class="content-section">
+    <h2 class="content-section-title">Open in the simulator</h2>
+    <p class="content-text">
+      Pick a hull below to see its stats and fittings, or jump straight into the
+      <a href="/">EVE Online combat simulator</a> and set up the fight yourself.
+    </p>
+  </section>
+  {factionGroups.map((faction) => (
+    <section class="content-section">
+      <h2 class="content-section-title">{faction.factionName}</h2>
+      {faction.classes.map((group) => (
+        <div>
+          <h3 class="content-group-title">{group.className}</h3>
+          <ul class="content-links">
+            {group.ships.map((ship) => (
+              <li><a href={`/ships/${ship.slug}/`}>{ship.profile.name}</a></li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
+  ))}
+</ContentLayout>

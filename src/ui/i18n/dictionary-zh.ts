@@ -1,7 +1,7 @@
 import type { LanguageSlice } from "./dictionaryTypes";
 
 export const ZH: LanguageSlice<"zh"> = {
-  "app.subtitle": { zh: "EVE Online 2D 战术模拟器" },
+  "app.subtitle": { zh: "EVE Online 战斗模拟器" },
   "lang.en": { zh: "English" },
   "lang.zh": { zh: "中文" },
   "lang.ja": { zh: "日本語" },
@@ -343,6 +343,28 @@ export const ZH: LanguageSlice<"zh"> = {
   "footer.mech.weapon.linkMissiles": { zh: "Missiles" },
   "footer.mech.weapon.linkDrones": { zh: "Drones" },
   "footer.mech.weapon.linkDamageTypes": { zh: "Damage types" },
+  "intro.heading": { zh: "浏览器中的 EVE Online 战斗模拟器" },
+  "intro.lede": {
+    zh: "Gunner 在 2D 画布上以真实运动模拟舰船对抗——质量、惯性、横向速度与炮塔跟踪。从 EVE Online 或 Pyfa 导入配装，设定初始距离，观看战斗展开：实际 DPS、命中率、电容稳定性与有效 HP 逐帧实时计算。",
+  },
+  "intro.combat.heading": { zh: "实时战斗" },
+  "intro.combat.text": {
+    zh: "舰船按指令机动——保持距离、环绕、接近——并遵循微曲与加力的物理规则。横向、径向与角速度逐帧更新，炮塔跟踪与太空中一样随角速度与信号半径变化。",
+  },
+  "intro.damage.heading": { zh: "伤害与防御" },
+  "intro.damage.text": {
+    zh: "炮塔、导弹与无人机的伤害类型作用于护盾、装甲与结构，计入抗性、维修与改装件。实际 DPS、施加 DPS 与有效 HP 随战斗进程实时更新。",
+  },
+  "intro.capacitor.heading": { zh: "电容战" },
+  "intro.capacitor.text": {
+    zh: "主动装备消耗你的电容；能量中和与掠能器消耗敌人的电容。查看配装是否电容稳定——以及不稳定时会发生什么。",
+  },
+  "intro.share.heading": { zh: "导入、保存与分享" },
+  "intro.share.text": {
+    zh: "直接粘贴来自游戏客户端或 Pyfa 的 EFT 配装，在浏览器中保存配置，并能把任何战斗分享为 URL——完整模拟状态都包含在链接里。",
+  },
+  "intro.note": { zh: "免费开源，无需账号。选择船体，导入配装，在下一次出港前先模拟你的 1v1。" },
+  "intro.ships": { zh: "在舰船索引中浏览全部船体——属性与预设配装。" },
   "unit.mm": { zh: "mm" },
   "unit.meter": { zh: "m" },
   "unit.kilometer": { zh: "km" },

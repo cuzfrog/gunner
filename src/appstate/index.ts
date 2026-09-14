@@ -31,3 +31,4 @@ export type { SavedFitting, SavedFittings } from "./savedFittings";
 export type { AppstateCradle } from "./cradle";
 export type { ProfileTextCodec } from "./profileText";
 export { registerAppstateModule } from "./module";
+export { URL_PARAM, encodeBase64 } from "./urlCodec";

@@ -1,7 +1,7 @@
 import type { LanguageSlice } from "./dictionaryTypes";
 
 export const JA: LanguageSlice<"ja"> = {
-  "app.subtitle": { ja: "EVE Online 2D 戦術シミュレーター" },
+  "app.subtitle": { ja: "EVE Online コンバットシミュレーター" },
   "lang.en": { ja: "English" },
   "lang.zh": { ja: "中文" },
   "lang.ja": { ja: "日本語" },
@@ -343,6 +343,28 @@ export const JA: LanguageSlice<"ja"> = {
   "footer.mech.weapon.linkMissiles": { ja: "Missiles" },
   "footer.mech.weapon.linkDrones": { ja: "Drones" },
   "footer.mech.weapon.linkDamageTypes": { ja: "Damage types" },
+  "intro.heading": { ja: "ブラウザで動く EVE Online 戦闘シミュレーター" },
+  "intro.lede": {
+    ja: "Gunner は 2D キャンバス上で、質量・慣性・横断速度・タレットトラッキングといった実際の運動に基づき艦船同士の戦闘をシミュレートします。EVE Online や Pyfa からフィッティングをインポートし、初期距離を設定して戦闘の展開をご覧ください。実効 DPS、命中率、キャパシタ安定性、実効 HP が毎ティック計算されます。",
+  },
+  "intro.combat.heading": { ja: "リアルタイム戦闘" },
+  "intro.combat.text": {
+    ja: "艦船は指示に従って機動します——指定距離維持、周回、接近。MWD と AB の物理も再現。横断・放射・角速度は毎ティック更新され、タレットトラッキングは宇宙と同じく角速度とシグネチャ半径に反応します。",
+  },
+  "intro.damage.heading": { ja: "ダメージと防御" },
+  "intro.damage.text": {
+    ja: "タレット、ミサイル、ドローンのダメージタイプが、レジスト・リペア・リグを込みでシールド・アーマー・ハルに適用されます。実効 DPS、与ダメージ、実効 HP は戦闘の推移に合わせて更新されます。",
+  },
+  "intro.capacitor.heading": { ja: "キャパシタ戦" },
+  "intro.capacitor.text": {
+    ja: "アクティブモジュールは自艦のキャパシタを消費し、エネルギーニュートライザーとノスフェラトゥは敵のキャパシタを奪います。フィットがキャパシタ安定かどうか、破綻したとき何が起きるかを確認できます。",
+  },
+  "intro.share.heading": { ja: "インポート・保存・共有" },
+  "intro.share.text": {
+    ja: "ゲームクライアントや Pyfa から EFT フィッティングをそのまま貼り付け、プロファイルをブラウザに保存し、戦闘を URL として共有できます——シミュレーション状態のすべてがリンクの中に。",
+  },
+  "intro.note": { ja: "無料・オープンソース、アカウント不要。船体を選び、フィットをインポートして、次の 1v1 を出港前に検証しましょう。" },
+  "intro.ships": { ja: "艦船インデックスですべての船体を閲覧——ステータスとプリセットフィット付き。" },
   "unit.mm": { ja: "mm" },
   "unit.meter": { ja: "m" },
   "unit.kilometer": { ja: "km" },

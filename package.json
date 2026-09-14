@@ -1,6 +1,6 @@
 {
   "name": "gunner",
-  "version": "0.32.0",
+  "version": "0.33.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,6 +19,7 @@
     "generate:fitting-db": "bun run scripts/generate-fitting-db.ts"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
     "awilix": "13.0.5"
   },
   "devDependencies": {

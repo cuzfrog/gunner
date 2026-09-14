@@ -1,0 +1,115 @@
+---
+import ContentLayout from "../../layouts/ContentLayout.astro";
+import {
+  buildMatchupPages,
+  buildShipPages,
+  firstPresetEft,
+  matchupWire,
+  presetFitTexts,
+  shipProfileCatalog,
+  shipStatRows,
+  shipWire,
+  simulatorDeepLink,
+  type MatchupPageData,
+} from "../_seo";
+
+interface Props {
+  readonly matchup: MatchupPageData;
+  readonly siblingMatchups: readonly MatchupPageData[];
+}
+
+export function getStaticPaths() {
+  const pages = buildShipPages(shipProfileCatalog(), presetFitTexts());
+  const matchups = buildMatchupPages(pages);
+  return matchups.map((matchup) => {
+    const ids = new Set([matchup.shipA.profile.id, matchup.shipB.profile.id]);
+    const siblingMatchups = matchups
+      .filter((other) => other.slug !== matchup.slug && (ids.has(other.shipA.profile.id) || ids.has(other.shipB.profile.id)))
+      .slice(0, 24);
+    return { params: { slug: matchup.slug }, props: { matchup, siblingMatchups } };
+  });
+}
+
+const { matchup, siblingMatchups } = Astro.props;
+const a = matchup.shipA;
+const b = matchup.shipB;
+const nameA = a.profile.name;
+const nameB = b.profile.name;
+const title = `${nameA} vs ${nameB} — EVE Online 1v1 Combat Simulation — Gunner`;
+const description = `Simulate ${nameA} versus ${nameB} in the Gunner EVE Online combat simulator. Real-time movement, turret tracking and capacitor warfare decide the fight — start from preset fittings and tune every parameter.`;
+const presets = presetFitTexts();
+const eftA = firstPresetEft(a, presets);
+const eftB = firstPresetEft(b, presets);
+if (eftA === undefined || eftB === undefined) throw new Error(`Matchup ${matchup.slug} is missing a preset fitting`);
+const deepLink = simulatorDeepLink(matchupWire(eftA, eftB));
+const statsA = shipStatRows(a.profile);
+const statsB = shipStatRows(b.profile);
+const statLabels = statsA.map((row) => row.label);
+const statRows = statLabels.map((label, index) => ({ label, valueA: statsA[index]?.value ?? "", valueB: statsB[index]?.value ?? "" }));
+const soloLinkA = simulatorDeepLink(shipWire(a.profile, eftA));
+const soloLinkB = simulatorDeepLink(shipWire(b.profile, eftB));
+---
+
+<ContentLayout title={title} description={description}>
+  <nav class="content-crumbs" aria-label="Breadcrumb">
+    <a href="/">Simulator</a> / <a href="/ships/">Ships</a> / {nameA} vs {nameB}
+  </nav>
+  <h1 class="content-title">{nameA} vs {nameB}</h1>
+  <p class="content-lede">
+    A 1v1 {nameA} against {nameB}, simulated in your browser: both ships fly their preset fittings under AI control from 20 km apart, while movement, transversal,
+    tracking and capacitor warfare play out in real time. Run the fight yourself and change anything — distance, skills, ammo, propulsion.
+  </p>
+
+  <section class="content-section">
+    <h2 class="content-section-title">Run the fight</h2>
+    <a class="btn content-cta" href={deepLink}>Simulate {nameA} vs {nameB}</a>
+    <p class="content-text">
+      Loads both preset fittings into the <a href="/">EVE Online combat simulator</a> — {nameA} keeps at range, {nameB} orbits, then watch who breaks first.
+    </p>
+  </section>
+
+  <section class="content-section">
+    <h2 class="content-section-title">{nameA} vs {nameB} comparison</h2>
+    <table class="content-stats">
+      <tbody>
+        {statRows.map((row) => (
+          <tr>
+            <th class="content-stats-name" scope="row">{row.label}</th>
+            <td class="content-stats-value">{row.valueA}</td>
+            <td class="content-stats-value">{row.valueB}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="content-text">
+      <a href={`/ships/${a.slug}/`}>{nameA} stats and fittings</a> — <a href={`/ships/${b.slug}/`}>{nameB} stats and fittings</a>
+    </p>
+  </section>
+
+  <section class="content-section">
+    <h2 class="content-section-title">{nameA} fitting</h2>
+    <article class="content-fitting">
+      <h3 class="content-fitting-title">{a.presets[0]?.name ?? nameA}</h3>
+      <a class="btn content-cta" href={soloLinkA}>Load the {nameA} alone</a>
+      {eftA !== undefined && <pre class="content-eft"><code>{eftA}</code></pre>}
+    </article>
+  </section>
+
+  <section class="content-section">
+    <h2 class="content-section-title">{nameB} fitting</h2>
+    <article class="content-fitting">
+      <h3 class="content-fitting-title">{b.presets[0]?.name ?? nameB}</h3>
+      <a class="btn content-cta" href={soloLinkB}>Load the {nameB} alone</a>
+      {eftB !== undefined && <pre class="content-eft"><code>{eftB}</code></pre>}
+    </article>
+  </section>
+
+  <section class="content-section">
+    <h2 class="content-section-title">More matchups</h2>
+    <ul class="content-links">
+      {siblingMatchups.map((sibling) => (
+        <li><a href={`/matchup/${sibling.slug}/`}>{sibling.shipA.profile.name} vs {sibling.shipB.profile.name}</a></li>
+      ))}
+    </ul>
+  </section>
+</ContentLayout>
