@@ -185,6 +185,24 @@ function extractCapacitorData(typeId: string, typedogmas: Record<string, SdeType
   };
 }
 
+interface SlotData {
+  readonly highSlots: number;
+  readonly medSlots: number;
+  readonly lowSlots: number;
+  readonly rigSlots: number;
+}
+
+function extractSlotData(typeId: string, typedogmas: Record<string, SdeTypeDogma>, attributeNames: Map<number, string>): SlotData {
+  const typeDogma = typedogmas[typeId];
+  const values = buildAttributeValues(attributeNames, typeDogma);
+  return {
+    highSlots: values.get("hiSlots") ?? 0,
+    medSlots: values.get("medSlots") ?? 0,
+    lowSlots: values.get("lowSlots") ?? 0,
+    rigSlots: values.get("rigSlots") ?? 0,
+  };
+}
+
 interface DefenseData {
   readonly shieldHp: number;
   readonly shieldRechargeTime: number;
@@ -303,6 +321,7 @@ function parseProfile(
   const droneLimits = parseDroneLimits(record["drones"], name);
   const defense = extractDefenseData(String(id), typedogmas, attributeNames);
   const capacitor = extractCapacitorData(String(id), typedogmas, attributeNames);
+  const slots = extractSlotData(String(id), typedogmas, attributeNames);
 
   return {
     id,
@@ -316,6 +335,10 @@ function parseProfile(
     scanResolution: parseNumber(hasString(targeting, "scanResolution", name)),
     maxTargetingRange: parseDistance(hasString(targeting, "maxTargetingRange", name)),
     maxLockedTargets: hasNumber(targeting, "maxLockedTargets", name),
+    highSlots: slots.highSlots,
+    medSlots: slots.medSlots,
+    lowSlots: slots.lowSlots,
+    rigSlots: slots.rigSlots,
     droneBandwidth: droneLimits.bandwidth,
     droneCapacity: droneLimits.capacity,
     maxActiveDrones: droneLimits.maxActive,
@@ -352,6 +375,11 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push(`    scanResolution: ${p.scanResolution},`);
     lines.push(`    maxTargetingRange: ${p.maxTargetingRange},`);
     lines.push(`    maxLockedTargets: ${p.maxLockedTargets},`);
+    lines.push(`    highSlots: ${p.highSlots},`);
+    lines.push(`    medSlots: ${p.medSlots},`);
+    lines.push(`    lowSlots: ${p.lowSlots},`);
+    lines.push(`    rigSlots: ${p.rigSlots},`);
+    lines.push(`    droneBandwidth: ${p.droneBandwidth},`);
     lines.push(`    droneBandwidth: ${p.droneBandwidth},`);
     lines.push(`    droneCapacity: ${p.droneCapacity},`);
     lines.push(`    maxActiveDrones: ${p.maxActiveDrones},`);
