@@ -171,6 +171,7 @@ const MODULE_GROUPS = new Set([
   // 213 Tracking Computer is handled explicitly below
   302, // Magnetic Field Stabilizer
   367, // Ballistic Control System
+  645, // Drone Damage Amplifier
   329, // Armor Plate
   762, // Inertial Stabilizer
   763, // Nanofiber Internal Structure
