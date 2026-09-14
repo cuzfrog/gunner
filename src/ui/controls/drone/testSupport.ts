@@ -90,7 +90,7 @@ function mockDroneLoadoutResolver(): DroneLoadoutResolver {
 
 function mockDroneLoadoutValidator(): DroneLoadoutValidator {
   return {
-    validate: vi.fn((): DroneLoadoutValidation => ({ valid: true, totalCount: 0, totalBandwidth: 0, totalVolume: 0, violations: [] })),
+    validate: vi.fn((): DroneLoadoutValidation => ({ valid: true, totalCount: 0, totalBandwidth: 0, totalVolume: 0, bandwidthLimit: 0, capacityLimit: 0, violations: [] })),
   };
 }
 

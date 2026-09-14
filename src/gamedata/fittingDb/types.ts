@@ -181,7 +181,9 @@ export type MissileBonusAttribute = "missileDamage" | "missileRoF" | "missileVel
 export type DroneBonusAttribute = "droneDamage";
 export type DefenseBonusAttribute = "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
 export type ModuleBonusAttribute = "capUse" | "duration";
-export type HullBonusAttribute = PropulsionBonusAttribute | TurretBonusAttribute | MissileBonusAttribute | DroneBonusAttribute | DefenseBonusAttribute | ModuleBonusAttribute;
+// Flat additions applied to the base ship stat before percent modifiers (strategic cruiser subsystems).
+export type ShipStatFlatAttribute = "shieldHpFlat" | "armorHpFlat" | "hullHpFlat" | "capacitorCapacityFlat" | "sigRadiusFlat" | "maxTargetingRangeFlat" | "droneCapacityFlat" | "droneBandwidthFlat";
+export type HullBonusAttribute = PropulsionBonusAttribute | TurretBonusAttribute | MissileBonusAttribute | DroneBonusAttribute | DefenseBonusAttribute | ModuleBonusAttribute | ShipStatFlatAttribute;
 
 export interface HullBonus {
   readonly attribute: HullBonusAttribute;

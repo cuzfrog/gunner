@@ -1,4 +1,4 @@
-import type { ChargeStats, FittingDb } from "../gamedata/fittingDb";
+import type { ChargeStats, FittingDb, HullBonus, ShipStatFlatAttribute } from "../gamedata/fittingDb";
 import type { TypeId } from "../gamedata/ids";
 import { type CapacitorSkills, type StatConditions, defaultCapacitorSkills } from "../ships";
 import { type BoostLoadout, type CapacitorSpec, type CommandBurstSpec, type DefenseSpec, type EwarLoadout, type MissileBoosterLoadout, scheduledDrainsFromProjections, type ScheduledDrain, type SensorBoostLoadout, type StackingPenalty } from "../sim";
@@ -121,12 +121,16 @@ function resolveSpec(db: FittingDb, fitting: FittingState, skills: CapacitorSkil
 
   const capacityMultiplier = capacityMultipliers.length > 0 ? stacking.apply(capacityMultipliers) : 1;
   const rechargeMultiplier = rechargeMultipliers.length > 0 ? stacking.apply(rechargeMultipliers) : 1;
-  const capacityAdd = capacityAdds.reduce((sum, add) => sum + add, 0);
+  const capacityAdd = capacityAdds.reduce((sum, add) => sum + add, 0) + flatSum(fitting.hullBonuses, "capacitorCapacityFlat");
 
   // pyfa order: flat battery adds apply before percent multipliers (pre-increase), skills apply on top
   const capacity = (profile.capacitorCapacity + capacityAdd) * capacityMultiplier * (1 + ENERGY_MANAGEMENT_BONUS * skills.energyManagement);
   const rechargeTime = profile.capacitorRechargeTime * rechargeMultiplier * (1 - ENERGY_SYSTEMS_OPERATIONS_BONUS * skills.energySystemsOperations);
   return { capacity, rechargeTime };
+}
+
+function flatSum(hullBonuses: readonly HullBonus[], attribute: ShipStatFlatAttribute): number {
+  return hullBonuses.reduce((sum, bonus) => (bonus.attribute === attribute ? sum + bonus.magnitude : sum), 0);
 }
 
 /** Propulsion capacity penalty (e.g. MWD -25%) applies at the consumer: the exported spec stays propulsion-independent. */

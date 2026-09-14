@@ -6,6 +6,7 @@ import {
   TURRET_WEAPON_GROUP_BY_ID,
   type CommandBurstStats,
   type HullBonusAttribute,
+  type ShipStatFlatAttribute,
   type SkillBonusType,
   type RigDrawback,
   type RigDrawbackReduction,
@@ -122,12 +123,17 @@ const SUBSYSTEM_SHIP_STAT_ATTRIBUTES: Readonly<Record<number, HullBonusAttribute
   37: "maxVelocity", 70: "agility", 263: "shieldHpPercent", 265: "armorHpPercent", 554: "mwdSigBloom",
 };
 
+// Flat ship-stat additions preassigned on the subsystem (op != 6), applied to the base stat before percent modifiers.
+const SUBSYSTEM_FLAT_SHIP_STAT_ATTRIBUTES: Readonly<Record<number, ShipStatFlatAttribute>> = {
+  9: "hullHpFlat", 76: "maxTargetingRangeFlat", 263: "shieldHpFlat", 265: "armorHpFlat",
+  283: "droneCapacityFlat", 482: "capacitorCapacityFlat", 552: "sigRadiusFlat", 1271: "droneBandwidthFlat",
+};
+
 const SUBSYSTEM_FLAT_ADDITION_REASONS: Readonly<Record<number, string>> = {
-  9: "flat structure HP addition", 11: "flat powergrid addition", 38: "flat cargo capacity addition",
-  48: "flat CPU addition", 70: "flat inertia addition", 76: "flat targeting range addition",
-  192: "flat max locked targets addition", 263: "flat shield HP addition", 265: "flat armor HP addition",
-  283: "flat drone capacity addition", 482: "flat capacitor capacity addition", 552: "flat signature radius addition",
-  1271: "flat drone bandwidth addition", 3320: "black ops jump system access flag", 3322: "black ops jump drive flag",
+  11: "flat powergrid addition is a fitting stat", 38: "flat cargo capacity addition is not modeled",
+  48: "flat CPU addition is a fitting stat", 70: "flat inertia addition is not modeled",
+  192: "flat max locked targets addition is not modeled",
+  3320: "black ops jump system access flag", 3322: "black ops jump drive flag",
 };
 
 const SUBSYSTEM_PERCENT_SKIP_REASONS: Readonly<Record<number, string>> = {
@@ -1217,7 +1223,7 @@ function isNonScalingAttribute(attrName: string): boolean {
 }
 
 type SubsystemModifierResolution =
-  | { kind: "mapped"; attribute: HullBonusAttribute; damageType?: DamageType }
+  | { kind: "mapped"; attribute: HullBonusAttribute; damageType?: DamageType; flat?: boolean }
   | { kind: "skip"; reason: string }
   | { kind: "unmapped"; attributeId: number };
 
@@ -1254,7 +1260,7 @@ function buildSubsystemBonuses(
       const key = `${resolution.attribute}:${resolution.damageType ?? ""}:${filter.chargeSkillId ?? ""}:${filter.moduleSkillId ?? ""}:${filter.moduleGroupId ?? ""}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      const bonus: HullBonus = { attribute: resolution.attribute, magnitude, scalesWithHullSkill: true, sourceId: String(subsystemTypeId) as TypeId, ...filter };
+      const bonus: HullBonus = { attribute: resolution.attribute, magnitude, scalesWithHullSkill: !resolution.flat, sourceId: String(subsystemTypeId) as TypeId, ...filter };
       bonuses.push(resolution.damageType !== undefined ? { ...bonus, damageType: resolution.damageType } : bonus);
     }
   }
@@ -1275,6 +1281,8 @@ function resolveSubsystemModifier(modifier: SdeDogmaEffectModifier, attributeNam
 function resolveSubsystemItemModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>): SubsystemModifierResolution {
   const attributeId = modifier.modifiedAttributeID;
   if (modifier.operation !== 6) {
+    const flatAttribute = SUBSYSTEM_FLAT_SHIP_STAT_ATTRIBUTES[attributeId];
+    if (flatAttribute) return { kind: "mapped", attribute: flatAttribute, flat: true };
     const reason = SUBSYSTEM_FLAT_ADDITION_REASONS[attributeId];
     return reason ? { kind: "skip", reason } : { kind: "unmapped", attributeId };
   }
@@ -1574,7 +1582,12 @@ async function main() {
 
     if (SUBSYSTEM_GROUP_IDS.has(type.groupID)) {
       if (typeDogma) {
-        const bonuses = buildSubsystemBonuses(attributeNames, typeDogma, dogmaEffects, type.typeID, enName ?? String(type.typeID), unmappedHullAttributes);
+        // Structure HP addition (+40 per subsystem) is preassigned on the subsystem dogma without a modifier effect.
+        const bonuses = [...buildSubsystemBonuses(attributeNames, typeDogma, dogmaEffects, type.typeID, enName ?? String(type.typeID), unmappedHullAttributes)];
+        const structureAddition = values.get("hp");
+        if (structureAddition !== undefined && structureAddition !== 0 && !bonuses.some((b) => b.attribute === "hullHpFlat")) {
+          bonuses.push({ attribute: "hullHpFlat", magnitude: structureAddition, scalesWithHullSkill: false, sourceId: id });
+        }
         if (bonuses.length > 0) subsystemBonuses[id] = bonuses;
         const stats = buildSubsystemStats({ typeId: id, name: enName ?? String(type.typeID), groupId: type.groupID, values });
         if (stats) subsystems[id] = stats;

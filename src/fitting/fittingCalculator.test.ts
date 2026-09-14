@@ -1,7 +1,8 @@
-import { _computeDroneControlRange, _applyRigDrawbackReduction } from "./fittingCalculator";
-import type { FittingModuleStats, RigDrawback, RigDrawbackReduction } from "../gamedata/fittingDb";
+import { _computeDroneControlRange, _applyRigDrawbackReduction, _resolveSensorStats } from "./fittingCalculator";
+import type { HullBonus, FittingModuleStats, RigDrawback, RigDrawbackReduction } from "../gamedata/fittingDb";
 import type { FittedModule } from "./fittingState";
-import { toTypeId, type TypeId } from "../gamedata/ids";
+import { toTypeId, type TypeId, type ShipId, type FactionId, type HullTypeId } from "../gamedata/ids";
+import type { ShipProfile } from "../ships";
 
 function fittedModule(moduleId: string): FittedModule {
   return { moduleId: toTypeId(moduleId), offline: false };
@@ -70,5 +71,56 @@ describe("_applyRigDrawbackReduction", () => {
 
   test("empty reductions returns original percent", () => {
     expect(_applyRigDrawbackReduction(shieldDrawback, [], 5)).toBe(10);
+  });
+});
+
+function sensorProfile(overrides: { maxTargetingRange?: number } = {}): ShipProfile {
+  return {
+    id: "29984" as ShipId,
+    name: "Tengu",
+    factionId: "caldari-state" as FactionId,
+    hullTypeId: "963" as HullTypeId,
+    mass: 5_200_000,
+    inertiaModifier: 0.56,
+    baseSpeed: 200,
+    sigRadius: 150,
+    scanResolution: 250,
+    maxTargetingRange: overrides.maxTargetingRange ?? 50000,
+    maxLockedTargets: 7,
+    highSlots: 0,
+    medSlots: 0,
+    lowSlots: 0,
+    rigSlots: 3,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
+    shieldHp: 2600,
+    shieldRechargeTime: 1250,
+    armorHp: 2100,
+    hullHp: 1700,
+    capacitorCapacity: 900,
+    capacitorRechargeTime: 750,
+    shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+    armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+    hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  };
+}
+
+function flatBonus(attribute: HullBonus["attribute"], magnitude: number): HullBonus {
+  return { attribute, magnitude, scalesWithHullSkill: false, sourceId: toTypeId("45626") };
+}
+
+describe("_resolveSensorStats", () => {
+  test("base sensor stats come from the profile at skill level 0", () => {
+    const spec = _resolveSensorStats(sensorProfile(), [], undefined);
+    expect(spec).toEqual({ scanResolution: 250, maxTargetingRange: 50000, maxLockedTargets: 7 });
+  });
+
+  test("subsystem flat targeting range adds to the base before skill multipliers", () => {
+    const profile = sensorProfile();
+    const withFlat = _resolveSensorStats(profile, [flatBonus("maxTargetingRangeFlat", 20000)], undefined);
+    expect(withFlat.maxTargetingRange).toBe(70000);
+    const withSkill = _resolveSensorStats(profile, [flatBonus("maxTargetingRangeFlat", 20000)], { longRangeTargeting: 4 });
+    expect(withSkill.maxTargetingRange).toBe(84000);
   });
 });

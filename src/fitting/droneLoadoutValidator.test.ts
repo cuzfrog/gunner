@@ -1,5 +1,5 @@
 import { DroneLoadoutValidatorImpl, type DroneLoadoutViolation, type DroneLoadoutValidation } from "./droneLoadoutValidator";
-import type { DroneStats, FittingDb } from "../gamedata/fittingDb";
+import type { DroneStats, FittingDb, HullBonus } from "../gamedata/fittingDb";
 import type { ShipProfile } from "../ships";
 import { toTypeId, type ShipId, type FactionId, type HullTypeId } from "../gamedata/ids";
 
@@ -72,7 +72,7 @@ describe("DroneLoadoutValidatorImpl", () => {
   const validator = new DroneLoadoutValidatorImpl({ fittingDb: db });
 
   test("validates an empty loadout as valid", () => {
-    const result = validator.validate([], makeProfile({}));
+    const result = validator.validate([], makeProfile({}), []);
     expect(result.valid).toBe(true);
     expect(result.totalCount).toBe(0);
     expect(result.totalBandwidth).toBe(0);
@@ -84,6 +84,7 @@ describe("DroneLoadoutValidatorImpl", () => {
     const result = validator.validate(
       [{ typeId: toTypeId("24545"), count: 3 }, { typeId: toTypeId("24546"), count: 2 }],
       makeProfile({ droneBandwidth: 35, droneCapacity: 35, maxActiveDrones: 5 }),
+      [],
     );
     expect(result.valid).toBe(true);
     expect(result.totalCount).toBe(5);
@@ -96,6 +97,7 @@ describe("DroneLoadoutValidatorImpl", () => {
     const result = validator.validate(
       [{ typeId: toTypeId("24545"), count: 3 }, { typeId: toTypeId("24546"), count: 3 }],
       makeProfile({ maxActiveDrones: 5 }),
+      [],
     );
     expect(result.valid).toBe(false);
     expect(result.totalCount).toBe(6);
@@ -106,6 +108,7 @@ describe("DroneLoadoutValidatorImpl", () => {
     const result = validator.validate(
       [{ typeId: toTypeId("24547"), count: 4 }],
       makeProfile({ droneBandwidth: 75, maxActiveDrones: 5 }),
+      [],
     );
     expect(result.valid).toBe(false);
     expect(result.totalBandwidth).toBe(100);
@@ -116,6 +119,7 @@ describe("DroneLoadoutValidatorImpl", () => {
     const result = validator.validate(
       [{ typeId: toTypeId("24547"), count: 4 }],
       makeProfile({ droneBandwidth: 200, droneCapacity: 50, maxActiveDrones: 5 }),
+      [],
     );
     expect(result.valid).toBe(false);
     expect(result.totalVolume).toBe(100);
@@ -126,6 +130,7 @@ describe("DroneLoadoutValidatorImpl", () => {
     const result = validator.validate(
       [{ typeId: toTypeId("24547"), count: 6 }],
       makeProfile({ droneBandwidth: 50, droneCapacity: 50, maxActiveDrones: 5 }),
+      [],
     );
     expect(result.valid).toBe(false);
     expect(result.violations).toEqual(["tooManyDrones", "bandwidthExceeded", "bayCapacityExceeded"]);
@@ -135,6 +140,7 @@ describe("DroneLoadoutValidatorImpl", () => {
     const result = validator.validate(
       [{ typeId: toTypeId("99999"), count: 1 }],
       makeProfile({}),
+      [],
     );
     expect(result.valid).toBe(true);
     expect(result.totalCount).toBe(1);
@@ -146,10 +152,26 @@ describe("DroneLoadoutValidatorImpl", () => {
     const result = validator.validate(
       [{ typeId: toTypeId("24545"), count: 1 }],
       makeProfile({ droneBandwidth: 0, droneCapacity: 0, maxActiveDrones: 0 }),
+      [],
     );
     expect(result.valid).toBe(false);
     expect(result.violations).toContain("tooManyDrones" as DroneLoadoutViolation);
     expect(result.violations).toContain("bandwidthExceeded" as DroneLoadoutViolation);
     expect(result.violations).toContain("bayCapacityExceeded" as DroneLoadoutViolation);
+  });
+
+  test("extends bandwidth and capacity limits by subsystem flat bonuses", () => {
+    const hullBonuses: readonly HullBonus[] = [
+      { attribute: "droneBandwidthFlat", magnitude: 125, scalesWithHullSkill: false, sourceId: toTypeId("45606") },
+      { attribute: "droneCapacityFlat", magnitude: 300, scalesWithHullSkill: false, sourceId: toTypeId("45606") },
+    ];
+    const result = validator.validate(
+      [{ typeId: toTypeId("24547"), count: 5 }],
+      makeProfile({ droneBandwidth: 0, droneCapacity: 0, maxActiveDrones: 5 }),
+      hullBonuses,
+    );
+    expect(result.valid).toBe(true);
+    expect(result.bandwidthLimit).toBe(125);
+    expect(result.capacityLimit).toBe(300);
   });
 });

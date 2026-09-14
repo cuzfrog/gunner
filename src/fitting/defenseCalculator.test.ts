@@ -456,3 +456,39 @@ describe("DefenseCalculatorImpl - repairAmplifier modules", () => {
     expect(shieldWithAmp!.cycleTime).toBeCloseTo(shieldWithoutAmp!.cycleTime, 5);
   });
 });
+
+describe("DefenseCalculatorImpl - subsystem flat bonuses", () => {
+  const neutralConditions = { skillLevel: 5 as const, overloaded: false, weaponOverloaded: false, defenseSkills: defaultDefenseSkills(0) };
+
+  function flatBonus(attribute: HullBonus["attribute"], magnitude: number): HullBonus {
+    return { attribute, magnitude, scalesWithHullSkill: false, sourceId: profile.id };
+  }
+
+  function resolveWithBonuses(bonuses: readonly HullBonus[]) {
+    const state = factory.create(profile, bonuses, [], [], [] as readonly CargoEntry[]);
+    return calculator.resolve(state, neutralConditions);
+  }
+
+  test("shield flat adds to base HP before percent multipliers", () => {
+    const base = resolveWithBonuses([]);
+    expect(base.layers.shield.hp).toBe(profile.shieldHp);
+    const boosted = resolveWithBonuses([flatBonus("shieldHpFlat", 1000)]);
+    expect(boosted.layers.shield.hp).toBe(profile.shieldHp + 1000);
+    const withPercent = resolveWithBonuses([flatBonus("shieldHpFlat", 1000), flatBonus("shieldHpPercent", 20)]);
+    expect(withPercent.layers.shield.hp).toBe(Math.round((profile.shieldHp + 1000) * 1.2));
+  });
+
+  test("armor flat adds to base HP before percent multipliers", () => {
+    const base = resolveWithBonuses([]);
+    expect(base.layers.armor.hp).toBe(profile.armorHp);
+    const withPercent = resolveWithBonuses([flatBonus("armorHpFlat", 500), flatBonus("armorHpPercent", 20)]);
+    expect(withPercent.layers.armor.hp).toBe(Math.round((profile.armorHp + 500) * 1.2));
+  });
+
+  test("hull flat adds to base HP before percent multipliers", () => {
+    const base = resolveWithBonuses([]);
+    expect(base.layers.hull.hp).toBe(profile.hullHp);
+    const withPercent = resolveWithBonuses([flatBonus("hullHpFlat", 160), flatBonus("hullHpPercent", 10)]);
+    expect(withPercent.layers.hull.hp).toBe(Math.round((profile.hullHp + 160) * 1.1));
+  });
+});

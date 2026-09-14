@@ -27,6 +27,7 @@ export type {
   HullBonus,
   HullBonusAttribute,
   PropulsionBonusAttribute,
+  ShipStatFlatAttribute,
   TurretBonusAttribute,
   MissileBonusAttribute,
   DroneBonusAttribute,
