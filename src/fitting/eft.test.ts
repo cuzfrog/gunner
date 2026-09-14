@@ -168,6 +168,23 @@ Dread Guristas Capacitor Power Relay`;
     ]);
   });
 
+  test("banks subsystem modules through the slot catalog", () => {
+    const text = `[Tengu, Subsystems]
+
+Ballistic Control System II
+
+200mm AutoCannon I
+
+Tengu Offensive - Accelerated Ejection Bay
+Tengu Core - Augmented Graviton Reactor`;
+    const parsed = parseEft(text);
+    expect(parsed!.banks.map((b) => b.bank)).toEqual(["low", "high", "subsystem"]);
+    expect(bankLines(parsed!, "subsystem").map((l) => (l.kind === "module" ? l.name : ""))).toEqual([
+      "Tengu Offensive - Accelerated Ejection Bay",
+      "Tengu Core - Augmented Graviton Reactor",
+    ]);
+  });
+
   test("parses quantity lines mixed into a module block as cargo", () => {
     const text = `[Rifter, Cargo]
 200mm AutoCannon I

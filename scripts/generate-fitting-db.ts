@@ -9,6 +9,7 @@ import {
   type SkillBonusType,
   type RigDrawback,
   type RigDrawbackReduction,
+  type SubsystemStats,
   type TurretWeaponGroup,
 } from "../src/gamedata/fittingDb/types";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
@@ -17,6 +18,7 @@ import { buildDefenseStatsFromIntents, type DefenseModuleStats } from "./fitting
 import { buildCapacitorStatsFromIntents, type CapacitorModuleStats } from "./fittingDb/buildCapacitorStats";
 import { buildCapWarfareStatsFromIntents, type EnergyNeutralizerStats, type NosferatuStats } from "./fittingDb/buildCapWarfareStats";
 import { buildBurstChargeStats, buildCommandBurstStats } from "./fittingDb/buildCommandBurstStats";
+import { buildSubsystemStats } from "./fittingDb/buildSubsystemStats";
 import { COMMAND_BURST_GROUP } from "./fittingDb/combatAttributes";
 import { buildCombatModuleStats } from "./fittingDb/buildModuleStats";
 import { auditCoverage, type AuditModuleEntry } from "./fittingDb/coverageAudit";
@@ -1542,6 +1544,7 @@ async function main() {
   const sensorBoosters: Record<string, Row<SensorBoosterStats>> = {};
   const signalAmplifiers: Record<string, Row<SignalAmplifierStats>> = {};
   const commandBursts: Record<string, Row<CommandBurstStats>> = {};
+  const subsystems: Record<string, SubsystemStats> = {};
   const sensorBoosterScripts: Record<string, Row<SensorBoosterScriptStats>> = {};
   const sensorDampenerScripts: Record<string, Row<SensorDampenerScriptStats>> = {};
   const hullBonuses: Record<ShipId, readonly HullBonus[]> = {};
@@ -1573,6 +1576,8 @@ async function main() {
       if (typeDogma) {
         const bonuses = buildSubsystemBonuses(attributeNames, typeDogma, dogmaEffects, type.typeID, enName ?? String(type.typeID), unmappedHullAttributes);
         if (bonuses.length > 0) subsystemBonuses[id] = bonuses;
+        const stats = buildSubsystemStats({ typeId: id, name: enName ?? String(type.typeID), groupId: type.groupID, values });
+        if (stats) subsystems[id] = stats;
       }
       continue;
     }
@@ -1923,7 +1928,7 @@ async function main() {
     `  MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats,\n` +
     `  OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, RigDrawbackReduction,\n` +
     `  SensorBoosterScriptStats, SensorBoosterStats, SensorDampenerScriptStats, SensorDampenerStats,\n` +
-    `  SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats,\n` +
+    `  SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, SubsystemStats, TargetPainterStats,\n` +
     `  TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, WarpScramblerStats,\n` +
     `} from "../types";\n\n`;
 
@@ -1959,6 +1964,8 @@ export const SENSOR_BOOSTERS: Readonly<Record<string, SensorBoosterStats>> = ${s
 
 export const SIGNAL_AMPLIFIERS: Readonly<Record<string, SignalAmplifierStats>> = ${stringifyWithTypeIds(signalAmplifiers)};
 export const COMMAND_BURSTS: Readonly<Record<string, CommandBurstStats>> = ${stringifyWithTypeIds(commandBursts)};
+
+export const SUBSYSTEMS: Readonly<Record<string, SubsystemStats>> = ${stringifyWithTypeIds(subsystems)};
 
 export const SENSOR_BOOSTER_SCRIPTS: Readonly<Record<string, SensorBoosterScriptStats>> = ${stringifyWithTypeIds(sensorBoosterScripts)};
 
@@ -2068,6 +2075,7 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     `${Object.keys(sensorBoosters).length} sensor boosters`,
     `${Object.keys(signalAmplifiers).length} signal amplifiers`,
     `${Object.keys(commandBursts).length} command bursts`,
+    `${Object.keys(subsystems).length} subsystems`,
     `${Object.keys(sensorBoosterScripts).length} sensor booster scripts`,
     `${Object.keys(sensorDampenerScripts).length} sensor dampener scripts`,
     `${Object.keys(hullBonuses).length} hull bonus sets`,

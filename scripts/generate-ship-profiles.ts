@@ -380,7 +380,6 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push(`    lowSlots: ${p.lowSlots},`);
     lines.push(`    rigSlots: ${p.rigSlots},`);
     lines.push(`    droneBandwidth: ${p.droneBandwidth},`);
-    lines.push(`    droneBandwidth: ${p.droneBandwidth},`);
     lines.push(`    droneCapacity: ${p.droneCapacity},`);
     lines.push(`    maxActiveDrones: ${p.maxActiveDrones},`);
     lines.push(`    shieldHp: ${p.shieldHp},`);

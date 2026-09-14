@@ -36,6 +36,7 @@ import {
   STASIS_GRAPPLERS,
   STASIS_WEBS,
   SUBSYSTEM_BONUSES,
+  SUBSYSTEMS,
   TARGET_PAINTERS,
   TRACKING_COMPUTERS,
   TRACKING_DISRUPTORS,
@@ -376,6 +377,7 @@ const ships = vi.mocked<Ships>({
 
 const db: FittingDb = {
   subsystemBonuses: {},
+  subsystems: {},
   commandBursts: {},
   modules: {
     "1600mm Steel Plates II": row("1600mm Steel Plates II", "1600mm Steel Plates II", { massAddition: 3_750_000, defense: { kind: "armorPlate", armorHpAdd: 4800 } }),
@@ -516,6 +518,7 @@ const skillBonusDb: FittingDb = {
 
 const fullFittingDb: FittingDb = {
   subsystemBonuses: SUBSYSTEM_BONUSES,
+  subsystems: SUBSYSTEMS,
   modules: FITTING_MODULES,
   turrets: TURRETS,
   charges: CHARGES,
@@ -1975,7 +1978,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, commandBursts: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES };
+  return { modules: {}, commandBursts: {}, subsystems: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {

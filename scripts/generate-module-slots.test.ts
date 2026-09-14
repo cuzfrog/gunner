@@ -42,7 +42,7 @@ describe("generateModuleSlotsContent", () => {
       GROUP_SLOTS,
     );
     expect(content).toMatch(/^import type \{ TypeId \} from "\.\.\/ids";\n/);
-    expect(content).toMatch(/^export type ModuleSlot = "high" \| "mid" \| "low" \| "rig";\n/m);
+    expect(content).toMatch(/^export type ModuleSlot = "high" \| "mid" \| "low" \| "rig" \| "subsystem";\n/m);
     expect(content).toContain('"1MN Afterburner I": "mid",');
     expect(content).toContain('"250mm Railgun I": "high",');
     expect(content).toContain('"Medium Shield Extender II": "mid",');

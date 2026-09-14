@@ -392,6 +392,7 @@ function isModuleRole(id: TypeId, db: FittingDb): boolean {
     db.turrets[id] !== undefined ||
     db.launchers[id] !== undefined ||
     db.subsystemBonuses[id] !== undefined ||
+    db.subsystems[id] !== undefined ||
     db.stasisWebs[id] !== undefined ||
     db.stasisGrapplers[id] !== undefined ||
     db.trackingComputers[id] !== undefined ||

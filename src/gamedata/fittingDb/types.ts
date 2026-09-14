@@ -469,11 +469,25 @@ export interface CommandBurstStats {
   readonly name: string;
 }
 
+export interface SubsystemStats {
+  readonly id: TypeId;
+  readonly name: string;
+  readonly slotKind: SubsystemSlotKind;
+  readonly highSlots: number;
+  readonly medSlots: number;
+  readonly lowSlots: number;
+  readonly turretHardpoints: number;
+  readonly launcherHardpoints: number;
+}
+
+export type SubsystemSlotKind = "core" | "offensive" | "defensive" | "propulsion";
+
 export interface FittingDbData {
   readonly modules: Readonly<Record<string, FittingModuleStats>>;
   readonly turrets: Readonly<Record<string, TurretStats>>;
   readonly charges: Readonly<Record<string, ChargeStats>>;
   readonly commandBursts: Readonly<Record<string, CommandBurstStats>>;
+  readonly subsystems: Readonly<Record<string, SubsystemStats>>;
   readonly launchers: Readonly<Record<string, LauncherStats>>;
   readonly missiles: Readonly<Record<string, MissileStats>>;
   readonly scripts: Readonly<Record<string, TurretScriptStats>>;
