@@ -27,7 +27,6 @@ Capital EM Shield Reinforcer II
 
 Strontium Clathrates x1416
 Nitrogen Isotopes x89229
-Navy Cap Booster 3200 x57
-Navy Cap Booster 3200 x11
+Navy Cap Booster 3200 x68
 Nova Rage Torpedo x820
 Mjolnir Torpedo x240

@@ -31,5 +31,4 @@ Arch Angel EMP XL x421
 Barrage XL x2997
 Arch Angel Depleted Uranium XL x674
 Hail XL x3787
-Navy Cap Booster 3200 x16
-Navy Cap Booster 3200 x68
+Navy Cap Booster 3200 x84

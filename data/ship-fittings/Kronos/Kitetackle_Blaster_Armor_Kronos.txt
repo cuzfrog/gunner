@@ -26,6 +26,9 @@ Large Explosive Armor Reinforcer I
 Large Auxiliary Nano Pump I
 
 
+Hammerhead II x5
+
+
 Caldari Navy Antimatter Charge L x3000
 Null L x2860
 Void L x5876

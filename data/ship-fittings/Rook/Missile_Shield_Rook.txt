@@ -22,6 +22,9 @@ Medium Particle Dispersion Augmentor I
 Medium Particle Dispersion Projector I
 
 
+Hornet II x5
+
+
 Caldari Navy Mjolnir Light Missile x1000
 Scourge Fury Light Missile x1000
 Navy Cap Booster 400 x17

@@ -31,6 +31,7 @@ Proteus Propulsion - Localized Injectors
 
 
 Vespa II x5
+Ogre II x3
 
 
 Void M x2000

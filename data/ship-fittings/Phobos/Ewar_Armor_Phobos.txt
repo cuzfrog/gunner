@@ -27,5 +27,4 @@ ECCM Script x1
 Navy Cap Booster 800 x9
 Nanite Repair Paste x120
 Targeting Range Script x1
-Focused Warp Disruption Script x2
-Focused Warp Disruption Script x1
+Focused Warp Disruption Script x3

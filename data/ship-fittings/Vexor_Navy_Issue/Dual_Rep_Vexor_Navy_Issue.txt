@@ -22,12 +22,7 @@ Medium Auxiliary Nano Pump I
 Medium Ancillary Current Router I
 
 
-Acolyte II x10
-Hammerhead II x2
-Hobgoblin II x1
-Hornet EC-300 x5
-Ogre II x2
-Valkyrie II x5
+Ogre II x3
 
 
 Federation Navy Antimatter Charge M x1500

@@ -26,8 +26,7 @@ Capital Core Defense Field Extender II
 
 
 Active Shielding Charge x500
-Navy Cap Booster 3200 x20
+Navy Cap Booster 3200 x27
 Shield Extension Charge x500
 Shield Harmonizing Charge x500
-Navy Cap Booster 3200 x7
 Nitrogen Isotopes x137217

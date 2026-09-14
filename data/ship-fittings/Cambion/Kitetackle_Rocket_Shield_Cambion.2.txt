@@ -20,7 +20,5 @@ Small Explosive Shield Reinforcer I
 
 
 Scourge Rage Rocket x1800
-Navy Cap Booster 100 x12
-Navy Cap Booster 100 x12
-Caldari Navy Scourge Rocket x2100
-Caldari Navy Scourge Rocket x100
+Navy Cap Booster 100 x24
+Caldari Navy Scourge Rocket x2200

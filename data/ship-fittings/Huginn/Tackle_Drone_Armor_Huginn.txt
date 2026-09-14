@@ -22,6 +22,9 @@ Medium Trimark Armor Pump II
 Medium Explosive Armor Reinforcer II
 
 
+Valkyrie II x4
+
+
 ECCM Script x1
 EMP M x80
 Scan Resolution Script x1

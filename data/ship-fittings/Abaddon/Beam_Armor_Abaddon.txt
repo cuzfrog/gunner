@@ -25,3 +25,6 @@ Tachyon Beam Laser II, Aurora L
 Large Capacitor Control Circuit II
 Large Ancillary Current Router II
 Large Energy Locus Coordinator I
+
+
+Praetor II x3

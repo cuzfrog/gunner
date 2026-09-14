@@ -22,5 +22,8 @@ Medium Explosive Armor Reinforcer I
 Medium Auxiliary Nano Pump I
 
 
+Valkyrie II x4
+
+
 EMP M x4520
 Fusion M x4520

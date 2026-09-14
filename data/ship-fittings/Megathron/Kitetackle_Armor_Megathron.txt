@@ -27,8 +27,7 @@ Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
 [Empty Rig slot]
 
 
-Caldari Navy Vespa x2
-Caldari Navy Vespa x2
+Caldari Navy Vespa x4
 
 
 Tungsten Charge L x100

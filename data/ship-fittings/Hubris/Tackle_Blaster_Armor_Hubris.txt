@@ -29,9 +29,6 @@ Null XL x2000
 Shadow Antimatter Charge XL x1856
 Void XL x1500
 Optimal Range Script x1
-Navy Cap Booster 3200 x27
+Navy Cap Booster 3200 x99
 Strontium Clathrates x750
-Oxygen Isotopes x6956
-Oxygen Isotopes x569836
-Navy Cap Booster 3200 x44
-Navy Cap Booster 3200 x28
+Oxygen Isotopes x576792

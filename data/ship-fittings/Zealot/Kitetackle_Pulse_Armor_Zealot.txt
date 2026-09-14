@@ -22,12 +22,9 @@ Medium Ancillary Current Router I
 Medium Ancillary Current Router II
 
 
-Hornet EC-300 x4
-Hornet EC-300 x1
+Hornet EC-300 x5
 
 
-Conflagration M x2
-Conflagration M x13
+Conflagration M x15
 Optimal Range Script x1
-Scorch M x7
-Scorch M x13
+Scorch M x20

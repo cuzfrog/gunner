@@ -28,5 +28,8 @@ Large EM Shield Reinforcer I
 [Empty Rig slot]
 
 
+Berserker II x5
+
+
 Caldari Navy Scourge Heavy Missile x5762
 Missile Precision Script x1

@@ -21,10 +21,7 @@ Medium Drone Speed Augmentor I
 Medium Polycarbon Engine Housing I
 
 
-Acolyte II x5
-Hammerhead II x5
-Hornet EC-300 x5
-Valkyrie II x5
+Infiltrator II x5
 
 
 Caldari Navy Inferno Light Missile x500

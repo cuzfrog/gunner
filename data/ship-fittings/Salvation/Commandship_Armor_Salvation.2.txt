@@ -26,10 +26,8 @@ Capital Trimark Armor Pump II
 
 
 Armor Energizing Charge x300
-Navy Cap Booster 3200 x12
+Navy Cap Booster 3200 x55
 Armor Reinforcement Charge x300
 Sensor Optimization Charge x199
 Strontium Clathrates x1000
-Helium Isotopes x42532
-Helium Isotopes x91958
-Navy Cap Booster 3200 x43
+Helium Isotopes x134490

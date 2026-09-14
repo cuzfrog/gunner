@@ -27,20 +27,15 @@ Large Trimark Armor Pump I
 Large Trimark Armor Pump I
 
 
-Hornet EC-300 x5
-Warrior II x3
-Warrior II x2
+Warrior II x5
+Praetor II x3
 
 
-Imperial Navy Standard L x2
-Imperial Navy Standard L x2
+Imperial Navy Standard L x4
 Radio L x4
 Navy Cap Booster 800 x20
-Conflagration L x1
-Conflagration L x3
+Conflagration L x4
 Standard L x4
 Multifrequency L x4
-Scorch L x1
-Scorch L x7
-Imperial Navy Infrared L x2
-Imperial Navy Infrared L x2
+Scorch L x8
+Imperial Navy Infrared L x4

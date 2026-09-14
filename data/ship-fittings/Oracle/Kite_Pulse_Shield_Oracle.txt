@@ -25,5 +25,4 @@ Medium Core Defense Field Extender I
 Medium Energy Locus Coordinator I
 
 
-Conflagration L x3
-Conflagration L x5
+Conflagration L x8

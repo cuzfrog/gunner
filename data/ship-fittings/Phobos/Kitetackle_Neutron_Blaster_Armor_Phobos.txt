@@ -28,6 +28,5 @@ Navy Cap Booster 800 x7
 Caldari Navy Antimatter Charge M x1000
 Null M x1000
 Nanite Repair Paste x243
-Void M x2000
-Void M x384
+Void M x2384
 Focused Warp Disruption Script x1

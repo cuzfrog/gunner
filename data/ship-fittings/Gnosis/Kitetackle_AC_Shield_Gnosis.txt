@@ -26,8 +26,7 @@ Medium Core Defense Field Extender I
 Medium Core Defense Field Extender I
 
 
-Hornet EC-300 x2
-Hornet EC-300 x3
+Hornet EC-300 x5
 
 
 Scan Resolution Script x2

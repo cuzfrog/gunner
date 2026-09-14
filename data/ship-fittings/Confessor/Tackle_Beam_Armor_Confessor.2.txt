@@ -25,7 +25,5 @@ Small Auxiliary Nano Pump II
 Sisters Core Scanner Probe x8
 True Sanshas Ultraviolet S x4
 Navy Cap Booster 400 x27
-Aurora S x1
-Aurora S x7
-Gleam S x6
-Gleam S x2
+Aurora S x8
+Gleam S x8

@@ -21,14 +21,9 @@ Small Energy Locus Coordinator II
 Small Polycarbon Engine Housing I
 
 
-Imperial Navy Xray S x2
-Imperial Navy Xray S x1
-True Sanshas Radio S x1
-True Sanshas Radio S x2
+Imperial Navy Xray S x3
+True Sanshas Radio S x3
 Nanite Repair Paste x102
-Aurora S x2
-Aurora S x1
-True Sanshas Infrared S x1
-True Sanshas Infrared S x2
-Gleam S x2
-Gleam S x1
+Aurora S x3
+True Sanshas Infrared S x3
+Gleam S x3

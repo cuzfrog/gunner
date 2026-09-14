@@ -18,4 +18,7 @@ Light Missile Launcher I, Inferno Light Missile
 [Empty Rig slot]
 
 
+Warrior II x3
+
+
 Inferno Light Missile x162

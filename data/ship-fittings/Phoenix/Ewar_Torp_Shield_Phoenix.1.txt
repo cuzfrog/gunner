@@ -25,32 +25,19 @@ Capital Core Defense Field Extender I
 Capital EM Shield Reinforcer I
 
 
-Mjolnir Rage Torpedo x4000
-Navy Cap Booster 3200 x3
-Navy Cap Booster 3200 x24
-Nova Rage Torpedo x2000
-Caldari Navy Scourge Torpedo x1000
-Nova Javelin Torpedo x2000
-Inferno Javelin Torpedo x2000
-Scourge Javelin Torpedo x2000
-Caldari Navy Inferno Torpedo x1000
-Strontium Clathrates x344
-Strontium Clathrates x780
-Scourge Rage Torpedo x2000
-Inferno Rage Torpedo x2000
-Caldari Navy Nova Torpedo x1000
-Scourge Rage Torpedo x1000
-Caldari Navy Scourge Torpedo x2000
-Inferno Javelin Torpedo x910
-Caldari Navy Inferno Torpedo x2000
-Nova Rage Torpedo x1000
-Caldari Navy Nova Torpedo x2000
-Nova Javelin Torpedo x1000
+Mjolnir Rage Torpedo x6984
+Navy Cap Booster 3200 x27
+Nova Rage Torpedo x3000
+Caldari Navy Scourge Torpedo x3000
+Nova Javelin Torpedo x3000
+Inferno Javelin Torpedo x2910
+Scourge Javelin Torpedo x3000
+Caldari Navy Inferno Torpedo x3000
+Strontium Clathrates x2265
+Scourge Rage Torpedo x3000
+Inferno Rage Torpedo x3000
+Caldari Navy Nova Torpedo x3000
 Nanite Repair Paste x500
-Inferno Rage Torpedo x1000
 Mjolnir Javelin Torpedo x2973
-Scourge Javelin Torpedo x1000
 Caldari Navy Mjolnir Torpedo x10083
-Mjolnir Rage Torpedo x2984
-Strontium Clathrates x1141
 Nitrogen Isotopes x45357

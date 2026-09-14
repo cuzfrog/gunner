@@ -21,9 +21,7 @@ Medium EM Shield Reinforcer II
 Medium EM Shield Reinforcer II
 
 
-Acolyte II x5
-Wasp II x3
-Hammerhead II x5
+Ogre II x5
 
 
 Nanite Repair Paste x50

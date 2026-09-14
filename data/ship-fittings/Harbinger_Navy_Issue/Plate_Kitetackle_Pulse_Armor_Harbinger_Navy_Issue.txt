@@ -26,14 +26,11 @@ Medium Trimark Armor Pump II
 Medium Trimark Armor Pump II
 
 
-Warrior II x2
-Warrior II x3
+Warrior II x5
 
 
-Imperial Navy Multifrequency M x6
-Imperial Navy Multifrequency M x6
-Conflagration M x3
-Conflagration M x3
+Imperial Navy Multifrequency M x12
+Conflagration M x6
 Navy Cap Booster 400 x15
 Nanite Repair Paste x300
 Scorch M x6

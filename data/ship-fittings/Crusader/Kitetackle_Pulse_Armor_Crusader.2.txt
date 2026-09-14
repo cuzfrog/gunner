@@ -17,8 +17,6 @@ Small Ancillary Current Router I
 [Empty Rig slot]
 
 
-Imperial Navy Multifrequency S x3
-Imperial Navy Multifrequency S x1
-Scorch S x2
-Scorch S x2
+Imperial Navy Multifrequency S x4
+Scorch S x4
 Nanite Repair Paste x86

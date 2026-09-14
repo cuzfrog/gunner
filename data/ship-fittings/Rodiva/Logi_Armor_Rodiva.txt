@@ -19,3 +19,6 @@ Heavy Mutadaptive Remote Armor Repairer II
 Medium Ancillary Current Router I
 Medium Trimark Armor Pump II
 Medium Trimark Armor Pump II
+
+
+Light Armor Maintenance Bot II x5

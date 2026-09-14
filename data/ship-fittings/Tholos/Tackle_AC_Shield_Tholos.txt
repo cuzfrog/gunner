@@ -22,6 +22,9 @@ Small Ancillary Current Router I
 [Empty Rig slot]
 
 
+Hobgoblin II x5
+
+
 Inferno Javelin Rocket x250
 Hail S x328
 Nanite Repair Paste x42

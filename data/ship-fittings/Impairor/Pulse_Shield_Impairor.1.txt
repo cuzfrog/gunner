@@ -10,5 +10,7 @@ Civilian Gatling Pulse Laser
 Arbalest Compact Light Missile Launcher, Caldari Navy Nova Light Missile
 
 
-Caldari Navy Nova Light Missile x34
-Caldari Navy Nova Light Missile x380
+Hornet EC-300 x1
+
+
+Caldari Navy Nova Light Missile x414

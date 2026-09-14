@@ -10,6 +10,9 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
 'Arbalest' Rocket Launcher I, Caldari Navy Inferno Rocket
 
 
+Warrior II x1
+
+
 Navy Cap Booster 50 x43
 Caldari Navy Mjolnir Rocket x315
 Caldari Navy Nova Light Missile x200

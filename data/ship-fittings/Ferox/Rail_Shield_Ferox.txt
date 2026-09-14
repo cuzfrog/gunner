@@ -25,6 +25,9 @@ Medium Ancillary Current Router I
 Medium Core Defense Field Extender I
 
 
+Hornet II x5
+
+
 Caldari Navy Iridium Charge M x3000
 Spike M x1952
 Navy Cap Booster 150 x23

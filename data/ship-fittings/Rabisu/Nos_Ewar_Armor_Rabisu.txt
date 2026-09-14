@@ -22,8 +22,7 @@ Medium Kinetic Armor Reinforcer I
 Medium Processor Overclocking Unit I
 
 
-Medium Armor Maintenance Bot I x2
-Medium Armor Maintenance Bot I x3
+Medium Armor Maintenance Bot I x5
 
 
 Navy Cap Booster 400 x32

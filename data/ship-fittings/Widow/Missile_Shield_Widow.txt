@@ -26,8 +26,8 @@ Large Core Defense Field Extender II
 Large Core Defense Field Extender II
 
 
-'Integrated' Warrior x1
-'Integrated' Warrior x3
+Warrior II x5
+Vespa II x5
 
 
 Mjolnir Auto-Targeting Cruise Missile I x11685

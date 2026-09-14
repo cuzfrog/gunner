@@ -18,5 +18,4 @@ Small Hyperspatial Velocity Optimizer II
 Small Processor Overclocking Unit II
 
 
-Void Bomb x2
-Void Bomb x1
+Void Bomb x3

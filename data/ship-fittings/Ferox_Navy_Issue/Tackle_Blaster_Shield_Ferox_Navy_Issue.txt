@@ -26,6 +26,9 @@ Medium Thermal Shield Reinforcer II
 Medium EM Shield Reinforcer II
 
 
+Hornet II x5
+
+
 Null M x2000
 Caldari Navy Antimatter Charge M x4000
 Void M x1280

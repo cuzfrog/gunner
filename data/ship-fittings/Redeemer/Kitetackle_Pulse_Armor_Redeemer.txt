@@ -26,10 +26,13 @@ Large Thermal Armor Reinforcer II
 [Empty Rig slot]
 
 
+Infiltrator II x5
+Praetor II x3
+
+
 Imperial Navy Standard L x5
 Nanite Repair Paste x100
-Scorch L x2
-Scorch L x3
+Scorch L x5
 Imperial Navy Multifrequency L x5
 Navy Cap Booster 3200 x7
 Helium Isotopes x70465

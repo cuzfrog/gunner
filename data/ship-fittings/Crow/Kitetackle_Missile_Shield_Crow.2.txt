@@ -17,8 +17,7 @@ Small Auxiliary Thrusters II
 Small Auxiliary Thrusters II
 
 
-Caldari Navy Mjolnir Light Missile x40
-Caldari Navy Mjolnir Light Missile x934
+Caldari Navy Mjolnir Light Missile x974
 Caldari Navy Scourge Light Missile x1468
 Caldari Navy Inferno Light Missile x1322
 Nanite Repair Paste x107

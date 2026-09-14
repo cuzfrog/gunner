@@ -20,8 +20,7 @@ Small Trimark Armor Pump I
 [Empty Rig slot]
 
 
-Acolyte II x2
-Acolyte II x2
+Acolyte II x4
 
 
 Nova Rage Rocket x832

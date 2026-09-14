@@ -26,5 +26,4 @@ Acolyte II x5
 
 
 Conflagration M x10
-Scorch M x3
-Scorch M x7
+Scorch M x10

@@ -17,6 +17,9 @@ Small Low Friction Nozzle Joints II
 [Empty Rig slot]
 
 
+Hobgoblin II x2
+
+
 Void S x958
 Null S x1000
 Nanite Repair Paste x100

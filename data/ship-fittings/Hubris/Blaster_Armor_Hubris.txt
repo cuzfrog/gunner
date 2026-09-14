@@ -27,7 +27,6 @@ Capital Auxiliary Nano Pump I
 
 Strontium Clathrates x3000
 Oxygen Isotopes x244385
-Navy Cap Booster 3200 x58
+Navy Cap Booster 3200 x74
 Null XL x760
 Void XL x1760
-Navy Cap Booster 3200 x16

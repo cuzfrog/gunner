@@ -21,11 +21,7 @@ Medium Transverse Bulkhead I
 Medium Transverse Bulkhead I
 
 
-Acolyte II x5
-Hammerhead II x2
-Hobgoblin II x1
-Hornet EC-300 x5
-Ogre II x2
+Ogre II x3
 
 
 Federation Navy Antimatter Charge M x1500

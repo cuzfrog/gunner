@@ -31,5 +31,4 @@ Nova Rage Torpedo x2745
 Nova Javelin Torpedo x3000
 Scourge Javelin Torpedo x2793
 Mjolnir Rage Torpedo x9330
-Strontium Clathrates x608
-Strontium Clathrates x1291
+Strontium Clathrates x1899

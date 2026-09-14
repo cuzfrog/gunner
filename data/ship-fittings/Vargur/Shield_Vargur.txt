@@ -26,8 +26,7 @@ Bastion Module I
 [Empty Rig slot]
 
 
-Warrior II x2
-Warrior II x8
+Warrior II x10
 
 
 Tracking Speed Script x1

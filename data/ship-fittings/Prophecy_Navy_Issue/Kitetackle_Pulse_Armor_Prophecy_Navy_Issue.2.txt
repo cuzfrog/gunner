@@ -25,16 +25,15 @@ Medium Energy Locus Coordinator II
 Medium Trimark Armor Pump I
 
 
+Infiltrator II x5
+
+
 Imperial Navy Microwave M x10
 Navy Cap Booster 800 x6
 Imperial Navy Multifrequency M x15
 Nanite Repair Paste x92
 Armor Energizing Charge x300
-Imperial Navy Xray M x7
-Imperial Navy Xray M x3
-Conflagration M x2
-Conflagration M x3
-Imperial Navy Infrared M x7
-Imperial Navy Infrared M x3
-Scorch M x7
-Scorch M x3
+Imperial Navy Xray M x10
+Conflagration M x5
+Imperial Navy Infrared M x10
+Scorch M x10

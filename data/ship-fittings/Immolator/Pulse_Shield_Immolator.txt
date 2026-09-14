@@ -12,7 +12,5 @@ True Sansha Small Focused Pulse Laser, Conflagration S
 
 
 Multifrequency S x1
-Conflagration S x1
-Conflagration S x7
-Scorch S x19
-Scorch S x1
+Conflagration S x8
+Scorch S x20

@@ -20,9 +20,9 @@ Small Core Defense Field Extender I
 Small Ancillary Current Router I
 
 
+Hobgoblin II x5
+
+
 Mining Laser Optimization Charge x600
 Mining Laser Field Enhancement Charge x600
 Evasive Maneuvers Charge x600
-
-
-Hobgoblin II x2

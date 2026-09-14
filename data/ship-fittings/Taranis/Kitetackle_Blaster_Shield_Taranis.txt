@@ -17,5 +17,8 @@ Light Neutron Blaster II, Null S
 [Empty Rig slot]
 
 
+Hobgoblin II x2
+
+
 Void S x1240
 Null S x760

@@ -20,14 +20,9 @@ Small Polycarbon Engine Housing I
 Small Energy Metastasis Adjuster II
 
 
-True Sanshas Xray S x1
-True Sanshas Xray S x2
-True Sanshas Ultraviolet S x2
-True Sanshas Ultraviolet S x4
-True Sanshas Multifrequency S x1
-True Sanshas Multifrequency S x2
-True Sanshas Standard S x1
-True Sanshas Standard S x2
+True Sanshas Xray S x3
+True Sanshas Ultraviolet S x6
+True Sanshas Multifrequency S x3
+True Sanshas Standard S x3
 Nanite Repair Paste x149
-Aurora S x2
-Aurora S x1
+Aurora S x3

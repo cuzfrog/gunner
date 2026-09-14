@@ -24,6 +24,9 @@ Medium Hydraulic Bay Thrusters II
 Medium Hydraulic Bay Thrusters II
 
 
+Hornet II x5
+
+
 Scourge Fury Heavy Missile x1000
 Active Shielding Charge x300
 Shield Extension Charge x300

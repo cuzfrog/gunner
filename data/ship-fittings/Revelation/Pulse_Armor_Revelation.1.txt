@@ -25,15 +25,10 @@ Capital Ancillary Current Router II
 Capital Energy Locus Coordinator I
 
 
-Conflagration XL x1
-Conflagration XL x5
+Conflagration XL x6
 Tracking Speed Script x2
-Strontium Clathrates x555
+Strontium Clathrates x2525
 Scorch XL x9
-Sanshas Multifrequency XL x3
-Sanshas Multifrequency XL x6
-Strontium Clathrates x1416
-Helium Isotopes x50066
-Helium Isotopes x66
-Strontium Clathrates x554
+Sanshas Multifrequency XL x9
+Helium Isotopes x50132
 Navy Cap Booster 3200 x11

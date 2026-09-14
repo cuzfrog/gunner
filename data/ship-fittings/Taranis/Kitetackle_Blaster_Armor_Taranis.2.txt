@@ -17,8 +17,7 @@ Small Ancillary Current Router I
 [Empty Rig slot]
 
 
-Hobgoblin II x1
-Hobgoblin II x1
+Hobgoblin II x2
 
 
 Null S x1000

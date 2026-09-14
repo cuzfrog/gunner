@@ -28,9 +28,8 @@ Capital Hybrid Metastasis Adjuster II
 
 Strontium Clathrates x2125
 Oxygen Isotopes x20193
-Navy Cap Booster 3200 x94
+Navy Cap Booster 3200 x101
 Null XL x2500
 Shadow Antimatter Charge XL x1985
 Void XL x2177
 Optimal Range Script x1
-Navy Cap Booster 3200 x7

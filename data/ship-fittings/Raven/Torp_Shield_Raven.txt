@@ -27,6 +27,9 @@ Large Semiconductor Memory Cell I
 [Empty Rig slot]
 
 
+Vespa II x5
+
+
 Caldari Navy Nova Torpedo x48
 Caldari Navy Inferno Torpedo x2488
 Caldari Navy Mjolnir Torpedo x1164

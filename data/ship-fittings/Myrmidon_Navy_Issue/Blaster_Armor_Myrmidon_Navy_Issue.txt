@@ -25,10 +25,7 @@ Medium Trimark Armor Pump II
 Medium Ancillary Current Router II
 
 
-Hobgoblin II x5
-Hammerhead II x5
-Ogre II x2
-Vespa II x5
+Ogre II x4
 
 
 Navy Cap Booster 800 x20

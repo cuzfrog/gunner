@@ -18,17 +18,13 @@ Small Energy Locus Coordinator II
 Small Polycarbon Engine Housing II
 
 
-True Sanshas Xray S x3
-True Sanshas Xray S x1
+True Sanshas Xray S x4
 Sisters Core Scanner Probe x8
 True Sanshas Ultraviolet S x2
 True Sanshas Multifrequency S x2
 True Sanshas Gamma S x2
 True Sanshas Standard S x2
-Nanite Repair Paste x152
-Nanite Repair Paste x1703
-Aurora S x1
-Aurora S x1
+Nanite Repair Paste x1855
+Aurora S x2
 True Sanshas Infrared S x2
-Gleam S x1
-Gleam S x1
+Gleam S x2

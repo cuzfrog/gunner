@@ -21,8 +21,7 @@ Medium Ancillary Current Router I
 [Empty Rig slot]
 
 
-Medium Armor Maintenance Bot I x2
-Medium Armor Maintenance Bot I x2
+Medium Armor Maintenance Bot I x4
 Light Armor Maintenance Bot I x1
 
 

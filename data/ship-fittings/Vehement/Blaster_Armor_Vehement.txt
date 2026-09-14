@@ -28,7 +28,6 @@ Capital Nanobot Accelerator II
 
 Void XL x6693
 Null XL x6437
-Navy Cap Booster 3200 x2
+Navy Cap Booster 3200 x106
 Strontium Clathrates x2026
 Oxygen Isotopes x9739
-Navy Cap Booster 3200 x104

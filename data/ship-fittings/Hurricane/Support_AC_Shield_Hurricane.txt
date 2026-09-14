@@ -25,6 +25,9 @@ Medium Thermal Shield Reinforcer I
 Medium EM Shield Reinforcer I
 
 
+Valkyrie II x4
+
+
 Barrage M x3988
 EMP M x3000
 Republic Fleet Fusion M x1458

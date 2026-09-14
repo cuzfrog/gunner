@@ -22,6 +22,9 @@ Medium Trimark Armor Pump I
 Medium Trimark Armor Pump I
 
 
+Infiltrator II x5
+
+
 Mjolnir Rage Heavy Assault Missile x1960
 Conflagration M x2
 Nova Rage Heavy Assault Missile x1175
@@ -30,5 +33,4 @@ Scourge Rage Heavy Assault Missile x4305
 Nanite Repair Paste x200
 Scourge Javelin Heavy Assault Missile x4195
 Nova Javelin Heavy Assault Missile x2000
-Scorch M x2
-Scorch M x1
+Scorch M x3

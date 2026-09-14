@@ -26,14 +26,9 @@ Capital Auxiliary Nano Pump I
 
 
 Strontium Clathrates x1625
-Oxygen Isotopes x32046
-Oxygen Isotopes x41356
-Navy Cap Booster 3200 x5
-Navy Cap Booster 3200 x24
-Navy Cap Booster 3200 x19
-Oxygen Isotopes x40115
+Oxygen Isotopes x113517
+Navy Cap Booster 3200 x49
 Null XL x1996
-Navy Cap Booster 3200 x1
 Guristas Antimatter Charge XL x1760
 Void XL x1925
 Guristas Thorium Charge XL x2000
