@@ -6,7 +6,7 @@ interface Props {
   readonly description?: string;
 }
 const DEFAULT_DESCRIPTION =
-  "Free EVE Online combat simulator. Simulate ship-vs-ship fights in your browser with real-time movement, tracking, damage application and capacitor warfare.";
+  "EVE Online combat simulator. Simulate ship-vs-ship fights in your browser with real-time movement, tracking, damage application and capacitor warfare.";
 const { title, description = DEFAULT_DESCRIPTION } = Astro.props;
 const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.href;
 const ogImageUrl = Astro.site ? new URL("/og-image.png", Astro.site).href : "/og-image.png";
@@ -62,7 +62,7 @@ const appSchema = {
 <body>
   <slot />
   <noscript>
-    <p>Gunner is a free browser-based EVE Online 2D fight simulator. It simulates ship-vs-ship combat with real-time movement, turret tracking, damage application and capacitor warfare. Please enable JavaScript to run the simulator.</p>
+    <p>Gunner is a browser-based EVE Online 2D fight simulator. It simulates ship-vs-ship combat with real-time movement, turret tracking, damage application and capacitor warfare. Please enable JavaScript to run the simulator.</p>
   </noscript>
   <div id="hover-hint" class="hover-hint" role="tooltip" hidden></div>
   <script>

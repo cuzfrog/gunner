@@ -363,7 +363,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "intro.share.text": {
     zh: "直接粘贴来自游戏客户端或 Pyfa 的 EFT 配装，在浏览器中保存配置，并能把任何战斗分享为 URL——完整模拟状态都包含在链接里。",
   },
-  "intro.note": { zh: "免费开源，无需账号。选择船体，导入配装，在下一次出港前先模拟你的 1v1。" },
+  "intro.note": { zh: "开源，无需账号。选择船体，导入配装，在下一次出港前先模拟你的 1v1。" },
   "intro.ships": { zh: "在舰船索引中浏览全部船体——属性与预设配装。" },
   "unit.mm": { zh: "mm" },
   "unit.meter": { zh: "m" },
