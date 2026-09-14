@@ -1,0 +1,35 @@
+[Proteus, Drone Armor Proteus]
+
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+1600mm Steel Plates II
+Multispectrum Energized Membrane II
+Damage Control II
+Magnetic Field Stabilizer II
+
+50MN Quad LiF Restrained Microwarpdrive
+Warp Scrambler II
+Stasis Webifier II
+Republic Fleet Medium Cap Battery
+
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Covert Ops Cloaking Device II
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+Medium Auxiliary Nano Pump I
+
+Proteus Offensive - Drone Synthesis Projector
+Proteus Propulsion - Hyperspatial Optimization
+Proteus Core - Friction Extension Processor
+Proteus Defensive - Nanobot Injector
+
+
+Ogre II x5
+
+
+Void M x1500

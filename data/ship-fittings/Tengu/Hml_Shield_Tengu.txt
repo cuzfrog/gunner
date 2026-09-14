@@ -1,0 +1,36 @@
+[Tengu, Hml Shield Tengu]
+
+Damage Control II
+Signal Amplifier II
+
+50MN Quad LiF Restrained Microwarpdrive
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Pithum C-Type EM Shield Amplifier
+Pith X-Type Kinetic Shield Hardener
+Federation Navy Stasis Webifier
+Republic Fleet Large Cap Battery
+
+Heavy Missile Launcher II, Scourge Heavy Missile
+Heavy Missile Launcher II, Scourge Heavy Missile
+Heavy Missile Launcher II, Scourge Heavy Missile
+Heavy Missile Launcher II, Scourge Heavy Missile
+Heavy Missile Launcher II, Scourge Heavy Missile
+Heavy Missile Launcher II, Scourge Heavy Missile
+Covert Ops Cloaking Device II
+
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+Medium Hydraulic Bay Thrusters II
+
+Tengu Offensive - Accelerated Ejection Bay
+Tengu Defensive - Amplification Node
+Tengu Propulsion - Fuel Catalyst
+Tengu Core - Obfuscation Manifold
+
+
+Hobgoblin II x5
+
+
+Scourge Heavy Missile x2000

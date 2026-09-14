@@ -1,0 +1,37 @@
+[Proteus, Blaster Armor Proteus]
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+1600mm Steel Plates II
+Multispectrum Energized Membrane II
+Damage Control II
+Medium Ancillary Armor Repairer
+
+50MN Quad LiF Restrained Microwarpdrive
+Warp Scrambler II
+Stasis Webifier II
+Medium Capacitor Booster II, Navy Cap Booster 800
+
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Covert Ops Cloaking Device II
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+Medium Ancillary Current Router II
+
+Proteus Offensive - Hybrid Encoding Platform
+Proteus Defensive - Augmented Plating
+Proteus Core - Friction Extension Processor
+Proteus Propulsion - Localized Injectors
+
+
+Vespa II x5
+
+
+Void M x2000
+Navy Cap Booster 800 x25

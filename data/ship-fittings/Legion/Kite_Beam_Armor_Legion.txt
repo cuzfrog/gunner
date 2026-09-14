@@ -1,0 +1,36 @@
+[Legion, Kite Beam Armor Legion]
+
+Heat Sink II
+Heat Sink II
+Imperial Navy Multispectrum Energized Membrane
+Damage Control II
+Tracking Enhancer II
+
+50MN Quad LiF Restrained Microwarpdrive
+Sensor Booster II
+Warp Scrambler II
+Stasis Webifier II
+Medium Capacitor Booster II, Navy Cap Booster 800
+
+Heavy Beam Laser II, Multifrequency L
+Heavy Beam Laser II, Multifrequency L
+Heavy Beam Laser II, Multifrequency L
+Heavy Beam Laser II, Multifrequency L
+Heavy Beam Laser II, Multifrequency L
+Heavy Beam Laser II, Multifrequency L
+Covert Ops Cloaking Device II
+
+Medium Hyperspatial Velocity Optimizer II
+Medium Hyperspatial Velocity Optimizer II
+Medium Auxiliary Nano Pump I
+
+Legion Offensive - Liquid Crystal Magnifiers
+Legion Defensive - Nanobot Injector
+Legion Core - Dissolution Sequencer
+Legion Propulsion - Wake Limiter
+
+
+Acolyte II x5
+
+
+Navy Cap Booster 800 x25

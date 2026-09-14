@@ -2299,6 +2299,58 @@ export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = {
    }
   ]
  },
+ "29984": {
+  "name": "Tengu",
+  "fittings": [
+   {
+    "name": "Ham Shield Tengu",
+    "body": "Ballistic Control System II\nBallistic Control System II\nDamage Control II\nPower Diagnostic System II\n\n50MN Quad LiF Restrained Microwarpdrive\nMultispectrum Shield Hardener II\nLarge Shield Extender II\nStasis Webifier II\nPithum C-Type Medium Shield Booster\nRepublic Fleet Large Cap Battery\n\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nCovert Ops Cloaking Device II\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\nMedium Capacitor Control Circuit II\n\nTengu Offensive - Accelerated Ejection Bay\nTengu Defensive - Supplemental Screening\nTengu Propulsion - Fuel Catalyst\nTengu Core - Augmented Graviton Reactor\n\n\nHobgoblin II x5\n\n\nMjolnir Rage Heavy Assault Missile x1500"
+   },
+   {
+    "name": "Hml Shield Tengu",
+    "body": "Damage Control II\nSignal Amplifier II\n\n50MN Quad LiF Restrained Microwarpdrive\nLarge Shield Extender II\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nPithum C-Type EM Shield Amplifier\nPith X-Type Kinetic Shield Hardener\nFederation Navy Stasis Webifier\nRepublic Fleet Large Cap Battery\n\nHeavy Missile Launcher II, Scourge Heavy Missile\nHeavy Missile Launcher II, Scourge Heavy Missile\nHeavy Missile Launcher II, Scourge Heavy Missile\nHeavy Missile Launcher II, Scourge Heavy Missile\nHeavy Missile Launcher II, Scourge Heavy Missile\nHeavy Missile Launcher II, Scourge Heavy Missile\nCovert Ops Cloaking Device II\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\nMedium Hydraulic Bay Thrusters II\n\nTengu Offensive - Accelerated Ejection Bay\nTengu Defensive - Amplification Node\nTengu Propulsion - Fuel Catalyst\nTengu Core - Obfuscation Manifold\n\n\nHobgoblin II x5\n\n\nScourge Heavy Missile x2000"
+   }
+  ]
+ },
+ "29986": {
+  "name": "Legion",
+  "fittings": [
+   {
+    "name": "Beam Armor Legion",
+    "body": "Heat Sink II\nHeat Sink II\nMultispectrum Energized Membrane II\nDamage Control II\nCentum C-Type Medium Armor Repairer\nTracking Enhancer II\n\nWarp Scrambler II\nStasis Webifier II\n50MN Quad LiF Restrained Microwarpdrive\nMedium Capacitor Booster II, Navy Cap Booster 800\n\nHeavy Beam Laser II, Multifrequency L\nHeavy Beam Laser II, Multifrequency L\nHeavy Beam Laser II, Multifrequency L\nHeavy Beam Laser II, Multifrequency L\nHeavy Beam Laser II, Multifrequency L\nHeavy Beam Laser II, Multifrequency L\nCovert Ops Cloaking Device II\n\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\nMedium Auxiliary Nano Pump I\n\nLegion Offensive - Liquid Crystal Magnifiers\nLegion Defensive - Nanobot Injector\nLegion Core - Energy Parasitic Complex\nLegion Propulsion - Intercalated Nanofibers\n\n\nAcolyte II x5\n\n\nNavy Cap Booster 800 x25"
+   },
+   {
+    "name": "Kite Beam Armor Legion",
+    "body": "Heat Sink II\nHeat Sink II\nImperial Navy Multispectrum Energized Membrane\nDamage Control II\nTracking Enhancer II\n\n50MN Quad LiF Restrained Microwarpdrive\nSensor Booster II\nWarp Scrambler II\nStasis Webifier II\nMedium Capacitor Booster II, Navy Cap Booster 800\n\nHeavy Beam Laser II, Multifrequency L\nHeavy Beam Laser II, Multifrequency L\nHeavy Beam Laser II, Multifrequency L\nHeavy Beam Laser II, Multifrequency L\nHeavy Beam Laser II, Multifrequency L\nHeavy Beam Laser II, Multifrequency L\nCovert Ops Cloaking Device II\n\nMedium Hyperspatial Velocity Optimizer II\nMedium Hyperspatial Velocity Optimizer II\nMedium Auxiliary Nano Pump I\n\nLegion Offensive - Liquid Crystal Magnifiers\nLegion Defensive - Nanobot Injector\nLegion Core - Dissolution Sequencer\nLegion Propulsion - Wake Limiter\n\n\nAcolyte II x5\n\n\nNavy Cap Booster 800 x25"
+   }
+  ]
+ },
+ "29988": {
+  "name": "Proteus",
+  "fittings": [
+   {
+    "name": "Blaster Armor Proteus",
+    "body": "Magnetic Field Stabilizer II\nMagnetic Field Stabilizer II\n1600mm Steel Plates II\nMultispectrum Energized Membrane II\nDamage Control II\nMedium Ancillary Armor Repairer\n\n50MN Quad LiF Restrained Microwarpdrive\nWarp Scrambler II\nStasis Webifier II\nMedium Capacitor Booster II, Navy Cap Booster 800\n\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nCovert Ops Cloaking Device II\n\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\nMedium Ancillary Current Router II\n\nProteus Offensive - Hybrid Encoding Platform\nProteus Defensive - Augmented Plating\nProteus Core - Friction Extension Processor\nProteus Propulsion - Localized Injectors\n\n\nVespa II x5\n\n\nVoid M x2000\nNavy Cap Booster 800 x25"
+   },
+   {
+    "name": "Drone Armor Proteus",
+    "body": "Drone Damage Amplifier II\nDrone Damage Amplifier II\n1600mm Steel Plates II\nMultispectrum Energized Membrane II\nDamage Control II\nMagnetic Field Stabilizer II\n\n50MN Quad LiF Restrained Microwarpdrive\nWarp Scrambler II\nStasis Webifier II\nRepublic Fleet Medium Cap Battery\n\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nHeavy Neutron Blaster II, Void M\nCovert Ops Cloaking Device II\n\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\nMedium Auxiliary Nano Pump I\n\nProteus Offensive - Drone Synthesis Projector\nProteus Propulsion - Hyperspatial Optimization\nProteus Core - Friction Extension Processor\nProteus Defensive - Nanobot Injector\n\n\nOgre II x5\n\n\nVoid M x1500"
+   }
+  ]
+ },
+ "29990": {
+  "name": "Loki",
+  "fittings": [
+   {
+    "name": "Art Shield Loki",
+    "body": "Gyrostabilizer II\nDamage Control II\n\n50MN Quad LiF Restrained Microwarpdrive\nMultispectrum Shield Hardener II\nLarge Shield Extender II\nLarge Shield Extender II\nFederation Navy Stasis Webifier\nFederation Navy Stasis Webifier\nRepublic Fleet Large Cap Battery\n\n720mm Howitzer Artillery II, Republic Fleet Phased Plasma M\n720mm Howitzer Artillery II, Republic Fleet Phased Plasma M\n720mm Howitzer Artillery II, Republic Fleet Phased Plasma M\n720mm Howitzer Artillery II, Republic Fleet Phased Plasma M\n720mm Howitzer Artillery II, Republic Fleet Phased Plasma M\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nCovert Ops Cloaking Device II\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\nMedium Ancillary Current Router II\n\nLoki Offensive - Projectile Scoping Array\nLoki Defensive - Covert Reconfiguration\nLoki Core - Immobility Drivers\nLoki Propulsion - Wake Limiter\n\n\nHobgoblin II x5\n\n\nRepublic Fleet Phased Plasma M x1200\nMjolnir Rage Heavy Assault Missile x600"
+   },
+   {
+    "name": "Ham Shield Loki",
+    "body": "Ballistic Control System II\nBallistic Control System II\nDamage Control II\n\n50MN Quad LiF Restrained Microwarpdrive\nMultispectrum Shield Hardener II\nLarge Shield Extender II\nPith X-Type Kinetic Shield Hardener\nFederation Navy Stasis Webifier\nStasis Webifier II\nRepublic Fleet Large Cap Battery\n\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\nHeavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile\n720mm Howitzer Artillery II, Republic Fleet Phased Plasma M\n720mm Howitzer Artillery II, Republic Fleet Phased Plasma M\n\nMedium Core Defense Field Extender II\nMedium Core Defense Field Extender II\nMedium Hydraulic Bay Thrusters II\n\nLoki Offensive - Launcher Efficiency Configuration\nLoki Core - Immobility Drivers\nLoki Propulsion - Wake Limiter\nLoki Defensive - Augmented Durability\n\n\nHobgoblin II x5\n\n\nMjolnir Rage Heavy Assault Missile x1200\nRepublic Fleet Phased Plasma M x800"
+   }
+  ]
+ },
  "32207": {
   "name": "Freki",
   "fittings": [

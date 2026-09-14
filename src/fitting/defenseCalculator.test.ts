@@ -1,4 +1,4 @@
-import { type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
+import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import { FITTING_DB, type HullBonus, type DefenseModuleStats } from "../gamedata/fittingDb";
 import { type DefenseSkills, type ShipProfile, type SkillLevel, defaultDefenseSkills } from "../ships";
 import { StackingPenaltyImpl } from "../sim";
@@ -461,7 +461,7 @@ describe("DefenseCalculatorImpl - subsystem flat bonuses", () => {
   const neutralConditions = { skillLevel: 5 as const, overloaded: false, weaponOverloaded: false, defenseSkills: defaultDefenseSkills(0) };
 
   function flatBonus(attribute: HullBonus["attribute"], magnitude: number): HullBonus {
-    return { attribute, magnitude, scalesWithHullSkill: false, sourceId: profile.id };
+    return { attribute, magnitude, scalesWithHullSkill: false, sourceId: toTypeId("24692") };
   }
 
   function resolveWithBonuses(bonuses: readonly HullBonus[]) {

@@ -120,7 +120,7 @@ describe("_resolveSensorStats", () => {
     const profile = sensorProfile();
     const withFlat = _resolveSensorStats(profile, [flatBonus("maxTargetingRangeFlat", 20000)], undefined);
     expect(withFlat.maxTargetingRange).toBe(70000);
-    const withSkill = _resolveSensorStats(profile, [flatBonus("maxTargetingRangeFlat", 20000)], { longRangeTargeting: 4 });
+    const withSkill = _resolveSensorStats(profile, [flatBonus("maxTargetingRangeFlat", 20000)], { longRangeTargeting: 4, signatureAnalysis: 0, targetManagement: 0, advancedTargetManagement: 0, sensorLinking: 0, signalSuppression: 0, frequencyModulation: 0 });
     expect(withSkill.maxTargetingRange).toBe(84000);
   });
 });

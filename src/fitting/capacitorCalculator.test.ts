@@ -1,4 +1,4 @@
-import { type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
+import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import { FITTING_DB, type HullBonus } from "../gamedata/fittingDb";
 import { type ShipProfile, type SkillLevel, type StatConditions, defaultCapacitorSkills } from "../ships";
 import { EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, StackingPenaltyImpl, type BoostLoadout, type CommandBurstSpec, type EwarLoadout, type EnergyNeutralizerSpec, type MissileBoosterLoadout, type SensorBoostLoadout, type StasisWebSpec, type TrackingBoosterSpec } from "../sim";
@@ -406,14 +406,14 @@ describe("CapacitorCalculatorImpl - subsystem flat bonuses", () => {
   function resolveWithBonuses(hullBonuses: readonly HullBonus[], entries: readonly FittingModuleEntry[] = []) {
     const state = factory.create(profile, hullBonuses, entries, [], [] as readonly CargoEntry[]);
     const defense = defenseCalculator.resolve(state, emptyConditions);
-    const sources: CapacitorDrainSources = { defense, turretDrains: [], ewar: EMPTY_EWAR_LOADOUT, boosts: EMPTY_BOOST_LOADOUT, missileBoosts: EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: EMPTY_SENSOR_BOOST_LOADOUT, commandBursts: [] };
+    const sources: CapacitorDrainSources = { defense, turretDrains: [], ewar: EMPTY_EWAR_LOADOUT, boosts: EMPTY_BOOST_LOADOUT, missileBoosts: EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: EMPTY_SENSOR_BOOST_LOADOUT, commandBursts: [], propulsionModuleId: undefined };
     return calculator.resolve(state, emptyConditions, sources);
   }
 
   test("flat capacitor capacity adds to base before percent multipliers", () => {
     const base = resolveWithBonuses([]);
     expect(base.spec.capacity).toBe(profile.capacitorCapacity);
-    const boosted = resolveWithBonuses([{ attribute: "capacitorCapacityFlat", magnitude: 200, scalesWithHullSkill: false, sourceId: profile.id }]);
+    const boosted = resolveWithBonuses([{ attribute: "capacitorCapacityFlat", magnitude: 200, scalesWithHullSkill: false, sourceId: toTypeId("24692") }]);
     expect(boosted.spec.capacity).toBe(profile.capacitorCapacity + 200);
   });
 });

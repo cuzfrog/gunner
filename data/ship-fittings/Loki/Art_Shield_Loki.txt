@@ -1,0 +1,37 @@
+[Loki, Art Shield Loki]
+
+Gyrostabilizer II
+Damage Control II
+
+50MN Quad LiF Restrained Microwarpdrive
+Multispectrum Shield Hardener II
+Large Shield Extender II
+Large Shield Extender II
+Federation Navy Stasis Webifier
+Federation Navy Stasis Webifier
+Republic Fleet Large Cap Battery
+
+720mm Howitzer Artillery II, Republic Fleet Phased Plasma M
+720mm Howitzer Artillery II, Republic Fleet Phased Plasma M
+720mm Howitzer Artillery II, Republic Fleet Phased Plasma M
+720mm Howitzer Artillery II, Republic Fleet Phased Plasma M
+720mm Howitzer Artillery II, Republic Fleet Phased Plasma M
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Covert Ops Cloaking Device II
+
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+Medium Ancillary Current Router II
+
+Loki Offensive - Projectile Scoping Array
+Loki Defensive - Covert Reconfiguration
+Loki Core - Immobility Drivers
+Loki Propulsion - Wake Limiter
+
+
+Hobgoblin II x5
+
+
+Republic Fleet Phased Plasma M x1200
+Mjolnir Rage Heavy Assault Missile x600
