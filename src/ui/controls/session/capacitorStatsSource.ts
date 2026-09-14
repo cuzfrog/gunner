@@ -1,5 +1,5 @@
 import { type CapacitorDrainSources, type CapacitorStats, type FittingImport, type ImportedFitting } from "../../../fitting";
-import { type BoostLoadout, type EwarLoadout, type MissileBoosterLoadout, type SensorBoostLoadout, type TurretSpec } from "../../../sim";
+import { type BoostLoadout, type CommandBurstSpec, type EwarLoadout, type MissileBoosterLoadout, type SensorBoostLoadout, type TurretSpec } from "../../../sim";
 import type { SidePanelState } from "../sidePanel";
 import type { Side } from "../side";
 import type { UiEvents } from "../../events";
@@ -12,6 +12,8 @@ import type { StatConditions } from "../../../ships";
  */
 export interface CapacitorStatsSource {
   stats(side: Side): CapacitorStats | undefined;
+  /** Scheduled command burst drains for a side; empty until a fitting with bursts is imported. */
+  commandBursts(side: Side): readonly CommandBurstSpec[];
   /** Feeds the fitting skeleton for a side; used by the import event and the session-restore boundary. */
   register(side: Side, imported: ImportedFitting): void;
 }
@@ -72,6 +74,10 @@ export class CapacitorStatsSourceImpl implements CapacitorStatsSource {
     this.imported[side] = imported;
   }
 
+  commandBursts(side: Side): readonly CommandBurstSpec[] {
+    return this.imported[side]?.commandBursts ?? [];
+  }
+
   private drainSources(side: Side, imported: ImportedFitting, state: SidePanelState): CapacitorDrainSources {
     return {
       defense: imported.defense,
@@ -82,6 +88,7 @@ export class CapacitorStatsSourceImpl implements CapacitorStatsSource {
       boosts: this.deps.boosterController.projection(side)?.loadout ?? imported.boosts,
       missileBoosts: this.deps.missileBoosterController.projection(side)?.loadout ?? imported.missileBoosts,
       sensorBoosts: this.deps.sensorBoosterController.projection(side)?.loadout ?? imported.sensorBoosts,
+      commandBursts: imported.commandBursts,
       // The summary keeps propulsionModuleId after toggle-off as variant-selection memory; a drain requires an active module.
       propulsionModuleId: state.fittedHull?.propulsionId !== undefined ? state.fittedHull.propulsionModuleId : undefined,
     };

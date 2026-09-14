@@ -406,6 +406,13 @@ export interface SensorBoostProjection {
   readonly activation?: readonly SensorBoosterActivation[];
 }
 
+export interface CommandBurstSpec {
+  readonly moduleName: string;
+  readonly moduleId: TypeId;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
+}
+
 export interface SensorSpec {
   readonly scanResolution: number;
   readonly maxTargetingRange: number;

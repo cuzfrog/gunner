@@ -4,6 +4,7 @@ import type { ShipId, TypeId } from "../src/gamedata/ids";
 import type { DamageResists, DamageType } from "../src/sim";
 import {
   TURRET_WEAPON_GROUP_BY_ID,
+  type CommandBurstStats,
   type HullBonusAttribute,
   type SkillBonusType,
   type RigDrawback,
@@ -15,6 +16,8 @@ import type { ShipNameLanguage } from "../src/ships";
 import { buildDefenseStatsFromIntents, type DefenseModuleStats } from "./fittingDb/buildDefenseStats";
 import { buildCapacitorStatsFromIntents, type CapacitorModuleStats } from "./fittingDb/buildCapacitorStats";
 import { buildCapWarfareStatsFromIntents, type EnergyNeutralizerStats, type NosferatuStats } from "./fittingDb/buildCapWarfareStats";
+import { buildBurstChargeStats, buildCommandBurstStats } from "./fittingDb/buildCommandBurstStats";
+import { COMMAND_BURST_GROUP } from "./fittingDb/combatAttributes";
 import { buildCombatModuleStats } from "./fittingDb/buildModuleStats";
 import { auditCoverage, type AuditModuleEntry } from "./fittingDb/coverageAudit";
 import type { SdeDogmaAttribute, SdeDogmaEffect, SdeDogmaEffectModifier, SdeGroup, SdeTypeDogma } from "./fittingDb/dogmaTypes";
@@ -1538,6 +1541,7 @@ async function main() {
   const sensorDampeners: Record<string, Row<SensorDampenerStats>> = {};
   const sensorBoosters: Record<string, Row<SensorBoosterStats>> = {};
   const signalAmplifiers: Record<string, Row<SignalAmplifierStats>> = {};
+  const commandBursts: Record<string, Row<CommandBurstStats>> = {};
   const sensorBoosterScripts: Record<string, Row<SensorBoosterScriptStats>> = {};
   const sensorDampenerScripts: Record<string, Row<SensorDampenerScriptStats>> = {};
   const hullBonuses: Record<ShipId, readonly HullBonus[]> = {};
@@ -1622,6 +1626,13 @@ async function main() {
         };
         addItemName(itemNames, id, type);
       }
+      continue;
+    }
+
+    const burstCharge = buildBurstChargeStats(id, enName, type.groupID, values);
+    if (burstCharge) {
+      charges[id] = burstCharge;
+      addItemName(itemNames, id, type);
       continue;
     }
 
@@ -1846,6 +1857,15 @@ async function main() {
       continue;
     }
 
+    if (type.groupID === COMMAND_BURST_GROUP) {
+      const stats = buildCommandBurstStats({ typeId: id, name: enName, values, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID) });
+      if (stats) {
+        commandBursts[id] = stats;
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
     if (type.groupID === SENSOR_BOOSTER_SCRIPT_GROUP) {
       const stats = buildSensorBoosterScriptStats(values);
       if (stats) {
@@ -1899,7 +1919,7 @@ async function main() {
     `/* eslint-disable */\n\n` +
     `import type { ShipId, TypeId } from "../../ids";\n` +
     `import type {\n` +
-    `  ChargeStats, DisruptionScriptStats, DroneStats, FittingModuleStats, HullBonus, LauncherStats,\n` +
+    `  ChargeStats, CommandBurstStats, DisruptionScriptStats, DroneStats, FittingModuleStats, HullBonus, LauncherStats,\n` +
     `  MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats,\n` +
     `  OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, RigDrawbackReduction,\n` +
     `  SensorBoosterScriptStats, SensorBoosterStats, SensorDampenerScriptStats, SensorDampenerStats,\n` +
@@ -1938,6 +1958,7 @@ export const SENSOR_DAMPENERS: Readonly<Record<string, SensorDampenerStats>> = $
 export const SENSOR_BOOSTERS: Readonly<Record<string, SensorBoosterStats>> = ${stringifyWithTypeIds(sensorBoosters)};
 
 export const SIGNAL_AMPLIFIERS: Readonly<Record<string, SignalAmplifierStats>> = ${stringifyWithTypeIds(signalAmplifiers)};
+export const COMMAND_BURSTS: Readonly<Record<string, CommandBurstStats>> = ${stringifyWithTypeIds(commandBursts)};
 
 export const SENSOR_BOOSTER_SCRIPTS: Readonly<Record<string, SensorBoosterScriptStats>> = ${stringifyWithTypeIds(sensorBoosterScripts)};
 
@@ -2046,6 +2067,7 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     `${Object.keys(sensorDampeners).length} sensor dampeners`,
     `${Object.keys(sensorBoosters).length} sensor boosters`,
     `${Object.keys(signalAmplifiers).length} signal amplifiers`,
+    `${Object.keys(commandBursts).length} command bursts`,
     `${Object.keys(sensorBoosterScripts).length} sensor booster scripts`,
     `${Object.keys(sensorDampenerScripts).length} sensor dampener scripts`,
     `${Object.keys(hullBonuses).length} hull bonus sets`,

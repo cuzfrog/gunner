@@ -1,6 +1,6 @@
-import type { EwarProjection, MissileBoosterProjection, ScheduledDrain, SensorBoostProjection, TurretBoostProjection } from "./types";
+import type { CommandBurstSpec, EwarProjection, MissileBoosterProjection, ScheduledDrain, SensorBoostProjection, TurretBoostProjection } from "./types";
 
-export function scheduledDrainsFromProjections(ewar: EwarProjection, boosts: TurretBoostProjection, missileBoosts: MissileBoosterProjection, sensorBoosts: SensorBoostProjection): readonly ScheduledDrain[] {
+export function scheduledDrainsFromProjections(ewar: EwarProjection, boosts: TurretBoostProjection, missileBoosts: MissileBoosterProjection, sensorBoosts: SensorBoostProjection, commandBursts: readonly CommandBurstSpec[]): readonly ScheduledDrain[] {
   const drains: ScheduledDrain[] = [];
   const activation = ewar.activation;
   const ewarFamilies = [
@@ -31,6 +31,10 @@ export function scheduledDrainsFromProjections(ewar: EwarProjection, boosts: Tur
       if (spec.capacitorNeed === undefined || spec.cycleTime === undefined || spec.capacitorNeed <= 0) return;
       drains.push({ moduleId: spec.moduleId, amount: spec.capacitorNeed, interval: spec.cycleTime, active: family.activation?.[i]?.active ?? true });
     });
+  }
+  for (const burst of commandBursts) {
+    if (burst.capacitorNeed <= 0 || burst.cycleTime <= 0) continue;
+    drains.push({ moduleId: burst.moduleId, amount: burst.capacitorNeed, interval: burst.cycleTime, active: true });
   }
   return drains;
 }

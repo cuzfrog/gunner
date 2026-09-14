@@ -294,6 +294,7 @@ const EMPTY_FITTING_STATE: FittingState = {
   cargo: [],
   sensorBoosterModules: [],
   sensorAmplifierModules: [],
+  commandBurstModules: [],
 };
 
 export const IMPORTED_RIFTER: ImportedFitting = {
@@ -325,6 +326,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   boosts: { computers: [], scripts: [] }, missileBoosts: { computers: [], enhancers: [], scripts: [] },
   hullBonuses: [],
   defense: EMPTY_DEFENSE_SPEC,
+  commandBursts: [],
   capacitor: { spec: { capacity: 0, rechargeTime: 0 }, peakRecharge: 0, rows: [], usagePerSecond: 0, weaponsPerSecond: 0, boosters: [], stablePercent: 100 },
   sensorSpec: { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4 },
   sensorBoosts: EMPTY_SENSOR_BOOST_LOADOUT,

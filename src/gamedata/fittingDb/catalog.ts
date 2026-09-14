@@ -36,6 +36,7 @@ import type {
 import {
   CHARGES,
   COMBAT_DRONES,
+  COMMAND_BURSTS,
   DISRUPTION_SCRIPTS,
   DRONES,
   FITTING_MODULES,
@@ -123,6 +124,7 @@ export const FITTING_DB: FittingDbData = {
   sensorDampeners: SENSOR_DAMPENERS,
   sensorBoosters: SENSOR_BOOSTERS,
   signalAmplifiers: SIGNAL_AMPLIFIERS,
+  commandBursts: COMMAND_BURSTS,
   sensorBoosterScripts: SENSOR_BOOSTER_SCRIPTS,
   sensorDampenerScripts: SENSOR_DAMPENER_SCRIPTS,
   hullBonuses: HULL_BONUSES,

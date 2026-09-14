@@ -52,5 +52,6 @@ function syntheticFittingState(context: DroneLoadoutContext, groups: readonly Dr
     cargo: [],
     sensorBoosterModules: [],
     sensorAmplifierModules: [],
+    commandBurstModules: [],
   };
 }

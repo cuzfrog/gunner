@@ -12,6 +12,7 @@ export type {
   CapacitorModuleKind,
   CapacitorModuleStats,
   ChargeStats,
+  CommandBurstStats,
   EnergyNeutralizerStats,
   NosferatuStats,
   DefenseAncillary,
@@ -60,6 +61,7 @@ export type {
 export {
   CHARGES,
   COMBAT_DRONES,
+  COMMAND_BURSTS,
   DISRUPTION_SCRIPTS,
   DRONES,
   FITTING_MODULES,

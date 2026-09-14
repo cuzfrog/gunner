@@ -218,6 +218,8 @@ export interface ChargeStats {
   readonly capacitorBonus?: number; // GJ injected per cycle, cap booster charges
   readonly volume?: number; // m3, cap booster charges
   readonly capacitorNeedMultiplier?: number; // turret capacitor need scaling from the charge (attr 317), e.g. 1.25 Conflagration
+  readonly warfareBuffId?: number; // raw SDE warfareBuff1ID, command burst charges
+  readonly warfareBuffMultiplier?: number; // raw SDE warfareBuff1Multiplier percent, command burst charges
   readonly chargeGroup: number;
   readonly chargeSize: number;
   readonly id: TypeId;
@@ -456,10 +458,22 @@ export interface DroneStats {
   readonly name: string;
 }
 
+export interface CommandBurstStats {
+  readonly maxRange: number; // m, fleet-wide effect radius
+  readonly cycleTime: number; // seconds, burst reapplies every cycle
+  readonly capacitorNeed: number; // GJ consumed by the user per cycle
+  readonly reloadTime: number; // seconds, charge consumption between cycles
+  readonly chargeGroup: number; // accepted charge family (shield/armor/skirmish/information/mining)
+  readonly requiredSkillIds: readonly TypeId[];
+  readonly id: TypeId;
+  readonly name: string;
+}
+
 export interface FittingDbData {
   readonly modules: Readonly<Record<string, FittingModuleStats>>;
   readonly turrets: Readonly<Record<string, TurretStats>>;
   readonly charges: Readonly<Record<string, ChargeStats>>;
+  readonly commandBursts: Readonly<Record<string, CommandBurstStats>>;
   readonly launchers: Readonly<Record<string, LauncherStats>>;
   readonly missiles: Readonly<Record<string, MissileStats>>;
   readonly scripts: Readonly<Record<string, TurretScriptStats>>;

@@ -1,7 +1,7 @@
 import { type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import { FITTING_DB, type HullBonus } from "../gamedata/fittingDb";
 import { type ShipProfile, type SkillLevel, type StatConditions, defaultCapacitorSkills } from "../ships";
-import { EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, StackingPenaltyImpl, type BoostLoadout, type EwarLoadout, type EnergyNeutralizerSpec, type MissileBoosterLoadout, type SensorBoostLoadout, type StasisWebSpec, type TrackingBoosterSpec } from "../sim";
+import { EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, StackingPenaltyImpl, type BoostLoadout, type CommandBurstSpec, type EwarLoadout, type EnergyNeutralizerSpec, type MissileBoosterLoadout, type SensorBoostLoadout, type StasisWebSpec, type TrackingBoosterSpec } from "../sim";
 import { FittingStateFactory, type CargoEntry, type FittingModuleEntry } from "./fittingState";
 import { DefenseCalculatorImpl } from "./defenseCalculator";
 import { CapacitorCalculatorImpl, buildInjectorDrains, type CapacitorDrainSources } from "./capacitorCalculator";
@@ -68,13 +68,14 @@ interface DrainLoadouts {
   readonly boosts?: BoostLoadout;
   readonly missileBoosts?: MissileBoosterLoadout;
   readonly sensorBoosts?: SensorBoostLoadout;
+  readonly commandBursts?: readonly CommandBurstSpec[];
 }
 
 function resolve(entries: readonly FittingModuleEntry[], conditions: StatConditions = emptyConditions, turrets: readonly ImportedTurret[] = [], loadouts: DrainLoadouts = {}, propulsionModuleId: TypeId | undefined = undefined): ReturnType<CapacitorCalculatorImpl["resolve"]> {
   const state = factory.create(profile, [] as readonly HullBonus[], entries, [], [] as readonly CargoEntry[]);
   const defense = defenseCalculator.resolve(state, conditions);
   const turretDrains = turrets.map((turret) => ({ moduleId: turret.moduleId, capacitorNeed: turret.capacitorNeed, cycleTime: turret.cycleTime, count: turret.turretCount }));
-  const sources: CapacitorDrainSources = { defense, turretDrains, ewar: loadouts.ewar ?? EMPTY_EWAR_LOADOUT, boosts: loadouts.boosts ?? EMPTY_BOOST_LOADOUT, missileBoosts: loadouts.missileBoosts ?? EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: loadouts.sensorBoosts ?? EMPTY_SENSOR_BOOST_LOADOUT, propulsionModuleId };
+  const sources: CapacitorDrainSources = { defense, turretDrains, ewar: loadouts.ewar ?? EMPTY_EWAR_LOADOUT, boosts: loadouts.boosts ?? EMPTY_BOOST_LOADOUT, missileBoosts: loadouts.missileBoosts ?? EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: loadouts.sensorBoosts ?? EMPTY_SENSOR_BOOST_LOADOUT, commandBursts: loadouts.commandBursts ?? [], propulsionModuleId };
   return calculator.resolve(state, conditions, sources);
 }
 

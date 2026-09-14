@@ -1,7 +1,7 @@
 import type { ChargeStats, FittingDb } from "../gamedata/fittingDb";
 import type { TypeId } from "../gamedata/ids";
 import { type CapacitorSkills, type StatConditions, defaultCapacitorSkills } from "../ships";
-import { type BoostLoadout, type CapacitorSpec, type DefenseSpec, type EwarLoadout, type MissileBoosterLoadout, scheduledDrainsFromProjections, type ScheduledDrain, type SensorBoostLoadout, type StackingPenalty } from "../sim";
+import { type BoostLoadout, type CapacitorSpec, type CommandBurstSpec, type DefenseSpec, type EwarLoadout, type MissileBoosterLoadout, scheduledDrainsFromProjections, type ScheduledDrain, type SensorBoostLoadout, type StackingPenalty } from "../sim";
 import { runCapSim, type StaticDrain } from "./capacitorSim";
 import type { FittingState } from "./fittingState";
 import { moduleSkillMultiplier } from "./skillMultiplier";
@@ -58,6 +58,7 @@ export interface CapacitorDrainSources {
   readonly boosts: BoostLoadout;
   readonly missileBoosts: MissileBoosterLoadout;
   readonly sensorBoosts: SensorBoostLoadout;
+  readonly commandBursts: readonly CommandBurstSpec[];
   readonly propulsionModuleId: TypeId | undefined;
 }
 
@@ -143,7 +144,7 @@ function buildUsageRows(db: FittingDb, conditions: StatConditions, sources: Capa
   }
 
   // Same extraction the runtime uses for its scheduled drains: the static rows cannot diverge from the sim.
-  const drains = scheduledDrainsFromProjections({ loadout: sources.ewar }, { loadout: sources.boosts }, { loadout: sources.missileBoosts }, { loadout: sources.sensorBoosts });
+  const drains = scheduledDrainsFromProjections({ loadout: sources.ewar }, { loadout: sources.boosts }, { loadout: sources.missileBoosts }, { loadout: sources.sensorBoosts }, sources.commandBursts);
   rows.push(...drainRows(db, drains));
 
   for (const repairer of sources.defense.repairers) {
@@ -222,7 +223,7 @@ export function buildInjectorDrains(fitting: FittingState, db: FittingDb): reado
 
 /** Display names for drain row modules; family catalogs cover ids absent from db.modules (e.g. tracking computers). */
 function moduleNameFor(db: FittingDb, moduleId: TypeId): string {
-  const family = db.stasisWebs[moduleId] ?? db.stasisGrapplers[moduleId] ?? db.trackingDisruptors[moduleId] ?? db.warpScramblers[moduleId] ?? db.targetPainters[moduleId] ?? db.sensorDampeners[moduleId] ?? db.trackingComputers[moduleId] ?? db.missileGuidanceComputers[moduleId] ?? db.sensorBoosters[moduleId];
+  const family = db.stasisWebs[moduleId] ?? db.stasisGrapplers[moduleId] ?? db.trackingDisruptors[moduleId] ?? db.warpScramblers[moduleId] ?? db.targetPainters[moduleId] ?? db.sensorDampeners[moduleId] ?? db.trackingComputers[moduleId] ?? db.missileGuidanceComputers[moduleId] ?? db.sensorBoosters[moduleId] ?? db.commandBursts[moduleId];
   return db.modules[moduleId]?.name ?? family?.name ?? "";
 }
 

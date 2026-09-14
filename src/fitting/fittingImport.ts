@@ -10,7 +10,7 @@ import type {
   SkillLevel,
   StatConditions,
 } from "../ships";
-import { type BoostLoadout, type EwarLoadout, type MissileBoosterLoadout, type SensorBoostLoadout, type SensorSpec, type StackingPenalty } from "../sim";
+import { type BoostLoadout, type CommandBurstSpec, type EwarLoadout, type MissileBoosterLoadout, type SensorBoostLoadout, type SensorSpec, type StackingPenalty } from "../sim";
 import { parseEft, type BankKind, type EftDocument, type EftLine, type QuantityItem } from "./eft";
 
 import type { ItemNameCatalog, ItemNameResolver } from "../gamedata/itemNames";
@@ -81,6 +81,7 @@ export interface ImportedFitting {
   readonly sensorBoosts: SensorBoostLoadout;
   readonly hullBonuses: readonly HullBonus[];
   readonly defense: DefenseSpec;
+  readonly commandBursts: readonly CommandBurstSpec[];
   readonly capacitor: CapacitorStats;
 }
 
@@ -209,7 +210,8 @@ export class FittingImportImpl implements FittingImport {
     const sensorBoosts = this.calculator.resolveSensorBoosts(fittingState, conditions);
     const defense = this.defenseCalculator.resolve(fittingState, conditions);
     const turretDrains = turrets.map((turret) => ({ moduleId: turret.moduleId, capacitorNeed: turret.capacitorNeed, cycleTime: turret.cycleTime, count: turret.turretCount }));
-    const capacitor = this.capacitorCalculator.resolve(fittingState, conditions, { defense, turretDrains, ewar, boosts, missileBoosts, sensorBoosts, propulsionModuleId: fittingState.propulsionModule?.moduleId });
+    const commandBursts = resolveCommandBurstSpecs(fittingState, this.db);
+    const capacitor = this.capacitorCalculator.resolve(fittingState, conditions, { defense, turretDrains, ewar, boosts, missileBoosts, sensorBoosts, commandBursts, propulsionModuleId: fittingState.propulsionModule?.moduleId });
 
     return {
       profile: resolved.profile,
@@ -230,6 +232,7 @@ export class FittingImportImpl implements FittingImport {
       sensorBoosts,
       hullBonuses: fittingState.hullBonuses,
       defense,
+      commandBursts,
       capacitor,
     };
   }
@@ -396,7 +399,8 @@ function isModuleRole(id: TypeId, db: FittingDb): boolean {
     db.warpScramblers[id] !== undefined ||
     db.targetPainters[id] !== undefined ||
     db.missileGuidanceComputers[id] !== undefined ||
-    db.missileGuidanceEnhancers[id] !== undefined
+    db.missileGuidanceEnhancers[id] !== undefined ||
+    db.commandBursts[id] !== undefined
   );
 }
 
@@ -552,6 +556,16 @@ function collectCargoEntries(items: readonly ResolvedQuantity[]): readonly Cargo
     if (item.kind === "resolved") entries.push({ id: item.id, quantity: item.quantity });
   }
   return entries;
+}
+
+function resolveCommandBurstSpecs(fitting: FittingState, db: FittingDb): readonly CommandBurstSpec[] {
+  const specs: CommandBurstSpec[] = [];
+  for (const mod of fitting.commandBurstModules) {
+    const stats = db.commandBursts[mod.moduleId];
+    if (!stats || stats.capacitorNeed <= 0) continue;
+    specs.push({ moduleName: stats.name, moduleId: mod.moduleId, capacitorNeed: stats.capacitorNeed, cycleTime: stats.cycleTime });
+  }
+  return specs;
 }
 
 const PREVIEW_CONDITIONS: StatConditions = { skillLevel: 5 as SkillLevel, overloaded: false, weaponOverloaded: false };

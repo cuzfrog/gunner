@@ -347,7 +347,7 @@ function capacitorSideFrom(imported: ImportedFitting | undefined, infinite: bool
   const propulsionRow = propulsion ? imported.capacitor.rows.find((row) => row.moduleId === propulsion.propulsionModuleId) : undefined;
   return {
     infinite,
-    drains: scheduledDrainsFromProjections(buildEwarProjection(imported.ewar, false), boosts, missileBoosts, sensorBoosts),
+    drains: scheduledDrainsFromProjections(buildEwarProjection(imported.ewar, false), boosts, missileBoosts, sensorBoosts, imported.commandBursts),
     boosters: capBoosterSpecsFrom(imported.capacitor.boosters),
     fittedDrainPerSecond: imported.capacitor.usagePerSecond,
     weaponsDrainPerSecond: imported.capacitor.weaponsPerSecond,

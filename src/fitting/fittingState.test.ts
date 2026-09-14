@@ -38,6 +38,7 @@ function moduleId(name: string): TypeId {
   for (const stats of Object.values(FITTING_DB.turrets)) if (stats.name === name) return stats.id;
   for (const stats of Object.values(FITTING_DB.launchers)) if (stats.name === name) return stats.id;
   for (const stats of Object.values(FITTING_DB.modules)) if (stats.name === name) return stats.id;
+  for (const stats of Object.values(FITTING_DB.commandBursts)) if (stats.name === name) return stats.id;
   for (const stats of Object.values(FITTING_DB.trackingComputers)) if (stats.name === name) return stats.id;
   for (const stats of Object.values(FITTING_DB.targetPainters)) if (stats.name === name) return stats.id;
   for (const stats of Object.values(FITTING_DB.missileGuidanceComputers)) if (stats.name === name) return stats.id;
@@ -203,6 +204,19 @@ describe("FittingStateFactory", () => {
     expect(subsystemBonuses.length).toBeGreaterThan(0);
     const state = factory.create(profile, hullBonuses, [{ moduleId: toTypeId("45601"), offline: false }], [], []);
     expect(state.hullBonuses).toEqual([...hullBonuses, ...subsystemBonuses]);
+  });
+
+  test("routes command bursts into their own bucket and keeps the loaded charge", () => {
+    const factory = new FittingStateFactory(FITTING_DB);
+    const state = factory.create(profile, hullBonuses, [entry("Armor Command Burst II", "Armor Energizing Charge")], [], []);
+    expect(state.commandBurstModules.length).toBe(1);
+    expect(state.commandBurstModules[0].chargeId).toBe(chargeId("Armor Energizing Charge"));
+  });
+
+  test("offline command bursts do not enter the bucket", () => {
+    const factory = new FittingStateFactory(FITTING_DB);
+    const state = factory.create(profile, hullBonuses, [entry("Armor Command Burst II", undefined, true)], [], []);
+    expect(state.commandBurstModules.length).toBe(0);
   });
 
   test("skips offline subsystem bonuses", () => {

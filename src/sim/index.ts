@@ -99,6 +99,7 @@ export type {
   SensorDampenerScriptSpec,
   SensorDampenerSpec,
   SensorSpec,
+  CommandBurstSpec,
   EnergyNeutralizerSpec,
   NosferatuSpec,
   ShipConfig,

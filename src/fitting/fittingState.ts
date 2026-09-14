@@ -44,6 +44,7 @@ export interface FittingState {
   readonly droneBoosterModules: readonly FittedModule[];
   readonly sensorBoosterModules: readonly FittedModule[];
   readonly sensorAmplifierModules: readonly FittedModule[];
+  readonly commandBurstModules: readonly FittedModule[];
   readonly droneGroups: readonly DroneGroup[];
   readonly drones: readonly CargoEntry[];
   readonly cargo: readonly CargoEntry[];
@@ -69,6 +70,7 @@ export class FittingStateFactory {
     const droneBoosterModules: FittedModule[] = [];
     const sensorBoosterModules: FittedModule[] = [];
     const sensorAmplifierModules: FittedModule[] = [];
+    const commandBurstModules: FittedModule[] = [];
     let propulsionModule: FittedModule | undefined;
     let order = 0;
     const mergedHullBonuses = [...hullBonuses];
@@ -129,6 +131,11 @@ export class FittingStateFactory {
         continue;
       }
 
+      if (this.db.commandBursts[mod.moduleId] !== undefined) {
+        commandBurstModules.push(mod);
+        continue;
+      }
+
       const stats = this.db.modules[mod.moduleId];
       if (!stats) continue;
 
@@ -181,6 +188,7 @@ export class FittingStateFactory {
       droneBoosterModules,
       sensorBoosterModules,
       sensorAmplifierModules,
+      commandBurstModules,
       droneGroups: [...droneCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([typeId, e]) => ({ typeId, count: e.count })),
       drones,
       cargo,
