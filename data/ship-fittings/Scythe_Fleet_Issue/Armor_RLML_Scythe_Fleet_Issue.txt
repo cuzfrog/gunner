@@ -1,0 +1,39 @@
+[Scythe Fleet Issue, Armor RLML Scythe Fleet Issue]
+
+Damage Control II
+800mm Crystalline Carbonide Restrained Plates
+Ballistic Control System II
+Ballistic Control System II
+Medium Ancillary Armor Repairer
+
+50MN Cold-Gas Enduring Microwarpdrive
+Warp Disruptor II
+Missile Guidance Computer II, Missile Range Script
+Missile Guidance Computer II, Missile Range Script
+Medium Cap Battery II
+
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Medium Infectious Scoped Energy Neutralizer
+
+Medium Polycarbon Engine Housing II
+Medium Polycarbon Engine Housing II
+Medium Ancillary Current Router I
+
+
+Acolyte II x5
+
+
+Caldari Navy Inferno Light Missile x1000
+Caldari Navy Mjolnir Light Missile x1000
+Caldari Navy Nova Light Missile x1000
+Caldari Navy Scourge Light Missile x1000
+Inferno Fury Light Missile x1000
+Missile Precision Script x2
+Missile Range Script x2
+Mjolnir Fury Light Missile x1000
+Nanite Repair Paste x100
+Nova Fury Light Missile x1000
+Scourge Fury Light Missile x1000

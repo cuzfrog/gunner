@@ -1,0 +1,37 @@
+[Stabber, Vulcan Stabber]
+
+Damage Control II
+Gyrostabilizer II
+Gyrostabilizer II
+Power Diagnostic System II
+
+50MN Cold-Gas Enduring Microwarpdrive
+Large Shield Extender II
+Large Shield Extender II
+Warp Disruptor II
+
+220mm Vulcan AutoCannon II, Barrage M
+220mm Vulcan AutoCannon II, Barrage M
+220mm Vulcan AutoCannon II, Barrage M
+220mm Vulcan AutoCannon II, Barrage M
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+
+
+Hornet II x5
+
+
+Barrage M x2000
+Hail M x2000
+Inferno Fury Light Missile x500
+Mjolnir Fury Light Missile x500
+Nanite Repair Paste x50
+Nova Fury Light Missile x500
+Republic Fleet Depleted Uranium M x1000
+Republic Fleet EMP M x1000
+Republic Fleet Phased Plasma M x1000
+Scourge Fury Light Missile x500

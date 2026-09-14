@@ -1,0 +1,38 @@
+[Exequror Navy Issue, Blaster Exequror Navy Issue]
+
+1600mm Steel Plates II
+Multispectrum Energized Membrane II
+Multispectrum Coating II
+Damage Control II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+
+50MN Quad LiF Restrained Microwarpdrive
+Warp Scrambler II
+Stasis Webifier II
+Stasis Webifier II
+
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Small Energy Nosferatu II
+
+Medium Ancillary Current Router I
+Medium Trimark Armor Pump I
+Medium Explosive Armor Reinforcer I
+
+
+Acolyte II x5
+
+
+Balmer Series Compact Tracking Disruptor I x1
+C-IR Compact Guidance Disruptor x1
+Federation Navy Antimatter Charge M x650
+Missile Precision Disruption Script x1
+Missile Range Disruption Script x1
+Nanite Repair Paste x30
+Null M x1000
+Optimal Range Disruption Script x1
+Tracking Speed Disruption Script x1
+Void M x2320

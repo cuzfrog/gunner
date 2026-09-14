@@ -1,0 +1,35 @@
+[Vexor, Blaster Vexor]
+
+Damage Control II
+Mark I Compact Reinforced Bulkheads
+Reinforced Bulkheads II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+
+50MN Quad LiF Restrained Microwarpdrive
+Faint Epsilon Scoped Warp Scrambler
+Fleeting Compact Stasis Webifier
+Fleeting Compact Stasis Webifier
+
+Medium Energy Neutralizer II
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+
+Medium Transverse Bulkhead I
+Medium Transverse Bulkhead I
+Medium Transverse Bulkhead I
+
+
+Acolyte II x5
+Hammerhead II x2
+Hobgoblin II x1
+Hornet EC-300 x5
+Ogre II x2
+
+
+Federation Navy Antimatter Charge M x1500
+Federation Navy Thorium Charge M x1000
+Nanite Repair Paste x50
+Null M x2000
+Void M x2000

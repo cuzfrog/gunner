@@ -1,0 +1,26 @@
+[Scythe, Shield Scythe]
+
+Mark I Compact Reactor Control Unit
+Mark I Compact Power Diagnostic System
+Damage Control II
+Mark I Compact Power Diagnostic System
+Multispectrum Energized Membrane II
+
+Large F-S9 Regolith Compact Shield Extender
+Large Shield Extender II
+EM Shield Hardener II
+Multispectrum Shield Hardener II
+50MN Y-T8 Compact Microwarpdrive
+
+Medium Murky Compact Remote Shield Booster
+Medium Murky Compact Remote Shield Booster
+Medium Murky Compact Remote Shield Booster
+[Empty High slot]
+[Empty High slot]
+
+Medium Thermal Shield Reinforcer I
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+
+
+Warrior I x4

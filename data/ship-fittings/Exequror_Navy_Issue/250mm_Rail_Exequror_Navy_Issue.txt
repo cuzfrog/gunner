@@ -1,0 +1,37 @@
+[Exequror Navy Issue, 250mm Rail Exequror Navy Issue]
+
+Damage Control II
+800mm Rolled Tungsten Compact Plates
+Multispectrum Coating II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Medium Ancillary Armor Repairer
+
+50MN Quad LiF Restrained Microwarpdrive
+Warp Disruptor II
+Fleeting Compact Stasis Webifier
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+
+250mm Railgun II, Spike M
+250mm Railgun II, Spike M
+250mm Railgun II, Spike M
+250mm Railgun II, Spike M
+Medium Infectious Scoped Energy Neutralizer
+
+Medium Ancillary Current Router I
+Medium Ancillary Current Router I
+Medium Ionic Field Projector II
+
+
+Acolyte II x5
+
+
+Caldari Navy Thorium Charge M x1500
+Federation Navy Antimatter Charge M x1500
+Javelin M x2000
+Nanite Repair Paste x100
+Navy Cap Booster 800 x14
+Optical Compact Tracking Computer x1
+Optimal Range Script x1
+Spike M x2000
+Tracking Speed Script x1
