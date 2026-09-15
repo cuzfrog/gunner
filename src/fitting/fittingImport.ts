@@ -288,26 +288,25 @@ export class FittingImportImpl implements FittingImport {
     const resolveQuantity = (item: QuantityItem, preferDrone: boolean): ResolvedQuantity => {
       const candidates = this.itemNameResolver.idsForName(item.name, language);
       const droneId = candidates.find((id) => this.db.drones[id] !== undefined);
-      const chargeId = candidates.find((id) => this.db.charges[id] !== undefined);
-      if (preferDrone && droneId) {
-        return { kind: "resolved", id: droneId, name: this.itemNameCatalog.nameForId(droneId, "en"), quantity: item.quantity, isDrone: true };
+      const chargeId = candidates.find((id) => isChargeRole(id, this.db));
+      // Classification is type-driven; the source band (preferDrone) only breaks ties when a
+      // name resolves to both a drone and a charge. Items that are neither follow the band,
+      // which the parser flags as ambiguous when it could be either the drone bay or the cargo hold.
+      if (droneId !== undefined && chargeId !== undefined) {
+        const id = preferDrone ? droneId : chargeId;
+        return { kind: "resolved", id, name: this.itemNameCatalog.nameForId(id, "en"), quantity: item.quantity, isDrone: preferDrone };
       }
-      if (chargeId) {
-        return { kind: "resolved", id: chargeId, name: this.itemNameCatalog.nameForId(chargeId, "en"), quantity: item.quantity, isDrone: false };
-      }
-      if (droneId) {
-        return { kind: "resolved", id: droneId, name: this.itemNameCatalog.nameForId(droneId, "en"), quantity: item.quantity, isDrone: true };
-      }
-      if (candidates.length > 0) {
-        return { kind: "resolved", id: candidates[0], name: this.itemNameCatalog.nameForId(candidates[0], "en"), quantity: item.quantity, isDrone: preferDrone };
-      }
+      if (droneId !== undefined) return { kind: "resolved", id: droneId, name: this.itemNameCatalog.nameForId(droneId, "en"), quantity: item.quantity, isDrone: true };
+      if (chargeId !== undefined) return { kind: "resolved", id: chargeId, name: this.itemNameCatalog.nameForId(chargeId, "en"), quantity: item.quantity, isDrone: false };
+      if (candidates.length > 0) return { kind: "resolved", id: candidates[0], name: this.itemNameCatalog.nameForId(candidates[0], "en"), quantity: item.quantity, isDrone: preferDrone };
       return { kind: "unrecognized", name: item.name, quantity: item.quantity, isDrone: preferDrone };
     };
 
     const resolvedDrones: ResolvedQuantity[] = [];
     const resolvedCargo: ResolvedQuantity[] = [];
 
-    for (const item of document.drones) resolvedDrones.push(resolveQuantity(item, true));
+    const dronesBandTrusted = !document.droneBandAmbiguous;
+    for (const item of document.drones) resolvedDrones.push(resolveQuantity(item, dronesBandTrusted));
     for (const item of document.cargo) resolvedCargo.push(resolveQuantity(item, false));
 
     const drones: ResolvedQuantity[] = [];

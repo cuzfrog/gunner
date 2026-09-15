@@ -28,6 +28,9 @@ export interface EftDocument {
   readonly banks: readonly EftBank[];
   readonly drones: readonly QuantityItem[];
   readonly cargo: readonly QuantityItem[];
+  /** True when the document carries a single quantity-only block, which cannot be positionally
+   *  attributed to the drone bay or the cargo hold (an empty section is not serialized). */
+  readonly droneBandAmbiguous: boolean;
 }
 
 const HEADER_PATTERN = /^\[(?<hull>[^,]+),\s*(?<name>.+)\]$/;
@@ -69,19 +72,14 @@ export function parseEft(text: string): EftDocument | undefined {
   const bankLines: Record<BankKind, EftLine[]> = { low: [], mid: [], high: [], rig: [], subsystem: [], service: [] };
   const drones: QuantityItem[] = [];
   const cargo: QuantityItem[] = [];
-  let droneBlockSeen = false;
+  const quantityOnlyBlocks: Block[] = [];
 
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
     if (isQuantityOnlyBlock(block)) {
-      for (const item of block.quantities) {
-        if (!droneBlockSeen) {
-          drones.push(item);
-          droneBlockSeen = true;
-        } else {
-          cargo.push(item);
-        }
-      }
+      // The drone bay is one contiguous section; a cargo-only fit (empty drone bay) therefore
+      // yields a single quantity block. Classification by item kind happens downstream.
+      quantityOnlyBlocks.push(block);
       continue;
     }
 
@@ -106,7 +104,12 @@ export function parseEft(text: string): EftDocument | undefined {
     if (lines.length > 0) banks.push({ bank: kind, lines });
   }
 
-  return { hullName, fittingName, banks, drones, cargo };
+  const droneBandAmbiguous = quantityOnlyBlocks.length === 1;
+  for (let b = 0; b < quantityOnlyBlocks.length; b++) {
+    (b === 0 ? drones : cargo).push(...quantityOnlyBlocks[b]!.quantities);
+  }
+
+  return { hullName, fittingName, banks, drones, cargo, droneBandAmbiguous };
 }
 
 export function moduleLines(document: EftDocument): readonly EftModule[] {

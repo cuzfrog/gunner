@@ -591,9 +591,6 @@ export class FittingCalculatorImpl implements FittingCalculator {
 
   resolveCargoCharges(fitting: FittingState): readonly { id: TypeId; quantity: number }[] {
     const charges: { id: TypeId; quantity: number }[] = [];
-    for (const item of fitting.drones) {
-      if (this.db.charges[item.id] || this.db.missiles[item.id]) charges.push({ id: item.id, quantity: item.quantity });
-    }
     for (const item of fitting.cargo) {
       if (this.db.charges[item.id] || this.db.missiles[item.id]) charges.push({ id: item.id, quantity: item.quantity });
     }

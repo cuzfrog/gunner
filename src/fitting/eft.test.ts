@@ -215,6 +215,23 @@ Republic Fleet EMP S x500`;
     ]);
   });
 
+  test("parses a multi-line quantity-only block as one drone band", () => {
+    const text = `[Rifter, Cargo Only]
+1MN Afterburner I
+
+Nova Fury Light Missile x1000
+Caldari Navy Scourge Light Missile x679
+Nanite Repair Paste x18`;
+    const parsed = parseEft(text);
+    expect(moduleLines(parsed!)).toEqual([{ name: "1MN Afterburner I", offline: false }]);
+    expect(parsed!.drones).toEqual([
+      { name: "Nova Fury Light Missile", quantity: 1000 },
+      { name: "Caldari Navy Scourge Light Missile", quantity: 679 },
+      { name: "Nanite Repair Paste", quantity: 18 },
+    ]);
+    expect(parsed!.cargo).toEqual([]);
+  });
+
   test("tolerates double blank boundaries between services, drones and cargo", () => {
     const text = `[Rifter, Boundaries]
 200mm AutoCannon I

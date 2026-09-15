@@ -1768,6 +1768,46 @@ Heat Sink II`,
     expect(names).toEqual(["Hail S", "Republic Fleet EMP S"]);
   });
 
+  test("cargo-only fit with a damage missile first line classifies everything as cargo", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const text = `[Rifter, Missile Cargo]
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+
+Nova Fury Light Missile x1000
+Caldari Navy Scourge Light Missile x679
+Nanite Repair Paste x18`;
+    const result = importer.importFitting(text, conditions);
+    expect(result).toBeDefined();
+    expect(result!.drones).toEqual([]);
+    const names = result!.cargoCharges.map((charge) => importer.itemNameForId(charge.id, "en"));
+    expect(names).toEqual(["Nova Fury Light Missile", "Caldari Navy Scourge Light Missile"]);
+    const summary = importer.summarize(text);
+    expect(summary?.sections.find((section) => section.kind === "drones")).toBeUndefined();
+    const cargoRows = summary?.sections.find((section) => section.kind === "cargo")?.rows ?? [];
+    expect(cargoRows.map((row) => row.name)).toEqual(["Nova Fury Light Missile", "Caldari Navy Scourge Light Missile", "Nanite Repair Paste"]);
+  });
+
+  test("multi-line drone band keeps every drone and cargo after it", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const text = `[Rifter, Drone Brawler]
+200mm AutoCannon I, Hail S
+
+Acolyte II x1
+Caldari Navy Hornet x4
+Hobgoblin II x1
+Warrior II x2
+
+Navy Cap Booster 800 x4`;
+    const result = importer.importFitting(text, conditions);
+    expect(result!.drones.map((d) => `${d.name} x${d.count}`).sort()).toEqual(["Acolyte II x1", "Caldari Navy Hornet x4", "Hobgoblin II x1", "Warrior II x2"].sort());
+    const names = result!.cargoCharges.map((charge) => importer.itemNameForId(charge.id, "en"));
+    expect(names).toEqual(["Navy Cap Booster 800"]);
+  });
+
   test("classifies cargo before drones by item kind", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
@@ -2435,7 +2475,7 @@ describe("FittingImportImpl identity resolution", () => {
 
 function eftDocument(hullName: string, names: readonly string[] = []): EftDocument {
   const lines = names.map((name) => ({ kind: "module" as const, name, offline: false }));
-  return { hullName, fittingName: "Test", banks: [{ bank: "low" as const, lines }], drones: [], cargo: [] };
+  return { hullName, fittingName: "Test", banks: [{ bank: "low" as const, lines }], drones: [], cargo: [], droneBandAmbiguous: false };
 }
 
 describe("_detectionOrder", () => {
