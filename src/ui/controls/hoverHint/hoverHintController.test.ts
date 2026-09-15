@@ -37,6 +37,14 @@ function dispatch(document: Document, type: string, target: unknown, relatedTarg
   document.dispatchEvent({ type, target, relatedTarget } as unknown as Event);
 }
 
+function renderingProvider(): HintContentProvider {
+  return {
+    render: vi.fn((_anchor: HTMLElement, container: HTMLElement) => {
+      container.appendChild(globalThis.document.createElement("span"));
+    }),
+  };
+}
+
 describe("HoverHintControllerImpl", () => {
   let originalDocument: Document | undefined;
   let originalElement: typeof Element | undefined;
@@ -292,7 +300,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
-    const provider: HintContentProvider = { render: vi.fn() };
+    const provider = renderingProvider();
     const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
@@ -304,13 +312,31 @@ describe("HoverHintControllerImpl", () => {
     expect(anchor.getAttribute("aria-describedby")).toBe("hover-hint");
   });
 
+  test("keeps hint hidden when provider renders no content", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint-content", "dps");
+    anchor.setAttribute("data-value", "42");
+    const provider: HintContentProvider = { render: vi.fn() };
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
+    controller.registerContentProvider("dps", provider);
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.hidden).toBe(true);
+    expect(anchor.getAttribute("aria-describedby")).toBe(null);
+  });
+
   test("delegates content rendering to registered provider on focus", () => {
     const document = globalThis.document;
     const timer = new ControllableTimer();
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
-    const provider: HintContentProvider = { render: vi.fn() };
+    const provider = renderingProvider();
     const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
@@ -392,7 +418,7 @@ describe("HoverHintControllerImpl", () => {
     anchor.setAttribute("data-hint-content", "dps");
     const child = document.createElement("svg");
     anchor.appendChild(child);
-    const provider: HintContentProvider = { render: vi.fn() };
+    const provider = renderingProvider();
     const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
@@ -423,7 +449,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
-    const provider: HintContentProvider = { render: vi.fn() };
+    const provider = renderingProvider();
     const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
@@ -499,7 +525,7 @@ describe("HoverHintControllerImpl", () => {
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
     anchor.setAttribute("aria-describedby", "existing-description");
-    const provider: HintContentProvider = { render: vi.fn() };
+    const provider = renderingProvider();
     const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 

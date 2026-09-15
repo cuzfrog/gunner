@@ -351,4 +351,19 @@ describe("DroneController", () => {
     catalogButton.trigger("click");
     expect(controller.capture().droneGroups).toEqual([{ typeId: HOBGOBLIN_ID, count: 6 }]);
   });
+
+  test("catalog items carry the drone hint content key for hover hints", () => {
+    const { document } = buildDrone({
+      droneCatalog: {
+        has: vi.fn(() => true),
+        dronesByClass: vi.fn((sizeClass: DroneSizeClass): readonly { id: TypeId; name: string; sizeClass: DroneSizeClass; damage: number; damageByType: Record<string, number>; bandwidth: number; volume: number }[] => sizeClass === "light" ? [{ id: WARRIOR_ID, name: "Warrior I", sizeClass: "light", damage: 10, damageByType: {}, bandwidth: 5, volume: 5 }] : []),
+        usualForClass: vi.fn(() => undefined),
+        idForName: vi.fn(() => undefined),
+      } satisfies DroneCatalog,
+    });
+    const catalogList = getFake(document, "ship-a-drone-catalog-light");
+    const catalogButton = catalogList.children[0]?.firstElementChild as unknown as FakeElement;
+    expect(catalogButton.getAttribute("data-hint-content")).toBe("drone");
+    expect(catalogButton.getAttribute("data-value")).toBe(WARRIOR_ID);
+  });
 });

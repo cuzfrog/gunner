@@ -3,25 +3,25 @@ import type { ShipProfile, Ships } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { HintContentProvider } from "../hoverHint";
 import { formatNumber, formatWithCommas } from "../controlsFormat";
-import type { ShipHintModel, ShipHintRenderer, ShipHintResists, ShipHintResistRow, ShipHintRow, ShipHintSection } from "./shipHintRenderer";
+import type { StatHintModel, StatHintRenderer, StatHintResists, StatHintResistRow, StatHintRow, StatHintSection } from "../statHint";
 
 export type ShipHintProvider = HintContentProvider;
 
 export interface ShipHintProviderDeps {
   readonly ships: Ships;
   readonly i18n: I18n;
-  readonly shipHintRenderer: ShipHintRenderer;
+  readonly statHintRenderer: StatHintRenderer;
 }
 
 export class ShipHintProviderImpl implements ShipHintProvider {
   private readonly ships: Ships;
   private readonly i18n: I18n;
-  private readonly renderer: ShipHintRenderer;
+  private readonly renderer: StatHintRenderer;
 
   constructor(deps: ShipHintProviderDeps) {
     this.ships = deps.ships;
     this.i18n = deps.i18n;
-    this.renderer = deps.shipHintRenderer;
+    this.renderer = deps.statHintRenderer;
   }
 
   render(anchor: HTMLElement, container: HTMLElement): void {
@@ -40,7 +40,7 @@ export class ShipHintProviderImpl implements ShipHintProvider {
     }
   }
 
-  private buildModel(profile: ShipProfile): ShipHintModel {
+  private buildModel(profile: ShipProfile): StatHintModel {
     const view = this.ships.hullView(profile, this.i18n.current());
     const sections = [
       this.fittingSection(profile),
@@ -49,11 +49,11 @@ export class ShipHintProviderImpl implements ShipHintProvider {
       this.droneSection(profile),
       this.capacitorSection(profile),
       this.defenseSection(profile),
-    ].filter((section): section is ShipHintSection => section !== undefined);
+    ].filter((section): section is StatHintSection => section !== undefined);
     return { name: view.name, subtitle: `${view.hullType} · ${view.faction}`, sections, resists: this.resists(profile) };
   }
 
-  private fittingSection(profile: ShipProfile): ShipHintSection {
+  private fittingSection(profile: ShipProfile): StatHintSection {
     return {
       heading: this.t("shipHint.section.fitting"),
       rows: [
@@ -65,7 +65,7 @@ export class ShipHintProviderImpl implements ShipHintProvider {
     };
   }
 
-  private navigationSection(profile: ShipProfile): ShipHintSection {
+  private navigationSection(profile: ShipProfile): StatHintSection {
     return {
       heading: this.t("shipHint.section.navigation"),
       rows: [
@@ -77,7 +77,7 @@ export class ShipHintProviderImpl implements ShipHintProvider {
     };
   }
 
-  private targetingSection(profile: ShipProfile): ShipHintSection {
+  private targetingSection(profile: ShipProfile): StatHintSection {
     return {
       heading: this.t("shipHint.section.targeting"),
       rows: [
@@ -88,7 +88,7 @@ export class ShipHintProviderImpl implements ShipHintProvider {
     };
   }
 
-  private droneSection(profile: ShipProfile): ShipHintSection | undefined {
+  private droneSection(profile: ShipProfile): StatHintSection | undefined {
     if (profile.droneBandwidth === 0 && profile.droneCapacity === 0) return undefined;
     return {
       heading: this.t("shipHint.section.drones"),
@@ -99,7 +99,7 @@ export class ShipHintProviderImpl implements ShipHintProvider {
     };
   }
 
-  private capacitorSection(profile: ShipProfile): ShipHintSection {
+  private capacitorSection(profile: ShipProfile): StatHintSection {
     return {
       heading: this.t("shipHint.section.capacitor"),
       rows: [
@@ -109,7 +109,7 @@ export class ShipHintProviderImpl implements ShipHintProvider {
     };
   }
 
-  private defenseSection(profile: ShipProfile): ShipHintSection {
+  private defenseSection(profile: ShipProfile): StatHintSection {
     return {
       heading: this.t("shipHint.section.defense"),
       rows: [
@@ -120,7 +120,7 @@ export class ShipHintProviderImpl implements ShipHintProvider {
     };
   }
 
-  private resists(profile: ShipProfile): ShipHintResists {
+  private resists(profile: ShipProfile): StatHintResists {
     return {
       heading: this.t("shipHint.section.resists"),
       columns: [
@@ -142,7 +142,7 @@ export class ShipHintProviderImpl implements ShipHintProvider {
   }
 }
 
-function resistRow(layer: string, resists: ShipProfile["shieldResists"]): ShipHintResistRow {
+function resistRow(layer: string, resists: ShipProfile["shieldResists"]): StatHintResistRow {
   return {
     layer,
     values: [resists.em, resists.thermal, resists.kinetic, resists.explosive].map((resist) => percentLabel(resist)),
@@ -156,4 +156,3 @@ function percentLabel(resist: number): string {
 function quantityLabel(value: number, decimals: number): string {
   return Number.isInteger(value) ? formatWithCommas(value) : formatNumber(value, decimals);
 }
-

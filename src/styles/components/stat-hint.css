@@ -1,12 +1,12 @@
 @layer components {
-.ship-hint {
+.stat-hint {
   display: flex;
   flex-direction: column;
   gap: 7px;
   min-width: 200px;
 }
 
-.ship-hint-header {
+.stat-hint-header {
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -14,24 +14,29 @@
   padding-bottom: 5px;
 }
 
-.ship-hint-name {
+.stat-hint-name {
   font-family: "Chakra Petch", sans-serif;
   font-size: 14px;
   color: var(--text-primary);
 }
 
-.ship-hint-subtitle {
+.stat-hint-subtitle {
   font-size: 11px;
   color: var(--text-secondary);
 }
 
-.ship-hint-section {
+.stat-hint-section {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.ship-hint-section-label {
+.stat-hint-section-divided {
+  border-top: 1px solid var(--border-dim);
+  padding-top: 4px;
+}
+
+.stat-hint-section-label {
   font-family: "Chakra Petch", sans-serif;
   font-size: 10px;
   text-transform: uppercase;
@@ -40,24 +45,45 @@
   margin-bottom: 1px;
 }
 
-.ship-hint-row {
+.stat-hint-row {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 8px;
+  gap: 4px;
+  align-items: center;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
-.ship-hint-label {
+.stat-hint-row-icon {
+  grid-template-columns: 18px 1fr auto;
+}
+
+.stat-hint-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.stat-hint-label {
   color: var(--text-secondary);
 }
 
-.ship-hint-value {
+.stat-hint-value {
   text-align: right;
   color: var(--text-primary);
 }
 
-.ship-hint-resists {
+.stat-hint-row-emphasis .stat-hint-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-hint-row-emphasis .stat-hint-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-hint-resists {
   display: grid;
   grid-template-columns: auto repeat(4, 1fr);
   gap: 2px 8px;
@@ -65,16 +91,16 @@
   font-variant-numeric: tabular-nums;
 }
 
-.ship-hint-resists-col {
+.stat-hint-resists-col {
   text-align: right;
   color: var(--text-dim);
 }
 
-.ship-hint-resists-layer {
+.stat-hint-resists-layer {
   color: var(--text-secondary);
 }
 
-.ship-hint-resists-value {
+.stat-hint-resists-value {
   text-align: right;
   color: var(--text-primary);
 }

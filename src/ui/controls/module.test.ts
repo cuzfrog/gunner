@@ -87,7 +87,7 @@ const controlsCradleKeys = {
   hoverHintController: "hoverHintController",
   dpsHintRenderer: "dpsHintRenderer",
   dpsHintProvider: "dpsHintProvider",
-  ammoHintRenderer: "ammoHintRenderer",
+  statHintRenderer: "statHintRenderer",
   ammoHintProvider: "ammoHintProvider",
   shipADroneController: "shipADroneController",
   shipBDroneController: "shipBDroneController",
@@ -101,8 +101,8 @@ const controlsCradleKeys = {
   appliedDpsHintProvider: "appliedDpsHintProvider",
   inflictedDpsHintRenderer: "inflictedDpsHintRenderer",
   inflictedDpsHintProvider: "inflictedDpsHintProvider",
-  shipHintRenderer: "shipHintRenderer",
   shipHintProvider: "shipHintProvider",
+  droneHintProvider: "droneHintProvider",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 
 describe("registerControlsModule", () => {

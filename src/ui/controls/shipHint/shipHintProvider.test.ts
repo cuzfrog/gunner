@@ -2,7 +2,7 @@ import type { ShipProfile, Ships } from "../../../ships";
 import type { Language } from "../../i18n";
 import { mockShips } from "../../testing";
 import { ShipHintProviderImpl } from "./shipHintProvider";
-import type { ShipHintModel, ShipHintRenderer } from "./shipHintRenderer";
+import type { StatHintModel, StatHintRenderer, StatHintRow } from "../statHint";
 import type { FactionId, HullTypeId, ShipId } from "../../../gamedata/ids";
 
 const PROFILE: ShipProfile = {
@@ -54,22 +54,22 @@ function makeShips(profile: ShipProfile | undefined): Ships {
   };
 }
 
-function makeRenderer(): { renderer: ShipHintRenderer; models: ShipHintModel[] } {
-  const models: ShipHintModel[] = [];
-  const renderer: ShipHintRenderer = {
-    render: (model: ShipHintModel, _container: HTMLElement) => { models.push(model); },
+function makeRenderer(): { renderer: StatHintRenderer; models: StatHintModel[] } {
+  const models: StatHintModel[] = [];
+  const renderer: StatHintRenderer = {
+    render: (model: StatHintModel, _container: HTMLElement) => { models.push(model); },
   };
   return { renderer, models };
 }
 
-function makeProvider(ships: Ships): { provider: ShipHintProviderImpl; models: ShipHintModel[] } {
+function makeProvider(ships: Ships): { provider: ShipHintProviderImpl; models: StatHintModel[] } {
   const { renderer, models } = makeRenderer();
   const i18n = { current: vi.fn((): Language => "en"), setLanguage: vi.fn(), t: vi.fn((key: string) => key), translateDocument: vi.fn() };
-  const provider = new ShipHintProviderImpl({ ships, i18n, shipHintRenderer: renderer });
+  const provider = new ShipHintProviderImpl({ ships, i18n, statHintRenderer: renderer });
   return { provider, models };
 }
 
-function rowsOf(model: ShipHintModel, heading: string): { readonly label: string; readonly value: string }[] {
+function rowsOf(model: StatHintModel, heading: string): readonly StatHintRow[] {
   const section = model.sections.find((s) => s.heading === heading);
   return section ? [...section.rows] : [];
 }

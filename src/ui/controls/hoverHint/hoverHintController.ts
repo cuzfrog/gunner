@@ -59,6 +59,10 @@ export class HoverHintControllerImpl implements HoverHintController {
     this.hintEl.textContent = "";
     try {
       this.currentProvider.render(this.currentAnchor, this.hintEl);
+      if (this.hintEl.childElementCount === 0 && this.hintEl.textContent === "") {
+        this.hide();
+        return;
+      }
       if (!this.anchored) this.placeByRect(this.currentAnchor);
     } catch {
       this.hide();
@@ -138,6 +142,10 @@ export class HoverHintControllerImpl implements HoverHintController {
       this.hintEl.textContent = "";
       try {
         provider.render(anchor, this.hintEl);
+        if (this.hintEl.childElementCount === 0 && this.hintEl.textContent === "") {
+          this.releaseAnchor();
+          return;
+        }
         this.hintEl.hidden = false;
         if (!this.anchored) this.placeByRect(anchor);
       } catch (err) {
