@@ -1,5 +1,6 @@
 [Keres, Kitetackle AC Armor Keres]
 
+
 Damage Control II
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Federation Navy 200mm Steel Plates
@@ -14,7 +15,8 @@ Remote Sensor Dampener II, Targeting Range Dampening Script
 125mm Gatling AutoCannon II, Barrage S
 
 Small Particle Dispersion Projector II
-[Empty Rig slot]
+Medium Projectile Collision Accelerator I
+
 
 
 Hobgoblin II x1

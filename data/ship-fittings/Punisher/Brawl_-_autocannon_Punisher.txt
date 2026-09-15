@@ -1,5 +1,6 @@
 [Punisher, Tackle AC Armor Punisher]
 
+
 Damage Control II
 Gyrostabilizer II
 Multispectrum Coating II
@@ -12,11 +13,12 @@ Warp Scrambler II
 200mm AutoCannon II, Hail S
 200mm AutoCannon II, Hail S
 200mm AutoCannon II, Hail S
-[Empty high slot]
+200mm AutoCannon II, Hail S
 
 Small Projectile Burst Aerator II
 Small Trimark Armor Pump II
 Small Trimark Armor Pump II
+
 
 
 Hail S x6000

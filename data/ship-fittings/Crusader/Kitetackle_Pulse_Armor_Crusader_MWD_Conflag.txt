@@ -1,9 +1,10 @@
 [Crusader, Kitetackle Pulse Armor Crusader (MWD Conflag)]
 
+
 Heat Sink II
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Damage Control II
-[Empty Low slot]
+Energized Adaptive Nano Membrane II
 
 Warp Scrambler II
 5MN Quad LiF Restrained Microwarpdrive
@@ -14,7 +15,8 @@ Small Focused Pulse Laser II, Conflagration S
 Small Focused Pulse Laser II, Conflagration S
 
 Small Ancillary Current Router I
-[Empty Rig slot]
+Small Energy Collision Accelerator I
+
 
 
 Imperial Navy Multifrequency S x4

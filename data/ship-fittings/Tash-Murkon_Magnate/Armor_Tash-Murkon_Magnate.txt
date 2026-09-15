@@ -1,5 +1,6 @@
 [Tash-Murkon Magnate, Armor Tash-Murkon Magnate]
 
+
 Reinforced Bulkheads I
 Small Armor Repairer II
 Inertial Stabilizers I
@@ -7,15 +8,16 @@ Nanofiber Internal Structure I
 
 Small Shield Extender I
 5MN Microwarpdrive I
-[Empty Med slot]
+Cap Recharger II
 
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Small Energy Nosferatu II
+Small Energy Nosferatu II
 
 Small Processor Overclocking Unit I
 Small Processor Overclocking Unit I
-[Empty Rig slot]
+Small Trimark Armor Pump I
+
 
 
 Hobgoblin I x3

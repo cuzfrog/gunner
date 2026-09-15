@@ -1,12 +1,13 @@
 [Bhaalgorn, Kitetackle Pulse Armor Bhaalgorn]
 
+
 Large Ancillary Armor Repairer, Nanite Repair Paste
 1600mm Steel Plates II
 Dark Blood Large Armor Repairer
 Damage Control II
 Reactive Armor Hardener
 Multispectrum Energized Membrane II
-[Empty Low slot]
+Energized Adaptive Nano Membrane II
 
 Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 800
 500MN Y-T8 Compact Microwarpdrive
@@ -25,6 +26,7 @@ Dark Blood Heavy Energy Neutralizer
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
+
 
 
 Warrior II x5

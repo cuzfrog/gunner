@@ -1,5 +1,6 @@
 [Scythe Fleet Issue, RLML XLASB Scythe Fleet Issue]
 
+
 Ballistic Control System II
 Ballistic Control System II
 Nanofiber Internal Structure II
@@ -16,11 +17,12 @@ Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
-[Empty High slot]
+Drone Link Augmentor II
 
 Medium Hydraulic Bay Thrusters II
 Medium EM Shield Reinforcer II
 Medium Thermal Shield Reinforcer II
+
 
 
 Warrior II x5

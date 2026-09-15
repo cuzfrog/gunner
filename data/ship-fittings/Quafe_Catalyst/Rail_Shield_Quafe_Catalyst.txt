@@ -1,11 +1,12 @@
 [Quafe Catalyst, Rail Shield Quafe Catalyst]
 
-[Empty Low slot]
-[Empty Low slot]
-[Empty Low slot]
+
+Damage Control II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
 
 1MN Y-S8 Compact Afterburner
-[Empty Med slot]
+Cap Recharger II
 
 150mm Railgun I, Antimatter Charge S
 150mm Railgun I, Antimatter Charge S
@@ -14,8 +15,8 @@
 150mm Railgun I, Antimatter Charge S
 150mm Railgun I, Antimatter Charge S
 150mm Railgun I, Antimatter Charge S
-[Empty High slot]
+150mm Railgun I, Antimatter Charge S
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Small Hybrid Collision Accelerator I
+Small Trimark Armor Pump I
+Small Hyperspatial Velocity Optimizer I

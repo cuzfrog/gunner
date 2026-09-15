@@ -1,5 +1,6 @@
 [Nefantar Thrasher, Kitetackle Shield Nefantar Thrasher]
 
+
 Republic Fleet Gyrostabilizer
 IFFA Compact Damage Control
 
@@ -14,11 +15,12 @@ Republic Fleet 200mm Autocannon, Republic Fleet Phased Plasma S
 Domination 200mm Autocannon, Republic Fleet Phased Plasma S
 Domination 200mm Autocannon, Republic Fleet Phased Plasma S
 200mm Light 'Scout' Autocannon I, Republic Fleet Phased Plasma S
-[Empty High slot]
+Small Energy Nosferatu II
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Small Core Defense Field Extender I
+Small Hyperspatial Velocity Optimizer I
+Small Hyperspatial Velocity Optimizer I
+
 
 
 Republic Fleet Phased Plasma S x768

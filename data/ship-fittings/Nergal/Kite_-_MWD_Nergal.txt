@@ -1,4 +1,5 @@
 [Nergal, Kitetackle Armor Nergal]
+
 Assault Damage Control II
 Entropic Radiation Sink II
 Multispectrum Coating II
@@ -9,10 +10,11 @@ Small Capacitor Booster II, Navy Cap Booster 400
 Warp Disruptor II
 
 Light Entropic Disintegrator II
-[Empty high slot]
+Drone Link Augmentor II
 
 Small Polycarbon Engine Housing II
 Small Polycarbon Engine Housing II
+
 
 
 Hobgoblin II x5

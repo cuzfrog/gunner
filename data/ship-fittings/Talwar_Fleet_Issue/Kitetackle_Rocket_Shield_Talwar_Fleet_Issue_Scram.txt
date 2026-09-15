@@ -1,5 +1,6 @@
 [Talwar Fleet Issue, Kitetackle Rocket Shield Talwar Fleet Issue (Scram)]
 
+
 Ballistic Control System II
 Co-Processor II
 Ballistic Control System II
@@ -14,11 +15,12 @@ Rocket Launcher II, Nova Rage Rocket
 Rocket Launcher II, Nova Rage Rocket
 Rocket Launcher II, Nova Rage Rocket
 Rocket Launcher II, Nova Rage Rocket
-[Empty High slot]
+Small Energy Nosferatu II
 
 Small Thermal Shield Reinforcer I
 Small EM Shield Reinforcer I
-[Empty Rig slot]
+Small Core Defense Field Extender I
+
 
 
 Nova Rage Rocket x1750

@@ -1,7 +1,8 @@
 [Tholos, Tackle Rocket Shield Tholos]
 
+
 Nanofiber Internal Structure II
-[Empty Low slot]
+Damage Control II
 
 Medium Ancillary Shield Booster, Navy Cap Booster 50
 Multispectrum Shield Hardener II
@@ -15,11 +16,12 @@ Covert Ops Cloaking Device II
 200mm AutoCannon II, Hail S
 200mm AutoCannon II, Hail S
 Rocket Launcher II, Inferno Rage Rocket
-[Empty High slot]
+Drone Link Augmentor II
 
 Small EM Shield Reinforcer I
 Small Ancillary Current Router II
 Small Core Defense Operational Solidifier II
+
 
 
 Hobgoblin II x5

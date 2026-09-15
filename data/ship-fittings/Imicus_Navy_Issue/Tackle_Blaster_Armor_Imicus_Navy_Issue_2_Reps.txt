@@ -1,4 +1,5 @@
 [Imicus Navy Issue, Tackle Blaster Armor Imicus Navy Issue (2 Reps)]
+
 Damage Control II
 Magnetic Field Stabilizer II
 Small Armor Repairer II
@@ -11,11 +12,12 @@ Small Capacitor Booster II, Navy Cap Booster 400
 
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
-[Empty high slot]
+Drone Link Augmentor II
 
-[Empty rig slot]
-[Empty rig slot]
-[Empty rig slot]
+Small Hybrid Collision Accelerator I
+Small Trimark Armor Pump I
+Small Hyperspatial Velocity Optimizer I
+
 
 
 Hobgoblin II x3

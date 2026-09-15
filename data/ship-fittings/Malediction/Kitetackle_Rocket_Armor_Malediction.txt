@@ -1,9 +1,10 @@
 [Malediction, Kitetackle Rocket Armor Malediction]
 
+
 Small Ancillary Armor Repairer, Nanite Repair Paste
 100mm Steel Plates II
 Nanofiber Internal Structure II
-[Empty Low slot]
+Damage Control II
 
 5MN Cold-Gas Enduring Microwarpdrive
 Warp Scrambler II
@@ -15,6 +16,7 @@ Compact Interdiction Nullifier
 
 Small Polycarbon Engine Housing II
 Small Auxiliary Thrusters II
+
 
 
 Nova Rage Rocket x500

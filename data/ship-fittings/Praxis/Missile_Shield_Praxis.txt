@@ -1,5 +1,6 @@
 [Praxis, Missile Shield Praxis]
 
+
 Damage Control II
 Shield Power Relay II
 Shield Power Relay II
@@ -22,11 +23,12 @@ Cruise Missile Launcher II, Inferno Fury Cruise Missile
 Cruise Missile Launcher II, Inferno Fury Cruise Missile
 Cruise Missile Launcher II, Inferno Fury Cruise Missile
 Cruise Missile Launcher II, Inferno Fury Cruise Missile
-[Empty High slot]
+Drone Link Augmentor II
 
 Large Core Defense Field Purger II
 Large Core Defense Field Purger II
 Large Core Defense Field Purger II
+
 
 
 Praetor II x4

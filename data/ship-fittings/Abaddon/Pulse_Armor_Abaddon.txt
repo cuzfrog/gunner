@@ -1,5 +1,6 @@
 [Abaddon, Pulse Armor Abaddon]
 
+
 Multispectrum Energized Membrane II
 Heat Sink II
 Multispectrum Energized Membrane II
@@ -11,7 +12,7 @@ Heat Sink II
 Optical Compact Tracking Computer, Tracking Speed Script
 Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 800
 100MN Y-S8 Compact Afterburner
-[Empty Med slot]
+Cap Recharger II
 
 Mega Pulse Laser II, Imperial Navy Multifrequency L
 Mega Pulse Laser II, Imperial Navy Multifrequency L
@@ -25,6 +26,7 @@ Mega Pulse Laser II, Imperial Navy Multifrequency L
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
+
 
 
 Wasp II x3

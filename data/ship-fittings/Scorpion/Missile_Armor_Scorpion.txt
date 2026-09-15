@@ -1,5 +1,6 @@
 [Scorpion, Missile Armor Scorpion]
 
+
 Ballistic Control System II
 Multispectrum Energized Membrane II
 Damage Control II
@@ -8,22 +9,23 @@ Damage Control II
 
 Sensor Booster II, Scan Resolution Script
 Large Cap Battery II
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Cap Recharger II
+Tracking Computer II
+Sensor Booster II
+Sensor Booster II
+Sensor Booster II
+Sensor Booster II
 
 Cruise Missile Launcher II, Caldari Navy Scourge Cruise Missile
 Cruise Missile Launcher II, Caldari Navy Scourge Cruise Missile
 Cruise Missile Launcher II, Caldari Navy Scourge Cruise Missile
 Cruise Missile Launcher II, Caldari Navy Scourge Cruise Missile
-[Empty High slot]
+Drone Link Augmentor II
 
 Large Kinetic Armor Reinforcer I
 Large Explosive Armor Reinforcer I
-[Empty Rig slot]
+Large Trimark Armor Pump I
+
 
 
 Vespa EC-600 x5

@@ -1,20 +1,22 @@
 [Vigil, Ewar Shield Vigil]
 
+
 Type-D Restrained Nanofiber Structure
-[Empty Low slot]
+Damage Control II
 
 Medium Shield Extender II
 5MN Cold-Gas Enduring Microwarpdrive
 Sensor Booster II, Scan Resolution Script
-[Empty Med slot]
-[Empty Med slot]
+Medium Shield Extender II
+Medium Shield Extender II
 
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Small Energy Nosferatu II
 
 Small Hyperspatial Velocity Optimizer II
 Small EM Shield Reinforcer I
-[Empty Rig slot]
+Small Core Defense Field Extender I
+
 
 
 Warrior II x1

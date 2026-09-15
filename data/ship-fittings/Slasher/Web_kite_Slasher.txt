@@ -1,4 +1,5 @@
 [Slasher, Tackle Art Armor Slasher]
+
 Damage Control II
 Small Ancillary Armor Repairer, Nanite Repair Paste
 
@@ -10,11 +11,12 @@ Tracking Disruptor II
 280mm Howitzer Artillery II, Tremor S
 280mm Howitzer Artillery II, Tremor S
 280mm Howitzer Artillery II, Tremor S
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Ancillary Current Router II
 Small Polycarbon Engine Housing II
 Small Auxiliary Thrusters II
+
 
 
 Nanite Repair Paste x32

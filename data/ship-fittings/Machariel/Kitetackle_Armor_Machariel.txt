@@ -1,5 +1,6 @@
 [Machariel, Kitetackle Armor Machariel]
 
+
 Damage Control II
 Federation Navy 1600mm Steel Plates
 Gyrostabilizer II
@@ -12,7 +13,7 @@ Sensor Booster II, Scan Resolution Script
 Warp Disruptor II
 Balmer Series Compact Tracking Disruptor I, Optimal Range Disruption Script
 Tracking Computer II, Tracking Speed Script
-[Empty Med slot]
+Cap Recharger II
 
 800mm Repeating Cannon I, Republic Fleet EMP L
 800mm Repeating Cannon I, Republic Fleet EMP L
@@ -26,6 +27,7 @@ Heavy Energy Neutralizer II
 Large Ancillary Current Router I
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
+
 
 
 Berserker II x4

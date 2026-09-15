@@ -1,8 +1,9 @@
 [Crucifier, Tackle Pulse Armor Crucifier]
 
+
 Coreli A-Type Small Armor Repairer
 Multispectrum Energized Membrane II
-[Empty Low slot]
+Damage Control II
 
 Tracking Disruptor II
 Tracking Disruptor II
@@ -15,6 +16,7 @@ Dual Afocal Pulse Laser I
 Small Trimark Armor Pump II
 Small Trimark Armor Pump II
 Small Trimark Armor Pump II
+
 
 
 Hornet EC-300 x1

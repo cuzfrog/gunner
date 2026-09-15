@@ -1,4 +1,5 @@
 [Dramiel, Tackle Art Armor Dramiel]
+
 Damage Control II
 Gyrostabilizer II
 Small Ancillary Armor Repairer, Nanite Repair Paste
@@ -10,11 +11,12 @@ Stasis Webifier II
 
 280mm Howitzer Artillery II, EMP S
 280mm Howitzer Artillery II, EMP S
-[Empty high slot]
+Drone Link Augmentor II
 
 Small Projectile Collision Accelerator II
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I
+
 
 
 Warrior II x3

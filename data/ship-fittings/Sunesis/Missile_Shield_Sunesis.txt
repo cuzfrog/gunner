@@ -1,5 +1,6 @@
 [Sunesis, Missile Shield Sunesis]
 
+
 Drone Damage Amplifier II
 Drone Damage Amplifier II
 Overdrive Injector System II
@@ -13,11 +14,12 @@ Compact Multispectrum Shield Hardener
 Arbalest Compact Light Missile Launcher, Scourge Light Missile
 Arbalest Compact Light Missile Launcher, Scourge Light Missile
 Arbalest Compact Light Missile Launcher, Scourge Light Missile
-[Empty High slot]
+Drone Link Augmentor II
 
 Small Core Defense Field Extender I
 Small Core Defense Field Extender I
 Small Core Defense Field Extender I
+
 
 
 Hobgoblin I x4

@@ -1,5 +1,6 @@
 [Raiju, Kitetackle Missile Shield Raiju (Abyssal)]
 
+
 Abyssal Ballistic Control System
 Domination Nanofiber Structure
 Abyssal Ballistic Control System
@@ -17,7 +18,8 @@ Caldari Navy Light Missile Launcher, Caldari Navy Mjolnir Light Missile
 
 Small Ancillary Current Router II
 Small EM Shield Reinforcer II
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+
 
 
 Caldari Navy Mjolnir Light Missile x358

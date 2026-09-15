@@ -1,5 +1,6 @@
 [Osprey, Shield Osprey]
 
+
 Mark I Compact Reactor Control Unit
 Mark I Compact Power Diagnostic System
 Damage Control II
@@ -13,12 +14,13 @@ Multispectrum Shield Hardener II
 Medium Murky Compact Remote Shield Booster
 Medium Murky Compact Remote Shield Booster
 Medium Murky Compact Remote Shield Booster
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Medium Energy Nosferatu II
 
 Medium Thermal Shield Reinforcer I
 Medium Core Defense Field Extender I
 Medium Core Defense Field Extender I
+
 
 
 Warrior I x4

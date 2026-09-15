@@ -1,4 +1,5 @@
 [Daredevil, Tackle Rail Armor Daredevil]
+
 Damage Control II
 Magnetic Field Stabilizer II
 Overdrive Injector System II
@@ -10,11 +11,12 @@ Stasis Webifier II
 
 150mm Railgun II, Javelin S
 150mm Railgun II, Javelin S
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I
+
 
 
 Nanite Repair Paste x32

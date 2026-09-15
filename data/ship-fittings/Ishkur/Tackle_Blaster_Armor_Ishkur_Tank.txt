@@ -1,4 +1,5 @@
 [Ishkur, Tackle Blaster Armor Ishkur (Tank)]
+
 Assault Damage Control II
 Centii A-Type Small Armor Repairer
 Centii A-Type Small Armor Repairer
@@ -11,10 +12,11 @@ Stasis Webifier II
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
-[Empty high slot]
+Drone Link Augmentor II
 
 Small Explosive Armor Reinforcer I
 Small Auxiliary Nano Pump II
+
 
 
 Hobgoblin II x5

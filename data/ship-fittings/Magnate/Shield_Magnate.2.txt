@@ -1,21 +1,23 @@
 [Magnate, Shield Magnate]
 
+
 Type-D Restrained Inertial Stabilizers
 Damage Control II
 Type-D Restrained Nanofiber Structure
-[Empty Low slot]
+Overdrive Injector System II
 
 5MN Microwarpdrive II
 Small Azeotropic Restrained Shield Extender
 Small Azeotropic Restrained Shield Extender
 
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Small Energy Nosferatu II
+Small Energy Nosferatu II
 
 Small Hyperspatial Velocity Optimizer I
 Small Auxiliary Thrusters I
 Small Auxiliary Thrusters I
+
 
 
 Acolyte II x3

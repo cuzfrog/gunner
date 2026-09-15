@@ -1,29 +1,31 @@
 [Phoenix Navy Issue, Torp Shield Phoenix Navy Issue]
 
+
 ML-EKP 'Polybolos' Ballistic Control System
 Domination Ballistic Control System
 Domination Ballistic Control System
 Damage Control II
-[Empty Low slot]
+Overdrive Injector System II
 
 Multispectrum Shield Hardener II
 Capital Clarity Ward Enduring Shield Booster
 Multispectrum Shield Hardener II
 Multispectrum Shield Hardener II
 Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Capital Shield Extender II
+Capital Shield Extender II
+Capital Shield Extender II
 
 XL Torpedo Launcher II, Scourge Rage XL Torpedo
 XL Torpedo Launcher II, Scourge Rage XL Torpedo
 Federation Navy Large Plasma Smartbomb
 XL Torpedo Launcher II, Scourge Rage XL Torpedo
-[Empty High slot]
+Heavy Energy Nosferatu II
 
 Capital Core Defense Field Extender I
 Capital Core Defense Field Extender I
 Capital EM Shield Reinforcer I
+
 
 
 Scourge Rage XL Torpedo x2000

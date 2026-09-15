@@ -1,24 +1,26 @@
 [Aliastra Catalyst, Ewar Rail Shield Aliastra Catalyst]
 
+
 Co-Processor II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 
 5MN Y-T8 Compact Microwarpdrive
-[Empty Med slot]
+Cap Recharger II
 
 150mm Railgun II, Javelin S
 150mm Railgun II, Javelin S
 150mm Railgun II, Javelin S
 150mm Railgun II, Javelin S
 150mm Railgun II, Javelin S
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+150mm Railgun II, Javelin S
+150mm Railgun II, Javelin S
+150mm Railgun II, Javelin S
 
 Small Ancillary Current Router II
 Small Processor Overclocking Unit I
-[Empty Rig slot]
+Small Hybrid Collision Accelerator I
+
 
 
 Javelin S x1120

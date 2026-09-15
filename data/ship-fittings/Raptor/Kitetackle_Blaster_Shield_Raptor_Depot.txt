@@ -1,8 +1,9 @@
 [Raptor, Kitetackle Blaster Shield Raptor (Depot)]
 
+
 Nanofiber Internal Structure II
 Magnetic Field Stabilizer II
-[Empty Low slot]
+Damage Control II
 
 Republic Fleet Medium Shield Extender
 5MN Y-T8 Compact Microwarpdrive
@@ -15,6 +16,7 @@ Light Neutron Blaster II, Void S
 
 Small Low Friction Nozzle Joints II
 Small EM Shield Reinforcer II
+
 
 
 Mobile Depot x1

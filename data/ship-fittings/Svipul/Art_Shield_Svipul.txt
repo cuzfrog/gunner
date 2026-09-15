@@ -1,5 +1,6 @@
 [Svipul, Art Shield Svipul]
 
+
 Gyrostabilizer II
 Gyrostabilizer II
 Gyrostabilizer II
@@ -14,12 +15,13 @@ Sensor Booster II, Scan Resolution Script
 280mm Howitzer Artillery II, Quake S
 280mm Howitzer Artillery II, Quake S
 280mm Howitzer Artillery II, Quake S
-[Empty High slot]
-[Empty High slot]
+Small Energy Nosferatu II
+Small Energy Nosferatu II
 
 Small Projectile Metastasis Adjuster I
-[Empty Rig slot]
-[Empty Rig slot]
+Small Projectile Collision Accelerator I
+Small Trimark Armor Pump I
+
 
 
 Tremor S x1736

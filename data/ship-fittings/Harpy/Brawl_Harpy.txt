@@ -1,4 +1,5 @@
 [Harpy, Kitetackle Blaster Shield Harpy]
+
 Assault Damage Control II
 Magnetic Field Stabilizer II
 Micro Auxiliary Power Core I
@@ -12,10 +13,11 @@ Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small EM Shield Reinforcer I
 Small Core Defense Field Extender II
+
 
 
 Void S x8000

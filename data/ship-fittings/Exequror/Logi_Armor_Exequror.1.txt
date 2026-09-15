@@ -1,11 +1,12 @@
 [Exequror, Logi Armor Exequror]
 
+
 Damage Control II
 Multispectrum Energized Membrane II
 Multispectrum Energized Membrane II
 1600mm Rolled Tungsten Compact Plates
-[Empty Low slot]
-[Empty Low slot]
+Energized Adaptive Nano Membrane II
+Overdrive Injector System II
 
 Sensor Booster II
 10MN Y-S8 Compact Afterburner
@@ -18,7 +19,8 @@ Medium Remote Armor Repairer II
 
 Medium Ancillary Current Router I
 Medium Ancillary Current Router I
-[Empty Rig slot]
+Medium Trimark Armor Pump I
+
 
 
 Medium Armor Maintenance Bot I x4

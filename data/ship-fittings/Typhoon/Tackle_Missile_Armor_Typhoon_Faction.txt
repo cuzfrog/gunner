@@ -1,5 +1,6 @@
 [Typhoon, Tackle Missile Armor Typhoon (Faction)]
 
+
 Damage Control II
 Ballistic Control System II
 Ballistic Control System II
@@ -12,7 +13,7 @@ Heavy Karelin Scoped Stasis Grappler
 DDO Scoped Tracking Disruptor I, Optimal Range Disruption Script
 Faint Scoped Warp Disruptor
 100MN Monopropellant Enduring Afterburner
-[Empty Med slot]
+Cap Recharger II
 
 'Arbalest' Rapid Heavy Missile Launcher I, Caldari Navy Mjolnir Heavy Missile
 'Arbalest' Rapid Heavy Missile Launcher I, Caldari Navy Mjolnir Heavy Missile
@@ -25,6 +26,7 @@ Heavy Gremlin Compact Energy Neutralizer
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
+
 
 
 Berserker II x4

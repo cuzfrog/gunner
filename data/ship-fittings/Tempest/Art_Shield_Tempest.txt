@@ -1,5 +1,6 @@
 [Tempest, Art Shield Tempest]
 
+
 Gyrostabilizer II
 Gyrostabilizer II
 Gyrostabilizer II
@@ -19,12 +20,13 @@ Large Shield Extender II
 1400mm Howitzer Artillery II, Domination EMP L
 1400mm Howitzer Artillery II, Domination EMP L
 1400mm Howitzer Artillery II, Domination EMP L
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Heavy Energy Nosferatu II
 
 Large Anti-EM Screen Reinforcer II
 Large Core Defense Field Extender II
 Large Core Defense Field Extender II
+
 
 
 Berserker II x3

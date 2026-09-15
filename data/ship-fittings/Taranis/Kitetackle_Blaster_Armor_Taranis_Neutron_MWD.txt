@@ -1,5 +1,6 @@
 [Taranis, Kitetackle Blaster Armor Taranis (Neutron MWD)]
 
+
 Damage Control II
 Magnetic Field Stabilizer II
 Small Ancillary Armor Repairer
@@ -11,10 +12,11 @@ Fleeting Compact Stasis Webifier
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II
 Light Neutron Blaster II, Void S
-[Empty High slot]
+Drone Link Augmentor II
 
 Small Ancillary Current Router II
-[Empty Rig slot]
+Small Hybrid Collision Accelerator I
+
 
 
 Warrior II x2

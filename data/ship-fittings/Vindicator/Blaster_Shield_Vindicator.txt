@@ -1,5 +1,6 @@
 [Vindicator, Blaster Shield Vindicator]
 
+
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
@@ -12,7 +13,7 @@ Tracking Enhancer II
 Warp Scrambler II
 Stasis Webifier II
 X-Large Ancillary Shield Booster, Navy Cap Booster 800
-[Empty Med slot]
+Large Shield Extender II
 
 Neutron Blaster Cannon II, Void L
 Neutron Blaster Cannon II, Void L
@@ -26,6 +27,7 @@ Neutron Blaster Cannon II, Void L
 Large Anti-EM Screen Reinforcer II
 Large Core Defense Field Extender II
 Large Core Defense Field Extender I
+
 
 
 Hammerhead II x5

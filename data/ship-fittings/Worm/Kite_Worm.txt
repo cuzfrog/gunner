@@ -1,4 +1,5 @@
 [Worm, Kitetackle Missile Shield Worm]
+
 Drone Damage Amplifier II
 Drone Damage Amplifier II
 
@@ -8,12 +9,13 @@ Warp Disruptor II
 Drone Navigation Computer II
 
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
-[Empty high slot]
-[Empty high slot]
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
 
 Small EM Shield Reinforcer I
 Small Core Defense Field Extender II
 Small Core Defense Field Extender II
+
 
 
 Hobgoblin II x2

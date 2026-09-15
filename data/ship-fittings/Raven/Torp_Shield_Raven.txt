@@ -1,5 +1,6 @@
 [Raven, Torp Shield Raven]
 
+
 Damage Control II
 Ballistic Control System II
 Ballistic Control System II
@@ -20,11 +21,12 @@ Prototype 'Arbalest' Torpedo Launcher
 Prototype 'Arbalest' Torpedo Launcher
 Prototype 'Arbalest' Torpedo Launcher
 'Noose' Cruise Missile Launcher, Scourge Cruise Missile
-[Empty High slot]
+Drone Link Augmentor II
 
 Large Semiconductor Memory Cell I
 Large Semiconductor Memory Cell I
-[Empty Rig slot]
+Large Core Defense Field Extender I
+
 
 
 Vespa II x5

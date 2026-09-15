@@ -1,5 +1,6 @@
 [Venture, Ewar Shield Venture]
 
+
 Damage Control II
 
 Multispectrum Shield Hardener II
@@ -7,12 +8,13 @@ Multispectrum Shield Hardener II
 Medium Ancillary Shield Booster, Cap Booster 50
 
 Small Ghoul Compact Energy Nosferatu
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Small Energy Nosferatu II
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Small Core Defense Field Extender I
+Small Hyperspatial Velocity Optimizer I
+Small Hyperspatial Velocity Optimizer I
+
 
 
 Hobgoblin I x2

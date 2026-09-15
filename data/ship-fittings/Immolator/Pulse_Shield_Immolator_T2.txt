@@ -1,14 +1,16 @@
 [Immolator, Pulse Shield Immolator (T2)]
 
+
 Damage Control II
 Overdrive Injector System II
 
 Small Shield Extender II
 Small Shield Booster II
-[Empty Med slot]
+Small Shield Extender II
 
 Dual Light Pulse Laser II, Scorch S
-[Empty High slot]
+Small Energy Nosferatu II
+
 
 
 Conflagration S x5

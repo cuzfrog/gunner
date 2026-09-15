@@ -1,8 +1,9 @@
 [Raiju, Kitetackle Missile Shield Raiju (Dread Guristas)]
 
+
 Domination Nanofiber Structure
-[Empty Low slot]
-[Empty Low slot]
+Damage Control II
+Overdrive Injector System II
 
 'Executive' Remote Sensor Dampener, Targeting Range Dampening Script
 1MN Abyssal Afterburner
@@ -18,6 +19,7 @@ Dread Guristas Light Missile Launcher, Dread Guristas Mjolnir Light Missile
 Small Polycarbon Engine Housing II
 Small Polycarbon Engine Housing II
 Small EM Shield Reinforcer II
+
 
 
 Nova Fury Light Missile x776

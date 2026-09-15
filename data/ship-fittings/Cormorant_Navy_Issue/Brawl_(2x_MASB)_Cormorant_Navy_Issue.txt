@@ -1,4 +1,5 @@
 [Cormorant Navy Issue, Tackle Blaster Shield Cormorant Navy Issue]
+
 Damage Control II
 Magnetic Field Stabilizer II
 
@@ -13,11 +14,12 @@ Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small EM Shield Reinforcer I
 Small Thermal Shield Reinforcer I
-[Empty rig slot]
+Small Hybrid Collision Accelerator I
+
 
 
 Nanite Repair Paste x64

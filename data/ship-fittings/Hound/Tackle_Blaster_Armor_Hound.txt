@@ -1,5 +1,6 @@
 [Hound, Tackle Blaster Armor Hound]
 
+
 Damage Control II
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Magnetic Field Stabilizer II
@@ -15,7 +16,8 @@ Small Energy Neutralizer II
 Covert Ops Cloaking Device II
 
 Small Polycarbon Engine Housing I
-[Empty Rig slot]
+Small Hybrid Collision Accelerator I
+
 
 
 Nova Rage Rocket x394

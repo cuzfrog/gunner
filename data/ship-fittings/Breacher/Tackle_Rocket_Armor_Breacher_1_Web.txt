@@ -1,4 +1,5 @@
 [Breacher, Tackle Rocket Armor Breacher (1 Web)]
+
 Damage Control II
 Ballistic Control System II
 Small Ancillary Armor Repairer, Nanite Repair Paste
@@ -14,7 +15,8 @@ Rocket Launcher II, Scourge Rage Rocket
 
 Small EM Shield Reinforcer I
 Small Thermal Shield Reinforcer I
-[Empty rig slot]
+Small Trimark Armor Pump I
+
 
 
 Hobgoblin II x2

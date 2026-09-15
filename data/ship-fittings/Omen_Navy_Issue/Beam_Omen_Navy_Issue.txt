@@ -1,5 +1,6 @@
 [Omen Navy Issue, Beam Omen Navy Issue]
 
+
 Damage Control II
 Multispectrum Energized Membrane II
 F-89 Compact Signal Amplifier
@@ -16,11 +17,12 @@ Heavy Beam Laser II, Aurora M
 Heavy Beam Laser II, Aurora M
 Heavy Beam Laser II, Aurora M
 Heavy Beam Laser II, Aurora M
-[Empty High slot]
+Drone Link Augmentor II
 
 Medium Energy Locus Coordinator II
 Medium Ionic Field Projector I
 Medium Ancillary Current Router II
+
 
 
 Hornet EC-300 x5

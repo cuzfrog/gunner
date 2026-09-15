@@ -1,13 +1,15 @@
 [Impairor, Pulse Shield Impairor (Civilian)]
 
-[Empty Low slot]
-[Empty Low slot]
+
+Damage Control II
+Heat Sink II
 
 1MN Civilian Afterburner
 1MN Civilian Afterburner
 
 Civilian Gatling Pulse Laser
 Civilian Gatling Railgun
+
 
 
 Hornet EC-300 x1

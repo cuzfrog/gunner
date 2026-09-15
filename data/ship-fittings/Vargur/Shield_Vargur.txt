@@ -1,5 +1,6 @@
 [Vargur, Shield Vargur]
 
+
 Republic Fleet Gyrostabilizer
 Gyrostabilizer II
 Tracking Enhancer II
@@ -12,18 +13,19 @@ Tracking Computer II, Optimal Range Script
 Pithum A-Type Medium Shield Booster
 Pithum C-Type Multispectrum Shield Hardener
 Pithum C-Type Multispectrum Shield Hardener
-[Empty Med slot]
+Large Shield Extender II
 
 Domination 800mm Repeating Cannon, Republic Fleet Phased Plasma L
 Domination 800mm Repeating Cannon, Republic Fleet Phased Plasma L
 Domination 800mm Repeating Cannon, Republic Fleet Phased Plasma L
 Domination 800mm Repeating Cannon, Republic Fleet Phased Plasma L
 Bastion Module I
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Heavy Energy Nosferatu II
 
-[Empty Rig slot]
-[Empty Rig slot]
+Large Projectile Collision Accelerator I
+Large Core Defense Field Extender I
+
 
 
 Warrior II x10

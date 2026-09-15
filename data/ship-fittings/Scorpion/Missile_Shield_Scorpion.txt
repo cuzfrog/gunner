@@ -1,5 +1,6 @@
 [Scorpion, Missile Shield Scorpion]
 
+
 Damage Control II
 Type-D Restrained Inertial Stabilizers
 Type-D Restrained Inertial Stabilizers
@@ -11,19 +12,20 @@ Large Azeotropic Restrained Shield Extender
 Multispectrum Shield Hardener II
 Large C5-L Compact Shield Booster
 500MN Quad LiF Restrained Microwarpdrive
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Large Shield Extender II
+Large Shield Extender II
+Large Shield Extender II
 
 'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Heavy Missile
 'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Heavy Missile
 'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Heavy Missile
 'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Heavy Missile
-[Empty High slot]
+Drone Link Augmentor II
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Large Core Defense Field Extender I
+Large Hyperspatial Velocity Optimizer I
+Large Hyperspatial Velocity Optimizer I
+
 
 
 Valkyrie I x7

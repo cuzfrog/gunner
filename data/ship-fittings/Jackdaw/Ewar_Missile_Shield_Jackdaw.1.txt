@@ -1,25 +1,27 @@
 [Jackdaw, Ewar Missile Shield Jackdaw]
 
+
 Ballistic Control System II
 Nanofiber Internal Structure II
 Ballistic Control System II
 
 5MN Microwarpdrive II
 Sensor Booster II, Scan Resolution Script
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Cap Recharger II
+Tracking Computer II
+Sensor Booster II
 
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
-[Empty High slot]
+Small Energy Nosferatu II
 
 Small EM Shield Reinforcer II
-[Empty Rig slot]
-[Empty Rig slot]
+Small Trimark Armor Pump I
+Small Hyperspatial Velocity Optimizer I
+
 
 
 Caldari Navy Mjolnir Light Missile x500

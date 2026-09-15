@@ -1,4 +1,5 @@
 [Maulus Navy Issue, Kitetackle Rail Armor Maulus Navy Issue]
+
 Damage Control II
 Drone Damage Amplifier II
 Drone Damage Amplifier II
@@ -10,11 +11,12 @@ Warp Scrambler II
 
 125mm Railgun II, Javelin S
 125mm Railgun II, Javelin S
-[Empty high slot]
+125mm Railgun II, Javelin S
 
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I
+
 
 
 Hornet EC-300 x5

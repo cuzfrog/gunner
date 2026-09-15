@@ -1,11 +1,12 @@
 [Phobos, Kitetackle Neutron Blaster Armor Phobos]
 
+
 Multispectrum Energized Membrane II
 Reactive Armor Hardener
 Abyssal Magnetic Field Stabilizer
 Medium Ancillary Armor Repairer
 Medium Armor Repairer II
-[Empty Low slot]
+Damage Control II
 
 Medium Cap Battery II
 Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
@@ -21,6 +22,7 @@ Medium Energy Nosferatu II
 
 Medium Explosive Armor Reinforcer II
 Medium Trimark Armor Pump II
+
 
 
 Mobile Small Warp Disruptor II x1

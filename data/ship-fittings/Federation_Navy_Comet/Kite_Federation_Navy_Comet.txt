@@ -1,4 +1,5 @@
 [Federation Navy Comet, Kitetackle Rail Armor Federation Navy Comet]
+
 Damage Control II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
@@ -10,11 +11,12 @@ Warp Disruptor II
 
 150mm Railgun II, Spike S
 150mm Railgun II, Spike S
-[Empty high slot]
+Drone Link Augmentor II
 
 Small Hybrid Locus Coordinator II
 Small Hybrid Locus Coordinator II
 Small Hybrid Locus Coordinator II
+
 
 
 Hobgoblin II x3

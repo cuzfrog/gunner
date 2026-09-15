@@ -1,5 +1,6 @@
 [Phoenix Navy Issue, Tackle Torp Shield Phoenix Navy Issue]
 
+
 Damage Control II
 Crosslink Compact Ballistic Control System
 Capacitor Flux Coil II
@@ -12,18 +13,19 @@ Capital Cap Battery II
 CONCORD Capital Shield Booster
 Heavy Warp Scrambler II
 Cap Recharger II
-[Empty Med slot]
-[Empty Med slot]
+Capital Shield Extender II
+Capital Shield Extender II
 
 XL Torpedo Launcher II, Scourge Rage XL Torpedo
 Caldari Navy Large Graviton Smartbomb
 XL Torpedo Launcher II, Scourge Rage XL Torpedo
 XL Torpedo Launcher II, Scourge Rage XL Torpedo
-[Empty High slot]
+Heavy Energy Nosferatu II
 
 Capital Core Defense Field Extender I
 Capital Core Defense Field Extender I
 Capital EM Shield Reinforcer I
+
 
 
 Strontium Clathrates x5289

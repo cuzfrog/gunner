@@ -1,5 +1,6 @@
 [Moros, Ewar Blaster Shield Moros]
 
+
 Damage Control II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
@@ -7,7 +8,7 @@ Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
-[Empty Low slot]
+Overdrive Injector System II
 
 Tracking Computer II, Optimal Range Script
 Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
@@ -18,11 +19,12 @@ Ion Siege Blaster II, Void XL
 Ion Siege Blaster II, Void XL
 Capital Gremlin Compact Energy Neutralizer
 Ion Siege Blaster II, Void XL
-[Empty High slot]
+Heavy Energy Nosferatu II
 
 Capital Hybrid Metastasis Adjuster I
 Capital Core Defense Field Extender I
 Capital Core Defense Field Extender I
+
 
 
 Tracking Speed Script x1

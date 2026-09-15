@@ -1,4 +1,5 @@
 [Jaguar, Kitetackle Missile Shield Jaguar]
+
 Nanofiber Internal Structure II
 Nanofiber Internal Structure II
 Overdrive Injector System II
@@ -12,10 +13,11 @@ Warp Disruptor II
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
-[Empty high slot]
+Drone Link Augmentor II
 
 Small Kinetic Shield Reinforcer I
 Small Ancillary Current Router II
+
 
 
 Warrior II x2

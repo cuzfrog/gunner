@@ -1,5 +1,6 @@
 [Confessor, Tackle Beam Armor Confessor (2 Heat Sinks)]
 
+
 Abyssal Heat Sink
 True Sansha Multispectrum Energized Membrane
 Abyssal Heat Sink
@@ -14,12 +15,13 @@ Small Focused Beam Laser II, True Sanshas Ultraviolet S
 Small Focused Beam Laser II, True Sanshas Ultraviolet S
 Small Focused Beam Laser II, True Sanshas Ultraviolet S
 Small Focused Beam Laser II, True Sanshas Ultraviolet S
-[Empty High slot]
-[Empty High slot]
+Small Energy Nosferatu II
+Small Energy Nosferatu II
 
 Small Ancillary Current Router I
 Small Auxiliary Nano Pump II
 Small Auxiliary Nano Pump II
+
 
 
 Sisters Core Scanner Probe x8

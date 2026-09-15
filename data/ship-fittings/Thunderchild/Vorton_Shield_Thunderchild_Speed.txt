@@ -1,10 +1,11 @@
 [Thunderchild, Vorton Shield Thunderchild (Speed)]
 
+
 Damage Control II
 Vorton Tuning System II
 Vorton Tuning System II
 Inertial Stabilizers II
-[Empty Low slot]
+Overdrive Injector System II
 
 500MN Cold-Gas Enduring Microwarpdrive
 Large Shield Extender II
@@ -12,14 +13,15 @@ Large Shield Extender II
 Multispectrum Shield Hardener II
 Sensor Booster II, Scan Resolution Script
 Sensor Booster II, Targeting Range Script
-[Empty Med slot]
+Large Shield Extender II
 
 Large Vorton Projector II
-[Empty High slot]
+Drone Link Augmentor II
 
 Large Core Defense Field Extender I
 Large Core Defense Field Extender I
 Large Hyperspatial Velocity Optimizer II
+
 
 
 Republic Fleet Warrior x5

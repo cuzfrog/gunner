@@ -1,21 +1,23 @@
 [Imicus Navy Issue, Drone Drone Shield Imicus Navy Issue]
-[Empty low slot]
-[Empty low slot]
-[Empty low slot]
-[Empty low slot]
 
-[Empty med slot]
-[Empty med slot]
-[Empty med slot]
-[Empty med slot]
+Damage Control II
+Overdrive Injector System II
+Power Diagnostic System II
+Power Diagnostic System II
 
-[Empty high slot]
-[Empty high slot]
-[Empty high slot]
+Cap Recharger II
+Sensor Booster II
+Tracking Computer II
+Sensor Booster II
+
+Drone Link Augmentor II
+Small Energy Nosferatu II
+Small Energy Nosferatu II
 
 Small Auxiliary Nano Pump II
 Small Auxiliary Nano Pump II
 Small Nanobot Accelerator II
+
 
 
 Hobgoblin II x3

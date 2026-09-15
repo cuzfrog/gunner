@@ -1,5 +1,6 @@
 [Claw, Kitetackle AC Shield Claw]
 
+
 Nanofiber Internal Structure II
 Overdrive Injector System II
 Inertial Stabilizers II
@@ -13,8 +14,9 @@ Small Energy Nosferatu II
 200mm AutoCannon II, Hail S
 200mm AutoCannon II, Hail S
 
-[Empty Rig slot]
-[Empty Rig slot]
+Small Projectile Collision Accelerator I
+Small Trimark Armor Pump I
+
 
 
 Barrage S x2000

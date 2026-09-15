@@ -1,5 +1,6 @@
 [Punisher, Kitetackle Beam Armor Punisher]
 
+
 Heat Sink II
 Heat Sink II
 Nanofiber Internal Structure II
@@ -12,11 +13,12 @@ Warp Disruptor II
 Small Focused Beam Laser II, Aurora S
 Small Focused Beam Laser II, Aurora S
 Small Focused Beam Laser II, Aurora S
-[Empty high slot]
+Small Focused Beam Laser II, Aurora S
 
 Small Energy Locus Coordinator II
 Small Energy Locus Coordinator II
 Small Energy Locus Coordinator II
+
 
 
 Nanite Repair Paste x32

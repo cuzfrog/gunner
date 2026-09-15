@@ -1,5 +1,6 @@
 [Bantam, Tackle Blaster Shield Bantam]
 
+
 Nanofiber Internal Structure I
 Nanofiber Internal Structure I
 
@@ -10,11 +11,12 @@ Enduring EM Shield Hardener
 
 Light Neutron Blaster I
 Light Neutron Blaster I
-[Empty High slot]
+Drone Link Augmentor II
 
 Small Core Defense Capacitor Safeguard I
 Small Core Defense Capacitor Safeguard I
 Small Core Defense Capacitor Safeguard I
+
 
 
 Light Shield Maintenance Bot II x1

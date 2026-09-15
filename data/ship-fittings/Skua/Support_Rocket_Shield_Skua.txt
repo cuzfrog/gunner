@@ -1,5 +1,6 @@
 [Skua, Support Rocket Shield Skua]
 
+
 Abyssal Ballistic Control System
 Abyssal Ballistic Control System
 Abyssal Ballistic Control System
@@ -7,9 +8,9 @@ Abyssal Ballistic Control System
 5MN Abyssal Microwarpdrive
 Pithum A-Type Multispectrum Shield Hardener
 Medium Abyssal Shield Extender
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Small Shield Extender II
+Small Shield Extender II
+Small Shield Extender II
 
 Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
 Shield Command Burst II, Shield Extension Charge
@@ -17,11 +18,12 @@ Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
 Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
 Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
 Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
-[Empty High slot]
+Small Energy Nosferatu II
 
 Small EM Shield Reinforcer II
-[Empty Rig slot]
-[Empty Rig slot]
+Small Core Defense Field Extender I
+Small Hyperspatial Velocity Optimizer I
+
 
 
 Nova Rage Rocket x1360

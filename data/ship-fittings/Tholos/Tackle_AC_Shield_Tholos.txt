@@ -1,5 +1,6 @@
 [Tholos, Tackle AC Shield Tholos]
 
+
 Damage Control II
 Gyrostabilizer II
 
@@ -15,11 +16,12 @@ Rocket Launcher II, Inferno Javelin Rocket
 200mm AutoCannon II, Hail S
 Rocket Launcher II, Inferno Javelin Rocket
 Covert Ops Cloaking Device II
-[Empty High slot]
+Drone Link Augmentor II
 
 Small EM Shield Reinforcer I
 Small Ancillary Current Router I
-[Empty Rig slot]
+Small Projectile Collision Accelerator I
+
 
 
 Hobgoblin II x5

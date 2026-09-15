@@ -1,4 +1,5 @@
 [Hawk, Kitetackle Missile Shield Hawk]
+
 Nanofiber Internal Structure II
 Nanofiber Internal Structure II
 
@@ -12,10 +13,11 @@ Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Processor Overclocking Unit I
 Small Polycarbon Engine Housing II
+
 
 
 Nanite Repair Paste x32

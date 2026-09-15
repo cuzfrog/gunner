@@ -1,5 +1,6 @@
 [Confessor, Tackle Beam Armor Confessor (Multifreq)]
 
+
 Damage Control II
 Small Ancillary Armor Repairer
 Coreli A-Type Small Armor Repairer
@@ -14,12 +15,13 @@ Dual Light Beam Laser II, Imperial Navy Multifrequency S
 Dual Light Beam Laser II, Imperial Navy Multifrequency S
 Dual Light Beam Laser II, Imperial Navy Multifrequency S
 Dual Light Beam Laser II, Imperial Navy Multifrequency S
-[Empty High slot]
-[Empty High slot]
+Small Energy Nosferatu II
+Small Energy Nosferatu II
 
 Small Ancillary Current Router I
 Small Ancillary Current Router II
 Small Energy Locus Coordinator II
+
 
 
 Sanshas Gamma S x4

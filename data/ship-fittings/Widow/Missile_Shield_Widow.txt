@@ -1,5 +1,6 @@
 [Widow, Missile Shield Widow]
 
+
 Damage Control II
 Ballistic Control System II
 Ballistic Control System II
@@ -19,11 +20,12 @@ Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
 Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
 Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
 Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
-[Empty High slot]
-[Empty High slot]
+Heavy Energy Nosferatu II
+Heavy Energy Nosferatu II
 
 Large Core Defense Field Extender II
 Large Core Defense Field Extender II
+
 
 
 Warrior II x5

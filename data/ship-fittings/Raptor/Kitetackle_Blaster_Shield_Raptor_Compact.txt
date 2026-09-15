@@ -1,8 +1,9 @@
 [Raptor, Kitetackle Blaster Shield Raptor (Compact)]
 
+
 Vortex Compact Magnetic Field Stabilizer
 Damage Control II
-[Empty Low slot]
+Magnetic Field Stabilizer II
 
 Small Shield Extender II
 5MN Y-T8 Compact Microwarpdrive
@@ -15,6 +16,7 @@ Light Neutron Blaster II, Void S
 
 Small Processor Overclocking Unit I
 Small Polycarbon Engine Housing II
+
 
 
 Caldari Navy Antimatter Charge S x2880

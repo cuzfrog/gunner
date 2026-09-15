@@ -1,4 +1,5 @@
 [Algos, Kitetackle AC Armor Algos]
+
 Damage Control II
 400mm Steel Plates II
 Small Ancillary Armor Repairer, Nanite Repair Paste
@@ -12,11 +13,12 @@ Warp Scrambler II
 200mm AutoCannon II, Hail S
 200mm AutoCannon II, Hail S
 200mm AutoCannon II, Hail S
-[Empty high slot]
+Drone Link Augmentor II
 
 Small Ancillary Current Router II
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I
+
 
 
 Hobgoblin II x5

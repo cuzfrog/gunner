@@ -1,5 +1,6 @@
 [Megathron, Kitetackle Armor Megathron]
 
+
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
@@ -7,7 +8,7 @@ Multispectrum Energized Membrane II
 Large Armor Repairer II
 Multispectrum Energized Membrane II
 Reactive Armor Hardener
-[Empty Low slot]
+Damage Control II
 
 Large Cap Battery II
 F-90 Compact Sensor Booster, Scan Resolution Script
@@ -22,9 +23,10 @@ Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
 Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
 Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Large Hybrid Collision Accelerator I
+Large Trimark Armor Pump I
+Large Hyperspatial Velocity Optimizer I
+
 
 
 Caldari Navy Vespa x4

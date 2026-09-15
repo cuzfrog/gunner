@@ -1,5 +1,6 @@
 [Megathron Navy Issue, Blaster Shield Megathron Navy Issue (Grappler)]
 
+
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
@@ -7,7 +8,7 @@ Damage Control II
 Tracking Enhancer II
 Tracking Enhancer II
 Power Diagnostic System II
-[Empty Low slot]
+Overdrive Injector System II
 
 500MN Y-T8 Compact Microwarpdrive
 Warp Scrambler II
@@ -26,6 +27,7 @@ Heavy Energy Neutralizer II
 Large Anti-EM Screen Reinforcer II
 Large Core Defense Field Extender II
 Large Core Defense Field Extender I
+
 
 
 Hammerhead II x5

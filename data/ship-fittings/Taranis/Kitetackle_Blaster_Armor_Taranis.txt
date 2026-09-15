@@ -1,5 +1,6 @@
 [Taranis, Kitetackle Blaster Armor Taranis]
 
+
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Magnetic Field Stabilizer II
 Damage Control II
@@ -11,10 +12,11 @@ Warp Scrambler II
 Light Ion Blaster II, Void S
 Light Ion Blaster II, Void S
 Light Ion Blaster II, Void S
-[Empty High slot]
+Drone Link Augmentor II
 
 Small Low Friction Nozzle Joints II
-[Empty Rig slot]
+Small Hybrid Collision Accelerator I
+
 
 
 Hobgoblin II x2

@@ -1,7 +1,8 @@
 [Echo, Kitetackle Art Shield Echo]
 
+
 Republic Fleet Gyrostabilizer
-[Empty Low slot]
+Damage Control II
 
 Republic Fleet Small Shield Extender
 Coreli A-Type 5MN Microwarpdrive
@@ -9,6 +10,7 @@ Caldari Navy Warp Disruptor
 
 280mm Howitzer Artillery II, Republic Fleet Depleted Uranium S
 280mm Howitzer Artillery II, Republic Fleet Depleted Uranium S
+
 
 
 Tremor S x233

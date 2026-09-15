@@ -1,8 +1,9 @@
 [Raiju, Kitetackle Missile Shield Raiju (Caldari Navy)]
 
+
 Shadow Serpentis Damage Control
 Republic Fleet Nanofiber Structure
-[Empty Low slot]
+Damage Control II
 
 Abyssal Warp Disruptor
 'Executive' Remote Sensor Dampener, Targeting Range Dampening Script
@@ -17,7 +18,8 @@ Caldari Navy Light Missile Launcher, Caldari Navy Mjolnir Light Missile
 
 Small Polycarbon Engine Housing II
 Small EM Shield Reinforcer II
-[Empty Rig slot]
+Medium Core Defense Field Extender I
+
 
 
 Nova Fury Light Missile x547

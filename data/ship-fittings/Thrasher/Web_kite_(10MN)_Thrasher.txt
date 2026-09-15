@@ -1,4 +1,5 @@
 [Thrasher, Tackle Shield Thrasher]
+
 Damage Control II
 Gyrostabilizer II
 
@@ -13,7 +14,7 @@ Warp Disruptor II
 250mm 'Scout' Accelerator Cannon
 250mm 'Scout' Accelerator Cannon
 250mm 'Scout' Accelerator Cannon
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I

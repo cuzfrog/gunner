@@ -1,4 +1,5 @@
 [Hawk, Tackle Rocket Shield Hawk (Tank)]
+
 Assault Damage Control II
 Co-Processor II
 
@@ -12,10 +13,11 @@ Rocket Launcher II, Scourge Rage Rocket
 Rocket Launcher II, Scourge Rage Rocket
 Rocket Launcher II, Scourge Rage Rocket
 Rocket Launcher II, Scourge Rage Rocket
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Bay Loading Accelerator II
 Small EM Shield Reinforcer I
+
 
 
 Nanite Repair Paste x64

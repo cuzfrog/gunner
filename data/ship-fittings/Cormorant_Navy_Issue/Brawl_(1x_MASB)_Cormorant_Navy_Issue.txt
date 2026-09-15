@@ -1,4 +1,5 @@
 [Cormorant Navy Issue, Kitetackle Blaster Shield Cormorant Navy Issue]
+
 Damage Control II
 Magnetic Field Stabilizer II
 
@@ -17,7 +18,8 @@ Rocket Launcher II, Scourge Rage Rocket
 
 Small EM Shield Reinforcer I
 Small Thermal Shield Reinforcer I
-[Empty rig slot]
+Small Hybrid Collision Accelerator I
+
 
 
 Nanite Repair Paste x32

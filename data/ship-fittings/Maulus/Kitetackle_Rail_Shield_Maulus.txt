@@ -1,8 +1,9 @@
 [Maulus, Kitetackle Rail Shield Maulus]
 
+
 Drone Damage Amplifier II
 Drone Damage Amplifier II
-[Empty Low slot]
+Damage Control II
 
 Remote Sensor Dampener II, Targeting Range Dampening Script
 5MN Quad LiF Restrained Microwarpdrive
@@ -12,9 +13,10 @@ Remote Sensor Dampener II, Targeting Range Dampening Script
 150mm Railgun II, Caldari Navy Iridium Charge S
 150mm Railgun II, Caldari Navy Iridium Charge S
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Small Hybrid Collision Accelerator I
+Small Trimark Armor Pump I
+Small Hyperspatial Velocity Optimizer I
+
 
 
 Warrior II x2

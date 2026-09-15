@@ -1,9 +1,10 @@
 [Svipul, Kitetackle Art Shield Svipul]
 
+
 Gyrostabilizer II
 IFFA Compact Damage Control
 Gyrostabilizer II
-[Empty Low slot]
+Damage Control II
 
 Medium F-S9 Regolith Compact Shield Extender
 Compact Multispectrum Shield Hardener
@@ -14,12 +15,13 @@ Warp Disruptor II
 280mm Howitzer Artillery II, Tremor S
 280mm Howitzer Artillery II, Tremor S
 280mm Howitzer Artillery II, Tremor S
-[Empty High slot]
-[Empty High slot]
+Small Energy Nosferatu II
+Small Energy Nosferatu II
 
 Small Core Defense Field Extender I
 Small Processor Overclocking Unit II
 Small Core Defense Field Extender I
+
 
 
 Republic Fleet Phased Plasma S x1000

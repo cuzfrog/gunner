@@ -1,5 +1,6 @@
 [Talwar Fleet Issue, Kitetackle Rocket Shield Talwar Fleet Issue (Point)]
 
+
 Ballistic Control System II
 Nanofiber Internal Structure II
 Ballistic Control System II
@@ -14,11 +15,12 @@ Rocket Launcher II, Scourge Javelin Rocket
 Rocket Launcher II, Scourge Javelin Rocket
 Rocket Launcher II, Scourge Javelin Rocket
 Rocket Launcher II, Scourge Javelin Rocket
-[Empty High slot]
+Small Energy Nosferatu II
 
 Small Polycarbon Engine Housing I
-[Empty Rig slot]
-[Empty Rig slot]
+Small Core Defense Field Extender I
+Small Hyperspatial Velocity Optimizer I
+
 
 
 Scourge Javelin Rocket x2250

@@ -1,4 +1,5 @@
 [Magnate Navy Issue, Tackle Beam Armor Magnate Navy Issue]
+
 Damage Control II
 Heat Sink II
 Heat Sink II
@@ -11,11 +12,12 @@ Stasis Webifier II
 
 Small Focused Beam Laser II, Scorch S
 Small Focused Beam Laser II, Scorch S
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Energy Burst Aerator II
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I
+
 
 
 Nanite Repair Paste x32

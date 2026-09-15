@@ -1,5 +1,6 @@
 [Scorpion Navy Issue, Torp Shield Scorpion Navy Issue]
 
+
 Ballistic Control System II
 Ballistic Control System II
 Ballistic Control System II
@@ -12,8 +13,8 @@ Adaptive Invulnerability Field II
 X-Large Ancillary Shield Booster, Navy Cap Booster 800
 Target Painter II
 Sensor Booster II, Scan Resolution Script
-[Empty Med slot]
-[Empty Med slot]
+Large Shield Extender II
+Large Shield Extender II
 
 Torpedo Launcher II, Scourge Rage Torpedo
 Torpedo Launcher II, Scourge Rage Torpedo
@@ -21,11 +22,12 @@ Torpedo Launcher II, Scourge Rage Torpedo
 Torpedo Launcher II, Scourge Rage Torpedo
 Torpedo Launcher II, Scourge Rage Torpedo
 Torpedo Launcher II, Scourge Rage Torpedo
-[Empty High slot]
+Drone Link Augmentor II
 
 Large Bay Loading Accelerator II
 Large Hydraulic Bay Thrusters I
-[Empty Rig slot]
+Large Core Defense Field Extender I
+
 
 
 'Augmented' Ogre x2

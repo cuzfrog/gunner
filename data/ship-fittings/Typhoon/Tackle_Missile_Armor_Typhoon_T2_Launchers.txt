@@ -1,5 +1,6 @@
 [Typhoon, Tackle Missile Armor Typhoon (T2 Launchers)]
 
+
 Damage Control II
 Ballistic Control System II
 Ballistic Control System II
@@ -12,7 +13,7 @@ DDO Scoped Tracking Disruptor I, Optimal Range Disruption Script
 Heavy Karelin Scoped Stasis Grappler
 Faint Scoped Warp Disruptor
 100MN Monopropellant Enduring Afterburner
-[Empty Med slot]
+Cap Recharger II
 
 Rapid Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
 Rapid Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
@@ -25,6 +26,7 @@ Rapid Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
+
 
 
 Republic Fleet Warrior x5

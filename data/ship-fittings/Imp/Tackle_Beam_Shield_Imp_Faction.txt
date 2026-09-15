@@ -1,5 +1,6 @@
 [Imp, Tackle Beam Shield Imp (Faction)]
 
+
 Domination Nanofiber Structure
 Brokara's Modified Heat Sink
 Brokara's Modified Heat Sink
@@ -12,10 +13,11 @@ True Sansha Warp Scrambler
 
 Small Focused Beam Laser II, True Sanshas Radio S
 Small Focused Beam Laser II, True Sanshas Radio S
-[Empty High slot]
+Small Energy Nosferatu II
 
 Small Energy Locus Coordinator II
 Small Polycarbon Engine Housing II
+
 
 
 True Sanshas Xray S x4

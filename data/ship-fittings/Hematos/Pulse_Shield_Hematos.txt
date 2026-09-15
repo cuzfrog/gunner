@@ -1,14 +1,16 @@
 [Hematos, Pulse Shield Hematos]
 
+
 Inertial Stabilizers II
-[Empty Low slot]
+Damage Control II
 
 Caldari Navy Medium Shield Extender
 F-90 Compact Sensor Booster, Targeting Range Script
 F-90 Compact Sensor Booster, Targeting Range Script
 
 'Longbow' Small Focused Pulse Laser I, Blood Ultraviolet S
-[Empty High slot]
+Small Energy Nosferatu II
+
 
 
 Imperial Navy Multifrequency S x3

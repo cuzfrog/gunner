@@ -1,4 +1,5 @@
 [Maulus Navy Issue, Kitetackle Armor Maulus Navy Issue]
+
 Damage Control II
 Drone Damage Amplifier II
 Drone Damage Amplifier II
@@ -8,13 +9,14 @@ Small Ancillary Armor Repairer, Nanite Repair Paste
 Warp Disruptor II
 Warp Scrambler II
 
-[Empty high slot]
-[Empty high slot]
-[Empty high slot]
+Drone Link Augmentor II
+Small Energy Nosferatu II
+Small Energy Nosferatu II
 
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I
+
 
 
 Hornet EC-300 x5
