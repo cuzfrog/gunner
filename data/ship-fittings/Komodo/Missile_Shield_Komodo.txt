@@ -32,11 +32,8 @@ Capital Core Defense Field Extender II
 Inferno Precision XL Cruise Missile x10386
 Inferno Fury XL Cruise Missile x10078
 Guristas Inferno XL Cruise Missile x4000
-Navy Cap Booster 3200 x35
+Navy Cap Booster 3200 x364
 Scourge Fury XL Cruise Missile x10000
-Strontium Clathrates x2545
+Strontium Clathrates x10150
 Nitrogen Isotopes x177956
-Oxygen Isotopes x1457173
-Navy Cap Booster 3200 x329
-Strontium Clathrates x7605
-Oxygen Isotopes x229545
+Oxygen Isotopes x1686718

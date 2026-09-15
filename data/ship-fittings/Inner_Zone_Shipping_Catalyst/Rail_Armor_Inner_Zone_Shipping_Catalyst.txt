@@ -1,8 +1,9 @@
 [Inner Zone Shipping Catalyst, Rail Armor Inner Zone Shipping Catalyst]
 
+
 Small Armor Repairer I
 Vortex Compact Magnetic Field Stabilizer
-[Empty Low slot]
+Damage Control II
 
 5MN Microwarpdrive I
 Dark Blood Cap Recharger
@@ -16,9 +17,10 @@ Modal Light Electron Particle Accelerator I
 150mm Carbide Railgun I, Shadow Thorium Charge S
 Modal Light Electron Particle Accelerator I
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Small Hybrid Collision Accelerator I
+Small Trimark Armor Pump I
+Small Hyperspatial Velocity Optimizer I
+
 
 
 Shadow Thorium Charge S x560

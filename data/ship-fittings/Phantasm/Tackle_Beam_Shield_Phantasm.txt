@@ -28,10 +28,8 @@ Valkyrie SW-600 x1
 
 Imperial Navy Microwave M x3
 Aurora M x3
-Imperial Navy Multifrequency M x2
-Imperial Navy Multifrequency M x1
-Imperial Navy Xray M x1
-Imperial Navy Xray M x2
+Imperial Navy Multifrequency M x3
+Imperial Navy Xray M x3
 Navy Cap Booster 800 x13
 Gleam M x3
 Nanite Repair Paste x250

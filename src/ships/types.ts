@@ -27,6 +27,10 @@ export interface ShipProfile {
   readonly scanResolution: number; // mm
   readonly maxTargetingRange: number; // m
   readonly maxLockedTargets: number;
+  readonly highSlots: number;
+  readonly medSlots: number;
+  readonly lowSlots: number;
+  readonly rigSlots: number;
   readonly droneBandwidth: number;
   readonly droneCapacity: number;
   readonly maxActiveDrones: number;

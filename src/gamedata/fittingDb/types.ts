@@ -181,7 +181,9 @@ export type MissileBonusAttribute = "missileDamage" | "missileRoF" | "missileVel
 export type DroneBonusAttribute = "droneDamage";
 export type DefenseBonusAttribute = "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
 export type ModuleBonusAttribute = "capUse" | "duration";
-export type HullBonusAttribute = PropulsionBonusAttribute | TurretBonusAttribute | MissileBonusAttribute | DroneBonusAttribute | DefenseBonusAttribute | ModuleBonusAttribute;
+// Flat additions applied to the base ship stat before percent modifiers (strategic cruiser subsystems).
+export type ShipStatFlatAttribute = "shieldHpFlat" | "armorHpFlat" | "hullHpFlat" | "capacitorCapacityFlat" | "sigRadiusFlat" | "maxTargetingRangeFlat" | "droneCapacityFlat" | "droneBandwidthFlat";
+export type HullBonusAttribute = PropulsionBonusAttribute | TurretBonusAttribute | MissileBonusAttribute | DroneBonusAttribute | DefenseBonusAttribute | ModuleBonusAttribute | ShipStatFlatAttribute;
 
 export interface HullBonus {
   readonly attribute: HullBonusAttribute;
@@ -218,6 +220,8 @@ export interface ChargeStats {
   readonly capacitorBonus?: number; // GJ injected per cycle, cap booster charges
   readonly volume?: number; // m3, cap booster charges
   readonly capacitorNeedMultiplier?: number; // turret capacitor need scaling from the charge (attr 317), e.g. 1.25 Conflagration
+  readonly warfareBuffId?: number; // raw SDE warfareBuff1ID, command burst charges
+  readonly warfareBuffMultiplier?: number; // raw SDE warfareBuff1Multiplier percent, command burst charges
   readonly chargeGroup: number;
   readonly chargeSize: number;
   readonly id: TypeId;
@@ -456,10 +460,36 @@ export interface DroneStats {
   readonly name: string;
 }
 
+export interface CommandBurstStats {
+  readonly maxRange: number; // m, fleet-wide effect radius
+  readonly cycleTime: number; // seconds, burst reapplies every cycle
+  readonly capacitorNeed: number; // GJ consumed by the user per cycle
+  readonly reloadTime: number; // seconds, charge consumption between cycles
+  readonly chargeGroup: number; // accepted charge family (shield/armor/skirmish/information/mining)
+  readonly requiredSkillIds: readonly TypeId[];
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export interface SubsystemStats {
+  readonly id: TypeId;
+  readonly name: string;
+  readonly slotKind: SubsystemSlotKind;
+  readonly highSlots: number;
+  readonly medSlots: number;
+  readonly lowSlots: number;
+  readonly turretHardpoints: number;
+  readonly launcherHardpoints: number;
+}
+
+export type SubsystemSlotKind = "core" | "offensive" | "defensive" | "propulsion";
+
 export interface FittingDbData {
   readonly modules: Readonly<Record<string, FittingModuleStats>>;
   readonly turrets: Readonly<Record<string, TurretStats>>;
   readonly charges: Readonly<Record<string, ChargeStats>>;
+  readonly commandBursts: Readonly<Record<string, CommandBurstStats>>;
+  readonly subsystems: Readonly<Record<string, SubsystemStats>>;
   readonly launchers: Readonly<Record<string, LauncherStats>>;
   readonly missiles: Readonly<Record<string, MissileStats>>;
   readonly scripts: Readonly<Record<string, TurretScriptStats>>;

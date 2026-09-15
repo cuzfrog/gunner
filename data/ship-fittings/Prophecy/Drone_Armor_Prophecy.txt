@@ -1,0 +1,31 @@
+[Prophecy, Drone Armor Prophecy]
+
+Damage Control II
+Drone Damage Amplifier II
+Reactive Armor Hardener
+Multispectrum Energized Membrane II
+1600mm Rolled Tungsten Compact Plates
+Multispectrum Energized Membrane II
+Kinetic Energized Membrane II
+
+50MN Y-T8 Compact Microwarpdrive
+Warp Scrambler II
+Large Compact Pb-Acid Cap Battery
+Cap Recharger II
+
+Drone Link Augmentor I
+Medium Gremlin Compact Energy Neutralizer
+Medium Gremlin Compact Energy Neutralizer
+Small Gremlin Compact Energy Neutralizer
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+Medium Anti-Explosive Pump II
+
+
+Praetor II x3
+
+
+Navy Cap Booster 400 x20
+Scourge Fury Light Missile x1000

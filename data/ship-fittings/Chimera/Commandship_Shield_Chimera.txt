@@ -24,9 +24,6 @@ Capital Core Defense Field Extender I
 Capital Core Defense Field Extender I
 
 
-Navy Cap Booster 3200 x70
-Nitrogen Isotopes x22440
-Navy Cap Booster 400 x3
-Navy Cap Booster 3200 x5
-Navy Cap Booster 400 x110
-Nitrogen Isotopes x88692
+Navy Cap Booster 3200 x75
+Nitrogen Isotopes x111132
+Navy Cap Booster 400 x113

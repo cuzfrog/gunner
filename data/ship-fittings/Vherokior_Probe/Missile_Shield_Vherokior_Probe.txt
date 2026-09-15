@@ -1,21 +1,26 @@
 [Vherokior Probe, Missile Shield Vherokior Probe]
 
+
 Type-D Restrained Inertial Stabilizers
 Overdrive Injector System I
-[Empty Low slot]
+Damage Control II
 
 1MN Afterburner I
 Civilian Kinetic Shield Hardener
-[Empty Med slot]
-[Empty Med slot]
+Small Shield Extender II
+Small Shield Extender II
 
 Light Missile Launcher I, Inferno Light Missile
 Light Missile Launcher I, Inferno Light Missile
-[Empty High slot]
+Drone Link Augmentor II
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Small Core Defense Field Extender I
+Small Hyperspatial Velocity Optimizer I
+Small Hyperspatial Velocity Optimizer I
+
+
+
+Warrior II x3
 
 
 Inferno Light Missile x162

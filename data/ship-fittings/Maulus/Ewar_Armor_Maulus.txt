@@ -1,5 +1,6 @@
 [Maulus, Ewar Armor Maulus]
 
+
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Capacitor Power Relay II
 Damage Control II
@@ -9,12 +10,13 @@ LFT Enduring Sensor Dampener, Targeting Range Dampening Script
 5MN Y-T8 Compact Microwarpdrive
 LFT Enduring Sensor Dampener, Targeting Range Dampening Script
 
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Small Energy Nosferatu II
 
 Small Auxiliary Nano Pump I
-[Empty Rig slot]
-[Empty Rig slot]
+Small Trimark Armor Pump I
+Small Hyperspatial Velocity Optimizer I
+
 
 
 Warrior II x4

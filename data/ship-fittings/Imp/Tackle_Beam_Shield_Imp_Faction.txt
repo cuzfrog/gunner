@@ -1,0 +1,32 @@
+[Imp, Tackle Beam Shield Imp (Faction)]
+
+
+Domination Nanofiber Structure
+Brokara's Modified Heat Sink
+Brokara's Modified Heat Sink
+Tairei's Modified Heat Sink
+
+Thukker Medium Shield Extender
+True Sansha Warp Disruptor
+Coreli A-Type 1MN Afterburner
+True Sansha Warp Scrambler
+
+Small Focused Beam Laser II, True Sanshas Radio S
+Small Focused Beam Laser II, True Sanshas Radio S
+Small Energy Nosferatu II
+
+Small Energy Locus Coordinator II
+Small Polycarbon Engine Housing II
+
+
+
+True Sanshas Xray S x4
+Sisters Core Scanner Probe x8
+True Sanshas Ultraviolet S x2
+True Sanshas Multifrequency S x2
+True Sanshas Gamma S x2
+True Sanshas Standard S x2
+Nanite Repair Paste x1855
+Aurora S x2
+True Sanshas Infrared S x2
+Gleam S x2

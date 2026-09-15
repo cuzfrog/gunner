@@ -25,9 +25,11 @@ Medium EM Shield Reinforcer II
 Medium EM Shield Reinforcer II
 
 
+Valkyrie II x5
+
+
 Nova Fury Light Missile x840
-Active Shielding Charge x219
-Active Shielding Charge x1200
+Active Shielding Charge x1419
 Scourge Fury Light Missile x1000
 Inferno Fury Light Missile x1000
 Navy Cap Booster 200 x25

@@ -1,5 +1,6 @@
 [Intaki Syndicate Catalyst, Kitetackle Blaster Shield Intaki Syndicate Catalyst]
 
+
 Damage Control II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
@@ -16,9 +17,10 @@ Light Ion Blaster II, Federation Navy Antimatter Charge S
 Light Ion Blaster II, Federation Navy Antimatter Charge S
 Light Ion Blaster II, Federation Navy Antimatter Charge S
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Small Hybrid Collision Accelerator I
+Small Trimark Armor Pump I
+Small Hyperspatial Velocity Optimizer I
+
 
 
 Federation Navy Antimatter Charge S x2040

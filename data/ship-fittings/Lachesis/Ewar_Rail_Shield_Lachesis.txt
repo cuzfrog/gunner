@@ -22,8 +22,7 @@ Medium EM Shield Reinforcer II
 Medium Core Defense Field Extender I
 
 
-Infiltrator II x3
-Infiltrator II x2
+Infiltrator II x5
 
 
 Scan Resolution Dampening Script x1

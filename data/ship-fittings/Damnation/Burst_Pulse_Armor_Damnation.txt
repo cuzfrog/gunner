@@ -1,0 +1,35 @@
+[Damnation, Burst Pulse Armor Damnation]
+
+1600mm Steel Plates II
+Damage Control II
+Multispectrum Energized Membrane II
+Multispectrum Energized Membrane II
+Heat Sink II
+Heat Sink II
+
+50MN Y-T8 Compact Microwarpdrive
+Stasis Webifier II
+Warp Scrambler II
+Medium Capacitor Booster II, Navy Cap Booster 800
+
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Armor Command Burst II, Armor Energizing Charge
+Armor Command Burst II, Rapid Repair Charge
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+
+
+Infiltrator II x5
+
+
+Conflagration M x4
+Gleam M x5
+Imperial Navy Multifrequency M x5
+Armor Energizing Charge x288
+Rapid Repair Charge x288
+Navy Cap Booster 800 x26

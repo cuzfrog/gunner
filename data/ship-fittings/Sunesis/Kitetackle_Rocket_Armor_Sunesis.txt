@@ -1,5 +1,6 @@
 [Sunesis, Kitetackle Rocket Armor Sunesis]
 
+
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Damage Control II
 Compact Multispectrum Energized Membrane
@@ -17,11 +18,11 @@ Rocket Launcher II, Nova Rage Rocket
 
 Small Trimark Armor Pump I
 Small Trimark Armor Pump I
-[Empty Rig slot]
+Small Trimark Armor Pump I
 
 
-Acolyte II x2
-Acolyte II x2
+
+Acolyte II x4
 
 
 Nova Rage Rocket x832

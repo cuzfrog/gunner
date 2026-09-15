@@ -1,0 +1,35 @@
+[Cenotaph, Breacher Shield Cenotaph]
+
+Damage Control II
+Power Diagnostic System II
+
+Large Ancillary Shield Booster
+Multispectrum Shield Hardener II
+Large Shield Extender II
+Large Shield Extender II
+Stasis Webifier II
+Warp Scrambler II
+50MN Cold-Gas Enduring Microwarpdrive
+
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+Dual 180mm AutoCannon II, Hail M
+Dual 180mm AutoCannon II, Hail M
+Dual 180mm AutoCannon II, Hail M
+Medium Energy Nosferatu II
+Small Energy Nosferatu II
+
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+Medium Polycarbon Engine Housing II
+
+
+Warrior II x5
+Hobgoblin II x5
+
+
+Navy Cap Booster 800 x20
+Hail M x1200
+Fusion M x600
+Scourge Fury Light Missile x2000

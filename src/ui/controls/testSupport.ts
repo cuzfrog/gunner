@@ -252,7 +252,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     missileCatalog: asValue(mockMissileCatalog()),
     droneCatalog: asValue(mockDroneCatalog()),
     droneLoadoutResolver: asValue(vi.mocked<DroneLoadoutResolver>({ resolve: vi.fn(() => []) })),
-    droneLoadoutValidator: asValue(vi.mocked<DroneLoadoutValidator>({ validate: vi.fn(() => ({ valid: true, totalCount: 0, totalBandwidth: 0, totalVolume: 0, violations: [] })) })),
+    droneLoadoutValidator: asValue(vi.mocked<DroneLoadoutValidator>({ validate: vi.fn(() => ({ valid: true, totalCount: 0, totalBandwidth: 0, totalVolume: 0, bandwidthLimit: 0, capacityLimit: 0, violations: [] })) })),
     launcherClasses: asValue(mockLauncherClasses()),
     fittingCalculator: asValue(vi.mocked<FittingCalculator>({
       resolveTurrets: vi.fn(() => []),

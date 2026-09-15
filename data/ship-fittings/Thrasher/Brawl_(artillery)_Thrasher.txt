@@ -1,4 +1,5 @@
 [Thrasher, Kitetackle Art Shield Thrasher]
+
 Damage Control II
 Gyrostabilizer II
 
@@ -13,11 +14,12 @@ Stasis Webifier II
 280mm Howitzer Artillery II, EMP S
 280mm Howitzer Artillery II, EMP S
 280mm Howitzer Artillery II, EMP S
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I
+
 
 
 EMP S x14000

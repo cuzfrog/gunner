@@ -1,12 +1,13 @@
 [Apostle, Commandship Armor Apostle]
 
+
 Damage Control II
 Reactive Armor Hardener
 25000mm Rolled Tungsten Compact Plates
 25000mm Rolled Tungsten Compact Plates
 25000mm Rolled Tungsten Compact Plates
-[Empty Low slot]
-[Empty Low slot]
+Energized Adaptive Nano Membrane II
+Overdrive Injector System II
 
 Capital F-RX Compact Capacitor Booster, Cap Booster 3200
 Thukker Large Cap Battery
@@ -18,17 +19,17 @@ Capital I-ax Enduring Remote Armor Repairer
 Capital I-ax Enduring Remote Armor Repairer
 Armor Command Burst II, Armor Energizing Charge
 Armor Command Burst II, Armor Energizing Charge
-[Empty High slot]
+Heavy Energy Nosferatu II
 
 Capital Trimark Armor Pump I
 Capital Trimark Armor Pump I
 Capital Trimark Armor Pump I
+
 
 
 Vespa EC-600 x5
 Hornet EC-300 x5
-Warrior II x1
-Warrior II x2
+Warrior II x3
 
 
 Strontium Clathrates x900

@@ -1,0 +1,31 @@
+[Chameleon, Ewar Shield Chameleon]
+
+Damage Control II
+Power Diagnostic System II
+Signal Amplifier II
+Inertial Stabilizers II
+
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Remote Sensor Dampener II, Targeting Range Dampening Script
+Remote Sensor Dampener II, Scan Resolution Dampening Script
+50MN Cold-Gas Enduring Microwarpdrive
+Warp Scrambler II
+
+Medium Energy Nosferatu II
+Medium Energy Nosferatu II
+Medium Energy Neutralizer II
+250mm Railgun II, Spike M
+
+Medium Particle Dispersion Augmentor II
+Medium Particle Dispersion Augmentor II
+
+
+Hornet EC-300 x4
+
+
+Nanite Repair Paste x100
+Targeting Range Dampening Script x3
+Scan Resolution Dampening Script x2
+Spike M x600

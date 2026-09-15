@@ -1,4 +1,5 @@
 [Heron Navy Issue, Kitetackle Missile Shield Heron Navy Issue]
+
 Ballistic Control System II
 Ballistic Control System II
 
@@ -10,15 +11,13 @@ Small Capacitor Booster II, Navy Cap Booster 400
 
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
-[Empty high slot]
-[Empty high slot]
+Small Energy Nosferatu II
+Small Energy Nosferatu II
 
 Small EM Shield Reinforcer I
 Small Thermal Shield Reinforcer I
-[Empty rig slot]
+Small Core Defense Field Extender I
 
-
-Warrior II x3
 
 
 Nanite Repair Paste x32

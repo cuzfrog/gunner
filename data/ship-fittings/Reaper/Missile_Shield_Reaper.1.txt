@@ -1,13 +1,18 @@
 [Reaper, Missile Shield Reaper]
 
+
 200mm Rolled Tungsten Compact Plates
-[Empty Low slot]
+Damage Control II
 
 Medium Ancillary Shield Booster, Navy Cap Booster 50
 Medium Ancillary Shield Booster, Navy Cap Booster 50
 
 Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
 'Arbalest' Rocket Launcher I, Caldari Navy Inferno Rocket
+
+
+
+Warrior II x1
 
 
 Navy Cap Booster 50 x43

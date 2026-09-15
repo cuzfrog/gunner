@@ -4,11 +4,13 @@ import { dirname } from "node:path";
 import * as process from "node:process";
 import type { TypeId } from "../src/gamedata/ids";
 import {
+  COMMAND_BURSTS,
   FITTING_MODULES,
   MISSILE_GUIDANCE_COMPUTERS,
   MISSILE_GUIDANCE_ENHANCERS,
   STASIS_GRAPPLERS,
   STASIS_WEBS,
+  SUBSYSTEMS,
   TARGET_PAINTERS,
   TRACKING_COMPUTERS,
   TRACKING_DISRUPTORS,
@@ -19,7 +21,7 @@ import {
 const OUTPUT_PATH = "src/gamedata/moduleSlots/moduleSlots.ts";
 const NAME_TO_ID_PATH = "data/ship-modules/nameToId.json";
 
-export type ModuleSlot = "high" | "mid" | "low" | "rig";
+export type ModuleSlot = "high" | "mid" | "low" | "rig" | "subsystem";
 
 interface NamedTypeId {
   readonly name: string;
@@ -72,6 +74,47 @@ const GROUP_SLOTS: Readonly<Record<string, ModuleSlot>> = {
   "Rig Scanning": "rig",
   "Rig Shield": "rig",
   "Rig Targeting": "rig",
+  // Coverage completing the fittingDb module set (regen previously threw on these groups).
+  "Ancillary Armor Repairer": "high",
+  "Ancillary Remote Armor Repairer": "high",
+  "Ancillary Remote Shield Booster": "high",
+  "Ancillary Shield Booster": "mid",
+  "Armor Coating": "low",
+  "Armor Hardener": "low",
+  "Armor Repair Unit": "high",
+  "Armor Resistance Shift Hardener": "low",
+  "Capacitor Battery": "mid",
+  "Capacitor Booster": "mid",
+  "Capacitor Flux Coil": "low",
+  "Capacitor Power Relay": "low",
+  "Capacitor Recharger": "mid",
+  "Cloaking Device": "high",
+  "Command Burst": "high",
+  "Damage Control": "low",
+  "Drone Control Range Module": "mid",
+  "Drone Damage Modules": "low",
+  "Energy Neutralizer": "high",
+  "Energy Nosferatu": "high",
+  "Entropic Radiation Sink": "low",
+  "Hull Repair Unit": "high",
+  "Mutadaptive Remote Armor Repairer": "high",
+  "Power Diagnostic System": "low",
+  "Precursor Weapon": "high",
+  "Remote Armor Repairer": "high",
+  "Remote Capacitor Transmitter": "high",
+  "Remote Shield Booster": "high",
+  "Sensor Booster": "mid",
+  "Sensor Dampener": "mid",
+  "Shield Boost Amplifier": "mid",
+  "Shield Booster": "mid",
+  "Shield Hardener": "mid",
+  "Shield Power Relay": "low",
+  "Shield Resistance Amplifier": "mid",
+  "Signal Amplifier": "low",
+  "Core Subsystem": "subsystem",
+  "Defensive Subsystem": "subsystem",
+  "Offensive Subsystem": "subsystem",
+  "Propulsion Subsystem": "subsystem",
 } as const;
 
 export function generateModuleSlotsContent(
@@ -111,7 +154,7 @@ export function generateModuleSlotsContent(
     .sort((a, b) => Number(a) - Number(b))
     .map((id) => `  [${JSON.stringify(id)} as TypeId]: "${slotsById[id]}",`);
 
-  return `import type { TypeId } from "../ids";\n\nexport type ModuleSlot = "high" | "mid" | "low" | "rig";\n\nexport const MODULE_SLOTS_BY_NAME: Readonly<Record<string, ModuleSlot>> = {\n${nameLines.join("\n")}\n} as const;\n\nexport const MODULE_SLOTS_BY_ID: Readonly<Record<TypeId, ModuleSlot>> = {\n${idLines.join("\n")}\n} as const;\n`;
+  return `import type { TypeId } from "../ids";\n\nexport type ModuleSlot = "high" | "mid" | "low" | "rig" | "subsystem";\n\nexport const MODULE_SLOTS_BY_NAME: Readonly<Record<string, ModuleSlot>> = {\n${nameLines.join("\n")}\n} as const;\n\nexport const MODULE_SLOTS_BY_ID: Readonly<Record<TypeId, ModuleSlot>> = {\n${idLines.join("\n")}\n} as const;\n`;
 
   function collectSlot(item: NamedTypeId): void {
     if (item.name in slotsByName) return;
@@ -144,6 +187,8 @@ function main(): void {
   for (const stats of Object.values(TARGET_PAINTERS)) modulesByName.set(stats.name, stats.id);
   for (const stats of Object.values(MISSILE_GUIDANCE_COMPUTERS)) modulesByName.set(stats.name, stats.id);
   for (const stats of Object.values(MISSILE_GUIDANCE_ENHANCERS)) modulesByName.set(stats.name, stats.id);
+  for (const stats of Object.values(COMMAND_BURSTS)) modulesByName.set(stats.name, stats.id);
+  for (const stats of Object.values(SUBSYSTEMS)) modulesByName.set(stats.name, stats.id);
   const modules: NamedTypeId[] = [...modulesByName.entries()].map(([name, id]) => ({ name, id })).sort((a, b) => a.name.localeCompare(b.name));
   const turrets: NamedTypeId[] = Object.values(TURRETS)
     .map((stats) => ({ name: stats.name, id: stats.id }))

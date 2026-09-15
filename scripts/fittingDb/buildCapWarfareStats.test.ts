@@ -22,6 +22,7 @@ function makeCtx(opts: Partial<BuildCapWarfareStatsContext>): BuildCapWarfareSta
 
 const ENERGY_NEUTRALIZER_FALLOFF_EFFECT = 6187;
 const ENERGY_NOSFERATU_FALLOFF_EFFECT = 6197;
+const REMOTE_CAPACITOR_TRANSMITTER_EFFECT = 6184;
 
 describe("buildCapWarfareStatsFromIntents", () => {
   test("builds heavy neutralizer stats from SDE attributes", () => {
@@ -67,6 +68,39 @@ describe("buildCapWarfareStatsFromIntents", () => {
       values: values({ energyNeutralizerAmount: 600, duration: 24000 }),
       effects: new Set([ENERGY_NEUTRALIZER_FALLOFF_EFFECT]),
       groupId: 76,
+      dogmaEffects,
+    }));
+    expect(result).toBeUndefined();
+  });
+
+  test("builds remote capacitor transmitter stats (neutralizer-shaped) from SDE attributes", () => {
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      [String(REMOTE_CAPACITOR_TRANSMITTER_EFFECT)]: makeEffect(REMOTE_CAPACITOR_TRANSMITTER_EFFECT, { category: 2, name: "shipModuleRemoteCapacitorTransmitter" }),
+    };
+    const result = buildCapWarfareStatsFromIntents(makeCtx({
+      values: values({ powerTransferAmount: 311, duration: 5000, capacitorNeed: 338, maxRange: 4800 }),
+      effects: new Set([REMOTE_CAPACITOR_TRANSMITTER_EFFECT]),
+      groupId: 67,
+      dogmaEffects,
+    }));
+    expect(result).toEqual({
+      neutralizer: { amount: 311, cycleTime: 5, capacitorNeed: 338, maxRange: 4800, falloff: 0, requiredSkillIds: [toTypeId("3423")] },
+    });
+  });
+
+  test("returns undefined for a transmitter group without the cap transfer effect", () => {
+    const result = buildCapWarfareStatsFromIntents(makeCtx({ groupId: 67 }));
+    expect(result).toBeUndefined();
+  });
+
+  test("returns undefined for a transmitter group with the nosferatu effect", () => {
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      [String(ENERGY_NOSFERATU_FALLOFF_EFFECT)]: makeEffect(ENERGY_NOSFERATU_FALLOFF_EFFECT, { category: 2 }),
+    };
+    const result = buildCapWarfareStatsFromIntents(makeCtx({
+      values: values({ powerTransferAmount: 311, duration: 5000 }),
+      effects: new Set([ENERGY_NOSFERATU_FALLOFF_EFFECT]),
+      groupId: 67,
       dogmaEffects,
     }));
     expect(result).toBeUndefined();

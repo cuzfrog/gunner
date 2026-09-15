@@ -6,7 +6,7 @@ Medium Shield Extender II
 Enduring Multispectrum Shield Hardener
 EM Shield Amplifier II
 5MN Quad LiF Restrained Microwarpdrive
-Faint Epsilon Scoped Warp Scrambler
+Warp Scrambler II
 
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
@@ -14,14 +14,13 @@ Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
 Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-[Empty High slot]
+Small Energy Neutralizer II
+Small Energy Nosferatu II
 
 Small Ancillary Current Router I
-[Empty Rig slot]
+Small Polycarbon Engine Housing II
 
 
-Caldari Navy Scourge Light Missile x198
-Scourge Fury Light Missile x738
-Nanite Repair Paste x122
-Warp Disrupt Probe x27
+Caldari Navy Scourge Light Missile x308
+Defender Missile I x10
+Warp Disrupt Probe x26

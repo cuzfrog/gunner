@@ -14,15 +14,14 @@ Multispectrum Shield Hardener II
 
 Covert Ops Cloaking Device II
 Prototype 'Arbalest' Rapid Light Missile Launcher
-[Empty High slot]
-[Empty High slot]
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
 
 Medium Core Defense Field Extender I
 Medium Core Defense Field Extender I
 
 
-Heavy Shield Maintenance Bot II x2
-Heavy Shield Maintenance Bot II x3
+Heavy Shield Maintenance Bot II x5
 
 
 Liquid Ozone x145

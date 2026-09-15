@@ -1,4 +1,5 @@
 [Succubus, Tackle Beam Armor Succubus]
+
 Damage Control II
 Centii A-Type Small Armor Repairer
 Heat Sink II
@@ -10,11 +11,12 @@ Stasis Webifier II
 
 Small Focused Beam Laser II, Aurora S
 Small Focused Beam Laser II, Aurora S
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Energy Locus Coordinator II
 Small Energy Locus Coordinator II
 Small Energy Locus Coordinator II
+
 
 
 Navy Cap Booster 400 x8

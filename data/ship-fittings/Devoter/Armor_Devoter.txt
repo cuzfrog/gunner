@@ -12,12 +12,12 @@ Imperial Navy EM Armor Hardener
 Sensor Booster II, Scan Resolution Script
 Small Capacitor Booster II, Navy Cap Booster 400
 
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
+Medium Energy Nosferatu II
+Medium Energy Nosferatu II
+Medium Energy Nosferatu II
 
 Medium Trimark Armor Pump II
 Medium Trimark Armor Pump II

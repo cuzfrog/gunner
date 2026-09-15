@@ -1,5 +1,6 @@
 [Nefantar Thrasher, Kitetackle AC Shield Nefantar Thrasher]
 
+
 Damage Control II
 Gyrostabilizer II
 
@@ -18,7 +19,8 @@ Initiated Compact Warp Disruptor
 
 Small Core Defense Field Extender I
 Small Processor Overclocking Unit I
-[Empty Rig slot]
+Small Projectile Collision Accelerator I
+
 
 
 Guristas Scourge Rocket x788

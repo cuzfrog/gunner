@@ -2,7 +2,7 @@
 
 Gotan's Modified Gyrostabilizer
 Gotan's Modified Gyrostabilizer
-[Empty Low slot]
+Gotan's Modified Gyrostabilizer
 
 1MN Abyssal Afterburner
 5MN Abyssal Microwarpdrive
@@ -16,11 +16,9 @@ Medium Abyssal Shield Extender
 
 Small Projectile Locus Coordinator II
 Small Projectile Locus Coordinator II
-[Empty Rig slot]
 
 
-'Augmented' Warrior x1
-'Augmented' Warrior x1
+'Augmented' Warrior x2
 
 
 Domination Titanium Sabot S x998

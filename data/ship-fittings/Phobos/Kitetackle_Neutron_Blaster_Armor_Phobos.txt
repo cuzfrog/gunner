@@ -1,0 +1,34 @@
+[Phobos, Kitetackle Neutron Blaster Armor Phobos]
+
+
+Multispectrum Energized Membrane II
+Reactive Armor Hardener
+Abyssal Magnetic Field Stabilizer
+Medium Ancillary Armor Repairer
+Medium Armor Repairer II
+Damage Control II
+
+Medium Cap Battery II
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+50MN Y-T8 Compact Microwarpdrive
+Fleeting Compact Stasis Webifier
+
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Medium Energy Neutralizer II
+Medium Energy Nosferatu II
+
+Medium Explosive Armor Reinforcer II
+Medium Trimark Armor Pump II
+
+
+
+Mobile Small Warp Disruptor II x1
+Navy Cap Booster 800 x7
+Caldari Navy Antimatter Charge M x1000
+Null M x1000
+Nanite Repair Paste x243
+Void M x2384
+Focused Warp Disruption Script x1

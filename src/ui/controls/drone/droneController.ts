@@ -214,8 +214,8 @@ export class DroneControllerImpl implements DroneController {
       return;
     }
     setText(this.els.summaryCount, `${v.totalCount}/${profile.maxActiveDrones}`);
-    setText(this.els.summaryBandwidth, `${v.totalBandwidth}/${profile.droneBandwidth}`);
-    setText(this.els.summaryBay, `${v.totalVolume}/${profile.droneCapacity}`);
+    setText(this.els.summaryBandwidth, `${v.totalBandwidth}/${v.bandwidthLimit}`);
+    setText(this.els.summaryBay, `${v.totalVolume}/${v.capacityLimit}`);
     this.els.summaryBar.classList.toggle("is-invalid", !v.valid);
   }
 
@@ -285,7 +285,7 @@ export class DroneControllerImpl implements DroneController {
       this.validationValue = undefined;
       return;
     }
-    this.validationValue = this.validator.validate(this.droneGroups, this.loadoutContext.profile);
+    this.validationValue = this.validator.validate(this.droneGroups, this.loadoutContext.profile, this.loadoutContext.hullBonuses);
     this.resolvedDrones = this.resolver.resolve(this.droneGroups, this.loadoutContext, this.conditions);
   }
 

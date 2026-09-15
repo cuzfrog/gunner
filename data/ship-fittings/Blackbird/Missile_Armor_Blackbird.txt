@@ -14,14 +14,14 @@ Multispectral ECM I
 Rapid Light Missile Launcher I, Caldari Navy Scourge Light Missile
 Rapid Light Missile Launcher I, Caldari Navy Scourge Light Missile
 Rapid Light Missile Launcher I, Caldari Navy Scourge Light Missile
-[Empty High slot]
+Rapid Light Missile Launcher I, Caldari Navy Scourge Light Missile
 
 Medium Particle Dispersion Augmentor I
 Medium Particle Dispersion Augmentor I
 Medium EM Shield Reinforcer I
 
 
-Hornet EC-300 x5
+Hornet EC-300 x2
 
 
 Caldari Navy Scourge Light Missile x1000

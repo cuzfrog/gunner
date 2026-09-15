@@ -22,6 +22,9 @@ Medium Core Defense Field Extender II
 Medium EM Shield Reinforcer II
 
 
+Hornet II x5
+
+
 Null M x3000
 Caldari Navy Antimatter Charge M x2000
 Void M x1900

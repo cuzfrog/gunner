@@ -5,7 +5,7 @@ const PORT = 4321;
 export const BASE_URL = `http://localhost:${PORT}`;
 
 export const FITTING_THRASHER = "data/ship-fittings/Thrasher/Brawl_(artillery)_Thrasher.txt";
-export const FITTING_MERLIN = "data/ship-fittings/Merlin/Brawl_-_1_web_Merlin.txt";
+export const FITTING_MERLIN = "data/ship-fittings/Merlin/Tackle_Blaster_Shield_Merlin_1_Web.txt";
 export const FITTING_CERBERUS = "data/ship-fittings/Cerberus/Missile_Shield_Cerberus.txt";
 export const FITTING_CURSE_EWAR = "data/ship-fittings/Curse/Ewar_Armor_Curse.txt";
 export const FITTING_ISHTAR = "data/ship-fittings/Ishtar/Drone_Shield_Ishtar.txt";

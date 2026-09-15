@@ -1,0 +1,33 @@
+[Guardian-Vexor, Rail Drone Guardian-Vexor]
+
+Damage Control II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Power Diagnostic System II
+Nanofiber Internal Structure II
+
+50MN Cold-Gas Enduring Microwarpdrive
+Large Shield Extender II
+Warp Disruptor II
+Stasis Webifier II
+
+150mm Railgun II, Spike M
+150mm Railgun II, Spike M
+150mm Railgun II, Spike M
+Small Energy Neutralizer II
+Small Energy Neutralizer II
+
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+
+
+Vespa II x5
+Hobgoblin II x5
+Ogre II x2
+
+
+Spike M x2000
+Javelin M x2000
+Caldari Navy Antimatter Charge M x1500
+Nanite Repair Paste x50

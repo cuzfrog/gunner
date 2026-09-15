@@ -1,9 +1,10 @@
 [Ares, Kitetackle AC Shield Ares]
 
+
 Inertial Stabilizers II
 Damage Control II
-[Empty Low slot]
-[Empty Low slot]
+Gyrostabilizer II
+Gyrostabilizer II
 
 Medium Shield Extender I
 5MN Y-T8 Compact Microwarpdrive
@@ -11,7 +12,7 @@ Warp Disruptor II
 
 125mm Gatling AutoCannon II, Titanium Sabot S
 125mm Gatling AutoCannon II, Titanium Sabot S
-[Empty High slot]
+125mm Gatling AutoCannon II, Titanium Sabot S
 
 Small Hyperspatial Velocity Optimizer I
 Small Processor Overclocking Unit I

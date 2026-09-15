@@ -1,5 +1,6 @@
 [Typhoon Fleet Issue, Kitetackle Torp Armor Typhoon Fleet Issue]
 
+
 Damage Control II
 Ballistic Control System II
 Ballistic Control System II
@@ -11,8 +12,8 @@ Reactive Armor Hardener
 Domination Stasis Webifier
 Warp Disruptor II
 500MN Y-T8 Compact Microwarpdrive
-[Empty Med slot]
-[Empty Med slot]
+Cap Recharger II
+Sensor Booster II
 
 Torpedo Launcher II, Scourge Rage Torpedo
 Torpedo Launcher II, Scourge Rage Torpedo
@@ -20,12 +21,13 @@ Torpedo Launcher II, Scourge Rage Torpedo
 Torpedo Launcher II, Scourge Rage Torpedo
 Torpedo Launcher II, Scourge Rage Torpedo
 Torpedo Launcher II, Scourge Rage Torpedo
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Heavy Energy Nosferatu II
 
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
+
 
 
 Caldari Navy Wasp x3

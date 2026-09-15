@@ -420,7 +420,7 @@ describe("EwarResolverImpl", () => {
       const projection = scramblerProjection([disruptor]);
       expect(resolver.propulsionSuppressedIgnoringRange(projection)).toBe(false);
       expect(resolver.propulsionSuppressed(projection, 1000)).toBe(false);
-      expect(scheduledDrainsFromProjections(projection, { loadout: EMPTY_BOOST_LOADOUT, activation: undefined }, { loadout: EMPTY_MISSILE_BOOSTER_LOADOUT, activation: undefined }, { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: [] })).toEqual([
+      expect(scheduledDrainsFromProjections(projection, { loadout: EMPTY_BOOST_LOADOUT, activation: undefined }, { loadout: EMPTY_MISSILE_BOOSTER_LOADOUT, activation: undefined }, { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: [] }, [])).toEqual([
         { moduleId: DISRUPTOR_II_ID, amount: 30, interval: 5, active: true },
       ]);
     });

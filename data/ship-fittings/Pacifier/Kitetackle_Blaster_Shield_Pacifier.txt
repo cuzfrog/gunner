@@ -1,5 +1,6 @@
 [Pacifier, Kitetackle Blaster Shield Pacifier]
 
+
 Damage Control II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
@@ -14,10 +15,11 @@ Light Neutron Blaster II, Federation Navy Antimatter Charge S
 Covert Ops Cloaking Device II
 Compact Interdiction Nullifier
 Light Neutron Blaster II, Federation Navy Antimatter Charge S
-[Empty High slot]
+Light Neutron Blaster II, Federation Navy Antimatter Charge S
 
 Small Low Friction Nozzle Joints II
-[Empty Rig slot]
+Medium Hybrid Collision Accelerator I
+
 
 
 Federation Navy Antimatter Charge S x1500

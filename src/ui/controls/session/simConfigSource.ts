@@ -107,6 +107,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
         this.boosterController.projection(side) ?? { loadout: EMPTY_BOOST_LOADOUT, activation: undefined },
         this.missileBoosterController.projection(side) ?? { loadout: EMPTY_MISSILE_BOOSTER_LOADOUT, activation: undefined },
         this.sensorBoosterController.projection(side) ?? { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: undefined },
+        this.capacitorStatsSource.commandBursts(side),
       ),
       boosters: this.capacitorController.capBoosterSpecs(side),
       ...(row ? { propulsion: { moduleId: row.moduleId, amount: row.amount, interval: row.cycleTime } } : {}),

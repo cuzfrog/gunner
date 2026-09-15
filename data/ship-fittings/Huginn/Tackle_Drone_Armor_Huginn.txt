@@ -13,13 +13,16 @@ True Sansha Warp Disruptor
 Shadow Serpentis Stasis Webifier
 
 650mm Medium 'Scout' Artillery I, EMP M
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Medium Energy Neutralizer II
+Medium Energy Nosferatu II
+Medium Energy Neutralizer II
+Medium Energy Nosferatu II
 
 Medium Trimark Armor Pump II
 Medium Explosive Armor Reinforcer II
+
+
+Valkyrie II x4
 
 
 ECCM Script x1

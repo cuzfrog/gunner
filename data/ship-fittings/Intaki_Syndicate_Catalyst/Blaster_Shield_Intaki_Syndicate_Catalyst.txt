@@ -1,8 +1,9 @@
 [Intaki Syndicate Catalyst, Blaster Shield Intaki Syndicate Catalyst]
 
+
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
-[Empty Low slot]
+Damage Control II
 
 Sensor Booster II, Scan Resolution Script
 5MN Y-T8 Compact Microwarpdrive
@@ -16,9 +17,10 @@ Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
 
-[Empty Rig slot]
-[Empty Rig slot]
-[Empty Rig slot]
+Small Hybrid Collision Accelerator I
+Small Trimark Armor Pump I
+Small Hyperspatial Velocity Optimizer I
+
 
 
 Null S x10000

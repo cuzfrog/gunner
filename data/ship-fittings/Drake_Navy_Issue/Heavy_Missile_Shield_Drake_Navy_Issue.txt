@@ -1,0 +1,34 @@
+[Drake Navy Issue, Heavy Missile Shield Drake Navy Issue]
+
+Damage Control II
+Ballistic Control System II
+Ballistic Control System II
+Power Diagnostic System II
+
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Multispectrum Shield Hardener II
+Missile Guidance Computer II, Missile Range Script
+50MN Cold-Gas Enduring Microwarpdrive
+
+Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Heavy Missile Launcher II, Scourge Precision Heavy Missile
+Small Gremlin Compact Energy Neutralizer
+
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+Medium Hydraulic Bay Thrusters II
+
+
+Vespa II x4
+
+
+Scourge Precision Heavy Missile x3000
+Missile Range Script x1
+Missile Precision Script x1

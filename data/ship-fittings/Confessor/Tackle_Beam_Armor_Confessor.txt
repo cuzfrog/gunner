@@ -1,5 +1,6 @@
 [Confessor, Tackle Beam Armor Confessor]
 
+
 Damage Control II
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Coreli A-Type Small Armor Repairer
@@ -14,20 +15,19 @@ Dual Light Beam Laser II, Imperial Navy Standard S
 Dual Light Beam Laser II, Imperial Navy Standard S
 Dual Light Beam Laser II, Imperial Navy Standard S
 Dual Light Beam Laser II, Imperial Navy Standard S
-[Empty High slot]
-[Empty High slot]
+Small Energy Nosferatu II
+Small Energy Nosferatu II
 
 Small Ancillary Current Router I
 Small Ancillary Current Router II
 Small Energy Locus Coordinator II
 
 
+
 Imperial Navy Multifrequency S x7
-Imperial Navy Xray S x3
-Imperial Navy Xray S x1
+Imperial Navy Xray S x4
 Nanite Repair Paste x246
-Aurora S x3
-Aurora S x1
+Aurora S x4
 Imperial Navy Gamma S x4
 Gleam S x4
 Navy Cap Booster 200 x47

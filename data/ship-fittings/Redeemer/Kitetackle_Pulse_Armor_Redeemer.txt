@@ -1,17 +1,18 @@
 [Redeemer, Kitetackle Pulse Armor Redeemer]
 
+
 Imperial Navy 1600mm Steel Plates
 Imperial Navy Heat Sink
 Imperial Navy 1600mm Steel Plates
 Imperial Navy Heat Sink
 IFFA Compact Damage Control
-[Empty Low slot]
-[Empty Low slot]
+Damage Control II
+Energized Adaptive Nano Membrane II
 
 Caldari Navy Warp Disruptor
 Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 3200
 500MN Y-T8 Compact Microwarpdrive
-[Empty Med slot]
+Cap Recharger II
 
 Dual Heavy Pulse Laser II, Conflagration L
 Dual Heavy Pulse Laser II, Conflagration L
@@ -19,17 +20,21 @@ Dual Heavy Pulse Laser II, Conflagration L
 Dual Heavy Pulse Laser II, Conflagration L
 Dual Heavy Pulse Laser II, Conflagration L
 Heavy Gremlin Compact Energy Neutralizer
-[Empty High slot]
-[Empty High slot]
+Heavy Energy Nosferatu II
+Heavy Energy Nosferatu II
 
 Large Thermal Armor Reinforcer II
-[Empty Rig slot]
+Capital Energy Collision Accelerator I
+
+
+
+Infiltrator II x5
+Praetor II x3
 
 
 Imperial Navy Standard L x5
 Nanite Repair Paste x100
-Scorch L x2
-Scorch L x3
+Scorch L x5
 Imperial Navy Multifrequency L x5
 Navy Cap Booster 3200 x7
 Helium Isotopes x70465

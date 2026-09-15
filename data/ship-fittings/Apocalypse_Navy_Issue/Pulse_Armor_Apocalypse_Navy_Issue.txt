@@ -10,7 +10,7 @@ Energized Adaptive Nano Membrane II
 Heat Sink II
 
 Cap Recharger II
-Cap Recharger II
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 800
 Tracking Computer II, Optimal Range Script
 Large Cap Battery II
 
@@ -30,3 +30,6 @@ Large Auxiliary Nano Pump I
 
 Infiltrator II x5
 Hobgoblin II x5
+
+
+Navy Cap Booster 800 x20

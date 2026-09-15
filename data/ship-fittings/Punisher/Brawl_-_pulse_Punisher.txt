@@ -1,4 +1,6 @@
 [Punisher, Tackle Pulse Armor Punisher]
+
+
 Damage Control II
 Heat Sink II
 Heat Sink II
@@ -11,11 +13,12 @@ Warp Scrambler II
 Dual Light Pulse Laser II, Conflagration S
 Dual Light Pulse Laser II, Conflagration S
 Dual Light Pulse Laser II, Conflagration S
-[Empty high slot]
+Dual Light Pulse Laser II, Conflagration S
 
 Small Energy Burst Aerator II
 Small Trimark Armor Pump II
 Small Trimark Armor Pump II
+
 
 
 Nanite Repair Paste x32

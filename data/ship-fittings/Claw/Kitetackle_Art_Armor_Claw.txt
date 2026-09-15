@@ -1,5 +1,6 @@
 [Claw, Kitetackle Art Armor Claw]
 
+
 Overdrive Injector System II
 Inertial Stabilizers II
 Small Ancillary Armor Repairer, Nanite Repair Paste
@@ -11,10 +12,11 @@ Warp Disruptor II
 280mm Howitzer Artillery II, Republic Fleet EMP S
 280mm Howitzer Artillery II, Republic Fleet EMP S
 280mm Howitzer Artillery II, Republic Fleet EMP S
-[Empty High slot]
+Small Energy Nosferatu II
 
 Small Polycarbon Engine Housing I
 Small Polycarbon Engine Housing I
+
 
 
 Republic Fleet Phased Plasma S x391

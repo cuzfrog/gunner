@@ -8,7 +8,7 @@ EM Shield Amplifier II
 Warp Disruptor II
 5MN Microwarpdrive II
 Stasis Webifier II
-[Empty Med slot]
+Multispectrum Shield Hardener II
 
 Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
 Skirmish Command Burst II, Interdiction Maneuvers Charge
@@ -18,7 +18,7 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
 Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
 
 Small Polycarbon Engine Housing II
-[Empty Rig slot]
+Small Polycarbon Engine Housing II
 
 
 Caldari Navy Mjolnir Light Missile x512

@@ -1,4 +1,5 @@
 [Cormorant, Kitetackle Shield Cormorant]
+
 Damage Control II
 Magnetic Field Stabilizer II
 
@@ -13,11 +14,12 @@ Warp Disruptor II
 150mm 'Scout' Accelerator Cannon
 150mm 'Scout' Accelerator Cannon
 150mm 'Scout' Accelerator Cannon
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Hybrid Locus Coordinator II
 Small Hybrid Locus Coordinator II
 Small Polycarbon Engine Housing II
+
 
 
 Navy Cap Booster 400 x8

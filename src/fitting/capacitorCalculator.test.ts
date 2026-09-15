@@ -1,7 +1,7 @@
-import { type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
+import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import { FITTING_DB, type HullBonus } from "../gamedata/fittingDb";
 import { type ShipProfile, type SkillLevel, type StatConditions, defaultCapacitorSkills } from "../ships";
-import { EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, StackingPenaltyImpl, type BoostLoadout, type EwarLoadout, type EnergyNeutralizerSpec, type MissileBoosterLoadout, type SensorBoostLoadout, type StasisWebSpec, type TrackingBoosterSpec } from "../sim";
+import { EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, StackingPenaltyImpl, type BoostLoadout, type CommandBurstSpec, type EwarLoadout, type EnergyNeutralizerSpec, type MissileBoosterLoadout, type SensorBoostLoadout, type StasisWebSpec, type TrackingBoosterSpec } from "../sim";
 import { FittingStateFactory, type CargoEntry, type FittingModuleEntry } from "./fittingState";
 import { DefenseCalculatorImpl } from "./defenseCalculator";
 import { CapacitorCalculatorImpl, buildInjectorDrains, type CapacitorDrainSources } from "./capacitorCalculator";
@@ -18,8 +18,11 @@ const profile: ShipProfile = {
   baseSpeed: 165,
   sigRadius: 270,
   scanResolution: 200,
-  maxTargetingRange: 30000,
-  maxLockedTargets: 4,
+  maxTargetingRange: 30000,  maxLockedTargets: 4,
+  highSlots: 3,
+  medSlots: 4,
+  lowSlots: 3,
+  rigSlots: 3,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -65,13 +68,14 @@ interface DrainLoadouts {
   readonly boosts?: BoostLoadout;
   readonly missileBoosts?: MissileBoosterLoadout;
   readonly sensorBoosts?: SensorBoostLoadout;
+  readonly commandBursts?: readonly CommandBurstSpec[];
 }
 
 function resolve(entries: readonly FittingModuleEntry[], conditions: StatConditions = emptyConditions, turrets: readonly ImportedTurret[] = [], loadouts: DrainLoadouts = {}, propulsionModuleId: TypeId | undefined = undefined): ReturnType<CapacitorCalculatorImpl["resolve"]> {
   const state = factory.create(profile, [] as readonly HullBonus[], entries, [], [] as readonly CargoEntry[]);
   const defense = defenseCalculator.resolve(state, conditions);
   const turretDrains = turrets.map((turret) => ({ moduleId: turret.moduleId, capacitorNeed: turret.capacitorNeed, cycleTime: turret.cycleTime, count: turret.turretCount }));
-  const sources: CapacitorDrainSources = { defense, turretDrains, ewar: loadouts.ewar ?? EMPTY_EWAR_LOADOUT, boosts: loadouts.boosts ?? EMPTY_BOOST_LOADOUT, missileBoosts: loadouts.missileBoosts ?? EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: loadouts.sensorBoosts ?? EMPTY_SENSOR_BOOST_LOADOUT, propulsionModuleId };
+  const sources: CapacitorDrainSources = { defense, turretDrains, ewar: loadouts.ewar ?? EMPTY_EWAR_LOADOUT, boosts: loadouts.boosts ?? EMPTY_BOOST_LOADOUT, missileBoosts: loadouts.missileBoosts ?? EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: loadouts.sensorBoosts ?? EMPTY_SENSOR_BOOST_LOADOUT, commandBursts: loadouts.commandBursts ?? [], propulsionModuleId };
   return calculator.resolve(state, conditions, sources);
 }
 
@@ -395,5 +399,21 @@ describe("capacitorCalculator", () => {
     expect(result.stablePercent).toBeUndefined();
     expect(result.depletesInSeconds).toBeDefined();
     expect(result.depletesInSeconds).toBeLessThan(600);
+  });
+});
+
+describe("CapacitorCalculatorImpl - subsystem flat bonuses", () => {
+  function resolveWithBonuses(hullBonuses: readonly HullBonus[], entries: readonly FittingModuleEntry[] = []) {
+    const state = factory.create(profile, hullBonuses, entries, [], [] as readonly CargoEntry[]);
+    const defense = defenseCalculator.resolve(state, emptyConditions);
+    const sources: CapacitorDrainSources = { defense, turretDrains: [], ewar: EMPTY_EWAR_LOADOUT, boosts: EMPTY_BOOST_LOADOUT, missileBoosts: EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: EMPTY_SENSOR_BOOST_LOADOUT, commandBursts: [], propulsionModuleId: undefined };
+    return calculator.resolve(state, emptyConditions, sources);
+  }
+
+  test("flat capacitor capacity adds to base before percent multipliers", () => {
+    const base = resolveWithBonuses([]);
+    expect(base.spec.capacity).toBe(profile.capacitorCapacity);
+    const boosted = resolveWithBonuses([{ attribute: "capacitorCapacityFlat", magnitude: 200, scalesWithHullSkill: false, sourceId: toTypeId("24692") }]);
+    expect(boosted.spec.capacity).toBe(profile.capacitorCapacity + 200);
   });
 });

@@ -1,8 +1,9 @@
 [Purifier, Kitetackle AC Shield Purifier]
 
+
 Nanofiber Internal Structure II
 Nanofiber Internal Structure II
-[Empty Low slot]
+Damage Control II
 
 Caldari Navy Medium Shield Extender
 5MN Y-T8 Compact Microwarpdrive
@@ -10,13 +11,13 @@ Faint Epsilon Scoped Warp Scrambler
 
 125mm Gatling AutoCannon II, Republic Fleet EMP S
 Covert Ops Cloaking Device II
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+125mm Gatling AutoCannon II, Republic Fleet EMP S
+125mm Gatling AutoCannon II, Republic Fleet EMP S
+125mm Gatling AutoCannon II, Republic Fleet EMP S
 
 Small Hyperspatial Velocity Optimizer II
 Small Processor Overclocking Unit II
 
 
-Void Bomb x2
-Void Bomb x1
+
+Void Bomb x3

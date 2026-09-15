@@ -26,6 +26,9 @@ Medium Auxiliary Nano Pump I
 Medium Nanobot Accelerator I
 
 
+Hammerhead II x5
+
+
 Inferno Heavy Missile x11120
 Nanite Repair Paste x59
 Inferno Fury Heavy Missile x3025

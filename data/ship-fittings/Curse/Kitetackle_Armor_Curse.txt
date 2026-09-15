@@ -9,8 +9,8 @@ Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
 50MN Y-T8 Compact Microwarpdrive
 Stasis Webifier II
 Warp Disruptor II
-[Empty Med slot]
-[Empty Med slot]
+Warp Scrambler II
+Fleeting Compact Stasis Webifier
 
 Medium Infectious Scoped Energy Neutralizer
 Medium Energy Neutralizer II
@@ -18,8 +18,8 @@ Medium Energy Neutralizer II
 Medium Ghoul Compact Energy Nosferatu
 Medium Gremlin Compact Energy Neutralizer
 
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Ancillary Current Router II
+Medium Trimark Armor Pump II
 
 
 Acolyte II x1

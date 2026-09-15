@@ -1,4 +1,4 @@
-import { EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, type EwarProjection, type MissileBoosterProjection, type MissileSpec, type SensorBoostProjection, type TurretBoostProjection, type TurretSpec, type WeaponSpec } from "../../../sim";
+import { EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, type CommandBurstSpec, type EwarProjection, type MissileBoosterProjection, type MissileSpec, type SensorBoostProjection, type TurretBoostProjection, type TurretSpec, type WeaponSpec } from "../../../sim";
 import { toTypeId } from "../../../gamedata/ids";
 import type { CapacitorStats } from "../../../fitting";
 import type { FittedHullSummary } from "../../../appstate";
@@ -151,7 +151,7 @@ function build() {
     infiniteCapacitor: vi.fn(() => false),
     capBoosterSpecs: vi.fn(() => []),
   } as unknown as CapacitorController;
-  const capacitorStatsSource = { stats: vi.fn((_side: "shipA" | "shipB") => undefined as CapacitorStats | undefined) } as unknown as CapacitorStatsSource & { stats: ReturnType<typeof vi.fn> };
+  const capacitorStatsSource = { stats: vi.fn((_side: "shipA" | "shipB") => undefined as CapacitorStats | undefined), commandBursts: vi.fn((_side: "shipA" | "shipB") => [] as readonly CommandBurstSpec[]) } as unknown as CapacitorStatsSource & { stats: ReturnType<typeof vi.fn> };
   return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, defenseController, capacitorController, capacitorStatsSource, turretSpec, missileSpec };
 }
 

@@ -1,4 +1,5 @@
 [Atron, Kitetackle Armor Atron]
+
 Magnetic Field Stabilizer II
 Nanofiber Internal Structure II
 Small Ancillary Armor Repairer, Nanite Repair Paste
@@ -10,11 +11,12 @@ Warp Disruptor II
 150mm 'Scout' Accelerator Cannon
 150mm 'Scout' Accelerator Cannon
 150mm 'Scout' Accelerator Cannon
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Hybrid Locus Coordinator II
 Small Hybrid Locus Coordinator II
 Small Ancillary Current Router II
+
 
 
 Nanite Repair Paste x32

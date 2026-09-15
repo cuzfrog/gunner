@@ -1,4 +1,5 @@
 [Magnate Navy Issue, Kitetackle Beam Armor Magnate Navy Issue]
+
 Heat Sink II
 Heat Sink II
 Nanofiber Internal Structure II
@@ -11,14 +12,12 @@ Warp Disruptor II
 
 Small Focused Beam Laser II, Aurora S
 Small Focused Beam Laser II, Aurora S
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Energy Locus Coordinator II
 Small Energy Locus Coordinator II
 Small Energy Locus Coordinator II
 
-
-Warrior II x4
 
 
 Nanite Repair Paste x32

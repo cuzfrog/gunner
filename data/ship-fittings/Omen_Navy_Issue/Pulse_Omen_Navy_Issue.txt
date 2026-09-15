@@ -1,0 +1,34 @@
+[Omen Navy Issue, Pulse Omen Navy Issue]
+
+Damage Control II
+Multispectrum Energized Membrane II
+Nanofiber Internal Structure II
+Heat Sink II
+Heat Sink II
+Heat Sink II
+Medium Ancillary Armor Repairer
+
+50MN Microwarpdrive II
+Warp Disruptor II
+Medium Capacitor Booster II, Navy Cap Booster 800
+
+Heavy Pulse Laser II, Scorch M
+Heavy Pulse Laser II, Scorch M
+Heavy Pulse Laser II, Scorch M
+Heavy Pulse Laser II, Scorch M
+Small Energy Neutralizer II
+
+Medium Energy Locus Coordinator II
+Medium Energy Locus Coordinator II
+Medium Ancillary Current Router I
+
+
+Hornet EC-300 x5
+Warrior II x5
+
+
+Conflagration M x4
+Imperial Navy Multifrequency M x4
+Nanite Repair Paste x150
+Navy Cap Booster 800 x16
+Scorch M x4

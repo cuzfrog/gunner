@@ -1,0 +1,33 @@
+[Myrmidon Navy Issue, Rail Armor Myrmidon Navy Issue]
+
+Damage Control II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Reactive Armor Hardener
+Multispectrum Energized Membrane II
+1600mm Rolled Tungsten Compact Plates
+
+Large Compact Pb-Acid Cap Battery
+Cap Recharger II
+Warp Scrambler II
+Stasis Webifier II
+50MN Y-T8 Compact Microwarpdrive
+
+Drone Link Augmentor I
+Medium I-ax Enduring Remote Armor Repairer
+250mm Railgun II, Spike M
+250mm Railgun II, Spike M
+Heavy Electron Blaster II, Void M
+Medium Energy Neutralizer II
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+Medium Ancillary Current Router II
+
+
+Ogre II x4
+
+
+Void M x400
+Spike M x600
+Nanite Repair Paste x100

@@ -375,6 +375,38 @@ describe("buildDefenseStatsFromIntents - repairers", () => {
     expect(stats?.ancillary).toEqual({ chargeMultiplier: 1, shots: 0, reloadTime: 60 });
   });
 
+  test("ancillary remote armor repairer (effect 6651) builds repairer/armor with charged ancillary", () => {
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "6651": makeEffect(6651, { category: 2, name: "shipModuleAncillaryRemoteArmorRepairer" }),
+    };
+    const ctx = makeCtx({
+      values: values({ armorDamageAmount: 290, duration: 6000, capacitorNeed: 264, chargedArmorDamageMultiplier: 3, reloadTime: 60000 }),
+      effects: new Set([6651]),
+      dogmaEffects,
+      typeDogma: makeTypeDogma([{ attributeID: 84, value: 290 }]),
+    });
+    const stats = buildDefenseStatsFromIntents(ctx);
+    expect(stats?.kind).toBe("repairer");
+    expect(stats?.layer).toBe("armor");
+    expect(stats?.ancillary).toEqual({ chargeMultiplier: 3, shots: 0, reloadTime: 60 });
+  });
+
+  test("ancillary remote shield booster (effect 6652) builds repairer/shield with ancillary", () => {
+    const dogmaEffects: Record<string, SdeDogmaEffect> = {
+      "6652": makeEffect(6652, { category: 2, name: "shipModuleAncillaryRemoteShieldBooster" }),
+    };
+    const ctx = makeCtx({
+      values: values({ shieldBonus: 950, duration: 8000, capacitorNeed: 1475, reloadTime: 60000 }),
+      effects: new Set([6652]),
+      dogmaEffects,
+      typeDogma: makeTypeDogma([{ attributeID: 68, value: 950 }]),
+    });
+    const stats = buildDefenseStatsFromIntents(ctx);
+    expect(stats?.kind).toBe("repairer");
+    expect(stats?.layer).toBe("shield");
+    expect(stats?.ancillary).toEqual({ chargeMultiplier: 1, shots: 0, reloadTime: 60 });
+  });
+
   test("armor repairer (effect 27) builds repairer/armor", () => {
     const dogmaEffects: Record<string, SdeDogmaEffect> = {
       "27": makeEffect(27, { category: 1, name: "armorRepair" }),

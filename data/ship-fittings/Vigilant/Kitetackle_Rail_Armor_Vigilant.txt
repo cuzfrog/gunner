@@ -8,25 +8,27 @@ Federation Navy Magnetic Field Stabilizer
 Imperial Navy Multispectrum Energized Membrane
 
 50MN Digital Booster Microwarpdrive
-Domination Warp Disruptor
-Federation Navy Stasis Webifier
 Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
+Caldari Navy Warp Disruptor
+Federation Navy Stasis Webifier
 
-200mm Railgun II, Federation Navy Antimatter Charge M
-200mm Railgun II, Federation Navy Antimatter Charge M
-200mm Railgun II, Federation Navy Antimatter Charge M
-200mm Railgun II, Federation Navy Antimatter Charge M
-200mm Railgun II, Federation Navy Antimatter Charge M
+200mm Railgun II, Federation Navy Thorium Charge M
+200mm Railgun II, Federation Navy Thorium Charge M
+200mm Railgun II, Federation Navy Thorium Charge M
+200mm Railgun II, Federation Navy Thorium Charge M
+200mm Railgun II, Federation Navy Thorium Charge M
 
 Medium Polycarbon Engine Housing II
 Medium Hybrid Metastasis Adjuster II
 Medium Hyperspatial Velocity Optimizer I
 
 
+Hammerhead II x5
+
+
 Spike M x2400
-Federation Navy Antimatter Charge M x2000
 Federation Navy Thorium Charge M x2400
-Navy Cap Booster 400 x24
-Nanite Repair Paste x940
-Nanite Repair Paste x48
+Navy Cap Booster 400 x25
+Nanite Repair Paste x1032
+Federation Navy Antimatter Charge M x2400
 Javelin M x2400

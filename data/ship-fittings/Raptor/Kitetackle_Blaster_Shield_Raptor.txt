@@ -1,8 +1,9 @@
 [Raptor, Kitetackle Blaster Shield Raptor]
 
+
 Nanofiber Internal Structure II
 Magnetic Field Stabilizer II
-[Empty Low slot]
+Damage Control II
 
 Republic Fleet Medium Shield Extender
 Stasis Webifier II
@@ -15,6 +16,7 @@ Light Neutron Blaster II, Null S
 
 Small EM Shield Reinforcer II
 Small Core Defense Field Extender II
+
 
 
 Void S x1455

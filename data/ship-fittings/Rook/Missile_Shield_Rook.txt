@@ -1,16 +1,16 @@
 [Rook, Missile Shield Rook]
 
 Damage Control II
-[Empty Low slot]
-[Empty Low slot]
+Ballistic Control System II
+Power Diagnostic System II
 
 Large Shield Extender II
 Multispectrum Shield Hardener II
 Medium Capacitor Booster II, Navy Cap Booster 400
 100MN Y-S8 Compact Afterburner
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Sensor Booster II, Targeting Range Script
+Large Shield Extender II
+Multispectrum Shield Hardener II
 
 Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
 Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
@@ -22,6 +22,12 @@ Medium Particle Dispersion Augmentor I
 Medium Particle Dispersion Projector I
 
 
-Caldari Navy Mjolnir Light Missile x535
+Hornet II x5
+
+
+Caldari Navy Mjolnir Light Missile x1000
+Scourge Fury Light Missile x1000
 Navy Cap Booster 400 x17
 Nanite Repair Paste x200
+Targeting Range Script x1
+Scan Resolution Script x1

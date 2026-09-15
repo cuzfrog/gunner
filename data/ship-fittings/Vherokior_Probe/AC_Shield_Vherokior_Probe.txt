@@ -1,21 +1,26 @@
 [Vherokior Probe, AC Shield Vherokior Probe]
 
-[Empty Low slot]
-[Empty Low slot]
-[Empty Low slot]
+
+Damage Control II
+Gyrostabilizer II
+Gyrostabilizer II
 
 1MN Afterburner I
 Small Shield Booster I
-[Empty Med slot]
-[Empty Med slot]
+Small Shield Extender II
+Small Shield Extender II
 
 200mm AutoCannon I, EMP S
 200mm AutoCannon I, EMP S
-[Empty High slot]
+Drone Link Augmentor II
 
 Small Gravity Capacitor Upgrade I
 Small Gravity Capacitor Upgrade I
-[Empty Rig slot]
+Small Projectile Collision Accelerator I
+
+
+
+Warrior II x3
 
 
 EMP S x300

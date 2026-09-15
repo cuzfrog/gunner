@@ -1,0 +1,29 @@
+[Scimitar, Logi Shield Scimitar]
+
+Damage Control II
+Power Diagnostic System II
+Capacitor Power Relay II
+Power Diagnostic System II
+
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Multispectrum Shield Hardener II
+50MN Quad LiF Restrained Microwarpdrive
+F-90 Compact Sensor Booster, ECCM Script
+
+Large Remote Shield Booster II
+Large Remote Shield Booster II
+Medium Remote Shield Booster II
+Medium Remote Shield Booster II
+
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+
+
+Light Shield Maintenance Bot II x3
+
+
+Nanite Repair Paste x200
+ECCM Script x1
+Targeting Range Script x1
+Scan Resolution Script x1

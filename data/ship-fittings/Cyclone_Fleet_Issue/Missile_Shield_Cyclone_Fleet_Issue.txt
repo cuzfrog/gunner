@@ -26,12 +26,10 @@ Medium Ancillary Current Router I
 Medium Core Defense Field Extender I
 
 
-Imperial Navy Infiltrator x2
-Imperial Navy Infiltrator x3
+Imperial Navy Infiltrator x5
 
 
-Caldari Navy Nova Heavy Missile x2379
-Caldari Navy Nova Heavy Missile x3479
+Caldari Navy Nova Heavy Missile x5858
 Mjolnir Fury Heavy Missile x3213
 Caldari Navy Mjolnir Heavy Missile x2960
 Scourge Fury Heavy Missile x557

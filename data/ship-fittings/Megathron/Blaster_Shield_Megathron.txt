@@ -1,0 +1,36 @@
+[Megathron, Blaster Shield Megathron]
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Federation Navy Magnetic Field Stabilizer
+Multispectrum Energized Membrane II
+Damage Control II
+Tracking Enhancer II
+Tracking Enhancer II
+Reactor Control Unit II
+
+500MN Quad LiF Restrained Microwarpdrive
+Large Shield Extender II
+Large Shield Extender II
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 800
+
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+
+Large Core Defense Field Extender II
+Large Core Defense Field Extender II
+Large Core Defense Field Extender II
+
+Hammerhead II x5
+Hobgoblin II x5
+
+
+Void L x6
+Federation Navy Antimatter Charge L x2000
+Nanite Repair Paste x100
+Navy Cap Booster 800 x20

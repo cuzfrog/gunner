@@ -1,0 +1,35 @@
+[Scythe Fleet Issue, Dual Prop Scythe Fleet Issue]
+
+Damage Control II
+Reactor Control Unit II
+Nanofiber Internal Structure II
+Gyrostabilizer II
+Gyrostabilizer II
+
+50MN Quad LiF Restrained Microwarpdrive
+10MN Afterburner II
+Warp Scrambler II
+X-Large Ancillary Shield Booster
+Multispectrum Shield Hardener II
+
+Dual 180mm AutoCannon II, Hail M
+Dual 180mm AutoCannon II, Hail M
+Dual 180mm AutoCannon II, Hail M
+Dual 180mm AutoCannon II, Hail M
+Small Energy Nosferatu II
+
+Medium Processor Overclocking Unit I
+Medium EM Shield Reinforcer II
+Medium Polycarbon Engine Housing II
+
+
+Acolyte II x5
+
+
+Barrage M x2000
+Hail M x2000
+Nanite Repair Paste x50
+Navy Cap Booster 400 x26
+Republic Fleet Depleted Uranium M x1000
+Republic Fleet EMP M x1000
+Republic Fleet Phased Plasma M x1000

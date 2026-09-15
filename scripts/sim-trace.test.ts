@@ -32,9 +32,9 @@ describe("TraceParamsParser", () => {
       "--ship-b-ewar", "data/ship-fittings/Curse/Ewar_Armor_Curse.txt",
       "--ship-b-ewar-overload", "false",
     ]);
-    expect(params.config.shipA.ewar?.loadout.webs).toHaveLength(1);
+    expect(params.config.shipA.ewar?.loadout.webs).toHaveLength(2);
     expect(params.config.shipA.ewar?.activation?.webs[0]?.overloaded).toBe(true);
-    expect(params.config.shipB.ewar?.loadout.webs).toHaveLength(0);
+    expect(params.config.shipB.ewar?.loadout.webs).toHaveLength(1);
     expect(params.config.shipB.ewar?.loadout.disruptors.length).toBeGreaterThanOrEqual(2);
     expect(params.config.shipB.ewar?.activation?.disruptors[0]?.overloaded).toBe(false);
   });
@@ -59,7 +59,7 @@ describe("TraceParamsParser", () => {
       "--ship-a-ewar-overload", "true",
     ]);
     const projection = params.config.shipA.ewar;
-    expect(projection?.loadout.webs).toHaveLength(1);
+    expect(projection?.loadout.webs).toHaveLength(2);
     expect(projection?.loadout.webs[0]?.moduleName).toBe("Stasis Webifier II");
     expect(projection?.loadout.disruptors).toHaveLength(0);
     expect(projection?.activation?.webs[0]?.overloaded).toBe(true);
@@ -71,7 +71,7 @@ describe("TraceParamsParser", () => {
       "--ship-b-ewar-overload", "false",
     ]);
     const projection = params.config.shipB.ewar;
-    expect(projection?.loadout.webs).toHaveLength(0);
+    expect(projection?.loadout.webs).toHaveLength(1);
     expect(projection?.loadout.disruptors.length).toBeGreaterThanOrEqual(2);
     expect(projection?.loadout.disruptors.some((d) => d.defaultScript?.name === "Optimal Range Disruption Script")).toBe(true);
     expect(projection?.loadout.disruptors.some((d) => d.defaultScript?.name === "Tracking Speed Disruption Script")).toBe(true);

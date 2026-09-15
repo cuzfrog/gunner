@@ -195,7 +195,7 @@ describe("DroneController", () => {
     const { controller, droneLoadoutValidator } = buildDrone({
       droneLoadoutResolver: resolverReturningDrones([importedDroneFixture()]),
       droneLoadoutValidator: {
-        validate: vi.fn(() => ({ valid: false, totalCount: 5, totalBandwidth: 25, totalVolume: 25, violations: ["bandwidthExceeded"] as readonly DroneLoadoutViolation[] })),
+        validate: vi.fn(() => ({ valid: false, totalCount: 5, totalBandwidth: 25, totalVolume: 25, bandwidthLimit: 25, capacityLimit: 25, violations: ["bandwidthExceeded"] as readonly DroneLoadoutViolation[] })),
       },
     });
     controller.applyImported(importedWithDrones([importedDroneFixture()]), NEUTRAL_CONDITIONS);
@@ -320,7 +320,7 @@ describe("DroneController", () => {
     const { document, controller } = buildDrone({
       droneLoadoutResolver: resolverReturningDrones([hobgoblin]),
       droneLoadoutValidator: {
-        validate: vi.fn(() => ({ valid: false, totalCount: 5, totalBandwidth: 25, totalVolume: 25, violations: ["bandwidthExceeded"] as readonly DroneLoadoutViolation[] })),
+        validate: vi.fn(() => ({ valid: false, totalCount: 5, totalBandwidth: 25, totalVolume: 25, bandwidthLimit: 25, capacityLimit: 25, violations: ["bandwidthExceeded"] as readonly DroneLoadoutViolation[] })),
       },
     });
     controller.applyImported(importedWithDrones([hobgoblin]), NEUTRAL_CONDITIONS);
@@ -329,8 +329,8 @@ describe("DroneController", () => {
     const summaryBay = getFake(document, "ship-a-drone-summary-bay");
     const summaryBar = getFake(document, "ship-a-drone-summary-bar");
     expect(summaryCount.textContent).toBe("5/5");
-    expect(summaryBandwidth.textContent).toBe("25/0");
-    expect(summaryBay.textContent).toBe("25/0");
+    expect(summaryBandwidth.textContent).toBe("25/25");
+    expect(summaryBay.textContent).toBe("25/25");
     expect(summaryBar.classList.toggle).toHaveBeenCalledWith("is-invalid", true);
   });
 

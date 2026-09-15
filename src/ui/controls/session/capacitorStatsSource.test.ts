@@ -1,5 +1,5 @@
 import { type CapacitorDrainSources, type CapacitorStats, type FittingImport, type ImportedFitting } from "../../../fitting";
-import type { BoostLoadout, EwarLoadout, TurretSpec } from "../../../sim";
+import type { BoostLoadout, CommandBurstSpec, EwarLoadout, TurretSpec } from "../../../sim";
 import { toTypeId } from "../../../gamedata/ids";
 import type { SidePanelState } from "../sidePanel";
 import type { UiEvents } from "../../events";
@@ -28,6 +28,7 @@ function importedFitting(): ImportedFitting {
     sensorBoosts: { boosters: [], amplifiers: [] },
     hullBonuses: [],
     defense: {},
+    commandBursts: [],
     capacitor: STATS,
   } as unknown as ImportedFitting;
 }
@@ -108,6 +109,17 @@ describe("capacitorStatsSource", () => {
     expect(sourcesArg.ewar).toBe(imported.ewar);
     expect(sourcesArg.missileBoosts).toBe(imported.missileBoosts);
     expect(sourcesArg.sensorBoosts).toBe(imported.sensorBoosts);
+  });
+
+  test("command bursts flow from the import into drain sources and the accessor", () => {
+    const burst: CommandBurstSpec = { moduleName: "Shield Command Burst II", moduleId: toTypeId("43555"), capacitorNeed: 25, cycleTime: 60 };
+    const { source, listeners, fittingImport, imported } = build({ commandBursts: [burst] } as never);
+    listeners[0]?.fittingImported("shipA", imported);
+    source.stats("shipA");
+    const [, , sourcesArg] = fittingImport.resolveCapacitorStats.mock.calls[0] as unknown as [ImportedFitting, unknown, CapacitorDrainSources];
+    expect(sourcesArg.commandBursts).toEqual([burst]);
+    expect(source.commandBursts("shipA")).toEqual([burst]);
+    expect(source.commandBursts("shipB")).toEqual([]);
   });
 
   test("propulsion module id follows the live fitted hull, not the import", () => {

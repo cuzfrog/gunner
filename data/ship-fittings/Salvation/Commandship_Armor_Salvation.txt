@@ -29,6 +29,5 @@ Armor Energizing Charge x200
 Armor Reinforcement Charge x200
 Optimal Range Script x1
 Rapid Repair Charge x200
-Navy Cap Booster 3200 x18
-Navy Cap Booster 3200 x86
+Navy Cap Booster 3200 x104
 Helium Isotopes x188085

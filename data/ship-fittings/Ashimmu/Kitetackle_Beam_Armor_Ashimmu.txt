@@ -27,11 +27,9 @@ Hornet EC-300 x5
 Warrior II x5
 
 
-Imperial Navy Multifrequency M x2
-Imperial Navy Multifrequency M x1
+Imperial Navy Multifrequency M x3
 Navy Cap Booster 400 x1
 Navy Cap Booster 800 x16
 Nanite Repair Paste x248
 Imperial Navy Standard M x6
-Imperial Navy Radio M x2
-Imperial Navy Radio M x1
+Imperial Navy Radio M x3

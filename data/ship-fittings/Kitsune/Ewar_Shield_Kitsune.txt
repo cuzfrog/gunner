@@ -1,17 +1,18 @@
 [Kitsune, Ewar Shield Kitsune]
 
-[Empty Low slot]
-[Empty Low slot]
+
+Damage Control II
+Overdrive Injector System II
 
 Caldari Navy Small Shield Extender
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
-[Empty Med slot]
+Medium Shield Extender II
+Medium Shield Extender II
+Medium Shield Extender II
+Medium Shield Extender II
 
 Caldari Navy Light Missile Launcher, Dread Guristas Scourge Light Missile
 Caldari Navy Light Missile Launcher, Dread Guristas Scourge Light Missile
 Caldari Navy Light Missile Launcher, Dread Guristas Scourge Light Missile
 
 Small Particle Dispersion Augmentor II
-[Empty Rig slot]
+Medium Core Defense Field Extender I

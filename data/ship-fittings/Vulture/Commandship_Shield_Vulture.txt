@@ -17,11 +17,14 @@ Shield Command Burst II, Shield Extension Charge
 Shield Command Burst II, Shield Harmonizing Charge
 Civilian Gatling Autocannon
 Information Command Burst II, Sensor Optimization Charge
-[Empty High slot]
-[Empty High slot]
+Medium Energy Nosferatu II
+Medium Energy Nosferatu II
 
-[Empty Rig slot]
-[Empty Rig slot]
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+
+
+Hornet II x5
 
 
 Shield Extension Charge x14654

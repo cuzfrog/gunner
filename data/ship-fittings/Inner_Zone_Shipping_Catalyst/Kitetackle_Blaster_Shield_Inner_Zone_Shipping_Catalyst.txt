@@ -1,5 +1,6 @@
 [Inner Zone Shipping Catalyst, Kitetackle Blaster Shield Inner Zone Shipping Catalyst]
 
+
 Nanofiber Internal Structure II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
@@ -18,7 +19,8 @@ Light Neutron Blaster II, Caldari Navy Antimatter Charge S
 
 Small Low Friction Nozzle Joints I
 Small Low Friction Nozzle Joints I
-[Empty Rig slot]
+Small Hybrid Collision Accelerator I
+
 
 
 Null S x2000

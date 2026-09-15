@@ -1,4 +1,5 @@
 [Succubus, Tackle Beam Shield Succubus]
+
 Damage Control II
 Heat Sink II
 Heat Sink II
@@ -10,11 +11,12 @@ Stasis Webifier II
 
 Small Focused Beam Laser II, Aurora S
 Small Focused Beam Laser II, Aurora S
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Energy Locus Coordinator II
 Small Energy Locus Coordinator II
 Small Ancillary Current Router II
+
 
 
 Aurora S x4000

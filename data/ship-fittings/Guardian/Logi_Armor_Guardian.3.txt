@@ -1,10 +1,10 @@
-[Guardian, Logi Armor Guardian]
+[Guardian, Fit Logi Armor Guardian]
 
 Damage Control II
 1600mm Rolled Tungsten Compact Plates
-[Empty Low slot]
-[Empty Low slot]
-[Empty Low slot]
+True Sansha Thermal Armor Hardener
+True Sansha EM Armor Hardener
+Reactive Armor Hardener
 
 10MN Y-S8 Compact Afterburner
 Alumel-Wired Enduring Sensor Booster, ECCM Script
@@ -13,12 +13,17 @@ Large Remote Armor Repairer II
 Large Remote Armor Repairer II
 Large Remote Armor Repairer II
 Large Remote Armor Repairer II
-[Empty High slot]
-[Empty High slot]
+Large Inductive Compact Remote Capacitor Transmitter
+Large Inductive Compact Remote Capacitor Transmitter
 
 Medium Ancillary Current Router II
 Medium Ancillary Current Router II
+
+
+Acolyte II x5
 
 
 Scan Resolution Script x1
+Targeting Range Script x1
 Nanite Repair Paste x100
+ECCM Script x1

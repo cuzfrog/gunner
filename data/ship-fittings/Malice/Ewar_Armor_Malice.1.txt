@@ -1,5 +1,6 @@
 [Malice, Ewar Armor Malice]
 
+
 400mm Rolled Tungsten Compact Plates
 Multispectrum Energized Membrane II
 Damage Control II
@@ -8,14 +9,15 @@ Damage Control II
 Balmer Series Compact Tracking Disruptor I, Optimal Range Disruption Script
 Small F-RX Compact Capacitor Booster, Navy Cap Booster 200
 
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Small Energy Nosferatu II
+Small Energy Nosferatu II
+Small Energy Nosferatu II
+Small Energy Nosferatu II
+Small Energy Nosferatu II
 
 Small Thermal Armor Reinforcer I
-[Empty Rig slot]
+Small Trimark Armor Pump I
+
 
 
 Nanite Repair Paste x250

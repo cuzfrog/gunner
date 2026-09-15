@@ -26,5 +26,4 @@ Capital Polycarbon Engine Housing I
 
 Sisters Combat Scanner Probe x8
 Sisters Core Scanner Probe x24
-Helium Isotopes x17585
-Helium Isotopes x50782
+Helium Isotopes x68367

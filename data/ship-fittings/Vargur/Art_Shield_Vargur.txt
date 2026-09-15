@@ -1,5 +1,6 @@
 [Vargur, Art Shield Vargur]
 
+
 Damage Control II
 Gyrostabilizer II
 Gyrostabilizer II
@@ -11,19 +12,20 @@ X-Large Ancillary Shield Booster, Cap Booster 400
 Multispectrum Shield Hardener II
 Tracking Computer II
 Multispectrum Shield Hardener II
-[Empty Med slot]
-[Empty Med slot]
+Large Shield Extender II
+Large Shield Extender II
 
 1200mm Artillery Cannon II, Quake L
 1200mm Artillery Cannon II, Quake L
 1200mm Artillery Cannon II, Quake L
 Bastion Module I
 1200mm Artillery Cannon II, Quake L
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Heavy Energy Nosferatu II
 
 Large Core Defense Field Extender II
 Large Core Defense Field Extender II
+
 
 
 Hornet EC-300 x5

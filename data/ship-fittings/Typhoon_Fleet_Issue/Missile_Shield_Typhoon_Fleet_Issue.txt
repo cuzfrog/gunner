@@ -1,18 +1,19 @@
 [Typhoon Fleet Issue, Missile Shield Typhoon Fleet Issue]
 
+
 Drone Damage Amplifier I
 Ballistic Control System I
 Drone Damage Amplifier I
 Ballistic Control System I
 Ballistic Control System I
 Ballistic Control System I
-[Empty Low slot]
+Damage Control II
 
 500MN Quad LiF Restrained Microwarpdrive
 Enduring Multispectrum Shield Hardener
 Eutectic Compact Cap Recharger
 Large Shield Booster I
-[Empty Med slot]
+Large Shield Extender II
 
 Rapid Heavy Missile Launcher I, Caldari Navy Scourge Heavy Missile
 Rapid Heavy Missile Launcher I, Caldari Navy Scourge Heavy Missile
@@ -20,12 +21,16 @@ Rapid Heavy Missile Launcher I, Caldari Navy Scourge Heavy Missile
 Rapid Heavy Missile Launcher I, Caldari Navy Scourge Heavy Missile
 Rapid Heavy Missile Launcher I, Caldari Navy Scourge Heavy Missile
 Rapid Heavy Missile Launcher I, Caldari Navy Scourge Heavy Missile
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Heavy Energy Nosferatu II
 
 Large EM Shield Reinforcer I
-[Empty Rig slot]
-[Empty Rig slot]
+Large Core Defense Field Extender I
+Large Hyperspatial Velocity Optimizer I
+
+
+
+Berserker II x5
 
 
 Caldari Navy Scourge Heavy Missile x5762

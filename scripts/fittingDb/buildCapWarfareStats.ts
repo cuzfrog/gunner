@@ -23,6 +23,10 @@ export function buildCapWarfareStatsFromIntents(ctx: BuildCapWarfareStatsContext
   if (!CAP_WARFARE_GROUPS.has(ctx.groupId)) return undefined;
   const effects = resolveEffects(ctx.effects, ctx.dogmaEffects);
   const intents = classifyCapacitorEffects(effects);
+  if (ctx.groupId === 67) {
+    const transfer = buildCapTransferStats(intents, ctx.values, ctx.requiredSkillIds);
+    return transfer ? { neutralizer: transfer } : undefined;
+  }
   if (ctx.groupId === 71) {
     const neutralizer = buildNeutralizerStats(intents, ctx.values, ctx.requiredSkillIds);
     return neutralizer ? { neutralizer } : undefined;
@@ -34,6 +38,22 @@ export function buildCapWarfareStatsFromIntents(ctx: BuildCapWarfareStatsContext
 function buildNeutralizerStats(intents: readonly { intent: CapacitorIntent }[], values: Map<string, number>, requiredSkillIds: readonly TypeId[]): EnergyNeutralizerStats | undefined {
   if (!hasIntent(intents, "energyNeutralizer")) return undefined;
   const amount = optionalNumber(values.get("energyNeutralizerAmount"));
+  const duration = optionalNumber(values.get("duration"));
+  if (amount === undefined || duration === undefined) return undefined;
+  return {
+    amount,
+    cycleTime: duration / 1000,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    maxRange: values.get("maxRange") ?? 0,
+    falloff: values.get("falloffEffectiveness") ?? 0,
+    requiredSkillIds,
+  };
+}
+
+/** Cap transmitters give powerTransferAmount GJ to a remote ship each cycle; the capacitorNeed attribute already covers that outflow, so the neutralizer shape drains the user correctly. */
+function buildCapTransferStats(intents: readonly { intent: CapacitorIntent }[], values: Map<string, number>, requiredSkillIds: readonly TypeId[]): EnergyNeutralizerStats | undefined {
+  if (!hasIntent(intents, "capTransfer")) return undefined;
+  const amount = optionalNumber(values.get("powerTransferAmount"));
   const duration = optionalNumber(values.get("duration"));
   if (amount === undefined || duration === undefined) return undefined;
   return {

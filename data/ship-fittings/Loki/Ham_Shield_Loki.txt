@@ -1,0 +1,37 @@
+[Loki, Ham Shield Loki]
+
+Ballistic Control System II
+Ballistic Control System II
+Damage Control II
+
+50MN Quad LiF Restrained Microwarpdrive
+Multispectrum Shield Hardener II
+Large Shield Extender II
+Pith X-Type Kinetic Shield Hardener
+Federation Navy Stasis Webifier
+Stasis Webifier II
+Republic Fleet Large Cap Battery
+
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+720mm Howitzer Artillery II, Republic Fleet Phased Plasma M
+720mm Howitzer Artillery II, Republic Fleet Phased Plasma M
+
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+Medium Hydraulic Bay Thrusters II
+
+Loki Offensive - Launcher Efficiency Configuration
+Loki Core - Immobility Drivers
+Loki Propulsion - Wake Limiter
+Loki Defensive - Augmented Durability
+
+
+Hobgoblin II x5
+
+
+Mjolnir Rage Heavy Assault Missile x1200
+Republic Fleet Phased Plasma M x800

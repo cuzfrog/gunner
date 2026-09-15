@@ -1,21 +1,23 @@
 [Pioneer Consortium Issue, Logi Shield Pioneer Consortium Issue]
 
+
 Damage Control I
-[Empty Low slot]
+Damage Control II
 
 Medium Shield Extender I
 Compact EM Shield Amplifier
 Compact Thermal Shield Amplifier
-[Empty Med slot]
+Cap Recharger II
 
 Small I-ax Enduring Remote Armor Repairer
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Small Energy Nosferatu II
+Small Energy Nosferatu II
 
 Small Ancillary Current Router I
 Small Processor Overclocking Unit I
-[Empty Rig slot]
+Small Trimark Armor Pump I
+
 
 
 Warrior I x1

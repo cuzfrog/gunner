@@ -1,4 +1,5 @@
 [Nergal, Tackle Armor Nergal]
+
 Entropic Radiation Sink II
 Multispectrum Coating II
 Centii A-Type Small Armor Repairer
@@ -9,7 +10,11 @@ Federation Navy Stasis Webifier
 Warp Disruptor II
 
 Light Entropic Disintegrator II
-[Empty high slot]
+Drone Link Augmentor II
 
 Small Capacitor Control Circuit I
 Small Capacitor Control Circuit I
+
+
+
+Hobgoblin II x5

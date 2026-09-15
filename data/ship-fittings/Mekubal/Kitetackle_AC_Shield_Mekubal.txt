@@ -1,5 +1,6 @@
 [Mekubal, Kitetackle AC Shield Mekubal]
 
+
 Gyrostabilizer II
 Damage Control II
 Domination Nanofiber Structure
@@ -14,11 +15,12 @@ Warp Scrambler II
 Small Energy Neutralizer II
 200mm AutoCannon II, Hail S
 200mm AutoCannon II, Hail S
-[Empty High slot]
+Small Energy Nosferatu II
 
 Small EM Shield Reinforcer II
 Small Core Defense Field Extender II
 Small Core Defense Field Extender II
+
 
 
 Republic Fleet Phased Plasma S x2231

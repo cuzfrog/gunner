@@ -1,13 +1,14 @@
 [Corax Navy Issue, Ewar Missile Shield Corax Navy Issue]
 
+
 Ballistic Control System II
 Ballistic Control System II
 
 Small Shield Extender II
 Small Shield Extender II
 5MN Quad LiF Restrained Microwarpdrive
-[Empty Med slot]
-[Empty Med slot]
+Small Shield Extender II
+Small Shield Extender II
 
 Light Missile Launcher II, Scourge Fury Light Missile
 Light Missile Launcher II, Scourge Fury Light Missile
@@ -19,6 +20,7 @@ Light Missile Launcher II, Scourge Fury Light Missile
 Small Core Defense Field Extender I
 Small Processor Overclocking Unit II
 Small Core Defense Field Extender I
+
 
 
 Nova Fury Light Missile x318

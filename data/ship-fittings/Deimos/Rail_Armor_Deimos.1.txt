@@ -22,6 +22,9 @@ Medium Ancillary Current Router I
 Medium Ancillary Current Router I
 
 
+Hammerhead II x5
+
+
 Spike M x3000
 ECCM Script x1
 Optimal Range Script x1

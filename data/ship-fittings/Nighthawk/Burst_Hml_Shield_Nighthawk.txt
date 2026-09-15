@@ -1,0 +1,34 @@
+[Nighthawk, Burst Hml Shield Nighthawk]
+
+Damage Control II
+Ballistic Control System II
+Ballistic Control System II
+Power Diagnostic System II
+
+Republic Fleet Large Shield Extender
+Caldari Navy Large Shield Extender
+Pithum A-Type EM Shield Amplifier
+Multispectrum Shield Hardener II
+50MN Quad LiF Restrained Microwarpdrive
+Warp Scrambler II
+
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Shield Command Burst II, Active Shielding Charge
+Information Command Burst II, Electronic Superiority Charge
+
+Medium Hydraulic Bay Thrusters II
+Medium Hydraulic Bay Thrusters II
+
+
+Hornet II x5
+
+
+Scourge Fury Heavy Missile x1000
+Active Shielding Charge x300
+Shield Extension Charge x300
+Electronic Superiority Charge x300
+Sensor Optimization Charge x300

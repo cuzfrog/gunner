@@ -1,0 +1,33 @@
+[Nyx, Blaster Armor Nyx]
+
+Damage Control II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Multispectrum Energized Membrane II
+Capital I-a Enduring Armor Repairer
+Capital I-a Enduring Armor Repairer
+
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Tracking Computer II, Tracking Speed Script
+Sensor Booster II, Scan Resolution Script
+Stasis Webifier II
+
+Ion Siege Blaster II, Null XL
+Ion Siege Blaster II, Null XL
+Ion Siege Blaster II, Null XL
+Ion Siege Blaster II, Null XL
+Ion Siege Blaster II, Null XL
+Capital Gremlin Compact Energy Neutralizer
+
+Capital Explosive Armor Reinforcer I
+Capital Auxiliary Nano Pump I
+Capital Auxiliary Nano Pump I
+
+
+Null XL x2000
+Void XL x2000
+Navy Cap Booster 3200 x40
+Strontium Clathrates x1000
+Oxygen Isotopes x60000

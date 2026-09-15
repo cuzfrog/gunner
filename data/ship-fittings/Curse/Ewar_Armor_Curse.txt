@@ -9,8 +9,8 @@ Tracking Disruptor II, Tracking Speed Disruption Script
 Tracking Disruptor II, Optimal Range Disruption Script
 Tracking Disruptor II, Tracking Speed Disruption Script
 10MN Afterburner II
-[Empty Med slot]
-[Empty Med slot]
+Warp Scrambler II
+Fleeting Compact Stasis Webifier
 
 Medium Energy Nosferatu II
 Medium Energy Neutralizer II
@@ -20,6 +20,9 @@ Medium Energy Neutralizer II
 
 Medium Processor Overclocking Unit II
 Medium Ancillary Current Router I
+
+
+Infiltrator II x5
 
 
 Missile Range Disruption Script x3

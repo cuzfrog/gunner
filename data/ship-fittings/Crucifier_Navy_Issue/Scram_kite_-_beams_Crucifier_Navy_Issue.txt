@@ -1,4 +1,5 @@
 [Crucifier Navy Issue, Tackle Beam Armor Crucifier Navy Issue]
+
 Damage Control II
 Heat Sink II
 Small Ancillary Armor Repairer, Nanite Repair Paste
@@ -10,11 +11,15 @@ Stasis Webifier II
 
 Small Focused Beam Laser II, Scorch S
 Small Focused Beam Laser II, Scorch S
-[Empty high slot]
+Drone Link Augmentor II
 
 Small Energy Burst Aerator II
 Small Transverse Bulkhead I
 Small Transverse Bulkhead I
+
+
+
+Hornet EC-300 x2
 
 
 Nanite Repair Paste x32

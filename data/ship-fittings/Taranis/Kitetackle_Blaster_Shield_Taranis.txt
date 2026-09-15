@@ -1,5 +1,6 @@
 [Taranis, Kitetackle Blaster Shield Taranis]
 
+
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Damage Control II
@@ -11,10 +12,14 @@ Initiated Compact Warp Scrambler
 Light Neutron Blaster II, Null S
 Light Neutron Blaster II, Null S
 Light Neutron Blaster II, Null S
-[Empty High slot]
+Drone Link Augmentor II
 
-[Empty Rig slot]
-[Empty Rig slot]
+Small Hybrid Collision Accelerator I
+Small Trimark Armor Pump I
+
+
+
+Hobgoblin II x2
 
 
 Void S x1240

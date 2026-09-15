@@ -1,12 +1,13 @@
 [Kronos, Kitetackle Blaster Armor Kronos]
 
+
 Damage Control II
 Abyssal Magnetic Field Stabilizer
 Imperial Navy Multispectrum Energized Membrane
 Large Abyssal Armor Repairer
 Imperial Navy Multispectrum Energized Membrane
 Large Abyssal Armor Repairer
-[Empty Low slot]
+Energized Adaptive Nano Membrane II
 
 Heavy F-RX Compact Capacitor Booster
 Heavy Stasis Grappler II
@@ -24,6 +25,10 @@ Medium Ghoul Compact Energy Nosferatu
 
 Large Explosive Armor Reinforcer I
 Large Auxiliary Nano Pump I
+
+
+
+Hammerhead II x5
 
 
 Caldari Navy Antimatter Charge L x3000

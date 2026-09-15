@@ -1,4 +1,5 @@
 [Daredevil, Tackle Blaster Shield Daredevil]
+
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
@@ -10,11 +11,12 @@ Stasis Webifier II
 
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Core Defense Field Extender II
 Small Core Defense Field Extender II
 Small Ancillary Current Router II
+
 
 
 Void S x4000

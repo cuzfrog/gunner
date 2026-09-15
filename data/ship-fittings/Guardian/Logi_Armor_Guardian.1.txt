@@ -1,20 +1,20 @@
-[Guardian, Logi Armor Guardian]
+[Guardian, Cap Logi Armor Guardian]
 
 IFFA Compact Damage Control
 True Sansha Thermal Armor Hardener
 1600mm Crystalline Carbonide Restrained Plates
 True Sansha EM Armor Hardener
-[Empty Low slot]
+Damage Control II
 
-F-90 Compact Sensor Booster
+F-90 Compact Sensor Booster, ECCM Script
 10MN Y-S8 Compact Afterburner
 
 Large Remote Armor Repairer II
 Large Remote Armor Repairer II
 Large Remote Armor Repairer II
 Large Remote Armor Repairer II
-[Empty High slot]
-[Empty High slot]
+Large Inductive Compact Remote Capacitor Transmitter
+Medium Inductive Compact Remote Capacitor Transmitter
 
 Medium Ancillary Current Router II
 Medium Ancillary Current Router II

@@ -1,0 +1,41 @@
+[Arbitrator, Long Point Arbitrator]
+
+Damage Control II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Multispectrum Energized Membrane II
+Medium Ancillary Armor Repairer
+
+50MN Cold-Gas Enduring Microwarpdrive
+Warp Disruptor II
+Medium Capacitor Booster II, Navy Cap Booster 800
+Tracking Disruptor II
+
+Medium Energy Neutralizer II
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+
+Medium Auxiliary Nano Pump I
+Medium Drone Speed Augmentor I
+Medium Polycarbon Engine Housing I
+
+
+Infiltrator II x5
+
+
+Caldari Navy Inferno Light Missile x500
+Caldari Navy Mjolnir Light Missile x500
+Caldari Navy Nova Light Missile x500
+Caldari Navy Scourge Light Missile x500
+Guidance Disruptor II x1
+Inferno Fury Light Missile x500
+Missile Precision Disruption Script x1
+Missile Range Disruption Script x1
+Mjolnir Fury Light Missile x500
+Nanite Repair Paste x100
+Navy Cap Booster 800 x10
+Nova Fury Light Missile x500
+Optimal Range Disruption Script x1
+Scourge Fury Light Missile x500
+Tracking Speed Disruption Script x1

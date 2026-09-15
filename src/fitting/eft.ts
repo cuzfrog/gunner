@@ -28,6 +28,9 @@ export interface EftDocument {
   readonly banks: readonly EftBank[];
   readonly drones: readonly QuantityItem[];
   readonly cargo: readonly QuantityItem[];
+  /** True when the document carries a single quantity-only block, which cannot be positionally
+   *  attributed to the drone bay or the cargo hold (an empty section is not serialized). */
+  readonly droneBandAmbiguous: boolean;
 }
 
 const HEADER_PATTERN = /^\[(?<hull>[^,]+),\s*(?<name>.+)\]$/;
@@ -69,23 +72,19 @@ export function parseEft(text: string): EftDocument | undefined {
   const bankLines: Record<BankKind, EftLine[]> = { low: [], mid: [], high: [], rig: [], subsystem: [], service: [] };
   const drones: QuantityItem[] = [];
   const cargo: QuantityItem[] = [];
-  let droneBlockSeen = false;
+  const quantityOnlyBlocks: Block[] = [];
 
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
     if (isQuantityOnlyBlock(block)) {
-      for (const item of block.quantities) {
-        if (!droneBlockSeen) {
-          drones.push(item);
-          droneBlockSeen = true;
-        } else {
-          cargo.push(item);
-        }
-      }
+      // The drone bay is one contiguous section; a cargo-only fit (empty drone bay) therefore
+      // yields a single quantity block. Classification by item kind happens downstream.
+      quantityOnlyBlocks.push(block);
       continue;
     }
 
-    const intended = intendedBanks[i];
+    let intended = intendedBanks[i];
+    if (!block.anchor) intended = consensusBank(block, intended) ?? intended;
     for (const line of block.lines) {
       if (line.kind === "empty") {
         bankLines[line.bank].push({ kind: "empty", label: line.label });
@@ -105,7 +104,12 @@ export function parseEft(text: string): EftDocument | undefined {
     if (lines.length > 0) banks.push({ bank: kind, lines });
   }
 
-  return { hullName, fittingName, banks, drones, cargo };
+  const droneBandAmbiguous = quantityOnlyBlocks.length === 1;
+  for (let b = 0; b < quantityOnlyBlocks.length; b++) {
+    (b === 0 ? drones : cargo).push(...quantityOnlyBlocks[b]!.quantities);
+  }
+
+  return { hullName, fittingName, banks, drones, cargo, droneBandAmbiguous };
 }
 
 export function moduleLines(document: EftDocument): readonly EftModule[] {
@@ -239,9 +243,22 @@ function parseModuleLine(line: string): EftModule | undefined {
 }
 
 function moduleBank(module: EftModule, intended: BankKind | undefined): BankKind | undefined {
-  const slot: ModuleSlot | undefined = MODULE_SLOTS_BY_NAME[module.name];
-  if (slot !== undefined) return slot;
-  return intended;
+  return intended ?? MODULE_SLOTS_BY_NAME[module.name];
+}
+
+/** Zero-slot banks (e.g. low on a hull without lows) shift subsequent blocks out of the contiguous run.
+ *  When every module of a non-anchored block unanimously resolves to one other bank, the block is re-banked there. */
+function consensusBank(block: Block, intended: BankKind | undefined): BankKind | undefined {
+  if (intended === undefined) return undefined;
+  let consensus: ModuleSlot | undefined;
+  for (const line of block.lines) {
+    if (line.kind !== "module") continue;
+    const slot = MODULE_SLOTS_BY_NAME[line.module.name];
+    if (slot === undefined) return undefined;
+    if (consensus !== undefined && consensus !== slot) return undefined;
+    consensus = slot;
+  }
+  return consensus !== undefined && consensus !== intended ? consensus : undefined;
 }
 
 function assignModuleBanks(blocks: Block[]): (BankKind | undefined)[] {

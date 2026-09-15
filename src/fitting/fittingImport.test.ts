@@ -36,6 +36,7 @@ import {
   STASIS_GRAPPLERS,
   STASIS_WEBS,
   SUBSYSTEM_BONUSES,
+  SUBSYSTEMS,
   TARGET_PAINTERS,
   TRACKING_COMPUTERS,
   TRACKING_DISRUPTORS,
@@ -95,8 +96,11 @@ const profile: ShipProfile = {
   baseSpeed: 165,
   sigRadius: 270,
   scanResolution: 200,
-  maxTargetingRange: 30000,
-  maxLockedTargets: 4,
+  maxTargetingRange: 30000,  maxLockedTargets: 4,
+  highSlots: 3,
+  medSlots: 4,
+  lowSlots: 3,
+  rigSlots: 3,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -121,8 +125,11 @@ const frigateProfile: ShipProfile = {
   baseSpeed: 365,
   sigRadius: 35,
   scanResolution: 200,
-  maxTargetingRange: 30000,
-  maxLockedTargets: 4,
+  maxTargetingRange: 30000,  maxLockedTargets: 4,
+  highSlots: 3,
+  medSlots: 4,
+  lowSlots: 3,
+  rigSlots: 3,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -147,8 +154,11 @@ const bonusProfile: ShipProfile = {
   baseSpeed: 205,
   sigRadius: 130,
   scanResolution: 200,
-  maxTargetingRange: 30000,
-  maxLockedTargets: 4,
+  maxTargetingRange: 30000,  maxLockedTargets: 4,
+  highSlots: 3,
+  medSlots: 4,
+  lowSlots: 3,
+  rigSlots: 3,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -173,8 +183,11 @@ const roleBonusProfile: ShipProfile = {
   baseSpeed: 195,
   sigRadius: 135,
   scanResolution: 200,
-  maxTargetingRange: 30000,
-  maxLockedTargets: 4,
+  maxTargetingRange: 30000,  maxLockedTargets: 4,
+  highSlots: 3,
+  medSlots: 4,
+  lowSlots: 3,
+  rigSlots: 3,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -199,8 +212,11 @@ const abaddonProfile: ShipProfile = {
   baseSpeed: 89,
   sigRadius: 470,
   scanResolution: 200,
-  maxTargetingRange: 30000,
-  maxLockedTargets: 4,
+  maxTargetingRange: 30000,  maxLockedTargets: 4,
+  highSlots: 3,
+  medSlots: 4,
+  lowSlots: 3,
+  rigSlots: 3,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -225,8 +241,11 @@ const harbingerProfile: ShipProfile = {
   baseSpeed: 165,
   sigRadius: 270,
   scanResolution: 200,
-  maxTargetingRange: 30000,
-  maxLockedTargets: 4,
+  maxTargetingRange: 30000,  maxLockedTargets: 4,
+  highSlots: 3,
+  medSlots: 4,
+  lowSlots: 3,
+  rigSlots: 3,
   droneBandwidth: 75,
   droneCapacity: 75,
   maxActiveDrones: 5,
@@ -284,8 +303,11 @@ const kestrelProfile: ShipProfile = {
   baseSpeed: 325,
   sigRadius: 38,
   scanResolution: 200,
-  maxTargetingRange: 30000,
-  maxLockedTargets: 4,
+  maxTargetingRange: 30000,  maxLockedTargets: 4,
+  highSlots: 3,
+  medSlots: 4,
+  lowSlots: 3,
+  rigSlots: 3,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -310,8 +332,11 @@ const stilettoProfile: ShipProfile = {
   baseSpeed: 435,
   sigRadius: 31,
   scanResolution: 200,
-  maxTargetingRange: 30000,
-  maxLockedTargets: 4,
+  maxTargetingRange: 30000,  maxLockedTargets: 4,
+  highSlots: 3,
+  medSlots: 4,
+  lowSlots: 3,
+  rigSlots: 3,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -352,6 +377,8 @@ const ships = vi.mocked<Ships>({
 
 const db: FittingDb = {
   subsystemBonuses: {},
+  subsystems: {},
+  commandBursts: {},
   modules: {
     "1600mm Steel Plates II": row("1600mm Steel Plates II", "1600mm Steel Plates II", { massAddition: 3_750_000, defense: { kind: "armorPlate", armorHpAdd: 4800 } }),
     "Reinforced Bulkheads II": row("Reinforced Bulkheads II", "Reinforced Bulkheads II", { agilityMultiplier: 1.05, defense: { kind: "hullBulkhead", hullHpPercent: 25 } }),
@@ -491,6 +518,7 @@ const skillBonusDb: FittingDb = {
 
 const fullFittingDb: FittingDb = {
   subsystemBonuses: SUBSYSTEM_BONUSES,
+  subsystems: SUBSYSTEMS,
   modules: FITTING_MODULES,
   turrets: TURRETS,
   charges: CHARGES,
@@ -517,6 +545,7 @@ const fullFittingDb: FittingDb = {
   sensorDampeners: SENSOR_DAMPENERS,
   sensorBoosters: SENSOR_BOOSTERS,
   signalAmplifiers: SIGNAL_AMPLIFIERS,
+  commandBursts: {},
   sensorBoosterScripts: SENSOR_BOOSTER_SCRIPTS,
   sensorDampenerScripts: SENSOR_DAMPENER_SCRIPTS,
 };
@@ -1356,10 +1385,10 @@ Warp Disruptor II`,
       conditions,
     );
     expect(result).toBeDefined();
-    // The disruptor resolves through the parser's default bank, so it precedes the scrambler in loadout order.
+    // Both resolve to mid through the slot catalog, so loadout order follows line order.
     expect(result!.ewar.scramblers).toEqual([
-      expect.objectContaining({ moduleName: "Warp Disruptor II", maxRange: 24000, overloadRangeBonusPercent: 20, propulsionBlock: false }),
       expect.objectContaining({ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20, propulsionBlock: true }),
+      expect.objectContaining({ moduleName: "Warp Disruptor II", maxRange: 24000, overloadRangeBonusPercent: 20, propulsionBlock: false }),
     ]);
     expect(result!.ewar.webs).toEqual([]);
     expect(result!.ewar.grapplers).toEqual([]);
@@ -1739,6 +1768,46 @@ Heat Sink II`,
     expect(names).toEqual(["Hail S", "Republic Fleet EMP S"]);
   });
 
+  test("cargo-only fit with a damage missile first line classifies everything as cargo", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const text = `[Rifter, Missile Cargo]
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+
+Nova Fury Light Missile x1000
+Caldari Navy Scourge Light Missile x679
+Nanite Repair Paste x18`;
+    const result = importer.importFitting(text, conditions);
+    expect(result).toBeDefined();
+    expect(result!.drones).toEqual([]);
+    const names = result!.cargoCharges.map((charge) => importer.itemNameForId(charge.id, "en"));
+    expect(names).toEqual(["Nova Fury Light Missile", "Caldari Navy Scourge Light Missile"]);
+    const summary = importer.summarize(text);
+    expect(summary?.sections.find((section) => section.kind === "drones")).toBeUndefined();
+    const cargoRows = summary?.sections.find((section) => section.kind === "cargo")?.rows ?? [];
+    expect(cargoRows.map((row) => row.name)).toEqual(["Nova Fury Light Missile", "Caldari Navy Scourge Light Missile", "Nanite Repair Paste"]);
+  });
+
+  test("multi-line drone band keeps every drone and cargo after it", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const text = `[Rifter, Drone Brawler]
+200mm AutoCannon I, Hail S
+
+Acolyte II x1
+Caldari Navy Hornet x4
+Hobgoblin II x1
+Warrior II x2
+
+Navy Cap Booster 800 x4`;
+    const result = importer.importFitting(text, conditions);
+    expect(result!.drones.map((d) => `${d.name} x${d.count}`).sort()).toEqual(["Acolyte II x1", "Caldari Navy Hornet x4", "Hobgoblin II x1", "Warrior II x2"].sort());
+    const names = result!.cargoCharges.map((charge) => importer.itemNameForId(charge.id, "en"));
+    expect(names).toEqual(["Navy Cap Booster 800"]);
+  });
+
   test("classifies cargo before drones by item kind", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
@@ -1949,7 +2018,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES };
+  return { modules: {}, commandBursts: {}, subsystems: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {
@@ -2406,7 +2475,7 @@ describe("FittingImportImpl identity resolution", () => {
 
 function eftDocument(hullName: string, names: readonly string[] = []): EftDocument {
   const lines = names.map((name) => ({ kind: "module" as const, name, offline: false }));
-  return { hullName, fittingName: "Test", banks: [{ bank: "low" as const, lines }], drones: [], cargo: [] };
+  return { hullName, fittingName: "Test", banks: [{ bank: "low" as const, lines }], drones: [], cargo: [], droneBandAmbiguous: false };
 }
 
 describe("_detectionOrder", () => {

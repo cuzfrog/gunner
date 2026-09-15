@@ -1,6 +1,6 @@
 {
   "name": "gunner",
-  "version": "0.34.0",
+  "version": "0.34.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,7 +16,9 @@
     "generate:icons": "bun run scripts/generate-icon-assets.ts",
     "generate:slots": "bun run scripts/generate-module-slots.ts",
     "generate:name-i18n": "bun run scripts/generate-name-i18n.ts",
-    "generate:fitting-db": "bun run scripts/generate-fitting-db.ts"
+    "generate:fitting-db": "bun run scripts/generate-fitting-db.ts",
+    "generate:fitting-presets": "bun run scripts/generate-fitting-presets.ts",
+    "validate:fittings": "bun run scripts/validate-fittings.ts"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

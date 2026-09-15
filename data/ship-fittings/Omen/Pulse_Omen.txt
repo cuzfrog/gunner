@@ -1,0 +1,32 @@
+[Omen, Pulse Omen]
+
+Damage Control II
+800mm Rolled Tungsten Compact Plates
+Multispectrum Energized Membrane II
+Heat Sink II
+Heat Sink II
+Medium Ancillary Armor Repairer
+
+50MN Cold-Gas Enduring Microwarpdrive
+Warp Disruptor II
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+
+Focused Medium Pulse Laser II, Scorch M
+Focused Medium Pulse Laser II, Scorch M
+Focused Medium Pulse Laser II, Scorch M
+Focused Medium Pulse Laser II, Scorch M
+Focused Medium Pulse Laser II, Scorch M
+
+Medium Energy Locus Coordinator II
+Medium Energy Locus Coordinator II
+Medium Polycarbon Engine Housing I
+
+
+Warrior II x8
+
+
+Conflagration M x5
+Imperial Navy Multifrequency M x5
+Nanite Repair Paste x100
+Navy Cap Booster 800 x14
+Scorch M x5

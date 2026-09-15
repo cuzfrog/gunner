@@ -1,0 +1,29 @@
+[Pilgrim, Drone Armor Pilgrim]
+
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Damage Control II
+1600mm Steel Plates II
+Multispectrum Energized Membrane II
+
+50MN Quad LiF Restrained Microwarpdrive
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+Warp Scrambler II
+Stasis Webifier II
+Drone Link Augmentor I
+
+Medium Energy Nosferatu II
+Medium Energy Neutralizer II
+Small Energy Nosferatu II
+Small Energy Neutralizer II
+
+Medium Auxiliary Nano Pump II
+Medium Trimark Armor Pump II
+
+
+Infiltrator II x4
+Valkyrie II x1
+
+
+Navy Cap Booster 800 x20
+Nanite Repair Paste x200

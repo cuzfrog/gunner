@@ -1,5 +1,6 @@
 [Hydra, Tackle Armor Hydra]
 
+
 Chelm's Modified Multispectrum Energized Membrane
 Draclira's Modified Multispectrum Energized Membrane
 Cormack's Modified Damage Control
@@ -13,14 +14,14 @@ Abyssal Warp Scrambler
 Small Abyssal Energy Neutralizer
 'Smokescreen' Covert Ops Cloaking Device II
 Small Abyssal Energy Neutralizer
-[Empty High slot]
+Drone Link Augmentor II
 
 Small Nanobot Accelerator II
 Small Nanobot Accelerator II
 
 
-Hornet EC-300 x1
-Hornet EC-300 x2
+
+Hornet EC-300 x3
 
 
 Mystic S x250

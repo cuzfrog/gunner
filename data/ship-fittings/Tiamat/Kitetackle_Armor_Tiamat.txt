@@ -3,8 +3,8 @@
 Corpum A-Type Multispectrum Energized Membrane
 Corpum A-Type Multispectrum Energized Membrane
 Medium Abyssal Armor Repairer
-[Empty Low slot]
-[Empty Low slot]
+Damage Control II
+1600mm Steel Plates II
 
 50MN Abyssal Microwarpdrive
 Abyssal Warp Disruptor
@@ -16,14 +16,13 @@ Corpii A-Type Small Energy Neutralizer
 Corpum A-Type Medium Energy Neutralizer
 'Smokescreen' Covert Ops Cloaking Device II
 Corpum A-Type Medium Energy Neutralizer
-[Empty High slot]
+Small Ghoul Compact Energy Nosferatu
 
 Medium Ancillary Current Router II
 Medium Auxiliary Nano Pump II
 
 
-Republic Fleet Warrior x8
-Republic Fleet Warrior x2
+Republic Fleet Warrior x10
 
 
 Navy Cap Booster 800 x16

@@ -1,5 +1,6 @@
 [Raven, Tackle Missile Armor Raven]
 
+
 Damage Control II
 Ballistic Control System II
 Ballistic Control System II
@@ -11,8 +12,8 @@ Warp Scrambler II
 Stasis Webifier II
 Sensor Booster II, Scan Resolution Script
 Tracking Computer II, Tracking Speed Script
-[Empty Med slot]
-[Empty Med slot]
+Cap Recharger II
+Sensor Booster II
 
 Cruise Missile Launcher II, Scourge Fury Cruise Missile
 Cruise Missile Launcher II, Scourge Fury Cruise Missile
@@ -25,6 +26,7 @@ Heavy Energy Neutralizer II
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
 Large Trimark Armor Pump I
+
 
 
 Hornet EC-300 x5

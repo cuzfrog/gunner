@@ -4,6 +4,7 @@ import {
   type FittingDb,
   type FittingModuleStats,
   type HullBonus,
+  type ShipStatFlatAttribute,
   type LauncherStats,
   type MissileGuidanceComputerStats,
   type MissileGuidanceEnhancerStats,
@@ -333,13 +334,16 @@ export class FittingCalculatorImpl implements FittingCalculator {
 
     let mwdSigBloomMultiplier = 1;
     for (const bonus of fitting.hullBonuses) {
-      if (!isPropulsionBonusAttribute(bonus.attribute)) continue;
-      const percent = hullBonusPercent(bonus, conditions.skillLevel);
-      switch (bonus.attribute) {
-        case "maxVelocity": speedPercents.push(percent / 100); break;
-        case "agility": agilityMultipliers.push(1 + percent / 100); break;
-        case "mwdSigBloom": mwdSigBloomMultiplier *= 1 + percent / 100; break;
+      if (isPropulsionBonusAttribute(bonus.attribute)) {
+        const percent = hullBonusPercent(bonus, conditions.skillLevel);
+        switch (bonus.attribute) {
+          case "maxVelocity": speedPercents.push(percent / 100); break;
+          case "agility": agilityMultipliers.push(1 + percent / 100); break;
+          case "mwdSigBloom": mwdSigBloomMultiplier *= 1 + percent / 100; break;
+        }
+        continue;
       }
+      if (bonus.attribute === "sigRadiusFlat") sigRadiusAdd += bonus.magnitude;
     }
 
     const massMultiplier = this.stacking.apply(massPercentages.map((p) => 1 + p));
@@ -508,20 +512,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
   }
 
   resolveSensorSpec(fitting: FittingState, conditions: StatConditions): SensorSpec {
-    const targeting = conditions.targetingSkills;
-    const longRangeLevel = targeting?.longRangeTargeting ?? 0;
-    const signatureAnalysisLevel = targeting?.signatureAnalysis ?? 0;
-    const targetManagementLevel = targeting?.targetManagement ?? 0;
-    const advancedTargetManagementLevel = targeting?.advancedTargetManagement ?? 0;
-
-    const signatureAnalysisMultiplier = 1 + 0.05 * signatureAnalysisLevel;
-    const longRangeMultiplier = 1 + 0.05 * longRangeLevel;
-
-    const scanResolution = Math.round(fitting.profile.scanResolution * signatureAnalysisMultiplier);
-    const maxTargetingRange = Math.round(fitting.profile.maxTargetingRange * longRangeMultiplier);
-    const maxLockedTargets = fitting.profile.maxLockedTargets + targetManagementLevel + advancedTargetManagementLevel;
-
-    return { scanResolution, maxTargetingRange, maxLockedTargets };
+    return resolveSensorStats(fitting.profile, fitting.hullBonuses, conditions.targetingSkills);
   }
 
   resolveDrones(fitting: FittingState, conditions: StatConditions): readonly ImportedDrone[] {
@@ -600,9 +591,6 @@ export class FittingCalculatorImpl implements FittingCalculator {
 
   resolveCargoCharges(fitting: FittingState): readonly { id: TypeId; quantity: number }[] {
     const charges: { id: TypeId; quantity: number }[] = [];
-    for (const item of fitting.drones) {
-      if (this.db.charges[item.id] || this.db.missiles[item.id]) charges.push({ id: item.id, quantity: item.quantity });
-    }
     for (const item of fitting.cargo) {
       if (this.db.charges[item.id] || this.db.missiles[item.id]) charges.push({ id: item.id, quantity: item.quantity });
     }
@@ -735,6 +723,26 @@ function hullBonusPercent(bonus: HullBonus, skillLevel: number): number {
   return bonus.magnitude * (bonus.scalesWithHullSkill ? skillLevel : 1);
 }
 
+function flatSum(hullBonuses: readonly HullBonus[], attribute: ShipStatFlatAttribute): number {
+  return hullBonuses.reduce((sum, bonus) => (bonus.attribute === attribute ? sum + bonus.magnitude : sum), 0);
+}
+
+function resolveSensorStats(profile: ShipProfile, hullBonuses: readonly HullBonus[], targeting: TargetingSkills | undefined): SensorSpec {
+  const longRangeLevel = targeting?.longRangeTargeting ?? 0;
+  const signatureAnalysisLevel = targeting?.signatureAnalysis ?? 0;
+  const targetManagementLevel = targeting?.targetManagement ?? 0;
+  const advancedTargetManagementLevel = targeting?.advancedTargetManagement ?? 0;
+
+  const signatureAnalysisMultiplier = 1 + 0.05 * signatureAnalysisLevel;
+  const longRangeMultiplier = 1 + 0.05 * longRangeLevel;
+
+  const scanResolution = Math.round(profile.scanResolution * signatureAnalysisMultiplier);
+  const maxTargetingRange = Math.round((profile.maxTargetingRange + flatSum(hullBonuses, "maxTargetingRangeFlat")) * longRangeMultiplier);
+  const maxLockedTargets = profile.maxLockedTargets + targetManagementLevel + advancedTargetManagementLevel;
+
+  return { scanResolution, maxTargetingRange, maxLockedTargets };
+}
+
 const PROPULSION_BONUS_ATTRIBUTES: Record<PropulsionBonusAttribute, true> = { maxVelocity: true, agility: true, mwdSigBloom: true };
 const TURRET_BONUS_ATTRIBUTES: Record<TurretBonusAttribute, true> = { turretTracking: true, turretOptimal: true, turretFalloff: true, turretDamage: true, turretRoF: true, turretSpoolMax: true };
 
@@ -862,3 +870,5 @@ function energyWarfareResistanceMultipliers(supportModules: readonly FittedModul
   }
   return multipliers;
 }
+
+export { resolveSensorStats as _resolveSensorStats };

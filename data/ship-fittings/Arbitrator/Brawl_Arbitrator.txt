@@ -1,0 +1,32 @@
+[Arbitrator, Brawl Arbitrator]
+
+Damage Control II
+1600mm Rolled Tungsten Compact Plates
+Multispectrum Energized Membrane II
+Multispectrum Energized Membrane II
+Drone Damage Amplifier II
+
+10MN Y-S8 Compact Afterburner
+Warp Scrambler II
+X5 Enduring Stasis Webifier
+DDO Scoped Tracking Disruptor I
+
+Medium Gremlin Compact Energy Neutralizer
+Medium Gremlin Compact Energy Neutralizer
+Small Ghoul Compact Energy Nosferatu
+Small Ghoul Compact Energy Nosferatu
+
+Medium Trimark Armor Pump I
+Medium Trimark Armor Pump I
+Medium Trimark Armor Pump I
+
+
+Infiltrator II x5
+
+
+Highstroke Scoped Guidance Disruptor x1
+Missile Precision Disruption Script x1
+Missile Range Disruption Script x1
+Nanite Repair Paste x50
+Optimal Range Disruption Script x1
+Tracking Speed Disruption Script x1

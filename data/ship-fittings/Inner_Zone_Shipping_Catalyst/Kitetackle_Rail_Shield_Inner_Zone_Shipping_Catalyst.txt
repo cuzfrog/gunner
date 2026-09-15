@@ -1,8 +1,9 @@
 [Inner Zone Shipping Catalyst, Kitetackle Rail Shield Inner Zone Shipping Catalyst]
 
+
 Type-D Restrained Capacitor Power Relay
 Magnetic Field Stabilizer II
-[Empty Low slot]
+Damage Control II
 
 Warp Scrambler II
 5MN Y-T8 Compact Microwarpdrive
@@ -17,8 +18,9 @@ Warp Scrambler II
 125mm Railgun II, Javelin S
 
 Small Processor Overclocking Unit I
-[Empty Rig slot]
-[Empty Rig slot]
+Small Hybrid Collision Accelerator I
+Small Trimark Armor Pump I
+
 
 
 Javelin S x9096

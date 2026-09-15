@@ -90,6 +90,7 @@ export function runCapSim(input: CapSimInput): CapSimResult {
         const needed = Math.min(activation.capNeed - cap, capacity - cap);
         const best = pickInjector(awaitingInjectors, (candidate) => -candidate.capNeed >= needed, "least");
         if (!best) break;
+        cap = Math.min(capacity, cap - best.capNeed);
         fireInjector(best, state, tNow);
       }
     }
@@ -109,6 +110,7 @@ export function runCapSim(input: CapSimInput): CapSimResult {
       const needed = capacity - cap;
       const best = pickInjector(awaitingInjectors, (candidate) => -candidate.capNeed <= needed, "most");
       if (!best) break;
+      cap -= best.capNeed; // injection without overshoot; capNeed is negative
       fireInjector(best, state, tNow);
     }
 

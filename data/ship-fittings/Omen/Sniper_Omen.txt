@@ -1,0 +1,33 @@
+[Omen, Sniper Omen]
+
+Damage Control II
+Multispectrum Energized Membrane II
+Heat Sink II
+Extruded Compact Heat Sink
+Reactor Control Unit II
+Medium Ancillary Armor Repairer
+
+50MN Y-T8 Compact Microwarpdrive
+Warp Disruptor II
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+
+Heavy Beam Laser II, Aurora M
+Heavy Beam Laser II, Aurora M
+Heavy Beam Laser II, Aurora M
+Heavy Beam Laser II, Aurora M
+Heavy Beam Laser II, Aurora M
+
+Medium Ionic Field Projector I
+Medium Ancillary Current Router I
+Medium Energy Locus Coordinator II
+
+
+Warrior II x5
+
+
+Aurora M x5
+Gleam M x5
+Imperial Navy Multifrequency M x5
+Imperial Navy Standard M x5
+Nanite Repair Paste x100
+Navy Cap Booster 800 x14

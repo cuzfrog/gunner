@@ -4,10 +4,13 @@ import type { ShipId, TypeId } from "../src/gamedata/ids";
 import type { DamageResists, DamageType } from "../src/sim";
 import {
   TURRET_WEAPON_GROUP_BY_ID,
+  type CommandBurstStats,
   type HullBonusAttribute,
+  type ShipStatFlatAttribute,
   type SkillBonusType,
   type RigDrawback,
   type RigDrawbackReduction,
+  type SubsystemStats,
   type TurretWeaponGroup,
 } from "../src/gamedata/fittingDb/types";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
@@ -15,6 +18,9 @@ import type { ShipNameLanguage } from "../src/ships";
 import { buildDefenseStatsFromIntents, type DefenseModuleStats } from "./fittingDb/buildDefenseStats";
 import { buildCapacitorStatsFromIntents, type CapacitorModuleStats } from "./fittingDb/buildCapacitorStats";
 import { buildCapWarfareStatsFromIntents, type EnergyNeutralizerStats, type NosferatuStats } from "./fittingDb/buildCapWarfareStats";
+import { buildBurstChargeStats, buildCommandBurstStats } from "./fittingDb/buildCommandBurstStats";
+import { buildSubsystemStats } from "./fittingDb/buildSubsystemStats";
+import { COMMAND_BURST_GROUP } from "./fittingDb/combatAttributes";
 import { buildCombatModuleStats } from "./fittingDb/buildModuleStats";
 import { auditCoverage, type AuditModuleEntry } from "./fittingDb/coverageAudit";
 import type { SdeDogmaAttribute, SdeDogmaEffect, SdeDogmaEffectModifier, SdeGroup, SdeTypeDogma } from "./fittingDb/dogmaTypes";
@@ -117,12 +123,17 @@ const SUBSYSTEM_SHIP_STAT_ATTRIBUTES: Readonly<Record<number, HullBonusAttribute
   37: "maxVelocity", 70: "agility", 263: "shieldHpPercent", 265: "armorHpPercent", 554: "mwdSigBloom",
 };
 
+// Flat ship-stat additions preassigned on the subsystem (op != 6), applied to the base stat before percent modifiers.
+const SUBSYSTEM_FLAT_SHIP_STAT_ATTRIBUTES: Readonly<Record<number, ShipStatFlatAttribute>> = {
+  9: "hullHpFlat", 76: "maxTargetingRangeFlat", 263: "shieldHpFlat", 265: "armorHpFlat",
+  283: "droneCapacityFlat", 482: "capacitorCapacityFlat", 552: "sigRadiusFlat", 1271: "droneBandwidthFlat",
+};
+
 const SUBSYSTEM_FLAT_ADDITION_REASONS: Readonly<Record<number, string>> = {
-  9: "flat structure HP addition", 11: "flat powergrid addition", 38: "flat cargo capacity addition",
-  48: "flat CPU addition", 70: "flat inertia addition", 76: "flat targeting range addition",
-  192: "flat max locked targets addition", 263: "flat shield HP addition", 265: "flat armor HP addition",
-  283: "flat drone capacity addition", 482: "flat capacitor capacity addition", 552: "flat signature radius addition",
-  1271: "flat drone bandwidth addition", 3320: "black ops jump system access flag", 3322: "black ops jump drive flag",
+  11: "flat powergrid addition is a fitting stat", 38: "flat cargo capacity addition is not modeled",
+  48: "flat CPU addition is a fitting stat", 70: "flat inertia addition is not modeled",
+  192: "flat max locked targets addition is not modeled",
+  3320: "black ops jump system access flag", 3322: "black ops jump drive flag",
 };
 
 const SUBSYSTEM_PERCENT_SKIP_REASONS: Readonly<Record<number, string>> = {
@@ -171,6 +182,7 @@ const MODULE_GROUPS = new Set([
   // 213 Tracking Computer is handled explicitly below
   302, // Magnetic Field Stabilizer
   367, // Ballistic Control System
+  645, // Drone Damage Amplifier
   329, // Armor Plate
   762, // Inertial Stabilizer
   763, // Nanofiber Internal Structure
@@ -198,7 +210,7 @@ const MODULE_GROUPS = new Set([
   328, // Armor Hardener
   338, // Shield Boost Amplifier
   40, // Shield Booster
-  41, // Shield Recharger
+  41, // Remote Shield Booster
   57, // Shield Power Relay
   1150, // Armor Resistance Shift Hardener (RAH)
   1156, // Ancillary Shield Booster
@@ -211,9 +223,19 @@ const MODULE_GROUPS = new Set([
   766, // Power Diagnostic System
   767, // Capacitor Power Relay
   768, // Capacitor Flux Coil
+  67, // Remote Capacitor Transmitter
   71, // Energy Neutralizer
   68, // Energy Nosferatu
+  // Remote repairers
+  325, // Remote Armor Repairer
+  1697, // Ancillary Remote Shield Booster
+  1698, // Ancillary Remote Armor Repairer
+  2018, // Mutadaptive Remote Armor Repairer
+  330, // Cloaking Device
 ]);
+
+const RIG_GROUPS = new Set([773, 774, 775, 776, 777, 778, 779, 781, 782, 786, 1308]);
+const CLOAKING_DEVICE_GROUP = 330;
 
 const SCRIPT_GROUPS = new Set([907]);
 const EWAR_SCRIPT_GROUPS = new Set([909]);
@@ -1205,7 +1227,7 @@ function isNonScalingAttribute(attrName: string): boolean {
 }
 
 type SubsystemModifierResolution =
-  | { kind: "mapped"; attribute: HullBonusAttribute; damageType?: DamageType }
+  | { kind: "mapped"; attribute: HullBonusAttribute; damageType?: DamageType; flat?: boolean }
   | { kind: "skip"; reason: string }
   | { kind: "unmapped"; attributeId: number };
 
@@ -1242,7 +1264,7 @@ function buildSubsystemBonuses(
       const key = `${resolution.attribute}:${resolution.damageType ?? ""}:${filter.chargeSkillId ?? ""}:${filter.moduleSkillId ?? ""}:${filter.moduleGroupId ?? ""}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      const bonus: HullBonus = { attribute: resolution.attribute, magnitude, scalesWithHullSkill: true, sourceId: String(subsystemTypeId) as TypeId, ...filter };
+      const bonus: HullBonus = { attribute: resolution.attribute, magnitude, scalesWithHullSkill: !resolution.flat, sourceId: String(subsystemTypeId) as TypeId, ...filter };
       bonuses.push(resolution.damageType !== undefined ? { ...bonus, damageType: resolution.damageType } : bonus);
     }
   }
@@ -1263,6 +1285,8 @@ function resolveSubsystemModifier(modifier: SdeDogmaEffectModifier, attributeNam
 function resolveSubsystemItemModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>): SubsystemModifierResolution {
   const attributeId = modifier.modifiedAttributeID;
   if (modifier.operation !== 6) {
+    const flatAttribute = SUBSYSTEM_FLAT_SHIP_STAT_ATTRIBUTES[attributeId];
+    if (flatAttribute) return { kind: "mapped", attribute: flatAttribute, flat: true };
     const reason = SUBSYSTEM_FLAT_ADDITION_REASONS[attributeId];
     return reason ? { kind: "skip", reason } : { kind: "unmapped", attributeId };
   }
@@ -1531,6 +1555,8 @@ async function main() {
   const sensorDampeners: Record<string, Row<SensorDampenerStats>> = {};
   const sensorBoosters: Record<string, Row<SensorBoosterStats>> = {};
   const signalAmplifiers: Record<string, Row<SignalAmplifierStats>> = {};
+  const commandBursts: Record<string, Row<CommandBurstStats>> = {};
+  const subsystems: Record<string, SubsystemStats> = {};
   const sensorBoosterScripts: Record<string, Row<SensorBoosterScriptStats>> = {};
   const sensorDampenerScripts: Record<string, Row<SensorDampenerScriptStats>> = {};
   const hullBonuses: Record<ShipId, readonly HullBonus[]> = {};
@@ -1560,8 +1586,15 @@ async function main() {
 
     if (SUBSYSTEM_GROUP_IDS.has(type.groupID)) {
       if (typeDogma) {
-        const bonuses = buildSubsystemBonuses(attributeNames, typeDogma, dogmaEffects, type.typeID, enName ?? String(type.typeID), unmappedHullAttributes);
+        // Structure HP addition (+40 per subsystem) is preassigned on the subsystem dogma without a modifier effect.
+        const bonuses = [...buildSubsystemBonuses(attributeNames, typeDogma, dogmaEffects, type.typeID, enName ?? String(type.typeID), unmappedHullAttributes)];
+        const structureAddition = values.get("hp");
+        if (structureAddition !== undefined && structureAddition !== 0 && !bonuses.some((b) => b.attribute === "hullHpFlat")) {
+          bonuses.push({ attribute: "hullHpFlat", magnitude: structureAddition, scalesWithHullSkill: false, sourceId: id });
+        }
         if (bonuses.length > 0) subsystemBonuses[id] = bonuses;
+        const stats = buildSubsystemStats({ typeId: id, name: enName ?? String(type.typeID), groupId: type.groupID, values });
+        if (stats) subsystems[id] = stats;
       }
       continue;
     }
@@ -1615,6 +1648,13 @@ async function main() {
         };
         addItemName(itemNames, id, type);
       }
+      continue;
+    }
+
+    const burstCharge = buildBurstChargeStats(id, enName, type.groupID, values);
+    if (burstCharge) {
+      charges[id] = burstCharge;
+      addItemName(itemNames, id, type);
       continue;
     }
 
@@ -1839,6 +1879,15 @@ async function main() {
       continue;
     }
 
+    if (type.groupID === COMMAND_BURST_GROUP) {
+      const stats = buildCommandBurstStats({ typeId: id, name: enName, values, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID) });
+      if (stats) {
+        commandBursts[id] = stats;
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
     if (type.groupID === SENSOR_BOOSTER_SCRIPT_GROUP) {
       const stats = buildSensorBoosterScriptStats(values);
       if (stats) {
@@ -1867,8 +1916,8 @@ async function main() {
         const defense = buildDefenseStats(values, effects, type.groupID, typeDogma, dogmaEffects);
         const capacitor = buildCapacitorStatsFromIntents({ values, effects, groupId: type.groupID, dogmaEffects, chargeCapacity: type.capacity ?? 0 });
         const warfare = buildCapWarfareStatsFromIntents({ values, effects, groupId: type.groupID, dogmaEffects, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID) });
-        if (stats || defense || capacitor || warfare) {
-          fittingModules[id] = { ...stats, defense, capacitor, neutralizer: warfare?.neutralizer, nosferatu: warfare?.nosferatu, id, name: enName };
+        if (stats || defense || capacitor || warfare || RIG_GROUPS.has(type.groupID) || type.groupID === CLOAKING_DEVICE_GROUP) {
+          fittingModules[id] = { ...(stats ?? {}), defense, capacitor, neutralizer: warfare?.neutralizer, nosferatu: warfare?.nosferatu, id, name: enName };
           addItemName(itemNames, id, type);
         }
       }
@@ -1892,11 +1941,11 @@ async function main() {
     `/* eslint-disable */\n\n` +
     `import type { ShipId, TypeId } from "../../ids";\n` +
     `import type {\n` +
-    `  ChargeStats, DisruptionScriptStats, DroneStats, FittingModuleStats, HullBonus, LauncherStats,\n` +
+    `  ChargeStats, CommandBurstStats, DisruptionScriptStats, DroneStats, FittingModuleStats, HullBonus, LauncherStats,\n` +
     `  MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats,\n` +
     `  OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, RigDrawbackReduction,\n` +
     `  SensorBoosterScriptStats, SensorBoosterStats, SensorDampenerScriptStats, SensorDampenerStats,\n` +
-    `  SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, TargetPainterStats,\n` +
+    `  SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, SubsystemStats, TargetPainterStats,\n` +
     `  TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, WarpScramblerStats,\n` +
     `} from "../types";\n\n`;
 
@@ -1931,6 +1980,9 @@ export const SENSOR_DAMPENERS: Readonly<Record<string, SensorDampenerStats>> = $
 export const SENSOR_BOOSTERS: Readonly<Record<string, SensorBoosterStats>> = ${stringifyWithTypeIds(sensorBoosters)};
 
 export const SIGNAL_AMPLIFIERS: Readonly<Record<string, SignalAmplifierStats>> = ${stringifyWithTypeIds(signalAmplifiers)};
+export const COMMAND_BURSTS: Readonly<Record<string, CommandBurstStats>> = ${stringifyWithTypeIds(commandBursts)};
+
+export const SUBSYSTEMS: Readonly<Record<string, SubsystemStats>> = ${stringifyWithTypeIds(subsystems)};
 
 export const SENSOR_BOOSTER_SCRIPTS: Readonly<Record<string, SensorBoosterScriptStats>> = ${stringifyWithTypeIds(sensorBoosterScripts)};
 
@@ -2039,6 +2091,8 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     `${Object.keys(sensorDampeners).length} sensor dampeners`,
     `${Object.keys(sensorBoosters).length} sensor boosters`,
     `${Object.keys(signalAmplifiers).length} signal amplifiers`,
+    `${Object.keys(commandBursts).length} command bursts`,
+    `${Object.keys(subsystems).length} subsystems`,
     `${Object.keys(sensorBoosterScripts).length} sensor booster scripts`,
     `${Object.keys(sensorDampenerScripts).length} sensor dampener scripts`,
     `${Object.keys(hullBonuses).length} hull bonus sets`,

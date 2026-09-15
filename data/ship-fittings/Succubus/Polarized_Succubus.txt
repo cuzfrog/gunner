@@ -1,4 +1,5 @@
 [Succubus, Tackle Pulse Shield Succubus]
+
 Nanofiber Internal Structure II
 Heat Sink II
 Heat Sink II
@@ -10,11 +11,12 @@ Stasis Webifier II
 
 Polarized Small Focused Pulse Laser, Conflagration S
 Polarized Small Focused Pulse Laser, Conflagration S
-[Empty high slot]
+Small Energy Nosferatu II
 
 Small Core Defense Field Extender II
 Small Core Defense Field Extender II
 Small Core Defense Field Extender II
+
 
 
 Conflagration S x4000

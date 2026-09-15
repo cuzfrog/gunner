@@ -1,0 +1,30 @@
+[Muninn, Artillery Armor Muninn]
+
+Damage Control II
+1600mm Steel Plates II
+Gyrostabilizer II
+Gyrostabilizer II
+Gyrostabilizer II
+Tracking Enhancer II
+
+50MN Microwarpdrive I
+Warp Disruptor II
+Tracking Computer II, Tracking Speed Script
+Medium Cap Battery II
+
+720mm Howitzer Artillery II, Quake M
+720mm Howitzer Artillery II, Quake M
+720mm Howitzer Artillery II, Quake M
+720mm Howitzer Artillery II, Quake M
+720mm Howitzer Artillery II, Quake M
+
+Medium Trimark Armor Pump I
+Medium Trimark Armor Pump I
+
+
+Warrior II x5
+
+
+Republic Fleet EMP M x2000
+Quake M x1000
+Nanite Repair Paste x50

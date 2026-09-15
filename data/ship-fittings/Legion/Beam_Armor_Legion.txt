@@ -1,0 +1,36 @@
+[Legion, Beam Armor Legion]
+
+Heat Sink II
+Heat Sink II
+Multispectrum Energized Membrane II
+Damage Control II
+Centum C-Type Medium Armor Repairer
+Tracking Enhancer II
+
+Warp Scrambler II
+Stasis Webifier II
+50MN Quad LiF Restrained Microwarpdrive
+Medium Capacitor Booster II, Navy Cap Booster 800
+
+Heavy Beam Laser II, Multifrequency L
+Heavy Beam Laser II, Multifrequency L
+Heavy Beam Laser II, Multifrequency L
+Heavy Beam Laser II, Multifrequency L
+Heavy Beam Laser II, Multifrequency L
+Heavy Beam Laser II, Multifrequency L
+Covert Ops Cloaking Device II
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+Medium Auxiliary Nano Pump I
+
+Legion Offensive - Liquid Crystal Magnifiers
+Legion Defensive - Nanobot Injector
+Legion Core - Energy Parasitic Complex
+Legion Propulsion - Intercalated Nanofibers
+
+
+Acolyte II x5
+
+
+Navy Cap Booster 800 x25

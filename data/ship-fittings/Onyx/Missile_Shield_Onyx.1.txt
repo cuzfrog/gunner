@@ -2,8 +2,8 @@
 
 Damage Control II
 Shield Power Relay II
-[Empty Low slot]
-[Empty Low slot]
+Shield Power Relay II
+Power Diagnostic System II
 
 Large Shield Extender II
 Large Shield Extender II
@@ -17,7 +17,7 @@ Heavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile
 Heavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile
 Heavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile
 Heavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile
-[Empty High slot]
+Heavy Assault Missile Launcher II, Scourge Javelin Heavy Assault Missile
 
 Medium Core Defense Field Purger II
 Medium Core Defense Field Purger II

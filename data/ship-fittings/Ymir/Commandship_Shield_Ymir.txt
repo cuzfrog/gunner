@@ -26,11 +26,10 @@ Capital Hyperspatial Velocity Optimizer II
 
 
 Active Shielding Charge x3000
-Navy Cap Booster 3200 x10
+Navy Cap Booster 3200 x80
 Shield Extension Charge x3000
 Shield Harmonizing Charge x3000
 Evasive Maneuvers Charge x2700
 Rapid Deployment Charge x2700
 Interdiction Maneuvers Charge x2700
-Navy Cap Booster 3200 x70
 Hydrogen Isotopes x212037

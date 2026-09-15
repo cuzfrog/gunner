@@ -1,0 +1,33 @@
+[Harbinger, Reactive Tackle Pulse Armor Harbinger]
+
+Damage Control II
+1600mm Rolled Tungsten Compact Plates
+Heat Sink II
+Reactive Armor Hardener
+Heat Sink II
+Heat Sink II
+
+10MN Y-S8 Compact Afterburner
+Faint Epsilon Scoped Warp Scrambler
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
+Stasis Webifier II
+
+Heavy Pulse Laser II, Scorch M
+Armor Command Burst II, Armor Energizing Charge
+Heavy Pulse Laser II, Scorch M
+Heavy Pulse Laser II, Scorch M
+Heavy Pulse Laser II, Scorch M
+Heavy Pulse Laser II, Scorch M
+Heavy Pulse Laser II, Scorch M
+
+Medium Trimark Armor Pump I
+Medium Trimark Armor Pump I
+Medium Trimark Armor Pump I
+
+
+Vespa EC-600 x5
+
+
+Conflagration M x6
+Cap Booster 200 x1
+Navy Cap Booster 400 x7

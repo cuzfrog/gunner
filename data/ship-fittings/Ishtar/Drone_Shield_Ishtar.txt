@@ -13,17 +13,15 @@ Multispectrum Shield Hardener II
 Large Compact Pb-Acid Cap Battery
 
 Drone Link Augmentor II
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor I
+Small Energy Neutralizer II
+Small Energy Neutralizer II
 
 Medium EM Shield Reinforcer II
 Medium EM Shield Reinforcer II
 
 
-Acolyte II x5
-Wasp II x3
-Hammerhead II x5
+Ogre II x5
 
 
 Nanite Repair Paste x50

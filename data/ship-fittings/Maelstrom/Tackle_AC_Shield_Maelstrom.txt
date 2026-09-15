@@ -1,10 +1,11 @@
 [Maelstrom, Tackle AC Shield Maelstrom]
 
+
 Damage Control II
 Gyrostabilizer II
 Gyrostabilizer II
 Gyrostabilizer II
-[Empty Low slot]
+Overdrive Injector System II
 
 500MN Y-T8 Compact Microwarpdrive
 Warp Scrambler II
@@ -12,7 +13,7 @@ Heavy Stasis Grappler II
 X-Large Ancillary Shield Booster, Navy Cap Booster 800
 Adaptive Invulnerability Field II
 Multispectrum Shield Hardener II
-[Empty Med slot]
+Large Shield Extender II
 
 800mm Repeating Cannon II, Republic Fleet EMP L
 800mm Repeating Cannon II, Republic Fleet EMP L
@@ -25,6 +26,7 @@ Heavy Energy Neutralizer II
 Large Anti-EM Screen Reinforcer II
 Large Core Defense Field Extender II
 Large Core Defense Field Extender I
+
 
 
 Hornet EC-300 x5

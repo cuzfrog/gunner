@@ -1,5 +1,6 @@
 [Rodiva, Logi Armor Rodiva]
 
+
 800mm Steel Plates II
 Multispectrum Energized Membrane II
 Damage Control II
@@ -13,9 +14,13 @@ Sensor Booster II, ECCM Script
 Republic Fleet Large Cap Battery
 
 Heavy Mutadaptive Remote Armor Repairer II
-[Empty High slot]
-[Empty High slot]
+Drone Link Augmentor II
+Medium Energy Nosferatu II
 
 Medium Ancillary Current Router I
 Medium Trimark Armor Pump II
 Medium Trimark Armor Pump II
+
+
+
+Light Armor Maintenance Bot II x5

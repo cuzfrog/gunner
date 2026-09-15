@@ -1,0 +1,30 @@
+[Scimitar, Tackle Shield Scimitar]
+
+Damage Control II
+Reactor Control Unit II
+Power Diagnostic System II
+Power Diagnostic System II
+
+Warp Scrambler II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+50MN Quad LiF Restrained Microwarpdrive
+F-90 Compact Sensor Booster, Targeting Range Script
+
+Large Remote Shield Booster II
+Large Remote Shield Booster II
+Medium Remote Shield Booster II
+Medium Remote Shield Booster II
+
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+
+
+Light Shield Maintenance Bot II x3
+Warrior II x2
+
+
+Nanite Repair Paste x200
+Targeting Range Script x1
+Scan Resolution Script x1
+ECCM Script x1

@@ -1,5 +1,6 @@
 [Deacon, Logi Armor Deacon]
 
+
 Type-D Restrained Capacitor Power Relay
 400mm Crystalline Carbonide Restrained Plates
 Multispectrum Energized Membrane II
@@ -13,5 +14,9 @@ Small Remote Armor Repairer II
 Small Remote Armor Repairer II
 Small Remote Armor Repairer II
 
-[Empty Rig slot]
-[Empty Rig slot]
+Small Trimark Armor Pump I
+Small Hyperspatial Velocity Optimizer I
+
+
+
+Light Armor Maintenance Bot II x1

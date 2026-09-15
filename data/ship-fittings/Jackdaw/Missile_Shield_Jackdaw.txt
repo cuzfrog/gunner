@@ -1,5 +1,6 @@
 [Jackdaw, Missile Shield Jackdaw]
 
+
 Ballistic Control System II
 Nanofiber Internal Structure II
 Ballistic Control System II
@@ -7,27 +8,27 @@ Ballistic Control System II
 Medium F-S9 Regolith Compact Shield Extender
 5MN Quad LiF Restrained Microwarpdrive
 5MN Y-T8 Compact Microwarpdrive
-[Empty Med slot]
-[Empty Med slot]
+Small Shield Extender II
+Small Shield Extender II
 
 Light Missile Launcher II, Mjolnir Fury Light Missile
 Light Missile Launcher II, Mjolnir Fury Light Missile
 Light Missile Launcher II, Mjolnir Fury Light Missile
 Light Missile Launcher II, Mjolnir Fury Light Missile
 Light Missile Launcher II, Mjolnir Fury Light Missile
-[Empty High slot]
+Small Energy Nosferatu II
 
 Small Auxiliary Thrusters I
-[Empty Rig slot]
-[Empty Rig slot]
+Small Core Defense Field Extender I
+Small Hyperspatial Velocity Optimizer I
+
 
 
 Nova Fury Light Missile x1000
 Caldari Navy Mjolnir Light Missile x1000
 Caldari Navy Scourge Light Missile x1000
 Mjolnir Fury Light Missile x645
-Missile Range Script x1
-Missile Range Script x2
+Missile Range Script x3
 Scourge Fury Light Missile x1000
 Nanite Repair Paste x18
 Caldari Navy Inferno Light Missile x1000

@@ -1,0 +1,22 @@
+[Inquisitor, Logi Armor Inquisitor (Coaxial)]
+
+
+Type-D Restrained Capacitor Flux Coil
+400mm Crystalline Carbonide Restrained Plates
+Damage Control II
+Energized Adaptive Nano Membrane II
+
+1MN Monopropellant Enduring Afterburner
+Eutectic Compact Cap Recharger
+
+Small Coaxial Compact Remote Armor Repairer
+Small Coaxial Compact Remote Armor Repairer
+Small Coaxial Compact Remote Armor Repairer
+
+Small Trimark Armor Pump I
+Small Hyperspatial Velocity Optimizer I
+Small Hyperspatial Velocity Optimizer I
+
+
+
+Light Armor Maintenance Bot II x1

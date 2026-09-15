@@ -5,7 +5,7 @@ Multispectrum Energized Membrane II
 1600mm Steel Plates II
 Reactive Armor Hardener
 Medium Armor Repairer II
-[Empty Low slot]
+Signal Amplifier II
 
 Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
 Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
@@ -15,9 +15,9 @@ Sensor Booster II, Scan Resolution Script
 Small Ghoul Compact Energy Nosferatu
 Medium Ghoul Compact Energy Nosferatu
 Small Ghoul Compact Energy Nosferatu
-[Empty High slot]
-[Empty High slot]
-[Empty High slot]
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
 
 Medium Ancillary Current Router II
 Medium Explosive Armor Reinforcer II
@@ -27,5 +27,4 @@ ECCM Script x1
 Navy Cap Booster 800 x9
 Nanite Repair Paste x120
 Targeting Range Script x1
-Focused Warp Disruption Script x2
-Focused Warp Disruption Script x1
+Focused Warp Disruption Script x3

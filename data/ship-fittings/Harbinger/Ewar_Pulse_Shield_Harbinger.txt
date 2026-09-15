@@ -25,13 +25,13 @@ Medium Energy Locus Coordinator II
 Medium Energy Metastasis Adjuster I
 
 
+Infiltrator II x5
+
+
 Imperial Navy Microwave M x12
 Navy Cap Booster 800 x5
 Imperial Navy Multifrequency M x12
-Conflagration M x9
-Conflagration M x3
+Conflagration M x12
 Nanite Repair Paste x90
-Imperial Navy Standard M x6
-Imperial Navy Standard M x6
-Scorch M x4
-Scorch M x2
+Imperial Navy Standard M x12
+Scorch M x6

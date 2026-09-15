@@ -4,13 +4,13 @@ Medium Ancillary Armor Repairer, Nanite Repair Paste
 Magnetic Field Stabilizer II
 Medium Armor Repairer II
 Magnetic Field Stabilizer II
-[Empty Low slot]
-[Empty Low slot]
+Damage Control II
+Imperial Navy Multispectrum Energized Membrane
 
 Abyssal Warp Disruptor
 Medium Capacitor Booster II, Navy Cap Booster 400
 50MN Abyssal Microwarpdrive
-[Empty Med slot]
+Stasis Webifier II
 
 250mm Railgun II, Spike M
 Skirmish Command Burst II, Interdiction Maneuvers Charge
@@ -24,8 +24,7 @@ Medium Explosive Armor Reinforcer II
 Medium Ancillary Current Router II
 
 
-Warrior II x1
-Warrior II x4
+Warrior II x5
 Light Armor Maintenance Bot II x5
 
 

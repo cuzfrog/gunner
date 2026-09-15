@@ -1,5 +1,6 @@
 [Phoenix Navy Issue, Tackle Torp Shield Phoenix Navy Issue]
 
+
 Damage Control II
 Crosslink Compact Ballistic Control System
 Capacitor Flux Coil II
@@ -12,31 +13,27 @@ Capital Cap Battery II
 CONCORD Capital Shield Booster
 Heavy Warp Scrambler II
 Cap Recharger II
-[Empty Med slot]
-[Empty Med slot]
+Capital Shield Extender II
+Capital Shield Extender II
 
 XL Torpedo Launcher II, Scourge Rage XL Torpedo
 Caldari Navy Large Graviton Smartbomb
 XL Torpedo Launcher II, Scourge Rage XL Torpedo
 XL Torpedo Launcher II, Scourge Rage XL Torpedo
-[Empty High slot]
+Heavy Energy Nosferatu II
 
 Capital Core Defense Field Extender I
 Capital Core Defense Field Extender I
 Capital EM Shield Reinforcer I
 
 
-Strontium Clathrates x212
+
+Strontium Clathrates x5289
 Scourge Rage XL Torpedo x1889
 Guristas Nova XL Torpedo x1000
 Guristas Scourge XL Torpedo x1000
-Nitrogen Isotopes x726
+Nitrogen Isotopes x51423
 Guristas Inferno XL Torpedo x1000
 Guristas Mjolnir XL Torpedo x1000
 Nanite Repair Paste x1000
 Scourge Javelin XL Torpedo x1000
-Strontium Clathrates x2425
-Nitrogen Isotopes x3638
-Nitrogen Isotopes x15226
-Nitrogen Isotopes x31833
-Strontium Clathrates x2652

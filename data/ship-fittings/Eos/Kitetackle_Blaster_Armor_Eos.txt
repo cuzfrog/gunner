@@ -5,13 +5,13 @@ Damage Control II
 True Sansha Energized Adaptive Nano Membrane
 True Sansha Energized Adaptive Nano Membrane
 Energized Adaptive Nano Membrane II
-[Empty Low slot]
-[Empty Low slot]
+Drone Damage Amplifier II
+Magnetic Field Stabilizer II
 
 Medium Capacitor Booster II, Navy Cap Booster 800
 Warp Scrambler II
 50MN Cold-Gas Enduring Microwarpdrive
-[Empty Med slot]
+Stasis Webifier II
 
 Heavy Neutron Blaster II, Void M
 Heavy Neutron Blaster II, Void M

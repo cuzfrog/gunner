@@ -25,12 +25,9 @@ Medium Trimark Armor Pump I
 Medium Trimark Armor Pump I
 
 
-Acolyte II x3
-Acolyte II x2
+Acolyte II x5
 
 
 Imperial Navy Multifrequency M x6
-Scorch M x2
-Scorch M x4
-Imperial Navy Gamma M x3
-Imperial Navy Gamma M x3
+Scorch M x6
+Imperial Navy Gamma M x6
