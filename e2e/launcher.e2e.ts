@@ -17,6 +17,7 @@ test.describe.serial("launcher configuration", () => {
 
   test("weapon system switch to missile shows launcher panel", async () => {
     await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_CERBERUS));
+    await page.locator("#ship-a-weapon-system-missile").click();
     await expect(page.locator("#ship-a-weapon-system-missile")).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator("#ship-a-launcher-panel")).toBeVisible();
     await expect(page.locator("#ship-a-turret-panel")).toBeHidden();

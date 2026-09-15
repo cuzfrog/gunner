@@ -41,6 +41,6 @@ test.describe.serial("fitting export", () => {
     await page.locator("#ship-b-export-fitting").click();
     await expect(page.locator("#ship-b-fitting-name")).toHaveText(/Copied/);
     const clipboardText = await getClipboardText(page);
-    expect(clipboardText).toContain("[Merlin, Tackle Blaster Shield Merlin]");
+    expect(clipboardText).toContain("[Merlin, Tackle Blaster Shield Merlin (1 Web)]");
   });
 });
