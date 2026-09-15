@@ -82,6 +82,30 @@ describe("capacitorSim", () => {
     expect(result.stableLow).toBeGreaterThan(0);
   });
 
+  test("injection larger than capacity still sustains the fit via the on-demand reserve", () => {
+    // frigate-sized pool: a 400 GJ Navy charge on a 313 GJ capacitor always overshoots,
+    // so the injector is held as reserve; reserve spends must credit the injection.
+    const frigateSpec = { capacity: 313, rechargeTime: 140.6 };
+    const drains: readonly StaticDrain[] = [
+      { amount: 16.42, interval: 1 },
+      { amount: 400, interval: 12.75, clipSize: 1, reloadTime: 10, injector: true },
+    ];
+    const result = runCapSim({ spec: frigateSpec, drains, tMaxSeconds: 7200 });
+    expect(result.stable).toBe(true);
+    expect(result.stableLow).toBeGreaterThan(0);
+  });
+
+  test("reserve spend covers a drain the pool can barely afford", () => {
+    // pool 313 GJ, drain 300 every 30 s: without reserve credit the second drain overdrafts
+    const drains: readonly StaticDrain[] = [
+      { amount: 300, interval: 30 },
+      { amount: 400, interval: 12, clipSize: 1, reloadTime: 10, injector: true },
+    ];
+    const result = runCapSim({ spec: { capacity: 313, rechargeTime: 140.6 }, drains, tMaxSeconds: 7200 });
+    expect(result.stable).toBe(true);
+    expect(result.stableLow).toBeGreaterThan(0);
+  });
+
   test("zero capacity with drains depletes immediately", () => {
     const result = runCapSim({ spec: { capacity: 0, rechargeTime: 1 }, drains: [{ amount: 10, interval: 5 }] });
     expect(result.stable).toBe(false);
