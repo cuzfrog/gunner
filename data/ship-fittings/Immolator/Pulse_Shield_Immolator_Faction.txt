@@ -1,0 +1,16 @@
+[Immolator, Pulse Shield Immolator (Faction)]
+
+True Sansha Heat Sink
+True Sansha Heat Sink
+
+Coreli A-Type 1MN Afterburner
+Gistii A-Type Small Shield Booster
+Thukker Small Shield Extender
+
+True Sansha Small Focused Pulse Laser, Conflagration S
+[Empty High slot]
+
+
+Multifrequency S x1
+Conflagration S x8
+Scorch S x20

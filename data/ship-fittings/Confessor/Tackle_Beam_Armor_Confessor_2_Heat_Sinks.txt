@@ -1,0 +1,29 @@
+[Confessor, Tackle Beam Armor Confessor (2 Heat Sinks)]
+
+Abyssal Heat Sink
+True Sansha Multispectrum Energized Membrane
+Abyssal Heat Sink
+Coreli A-Type Small Armor Repairer
+Coreli A-Type Small Armor Repairer
+
+Domination 1MN Afterburner
+Dread Guristas Warp Scrambler
+Small Capacitor Booster II, Navy Cap Booster 400
+
+Small Focused Beam Laser II, True Sanshas Ultraviolet S
+Small Focused Beam Laser II, True Sanshas Ultraviolet S
+Small Focused Beam Laser II, True Sanshas Ultraviolet S
+Small Focused Beam Laser II, True Sanshas Ultraviolet S
+[Empty High slot]
+[Empty High slot]
+
+Small Ancillary Current Router I
+Small Auxiliary Nano Pump II
+Small Auxiliary Nano Pump II
+
+
+Sisters Core Scanner Probe x8
+True Sanshas Ultraviolet S x4
+Navy Cap Booster 400 x27
+Aurora S x8
+Gleam S x8
