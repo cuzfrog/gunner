@@ -1,0 +1,24 @@
+[Sentinel, Neut Armor Sentinel]
+
+Damage Control II
+Energized Adaptive Nano Membrane II
+Imperial Navy Multispectrum Energized Membrane
+
+1MN Y-S8 Compact Afterburner
+Tracking Disruptor II
+Target Painter II
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 150
+
+Small Focused Pulse Laser II, Imperial Navy Multifrequency S
+Small Focused Pulse Laser II, Imperial Navy Multifrequency S
+Small Infectious Scoped Energy Neutralizer
+
+Small Auxiliary Nano Pump I
+Small Auxiliary Nano Pump I
+
+Acolyte II x4
+
+
+Imperial Navy Multifrequency S x200
+Navy Cap Booster 150 x12
+Nanite Repair Paste x50

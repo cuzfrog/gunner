@@ -1,0 +1,32 @@
+[Lif, Logi Armor Lif]
+
+Damage Control II
+CONCORD 25000mm Steel Plates
+Energized Adaptive Nano Membrane II
+Energized Adaptive Nano Membrane II
+Imperial Navy Multispectrum Energized Membrane
+
+CONCORD Capital Remote Armor Repairer
+CONCORD Capital Remote Armor Repairer
+CONCORD Capital Remote Armor Repairer
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Capital Capacitor Booster II, Navy Cap Booster 3200
+
+Armor Command Burst II, Armor Energizing Charge
+Armor Command Burst II, Armor Energizing Charge
+Armor Command Burst II, Rapid Repair Charge
+Drone Link Augmentor II
+Capital Infectious Scoped Energy Neutralizer
+Heavy Infectious Scoped Energy Neutralizer
+
+Capital Auxiliary Nano Pump I
+Capital Auxiliary Nano Pump I
+Capital Trimark Armor Pump I
+
+Praetor II x5
+
+
+Navy Cap Booster 3200 x60
+Helium Isotopes x30000
+Strontium Clathrates x1000

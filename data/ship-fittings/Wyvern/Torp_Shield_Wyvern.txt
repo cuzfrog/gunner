@@ -1,0 +1,33 @@
+[Wyvern, Torp Shield Wyvern]
+
+Ballistic Control System II
+Ballistic Control System II
+Damage Control II
+Caldari Navy Power Diagnostic System
+
+CONCORD Capital Shield Booster
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+Multispectrum Shield Hardener II
+Multispectrum Shield Hardener II
+EM Shield Hardener II
+Sensor Booster II, Scan Resolution Script
+Stasis Webifier II
+
+XL Torpedo Launcher II, Mjolnir Rage Torpedo
+XL Torpedo Launcher II, Mjolnir Rage Torpedo
+XL Torpedo Launcher II, Mjolnir Rage Torpedo
+XL Torpedo Launcher II, Mjolnir Rage Torpedo
+XL Torpedo Launcher II, Mjolnir Rage Torpedo
+Capital Gremlin Compact Energy Neutralizer
+
+Capital Core Defense Field Extender I
+Capital Core Defense Field Extender I
+Capital EM Shield Reinforcer I
+
+
+Mjolnir Rage Torpedo x6000
+Caldari Navy Mjolnir Torpedo x6000
+Navy Cap Booster 3200 x40
+Nitrogen Isotopes x60000
+Strontium Clathrates x1000

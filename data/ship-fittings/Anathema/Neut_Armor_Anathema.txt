@@ -1,0 +1,23 @@
+[Anathema, Neut Armor Anathema]
+
+Damage Control II
+Energized Adaptive Nano Membrane II
+Inertial Stabilizers II
+Inertial Stabilizers II
+
+1MN Y-S8 Compact Afterburner
+Phased Muon Scoped Sensor Dampener
+Phased Muon Scoped Sensor Dampener
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 150
+
+Covert Ops Cloaking Device II
+Small Energy Neutralizer II
+Rocket Launcher II, Caldari Navy Mjolnir Rocket
+
+Small Auxiliary Nano Pump I
+Small Auxiliary Nano Pump I
+
+
+Navy Cap Booster 150 x12
+Caldari Navy Mjolnir Rocket x200
+Nanite Repair Paste x50
