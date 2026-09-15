@@ -101,6 +101,8 @@ const controlsCradleKeys = {
   appliedDpsHintProvider: "appliedDpsHintProvider",
   inflictedDpsHintRenderer: "inflictedDpsHintRenderer",
   inflictedDpsHintProvider: "inflictedDpsHintProvider",
+  shipHintRenderer: "shipHintRenderer",
+  shipHintProvider: "shipHintProvider",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 
 describe("registerControlsModule", () => {

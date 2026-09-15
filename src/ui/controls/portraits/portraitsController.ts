@@ -25,6 +25,7 @@ interface PortraitEffect {
 
 const HP_BAR_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
 const FULL_POOL: Readonly<Record<DefenseLayer, number>> = { shield: 1, armor: 1, hull: 1 };
+const SHIP_HINT_CONTENT_KEY = "shipProfile";
 
 export class PortraitsControllerImpl implements PortraitsController {
   private readonly els: PortraitsEls;
@@ -82,6 +83,8 @@ export class PortraitsControllerImpl implements PortraitsController {
       effects.hidden = true;
       hpBars.hidden = true;
       lockBadge.hidden = true;
+      image.removeAttribute("data-hint-content");
+      image.removeAttribute("data-value");
       state.lastKey = "";
       state.lastId = "";
       return;
@@ -107,6 +110,8 @@ export class PortraitsControllerImpl implements PortraitsController {
     if (state.lastId !== profile.id) {
       state.lastId = profile.id;
       image.src = this.imageCatalog.shipImageUrl(profile.id) ?? "";
+      image.setAttribute("data-hint-content", SHIP_HINT_CONTENT_KEY);
+      image.setAttribute("data-value", profile.id);
     }
     effects.innerHTML = "";
     const icons = document.createDocumentFragment();

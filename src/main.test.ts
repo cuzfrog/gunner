@@ -60,6 +60,10 @@ class FakeElement {
     this.attributes[qualifiedName] = value;
   }
 
+  removeAttribute(qualifiedName: string): void {
+    delete this.attributes[qualifiedName];
+  }
+
   addEventListener(event: string, handler: () => void): void {
     this.handlers[event] ??= [];
     this.handlers[event].push(handler);

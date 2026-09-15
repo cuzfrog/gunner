@@ -235,6 +235,38 @@ describe("PortraitsController", () => {
     expect(els.shipAEffects.hidden).toBe(true);
   });
 
+  test("assigned profile sets the ship profile hint content and value on the image", () => {
+    const { controller, els, profiles } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    controller.update();
+    expect(els.shipAImage.getAttribute("data-hint-content")).toBe("shipProfile");
+    expect(els.shipAImage.getAttribute("data-value")).toBe(SHIP_A_PROFILE.id);
+    profiles.shipB = SHIP_B_PROFILE;
+    controller.update();
+    expect(els.shipBImage.getAttribute("data-hint-content")).toBe("shipProfile");
+    expect(els.shipBImage.getAttribute("data-value")).toBe(SHIP_B_PROFILE.id);
+  });
+
+  test("switching to a different hull updates the hint data-value", () => {
+    const { controller, els, profiles } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    controller.update();
+    const other = { ...SHIP_B_PROFILE, id: "621" as ShipId };
+    profiles.shipA = other;
+    controller.update();
+    expect(els.shipAImage.getAttribute("data-value")).toBe("621");
+  });
+
+  test("removing a profile clears the hint attributes from the image", () => {
+    const { controller, els, profiles } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    controller.update();
+    profiles.shipA = undefined;
+    controller.update();
+    expect(els.shipAImage.getAttribute("data-hint-content")).toBeNull();
+    expect(els.shipAImage.getAttribute("data-value")).toBeNull();
+  });
+
   test("shipImageUrl returning undefined sets an empty src without crashing", () => {
     const { controller, els, profiles, imageCatalog } = buildController();
     profiles.shipA = SHIP_A_PROFILE;

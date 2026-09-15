@@ -1,0 +1,81 @@
+@layer components {
+.ship-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 200px;
+}
+
+.ship-hint-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 5px;
+}
+
+.ship-hint-name {
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.ship-hint-subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.ship-hint-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ship-hint-section-label {
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-bottom: 1px;
+}
+
+.ship-hint-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ship-hint-label {
+  color: var(--text-secondary);
+}
+
+.ship-hint-value {
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.ship-hint-resists {
+  display: grid;
+  grid-template-columns: auto repeat(4, 1fr);
+  gap: 2px 8px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ship-hint-resists-col {
+  text-align: right;
+  color: var(--text-dim);
+}
+
+.ship-hint-resists-layer {
+  color: var(--text-secondary);
+}
+
+.ship-hint-resists-value {
+  text-align: right;
+  color: var(--text-primary);
+}
+}

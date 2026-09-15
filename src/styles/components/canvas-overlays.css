@@ -51,6 +51,8 @@
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
+  pointer-events: auto;
+  cursor: help;
 }
 
 .portrait-lock-badge {

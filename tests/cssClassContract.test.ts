@@ -121,6 +121,7 @@ const APPROVED_PREFIXES = [
   "range-overlay",
   "combatant-portrait",
   "portrait",
+  "ship-hint",
   "ship-select",
   "sim-canvas",
   "footer",

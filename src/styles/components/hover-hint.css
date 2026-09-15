@@ -6,7 +6,7 @@
   top: anchor(bottom);
   translate: -50% 4px;
   /* stylelint-disable-next-line declaration-property-value-no-unknown -- valid CSS anchor positioning, not yet in stylelint-config-standard */
-  position-try-fallbacks: --hover-hint-above, shift-inline;
+  position-try-fallbacks: --hover-hint-above;
   z-index: var(--z-popup);
   max-width: 308px;
   padding: 7px 9px;
@@ -27,9 +27,12 @@
 .hover-hint[hidden] { display: none; }
 
 @position-try --hover-hint-above {
-  top: anchor(top);
-  /* stylelint-disable-next-line at-rule-descriptor-no-unknown -- valid CSS anchor positioning, not yet in stylelint-config-standard */
-  translate: -50% calc(-100% - 4px);
+  top: auto;
+  /* stylelint-disable-next-line declaration-property-value-no-unknown -- valid CSS anchor positioning, not yet in stylelint-config-standard */
+  bottom: anchor(top);
+
+  /* Base translate is -50% 4px; translate is not settable in @position-try, so margin compensates the 4px drop. */
+  margin-bottom: 8px;
 }
 
 .hover-hint-anchor {

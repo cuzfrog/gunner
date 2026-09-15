@@ -47,6 +47,7 @@ import type { AmmoHintProvider } from "./ammoHint";
 import type { AmmoHintRenderer } from "./ammoHint";
 import type { AppliedDpsHintProvider, AppliedDpsHintRenderer } from "./appliedDpsHint";
 import type { InflictedDpsHintProvider, InflictedDpsHintRenderer } from "./inflictedDpsHint";
+import type { ShipHintProvider, ShipHintRenderer } from "./shipHint";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -149,4 +150,6 @@ export interface ControlsCradle {
   readonly appliedDpsHintProvider: AppliedDpsHintProvider;
   readonly inflictedDpsHintRenderer: InflictedDpsHintRenderer;
   readonly inflictedDpsHintProvider: InflictedDpsHintProvider;
+  readonly shipHintRenderer: ShipHintRenderer;
+  readonly shipHintProvider: ShipHintProvider;
 }
