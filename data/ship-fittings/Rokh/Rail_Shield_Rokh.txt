@@ -1,0 +1,35 @@
+[Rokh, Rail Shield Rokh]
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Damage Control II
+Reactor Control Unit II
+
+500MN Microwarpdrive II
+Large Shield Extender II
+Large Shield Extender II
+Large Shield Extender II
+Tracking Computer II, Optimal Range Script
+Tracking Computer II, Tracking Speed Script
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 800
+
+425mm Railgun II, Javelin L
+425mm Railgun II, Javelin L
+425mm Railgun II, Javelin L
+425mm Railgun II, Javelin L
+425mm Railgun II, Javelin L
+425mm Railgun II, Javelin L
+425mm Railgun II, Javelin L
+425mm Railgun II, Javelin L
+
+Large Core Defense Field Extender II
+Large Core Defense Field Extender II
+Large Core Defense Field Extender II
+
+Wasp II x3
+
+
+Caldari Navy Antimatter Charge L x2000
+Javelin L x1000
+Nanite Repair Paste x100
+Navy Cap Booster 800 x20

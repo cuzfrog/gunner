@@ -1,0 +1,35 @@
+[Hyperion, Drone Armor Hyperion]
+
+Large Armor Repairer II
+Large Armor Repairer II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Multispectrum Energized Membrane II
+Damage Control II
+Reactor Control Unit II
+
+100MN Y-S8 Compact Afterburner
+Stasis Webifier II
+Warp Scrambler II
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 800
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 800
+
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Neutron Blaster Cannon II, Void L
+Heavy Energy Neutralizer II
+Heavy Energy Neutralizer II
+
+Large Trimark Armor Pump II
+Large Trimark Armor Pump II
+Large Auxiliary Nano Pump I
+
+Ogre II x5
+
+
+Void L x6
+Federation Navy Antimatter Charge L x2000
+Nanite Repair Paste x100
+Navy Cap Booster 800 x20
