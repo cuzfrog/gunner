@@ -96,7 +96,7 @@ export class FakeElement {
   }
   contains(shipB: unknown): boolean {
     if (!(shipB instanceof FakeElement)) return false;
-    return shipB === this || this.children.includes(shipB);
+    return shipB === this || this.children.some((child) => child.contains(shipB));
   }
   closest(selector?: string): FakeElement | null {
     if (!selector) return null;
