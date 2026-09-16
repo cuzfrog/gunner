@@ -30,8 +30,7 @@ Proteus Core - Friction Extension Processor
 Proteus Propulsion - Localized Injectors
 
 
-Vespa II x5
-Ogre II x3
+Hobgoblin II x5
 
 
 Void M x2000

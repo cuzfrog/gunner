@@ -30,7 +30,6 @@ Tengu Propulsion - Fuel Catalyst
 Tengu Core - Obfuscation Manifold
 
 
-Hobgoblin II x5
 
 
 Scourge Heavy Missile x2000

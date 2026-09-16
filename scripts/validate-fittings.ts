@@ -38,6 +38,7 @@ const SUPPORT_DRONE_NAMES: ReadonlySet<string> = new Set(Object.values(FITTING_D
 const STRATEGIC_CRUISER_HULL_TYPE_ID = "963";
 
 const SUBSYSTEM_BY_NAME: ReadonlyMap<string, SubsystemStats> = new Map(Object.values(FITTING_DB.subsystems).map((stats) => [stats.name, stats]));
+const SUBSYSTEM_BONUSES = FITTING_DB.subsystemBonuses;
 const LAUNCHER_IDS_BY_NAME: ReadonlyMap<string, TypeId> = new Map(Object.values(FITTING_DB.launchers).map((stats) => [stats.name, stats.id]));
 const TURRET_IDS_BY_NAME: ReadonlyMap<string, TypeId> = new Map(Object.values(FITTING_DB.turrets).map((stats) => [stats.name, stats.id]));
 
@@ -141,7 +142,10 @@ async function main(): Promise<void> {
     }
 
     // Parser sends only the first quantity item to drones and the rest to cargo; drone-named items in both are drone loadout.
-    const droneCheck = checkDrones([...parsed.drones, ...parsed.cargo], profile, fp);
+    const subsystemStats = subsystemLines
+      .map((line) => SUBSYSTEM_BY_NAME.get(line.name))
+      .filter((stats): stats is SubsystemStats => stats !== undefined);
+    const droneCheck = checkDrones([...parsed.drones, ...parsed.cargo], profile, computeDroneLimits(profile, subsystemStats), fp);
     failed += droneCheck.errorCount;
     failures.push(...droneCheck.failures);
 
@@ -228,12 +232,30 @@ function checkHardpoints(banks: readonly EftBank[], expected: SlotExpectation, f
   return failed;
 }
 
+interface DroneLimits {
+  readonly capacity: number;
+  readonly bandwidth: number;
+}
+
+// Same rule as DroneLoadoutValidatorImpl: hull limits plus drone flats granted by fitted subsystems.
+function computeDroneLimits(profile: Pick<ShipProfile, "droneCapacity" | "droneBandwidth">, subsystems: readonly SubsystemStats[]): DroneLimits {
+  let capacity = profile.droneCapacity;
+  let bandwidth = profile.droneBandwidth;
+  for (const subsystem of subsystems) {
+    for (const bonus of SUBSYSTEM_BONUSES[subsystem.id] ?? []) {
+      if (bonus.attribute === "droneCapacityFlat") capacity += bonus.magnitude;
+      if (bonus.attribute === "droneBandwidthFlat") bandwidth += bonus.magnitude;
+    }
+  }
+  return { capacity, bandwidth };
+}
+
 interface DroneCheckResult {
   readonly errorCount: number;
   readonly failures: readonly string[];
 }
 
-function checkDrones(items: readonly QuantityItem[], profile: ShipProfileWithSlots, fp: string): DroneCheckResult {
+function checkDrones(items: readonly QuantityItem[], profile: ShipProfileWithSlots, droneLimits: DroneLimits, fp: string): DroneCheckResult {
   const failures: string[] = [];
   let errorCount = 0;
   let volume = 0;
@@ -249,19 +271,23 @@ function checkDrones(items: readonly QuantityItem[], profile: ShipProfileWithSlo
     }
     if (SUPPORT_DRONE_NAMES.has(drone.name)) recognized = true;
   }
-  if (volume > profile.droneCapacity) {
+  if (volume > droneLimits.capacity) {
     errorCount++;
-    failures.push(`[DRONE BAY] ${fp}: ${volume} m3 of drones exceeds hull capacity ${profile.droneCapacity} m3`);
+    failures.push(`[DRONE BAY] ${fp}: ${volume} m3 of drones exceeds hull capacity ${droneLimits.capacity} m3`);
   }
-  if (bandwidth > profile.droneBandwidth) {
+  if (bandwidth > droneLimits.bandwidth) {
     errorCount++;
-    failures.push(`[DRONE BANDWIDTH] ${fp}: ${bandwidth} Mbit/s of drones exceeds hull bandwidth ${profile.droneBandwidth} Mbit/s`);
+    failures.push(`[DRONE BANDWIDTH] ${fp}: ${bandwidth} Mbit/s of drones exceeds hull bandwidth ${droneLimits.bandwidth} Mbit/s`);
   }
-  if (profile.droneBandwidth > 0 && !recognized) {
+  if (droneLimits.bandwidth > 0 && !recognized) {
     errorCount++;
-    failures.push(`[DRONES MISSING] ${fp}: hull carries ${profile.droneBandwidth} Mbit/s drone bandwidth but the fit fields none`);
+    failures.push(`[DRONES MISSING] ${fp}: hull carries ${droneLimits.bandwidth} Mbit/s drone bandwidth but the fit fields none`);
   }
   return { errorCount, failures };
 }
 
-await main();
+export { computeDroneLimits as _computeDroneLimits };
+
+if (import.meta.main) {
+  await main();
+}
