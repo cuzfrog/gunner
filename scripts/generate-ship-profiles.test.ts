@@ -1,29 +1,50 @@
-import { _buildAttributeNameMap, _buildShipNameToType, _extractCapacitorData, _extractDefenseData, _parseDroneLimits, _parseProfile, _resolveShipIds, _slugify } from "./generate-ship-profiles";
+import { _buildAttributeNameMap, _buildShipNameToType, _extractCapacitorData, _extractDefenseData, _parseProfile, _resolveShipIds } from "./generate-ship-profiles";
 import type { SdeDogmaAttribute, SdeGroup, SdeType, SdeTypeDogma } from "./generate-ship-profiles";
 
-describe("_slugify", () => {
-  test("lowercases and joins words with hyphens", () => {
-    expect(_slugify("Amarr Empire")).toBe("amarr-empire");
-    expect(_slugify("Jovian Directorate")).toBe("jovian-directorate");
-  });
+// Attribute IDs in these fixtures are arbitrary; only the id-to-name mapping matters to the unit under test.
+const ATTRIBUTE_NAMES = new Map<number, string>([
+  [501, "agility"], [502, "maxVelocity"], [503, "signatureRadius"],
+  [504, "scanResolution"], [505, "maxTargetRange"], [506, "maxLockedTargets"],
+  [507, "hiSlots"], [508, "medSlots"], [509, "lowSlots"], [510, "rigSlots"],
+  [511, "droneCapacity"], [512, "droneBandwidth"], [513, "maxActiveDrones"],
+  [520, "hp"], [521, "armorHP"], [522, "shieldCapacity"], [523, "capacitorCapacity"], [524, "rechargeRate"], [525, "shieldRechargeRate"],
+]);
 
-  test("strips apostrophes and collapses punctuation", () => {
-    expect(_slugify("Mordu's Legion")).toBe("mordus-legion");
-    expect(_slugify("Sisters of EVE")).toBe("sisters-of-eve");
-  });
+const DEFENSE_ATTRIBUTE_NAMES = new Map<number, string>([
+  ...ATTRIBUTE_NAMES,
+  [263, "shieldCapacity"], [479, "shieldRechargeRate"], [265, "armorHP"], [9, "hp"], [482, "capacitorCapacity"], [55, "rechargeRate"],
+  [267, "armorEmDamageResonance"], [270, "armorThermalDamageResonance"], [269, "armorKineticDamageResonance"], [268, "armorExplosiveDamageResonance"],
+  [271, "shieldEmDamageResonance"], [274, "shieldThermalDamageResonance"], [273, "shieldKineticDamageResonance"], [272, "shieldExplosiveDamageResonance"],
+  [113, "emDamageResonance"], [110, "thermalDamageResonance"], [109, "kineticDamageResonance"], [111, "explosiveDamageResonance"],
+]);
 
-  test("trims leading and trailing non-alphanumerics", () => {
-    expect(_slugify("  Gallente Federation  ")).toBe("gallente-federation");
-  });
-});
+const RIFTER_TYPE: SdeType = { typeID: 587, "typeName_en-us": "Rifter", groupID: 25, published: 1, mass: 1_067_000 };
+const SHIP_NAME_TO_TYPE = new Map<string, SdeType>([["Rifter", RIFTER_TYPE]]);
+
+function dogmaFor(values: Readonly<Record<string, number>>, names: ReadonlyMap<number, string> = ATTRIBUTE_NAMES): SdeTypeDogma {
+  const nameToId = new Map([...names].map(([id, name]) => [name, id]));
+  return {
+    dogmaAttributes: Object.entries(values).map(([name, value]) => {
+      const attributeID = nameToId.get(name);
+      if (attributeID === undefined) throw new Error(`Unknown attribute name "${name}" in fixture.`);
+      return { attributeID, value };
+    }),
+  };
+}
+
+const MINIMAL_DOGMA: Readonly<Record<string, number>> = {
+  agility: 3.2, maxVelocity: 365, signatureRadius: 35,
+  hp: 400, armorHP: 250, shieldCapacity: 375, capacitorCapacity: 250, rechargeRate: 625_000,
+};
 
 describe("_buildShipNameToType", () => {
-  function makeType(overrides: { typeID: number; typeName: string; groupID: number; published?: number }): SdeType {
+  function makeType(overrides: { typeID: number; typeName: string; groupID: number; published?: number; mass?: number }): SdeType {
     return {
       typeID: overrides.typeID,
       "typeName_en-us": overrides.typeName,
       groupID: overrides.groupID,
       published: overrides.published ?? 1,
+      mass: overrides.mass ?? 1_000_000,
     };
   }
 
@@ -61,13 +82,9 @@ describe("_buildShipNameToType", () => {
 });
 
 describe("_resolveShipIds", () => {
-  function rifterType(): SdeType {
-    return { typeID: 587, "typeName_en-us": "Rifter", groupID: 25, published: 1 };
-  }
+  const map = new Map<string, SdeType>([["Rifter", RIFTER_TYPE]]);
 
-  const map = new Map<string, SdeType>([["Rifter", rifterType()]]);
-
-  test("resolves type and group ids for a known ship", () => {
+  test("resolves type and group ids from the SDE type record", () => {
     const result = _resolveShipIds({
       name: "Rifter",
       faction: "Minmatar Republic",
@@ -76,91 +93,120 @@ describe("_resolveShipIds", () => {
     expect(String(result.id)).toBe("587");
     expect(String(result.factionId)).toBe("minmatar-republic");
     expect(String(result.hullTypeId)).toBe("25");
-    expect(result.matched).toBe(true);
+    expect(result.type).toBe(RIFTER_TYPE);
   });
 
-  test("falls back to legacy ids for a missing ship", () => {
-    const result = _resolveShipIds({
+  test("throws for a ship name that has no SDE match", () => {
+    expect(() => _resolveShipIds({
       name: "Eidolon",
       faction: "Jovian Directorate",
       hullType: "Standard Battleships",
-    }, map);
-    expect(String(result.id)).toBe("legacy-eidolon");
-    expect(String(result.factionId)).toBe("jovian-directorate");
-    expect(String(result.hullTypeId)).toBe("legacy-standard-battleships");
-    expect(result.matched).toBe(false);
+    }, map)).toThrow('No SDE ship for "Eidolon"');
   });
 });
 
 describe("_parseProfile", () => {
-  const shipNameToType = new Map<string, SdeType>([["Rifter", { typeID: 587, "typeName_en-us": "Rifter", groupID: 25, published: 1 }]]);
-  const emptyTypedogmas: Record<string, SdeTypeDogma> = {};
-  const emptyAttributeNames = new Map<number, string>();
+  const typedogmas: Record<string, SdeTypeDogma> = { "587": dogmaFor(MINIMAL_DOGMA) };
 
-  test("parses a valid profile and resolves ids", () => {
+  test("resolves numerics from the SDE type record and typedogma, ignoring scraped wiki blocks", () => {
     const raw = {
       name: "Rifter",
       faction: "Minmatar Republic",
       hullType: "Standard Frigates",
-      navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
-      structure: { mass: "1,067,000 kg" },
-      targeting: { sigRadius: "35 m", scanResolution: "200 mm", maxTargetingRange: "30 km", maxLockedTargets: 4 },
-      drones: { droneCapacity: "25 m³", droneBandwidth: "25 Mbit/sec" },
+      navigation: { maxVelocity: "999 m/s", inertiaModifier: "9" },
+      structure: { mass: "42 kg" },
+      targeting: { sigRadius: "999 m", scanResolution: "999 mm", maxTargetingRange: "999 km", maxLockedTargets: 99 },
+      drones: { droneCapacity: "999 m³", droneBandwidth: "999 Mbit/sec" },
+      fittings: { highSlots: 9, mediumSlots: 9 },
     };
-    const profile = _parseProfile(raw, 0, shipNameToType, emptyTypedogmas, emptyAttributeNames);
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      "587": dogmaFor({ ...MINIMAL_DOGMA, scanResolution: 660, maxTargetRange: 22_500, maxLockedTargets: 4, hiSlots: 3, medSlots: 3, lowSlots: 4, rigSlots: 3, droneCapacity: 0, droneBandwidth: 0 }),
+    };
+    const profile = _parseProfile(raw, 0, SHIP_NAME_TO_TYPE, typedogmas, ATTRIBUTE_NAMES);
     expect(String(profile.id)).toBe("587");
     expect(profile.name).toBe("Rifter");
     expect(String(profile.factionId)).toBe("minmatar-republic");
     expect(String(profile.hullTypeId)).toBe("25");
     expect(profile.mass).toBe(1_067_000);
+    expect(profile.inertiaModifier).toBe(3.2);
     expect(profile.baseSpeed).toBe(365);
     expect(profile.sigRadius).toBe(35);
-    expect(profile.droneBandwidth).toBe(25);
-    expect(profile.droneCapacity).toBe(25);
-    expect(profile.maxActiveDrones).toBe(5);
-  });
-
-  test("defaults drone limits to zero when drones block is absent", () => {
-    const raw = {
-      name: "Rifter",
-      faction: "Minmatar Republic",
-      hullType: "Standard Frigates",
-      navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
-      structure: { mass: "1,067,000 kg" },
-      targeting: { sigRadius: "35 m", scanResolution: "200 mm", maxTargetingRange: "30 km", maxLockedTargets: 4 },
-    };
-    const profile = _parseProfile(raw, 0, shipNameToType, emptyTypedogmas, emptyAttributeNames);
+    expect(profile.scanResolution).toBe(660);
+    expect(profile.maxTargetingRange).toBe(22_500);
+    expect(profile.maxLockedTargets).toBe(4);
+    expect(profile.highSlots).toBe(3);
+    expect(profile.medSlots).toBe(3);
+    expect(profile.lowSlots).toBe(4);
+    expect(profile.rigSlots).toBe(3);
     expect(profile.droneBandwidth).toBe(0);
     expect(profile.droneCapacity).toBe(0);
     expect(profile.maxActiveDrones).toBe(0);
   });
 
-  test("extracts defense data from typedogma when ship is matched", () => {
-    const attributeNames = new Map<number, string>([
-      [263, "shieldCapacity"], [479, "shieldRechargeRate"], [265, "armorHP"], [9, "hp"], [482, "capacitorCapacity"], [55, "rechargeRate"],
-      [267, "armorEmDamageResonance"], [270, "armorThermalDamageResonance"], [269, "armorKineticDamageResonance"], [268, "armorExplosiveDamageResonance"],
-      [271, "shieldEmDamageResonance"], [274, "shieldThermalDamageResonance"], [273, "shieldKineticDamageResonance"], [272, "shieldExplosiveDamageResonance"],
-      [113, "emDamageResonance"], [110, "thermalDamageResonance"], [109, "kineticDamageResonance"], [111, "explosiveDamageResonance"],
-    ]);
+  test("defaults scan resolution, targeting range, locks, and slots to zero when the SDE lacks them", () => {
+    const profile = _parseProfile({ name: "Rifter", faction: "Minmatar Republic", hullType: "Standard Frigates" }, 0, SHIP_NAME_TO_TYPE, typedogmas, ATTRIBUTE_NAMES);
+    expect(profile.scanResolution).toBe(0);
+    expect(profile.maxTargetingRange).toBe(0);
+    expect(profile.maxLockedTargets).toBe(0);
+    expect(profile.highSlots).toBe(0);
+    expect(profile.medSlots).toBe(0);
+    expect(profile.lowSlots).toBe(0);
+    expect(profile.rigSlots).toBe(0);
+  });
+
+  test("falls back to maxActiveDrones 5 for drone-capable hulls", () => {
     const typedogmas: Record<string, SdeTypeDogma> = {
-      "587": {
-        dogmaAttributes: [
-          { attributeID: 263, value: 375 }, { attributeID: 479, value: 625000 }, { attributeID: 265, value: 250 }, { attributeID: 9, value: 400 }, { attributeID: 482, value: 6375 }, { attributeID: 55, value: 1250000 },
-          { attributeID: 267, value: 0.5 }, { attributeID: 270, value: 0.35 }, { attributeID: 269, value: 0.25 }, { attributeID: 268, value: 0.2 },
-          { attributeID: 271, value: 0.5 }, { attributeID: 274, value: 0.6 }, { attributeID: 273, value: 0.7 }, { attributeID: 272, value: 0.75 },
-          { attributeID: 113, value: 0.67 }, { attributeID: 110, value: 0.67 }, { attributeID: 109, value: 0.67 }, { attributeID: 111, value: 0.67 },
-        ],
-      },
+      "587": dogmaFor({ ...MINIMAL_DOGMA, droneCapacity: 40, droneBandwidth: 25 }),
     };
-    const raw = {
-      name: "Rifter",
-      faction: "Minmatar Republic",
-      hullType: "Standard Frigates",
-      navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
-      structure: { mass: "1,067,000 kg" },
-      targeting: { sigRadius: "35 m", scanResolution: "200 mm", maxTargetingRange: "30 km", maxLockedTargets: 4 },
+    const profile = _parseProfile({ name: "Rifter", faction: "Minmatar Republic", hullType: "Standard Frigates" }, 0, SHIP_NAME_TO_TYPE, typedogmas, ATTRIBUTE_NAMES);
+    expect(profile.droneCapacity).toBe(40);
+    expect(profile.droneBandwidth).toBe(25);
+    expect(profile.maxActiveDrones).toBe(5);
+  });
+
+  test("respects an explicit maxActiveDrones dogma attribute when present", () => {
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      "587": dogmaFor({ ...MINIMAL_DOGMA, droneCapacity: 40, droneBandwidth: 25, maxActiveDrones: 7 }),
     };
-    const profile = _parseProfile(raw, 0, shipNameToType, typedogmas, attributeNames);
+    const profile = _parseProfile({ name: "Rifter", faction: "Minmatar Republic", hullType: "Standard Frigates" }, 0, SHIP_NAME_TO_TYPE, typedogmas, ATTRIBUTE_NAMES);
+    expect(profile.maxActiveDrones).toBe(7);
+  });
+
+  test("throws for a ship name that has no SDE match", () => {
+    expect(() => _parseProfile({ name: "Penitence", faction: "Amarr Empire", hullType: "Recon Ships" }, 0, SHIP_NAME_TO_TYPE, typedogmas, ATTRIBUTE_NAMES)).toThrow('No SDE ship for "Penitence"');
+  });
+
+  test("throws naming the attribute when a required dogma value is missing", () => {
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      "587": dogmaFor({ agility: 3.2, maxVelocity: 365, hp: 400, armorHP: 250, shieldCapacity: 375, capacitorCapacity: 250, rechargeRate: 625_000 }),
+    };
+    expect(() => _parseProfile({ name: "Rifter", faction: "Minmatar Republic", hullType: "Standard Frigates" }, 0, SHIP_NAME_TO_TYPE, typedogmas, ATTRIBUTE_NAMES)).toThrow('Rifter: SDE attribute "signatureRadius" is missing or not positive.');
+  });
+
+  test("throws naming the attribute when a required dogma value is zero", () => {
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      "587": dogmaFor({ ...MINIMAL_DOGMA, maxVelocity: 0 }),
+    };
+    expect(() => _parseProfile({ name: "Rifter", faction: "Minmatar Republic", hullType: "Standard Frigates" }, 0, SHIP_NAME_TO_TYPE, typedogmas, ATTRIBUTE_NAMES)).toThrow('Rifter: SDE attribute "maxVelocity" is missing or not positive.');
+  });
+
+  test("throws when the SDE type record mass is missing or not positive", () => {
+    const zeroMassType: SdeType = { ...RIFTER_TYPE, mass: 0 };
+    const map = new Map<string, SdeType>([["Rifter", zeroMassType]]);
+    expect(() => _parseProfile({ name: "Rifter", faction: "Minmatar Republic", hullType: "Standard Frigates" }, 0, map, typedogmas, ATTRIBUTE_NAMES)).toThrow('Rifter: SDE type record "mass" is missing or not positive.');
+  });
+
+  test("carries defense data from typedogma into the profile", () => {
+    const typedogmas: Record<string, SdeTypeDogma> = {
+      "587": dogmaFor({
+        ...MINIMAL_DOGMA,
+        shieldRechargeRate: 625_000,
+        armorEmDamageResonance: 0.5, armorThermalDamageResonance: 0.35, armorKineticDamageResonance: 0.25, armorExplosiveDamageResonance: 0.2,
+        shieldEmDamageResonance: 0.5, shieldThermalDamageResonance: 0.6, shieldKineticDamageResonance: 0.7, shieldExplosiveDamageResonance: 0.75,
+        emDamageResonance: 0.67, thermalDamageResonance: 0.67, kineticDamageResonance: 0.67, explosiveDamageResonance: 0.67,
+      }, DEFENSE_ATTRIBUTE_NAMES),
+    };
+    const profile = _parseProfile({ name: "Rifter", faction: "Minmatar Republic", hullType: "Standard Frigates" }, 0, SHIP_NAME_TO_TYPE, typedogmas, DEFENSE_ATTRIBUTE_NAMES);
     expect(profile.shieldHp).toBe(375);
     expect(profile.shieldRechargeTime).toBe(625);
     expect(profile.armorHp).toBe(250);
@@ -168,95 +214,16 @@ describe("_parseProfile", () => {
     expect(profile.shieldResists).toEqual({ em: 0.5, thermal: 0.4, kinetic: 0.3, explosive: 0.25 });
     expect(profile.armorResists).toEqual({ em: 0.5, thermal: 0.65, kinetic: 0.75, explosive: 0.8 });
     expect(profile.hullResists).toEqual({ em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 });
-    expect(profile.capacitorCapacity).toBe(6375);
-    expect(profile.capacitorRechargeTime).toBe(1250);
-  });
-
-  test("defaults defense to zero when typedogma is missing", () => {
-    const raw = {
-      name: "Rifter",
-      faction: "Minmatar Republic",
-      hullType: "Standard Frigates",
-      navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
-      structure: { mass: "1,067,000 kg" },
-      targeting: { sigRadius: "35 m", scanResolution: "200 mm", maxTargetingRange: "30 km", maxLockedTargets: 4 },
-    };
-    const profile = _parseProfile(raw, 0, shipNameToType, emptyTypedogmas, emptyAttributeNames);
-    expect(profile.shieldHp).toBe(0);
-    expect(profile.shieldRechargeTime).toBe(0);
-    expect(profile.armorHp).toBe(0);
-    expect(profile.hullHp).toBe(0);
-    expect(profile.shieldResists).toEqual({ em: 0, thermal: 0, kinetic: 0, explosive: 0 });
-    expect(profile.armorResists).toEqual({ em: 0, thermal: 0, kinetic: 0, explosive: 0 });
-    expect(profile.hullResists).toEqual({ em: 0, thermal: 0, kinetic: 0, explosive: 0 });
-  });
-
-  test("carries capacitor data from typedogma into the profile", () => {
-    const attributeNames = new Map<number, string>([[482, "capacitorCapacity"], [55, "rechargeRate"]]);
-    const typedogmas: Record<string, SdeTypeDogma> = {
-      "587": { dogmaAttributes: [{ attributeID: 482, value: 450 }, { attributeID: 55, value: 250000 }] },
-    };
-    const raw = {
-      name: "Rifter",
-      faction: "Minmatar Republic",
-      hullType: "Standard Frigates",
-      navigation: { maxVelocity: "365 m/s", inertiaModifier: "3" },
-      structure: { mass: "1,067,000 kg" },
-      targeting: { sigRadius: "35 m", scanResolution: "200 mm", maxTargetingRange: "30 km", maxLockedTargets: 4 },
-    };
-    const profile = _parseProfile(raw, 0, shipNameToType, typedogmas, attributeNames);
-    expect(profile.capacitorCapacity).toBe(450);
-    expect(profile.capacitorRechargeTime).toBe(250);
+    expect(profile.capacitorCapacity).toBe(250);
+    expect(profile.capacitorRechargeTime).toBe(625);
   });
 
   test("throws for a non-object entry", () => {
-    expect(() => _parseProfile(null, 0, shipNameToType, emptyTypedogmas, emptyAttributeNames)).toThrow("Entry 0 is not an object");
+    expect(() => _parseProfile(null, 0, SHIP_NAME_TO_TYPE, {}, ATTRIBUTE_NAMES)).toThrow("Entry 0 is not an object");
   });
 
   test("throws for an empty name", () => {
-    expect(() => _parseProfile({ name: "" }, 0, shipNameToType, emptyTypedogmas, emptyAttributeNames)).toThrow("Entry 0 has an empty name");
-  });
-});
-
-describe("_parseDroneLimits", () => {
-  test("returns zeros when drones block is absent", () => {
-    const limits = _parseDroneLimits(undefined, "Test");
-    expect(limits).toEqual({ bandwidth: 0, capacity: 0, maxActive: 0 });
-  });
-
-  test("parses bandwidth and capacity with default maxActive 5", () => {
-    const limits = _parseDroneLimits({ droneBandwidth: "75 Mbit/sec", droneCapacity: "75 m³" }, "Test");
-    expect(limits).toEqual({ bandwidth: 75, capacity: 75, maxActive: 5 });
-  });
-
-  test("returns zeros when both bandwidth and capacity are zero", () => {
-    const limits = _parseDroneLimits({ droneBandwidth: "0 Mbit/sec", droneCapacity: "0 m³" }, "Test");
-    expect(limits).toEqual({ bandwidth: 0, capacity: 0, maxActive: 0 });
-  });
-
-  test("returns maxActive 5 when only bandwidth is non-zero", () => {
-    const limits = _parseDroneLimits({ droneBandwidth: "50 Mbit/sec", droneCapacity: "0 m³" }, "Test");
-    expect(limits).toEqual({ bandwidth: 50, capacity: 0, maxActive: 5 });
-  });
-
-  test("throws when droneBandwidth is missing from a present drones block", () => {
-    expect(() => _parseDroneLimits({ droneCapacity: "25 m³" }, "Test")).toThrow("Test drones: missing or invalid droneBandwidth");
-  });
-
-  test("throws when droneCapacity is missing from a present drones block", () => {
-    expect(() => _parseDroneLimits({ droneBandwidth: "25 Mbit/sec" }, "Test")).toThrow("Test drones: missing or invalid droneCapacity");
-  });
-
-  test("treats empty string values as zero", () => {
-    const limits = _parseDroneLimits({ droneBandwidth: "", droneCapacity: "" }, "Test");
-    expect(limits).toEqual({ bandwidth: 0, capacity: 0, maxActive: 0 });
-  });
-
-  test("takes the upper bound of range strings for T3 strategic cruisers", () => {
-    expect(_parseDroneLimits({ droneBandwidth: "0-50 Mbit/sec", droneCapacity: "0-200 m³" }, "Legion")).toEqual({ bandwidth: 50, capacity: 200, maxActive: 5 });
-    expect(_parseDroneLimits({ droneBandwidth: "25–40 Mbit/sec", droneCapacity: "25–50 m³" }, "Loki")).toEqual({ bandwidth: 40, capacity: 50, maxActive: 5 });
-    expect(_parseDroneLimits({ droneBandwidth: "25-125 Mbit/sec", droneCapacity: "50-300 m³" }, "Proteus")).toEqual({ bandwidth: 125, capacity: 300, maxActive: 5 });
-    expect(_parseDroneLimits({ droneBandwidth: "0-25 Mbit/sec", droneCapacity: "0-50 m³" }, "Tengu")).toEqual({ bandwidth: 25, capacity: 50, maxActive: 5 });
+    expect(() => _parseProfile({ name: "" }, 0, SHIP_NAME_TO_TYPE, {}, ATTRIBUTE_NAMES)).toThrow("Entry 0 has an empty name");
   });
 });
 
@@ -293,10 +260,8 @@ describe("_extractCapacitorData", () => {
     expect(capacitor.capacitorRechargeTime).toBe(1250);
   });
 
-  test("returns zeros for legacy entries without SDE typedogma", () => {
-    const capacitor = _extractCapacitorData("99999", {}, makeAttributeNames());
-    expect(capacitor.capacitorCapacity).toBe(0);
-    expect(capacitor.capacitorRechargeTime).toBe(0);
+  test("throws when the typedogma is missing", () => {
+    expect(() => _extractCapacitorData("99999", {}, makeAttributeNames())).toThrow("99999: missing typedogma");
   });
 
   test("throws when the typedogma lacks capacitorCapacity", () => {
@@ -345,14 +310,7 @@ describe("_extractDefenseData", () => {
     expect(defense.hullResists).toEqual({ em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 });
   });
 
-  test("returns zero HP and zero resists when typedogma is missing", () => {
-    const defense = _extractDefenseData("99999", {}, makeAttributeNames());
-    expect(defense.shieldHp).toBe(0);
-    expect(defense.shieldRechargeTime).toBe(0);
-    expect(defense.armorHp).toBe(0);
-    expect(defense.hullHp).toBe(0);
-    expect(defense.shieldResists).toEqual({ em: 0, thermal: 0, kinetic: 0, explosive: 0 });
-    expect(defense.armorResists).toEqual({ em: 0, thermal: 0, kinetic: 0, explosive: 0 });
-    expect(defense.hullResists).toEqual({ em: 0, thermal: 0, kinetic: 0, explosive: 0 });
+  test("throws when the typedogma is missing", () => {
+    expect(() => _extractDefenseData("99999", {}, makeAttributeNames())).toThrow("99999: missing typedogma");
   });
 });

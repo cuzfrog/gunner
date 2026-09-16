@@ -2196,49 +2196,4 @@ export const SHIP_NAMES: Readonly<Record<string, Readonly<Record<"en" | "zh" | "
     zh: "伊米尔级",
     ja: "ユミル",
   },
-  "legacy-eidolon": {
-    en: "Eidolon",
-    zh: "Eidolon",
-    ja: "Eidolon",
-  },
-  "legacy-gecko": {
-    en: "Gecko",
-    zh: "壁虎级",
-    ja: "ゲッコー",
-  },
-  "legacy-herald": {
-    en: "Herald",
-    zh: "Herald",
-    ja: "Herald",
-  },
-  "legacy-ixion": {
-    en: "Ixion",
-    zh: "伊克西翁级",
-    ja: "イクシオン",
-  },
-  "legacy-penitence": {
-    en: "Penitence",
-    zh: "Penitence",
-    ja: "Penitence",
-  },
-  "legacy-phantom": {
-    en: "Phantom",
-    zh: "Phantom",
-    ja: "Phantom",
-  },
-  "legacy-specter": {
-    en: "Specter",
-    zh: "Specter",
-    ja: "Specter",
-  },
-  "legacy-visitant": {
-    en: "Visitant",
-    zh: "Visitant",
-    ja: "Visitant",
-  },
-  "legacy-wraith": {
-    en: "Wraith",
-    zh: "Wraith",
-    ja: "Wraith",
-  },
 } as const;

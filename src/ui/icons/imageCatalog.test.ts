@@ -1,5 +1,4 @@
 import { toShipId, toTypeId } from "../../gamedata/ids";
-import { SHIP_IMAGE_FILES } from "./shipImageIds";
 import { StaticImageCatalog } from "./imageCatalog";
 
 describe("StaticImageCatalog", () => {
@@ -11,24 +10,6 @@ describe("StaticImageCatalog", () => {
 
   test("shipImageUrl returns undefined for an unknown id", () => {
     expect(catalog.shipImageUrl(toShipId("legacy-unknown"))).toBeUndefined();
-  });
-
-  test("every legacy ship id resolves to an image file", () => {
-    const legacyIds = Object.keys(SHIP_IMAGE_FILES).filter((id) => id.startsWith("legacy-"));
-    expect(legacyIds).toEqual([
-      "legacy-eidolon",
-      "legacy-gecko",
-      "legacy-herald",
-      "legacy-ixion",
-      "legacy-penitence",
-      "legacy-phantom",
-      "legacy-specter",
-      "legacy-visitant",
-      "legacy-wraith",
-    ]);
-    for (const id of legacyIds) {
-      expect(catalog.shipImageUrl(toShipId(id))).toBeDefined();
-    }
   });
 
   test("itemIconUrl returns the icon path for a known item", () => {

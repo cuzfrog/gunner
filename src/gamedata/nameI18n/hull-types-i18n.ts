@@ -236,44 +236,4 @@ export const HULL_TYPE_NAMES: Readonly<Record<string, Readonly<Record<"en" | "zh
     zh: "战略巡洋舰",
     ja: "戦略的巡洋艦",
   },
-  "legacy-electronic-attack-frigates": {
-    en: "Electronic Attack Frigates",
-    zh: "电子攻击舰",
-    ja: "電子攻撃船",
-  },
-  "legacy-faction-heavy-drone": {
-    en: "Faction Heavy Drone",
-    zh: "战斗无人机",
-    ja: "戦闘用ドローン",
-  },
-  "legacy-haulers": {
-    en: "Haulers",
-    zh: "运载舰",
-    ja: "ハウラー",
-  },
-  "legacy-pirate-faction-cruisers": {
-    en: "Pirate Faction Cruisers",
-    zh: "巡洋舰",
-    ja: "巡洋艦",
-  },
-  "legacy-recon-ships": {
-    en: "Recon Ships",
-    zh: "力场侦察舰",
-    ja: "軍事偵察船",
-  },
-  "legacy-standard-battleships": {
-    en: "Standard Battleships",
-    zh: "战列舰",
-    ja: "戦艦",
-  },
-  "legacy-standard-cruisers": {
-    en: "Standard Cruisers",
-    zh: "巡洋舰",
-    ja: "巡洋艦",
-  },
-  "legacy-standard-frigates": {
-    en: "Standard Frigates",
-    zh: "护卫舰",
-    ja: "フリゲート",
-  },
 } as const;

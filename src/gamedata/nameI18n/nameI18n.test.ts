@@ -4,8 +4,6 @@ import { StaticNameI18nCatalog } from "./catalog";
 const nameI18n = new StaticNameI18nCatalog();
 
 const RIFTER_ID = "587" as ShipId;
-const ABSOLUTION_ID = "22448" as ShipId;
-const EIDOLON_ID = "legacy-eidolon" as ShipId;
 const STANDARD_FRIGATES_ID = "25" as HullTypeId;
 const MINMATAR_REPUBLIC_ID = "minmatar-republic" as FactionId;
 
@@ -38,11 +36,6 @@ describe("shipName", () => {
     expect(nameI18n.shipName(RIFTER_ID, "zh")).toBe("裂谷级");
     expect(nameI18n.shipName(RIFTER_ID, "ja")).toBe("リフター");
     expect(nameI18n.shipName(RIFTER_ID, "en")).toBe("Rifter");
-  });
-
-  test("falls back to the canonical name for legacy ids", () => {
-    expect(nameI18n.shipName(EIDOLON_ID, "zh")).toBe("Eidolon");
-    expect(nameI18n.shipName(EIDOLON_ID, "ja")).toBe("Eidolon");
   });
 
   test("returns undefined for unknown hulls", () => {
