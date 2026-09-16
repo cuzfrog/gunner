@@ -28,8 +28,11 @@ test.describe.serial("ship hint", () => {
     await expect(headings.nth(2)).toHaveText("Targeting");
     await expect(headings.nth(3)).toHaveText("Capacitor");
     await expect(headings.nth(4)).toHaveText("Defense");
-    await expect(headings.nth(5)).toHaveText("Resists");
+    await expect(headings.nth(5)).toHaveText("Minmatar Destroyer bonuses (per skill level)");
+    await expect(headings.nth(6)).toHaveText("Role Bonus");
+    await expect(headings.nth(7)).toHaveText("Resists");
     await expect(hint.locator(".stat-hint-row", { hasText: "High slots" }).locator(".stat-hint-value")).toHaveText("8");
+    await expect(hint.locator(".stat-hint-row-statement", { hasText: "5% bonus to Small Projectile Turret damage" })).toBeVisible();
   });
 
   test("switching hulls updates the hint content", async () => {

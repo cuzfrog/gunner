@@ -35,6 +35,7 @@ const profile: ShipProfile = {
   shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
   armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  bonuses: [],
 };
 
 const stacking = new StackingPenaltyImpl();

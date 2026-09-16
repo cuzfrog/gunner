@@ -33,6 +33,15 @@ const PROFILE: ShipProfile = {
   shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.875 },
   armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
   hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
+  bonuses: [],
+};
+
+const BONUS_PROFILE: ShipProfile = {
+  ...PROFILE,
+  bonuses: [
+    { header: "Minmatar Frigate bonuses (per skill level)", lines: ["5% bonus to Small Projectile Turret damage"] },
+    { header: "Role Bonus", lines: ["200% bonus to Remote Assistance effect"] },
+  ],
 };
 
 const NO_DRONE_PROFILE: ShipProfile = { ...PROFILE, droneBandwidth: 0, droneCapacity: 0 };
@@ -150,6 +159,34 @@ describe("ShipHintProviderImpl", () => {
     provider.render(fakeAnchor("587"), {} as HTMLElement);
     const model = models[0];
     expect(model.sections.map((s) => s.heading)).not.toContain("shipHint.section.drones");
+  });
+
+  test("appends bonus groups as statement sections after defense", () => {
+    const { provider, models } = makeProvider(makeShips(BONUS_PROFILE));
+    provider.render(fakeAnchor("587"), {} as HTMLElement);
+    const model = models[0];
+    expect(model.sections.map((s) => s.heading)).toEqual([
+      "shipHint.section.fitting",
+      "shipHint.section.navigation",
+      "shipHint.section.targeting",
+      "shipHint.section.drones",
+      "shipHint.section.capacitor",
+      "shipHint.section.defense",
+      "Minmatar Frigate bonuses (per skill level)",
+      "Role Bonus",
+    ]);
+    expect(rowsOf(model, "Minmatar Frigate bonuses (per skill level)")).toEqual([
+      { value: "5% bonus to Small Projectile Turret damage", statement: true },
+    ]);
+    expect(rowsOf(model, "Role Bonus")).toEqual([
+      { value: "200% bonus to Remote Assistance effect", statement: true },
+    ]);
+  });
+
+  test("adds no bonus sections when the hull has none", () => {
+    const { provider, models } = makeProvider(makeShips(PROFILE));
+    provider.render(fakeAnchor("587"), {} as HTMLElement);
+    expect(models[0].sections.map((s) => s.heading)).toHaveLength(6);
   });
 
   test("builds resist table with damage type columns and fractional percents", () => {

@@ -22,6 +22,7 @@ export class FakeElement {
   offsetParent: FakeElement | null = null;
   offsetWidth = 0;
   offsetHeight = 0;
+  scrollHeight = 0;
   private _innerHTML = "";
   private attributes: Record<string, string | null> = {};
   private handlers: Record<string, Array<(event?: unknown) => void>> = {};
@@ -42,8 +43,7 @@ export class FakeElement {
     this.children = [];
   }
 
-  get firstElementChild(): FakeElement | null { return this.children.find((c) => c.tagName !== "#text") ?? null; }
-  get childElementCount(): number { return this.children.filter((c) => c.tagName !== "#text").length; }
+  get firstElementChild(): FakeElement | null { return this.children.find((c) => c.tagName !== "#text") ?? null; }  get childElementCount(): number { return this.children.filter((c) => c.tagName !== "#text").length; }
   get options(): FakeElement[] { return this.children; }
   getAttribute(name: string): string | null { return this.attributes[name] ?? null; }
   setAttribute(name: string, value: string): void {

@@ -3,6 +3,8 @@ import { dirname, join } from "node:path";
 import type { ShipProfile } from "../src/ships";
 import type { FactionId, HullTypeId, ShipId } from "../src/gamedata/ids";
 
+type ShipBonusGroup = ShipProfile["bonuses"][number];
+
 interface ShipIdentity {
   readonly name: string;
   readonly faction: string;
@@ -50,6 +52,11 @@ function hasString(value: Record<string, unknown>, key: string, context: string)
   const field = value[key];
   if (typeof field !== "string") throw new Error(`${context}: missing or invalid ${key}`);
   return field;
+}
+
+function optionalString(value: Record<string, unknown>, key: string): string | undefined {
+  const field = value[key];
+  return typeof field === "string" && field.length > 0 ? field : undefined;
 }
 
 function slugify(input: string): string {
@@ -243,6 +250,42 @@ function fallbackMaxActiveDrones(droneCapacity: number, droneBandwidth: number):
   return droneCapacity > 0 || droneBandwidth > 0 ? MAX_ACTIVE_DRONES_FALLBACK : 0;
 }
 
+// Breaks glued one-line wiki blobs: lower-to-upper word joins ("speedRole"), lower-to-digit joins
+// ("speed10%"), paren-glued numbers ("level)20% bonus"), glued bullets ("duration• Can fit"), and
+// colon-glued statements ("level):10% bonus").
+const GLUED_BREAK_PATTERN = /(?<=[a-z])(?=[A-Z0-9])|(?<=[\)])(?=[0-9])|(?<=[a-z\):])(?=• )|(?<=:)(?=[A-Z0-9])/g;
+
+function parseBonuses(raw: string | undefined): readonly ShipBonusGroup[] {
+  if (raw === undefined) return [];
+  const drafts: { header: string; lines: string[] }[] = [];
+  let current: { header: string; lines: string[] } | undefined;
+  for (const line of bonusLines(raw)) {
+    if (isBonusHeader(line)) {
+      current = { header: bonusHeaderText(line), lines: [] };
+      drafts.push(current);
+      continue;
+    }
+    if (current === undefined) {
+      current = { header: "", lines: [] };
+      drafts.push(current);
+    }
+    current.lines.push(line);
+  }
+  return drafts.filter((draft) => draft.lines.length > 0).map((draft) => ({ header: draft.header, lines: [...draft.lines] }));
+}
+
+function bonusLines(raw: string): readonly string[] {
+  return raw.split("\n").flatMap((line) => line.split(GLUED_BREAK_PATTERN)).map((line) => line.trim()).filter((line) => line.length > 0);
+}
+
+function isBonusHeader(line: string): boolean {
+  return line.endsWith(":") || /^Role Bonus$/i.test(line) || /bonuses \(per skill level\)$/i.test(line) || /^• .+ Mode$/i.test(line);
+}
+
+function bonusHeaderText(line: string): string {
+  return line.replace(/:$/, "").replace(/^• /, "");
+}
+
 function parseProfile(
   raw: unknown,
   index: number,
@@ -270,6 +313,7 @@ function parseProfile(
   const defense = extractDefenseData(String(id), typedogmas, attributeNames);
   const capacitor = extractCapacitorData(String(id), typedogmas, attributeNames);
   const slots = extractSlotData(String(id), typedogmas, attributeNames);
+  const bonuses = parseBonuses(optionalString(record, "shipBonuses"));
 
   return {
     id,
@@ -299,6 +343,7 @@ function parseProfile(
     shieldResists: defense.shieldResists,
     armorResists: defense.armorResists,
     hullResists: defense.hullResists,
+    bonuses,
   };
 }
 
@@ -339,6 +384,7 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push(`    shieldResists: ${formatResists(p.shieldResists)},`);
     lines.push(`    armorResists: ${formatResists(p.armorResists)},`);
     lines.push(`    hullResists: ${formatResists(p.hullResists)},`);
+    lines.push(`    bonuses: ${JSON.stringify(p.bonuses)},`);
     lines.push("  },");
   }
 
@@ -380,6 +426,7 @@ export {
   buildShipNameToType as _buildShipNameToType,
   extractCapacitorData as _extractCapacitorData,
   extractDefenseData as _extractDefenseData,
+  parseBonuses as _parseBonuses,
   parseProfile as _parseProfile,
   resolveShipIds as _resolveShipIds,
 };

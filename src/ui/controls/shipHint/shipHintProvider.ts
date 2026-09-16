@@ -49,8 +49,16 @@ export class ShipHintProviderImpl implements ShipHintProvider {
       this.droneSection(profile),
       this.capacitorSection(profile),
       this.defenseSection(profile),
+      ...this.bonusSections(profile),
     ].filter((section): section is StatHintSection => section !== undefined);
     return { name: view.name, subtitle: `${view.hullType} · ${view.faction}`, sections, resists: this.resists(profile) };
+  }
+
+  private bonusSections(profile: ShipProfile): readonly StatHintSection[] {
+    return profile.bonuses.map((group) => ({
+      heading: group.header === "" ? undefined : group.header,
+      rows: group.lines.map((line) => ({ value: line, statement: true as const })),
+    }));
   }
 
   private fittingSection(profile: ShipProfile): StatHintSection {

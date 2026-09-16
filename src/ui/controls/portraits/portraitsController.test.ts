@@ -38,6 +38,7 @@ const SHIP_A_PROFILE: ShipProfile = {
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  bonuses: [],
 };
 const SHIP_B_PROFILE: ShipProfile = {
   id: "603" as ShipId,
@@ -66,6 +67,7 @@ const SHIP_B_PROFILE: ShipProfile = {
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  bonuses: [],
 };
 
 function createFakePortraitEls(document: Document): PortraitsEls {

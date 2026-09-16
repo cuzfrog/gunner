@@ -144,6 +144,7 @@ export const RIFTER_PROFILE: ShipProfile = {
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  bonuses: [],
 };
 
 const THRASHER_PROFILE: ShipProfile = {
@@ -174,6 +175,7 @@ const THRASHER_PROFILE: ShipProfile = {
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  bonuses: [],
 };
 
 const BRUTIX_PROFILE: ShipProfile = {
@@ -204,6 +206,7 @@ const BRUTIX_PROFILE: ShipProfile = {
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  bonuses: [],
 };
 
 const WRAITH_PROFILE: ShipProfile = {
@@ -234,6 +237,7 @@ const WRAITH_PROFILE: ShipProfile = {
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  bonuses: [],
 };
 
 const KNOWN_HULLS: readonly ShipProfile[] = [RIFTER_PROFILE, THRASHER_PROFILE, BRUTIX_PROFILE, WRAITH_PROFILE];

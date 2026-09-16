@@ -63,4 +63,30 @@ describe("SHIP_PROFILES data contract", () => {
     expect(shuttle.scanResolution).toBe(0);
     expect(shuttle.maxLockedTargets).toBe(2);
   });
+
+  test("keeps every bonus group non-empty and free of glued wiki residue", () => {
+    for (const profile of SHIP_PROFILES) {
+      for (const group of profile.bonuses) {
+        expect(group.lines.length).toBeGreaterThan(0);
+        expect(group.header.endsWith(":")).toBe(false);
+        for (const line of group.lines) {
+          expect(line.length).toBeGreaterThan(0);
+          expect(line).not.toMatch(/[a-z][0-9]+%/);
+          expect(line).not.toMatch(/bonuses \(per skill level\):?[0-9]/);
+        }
+      }
+    }
+  });
+
+  test("keeps skill and role bonus groups separated", () => {
+    expect(profileByName("Abaddon").bonuses).toEqual([
+      { header: "Amarr Battleship bonuses (per skill level)", lines: ["7.5% bonus to Large Energy Turret damage", "4% bonus to all armor resistances"] },
+      { header: "Role Bonus", lines: ["100% bonus to Shield Extender hitpoints", "50% bonus to Armor Plate hitpoints", "5% Additional bonus to Reinforced Bulkhead hitpoints"] },
+    ]);
+  });
+
+  test("carries no bonuses for hulls without scraped bonus text", () => {
+    expect(profileByName("Civilian Amarr Shuttle").bonuses).toEqual([]);
+    expect(profileByName("Medusa").bonuses).toEqual([]);
+  });
 });

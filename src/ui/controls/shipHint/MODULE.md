@@ -13,9 +13,10 @@ Hover hint content provider for combatant ship portraits. Implements
 `HintContentProvider` with key `"shipProfile"`. Renders the ship's localized
 name, hull type + faction subtitle, and base hull attribute sections read
 from `ShipProfile`: fitting slots, navigation, targeting, drones (omitted
-when the hull has none), capacitor, defense HP, and a resist table
-(shield/armor/hull x EM/thermal/kinetic/explosive). Model rendering is
-delegated to the shared `statHint` renderer.
+when the hull has none), capacitor, defense HP, a resist table
+(shield/armor/hull x EM/thermal/kinetic/explosive), and the scraped ship
+bonus groups (`ShipProfile.bonuses`) rendered as statement sections after
+defense. Model rendering is delegated to the shared `statHint` renderer.
 
 The provider reads `data-value` (the ship id) from the anchor element and
 resolves the profile through `Ships.findHullById`; localized labels come

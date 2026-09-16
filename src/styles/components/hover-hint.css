@@ -26,6 +26,15 @@
 
 .hover-hint[hidden] { display: none; }
 
+/* Tall hints (e.g. ship hints with long bonus lists) become scrollable and interactive so the
+   whole content stays reachable; the controller toggles this class and passes the fitting
+   max-height (larger of the spaces around the anchor) via --hover-hint-max-height. */
+.hover-hint-scrollable {
+  max-height: var(--hover-hint-max-height, 60vh);
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
 @position-try --hover-hint-above {
   top: auto;
   /* stylelint-disable-next-line declaration-property-value-no-unknown -- valid CSS anchor positioning, not yet in stylelint-config-standard */

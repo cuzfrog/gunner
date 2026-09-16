@@ -1,4 +1,4 @@
-import { _buildAttributeNameMap, _buildShipNameToType, _extractCapacitorData, _extractDefenseData, _parseProfile, _resolveShipIds } from "./generate-ship-profiles";
+import { _buildAttributeNameMap, _buildShipNameToType, _extractCapacitorData, _extractDefenseData, _parseBonuses, _parseProfile, _resolveShipIds } from "./generate-ship-profiles";
 import type { SdeDogmaAttribute, SdeGroup, SdeType, SdeTypeDogma } from "./generate-ship-profiles";
 
 // Attribute IDs in these fixtures are arbitrary; only the id-to-name mapping matters to the unit under test.
@@ -218,12 +218,81 @@ describe("_parseProfile", () => {
     expect(profile.capacitorRechargeTime).toBe(625);
   });
 
+  test("carries parsed ship bonuses into the profile", () => {
+    const raw = {
+      name: "Rifter",
+      faction: "Minmatar Republic",
+      hullType: "Standard Frigates",
+      shipBonuses: "Minmatar Frigate bonuses (per skill level):5% bonus to Small Projectile Turret damage\nRole Bonus:\nRole bonus damage at close range",
+    };
+    const profile = _parseProfile(raw, 0, SHIP_NAME_TO_TYPE, typedogmas, ATTRIBUTE_NAMES);
+    expect(profile.bonuses).toEqual([
+      { header: "Minmatar Frigate bonuses (per skill level)", lines: ["5% bonus to Small Projectile Turret damage"] },
+      { header: "Role Bonus", lines: ["Role bonus damage at close range"] },
+    ]);
+  });
+
   test("throws for a non-object entry", () => {
     expect(() => _parseProfile(null, 0, SHIP_NAME_TO_TYPE, {}, ATTRIBUTE_NAMES)).toThrow("Entry 0 is not an object");
   });
 
   test("throws for an empty name", () => {
     expect(() => _parseProfile({ name: "" }, 0, SHIP_NAME_TO_TYPE, {}, ATTRIBUTE_NAMES)).toThrow("Entry 0 has an empty name");
+  });
+});
+
+describe("_parseBonuses", () => {
+  test("returns no groups for missing or empty text", () => {
+    expect(_parseBonuses(undefined)).toEqual([]);
+    expect(_parseBonuses("")).toEqual([]);
+  });
+
+  test("groups colon-terminated headers with their bonus lines", () => {
+    const text = "Amarr Battleship bonuses (per skill level):\n7.5% bonus to Large Energy Turret damage\n4% bonus to all armor resistances\nRole Bonus:\n100% bonus to Shield Extender hitpoints";
+    expect(_parseBonuses(text)).toEqual([
+      { header: "Amarr Battleship bonuses (per skill level)", lines: ["7.5% bonus to Large Energy Turret damage", "4% bonus to all armor resistances"] },
+      { header: "Role Bonus", lines: ["100% bonus to Shield Extender hitpoints"] },
+    ]);
+  });
+
+  test("splits glued one-line wiki blobs at word and number boundaries", () => {
+    const text = "Gallente Destroyer bonuses (per skill level):10% bonus to Small Hybrid Turret tracking speed10% bonus to Small Hybrid Turret falloffRole Bonus:50% bonus to Small Hybrid Turret optimal range";
+    expect(_parseBonuses(text)).toEqual([
+      { header: "Gallente Destroyer bonuses (per skill level)", lines: ["10% bonus to Small Hybrid Turret tracking speed", "10% bonus to Small Hybrid Turret falloff"] },
+      { header: "Role Bonus", lines: ["50% bonus to Small Hybrid Turret optimal range"] },
+    ]);  });
+
+  test("splits headers glued to lines without a colon separator", () => {
+    const text = "Heavy Interdiction Cruisers bonuses (per skill level)20% bonus to Warp Disruption Field Generator scramble range";
+    expect(_parseBonuses(text)).toEqual([
+      { header: "Heavy Interdiction Cruisers bonuses (per skill level)", lines: ["20% bonus to Warp Disruption Field Generator scramble range"] },
+    ]);
+  });
+
+  test("detects headers without trailing colons and mode headings", () => {
+    const text = [
+      "Caldari Battlecruiser Bonuses (per skill level)",
+      "5% bonus to Cruise Missile and Torpedo explosion velocity",
+      "Role Bonus",
+      "95% reduction in Rapid Heavy Missile Launcher Powergrid requirement",
+      "• Additional bonuses are available while one of three Modes are active.",
+      "• Primary Mode",
+      "250% bonus to lock range",
+    ].join("\n");
+    expect(_parseBonuses(text)).toEqual([
+      { header: "Caldari Battlecruiser Bonuses (per skill level)", lines: ["5% bonus to Cruise Missile and Torpedo explosion velocity"] },
+      { header: "Role Bonus", lines: ["95% reduction in Rapid Heavy Missile Launcher Powergrid requirement", "• Additional bonuses are available while one of three Modes are active."] },
+      { header: "Primary Mode", lines: ["250% bonus to lock range"] },
+    ]);
+  });
+
+  test("groups leading bonus lines under a headerless group", () => {
+    expect(_parseBonuses("5% bonus to damage")).toEqual([{ header: "", lines: ["5% bonus to damage"] }]);
+  });
+
+  test("drops header-only trailing groups and keeps decimals intact", () => {
+    const text = "Role Bonus:\n7.5% bonus to damage\nRecon Ships bonuses (per skill level):";
+    expect(_parseBonuses(text)).toEqual([{ header: "Role Bonus", lines: ["7.5% bonus to damage"] }]);
   });
 });
 

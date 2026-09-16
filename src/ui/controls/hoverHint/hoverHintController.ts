@@ -15,6 +15,7 @@ const HINT_SELECTOR = "[data-hint], [data-hint-content]";
 const CONTENT_ATTR = "data-hint-content";
 const STRING_ATTR = "data-hint";
 const DEFERRED_HIDE_MS = 50;
+const HINT_VIEWPORT_GAP_PX = 12;
 
 export class HoverHintControllerImpl implements HoverHintController {
   private readonly hintEl: HTMLElement;
@@ -63,6 +64,7 @@ export class HoverHintControllerImpl implements HoverHintController {
         this.hide();
         return;
       }
+      this.applyScrollable();
       if (!this.anchored) this.placeByRect(this.currentAnchor);
     } catch {
       this.hide();
@@ -79,16 +81,23 @@ export class HoverHintControllerImpl implements HoverHintController {
 
   private onPointerOver(event: Event): void {
     this.clearHideTimer();
+    if (this.insideHint(event)) return;
     const anchor = this.anchorFor(event);
     if (anchor === undefined) this.hide();
     else this.scheduleShow(anchor);
   }
 
   private onPointerOut(event: Event): void {
+    if (this.insideHint(event)) {
+      const related = this.relatedTarget(event);
+      if (related instanceof Element && (this.hintEl.contains(related) || this.insideCurrentAnchor(related))) return;
+      this.hide();
+      return;
+    }
     const anchor = this.anchorFor(event);
     if (anchor === undefined) return;
-    const related = (event as Event & { readonly relatedTarget: EventTarget | null }).relatedTarget;
-    if (related instanceof Element && anchor.contains(related)) return;
+    const related = this.relatedTarget(event);
+    if (related instanceof Element && (anchor.contains(related) || this.hintEl.contains(related))) return;
     if (related === null && (anchor === this.pendingAnchor || anchor === this.currentAnchor)) {
       this.scheduleDeferredHide();
       return;
@@ -124,6 +133,34 @@ export class HoverHintControllerImpl implements HoverHintController {
     return anchor;
   }
 
+  private insideHint(event: Event): boolean {
+    const target = event.target;
+    return target instanceof Element && this.hintEl.contains(target);
+  }
+
+  private insideCurrentAnchor(target: Element): boolean {
+    return this.currentAnchor !== undefined && this.currentAnchor.contains(target);
+  }
+
+  private relatedTarget(event: Event): EventTarget | null {
+    return (event as Event & { readonly relatedTarget: EventTarget | null }).relatedTarget;
+  }
+
+  // Tall hints become scrollable and interactive; short hints keep pointer-events: none so they
+  // never block hovering the elements beneath them. The cap is the larger of the spaces above and
+  // below the anchor, so the flipped or default placement always fits the viewport.
+  private applyScrollable(): void {
+    const anchor = this.currentAnchor;
+    if (anchor === undefined) return;
+    const rect = anchor.getBoundingClientRect();
+    const viewportHeight = this.document.documentElement.clientHeight;
+    const available = Math.max(viewportHeight - rect.bottom - HINT_VIEWPORT_GAP_PX, rect.top - HINT_VIEWPORT_GAP_PX);
+    const overflow = this.hintEl.scrollHeight > available;
+    this.hintEl.classList.toggle("hover-hint-scrollable", overflow);
+    if (overflow) this.hintEl.style.setProperty("--hover-hint-max-height", `${available}px`);
+    else this.hintEl.style.removeProperty("--hover-hint-max-height");
+  }
+
   private scheduleShow(anchor: HTMLElement): void {
     if (this.showTimer !== undefined && this.pendingAnchor === anchor) return;
     this.clearShowTimer();
@@ -147,6 +184,7 @@ export class HoverHintControllerImpl implements HoverHintController {
           return;
         }
         this.hintEl.hidden = false;
+        this.applyScrollable();
         if (!this.anchored) this.placeByRect(anchor);
       } catch (err) {
         this.releaseAnchor();
@@ -160,6 +198,7 @@ export class HoverHintControllerImpl implements HoverHintController {
     this.activate(anchor, undefined);
     this.hintEl.textContent = content;
     this.hintEl.hidden = false;
+    this.applyScrollable();
     if (!this.anchored) this.placeByRect(anchor);
   }
 
@@ -176,6 +215,7 @@ export class HoverHintControllerImpl implements HoverHintController {
     this.clearShowTimer();
     this.clearHideTimer();
     this.hintEl.hidden = true;
+    this.hintEl.classList.remove("hover-hint-scrollable");
     if (this.currentProvider !== undefined && this.currentAnchor !== undefined) {
       this.currentProvider.hide?.(this.currentAnchor, this.hintEl);
     }

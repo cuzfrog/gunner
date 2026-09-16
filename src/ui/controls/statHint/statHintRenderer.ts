@@ -5,6 +5,7 @@ export interface StatHintRow {
   readonly iconUrl?: string;
   readonly value: string;
   readonly emphasis?: boolean;
+  readonly statement?: boolean;
 }
 
 export interface StatHintSection {
@@ -66,9 +67,12 @@ function renderSection(section: StatHintSection): HTMLElement {
 }
 
 function renderRow(row: StatHintRow): HTMLElement {
-  const className = row.iconUrl !== undefined
-    ? row.emphasis === true ? "stat-hint-row stat-hint-row-icon stat-hint-row-emphasis" : "stat-hint-row stat-hint-row-icon"
-    : row.emphasis === true ? "stat-hint-row stat-hint-row-emphasis" : "stat-hint-row";
+  const className = [
+    "stat-hint-row",
+    row.iconUrl !== undefined ? "stat-hint-row-icon" : "",
+    row.statement === true ? "stat-hint-row-statement" : "",
+    row.emphasis === true ? "stat-hint-row-emphasis" : "",
+  ].filter((part) => part.length > 0).join(" ");
   const children: (Element | DocumentFragment)[] = [];
   if (row.iconUrl !== undefined) children.push(html`<img class="stat-hint-icon" src=${row.iconUrl} alt="">`);
   if (row.label !== undefined) children.push(html`<span class="stat-hint-label">${row.label}</span>`);

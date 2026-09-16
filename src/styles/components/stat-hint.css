@@ -58,6 +58,15 @@
   grid-template-columns: 18px 1fr auto;
 }
 
+.stat-hint-row-statement {
+  grid-template-columns: 1fr;
+}
+
+.stat-hint-row-statement .stat-hint-value {
+  text-align: left;
+  color: var(--text-secondary);
+}
+
 .stat-hint-icon {
   width: 15px;
   height: 15px;

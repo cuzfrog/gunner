@@ -130,6 +130,20 @@ describe("StatHintRendererImpl", () => {
     expect(valueOnlyRow[0].className).toBe("stat-hint-value");
   });
 
+  test("marks statement rows with the statement class", () => {
+    const renderer = new StatHintRendererImpl();
+    const model: StatHintModel = {
+      sections: [{ heading: "Role Bonus", rows: [{ value: "50% bonus to optimal range", statement: true }] }],
+    };
+    const container = globalThis.document.createElement("div") as unknown as FakeElement;
+    renderer.render(model, container as unknown as HTMLElement);
+    const root = elementChildren(container)[0];
+    const sectionChildren = elementChildren(elementChildren(root)[0]);
+    expect(sectionChildren[0].className).toBe("stat-hint-section-label");
+    expect(sectionChildren[0].textContent).toBe("Role Bonus");
+    expect(sectionChildren[1].className).toBe("stat-hint-row stat-hint-row-statement");
+  });
+
   test("renders resists grid after sections", () => {
     const renderer = new StatHintRendererImpl();
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
