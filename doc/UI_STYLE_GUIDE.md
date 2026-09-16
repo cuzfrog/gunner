@@ -8,7 +8,7 @@ Sources of truth:
 - `src/pages/index.astro` + `src/components/**/*.astro` — markup structure and class naming
 - `doc/CSS_RULES.md` — DOM styling conventions and class ownership rules
 - `src/ui/renderer.ts` `COLORS` — canvas palette (mirrors CSS tokens)
-- `src/styles/primitives.css` — base primitives: `btn`, `btn-toggle`, `icon-button`, `input-field`, `field-label`, `form-field`, `form-field-row`, `form-slider`, `input-with-unit`, `input-suffix`, `effective-value`, `segmented-control`, `choice-selector`, `overload-button`, `mono`, `popup`, `menu-popup`, `popup-item`, `trigger`, `truncate`, `chevron`
+- `src/styles/primitives.css` — base primitives: `btn`, `btn-toggle`, `icon-button`, `input-field`, `field-label`, `form-field`, `form-field-row`, `form-slider`, `input-with-unit`, `input-suffix`, `effective-value`, `segmented-control`, `choice-selector`, `overload-button`, `mono`, `popup`, `menu-popup`, `popup-item`, `thin-scrollbar`, `trigger`, `truncate`, `chevron`
 
 ## Design identity
 
@@ -113,7 +113,9 @@ Validation: `.hull-invalid` / `.error` classes apply `--danger-red`. The `.effec
 
 ### Popups
 
-Anchored dropdowns (`.ship-select-popup`, `.ammo-popup`, `.skill-popup`, `.paste-popup`, `.menu-popup`): absolute positioned `top: calc(100% + 4px)` relative to a `position: relative` parent, panel bg, 1px border, popup shadow, radius 2px, padding 6px, `z-index: 30`. Visibility is controlled by the `hidden` attribute plus the global `[hidden] { display: none }` rule. Scrollable lists style scrollbars: thin, teal-tinted thumb (`scrollbar-width: thin; scrollbar-color: rgba(92,203,203,.35) transparent` + webkit equivalents).
+Anchored dropdowns (`.ship-select-popup`, `.ammo-popup`, `.skill-popup`, `.paste-popup`, `.menu-popup`): absolute positioned `top: calc(100% + 4px)` relative to a `position: relative` parent, panel bg, 1px border, popup shadow, radius 2px, padding 6px, `z-index: 30`. Visibility is controlled by the `hidden` attribute plus the global `[hidden] { display: none }` rule. Scrollable surfaces compose the `thin-scrollbar` primitive (`scrollbar-width: thin; scrollbar-color: var(--accent-teal-35) transparent`); never re-declare scrollbar properties in component CSS — a scrollable surface without `thin-scrollbar` is a bug.
+
+Hover hints (`.hover-hint`): one body-level singleton (`Layout.astro`) driven by the hoverHint controller. Positioned with CSS anchor positioning: `justify-self: anchor-center` centers the hint on its anchor and, when the anchor sits near a viewport edge, safe alignment shifts the margin box back inside the viewport — `margin-inline: var(--hint-viewport-gap)` reserves the edge gap. `@position-try --hover-hint-above` flips it above when there is no room below. Max width comes from `--hover-hint-max-width` (capped to the viewport gap-to-gap); tall hints get `.hover-hint-scrollable` from the controller (max-height via `--hover-hint-max-height`) and scroll with `thin-scrollbar`. Engines without anchor positioning fall back to `position: fixed` + measured `left`/`top` with the same clamping done in the controller.
 
 List entries: transparent-bg buttons, hover fills `var(--bg-inset)`, selected entry gets `border-left: 2px solid var(--accent-teal)` + teal text. Group labels (`.fitting-group-label`) are 10px uppercase Chakra Petch.
 

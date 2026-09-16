@@ -44,6 +44,7 @@ Current base classes:
 - `popup` (and `popup-below`, `popup-above`, `popup-left`, `popup-right`, `popup-scroll`)
 - `menu-popup` (composition of `popup` for small stacked-button popups)
 - `popup-item`
+- `thin-scrollbar` (shared scrollbar recipe; compose on every scrollable surface)
 - `trigger`
 - `btn` (and `btn-panel`, `btn-primary-text`, `btn-toggle`)
 - `icon-button`

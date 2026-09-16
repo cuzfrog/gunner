@@ -20,12 +20,16 @@
 .popup-left { left: 0; }
 .popup-right { right: 0; }
 
+/* ---- thin-scrollbar (shared scrollbar recipe; compose on any scrollable surface) ---- */
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-teal-35) transparent;
+}
+
 .popup-scroll {
   max-height: 286px;
   overflow-x: hidden;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--accent-teal-35) transparent;
 }
 
 /* ---- popup-item ---- */

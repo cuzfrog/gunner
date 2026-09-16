@@ -107,6 +107,7 @@ const APPROVED_PREFIXES = [
   "new-profile",
   "menu-popup",
   "paste",
+  "thin-scrollbar",
   "confirm",
   "hints-slide",
   "hint",

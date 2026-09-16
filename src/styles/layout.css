@@ -13,14 +13,6 @@
   .result-grid {
     display: flex;
     overflow-x: auto;
-    scrollbar-width: thin;
-  }
-
-  .result-grid::-webkit-scrollbar { height: 7px; }
-
-  .result-grid::-webkit-scrollbar-thumb {
-    background: var(--border-dim);
-    border-radius: 2px;
   }
 
   .skill-section { margin-top: 0; }
