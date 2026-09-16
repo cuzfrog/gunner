@@ -38,6 +38,23 @@ function dispatch(document: Document, type: string, target: unknown, relatedTarg
   document.dispatchEvent({ type, target, relatedTarget } as unknown as Event);
 }
 
+function setViewportWidth(document: Document, width: number): void {
+  (document.documentElement as unknown as { clientWidth: number }).clientWidth = width;
+}
+
+function stubAnchorRect(anchor: HTMLElement, rect: { left: number; width: number; bottom: number }): void {
+  (anchor as unknown as FakeElement).getBoundingClientRect = () => ({
+    left: rect.left,
+    top: rect.bottom - 40,
+    right: rect.left + rect.width,
+    bottom: rect.bottom,
+    width: rect.width,
+    height: 40,
+    x: rect.left,
+    y: rect.bottom - 40,
+  });
+}
+
 function renderingProvider(): HintContentProvider {
   return {
     render: vi.fn((_anchor: HTMLElement, container: HTMLElement) => {
@@ -657,5 +674,57 @@ describe("HoverHintControllerImpl", () => {
 
     expect(provider.render).not.toHaveBeenCalled();
     expect(hintEl.hidden).toBe(true);
+  });
+
+  test("centers the hint on the anchor when it fits the viewport", () => {
+    const document = globalThis.document;
+    setViewportWidth(document, 1540);
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    hintEl.offsetWidth = 300;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    stubAnchorRect(anchor, { left: 500, width: 100, bottom: 200 });
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.style.left).toBe("550px");
+    expect(hintEl.style.top).toBe("200px");
+  });
+
+  test("clamps the hint inside the right viewport edge", () => {
+    const document = globalThis.document;
+    setViewportWidth(document, 990);
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    hintEl.offsetWidth = 420;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    stubAnchorRect(anchor, { left: 900, width: 100, bottom: 200 });
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.style.left).toBe("768px");
+  });
+
+  test("clamps the hint inside the left viewport edge", () => {
+    const document = globalThis.document;
+    setViewportWidth(document, 990);
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    hintEl.offsetWidth = 420;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    stubAnchorRect(anchor, { left: 0, width: 60, bottom: 200 });
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.style.left).toBe("222px");
   });
 });

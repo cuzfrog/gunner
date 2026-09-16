@@ -15,6 +15,7 @@ const HINT_SELECTOR = "[data-hint], [data-hint-content]";
 const CONTENT_ATTR = "data-hint-content";
 const STRING_ATTR = "data-hint";
 const DEFERRED_HIDE_MS = 50;
+// Keep in sync with the --hint-viewport-gap token (src/styles/tokens.css).
 const HINT_VIEWPORT_GAP_PX = 12;
 
 export class HoverHintControllerImpl implements HoverHintController {
@@ -237,10 +238,17 @@ export class HoverHintControllerImpl implements HoverHintController {
     }
   }
 
+  // Fallback for engines without CSS anchor positioning: center on the anchor (the fixed
+  // translate: -50% 0 in the stylesheet centers the box on this point) and clamp so the box
+  // keeps the viewport gap on both edges. The vertical gap comes from margin-top in CSS.
   private placeByRect(anchor: HTMLElement): void {
     const rect = anchor.getBoundingClientRect();
-    this.hintEl.style.left = `${rect.left + rect.width / 2}px`;
-    this.hintEl.style.top = `${rect.bottom + 4}px`;
+    const viewportWidth = this.document.documentElement.clientWidth;
+    const center = rect.left + rect.width / 2;
+    const halfWidth = this.hintEl.offsetWidth / 2;
+    const clampedCenter = Math.max(HINT_VIEWPORT_GAP_PX + halfWidth, Math.min(center, viewportWidth - HINT_VIEWPORT_GAP_PX - halfWidth));
+    this.hintEl.style.left = `${clampedCenter}px`;
+    this.hintEl.style.top = `${rect.bottom}px`;
   }
 
   private scheduleDeferredHide(): void {
