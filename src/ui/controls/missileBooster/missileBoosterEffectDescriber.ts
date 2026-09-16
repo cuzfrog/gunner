@@ -1,11 +1,9 @@
-import type { MissileBoosterProjection, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec } from "../../../sim";
+import type { MissileBoosterProjection, MissileScriptSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 
 export interface MissileBoosterEffectDescriber {
   computerHint(projection: MissileBoosterProjection): string;
   enhancerHint(projection: MissileBoosterProjection): string;
-  computerModuleEffect(spec: MissileBoosterSpec, script: MissileScriptSpec | undefined, overloaded: boolean): string;
-  enhancerModuleEffect(spec: MissileEnhancerSpec): string;
 }
 
 type BonusKey = "explosionRadiusBonusPercent" | "explosionVelocityBonusPercent" | "missileVelocityBonusPercent" | "flightTimeBonusPercent";
@@ -37,23 +35,6 @@ export class MissileBoosterEffectDescriberImpl implements MissileBoosterEffectDe
     const values = BONUS_KEYS.map((key) => ({
       label: this.i18n.t(key.label),
       value: this.enhancerBonusFor(projection, key.bonus),
-    }));
-    return this.formatParts(values);
-  }
-
-  computerModuleEffect(spec: MissileBoosterSpec, script: MissileScriptSpec | undefined, overloaded: boolean): string {
-    const overloadFactor = overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
-    const values = BONUS_KEYS.map((key) => ({
-      label: this.i18n.t(key.label),
-      value: spec[key.bonus] * overloadFactor * (script?.[key.multiplier] ?? 1),
-    }));
-    return this.formatParts(values);
-  }
-
-  enhancerModuleEffect(spec: MissileEnhancerSpec): string {
-    const values = BONUS_KEYS.map((key) => ({
-      label: this.i18n.t(key.label),
-      value: spec[key.bonus],
     }));
     return this.formatParts(values);
   }

@@ -50,7 +50,7 @@ export class DroneHintProviderImpl implements DroneHintProvider {
       const value = damageValue(stats, type);
       if (value > 0) rows.push({ label: this.t(`dpsHint.damageType.${type}`), iconUrl: DAMAGE_ICON_URLS[type], value: formatNumber(value, 1) });
     }
-    rows.push({ label: this.t("droneHint.cycleTime"), value: `${formatNumber(stats.cycleTime, 1)} ${this.t("unit.second")}` });
+    rows.push({ label: this.t("label.cycleTime"), value: `${formatNumber(stats.cycleTime, 1)} ${this.t("unit.second")}` });
     return { heading: this.t("dpsHint.damage"), rows };
   }
 
@@ -69,7 +69,7 @@ export class DroneHintProviderImpl implements DroneHintProvider {
     return {
       heading: this.t("shipHint.section.navigation"),
       rows: [
-        { label: this.t("label.droneMaxVelocity"), value: `${formatWithCommas(stats.maxVelocity)} ${this.t("unit.meterPerSecond")}` },
+        { label: this.t("label.maxVelocity"), value: `${formatWithCommas(stats.maxVelocity)} ${this.t("unit.meterPerSecond")}` },
         { label: this.t("label.droneOrbitSpeed"), value: `${formatWithCommas(stats.orbitSpeed)} ${this.t("unit.meterPerSecond")}` },
         { label: this.t("droneHint.orbitRange"), value: formatDistance(stats.orbitRange, (key) => this.t(key)) },
       ],

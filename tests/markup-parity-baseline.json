@@ -684,7 +684,7 @@
     "label.drone",
     "label.droneControlRange",
     "label.droneCount",
-    "label.droneMaxVelocity",
+    "label.maxVelocity",
     "label.droneOrbitSpeed",
     "label.droneRange",
     "label.explosionRadius",

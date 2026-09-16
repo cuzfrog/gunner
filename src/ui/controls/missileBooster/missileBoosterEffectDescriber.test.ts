@@ -124,27 +124,4 @@ describe("MissileBoosterEffectDescriber", () => {
     };
     expect(describer.enhancerHint(projection)).toBe("No effect");
   });
-
-  test("computerModuleEffect reports per-spec bonuses with overload", () => {
-    const effect = describer.computerModuleEffect(MGC_II, undefined, false);
-    expect(effect).toContain("Explosion radius");
-    expect(effect).toContain("-8.3%");
-
-    const effectOverloaded = describer.computerModuleEffect(MGC_II, undefined, true);
-    expect(effectOverloaded).not.toBe(effect);
-  });
-
-  test("computerModuleEffect applies script multipliers", () => {
-    const effectNoScript = describer.computerModuleEffect(MGC_II, undefined, false);
-    const effectPrecision = describer.computerModuleEffect(MGC_II, PRECISION_SCRIPT, false);
-    expect(effectNoScript).not.toBe(effectPrecision);
-  });
-
-  test("enhancerModuleEffect reports per-spec bonuses", () => {
-    const effect = describer.enhancerModuleEffect(MGE_II);
-    expect(effect).toContain("Explosion radius");
-    expect(effect).toContain("-6.0%");
-    expect(effect).toContain("Explosion velocity");
-    expect(effect).toContain("+6.0%");
-  });
 });

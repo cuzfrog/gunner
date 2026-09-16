@@ -113,7 +113,7 @@ describe("BoosterController", () => {
     expect(rows[0]?.children[0]?.getAttribute("aria-pressed")).toBe("true");
   });
 
-  test("module button title shows the effect description instead of the module name", () => {
+  test("module rows carry the module hint provider attributes", () => {
     const { controller, boosterEls } = buildBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const section = boosterEls.sections.shipA as unknown as FakeElement;
@@ -121,7 +121,9 @@ describe("BoosterController", () => {
     const rows = block.children.filter((child) => child.className.split(" ").includes("ewar-row"));
     const firstButton = rows[0]?.children[0] as unknown as FakeElement;
     const nameSpan = firstButton.children[1] as unknown as FakeElement;
-    expect(nameSpan.getAttribute("data-hint")).toBe("ewar.hover.tracking +10.0% · ewar.hover.optimal +5.0% · ewar.hover.falloff +10.0%");
+    expect(firstButton.getAttribute("data-hint-content")).toBe("module");
+    expect(firstButton.getAttribute("data-value")).toBe(LOADOUT.computers[0].moduleId);
+    expect(nameSpan.getAttribute("data-hint")).toBeNull();
   });
 
   test("setLoadout with empty loadout hides section and clears summary", () => {
@@ -192,19 +194,21 @@ describe("BoosterController", () => {
     expect(gear.getAttribute("data-hint")).toContain(OPTIMAL_SCRIPT.name);
   });
 
-  test("selecting a script updates the module button title to reflect the script multipliers", () => {
+  test("selecting a script keeps the row hint anchored to the module", () => {
     const { controller, boosterEls, document } = buildBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const section = boosterEls.sections.shipA as unknown as FakeElement;
     const row = firstRow(section)!;
     const button = row.children[0] as unknown as FakeElement;
     const nameSpan = button.children[1] as unknown as FakeElement;
-    expect(nameSpan.getAttribute("data-hint")).toBe("ewar.hover.tracking +10.0% · ewar.hover.optimal +5.0% · ewar.hover.falloff +10.0%");
+    expect(button.getAttribute("data-value")).toBe(LOADOUT.computers[0].moduleId);
     const gear = row.children.find((child) => child.className.split(" ").includes("ewar-script-gear"))!;
     gear.trigger("click");
     const popup = scriptPopupFor(document, "shipA")!;
     const optimalOption = popup.children.find((child) => child.textContent?.includes(OPTIMAL_SCRIPT.name));
     optimalOption!.trigger("click");
-    expect(nameSpan.getAttribute("data-hint")).toBe("ewar.hover.optimal +10.0% · ewar.hover.falloff +20.0%");
+    expect(button.getAttribute("data-hint-content")).toBe("module");
+    expect(button.getAttribute("data-value")).toBe(LOADOUT.computers[0].moduleId);
+    expect(nameSpan.getAttribute("data-hint")).toBeNull();
   });
 });

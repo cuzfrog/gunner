@@ -51,8 +51,6 @@ function buildController(now: () => number = () => 0): {
     webHint: vi.fn(() => "web-hint"),
     neutralizerDescription: vi.fn(() => "neutralizer-title"),
     nosferatuDescription: vi.fn(() => "nosferatu-title"),
-    neutralizerModuleEffect: vi.fn(() => "neutralizer-effect"),
-    nosferatuModuleEffect: vi.fn(() => "nosferatu-effect"),
     neutralizerHint: vi.fn(() => "neutralizer-hint"),
     nosferatuHint: vi.fn(() => "nosferatu-hint"),
     grapplerDescription: vi.fn(() => "grappler-title"),
@@ -63,12 +61,6 @@ function buildController(now: () => number = () => 0): {
     scramblerHint: vi.fn(() => "scrambler-hint"),
     painterHint: vi.fn(() => "painter-hint"),
     dampenerHint: vi.fn(() => "dampener-hint"),
-    painterModuleEffect: vi.fn(() => "painter-effect"),
-    dampenerModuleEffect: vi.fn(() => "dampener-effect"),
-    webModuleEffect: vi.fn(() => "web-effect"),
-    grapplerModuleEffect: vi.fn(() => "grappler-effect"),
-    disruptorModuleEffect: vi.fn(() => "disruptor-effect"),
-    scramblerModuleEffect: vi.fn(() => "scrambler-effect"),
   });
   const events = new UiEventsImpl();
   const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");

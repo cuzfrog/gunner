@@ -48,6 +48,7 @@ import type { AppliedDpsHintProvider, AppliedDpsHintRenderer } from "./appliedDp
 import type { InflictedDpsHintProvider, InflictedDpsHintRenderer } from "./inflictedDpsHint";
 import type { ShipHintProvider } from "./shipHint";
 import type { DroneHintProvider } from "./droneHint";
+import type { ModuleHintProvider } from "./moduleHint";
 import type { StatHintRenderer } from "./statHint";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
@@ -153,4 +154,5 @@ export interface ControlsCradle {
   readonly inflictedDpsHintProvider: InflictedDpsHintProvider;
   readonly shipHintProvider: ShipHintProvider;
   readonly droneHintProvider: DroneHintProvider;
+  readonly moduleHintProvider: ModuleHintProvider;
 }

@@ -1,6 +1,5 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
-import type { MissileBoosterLoadout, MissileBoosterProjection, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec } from "../../../sim";
-import type { StoredMissileBoosterActivation } from "../../../appstate";
+import type { MissileBoosterLoadout, MissileBoosterProjection, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec } from "../../../sim";import type { StoredMissileBoosterActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -36,7 +35,6 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
   private readonly describer: MissileBoosterEffectDescriber;
   private readonly states = new Map<Side, MissileBoosterState>();
   private readonly scriptSections: Record<Side, ScriptSection<number>>;
-  private readonly computerNameSpans = new Map<Side, HTMLSpanElement[]>();
   private readonly overloadAction: IconActionImpl;
   private readonly sectionBlock: SectionBlockImpl;
 
@@ -129,7 +127,6 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
     const summary = this.els.summaries[side];
     const state = this.states.get(side);
     this.scriptSections[side].close();
-    this.computerNameSpans.delete(side);
     section.innerHTML = "";
     if (!state || this.isEmpty(state.loadout)) {
       section.hidden = true;
@@ -211,13 +208,11 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
   }
 
   private renderComputers(side: Side, state: MissileBoosterState, section: HTMLElement): void {
-    const nameSpans: HTMLSpanElement[] = [];
     for (let i = 0; i < state.loadout.computers.length; i++) {
       const computer = state.loadout.computers[i];
       const activation = state.activation[i];
       const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}></div>` as unknown as HTMLDivElement;
-      const { button, nameSpan } = this.createModuleButton(activation.active, computer, activation.script, activation.overloaded);
-      nameSpans.push(nameSpan);
+      const button = this.createModuleButton(activation.active, computer);
       button.addEventListener("click", () => this.toggleComputer(side, i, button, row));
       row.appendChild(button);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, computer, () => this.toggleComputerOverload(side, i, overloadButton));
@@ -230,14 +225,14 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
       row.appendChild(gear);
       section.appendChild(row);
     }
-    this.computerNameSpans.set(side, nameSpans);
   }
 
   private renderEnhancers(side: Side, state: MissileBoosterState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.enhancers.length; i++) {
       const enhancer = state.loadout.enhancers[i];
-      const { button } = this.createEnhancerButton(enhancer);
-      const row = html`<div class="ewar-row">${button}</div>` as unknown as HTMLDivElement;
+      const button = this.createEnhancerButton(enhancer);
+      const row = html`<div class="ewar-row"></div>` as unknown as HTMLDivElement;
+      row.appendChild(button);
       section.appendChild(row);
     }
   }
@@ -251,21 +246,18 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
     return this.fittingImport.itemNameForId(script.moduleId, this.i18n.current());
   }
 
-  private createModuleButton(active: boolean, computer: MissileBoosterSpec, script: MissileScriptSpec | undefined, overloaded: boolean): { button: HTMLButtonElement; nameSpan: HTMLSpanElement } {
+  private createModuleButton(active: boolean, computer: MissileBoosterSpec): HTMLButtonElement {
     const displayName = this.moduleDisplayName(computer);
-    const effectTitle = this.describer.computerModuleEffect(computer, script, overloaded);
     const iconUrl = this.imageCatalog.itemIconUrl(computer.moduleId);
-    const nameSpan = html`<span class="truncate" data-hint=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
-    const button = html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
-    return { button, nameSpan };
+    const nameSpan = html`<span class="truncate">${displayName}</span>` as unknown as HTMLSpanElement;
+    return html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName} data-hint-content="module" data-value=${String(computer.moduleId)}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
   }
 
-  private createEnhancerButton(enhancer: MissileEnhancerSpec): { button: HTMLButtonElement } {
+  private createEnhancerButton(enhancer: MissileEnhancerSpec): HTMLButtonElement {
     const displayName = this.moduleDisplayName(enhancer);
-    const effectTitle = this.describer.enhancerModuleEffect(enhancer);
     const iconUrl = this.imageCatalog.itemIconUrl(enhancer.moduleId);
-    const button = html`<button type="button" class="ewar-module-toggle" aria-disabled="true" aria-label=${displayName}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}><span class="truncate" data-hint=${effectTitle}>${displayName}</span></button>` as unknown as HTMLButtonElement;
-    return { button };
+    const nameSpan = html`<span class="truncate">${displayName}</span>` as unknown as HTMLSpanElement;
+    return html`<button type="button" class="ewar-module-toggle" aria-disabled="true" aria-label=${displayName} data-hint-content="module" data-value=${String(enhancer.moduleId)}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
   }
 
   private createOverloadButton(active: boolean, overloaded: boolean, index: number, spec: { readonly moduleId: TypeId }, onToggle: () => void): HTMLButtonElement {
@@ -316,9 +308,6 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
       if (script === undefined) return;
       state.activation[index].script = script;
     }
-    const script = state.activation[index].script;
-    const nameSpan = this.computerNameSpans.get(side)?.[index];
-    if (nameSpan) nameSpan.setAttribute("data-hint", this.describer.computerModuleEffect(state.loadout.computers[index], script, state.activation[index].overloaded));
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }
@@ -336,8 +325,6 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
         else child.setAttribute("disabled", "");
       }
     }
-    const nameSpan = this.computerNameSpans.get(side)?.[index];
-    if (nameSpan) nameSpan.setAttribute("data-hint", this.describer.computerModuleEffect(state.loadout.computers[index], activation.script, activation.overloaded));
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }
@@ -348,8 +335,6 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
     const overloaded = !state.activation[index].overloaded;
     state.activation[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
-    const nameSpan = this.computerNameSpans.get(side)?.[index];
-    if (nameSpan) nameSpan.setAttribute("data-hint", this.describer.computerModuleEffect(state.loadout.computers[index], state.activation[index].script, overloaded));
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }

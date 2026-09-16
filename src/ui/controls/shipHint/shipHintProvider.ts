@@ -69,7 +69,7 @@ export class ShipHintProviderImpl implements ShipHintProvider {
     return {
       heading: this.t("shipHint.section.navigation"),
       rows: [
-        { label: this.t("shipHint.maxVelocity"), value: `${formatWithCommas(profile.baseSpeed)} ${this.t("unit.meterPerSecond")}` },
+        { label: this.t("label.maxVelocity"), value: `${formatWithCommas(profile.baseSpeed)} ${this.t("unit.meterPerSecond")}` },
         { label: this.t("shipHint.mass"), value: `${formatWithCommas(profile.mass)} ${this.t("unit.kilogram")}` },
         { label: this.t("shipHint.inertiaModifier"), value: `${formatNumber(profile.inertiaModifier, 3)}x` },
         { label: this.t("shipHint.signatureRadius"), value: `${quantityLabel(profile.sigRadius, 1)} ${this.t("unit.meter")}` },
@@ -81,9 +81,9 @@ export class ShipHintProviderImpl implements ShipHintProvider {
     return {
       heading: this.t("shipHint.section.targeting"),
       rows: [
-        { label: this.t("shipHint.scanResolution"), value: `${formatWithCommas(profile.scanResolution)} ${this.t("unit.mm")}` },
-        { label: this.t("shipHint.targetingRange"), value: `${quantityLabel(profile.maxTargetingRange / 1000, 1)} ${this.t("unit.kilometer")}` },
-        { label: this.t("shipHint.maxLockedTargets"), value: String(profile.maxLockedTargets) },
+        { label: this.t("label.scanResolution"), value: `${formatWithCommas(profile.scanResolution)} ${this.t("unit.mm")}` },
+        { label: this.t("label.targetingRange"), value: `${quantityLabel(profile.maxTargetingRange / 1000, 1)} ${this.t("unit.kilometer")}` },
+        { label: this.t("label.maxLockedTargets"), value: String(profile.maxLockedTargets) },
       ],
     };
   }

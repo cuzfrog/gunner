@@ -120,15 +120,15 @@ describe("ShipHintProviderImpl", () => {
       { label: "shipHint.rigSlots", value: "3" },
     ]);
     expect(rowsOf(model, "shipHint.section.navigation")).toEqual([
-      { label: "shipHint.maxVelocity", value: "365 unit.meterPerSecond" },
+      { label: "label.maxVelocity", value: "365 unit.meterPerSecond" },
       { label: "shipHint.mass", value: "1,032,000 unit.kilogram" },
       { label: "shipHint.inertiaModifier", value: "3.1x" },
       { label: "shipHint.signatureRadius", value: "36 unit.meter" },
     ]);
     expect(rowsOf(model, "shipHint.section.targeting")).toEqual([
-      { label: "shipHint.scanResolution", value: "650 unit.mm" },
-      { label: "shipHint.targetingRange", value: "42.5 unit.kilometer" },
-      { label: "shipHint.maxLockedTargets", value: "4" },
+      { label: "label.scanResolution", value: "650 unit.mm" },
+      { label: "label.targetingRange", value: "42.5 unit.kilometer" },
+      { label: "label.maxLockedTargets", value: "4" },
     ]);
     expect(rowsOf(model, "shipHint.section.drones")).toEqual([
       { label: "shipHint.droneBandwidth", value: "10 unit.droneBandwidth" },

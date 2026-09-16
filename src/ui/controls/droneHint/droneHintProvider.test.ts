@@ -86,7 +86,7 @@ describe("DroneHintProviderImpl", () => {
     expect(damage.heading).toBe("dpsHint.damage");
     expect(damage.rows[0]).toEqual({ label: "ammoHint.total", value: "38.4", emphasis: true });
     expect(damage.rows[1]).toEqual({ label: "dpsHint.damageType.thermal", iconUrl: "images/icons/damage-thermal.png", value: "38.4" });
-    expect(damage.rows[2]).toEqual({ label: "droneHint.cycleTime", value: "4 unit.second" });
+    expect(damage.rows[2]).toEqual({ label: "label.cycleTime", value: "4 unit.second" });
   });
 
   test("omits zero damage types", () => {
@@ -111,7 +111,7 @@ describe("DroneHintProviderImpl", () => {
     expect(model.sections[2]).toEqual({
       heading: "shipHint.section.navigation",
       rows: [
-        { label: "label.droneMaxVelocity", value: "3,360 unit.meterPerSecond" },
+        { label: "label.maxVelocity", value: "3,360 unit.meterPerSecond" },
         { label: "label.droneOrbitSpeed", value: "660 unit.meterPerSecond" },
         { label: "droneHint.orbitRange", value: "700 unit.meter" },
       ],
