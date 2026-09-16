@@ -1,4 +1,4 @@
-import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineEvents, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type InflictedDps, type MissileRuntimeState, type MissileSpec, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "../sim";
+import { EMPTY_DEFENSE_ASSESSMENT, EMPTY_DEFENSE_SPEC, Vec2, ZERO_DAMAGE, type AttackAssessment, type DefenseView, type DroneRuntimeState, type DroneSpec, type EngineConfig, type EngineEvents, type EngineView, type EngagementFrame, type EngagementView, type HitChanceBreakdown, type InflictedDps, type MissileRuntimeState, type MissileSpec, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec, type WeaponAttack } from "../sim";
 import { toTypeId } from "../gamedata/ids";
 import type { Controls, ControlsCallbacks, Loop, Renderer, UiEvents } from "../ui";
 import type { EngagementEngine } from "../sim";
@@ -56,8 +56,9 @@ function baseView(): EngineView {
     damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
     turret: { hit, expectedMultiplier: 1, spoolFactor: 1, inOptimal: true },
   };
+  const turretAttack: WeaponAttack = { weapon: turret, assessment };
   const engagementView: EngagementView = {
-    frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] },
+    frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [turretAttack], shipB: [turretAttack] },
     effectiveWeapons: { shipA: turret, shipB: turret },
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
     locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
@@ -284,6 +285,27 @@ describe("AppImpl", () => {
     controls.getEngineConfig.mockReturnValue(engineConfig);
   });
 
+  test("camera ranges ignore drone weapons when a mounted weapon exists", () => {
+    app.start();
+    renderer.setCameraRanges.mockClear();
+    const drone: DroneSpec = { kind: "drone", moduleId: toTypeId("2"), tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: ZERO_DAMAGE, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+    // Drone system active puts drone specs first, exactly like simConfigSource.weaponsFor.
+    controls.getEngineConfig.mockReturnValue({ ...engineConfig, weapons: { shipA: [drone, turret], shipB: [turret] } });
+    callbacks().onConfigChange();
+    expect(renderer.setCameraRanges).toHaveBeenCalledWith({ shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } });
+    controls.getEngineConfig.mockReturnValue(engineConfig);
+  });
+
+  test("drone-only ships get zero camera ranges so auto zoom frames by distance", () => {
+    app.start();
+    renderer.setCameraRanges.mockClear();
+    const drone: DroneSpec = { kind: "drone", moduleId: toTypeId("2"), tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: ZERO_DAMAGE, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+    controls.getEngineConfig.mockReturnValue({ ...engineConfig, weapons: { shipA: [drone], shipB: [drone] } });
+    callbacks().onConfigChange();
+    expect(renderer.setCameraRanges).toHaveBeenCalledWith({ shipA: { kind: "turret", optimal: 0, falloff: 0 }, shipB: { kind: "turret", optimal: 0, falloff: 0 } });
+    controls.getEngineConfig.mockReturnValue(engineConfig);
+  });
+
   test("renderFrame passes engine view snapshot, frame, weapon ranges, and defense runtime to renderer", () => {
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, [], { shipA: [], shipB: [] }, { shipA: [], shipB: [] }, emptyDefenseView);
@@ -291,9 +313,15 @@ describe("AppImpl", () => {
 
   test("renderFrame passes drone render info from engine view drone states and specs", () => {
     const drone: DroneSpec = { kind: "drone", moduleId: toTypeId("2"), tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: ZERO_DAMAGE, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+    const droneAssessment: AttackAssessment = {
+      boostedWeapon: drone, effectiveWeapon: drone,
+      damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
+    };
+    const droneAttack: WeaponAttack = { weapon: drone, assessment: droneAssessment };
     const droneState: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(100, 200)], distanceToTarget: 1000, distanceToSlot: 100, inControlRange: true };
     const droneView: EngineView = {
       ...baseView(),
+      weaponAttacks: { shipA: [droneAttack], shipB: [droneAttack] },
       effectiveWeapons: { shipA: drone, shipB: drone },
       drones: { shipA: [droneState], shipB: [droneState] },
       droneSpecs: { shipA: [drone], shipB: [drone] },
@@ -301,7 +329,30 @@ describe("AppImpl", () => {
     engine.reset.mockImplementation(() => { emitView(droneView); return droneView; });
     engine.view.mockReturnValue(droneView);
     app.start();
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "drone", optimal: 1000, falloff: 500 }, shipB: { kind: "drone", optimal: 1000, falloff: 500 } }, [], { shipA: [{ positions: [new Vec2(100, 200)], optimal: 1000, falloff: 500, controlRange: 60000 }], shipB: [{ positions: [new Vec2(100, 200)], optimal: 1000, falloff: 500, controlRange: 60000 }] }, { shipA: [], shipB: [] }, emptyDefenseView);
+    const zeroRange = { kind: "turret", optimal: 0, falloff: 0 } as const;
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: zeroRange, shipB: zeroRange }, [], { shipA: [{ positions: [new Vec2(100, 200)], optimal: 1000, falloff: 500, controlRange: 60000 }], shipB: [{ positions: [new Vec2(100, 200)], optimal: 1000, falloff: 500, controlRange: 60000 }] }, { shipA: [], shipB: [] }, emptyDefenseView);
+  });
+
+  test("renders the mounted weapon range, not the drone range, when drones are the active system", () => {
+    const drone: DroneSpec = { kind: "drone", moduleId: toTypeId("2"), tracking: 0.15, sigResolution: 40, optimal: 1000, falloff: 500, damagePerShot: ZERO_DAMAGE, cycleTime: 4, droneCount: 5, maxVelocity: 6000, orbitSpeed: 1800, orbitRange: 1000, isSentry: false, controlRange: 60000 };
+    const disruptedTurret: TurretSpec = { ...turret, optimal: 9000, falloff: 1000 };
+    const droneAssessment: AttackAssessment = { boostedWeapon: drone, effectiveWeapon: drone, damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE } };
+    const turretAssessment: AttackAssessment = { boostedWeapon: turret, effectiveWeapon: disruptedTurret, damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE } };
+    // Drone system active puts drone specs first, exactly like simConfigSource.weaponsFor.
+    const attacks: readonly WeaponAttack[] = [
+      { weapon: drone, assessment: droneAssessment },
+      { weapon: turret, assessment: turretAssessment },
+    ];
+    const mixedView: EngineView = {
+      ...baseView(),
+      weaponAttacks: { shipA: attacks, shipB: attacks },
+      effectiveWeapons: { shipA: drone, shipB: drone },
+    };
+    engine.reset.mockImplementation(() => { emitView(mixedView); return mixedView; });
+    engine.view.mockReturnValue(mixedView);
+    app.start();
+    const drawCall = renderer.draw.mock.calls[0];
+    expect(drawCall[2]).toEqual({ shipA: { kind: "turret", optimal: 9000, falloff: 1000 }, shipB: { kind: "turret", optimal: 9000, falloff: 1000 } });
   });
 
   test("renderFrame passes missile render info from engine view missile states", () => {
