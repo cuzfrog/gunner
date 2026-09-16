@@ -51,7 +51,7 @@ Semantic color mapping (used consistently across CSS and canvas):
 
 ### Alpha variants of accents
 
-Where a translucent accent is needed (glows, dim borders, scrollbar thumbs), hardcoding rgba is currently tolerated, e.g. `rgba(92, 203, 203, 0.35)`. Prefer adding a named token if the same alpha value appears more than twice.
+Where a translucent accent is needed (glows, dim borders, scrollbar thumbs), add an alpha-variant token instead of hardcoding rgba; the codebase currently has no rgba literals outside `tokens.css`.
 
 ### Typography
 
