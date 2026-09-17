@@ -10,11 +10,11 @@ export interface WeaponCooldownSnapshot {
   readonly timer: number;
   readonly cycleTime: number;
   readonly spoolCycles: number;
+  readonly identity: string;
 }
 
 export interface SideClockSnapshot {
   readonly cooldowns: ReadonlyMap<number, WeaponCooldownSnapshot>;
-  readonly weaponSignature: string;
 }
 
 export interface WeaponClockState {
@@ -32,11 +32,11 @@ interface WeaponCooldown {
   timer: number;
   cycleTime: number;
   spoolCycles: number;
+  identity: string;
 }
 
 interface SideClock {
   cooldowns: Map<number, WeaponCooldown>;
-  weaponSignature: string;
   rng: Rng;
 }
 
@@ -83,35 +83,31 @@ export class WeaponClockImpl implements WeaponClock {
       const shipAEvents = this.stepSide("shipA", dt, view.weaponAttacks.shipA, "shipB", capacitor);
       for (const event of shipAEvents) events.push(event);
     } else {
-      this.clearCooldowns("shipA", view.weaponAttacks.shipA);
+      // Disengaged: weapons stop cycling entirely, matching the capacitor gate that only drains weapon capacitors while engaged.
+      this.sides["shipA"].cooldowns.clear();
     }
     if (view.locks.shipB.status === "locked") {
       const shipBEvents = this.stepSide("shipB", dt, view.weaponAttacks.shipB, "shipA", capacitor);
       for (const event of shipBEvents) events.push(event);
     } else {
-      this.clearCooldowns("shipB", view.weaponAttacks.shipB);
+      this.sides["shipB"].cooldowns.clear();
     }
     return events;
-  }
-
-  private clearCooldowns(source: Side, attacks: readonly WeaponAttack[]): void {
-    const clock = this.sides[source];
-    clock.cooldowns.clear();
-    clock.weaponSignature = weaponSignature(attacks);
   }
 
   private stepSide(source: Side, dt: number, attacks: readonly WeaponAttack[], target: Side, capacitor?: CapacitorGate): readonly DamageEvent[] {
     const events: DamageEvent[] = [];
     const clock = this.sides[source];
-    const signature = weaponSignature(attacks);
-    if (signature !== clock.weaponSignature) {
-      clock.cooldowns.clear();
-      clock.weaponSignature = signature;
-    }
     for (let i = 0; i < attacks.length; i++) {
       const attack = attacks[i];
       const kind = attack.weapon.kind;
       if (kind === "missile") continue;
+      const identity = weaponIdentity(attack.weapon);
+      const existing = clock.cooldowns.get(i);
+      if (existing && existing.identity !== identity) {
+        // The weapon at this slot changed (ammo swap, reorder, refit): restart only its cycle and spool.
+        clock.cooldowns.delete(i);
+      }
       const breakdown = attack.assessment.turret ?? attack.assessment.drone;
       if (!breakdown) continue;
       if (attack.assessment.drone && !attack.assessment.drone.inRange) continue;
@@ -131,7 +127,7 @@ export class WeaponClockImpl implements WeaponClock {
         // Activation denied: no cooldown entry, the debit is retried next frame.
         continue;
       }
-      const cooldown = clock.cooldowns.get(i) ?? { timer: cycleTime, cycleTime, spoolCycles: 0 };
+      const cooldown = clock.cooldowns.get(i) ?? { timer: cycleTime, cycleTime, spoolCycles: 0, identity };
       cooldown.timer -= dt;
       if (cooldown.timer <= 0) {
         if (capacitor && capNeed > 0 && !capacitor.attemptDebit(source, capNeed, attack.weapon.moduleId)) {
@@ -166,31 +162,26 @@ export class WeaponClockImpl implements WeaponClock {
 }
 
 function emptySide(createRng: () => Rng): SideClock {
-  return { cooldowns: new Map(), weaponSignature: "", rng: createRng() };
+  return { cooldowns: new Map(), rng: createRng() };
 }
 
 function snapshotClock(clock: SideClock): SideClockSnapshot {
   const cooldowns = [...clock.cooldowns].map(
-    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime, spoolCycles: cooldown.spoolCycles }] as const,
+    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime, spoolCycles: cooldown.spoolCycles, identity: cooldown.identity }] as const,
   );
-  return { cooldowns: new Map(cooldowns), weaponSignature: clock.weaponSignature };
+  return { cooldowns: new Map(cooldowns) };
 }
 
 function materializeClock(snapshot: SideClockSnapshot, createRng: () => Rng): SideClock {
   const cooldowns = [...snapshot.cooldowns].map(
-    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime, spoolCycles: cooldown.spoolCycles }] as const,
+    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime, spoolCycles: cooldown.spoolCycles, identity: cooldown.identity }] as const,
   );
-  return { cooldowns: new Map(cooldowns), weaponSignature: snapshot.weaponSignature, rng: createRng() };
+  return { cooldowns: new Map(cooldowns), rng: createRng() };
 }
 
-function weaponSignature(attacks: readonly WeaponAttack[]): string {
-  let sig = "";
-  for (const attack of attacks) {
-    const w = attack.weapon;
-    const spool = w.kind === "turret" && w.spool ? `${w.spool.perCycle}:${w.spool.max}` : "";
-    sig += w.kind + ":" + w.cycleTime + (spool ? ":" + spool : "") + ";";
-  }
-  return sig;
+function weaponIdentity(weapon: WeaponSpec): string {
+  const spool = weapon.kind === "turret" && weapon.spool ? `${weapon.spool.perCycle}:${weapon.spool.max}` : "";
+  return weapon.kind + ":" + weapon.moduleId + ":" + weapon.cycleTime + (spool ? ":" + spool : "");
 }
 
 function turretCapacitorNeed(weapon: WeaponSpec): number {

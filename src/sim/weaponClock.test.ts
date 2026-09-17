@@ -196,6 +196,29 @@ describe("WeaponClockImpl", () => {
     expect(eventsAfter).toHaveLength(0);
   });
 
+  test("ammo swap on one weapon restarts only that weapon's cycle", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const volley = { em: 0, thermal: 0, kinetic: 100, explosive: 0 };
+    const fastTurret: TurretSpec = { ...turret, cycleTime: 2 };
+    const viewA = makeView([turretAttack(1, volley), turretAttack(1, volley)]);
+    const viewB = makeView([{ weapon: fastTurret, assessment: makeAssessment(1, volley) }, turretAttack(1, volley)]);
+    clock.step(4, viewA);
+    const events = clock.step(1, viewB);
+    expect(events).toHaveLength(1);
+    expect(events[0].weaponIndex).toBe(1);
+  });
+
+  test("refit that reorders weapons preserves cycles of matching weapons", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const volley = { em: 0, thermal: 0, kinetic: 100, explosive: 0 };
+    const otherTurret: TurretSpec = { ...turret, moduleId: toTypeId("9") };
+    const viewA = makeView([turretAttack(1, volley), { weapon: otherTurret, assessment: makeAssessment(1, volley) }]);
+    clock.step(4, viewA);
+    // Swap the two slots: each slot now holds the other weapon, so both restart.
+    const swapped = makeView([{ weapon: otherTurret, assessment: makeAssessment(1, volley) }, turretAttack(1, volley)]);
+    expect(clock.step(1, swapped)).toHaveLength(0);
+  });
+
   test("unlocked side produces no events", () => {
     const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
     const attack = turretAttack(1, { em: 0, thermal: 0, kinetic: 100, explosive: 0 });
