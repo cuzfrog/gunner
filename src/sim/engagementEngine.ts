@@ -81,8 +81,9 @@ export class EngagementEngineImpl implements EngagementEngine {
     this.config = config;
     this.destroyedSides.clear();
     this.live.simulation.reset(config.sim);
+    const spawn = this.live.simulation.snapshot();
     this.live.droneSimulator.reset(droneSimConfigFrom(config));
-    this.live.missileSimulator.reset(missileSimConfigFrom(config));
+    this.live.missileSimulator.reset(missileSimConfigFrom(config), { shipA: spawn.shipA.position, shipB: spawn.shipB.position });
     this.live.weaponClock.reset();
     this.live.lockClock.reset();
     this.live.defenseSimulator.reset(config.defense);
@@ -279,7 +280,7 @@ export class EngagementEngineImpl implements EngagementEngine {
       weapons: config.weapons,
       paintedSigRadii: painted,
       droneStates: { shipA: world.droneSimulator.states("shipA"), shipB: world.droneSimulator.states("shipB") },
-      missileFacts: { shipA: this.missileFactsFor(world, "shipA", config), shipB: this.missileFactsFor(world, "shipB", config) },
+      missileFacts: { shipA: this.missileFactsFor(world, "shipA", config, painted.shipB), shipB: this.missileFactsFor(world, "shipB", config, painted.shipA) },
       spoolCycles: { shipA: this.spoolCyclesFor(world, "shipA", config), shipB: this.spoolCyclesFor(world, "shipB", config) },
       defenses: { shipA: config.defense.shipA, shipB: config.defense.shipB },
       overloaded: config.overloaded,
@@ -302,12 +303,12 @@ export class EngagementEngineImpl implements EngagementEngine {
     return baseSig * this.ewarResolver.sigMultiplier(ship.ewar, distance);
   }
 
-  private missileFactsFor(world: SimWorld, side: Side, config: EngineConfig): readonly MissileAttackFacts[] {
+  private missileFactsFor(world: SimWorld, side: Side, config: EngineConfig, paintedTargetSig: number): readonly MissileAttackFacts[] {
     const facts: MissileAttackFacts[] = [];
     let missileIndex = 0;
     for (const weapon of config.weapons[side]) {
       if (weapon.kind === "missile") {
-        facts.push(world.missileSimulator.facts(side, missileIndex));
+        facts.push(world.missileSimulator.facts(side, missileIndex, weapon, paintedTargetSig));
         missileIndex++;
       }
     }

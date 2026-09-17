@@ -81,12 +81,12 @@ function droneSimulatorState(): DroneSimulatorState {
 }
 
 function missileSimulatorState(): MissileSimulatorState {
-  const side = { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), lastPaintedSig: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
+  const side = { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
   return { sides: { shipA: side, shipB: { ...side } }, time: 0, lastFrameShipA: new Vec2(0, 0), lastFrameShipB: new Vec2(0, 0) };
 }
 
 function weaponClockState(): WeaponClockState {
-  const side = { cooldowns: new Map(), weaponSignature: "" };
+  const side = { cooldowns: new Map() };
   return { seed: 0, sides: { shipA: side, shipB: { ...side } } };
 }
 

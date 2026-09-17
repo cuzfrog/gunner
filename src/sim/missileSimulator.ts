@@ -31,7 +31,6 @@ export interface MissileSideSnapshot {
   readonly entities: readonly MissileBodySnapshot[];
   readonly cooldowns: ReadonlyMap<number, number>;
   readonly weaponSpecs: ReadonlyMap<number, MissileSpec>;
-  readonly lastPaintedSig: ReadonlyMap<number, number>;
   readonly lastTargetVelocity: Vec2;
   readonly lastTargetMaxSpeed: number;
 }
@@ -44,11 +43,12 @@ export interface MissileSimulatorState {
 }
 
 export interface MissileSimulator extends Restorable<MissileSimulatorState> {
-  reset(config: MissileSimConfig): void;
+  reset(config: MissileSimConfig, shipPositions: Record<Side, Vec2>): void;
   update(config: MissileSimConfig): void;
   step(dt: number, frame: EngagementFrame, launches: Record<Side, readonly MissileLaunchSpec[]>): readonly DamageEvent[];
   states(side: Side): readonly MissileRuntimeState[];
-  facts(side: Side, weaponIndex: number): MissileAttackFacts;
+  /** baseSpec is the configured (unboosted) spec, used until the first launch records the boosted spec; paintedTargetSig is the current-frame painted target signature. */
+  facts(side: Side, weaponIndex: number, baseSpec: MissileSpec, paintedTargetSig: number): MissileAttackFacts;
 }
 
 const ACCEL_TAU = 0.5;
@@ -77,7 +77,6 @@ interface SideState {
   entities: MissileBody[];
   cooldowns: Map<number, number>;
   weaponSpecs: Map<number, MissileSpec>;
-  lastPaintedSig: Map<number, number>;
   lastTargetVelocity: Vec2;
   lastTargetMaxSpeed: number;
 }
@@ -96,9 +95,11 @@ export class MissileSimulatorImpl implements MissileSimulator {
     this.lastFrameShipB = new Vec2(0, 0);
   }
 
-  reset(_config: MissileSimConfig): void {
+  reset(config: MissileSimConfig, shipPositions: Record<Side, Vec2>): void {
     this.sides = { shipA: emptySide(), shipB: emptySide() };
     this.time = 0;
+    this.lastFrameShipA = shipPositions.shipA;
+    this.lastFrameShipB = shipPositions.shipB;
   }
 
   update(_config: MissileSimConfig): void {
@@ -118,22 +119,20 @@ export class MissileSimulatorImpl implements MissileSimulator {
     return this.sides[side].entities.map((m) => ({ position: m.position, velocity: m.velocity, trail: m.trail, side, weaponIndex: m.weaponIndex }));
   }
 
-  facts(side: Side, weaponIndex: number): MissileAttackFacts {
+  facts(side: Side, weaponIndex: number, baseSpec: MissileSpec, paintedTargetSig: number): MissileAttackFacts {
     const state = this.sides[side];
     const inFlight = state.entities.filter((m) => m.weaponIndex === weaponIndex);
-    const spec = state.weaponSpecs.get(weaponIndex);
-    if (!spec) return { inFlightCount: inFlight.length, nearestTimeToImpact: 0, predicted: NO_APPLICATION, interceptable: false };
+    const spec = state.weaponSpecs.get(weaponIndex) ?? baseSpec;
     const targetStart = this.targetPos(side);
     const targetVel = clampToMaxSpeed(state.lastTargetVelocity, state.lastTargetMaxSpeed);
-    const paintedSig = state.lastPaintedSig.get(weaponIndex) ?? 0;
     const impactTimes: number[] = inFlight.map((m) => pursuitImpactTime(m, targetStart, targetVel)).filter((t) => t !== undefined);
-    if (paintedSig > 0) {
-      const launch = simulateIntercept(spec, this.shipPos(side), targetStart, targetVel, paintedSig);
+    if (paintedTargetSig > 0) {
+      const launch = simulateIntercept(spec, this.shipPos(side), targetStart, targetVel, paintedTargetSig);
       if (launch.interceptable) impactTimes.push(launch.timeToImpact);
     }
     const nearestTimeToImpact = impactTimes.length > 0 ? Math.min(...impactTimes) : 0;
     const interceptable = impactTimes.length > 0;
-    const predicted = this.predictApplication(state, spec, weaponIndex, interceptable);
+    const predicted = this.predictApplication(spec, targetVel, state.lastTargetMaxSpeed, paintedTargetSig, interceptable);
     return { inFlightCount: inFlight.length, nearestTimeToImpact, predicted, interceptable };
   }
 
@@ -154,7 +153,8 @@ export class MissileSimulatorImpl implements MissileSimulator {
   private stepSide(side: Side, dt: number, shipPos: Vec2, targetPos: Vec2, targetVel: Vec2, targetMaxSpeed: number, launches: readonly MissileLaunchSpec[]): readonly DamageEvent[] {
     const state = this.sides[side];
     this.updateTargetKinematics(state, targetVel, targetMaxSpeed);
-    this.handleLaunches(state, shipPos, launches, dt);
+    this.tickCooldowns(state, dt);
+    this.handleLaunches(state, shipPos, launches);
     return this.advanceEntities(side, state, dt, targetPos, targetVel);
   }
 
@@ -163,16 +163,17 @@ export class MissileSimulatorImpl implements MissileSimulator {
     state.lastTargetMaxSpeed = targetMaxSpeed;
   }
 
-  private handleLaunches(state: SideState, shipPos: Vec2, launches: readonly MissileLaunchSpec[], dt: number): void {
+  /** Launcher cycles continue without a lock (missiles cost no capacitor); a launch needs an expired cooldown plus a request. */
+  private tickCooldowns(state: SideState, dt: number): void {
+    for (const [weaponIndex, cooldown] of state.cooldowns) {
+      if (cooldown > 0) state.cooldowns.set(weaponIndex, Math.max(0, cooldown - dt));
+    }
+  }
+
+  private handleLaunches(state: SideState, shipPos: Vec2, launches: readonly MissileLaunchSpec[]): void {
     for (const launch of launches) {
       state.weaponSpecs.set(launch.weaponIndex, launch.boosted);
-      state.lastPaintedSig.set(launch.weaponIndex, launch.paintedTargetSig);
-      const cooldown = state.cooldowns.get(launch.weaponIndex) ?? 0;
-      if (cooldown > 0) {
-        const remaining = cooldown - dt;
-        state.cooldowns.set(launch.weaponIndex, Math.max(0, remaining));
-        if (remaining > 0) continue;
-      }
+      if ((state.cooldowns.get(launch.weaponIndex) ?? 0) > 0) continue;
       state.entities.push(createMissile(shipPos, launch));
       state.cooldowns.set(launch.weaponIndex, launch.boosted.cycleTime);
     }
@@ -206,11 +207,10 @@ export class MissileSimulatorImpl implements MissileSimulator {
     return { target, source, weaponIndex: missile.weaponIndex, kind: "missile", rawByType };
   }
 
-  private predictApplication(state: SideState, spec: MissileSpec, weaponIndex: number, interceptable: boolean): MissileApplicationResult {
-    const paintedSig = state.lastPaintedSig.get(weaponIndex) ?? 0;
-    if (paintedSig <= 0) return NO_APPLICATION;
-    const predictedSpeed = Math.min(state.lastTargetVelocity.len(), state.lastTargetMaxSpeed);
-    const result = this.application.compute(spec, predictedSpeed, paintedSig);
+  private predictApplication(spec: MissileSpec, targetVel: Vec2, targetMaxSpeed: number, paintedTargetSig: number, interceptable: boolean): MissileApplicationResult {
+    if (paintedTargetSig <= 0) return NO_APPLICATION;
+    const predictedSpeed = Math.min(targetVel.len(), targetMaxSpeed);
+    const result = this.application.compute(spec, predictedSpeed, paintedTargetSig);
     if (!interceptable) return { application: 0, signatureTerm: result.signatureTerm, velocityTerm: result.velocityTerm };
     return result;
   }
@@ -225,22 +225,20 @@ export class MissileSimulatorImpl implements MissileSimulator {
 }
 
 function emptySide(): SideState {
-  return { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), lastPaintedSig: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
+  return { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
 }
 
 function snapshotSide(state: SideState): MissileSideSnapshot {
   return {
     entities: state.entities.map(snapshotBody), cooldowns: new Map(state.cooldowns), weaponSpecs: new Map(state.weaponSpecs),
-    lastPaintedSig: new Map(state.lastPaintedSig), lastTargetVelocity: state.lastTargetVelocity,
-    lastTargetMaxSpeed: state.lastTargetMaxSpeed,
+    lastTargetVelocity: state.lastTargetVelocity, lastTargetMaxSpeed: state.lastTargetMaxSpeed,
   };
 }
 
 function materializeSide(snapshot: MissileSideSnapshot): SideState {
   return {
     entities: snapshot.entities.map(materializeBody), cooldowns: new Map(snapshot.cooldowns), weaponSpecs: new Map(snapshot.weaponSpecs),
-    lastPaintedSig: new Map(snapshot.lastPaintedSig), lastTargetVelocity: snapshot.lastTargetVelocity,
-    lastTargetMaxSpeed: snapshot.lastTargetMaxSpeed,
+    lastTargetVelocity: snapshot.lastTargetVelocity, lastTargetMaxSpeed: snapshot.lastTargetMaxSpeed,
   };
 }
 
