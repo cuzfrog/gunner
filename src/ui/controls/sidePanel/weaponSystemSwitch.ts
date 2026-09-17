@@ -1,12 +1,20 @@
-import type { WeaponKind } from "../../../sim";
+import type { ImportedLauncher, ImportedTurret } from "../../../fitting";
+import type { DroneSpec, WeaponKind } from "../../../sim";
+import { damageVectorSum } from "../../../sim";
 import type { UiEvents } from "../../events";
 import type { Side } from "../side";
+
+interface FittedWeaponSystems {
+  readonly turret?: ImportedTurret;
+  readonly launcher?: ImportedLauncher;
+  readonly drones?: readonly DroneSpec[];
+}
 
 export interface WeaponSystemSwitch {
   readonly side: Side;
   activeKind(): WeaponKind;
   setActiveKind(kind: WeaponKind): void;
-  autoToggle(hasTurret: boolean, hasLauncher: boolean, hasDrone: boolean): void;
+  autoSelectPrimary(systems: FittedWeaponSystems): void;
   refresh(): void;
   clear(): void;
 }
@@ -57,10 +65,9 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
     this.refresh();
   }
 
-  autoToggle(hasTurret: boolean, hasLauncher: boolean, hasDrone: boolean): void {
-    if (hasDrone && !hasTurret && !hasLauncher) this.kind = "drone";
-    else if (hasLauncher && !hasTurret && !hasDrone) this.kind = "missile";
-    else if (hasTurret && !hasLauncher && !hasDrone) this.kind = "turret";
+  autoSelectPrimary(systems: FittedWeaponSystems): void {
+    const kind = primaryKind(systems);
+    if (kind) this.kind = kind;
     this.refresh();
   }
 
@@ -87,4 +94,31 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
     this.refresh();
     this.events.emitConfigInvalidated();
   }
+}
+
+// Priority order for dps ties: ship-mounted guns before missiles before drones.
+function primaryKind(systems: FittedWeaponSystems): WeaponKind | undefined {
+  const dps: readonly (readonly [WeaponKind, number])[] = [["turret", turretDps(systems.turret)], ["missile", launcherDps(systems.launcher)], ["drone", dronesDps(systems.drones)]];
+  let best: readonly [WeaponKind, number] | undefined;
+  for (const entry of dps) {
+    if (entry[1] <= 0) continue;
+    if (best === undefined || entry[1] > best[1]) best = entry;
+  }
+  return best?.[0];
+}
+
+function turretDps(turret: ImportedTurret | undefined): number {
+  return turret && turret.cycleTime > 0 ? (damageVectorSum(turret.damagePerShot) * turret.turretCount) / turret.cycleTime : 0;
+}
+
+function launcherDps(launcher: ImportedLauncher | undefined): number {
+  return launcher && launcher.cycleTime > 0 ? (damageVectorSum(launcher.damagePerMissile) * launcher.count) / launcher.cycleTime : 0;
+}
+
+function dronesDps(drones: readonly DroneSpec[] | undefined): number {
+  return (drones ?? []).reduce((total, drone) => total + droneDps(drone), 0);
+}
+
+function droneDps(drone: DroneSpec): number {
+  return drone.cycleTime > 0 ? (damageVectorSum(drone.damagePerShot) * drone.droneCount) / drone.cycleTime : 0;
 }

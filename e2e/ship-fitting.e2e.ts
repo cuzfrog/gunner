@@ -1,4 +1,4 @@
-import { test, expect, loadFittingText, importFittingViaPaste, FITTING_THRASHER, BASE_URL } from "./fixtures";
+import { test, expect, loadFittingText, importFittingViaPaste, FITTING_THRASHER, FITTING_DOMINIX, FITTING_ISHTAR, BASE_URL } from "./fixtures";
 import type { Page } from "@playwright/test";
 
 let page: Page;
@@ -46,6 +46,18 @@ test.describe.serial("ship selection and fitting", () => {
     await expect(page.locator("#ship-a-fitting-eye")).toBeEnabled();
   });
 
+  test("importing a mixed fit selects the weapon system tab with the highest dps", async () => {
+    await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_DOMINIX));
+    // 5x Ogre II at skills out-dps the 4x Mega Pulse Lasers, so the drone tab is primary.
+    await expect(page.locator("#ship-a-weapon-system-drone")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("#ship-a-drone-panel")).toBeVisible();
+  });
+
+  test("importing a drone-only fit selects the drone tab", async () => {
+    await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_ISHTAR));
+    await expect(page.locator("#ship-a-weapon-system-drone")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("#ship-a-drone-panel")).toBeVisible();
+  });
   test("imported fitting previews via the eye and is saved in the list", async () => {
     await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_THRASHER));
     await page.locator("#ship-a-fitting-eye").click();

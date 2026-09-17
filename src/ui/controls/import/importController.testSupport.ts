@@ -159,8 +159,8 @@ export function buildImportController(document: Document) {
   const shipBLauncher = { applyImported: vi.fn() };
   const launchers = { shipA: shipALauncher, shipB: shipBLauncher };
   const weaponSystemSwitches: Record<Side, WeaponSystemSwitch> = {
-    shipA: { side: "shipA", activeKind: vi.fn(() => "turret" as const), setActiveKind: vi.fn(), autoToggle: vi.fn(), refresh: vi.fn(), clear: vi.fn() },
-    shipB: { side: "shipB", activeKind: vi.fn(() => "turret" as const), setActiveKind: vi.fn(), autoToggle: vi.fn(), refresh: vi.fn(), clear: vi.fn() },
+    shipA: { side: "shipA", activeKind: vi.fn(() => "turret" as const), setActiveKind: vi.fn(), autoSelectPrimary: vi.fn(), refresh: vi.fn(), clear: vi.fn() },
+    shipB: { side: "shipB", activeKind: vi.fn(() => "turret" as const), setActiveKind: vi.fn(), autoSelectPrimary: vi.fn(), refresh: vi.fn(), clear: vi.fn() },
   };
   const profileController = { showStatus: vi.fn() };
   const profileTextCodec = makeMockProfileTextCodec();
@@ -185,7 +185,7 @@ export function buildImportController(document: Document) {
     shipBSide: shipBPanel as unknown as SidePanel,
     turrets,
     launchers,
-    drones: { shipA: { applyImported: vi.fn() }, shipB: { applyImported: vi.fn() } },
+    drones: { shipA: { applyImported: vi.fn(), currentDroneSpecs: vi.fn(() => []) }, shipB: { applyImported: vi.fn(), currentDroneSpecs: vi.fn(() => []) } },
     weaponSystemSwitches,
     profileController: profileController as unknown as ProfileController,
     profileTextCodec,

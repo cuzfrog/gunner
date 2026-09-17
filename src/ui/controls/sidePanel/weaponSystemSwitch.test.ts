@@ -1,3 +1,6 @@
+import { EMPTY_DAMAGE_BREAKDOWN, type ImportedLauncher, type ImportedTurret } from "../../../fitting";
+import type { DroneSpec } from "../../../sim";
+import type { TypeId } from "../../../gamedata/ids";
 import { WeaponSystemSwitchImpl } from "./weaponSystemSwitch";
 import type { WeaponSystemSwitch } from "./weaponSystemSwitch";
 import { UiEventsImpl } from "../../events";
@@ -87,62 +90,102 @@ describe("WeaponSystemSwitchImpl", () => {
     expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(true);
   });
 
-  test("autoToggle switches to missile when only launcher is available", () => {
+  test("autoSelectPrimary switches to missile when only a launcher is fitted", () => {
     const { switch: sw, document } = buildSwitch();
-    sw.autoToggle(false, true, false);
+    sw.autoSelectPrimary({ launcher: launcherOf(30, 2, 2) });
     expect(sw.activeKind()).toBe("missile");
     expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(false);
     expect(getFake(document, "ship-a-turret-panel").hidden).toBe(true);
   });
 
-  test("autoToggle switches to turret when only turret is available", () => {
+  test("autoSelectPrimary switches to turret when only a turret is fitted", () => {
     const { switch: sw, document } = buildSwitch();
     sw.setActiveKind("missile");
-    sw.autoToggle(true, false, false);
+    sw.autoSelectPrimary({ turret: turretOf(50, 2, 1) });
     expect(sw.activeKind()).toBe("turret");
     expect(getFake(document, "ship-a-turret-panel").hidden).toBe(false);
     expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(true);
   });
 
-  test("autoToggle keeps current kind when both weapon types are available", () => {
-    const { switch: sw } = buildSwitch();
-    sw.setActiveKind("missile");
-    sw.autoToggle(true, true, false);
-    expect(sw.activeKind()).toBe("missile");
-  });
-
-  test("autoToggle keeps current kind when neither weapon type is available", () => {
-    const { switch: sw } = buildSwitch();
-    sw.autoToggle(false, false, false);
-    expect(sw.activeKind()).toBe("turret");
-  });
-
-  test("autoToggle switches to drone when only drone is available", () => {
+  test("autoSelectPrimary switches to drone when only drones are fitted", () => {
     const { switch: sw, document } = buildSwitch();
-    sw.autoToggle(false, false, true);
+    sw.autoSelectPrimary({ drones: [droneGroupOf(25, 2, 4)] });
     expect(sw.activeKind()).toBe("drone");
     expect(getFake(document, "ship-a-drone-panel").hidden).toBe(false);
     expect(getFake(document, "ship-a-turret-panel").hidden).toBe(true);
   });
 
-  test("autoToggle keeps current kind when turret and drone are available", () => {
+  test("autoSelectPrimary picks the drone system when its dps is the highest", () => {
     const { switch: sw } = buildSwitch();
-    sw.setActiveKind("drone");
-    sw.autoToggle(true, false, true);
+    sw.autoSelectPrimary({ turret: turretOf(40, 2, 1), drones: [droneGroupOf(30, 2, 4)] });
     expect(sw.activeKind()).toBe("drone");
   });
 
-  test("autoToggle keeps current kind when launcher and drone are available", () => {
+  test("autoSelectPrimary picks the turret system when its dps is the highest", () => {
     const { switch: sw } = buildSwitch();
     sw.setActiveKind("drone");
-    sw.autoToggle(false, true, true);
-    expect(sw.activeKind()).toBe("drone");
+    sw.autoSelectPrimary({ turret: turretOf(50, 2, 2), drones: [droneGroupOf(20, 2, 4)] });
+    expect(sw.activeKind()).toBe("turret");
   });
 
-  test("autoToggle keeps current kind when all weapon types are available", () => {
+  test("autoSelectPrimary picks the missile system when its dps is the highest", () => {
+    const { switch: sw } = buildSwitch();
+    sw.autoSelectPrimary({ launcher: launcherOf(45, 2, 2), drones: [droneGroupOf(20, 2, 4)] });
+    expect(sw.activeKind()).toBe("missile");
+  });
+
+  test("autoSelectPrimary sums drone group dps across groups", () => {
+    const { switch: sw } = buildSwitch();
+    const groups = [droneGroupOf(30, 2, 2), droneGroupOf(30, 2, 4)];
+    sw.autoSelectPrimary({ turret: turretOf(40, 2, 1), drones: groups });
+    expect(sw.activeKind()).toBe("drone");
+  });
+  test("autoSelectPrimary keeps the current kind when nothing is fitted", () => {
+    const { switch: sw } = buildSwitch();
+    sw.setActiveKind("missile");
+    sw.autoSelectPrimary({});
+    expect(sw.activeKind()).toBe("missile");
+  });
+
+  test("autoSelectPrimary keeps the current kind when only zero-damage systems are fitted", () => {
+    const { switch: sw } = buildSwitch();
+    sw.autoSelectPrimary({ turret: turretOf(0, 2, 1), drones: [droneGroupOf(0, 2, 4)] });
+    expect(sw.activeKind()).toBe("turret");
+  });
+
+  test("autoSelectPrimary prefers the turret system on a dps tie", () => {
+    const { switch: sw } = buildSwitch();
+    sw.autoSelectPrimary({ turret: turretOf(50, 2, 1), launcher: launcherOf(50, 2, 1) });
+    expect(sw.activeKind()).toBe("turret");
+  });
+
+  test("autoSelectPrimary prefers the missile system over drones on a dps tie", () => {
     const { switch: sw } = buildSwitch();
     sw.setActiveKind("drone");
-    sw.autoToggle(true, true, true);
-    expect(sw.activeKind()).toBe("drone");
+    sw.autoSelectPrimary({ launcher: launcherOf(40, 2, 1), drones: [droneGroupOf(10, 2, 4)] });
+    expect(sw.activeKind()).toBe("missile");
   });
 });
+
+const NO_DAMAGE = { em: 0, thermal: 0, kinetic: 0, explosive: 0 } as const;
+
+function turretOf(perShot: number, cycleTime: number, turretCount: number): ImportedTurret {
+  return {
+    tracking: 0, sigResolutionClass: "S", optimal: 0, falloff: 0, chargeSize: 1, chargeId: "1" as TypeId, base: { tracking: 0, optimal: 0, falloff: 0 },
+    moduleId: "1" as TypeId, damageMultiplier: 1, damagePerShot: { ...NO_DAMAGE, em: perShot }, cycleTime, capacitorNeed: 0, turretCount, damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
+  };
+}
+
+function launcherOf(perMissile: number, cycleTime: number, count: number): ImportedLauncher {
+  return {
+    moduleId: "1" as TypeId, name: "Launcher", count, chargeId: "1" as TypeId, chargeName: "Missile", damagePerMissile: { ...NO_DAMAGE, em: perMissile },
+    cycleTime, explosionRadius: 0, explosionVelocity: 0, damageReductionFactor: 0, maxVelocity: 0, flightTime: 0, damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
+  };
+}
+
+function droneGroupOf(perShot: number, cycleTime: number, droneCount: number): DroneSpec {
+  return {
+    kind: "drone", moduleId: "1" as TypeId, tracking: 0, sigResolution: 0, optimal: 0, falloff: 0, damagePerShot: { ...NO_DAMAGE, em: perShot },
+    cycleTime, droneCount, maxVelocity: 0, orbitSpeed: 0, orbitRange: 0, isSentry: false, controlRange: 0,
+  };
+}

@@ -59,7 +59,6 @@ no-new-exports:
   - drone/testSupport.ts
   - drone/module.ts
   - drone/index.ts
-  - import/shipADrone.ts
   - export/module.ts
   - export/exportController.ts
   - export/exportController.test.ts
