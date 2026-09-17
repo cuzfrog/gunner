@@ -274,12 +274,13 @@ function parseBonuses(raw: string | undefined): readonly ShipBonusGroup[] {
   return drafts.filter((draft) => draft.lines.length > 0).map((draft) => ({ header: draft.header, lines: [...draft.lines] }));
 }
 
+// Wiki text glues bullets to the previous word with a non-breaking space; normalize before splitting.
 function bonusLines(raw: string): readonly string[] {
-  return raw.split("\n").flatMap((line) => line.split(GLUED_BREAK_PATTERN)).map((line) => line.trim()).filter((line) => line.length > 0);
+  return raw.replace(/\u00a0/g, " ").split("\n").flatMap((line) => line.split(GLUED_BREAK_PATTERN)).map((line) => line.trim()).filter((line) => line.length > 0);
 }
 
 function isBonusHeader(line: string): boolean {
-  return line.endsWith(":") || /^Role Bonus$/i.test(line) || /bonuses \(per skill level\)$/i.test(line) || /^• .+ Mode$/i.test(line);
+  return line.endsWith(":") || /^• .+ Mode$/i.test(line) || /bonuses( per level)?$/i.test(line) || /bonuses \(per skill level\)$/i.test(line) || /^[A-Z][A-Za-z]+( [A-Z][A-Za-z]+){1,3}$/.test(line);
 }
 
 function bonusHeaderText(line: string): string {

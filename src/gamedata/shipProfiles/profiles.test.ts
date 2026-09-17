@@ -69,10 +69,17 @@ describe("SHIP_PROFILES data contract", () => {
       for (const group of profile.bonuses) {
         expect(group.lines.length).toBeGreaterThan(0);
         expect(group.header.endsWith(":")).toBe(false);
+        expect(group.header).not.toMatch(/\u00a0/);
         for (const line of group.lines) {
           expect(line.length).toBeGreaterThan(0);
           expect(line).not.toMatch(/[a-z][0-9]+%/);
           expect(line).not.toMatch(/bonuses \(per skill level\):?[0-9]/);
+          expect(line).not.toMatch(/\u00a0/);
+          expect(line).not.toMatch(/(?<=.)•/);
+          expect(line).not.toMatch(/:$/);
+          expect(line).not.toMatch(/^• .+ Mode$/i);
+          expect(line).not.toMatch(/bonuses( per level)?$/i);
+          expect(line).not.toMatch(/^[A-Z][A-Za-z]+( [A-Z][A-Za-z]+){1,3}$/);
         }
       }
     }

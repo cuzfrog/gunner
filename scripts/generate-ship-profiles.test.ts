@@ -1,5 +1,16 @@
+import { join } from "node:path";
 import { _buildAttributeNameMap, _buildShipNameToType, _extractCapacitorData, _extractDefenseData, _parseBonuses, _parseProfile, _resolveShipIds } from "./generate-ship-profiles";
 import type { SdeDogmaAttribute, SdeGroup, SdeType, SdeTypeDogma } from "./generate-ship-profiles";
+import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
+
+interface ShipBonusInput {
+  readonly name: string;
+  readonly shipBonuses?: string;
+}
+
+function isShipBonusInput(value: unknown): value is ShipBonusInput {
+  return typeof value === "object" && value !== null && "name" in value && typeof value.name === "string" && ("shipBonuses" in value ? typeof value.shipBonuses === "string" : true);
+}
 
 // Attribute IDs in these fixtures are arbitrary; only the id-to-name mapping matters to the unit under test.
 const ATTRIBUTE_NAMES = new Map<number, string>([
@@ -286,8 +297,63 @@ describe("_parseBonuses", () => {
     ]);
   });
 
+  test("normalizes non-breaking spaces glued to bullets before splitting", () => {
+    const text = "Role Bonus:•\u00a0Can fit Purloined Sansha Data Analyzer";
+    expect(_parseBonuses(text)).toEqual([{ header: "Role Bonus", lines: ["• Can fit Purloined Sansha Data Analyzer"] }]);
+  });
+
+  test("separates mode headings glued with non-breaking spaces", () => {
+    const text = "Misc bonus:\n+33% Small Energy Turret Damage\n•\u00a0Defense Mode \n33.3% bonus to all armor resistances while Defense Mode is enabled\n•\u00a0Propulsion Mode \n66.6% bonus to Afterburner and Microwarpdrive speed boost while Propulsion Mode is enabled";
+    expect(_parseBonuses(text)).toEqual([
+      { header: "Misc bonus", lines: ["+33% Small Energy Turret Damage"] },
+      { header: "Defense Mode", lines: ["33.3% bonus to all armor resistances while Defense Mode is enabled"] },
+      { header: "Propulsion Mode", lines: ["66.6% bonus to Afterburner and Microwarpdrive speed boost while Propulsion Mode is enabled"] },
+    ]);
+  });
+
+  test("recognizes plural role and hull class bonus headers", () => {
+    const text = "Heavy Assault Cruiser Bonuses\n10% bonus to Heavy Missile and Heavy Assault Missile Explosion Velocity\nMinmatar Cruiser Bonuses\n10% bonus to Light Missile, Heavy Missile and Heavy Assault Missile Damage\nRole Bonuses\n500% bonus to Stasis Webifying Drone stasis Webifier effectiveness\n•\u00a0Can fit Assault Damage Controls";
+    expect(_parseBonuses(text)).toEqual([
+      { header: "Heavy Assault Cruiser Bonuses", lines: ["10% bonus to Heavy Missile and Heavy Assault Missile Explosion Velocity"] },
+      { header: "Minmatar Cruiser Bonuses", lines: ["10% bonus to Light Missile, Heavy Missile and Heavy Assault Missile Damage"] },
+      { header: "Role Bonuses", lines: ["500% bonus to Stasis Webifying Drone stasis Webifier effectiveness", "• Can fit Assault Damage Controls"] },
+    ]);
+  });
+
+  test("recognizes hull class bonus headers with a per level suffix", () => {
+    const text = "Assault Frigate Bonuses per level\n7.5% bonus to Light Missile and Rocket Launcher Rate of Fire\nMinmatar Frigate Bonuses per level\n7.5% bonus to Light Missile and Rocket Damage\nRole Bonuses\n500% bonus to Stasis Webifying Drone effectiveness";
+    expect(_parseBonuses(text)).toEqual([
+      { header: "Assault Frigate Bonuses per level", lines: ["7.5% bonus to Light Missile and Rocket Launcher Rate of Fire"] },
+      { header: "Minmatar Frigate Bonuses per level", lines: ["7.5% bonus to Light Missile and Rocket Damage"] },
+      { header: "Role Bonuses", lines: ["500% bonus to Stasis Webifying Drone effectiveness"] },
+    ]);
+  });
+
+  test("recognizes standalone race and hull class titles", () => {
+    const text = "Gallente Dreadnought\n10% bonus to Capital Projectile Turret falloff.\nMinmatar Dreadnought\n10% bonus to Capital Projectile Turret damage.\nRole Bonus\n•\u00a0Can fit a Siege Module.";
+    expect(_parseBonuses(text)).toEqual([
+      { header: "Gallente Dreadnought", lines: ["10% bonus to Capital Projectile Turret falloff."] },
+      { header: "Minmatar Dreadnought", lines: ["10% bonus to Capital Projectile Turret damage."] },
+      { header: "Role Bonus", lines: ["• Can fit a Siege Module."] },
+    ]);
+  });
+
   test("groups leading bonus lines under a headerless group", () => {
     expect(_parseBonuses("5% bonus to damage")).toEqual([{ header: "", lines: ["5% bonus to damage"] }]);
+  });
+
+  test("keeps the committed ship profiles in sync with the parser", async () => {
+    const input: readonly unknown[] = await Bun.file(join(import.meta.dir, "..", "data", "ship-profiles.json")).json();
+    const bonusesByName = new Map<string, string>();
+    for (const entry of input) {
+      if (!isShipBonusInput(entry)) throw new Error("ship-profiles.json contains an entry that is not a ship record");
+      bonusesByName.set(entry.name, entry.shipBonuses ?? "");
+    }
+    for (const profile of SHIP_PROFILES) {
+      const shipBonuses = bonusesByName.get(profile.name);
+      expect(shipBonuses, `data/ship-profiles.json is missing "${profile.name}"`).toBeDefined();
+      expect(profile.bonuses).toEqual(_parseBonuses(shipBonuses));
+    }
   });
 
   test("drops header-only trailing groups and keeps decimals intact", () => {

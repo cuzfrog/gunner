@@ -60,7 +60,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.7, explosive: 0.875 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.625, explosive: 0.8 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["20% bonus to Medium Energy Turret damage","4% bonus to Armored Command and Information Command burst strength and duration"]},{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["10% reduction in Medium Energy Turret activation cost","4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","50% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["20% bonus to Medium Energy Turret damage","4% bonus to Armored Command and Information Command burst strength and duration"]},{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["10% reduction in Medium Energy Turret activation cost","4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","50% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "2836" as ShipProfile["id"],
@@ -90,7 +90,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.85, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.675, kinetic: 0.8375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["20% bonus to Medium Hybrid Turret damage","20% bonus to Warp Scrambler and Warp Disruptor optimal range"]},{"header":"Role Bonus","lines":["50% bonus to Medium Hybrid Turret falloff","25% bonus to Medium Hybrid Turret tracking speed","25% bonus to ship max velocity","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["20% bonus to Medium Hybrid Turret damage","20% bonus to Warp Scrambler and Warp Disruptor optimal range"]},{"header":"Role Bonus","lines":["50% bonus to Medium Hybrid Turret falloff","25% bonus to Medium Hybrid Turret tracking speed","25% bonus to ship max velocity","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "23919" as ShipProfile["id"],
@@ -120,7 +120,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Carrier bonuses (per skill level)","lines":["7.5% bonus to Fighter damage","4% bonus to all armor resistances","5+ bonus to ship warp core strength","5% reduction in Weapon Disruption Burst Projector cycle time","2% bonus to Armored Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Burst Projectors","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Heavy Fighters","• Can lock at extended ranges","400% bonus to Armor Plates and Shield Extenders","50% bonus to Remote Sensor Dampener resistance","50% bonus to Stasis effect resistance","50% increase to Remote Electronic Assistance impedance","• Conduit Jump capable","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Amarr Carrier bonuses (per skill level)","lines":["7.5% bonus to Fighter damage","4% bonus to all armor resistances","5+ bonus to ship warp core strength","5% reduction in Weapon Disruption Burst Projector cycle time","2% bonus to Armored Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Burst Projectors","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Heavy Fighters","• Can lock at extended ranges","400% bonus to Armor Plates and Shield Extenders","50% bonus to Remote Sensor Dampener resistance","50% bonus to Stasis effect resistance","50% increase to Remote Electronic Assistance impedance","• Conduit Jump capable","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "32872" as ShipProfile["id"],
@@ -240,7 +240,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Battlecruiser bonuses (per skil level)","lines":["4% bonus to all shield resistances"]},{"header":"Gallente Battlecruiser bonuses (per skil level)","lines":["10% bonus to Kinetic and Thermal Heavy Missile and Heavy Assault Missile damage"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","500% bonus to Medium Combat Drone damage","250% bonus to Medium Combat Drone hitpoints","50% bonus to Command Burst area of effect range","12.5% bonus to Drone microwarp velocity"]}],
+    bonuses: [{"header":"Caldari Battlecruiser bonuses (per skil level)","lines":["4% bonus to all shield resistances"]},{"header":"Gallente Battlecruiser bonuses (per skil level)","lines":["10% bonus to Kinetic and Thermal Heavy Missile and Heavy Assault Missile damage"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","500% bonus to Medium Combat Drone damage","250% bonus to Medium Combat Drone hitpoints","50% bonus to Command Burst area of effect range","12.5% bonus to Drone microwarp velocity"]}],
   },
   {
     id: "11134" as ShipProfile["id"],
@@ -300,7 +300,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.6 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.3 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Frigate bonuses (per skill level)","lines":["5% bonus to Core and Combat Scanner Probe deviation","15% reduction in warp drive capacitor need"]},{"header":"Covert Ops bonuses (per skill level)","lines":["20% reduction in Cloaking Devices CPU requirement","10% bonus to Core and Combat Scanner Probe strength","10% reduction in Survey Probe flight time"]},{"header":"Role Bonus","lines":["10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","60% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Amarr Frigate bonuses (per skill level)","lines":["5% bonus to Core and Combat Scanner Probe deviation","15% reduction in warp drive capacitor need"]},{"header":"Covert Ops bonuses (per skill level)","lines":["20% reduction in Cloaking Devices CPU requirement","10% bonus to Core and Combat Scanner Probe strength","10% reduction in Survey Probe flight time"]},{"header":"Role Bonus","lines":["10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","60% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "89807" as ShipProfile["id"],
@@ -330,7 +330,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Battlecruiser Bonuses (per skill level)","lines":["5% bonus to Cruise Missile and Torpedo explosion velocity","5% bonus to Cruise Missile and Torpedo explosion radius"]},{"header":"Role Bonus","lines":["95% reduction in Rapid Heavy Missile, Cruise Missile and Torpedo Launcher Powergrid requirement","50% reduction in Rapid Heavy Missile, Cruise Missile and Torpedo Launcher CPU requirement","• Additional bonuses are available while one of three Modes are active. Modes may be switched no more than once every 10 seconds.","• Primary Mode","250% bonus to lock range","33.3% decrease in missile velocity","1,000% increase in missile flight time","25% bonus to Rapid Heavy Missile Launcher, Cruise Missile Launcher and Torpedo Launcher rate of fire","• Secondary Mode","50% decrease in missile flight time","50% bonus to Rapid Heavy Missile Launcher, Cruise Missile Launcher and Torpedo Launcher rate of fire","• Tertiary Mode","90% reduction in Micro Jump Drive Reactivation Delay","25% bonus to ship inertia modifier","50% bonus to Heavy Missile, Cruise Missile and Torpedo velocity","25% bonus to Rapid Heavy Missile Launcher, Cruise Missile Launcher and Torpedo Launcher rate of fire"]}],
+    bonuses: [{"header":"Caldari Battlecruiser Bonuses (per skill level)","lines":["5% bonus to Cruise Missile and Torpedo explosion velocity","5% bonus to Cruise Missile and Torpedo explosion radius"]},{"header":"Role Bonus","lines":["95% reduction in Rapid Heavy Missile, Cruise Missile and Torpedo Launcher Powergrid requirement","50% reduction in Rapid Heavy Missile, Cruise Missile and Torpedo Launcher CPU requirement","• Additional bonuses are available while one of three Modes are active. Modes may be switched no more than once every 10 seconds."]},{"header":"Primary Mode","lines":["250% bonus to lock range","33.3% decrease in missile velocity","1,000% increase in missile flight time","25% bonus to Rapid Heavy Missile Launcher, Cruise Missile Launcher and Torpedo Launcher rate of fire"]},{"header":"Secondary Mode","lines":["50% decrease in missile flight time","50% bonus to Rapid Heavy Missile Launcher, Cruise Missile Launcher and Torpedo Launcher rate of fire"]},{"header":"Tertiary Mode","lines":["90% reduction in Micro Jump Drive Reactivation Delay","25% bonus to ship inertia modifier","50% bonus to Heavy Missile, Cruise Missile and Torpedo velocity","25% bonus to Rapid Heavy Missile Launcher, Cruise Missile Launcher and Torpedo Launcher rate of fire"]}],
   },
   {
     id: "28848" as ShipProfile["id"],
@@ -480,7 +480,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Carrier bonuses (per skill level)","lines":["5% bonus to Remote Capacitor Transmitter and Remote Armor Repairer amount","4% bonus to all armor resistances","20% bonus to Capacitor Booster amount","1% bonus to Armored Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Triage modules","• Can use two Command Burst modules","50% reduction in CPU requirements for Command Burst modules","200% bonus to Command Burst area of effect range","200% bonus to Logistics Drone transfer amount","5x penalty to Entosis Link duration","• Can only online one Capacitor Booster module"]}],
+    bonuses: [{"header":"Amarr Carrier bonuses (per skill level)","lines":["5% bonus to Remote Capacitor Transmitter and Remote Armor Repairer amount","4% bonus to all armor resistances","20% bonus to Capacitor Booster amount","1% bonus to Armored Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Triage modules","• Can use two Command Burst modules","50% reduction in CPU requirements for Command Burst modules","200% bonus to Command Burst area of effect range","200% bonus to Logistics Drone transfer amount","5x penalty to Entosis Link duration","• Can only online one Capacitor Booster module"]}],
   },
   {
     id: "29266" as ShipProfile["id"],
@@ -540,7 +540,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.5, kinetic: 0.775, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.59375, kinetic: 0.75625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret damage","7.5% bonus to Remote Sensor Dampener effectiveness"]},{"header":"Recon Ships bonuses (per skill level)","lines":["20% bonus to Warp Scrambler and Warp Disruptor optimal range","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator• Cloak reactivation delay reduced to 5 seconds"]}],
+    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret damage","7.5% bonus to Remote Sensor Dampener effectiveness"]},{"header":"Recon Ships bonuses (per skill level)","lines":["20% bonus to Warp Scrambler and Warp Disruptor optimal range","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds"]}],
   },
   {
     id: "628" as ShipProfile["id"],
@@ -600,7 +600,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Carrier bonuses (per skill level)","lines":["4% bonus to all armor resistances","5% bonus to Cenobite Support Fighter neutralization optimal range","2% bonus to Cenobite Support Fighter neutralization strength","1% bonus to Armored Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Capital Micro Jump Drive and Capital Micro Jump Field Generator","• Can fit two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump Capable","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Amarr Carrier bonuses (per skill level)","lines":["4% bonus to all armor resistances","5% bonus to Cenobite Support Fighter neutralization optimal range","2% bonus to Cenobite Support Fighter neutralization strength","1% bonus to Armored Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Capital Micro Jump Drive and Capital Micro Jump Field Generator","• Can fit two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump Capable","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "11202" as ShipProfile["id"],
@@ -780,7 +780,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["20% bonus to Stasis Webifier range"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["15% bonus to Energy Nosferatu and Energy Neutralizer drain amount","20% bonus to Energy Nosferatu and Energy Neutralizer optimal range","10% bonus to Energy Nosferatu and Energy Neutralizer fallof range"]},{"header":"Role Bonus","lines":["125% bonus to Medium Energy Turret damage","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level"]}],
+    bonuses: [{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["20% bonus to Stasis Webifier range"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["15% bonus to Energy Nosferatu and Energy Neutralizer drain amount","20% bonus to Energy Nosferatu and Energy Neutralizer optimal range","10% bonus to Energy Nosferatu and Energy Neutralizer fallof range"]},{"header":"Role Bonus","lines":["125% bonus to Medium Energy Turret damage","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level"]}],
   },
   {
     id: "22466" as ShipProfile["id"],
@@ -810,7 +810,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.85, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.675, kinetic: 0.8375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret damage","10% bonus to Medium Hybrid Turret falloff","4% bonus to Armored Command and Skirmish Command burst strength and duration"]},{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret damage","10% bonus to Armor Repairer amount"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","50% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret damage","10% bonus to Medium Hybrid Turret falloff","4% bonus to Armored Command and Skirmish Command burst strength and duration"]},{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret damage","10% bonus to Armor Repairer amount"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","50% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "33468" as ShipProfile["id"],
@@ -840,7 +840,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Frigate bonuses (per skill level)","lines":["20% bonus to Drone hitpoints"]},{"header":"Amarr Frigate bonuses (per skill level)","lines":["4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["100% reduction in Cloaking Devices CPU requirement","37.5% bonus to Core and Combat Scanner Probe strength","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device","• Cloak reactivation delay reduced to 15 seconds"]}],
+    bonuses: [{"header":"Gallente Frigate bonuses (per skill level)","lines":["20% bonus to Drone hitpoints"]},{"header":"Amarr Frigate bonuses (per skill level)","lines":["4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["100% reduction in Cloaking Devices CPU requirement","37.5% bonus to Core and Combat Scanner Probe strength","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device","• Cloak reactivation delay reduced to 15 seconds"]}],
   },
   {
     id: "608" as ShipProfile["id"],
@@ -960,7 +960,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.2, thermal: 0.2, kinetic: 0.5, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Upwell Freighter bonuses (per skill level)","lines":["10% bonus to ship infrastructure hold capacity","10% bonus to missile damage","20% bonus to Auto-Targetting missile damage"]},{"header":"Role Bonus","lines":["90% reduction to effective distance traveled for jump fatigue","90% reduction in Capital Flex Shield Hardener capacitor activation cost and powergrid requirements.","• Unable to use Cloaking modules","• Can link to Orbital Skyhook reagent silos bypassing the normal ship restrictions"]}],
+    bonuses: [{"header":"Upwell Freighter bonuses (per skill level)","lines":["10% bonus to ship infrastructure hold capacity","10% bonus to missile damage","20% bonus to Auto-Targetting missile damage"]},{"header":"Role Bonus","lines":["90% reduction to effective distance traveled for jump fatigue","90% reduction in Capital Flex Shield Hardener capacitor activation cost and powergrid requirements.","• Unable to use Cloaking modules","• Can link to Orbital Skyhook reagent silos bypassing the normal ship restrictions"]}],
   },
   {
     id: "11567" as ShipProfile["id"],
@@ -990,7 +990,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Titan bonuses (per skill level)","lines":["180% bonus to Capital Energy Turret damage","10% reduction in Capital Energy Turret activation cost","10+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Doomsday devices","• Can fit Jump Portal Generator","• Can fit Clone Vat Bay","• Can use three Command Burst modules","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration","• Can fit one Phenomena Generator module"]}],
+    bonuses: [{"header":"Amarr Titan bonuses (per skill level)","lines":["180% bonus to Capital Energy Turret damage","10% reduction in Capital Energy Turret activation cost","10+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Doomsday devices","• Can fit Jump Portal Generator","• Can fit Clone Vat Bay","• Can use three Command Burst modules","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration","• Can fit one Phenomena Generator module"]}],
   },
   {
     id: "78576" as ShipProfile["id"],
@@ -1020,7 +1020,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Titan bonuses (per skill level)","lines":["• 6+ bonus to ship warp core strength","10% bonus to Projectile Turret falloff","5% bonus to Capital Projectile Turret tracking speed"]},{"header":"Minmatar Titan bonuses (per skill level)","lines":["• 6+ bonus to ship warp core strength","200% bonus to Capital Projectile Turret Damage","5% bonus to Capital Projectile Turret rate of fire"]},{"header":"Role Bonus","lines":["• Can fit a Doomsday module","• Can fit a Phenomena Generator module","• Can fit a Jump Portal Generator Module","• Can fit a Clone Vat Bay module","• Can use three Command Burst modules","25% bonus to warp speed and warp acceleration","200.0% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Gallente Titan bonuses (per skill level)","lines":["• 6+ bonus to ship warp core strength","10% bonus to Projectile Turret falloff","5% bonus to Capital Projectile Turret tracking speed"]},{"header":"Minmatar Titan bonuses (per skill level)","lines":["• 6+ bonus to ship warp core strength","200% bonus to Capital Projectile Turret Damage","5% bonus to Capital Projectile Turret rate of fire"]},{"header":"Role Bonus","lines":["• Can fit a Doomsday module","• Can fit a Phenomena Generator module","• Can fit a Jump Portal Generator Module","• Can fit a Clone Vat Bay module","• Can use three Command Burst modules","25% bonus to warp speed and warp acceleration","200.0% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "88001" as ShipProfile["id"],
@@ -1050,7 +1050,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.3, kinetic: 0.4, explosive: 0.625 },
     armorResists: { em: 0.5, thermal: 0.43125, kinetic: 0.25, explosive: 0.4 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Marauders bonuses (per skill level)","lines":["7.5% bonus to Armor Repairer repair amount.","20% bonus to Supratidal Entropic Disintegrator maximum damage multiplier bonus."]},{"header":"Precursor Battleship bonuses (per skill level)","lines":["7.5% bonus to Supratidal Entropic Disintegrator maximum range.","7.5% bonus to Supratidal Entropic Disintegrator tracking speed."]},{"header":"Role Bonus","lines":["100% bonus to Remote Armor Repairer range.","50% reduced Energy Neutralizer capacitor need.","50% reduced Remote Armor Repairer capacitor need.","50% reduced Smart Bomb capacitor need.","100% bonus to Tractor Beam range and velocity.","• Can fit Bastion modules"]}],
+    bonuses: [{"header":"Marauders bonuses (per skill level)","lines":["7.5% bonus to Armor Repairer repair amount.","20% bonus to Supratidal Entropic Disintegrator maximum damage multiplier bonus."]},{"header":"Precursor Battleship bonuses (per skill level)","lines":["7.5% bonus to Supratidal Entropic Disintegrator maximum range.","7.5% bonus to Supratidal Entropic Disintegrator tracking speed."]},{"header":"Role Bonus","lines":["100% bonus to Remote Armor Repairer range.","50% reduced Energy Neutralizer capacitor need.","50% reduced Remote Armor Repairer capacitor need.","50% reduced Smart Bomb capacitor need.","100% bonus to Tractor Beam range and velocity.","• Can fit Bastion modules"]}],
   },
   {
     id: "648" as ShipProfile["id"],
@@ -1110,7 +1110,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.475, explosive: 0.625 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.34375, explosive: 0.4 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Dreadnought bonuses (per skill level)","lines":["5% to XL Torpedo, XL Cruise and Torpedo Damage","5% Reduction to XL Torpedo, XL Cruise and Torpedo Explosion Radius"]},{"header":"Lancer Dreadnought bonuses (per skill level)","lines":["10% Bonus to Disruptive Lance damage","20% Bonus to Disruptive Lance maximum range"]},{"header":"Role Bonus","lines":["• Can fit a Siege module","• Can fit a Disruptor Lance","• 5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Amarr Dreadnought bonuses (per skill level)","lines":["5% to XL Torpedo, XL Cruise and Torpedo Damage","5% Reduction to XL Torpedo, XL Cruise and Torpedo Explosion Radius"]},{"header":"Lancer Dreadnought bonuses (per skill level)","lines":["10% Bonus to Disruptive Lance damage","20% Bonus to Disruptive Lance maximum range"]},{"header":"Role Bonus","lines":["• Can fit a Siege module","• Can fit a Disruptor Lance","• 5x penalty to Entosis Link duration"]}],
   },
   {
     id: "582" as ShipProfile["id"],
@@ -1260,7 +1260,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.75, thermal: 0.6, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.9, thermal: 0.675, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"","lines":["Heavy Assault Cruiser Bonuses","10% bonus to Heavy Missile and Heavy Assault Missile Explosion Velocity","10% bonus to Light Missile, Heavy Missile and Heavy Assault Missile launcher Rate of Fire","Minmatar Cruiser Bonuses","10% bonus to Light Missile, Heavy Missile and Heavy Assault Missile Damage","10% bonus to Shield Booster and Armor Repairer ammount","Role Bonuses","500% bonus to Stasis Webifying Drone stasis Webifier effectiveness","500% bonus to Stasis Webifying Drone hitpoints","50% bonus to Statis Webifying Drone max velocity","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Heavy Assault Cruiser Bonuses","lines":["10% bonus to Heavy Missile and Heavy Assault Missile Explosion Velocity","10% bonus to Light Missile, Heavy Missile and Heavy Assault Missile launcher Rate of Fire"]},{"header":"Minmatar Cruiser Bonuses","lines":["10% bonus to Light Missile, Heavy Missile and Heavy Assault Missile Damage","10% bonus to Shield Booster and Armor Repairer ammount"]},{"header":"Role Bonuses","lines":["500% bonus to Stasis Webifying Drone stasis Webifier effectiveness","500% bonus to Stasis Webifying Drone hitpoints","50% bonus to Statis Webifying Drone max velocity","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "1944" as ShipProfile["id"],
@@ -1320,7 +1320,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Battleship bonuses (per skill level)","lines":["20% bonus to Stasis Webifier optimal range"]},{"header":"Amarr Battleship bonuses (per skill level)","lines":["15% bonus to Energy Nosferatu and Energy Neutralizer drain amount"]},{"header":"Role Bonus","lines":["100% bonus to Large Energy Turret damage","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level","100% bonus to Shield Extender hitpoints","50% bonus to Armor Plate hitpoints","5% Additional bonus to Reinforced Bulkhead hitpoints"]}],
+    bonuses: [{"header":"Minmatar Battleship bonuses (per skill level)","lines":["20% bonus to Stasis Webifier optimal range"]},{"header":"Amarr Battleship bonuses (per skill level)","lines":["15% bonus to Energy Nosferatu and Energy Neutralizer drain amount"]},{"header":"Role Bonus","lines":["100% bonus to Large Energy Turret damage","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level","100% bonus to Shield Extender hitpoints","50% bonus to Armor Plate hitpoints","5% Additional bonus to Reinforced Bulkhead hitpoints"]}],
   },
   {
     id: "37480" as ShipProfile["id"],
@@ -1410,7 +1410,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Role Bonus","lines":["90% reduction to effective distance traveled for jump fatigue","• Immune to Interdiction Sphere Launcher, Warp Disruption Field Generator and Mobile Small, Medium and Large Warp Disruptor","• Immune to all cargo scanners"]}],
+    bonuses: [{"header":"Role Bonus","lines":["90% reduction to effective distance traveled for jump fatigue","• Immune to Interdiction Sphere Launcher, Warp Disruption Field Generator and Mobile Small, Medium and Large Warp Disruptor","• Immune to all cargo scanners"]}],
   },
   {
     id: "34328" as ShipProfile["id"],
@@ -1500,7 +1500,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.75, thermal: 0.6, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.9, thermal: 0.675, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Projectile Turret rate of fire","5% bonus to Medium Projectile Turret damage"]},{"header":"Heavy Interdiction Cruisers bonuses (per skill level)","lines":["10% bonus to Medium Projectile Turret falloff","5% bonus to Warp Disruption Field Generator scramble range","Role Bonus:• Can fit Warp Disruption Field Generator and Cynosural Field Generator modules","20% bonus to all shield resistances"]}],
+    bonuses: [{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Projectile Turret rate of fire","5% bonus to Medium Projectile Turret damage"]},{"header":"Heavy Interdiction Cruisers bonuses (per skill level)","lines":["10% bonus to Medium Projectile Turret falloff","5% bonus to Warp Disruption Field Generator scramble range"]},{"header":"Role Bonus","lines":["• Can fit Warp Disruption Field Generator and Cynosural Field Generator modules","20% bonus to all shield resistances"]}],
   },
   {
     id: "16229" as ShipProfile["id"],
@@ -1530,7 +1530,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret damage","7.5% bonus to Armor Repairer amount","Role Bonus:• Can use one Command Burst module","25% bonus to Medium Hybrid Turret optimal range and falloff","50% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret damage","7.5% bonus to Armor Repairer amount"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","25% bonus to Medium Hybrid Turret optimal range and falloff","50% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "33151" as ShipProfile["id"],
@@ -1560,7 +1560,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret damage","7.5% bonus to Medium Hybrid Turret tracking speed","Role Bonus:• Can fit Warfare Link modules","25% bonus to Medium Hybrid Turret optimal range and falloff"]}],
+    bonuses: [{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret damage","7.5% bonus to Medium Hybrid Turret tracking speed"]},{"header":"Role Bonus","lines":["• Can fit Warfare Link modules","25% bonus to Medium Hybrid Turret optimal range and falloff"]}],
   },
   {
     id: "599" as ShipProfile["id"],
@@ -1650,7 +1650,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.3, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.55, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Frigate bonuses (per skill level)","lines":["5% bonus to Core and Combat Scanner Probe deviation","15% reduction in warp drive capacitor need"]},{"header":"Covert Ops bonuses (per skill level)","lines":["20% reduction in Cloaking Devices CPU requirement","10% bonus to Core and Combat Scanner Probe strength","10% reduction in time required for Survey Probe scans"]},{"header":"Role Bonus","lines":["10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","60% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Caldari Frigate bonuses (per skill level)","lines":["5% bonus to Core and Combat Scanner Probe deviation","15% reduction in warp drive capacitor need"]},{"header":"Covert Ops bonuses (per skill level)","lines":["20% reduction in Cloaking Devices CPU requirement","10% bonus to Core and Combat Scanner Probe strength","10% reduction in time required for Survey Probe scans"]},{"header":"Role Bonus","lines":["10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","60% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "42246" as ShipProfile["id"],
@@ -1680,7 +1680,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.6 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.3 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Covert Ops bonuses (per skill level)","lines":["10% bonus to Core and Combat Scanner Probe Strength","25% bonus to Energy Nosferatu and Energy Neutralizer falloff range"]},{"header":"Minmatar Frigate bonuses (per skill level)","lines":["20% bonus to Stasis Webifier range","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Amarr Frigate bonuses (per skill level)","lines":["20% bonus to Energy Nosferatu and Energy Neutralizer drain amount","25% bonus to Small Energy Turret falloff range"]},{"header":"Role Bonus","lines":["400% bonus to Small Energy Turret damage","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level"]}],
+    bonuses: [{"header":"Covert Ops bonuses (per skill level)","lines":["10% bonus to Core and Combat Scanner Probe Strength","25% bonus to Energy Nosferatu and Energy Neutralizer falloff range"]},{"header":"Minmatar Frigate bonuses (per skill level)","lines":["20% bonus to Stasis Webifier range","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Amarr Frigate bonuses (per skill level)","lines":["20% bonus to Energy Nosferatu and Energy Neutralizer drain amount","25% bonus to Small Energy Turret falloff range"]},{"header":"Role Bonus","lines":["400% bonus to Small Energy Turret damage","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level"]}],
   },
   {
     id: "45647" as ShipProfile["id"],
@@ -1710,7 +1710,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Dreadnought bonuses (per skill level)","lines":["4% bonus to all shield resistances"]},{"header":"Gallente Dreadnought bonuses (per skill level)","lines":["5% bonus to thermal and kinetic XL Cruise, XL Torpedo and Torpedo damage"]},{"header":"Role Bonus","lines":["• Can fit Siege Modules","• Can launch Light Fighters","100% bonus to Fighter damage and hitpoints","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Caldari Dreadnought bonuses (per skill level)","lines":["4% bonus to all shield resistances"]},{"header":"Gallente Dreadnought bonuses (per skill level)","lines":["5% bonus to thermal and kinetic XL Cruise, XL Torpedo and Torpedo damage"]},{"header":"Role Bonus","lines":["• Can fit Siege Modules","• Can launch Light Fighters","100% bonus to Fighter damage and hitpoints","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "17619" as ShipProfile["id"],
@@ -1800,7 +1800,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.8, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Frigate bonuses (per skill level)","lines":["4% bonus to all shield resistances"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["5% bonus to Light Missile and Rocket Launcher rate of fire"]},{"header":"Role Bonus","lines":["115% bonus to kinetic Light Missile and Rocket damage","50% reduction in module heat damage amount taken•  Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Caldari Frigate bonuses (per skill level)","lines":["4% bonus to all shield resistances"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["5% bonus to Light Missile and Rocket Launcher rate of fire"]},{"header":"Role Bonus","lines":["115% bonus to kinetic Light Missile and Rocket damage","50% reduction in module heat damage amount taken","•  Can fit Assault Damage Controls"]}],
   },
   {
     id: "621" as ShipProfile["id"],
@@ -1980,7 +1980,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Shield Booster amount"]},{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["5% bonus to ship Stasis Webifier resistance"]},{"header":"Role Bonus","lines":["125% bonus to Medium Projectile Turret and Heavy Assault Missile damage","• can use Command Burst module","50% bonus to Command Burst area of effect range","25% bonus to Medium Projectile Turret optimal range and falloff and Missile velocity","• can fit one Medium Breacher Pod Launcher","• can fit Covert Ops Cloaking Device","100% reduction in Cloaking Devices CPU requirement","• cloak reactivation delay reduced to 15 seconds","• immune to all cargo scanners"]}],
+    bonuses: [{"header":"Caldari Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Shield Booster amount"]},{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["5% bonus to ship Stasis Webifier resistance"]},{"header":"Role Bonus","lines":["125% bonus to Medium Projectile Turret and Heavy Assault Missile damage","• can use Command Burst module","50% bonus to Command Burst area of effect range","25% bonus to Medium Projectile Turret optimal range and falloff and Missile velocity","• can fit one Medium Breacher Pod Launcher","• can fit Covert Ops Cloaking Device","100% reduction in Cloaking Devices CPU requirement","• cloak reactivation delay reduced to 15 seconds","• immune to all cargo scanners"]}],
   },
   {
     id: "11993" as ShipProfile["id"],
@@ -2010,7 +2010,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.8, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.8625, kinetic: 0.625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["7.5% bonus to Shield Booster amount","5% bonus to Rapid Light Missile, Heavy Missile and Heavy Assault Missile Launcher Rate of Fire"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["5% bonus to kinetic Light Missile, Heavy Missile and Heavy Assault Missile damage","20% bonus to Heavy Assault Missile max velocity"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["7.5% bonus to Shield Booster amount","5% bonus to Rapid Light Missile, Heavy Missile and Heavy Assault Missile Launcher Rate of Fire"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["5% bonus to kinetic Light Missile, Heavy Missile and Heavy Assault Missile damage","20% bonus to Heavy Assault Missile max velocity"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "33675" as ShipProfile["id"],
@@ -2040,7 +2040,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.55, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.725, kinetic: 0.4375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["20% bonus to kinetic and thermal missile damage"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["10% reduction in ECM Target Jammer activation cost"]},{"header":"Recon Ships bonuses (per skill level)","lines":["30% bonus to ECM Target Jammer strength","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["600% bonus to Medium Combat Drone damage and hitpoints","80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator• Cloak reactivation delay reduced to 5 seconds"]}],
+    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["20% bonus to kinetic and thermal missile damage"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["10% reduction in ECM Target Jammer activation cost"]},{"header":"Recon Ships bonuses (per skill level)","lines":["30% bonus to ECM Target Jammer strength","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["600% bonus to Medium Combat Drone damage and hitpoints","80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds"]}],
   },
   {
     id: "20185" as ShipProfile["id"],
@@ -2100,7 +2100,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.1, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.7, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Frigate bonuses (per skill level)","lines":["5% bonus to ship max velocity when using Cloaking Devices","15% reduction in warp drive capacitor need"]},{"header":"Covert Ops bonuses (per skill level)","lines":["20% reduction in Cloaking Devices CPU requirement","10% bonus to Core and Combat Scanner Probe strength","10% reduction in Survey Probe flight time"]},{"header":"Role Bonus","lines":["10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","60% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Minmatar Frigate bonuses (per skill level)","lines":["5% bonus to ship max velocity when using Cloaking Devices","15% reduction in warp drive capacitor need"]},{"header":"Covert Ops bonuses (per skill level)","lines":["20% reduction in Cloaking Devices CPU requirement","10% bonus to Core and Combat Scanner Probe strength","10% reduction in Survey Probe flight time"]},{"header":"Role Bonus","lines":["10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","60% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "42243" as ShipProfile["id"],
@@ -2130,7 +2130,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Dreadnought bonuses (per skill level)","lines":["15% bonus to Energy Nosferatu and Energy Neutralizer drain amount"]},{"header":"Minmatar Dreadnought bonuses (per skill level)","lines":["20% bonus to Stasis Webifier optimal range"]},{"header":"Role Bonus","lines":["• Can fit Siege Modules","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level","• Capital Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of their signature redius","37.5% bonus to Capital Energy Turret damage","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Amarr Dreadnought bonuses (per skill level)","lines":["15% bonus to Energy Nosferatu and Energy Neutralizer drain amount"]},{"header":"Minmatar Dreadnought bonuses (per skill level)","lines":["20% bonus to Stasis Webifier optimal range"]},{"header":"Role Bonus","lines":["• Can fit Siege Modules","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level","• Capital Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of their signature redius","37.5% bonus to Capital Energy Turret damage","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "23915" as ShipProfile["id"],
@@ -2160,7 +2160,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Carrier bonuses (per skill level)","lines":["4% bonus to all shield resistances","5% bonus to Scarab Support Fighter ECM optimal range","5% bonus to Scarab Support Fighter ECM strenth","1% bonus to Shield Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Capital Micro Jump Drive and Capital Micro Jump Field Generator","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump Capable","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Caldari Carrier bonuses (per skill level)","lines":["4% bonus to all shield resistances","5% bonus to Scarab Support Fighter ECM optimal range","5% bonus to Scarab Support Fighter ECM strenth","1% bonus to Shield Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Capital Micro Jump Drive and Capital Micro Jump Field Generator","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump Capable","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "33397" as ShipProfile["id"],
@@ -2190,7 +2190,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.5, thermal: 0.4, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.8, thermal: 0.5125, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Covert Ops bonuses (per skill level)","lines":["20% reduction in Cloaking Devices CPU requirement","10% bonus to Core and Combat Scanner Probe strength"]},{"header":"Gallente Frigate bonuses (per skill level)","lines":["15% bonus to Small Projectile Turret tracking speed"]},{"header":"Minmatar Frigate bonuses (per skill level)","lines":["10% bonus to Small Projectile Turret optimal range and falloff"]},{"header":"Role Bonus","lines":["200% bonus to Small Projectile Turret damage","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","140% bonus to warp speed and warp acceleration","75% reduction in projection weapon reload time"]}],
+    bonuses: [{"header":"Covert Ops bonuses (per skill level)","lines":["20% reduction in Cloaking Devices CPU requirement","10% bonus to Core and Combat Scanner Probe strength"]},{"header":"Gallente Frigate bonuses (per skill level)","lines":["15% bonus to Small Projectile Turret tracking speed"]},{"header":"Minmatar Frigate bonuses (per skill level)","lines":["10% bonus to Small Projectile Turret optimal range and falloff"]},{"header":"Role Bonus","lines":["200% bonus to Small Projectile Turret damage","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","140% bonus to warp speed and warp acceleration","75% reduction in projection weapon reload time"]}],
   },
   {
     id: "27299" as ShipProfile["id"],
@@ -2370,7 +2370,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.75, thermal: 0.6, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.9, thermal: 0.675, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["5% bonus to Heavy Missile and Heavy Assault Missile Launcher rate of fire","10% bonus to Heavy Missile and Heavy Assault Missile velocity","3% bonus to Shield Command and Skirmish Command burst strength and duration"]},{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Heavy Missile and Heavy Assault Missile Launcher rate of fire","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","100% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["5% bonus to Heavy Missile and Heavy Assault Missile Launcher rate of fire","10% bonus to Heavy Missile and Heavy Assault Missile velocity","3% bonus to Shield Command and Skirmish Command burst strength and duration"]},{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Heavy Missile and Heavy Assault Missile Launcher rate of fire","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","100% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "85229" as ShipProfile["id"],
@@ -2400,7 +2400,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
     armorResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Cruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Energy Turret damage","10% bonus to Medium Energy Turret tracking speed"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["10% bonus to Rapid Light Missile, Heavy Missile and Heavy Assault Missile Launcher rate of fire","10% bonus to Heavy Missile and Heavy Assault Missile flight time","4% bonus to all shield resistances"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Hybrid Turret damage","7.5% bonus to Medium Hybrid Turret tracking speed"]},{"header":"Minmater Cruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Projectile Turret damage","10% bonus to Medium Projectile Turret tracking speed"]},{"header":"Recon Ships bonuses (per skill level)","lines":["15% bonus to warp speed and acceleration"]},{"header":"Role Bonus","lines":["100% reduction in Cloaking Devices cpu requirement","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","50% reduction in Cynosural Field Generator duration","100% reduction in Cynosural Field Generator liquid ozone consumtion","• Can use Medium Micro Jump Drive modules","99%reduction in powergrid and cpu requirements for Micro Jump Drive modules","150% bonus to Medium Combat Drone damage and hitpoints","• Stasis Webifier optimal range increased by a percentage equal to -7.5x pilot negative security status with a floor of 0% and a ceiling of 75%","Warp Scrambler  and Warp Disruptor optimal range increased by a percentage equal to -3.75x pilot negative security status with a floor of 0% and a ceiling of 37.5%"]}],
+    bonuses: [{"header":"Amarr Cruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Energy Turret damage","10% bonus to Medium Energy Turret tracking speed"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["10% bonus to Rapid Light Missile, Heavy Missile and Heavy Assault Missile Launcher rate of fire","10% bonus to Heavy Missile and Heavy Assault Missile flight time","4% bonus to all shield resistances"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Hybrid Turret damage","7.5% bonus to Medium Hybrid Turret tracking speed"]},{"header":"Minmater Cruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Projectile Turret damage","10% bonus to Medium Projectile Turret tracking speed"]},{"header":"Recon Ships bonuses (per skill level)","lines":["15% bonus to warp speed and acceleration"]},{"header":"Role Bonus","lines":["100% reduction in Cloaking Devices cpu requirement","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","50% reduction in Cynosural Field Generator duration","100% reduction in Cynosural Field Generator liquid ozone consumtion","• Can use Medium Micro Jump Drive modules","99%reduction in powergrid and cpu requirements for Micro Jump Drive modules","150% bonus to Medium Combat Drone damage and hitpoints","• Stasis Webifier optimal range increased by a percentage equal to -7.5x pilot negative security status with a floor of 0% and a ceiling of 75%","Warp Scrambler  and Warp Disruptor optimal range increased by a percentage equal to -3.75x pilot negative security status with a floor of 0% and a ceiling of 37.5%"]}],
   },
   {
     id: "16236" as ShipProfile["id"],
@@ -2520,7 +2520,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.55, explosive: 0.75 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.4375, explosive: 0.6 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Tactical Destroyer bonuses (per skill level)","lines":["7.5% bonus to Small Energy Turret damage","10% reduction in Small Energy Turret activation cost","5% reduction in module heat damage amount taken"]},{"header":"Misc bonus","lines":["+33% Small Energy Turret Damage","95% reduction in Scan Probe Launcher CPU requirements","• Additional bonuses are available while one of three Tactical Destroyer Modes are active. Modes may be switched no more than once every 10 seconds.","• Defense Mode","33.3% bonus to all armor resistances while Defense Mode is enabled","33.3% reduction in ship signature radius while Defense Mode is enabled","33.3% bonus to Remote Armor Repairer amount, and reduction in activation cost  while Defense Mode is enabled","• Propulsion Mode","66.6% bonus to Afterburner and Microwarpdrive speed boost while Propulsion Mode is enabled","33.3% bonus to ship inertia modifier while Propulsion Mode is enabled","• Sharpshooter Mode","66.6% bonus to Small Energy Turret optimal range while Sharpshooter Mode is enabled","33.3% bonus to Small Energy Turret damage while Sharpshooter Mode is enabled","100% bonus to sensor strength and targeting range while Sharpshooter Mode is enabled","66.6% increased resistances against hostile Sensor Dampeners and Weapon Disruptors while Sharpshooter Mode is enabled"]}],
+    bonuses: [{"header":"Amarr Tactical Destroyer bonuses (per skill level)","lines":["7.5% bonus to Small Energy Turret damage","10% reduction in Small Energy Turret activation cost","5% reduction in module heat damage amount taken"]},{"header":"Misc bonus","lines":["+33% Small Energy Turret Damage","95% reduction in Scan Probe Launcher CPU requirements","• Additional bonuses are available while one of three Tactical Destroyer Modes are active. Modes may be switched no more than once every 10 seconds."]},{"header":"Defense Mode","lines":["33.3% bonus to all armor resistances while Defense Mode is enabled","33.3% reduction in ship signature radius while Defense Mode is enabled","33.3% bonus to Remote Armor Repairer amount, and reduction in activation cost  while Defense Mode is enabled"]},{"header":"Propulsion Mode","lines":["66.6% bonus to Afterburner and Microwarpdrive speed boost while Propulsion Mode is enabled","33.3% bonus to ship inertia modifier while Propulsion Mode is enabled"]},{"header":"Sharpshooter Mode","lines":["66.6% bonus to Small Energy Turret optimal range while Sharpshooter Mode is enabled","33.3% bonus to Small Energy Turret damage while Sharpshooter Mode is enabled","100% bonus to sensor strength and targeting range while Sharpshooter Mode is enabled","66.6% increased resistances against hostile Sensor Dampeners and Weapon Disruptors while Sharpshooter Mode is enabled"]}],
   },
   {
     id: "32876" as ShipProfile["id"],
@@ -2730,7 +2730,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.8, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.8625, kinetic: 0.625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Hauler bonuses (per skill level)","lines":["5% bonus to ship cargo capacity","5% bonus to ship max velocity"]},{"header":"Transport Ships bonuses (per skill level)","lines":["5% bonus to warp speed and warp acceleration","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","• Immune to all Cargo Scanners","90% reduction to effective distance traveled for jump fatigue","75% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Caldari Hauler bonuses (per skill level)","lines":["5% bonus to ship cargo capacity","5% bonus to ship max velocity"]},{"header":"Transport Ships bonuses (per skill level)","lines":["5% bonus to warp speed and warp acceleration","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","• Immune to all Cargo Scanners","90% reduction to effective distance traveled for jump fatigue","75% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "11176" as ShipProfile["id"],
@@ -2850,7 +2850,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Frigate bonuses (per skill level)","lines":["20% bonus to Stasis Webifier range"]},{"header":"Amarr Frigate bonuses (per skill level)","lines":["15% bonus to Energy Nosferatu and Energy Neutralizer drain amount","20% bonus to Energy Nosferatu and Energy Neutralizer optimal range","10% bonus to Energy Nosferatu and Energy Neutralizer fallof range"]},{"header":"Role Bonus","lines":["125% bonus to Small Energy Turret damage","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level"]}],
+    bonuses: [{"header":"Minmatar Frigate bonuses (per skill level)","lines":["20% bonus to Stasis Webifier range"]},{"header":"Amarr Frigate bonuses (per skill level)","lines":["15% bonus to Energy Nosferatu and Energy Neutralizer drain amount","20% bonus to Energy Nosferatu and Energy Neutralizer optimal range","10% bonus to Energy Nosferatu and Energy Neutralizer fallof range"]},{"header":"Role Bonus","lines":["125% bonus to Small Energy Turret damage","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level"]}],
   },
   {
     id: "11184" as ShipProfile["id"],
@@ -2910,7 +2910,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.625, explosive: 0.8125 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.53125, explosive: 0.7 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Cruiser bonuses (per skill level)","lines":["7.5% bonus to Weapon Disruptor effectiveness","10% bonus to Drone hitpoints and damage"]},{"header":"Recon Ships bonuses (per skill level)","lines":["40% bonus to Energy Nosferatu and Energy Neutralizer optimal range","20% bonus to Energy Nosferatu and Energy Neutralizer falloff range","20% bonus to Energy Nosferatu and Energy Neutralizer drain amount","Role Bonus:• Cannot be detected by directional scanners"]}],
+    bonuses: [{"header":"Amarr Cruiser bonuses (per skill level)","lines":["7.5% bonus to Weapon Disruptor effectiveness","10% bonus to Drone hitpoints and damage"]},{"header":"Recon Ships bonuses (per skill level)","lines":["40% bonus to Energy Nosferatu and Energy Neutralizer optimal range","20% bonus to Energy Nosferatu and Energy Neutralizer falloff range","20% bonus to Energy Nosferatu and Energy Neutralizer drain amount"]},{"header":"Role Bonus","lines":["• Cannot be detected by directional scanners"]}],
   },
   {
     id: "77726" as ShipProfile["id"],
@@ -2940,7 +2940,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.9, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.69, kinetic: 0.85, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret Falloff","7.5% bonus to Medium Hybrid Turret tracking speed"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["20% bonus to Medium Hybrid Turret damage","10% bonus to Armor Repairer amount","25% bonus to Warp scrambler and Warp Disruptor optimal range"]},{"header":"Role Bonus","lines":["30% bonus to ship max velocity","100% reduction in Armor Plates mass penalty","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret Falloff","7.5% bonus to Medium Hybrid Turret tracking speed"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["20% bonus to Medium Hybrid Turret damage","10% bonus to Armor Repairer amount","25% bonus to Warp scrambler and Warp Disruptor optimal range"]},{"header":"Role Bonus","lines":["30% bonus to ship max velocity","100% reduction in Armor Plates mass penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "16231" as ShipProfile["id"],
@@ -2970,7 +2970,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Heavy Missile and Heavy Assault Missile Launcher rate of fire","7.5% bonus to Shield Booster amount"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","25% bonus to Missile velocity","50% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Heavy Missile and Heavy Assault Missile Launcher rate of fire","7.5% bonus to Shield Booster amount"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","25% bonus to Missile velocity","50% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "72811" as ShipProfile["id"],
@@ -3000,7 +3000,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Heavy Missile and Heavy Assault Missile Launcher rate of fire","5% bonus to Heavy Missile and Heavy Assault Missile explosion velocity","3% reduction to ship signature radius"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","50% bonus to Command Burst area of effect range","25% bonus to Missile velocity"]}],
+    bonuses: [{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Heavy Missile and Heavy Assault Missile Launcher rate of fire","5% bonus to Heavy Missile and Heavy Assault Missile explosion velocity","3% reduction to ship signature radius"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","50% bonus to Command Burst area of effect range","25% bonus to Missile velocity"]}],
   },
   {
     id: "17720" as ShipProfile["id"],
@@ -3060,7 +3060,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Carrier bonuses (per skill level)","lines":["30% bonus to Energy Nosferatu drain amount, optimal range and falloff","20% bonus to Capacitor Booster amount"]},{"header":"Minmatar Carrier bonuses (per skill level)","lines":["5% bonus to Capital Remote Armor Repairer cycle time","5% bonus to Armor Repair amount"]},{"header":"Role Bonus","lines":["• Can fit Triage module","• Can use two Command Burst modules","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level","90% reduction in CPU requirements for Command Burst modules","200% bonus to Logistics Drone transfer amount","90% reduction in Remote Armor Repairer powergrid requirement","90% reduction in Energy Nosferatu CPU requirement","200% bonus to Command Burst area of effect range","• Can only online one Capacitor Booster module","5x penalty to Entosis Link cycle time"]}],
+    bonuses: [{"header":"Amarr Carrier bonuses (per skill level)","lines":["30% bonus to Energy Nosferatu drain amount, optimal range and falloff","20% bonus to Capacitor Booster amount"]},{"header":"Minmatar Carrier bonuses (per skill level)","lines":["5% bonus to Capital Remote Armor Repairer cycle time","5% bonus to Armor Repair amount"]},{"header":"Role Bonus","lines":["• Can fit Triage module","• Can use two Command Burst modules","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level","90% reduction in CPU requirements for Command Burst modules","200% bonus to Logistics Drone transfer amount","90% reduction in Remote Armor Repairer powergrid requirement","90% reduction in Energy Nosferatu CPU requirement","200% bonus to Command Burst area of effect range","• Can only online one Capacitor Booster module","5x penalty to Entosis Link cycle time"]}],
   },
   {
     id: "47269" as ShipProfile["id"],
@@ -3120,7 +3120,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.7, explosive: 0.875 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.625, explosive: 0.8 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["10% bonus to ship armor hitpoints","10% bonus to Heavy Missile and Heavy Assault Missile damage","3% bonus to Armored Command and Information Command burst strength and duration"]},{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["10% bonus to Heavy Missile and Heavy Assault Missile max velocity","4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","100% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["10% bonus to ship armor hitpoints","10% bonus to Heavy Missile and Heavy Assault Missile damage","3% bonus to Armored Command and Information Command burst strength and duration"]},{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["10% bonus to Heavy Missile and Heavy Assault Missile max velocity","4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","100% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "17928" as ShipProfile["id"],
@@ -3210,7 +3210,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.85, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.675, kinetic: 0.8375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret falloff","7.5% bonus to Medium Hybrid Turret damage"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret damage","7.5% bonus to Armor Repairer amount"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret falloff","7.5% bonus to Medium Hybrid Turret damage"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret damage","7.5% bonus to Armor Repairer amount"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "81046" as ShipProfile["id"],
@@ -3240,7 +3240,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.2, thermal: 0.8, kinetic: 0.5, explosive: 0.75 },
     armorResists: { em: 0.5, thermal: 0.8625, kinetic: 0.25, explosive: 0.55 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Upwell Hauler bonuses (per skill level)","lines":["10% bonus to infrastructure hold capacity","15% bonus to missile damage"]},{"header":"Transport Ships bonuses (per skill level)","lines":["5% bonus to warp speed and warp acceleration","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["90% reduction in heavy missile launcher, heavy assault missile launcher and rapid light missile launcher powergrid and CPU fitting requirements","90% reduction to effective distance traveled for jump fatigue","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","• Immune to all Cargo Scanners","• Can link to Orbital Skyhook reagent silos bypassing the normal ship restrictions","75% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Upwell Hauler bonuses (per skill level)","lines":["10% bonus to infrastructure hold capacity","15% bonus to missile damage"]},{"header":"Transport Ships bonuses (per skill level)","lines":["5% bonus to warp speed and warp acceleration","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["90% reduction in heavy missile launcher, heavy assault missile launcher and rapid light missile launcher powergrid and CPU fitting requirements","90% reduction to effective distance traveled for jump fatigue","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","• Immune to all Cargo Scanners","• Can link to Orbital Skyhook reagent silos bypassing the normal ship restrictions","75% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "12017" as ShipProfile["id"],
@@ -3270,7 +3270,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.7, explosive: 0.875 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.625, explosive: 0.8 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Cruiser bonuses (per skill level)","lines":["10% reduction in Medium Energy Turret activation cost","5% bonus to Medium Energy Turret damage"]},{"header":"Heavy Interdiction Cruisers bonuses (per skill level)","lines":["10% bonus to Medium Energy Turret optimal range","5% bonus to Warp Disruption Field Generator scramble range","Role Bonus:• Can fit Warp Disruption Field Generator and Cynosural Field Generator modules","20% bonus to all armor resistances"]}],
+    bonuses: [{"header":"Amarr Cruiser bonuses (per skill level)","lines":["10% reduction in Medium Energy Turret activation cost","5% bonus to Medium Energy Turret damage"]},{"header":"Heavy Interdiction Cruisers bonuses (per skill level)","lines":["10% bonus to Medium Energy Turret optimal range","5% bonus to Warp Disruption Field Generator scramble range"]},{"header":"Role Bonus","lines":["• Can fit Warp Disruption Field Generator and Cynosural Field Generator modules","20% bonus to all armor resistances"]}],
   },
   {
     id: "645" as ShipProfile["id"],
@@ -3420,7 +3420,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Battlecruiser bonuses (per skill level)","lines":["4% bonus to all shield resistances","10% bonus to kinetic Heavy Missile and Heavy Assault Missile damage","Role Bonus:• Can use one Command Burst module","25% bonus to Missile velocity","50% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Caldari Battlecruiser bonuses (per skill level)","lines":["4% bonus to all shield resistances","10% bonus to kinetic Heavy Missile and Heavy Assault Missile damage"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","25% bonus to Missile velocity","50% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "33153" as ShipProfile["id"],
@@ -3450,7 +3450,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Battlecruiser skill bonus per level","lines":["10% bonus to Heavy Missile and Heavy Assault Missile damage","5% bonus to Heavy Missile and Heavy Assault Missile explosion radius"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","50% bonus to Command Burst area of effect range","25% bonus to Missile velocity"]}],
+    bonuses: [{"header":"Caldari Battlecruiser skill bonus per level","lines":["10% bonus to Heavy Missile and Heavy Assault Missile damage","5% bonus to Heavy Missile and Heavy Assault Missile explosion radius"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","50% bonus to Command Burst area of effect range","25% bonus to Missile velocity"]}],
   },
   {
     id: "17932" as ShipProfile["id"],
@@ -3510,7 +3510,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.5, kinetic: 0.4, explosive: 0.85 },
     armorResists: { em: 0.5, thermal: 0.75, kinetic: 0.25, explosive: 0.65 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Command Destroyers bonuses (per skill level)","lines":["2% bonus to Skirmish Command and Information Command Burst effect strength and duration","5% reduction in Micro Jump Field Generator spool up time"]},{"header":"Precursor Destroyer bonuses (per skill level)","lines":["30% bonus to Light Entropic Disintegrator optimal range","20% bonus to Light Entropic Disintegrator damage"]},{"header":"Role Bonus","lines":["•  Can use one Command Burst module","•  Can fit Micro Jump Field Generators","50% reduction in reactivation delay for Defender Launcher","95% reduction in powergrid requirements for Command Bursts","50% reduction in Microwarpdrive signature radius penalty","100% bonus to Remote Armor Repairer range","50% reduced Remote Armor Repairer capacitor need","50% reduced Energy Neutralizer capacitor need","50% reduced Smart Bomb capacitor need"]}],
+    bonuses: [{"header":"Command Destroyers bonuses (per skill level)","lines":["2% bonus to Skirmish Command and Information Command Burst effect strength and duration","5% reduction in Micro Jump Field Generator spool up time"]},{"header":"Precursor Destroyer bonuses (per skill level)","lines":["30% bonus to Light Entropic Disintegrator optimal range","20% bonus to Light Entropic Disintegrator damage"]},{"header":"Role Bonus","lines":["•  Can use one Command Burst module","•  Can fit Micro Jump Field Generators","50% reduction in reactivation delay for Defender Launcher","95% reduction in powergrid requirements for Command Bursts","50% reduction in Microwarpdrive signature radius penalty","100% bonus to Remote Armor Repairer range","50% reduced Remote Armor Repairer capacitor need","50% reduced Energy Neutralizer capacitor need","50% reduced Smart Bomb capacitor need"]}],
   },
   {
     id: "49711" as ShipProfile["id"],
@@ -3540,7 +3540,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Precursor Battlecruiser bonuses (per skill level)","lines":["10% bonus to Heavy Entropic Disintegrator damage","4% bonus to all armor resistances","Role Bonus:• Can use one Command Burst module","50% bonus to Command Burst area of effect","25% bonus to Heavy Entropic Disintegrator optimal range","50% reduced Energy Neutralizer capacitor need","50% reduced Remote Armor Repairer capacitor need","50% reduced Smart Bomb capacitor need","100% bonus to Remote Armor Repairer range"]}],
+    bonuses: [{"header":"Precursor Battlecruiser bonuses (per skill level)","lines":["10% bonus to Heavy Entropic Disintegrator damage","4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","50% bonus to Command Burst area of effect","25% bonus to Heavy Entropic Disintegrator optimal range","50% reduced Energy Neutralizer capacitor need","50% reduced Remote Armor Repairer capacitor need","50% reduced Smart Bomb capacitor need","100% bonus to Remote Armor Repairer range"]}],
   },
   {
     id: "12011" as ShipProfile["id"],
@@ -3570,7 +3570,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.8, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.8625, kinetic: 0.625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret tracking speed","5% bonus to Medium Hybrid Turret damage"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Hybrid Turret Optimal range","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret tracking speed","5% bonus to Medium Hybrid Turret damage"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Hybrid Turret Optimal range","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "3532" as ShipProfile["id"],
@@ -3600,7 +3600,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"","lines":["Role Bonus:• Can fit Purloined Sansha Data Analyzer"]}],
+    bonuses: [{"header":"Role Bonus","lines":["• Can fit Purloined Sansha Data Analyzer"]}],
   },
   {
     id: "617" as ShipProfile["id"],
@@ -3660,7 +3660,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Mining Frigate bonuses (per skill level)","lines":["5% reduction in Ice Harvesting duration","5% bonus to Ore Mining yield"]},{"header":"Expedition Frigates bonuses (per skill level)","lines":["5% reduction in Ice Harvesting duration","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["300% bonus to Ore Mining yield","50% reduction in Ice Harvesting duration","50% reduction in Cloaking Devices CPU requirement","• Cloak reactivation delay and targeting delay reduced to 5 seconds","• No penalty to ship max velocity when using Cloaking Devices"]}],
+    bonuses: [{"header":"Mining Frigate bonuses (per skill level)","lines":["5% reduction in Ice Harvesting duration","5% bonus to Ore Mining yield"]},{"header":"Expedition Frigates bonuses (per skill level)","lines":["5% reduction in Ice Harvesting duration","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["300% bonus to Ore Mining yield","50% reduction in Ice Harvesting duration","50% reduction in Cloaking Devices CPU requirement","• Cloak reactivation delay and targeting delay reduced to 5 seconds","• No penalty to ship max velocity when using Cloaking Devices"]}],
   },
   {
     id: "44995" as ShipProfile["id"],
@@ -3690,7 +3690,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
     armorResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Recon Ships bonuses (per skill level)","lines":["5% bonus to Warp Scrambler and Warp Disruptor optimal range","10% to Stasis Webifier optimal range","10% bonus to warp speed and acceleration"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret damage","7.5% bonus to Medium Hybrid Turret tracking speed"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Projectile Turret rate of fire","10% bonus to Medium Projectile Turret falloff"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["5% bonus to Rapid Light Missile, Heavy Missile and Heavy Assault Missile Launcher rate of fire","10% bonus to Heavy Missile and Heavy Assault Missile flight time"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Energy Turret damage","10% bonus to Medium Energy Turret optimal range"]},{"header":"Role Bonus","lines":["100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration","10% bonus to security status gains from destruction of non-capsuleer pirates while flying this ship","• Armor Repairer and Shield Booster effectiveness increased by a percentage equal to 10x pilot security status, with a floor of 0% and ceiling of 50%"]}],
+    bonuses: [{"header":"Recon Ships bonuses (per skill level)","lines":["5% bonus to Warp Scrambler and Warp Disruptor optimal range","10% to Stasis Webifier optimal range","10% bonus to warp speed and acceleration"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret damage","7.5% bonus to Medium Hybrid Turret tracking speed"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Projectile Turret rate of fire","10% bonus to Medium Projectile Turret falloff"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["5% bonus to Rapid Light Missile, Heavy Missile and Heavy Assault Missile Launcher rate of fire","10% bonus to Heavy Missile and Heavy Assault Missile flight time"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Energy Turret damage","10% bonus to Medium Energy Turret optimal range"]},{"header":"Role Bonus","lines":["100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration","10% bonus to security status gains from destruction of non-capsuleer pirates while flying this ship","• Armor Repairer and Shield Booster effectiveness increased by a percentage equal to 10x pilot security status, with a floor of 0% and ceiling of 50%"]}],
   },
   {
     id: "12044" as ShipProfile["id"],
@@ -3720,7 +3720,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.85, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.675, kinetic: 0.8375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Frigate bonuses (per skill level)","lines":["10% bonus to Small Hybrid Turret damage"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["10% bonus to Small Hybrid Turret optimal range","7.5% bonus to Small Hybrid Turret tracking speed"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Gallente Frigate bonuses (per skill level)","lines":["10% bonus to Small Hybrid Turret damage"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["10% bonus to Small Hybrid Turret optimal range","7.5% bonus to Small Hybrid Turret tracking speed"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "22442" as ShipProfile["id"],
@@ -3750,7 +3750,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.85, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.675, kinetic: 0.8375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["7.5% bonus to Heavy Drone, Medium Drone and Light Drone tracking speed","5% bonus to Sentry Drone tracking speed","5% bonus to Drone optimal range","3% bonus to Armored Command and Skirmish Command burst strength and duration"]},{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Heavy Drone, Medium Drone, and Light Drone hitpoints and damage","5% bonus to Sentry Drone hitpoints and damage","4% bonus to all armor resistances","Role Bonus:• Can use 2 Command Burst modules","100% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["7.5% bonus to Heavy Drone, Medium Drone and Light Drone tracking speed","5% bonus to Sentry Drone tracking speed","5% bonus to Drone optimal range","3% bonus to Armored Command and Skirmish Command burst strength and duration"]},{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Heavy Drone, Medium Drone, and Light Drone hitpoints and damage","5% bonus to Sentry Drone hitpoints and damage","4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","100% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "655" as ShipProfile["id"],
@@ -3810,7 +3810,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Titan bonuses (per skill level)","lines":["180% bonus to Capital Hybrid Turret damage","5% bonus to Capital Hybrid Turret rate of fire","10+ bonus to ship warp core strength","Role Bonus:• Can fit Doomsday devices","• Can fit Jump Portal Generator","• Can fit Clone Vat Bay","• Can use three Command Burst modules","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration","• Can fit one Phenomena Generator module"]}],
+    bonuses: [{"header":"Gallente Titan bonuses (per skill level)","lines":["180% bonus to Capital Hybrid Turret damage","5% bonus to Capital Hybrid Turret rate of fire","10+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Doomsday devices","• Can fit Jump Portal Generator","• Can fit Clone Vat Bay","• Can use three Command Burst modules","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration","• Can fit one Phenomena Generator module"]}],
   },
   {
     id: "22460" as ShipProfile["id"],
@@ -3840,7 +3840,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.4, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.5125, kinetic: 0.675, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Interdictors bonuses (per skill level)","lines":["20% reduction in Armor Plate mass penalty","10% reduction in Microwarpdrive signature radius penalty"]},{"header":"Gallente Destroyer bonuses (per skill level)","lines":["7.5% bonus to Small Hybrid Turret rate of fire","10% bonus to Small Hybrid Turret tracking speed"]},{"header":"Role Bonus","lines":["• Can fit Interdiction Sphere Launcher","25% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Interdictors bonuses (per skill level)","lines":["20% reduction in Armor Plate mass penalty","10% reduction in Microwarpdrive signature radius penalty"]},{"header":"Gallente Destroyer bonuses (per skill level)","lines":["7.5% bonus to Small Hybrid Turret rate of fire","10% bonus to Small Hybrid Turret tracking speed"]},{"header":"Role Bonus","lines":["• Can fit Interdiction Sphere Launcher","25% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "32790" as ShipProfile["id"],
@@ -3870,7 +3870,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.8, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.8625, kinetic: 0.625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Logistics Cruisers bonuses (per skill level)","lines":["17% reduction in Remote Shield Booster and Remote Capacitor Transmitter activation cost","7.5% bonus to Shield Extender hitpoints"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["160% bonus to Remote Capacitor Transmitter range","20% bonus to Logistic Drone transfer amount","62% bonus to Remote Shield Booster optimal range and falloff"]},{"header":"Role Bonus","lines":["50% reduction in Remote Shield Booster CPU requirement","50% reduction in Remote Capacitor Transmitter powergrid requirement","40% reduction in module heat damage amount taken","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator"]}],
+    bonuses: [{"header":"Logistics Cruisers bonuses (per skill level)","lines":["17% reduction in Remote Shield Booster and Remote Capacitor Transmitter activation cost","7.5% bonus to Shield Extender hitpoints"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["160% bonus to Remote Capacitor Transmitter range","20% bonus to Logistic Drone transfer amount","62% bonus to Remote Shield Booster optimal range and falloff"]},{"header":"Role Bonus","lines":["50% reduction in Remote Shield Booster CPU requirement","50% reduction in Remote Capacitor Transmitter powergrid requirement","40% reduction in module heat damage amount taken","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator"]}],
   },
   {
     id: "589" as ShipProfile["id"],
@@ -3990,7 +3990,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.7, kinetic: 0.625, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.79375, kinetic: 0.53125, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret damage","10% reduction in ECM Target Jammer activation cost"]},{"header":"Recon Ships bonuses (per skill level)","lines":["30% bonus to ECM Target Jammer strength","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator• Cloak reactivation delay reduced to 5 seconds"]}],
+    bonuses: [{"header":"Caldari Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret damage","10% reduction in ECM Target Jammer activation cost"]},{"header":"Recon Ships bonuses (per skill level)","lines":["30% bonus to ECM Target Jammer strength","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds"]}],
   },
   {
     id: "17841" as ShipProfile["id"],
@@ -4080,7 +4080,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Battlecruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret damage","10% bonus to Medium Hybrid Turret optimal range","Role Bonus:• Can use one Command Burst module","25% bonus to Medium Hybrid Turret optimal range and falloff","50% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Caldari Battlecruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret damage","10% bonus to Medium Hybrid Turret optimal range"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","25% bonus to Medium Hybrid Turret optimal range and falloff","50% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "72812" as ShipProfile["id"],
@@ -4110,7 +4110,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Hybrid Turret damage","5% bonus to Medium Hybrid Turret tracking speed","7.5% bonus to Shield Booster activation cost","10% reduction in Shield Booster power and CPU requirements"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","50% bonus to Command Burst area of effect range","25% bonus to Medium Hybrid Turret optimal range and falloff"]}],
+    bonuses: [{"header":"Caldari Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Hybrid Turret damage","5% bonus to Medium Hybrid Turret tracking speed","7.5% bonus to Shield Booster activation cost","10% reduction in Shield Booster power and CPU requirements"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","50% bonus to Command Burst area of effect range","25% bonus to Medium Hybrid Turret optimal range and falloff"]}],
   },
   {
     id: "35781" as ShipProfile["id"],
@@ -4140,7 +4140,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.8, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.862, kinetic: 0.625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Heavy Interdicion Cruisers bonuses (per skill level)","lines":["5% bonus to Warp Disruption Field Generator scramble range"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["20% bonus to Afterburner velocity bonus"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Energy Turret tracking speed"]},{"header":"Role Bonus","lines":["250% bonus to Medium Energy Turret damage","20% bonus to all shield resistances","•  Can fit Warp Disruption Field Generator","•  Unaffected by Warp Disruption Field Generator mass &amp; speed effects"]}],
+    bonuses: [{"header":"Heavy Interdicion Cruisers bonuses (per skill level)","lines":["5% bonus to Warp Disruption Field Generator scramble range"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["20% bonus to Afterburner velocity bonus"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Energy Turret tracking speed"]},{"header":"Role Bonus","lines":["250% bonus to Medium Energy Turret damage","20% bonus to all shield resistances","•  Can fit Warp Disruption Field Generator","•  Unaffected by Warp Disruption Field Generator mass &amp; speed effects"]}],
   },
   {
     id: "22464" as ShipProfile["id"],
@@ -4170,7 +4170,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.55, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.725, kinetic: 0.4375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Interdictors bonuses (per skill level)","lines":["15% increased shield hitpoints per level","10% reduction in Microwarpdrive signature radius penalty"]},{"header":"Caldari Destroyer bonuses (per skill level)","lines":["10% bonus to kinetic Light Missile and Rocket damage","10% bonus to Light Missile and Rocket max velocity"]},{"header":"Role Bonus","lines":["• Can fit Interdiction Sphere Launcher","25% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Interdictors bonuses (per skill level)","lines":["15% increased shield hitpoints per level","10% reduction in Microwarpdrive signature radius penalty"]},{"header":"Caldari Destroyer bonuses (per skill level)","lines":["10% bonus to kinetic Light Missile and Rocket damage","10% bonus to Light Missile and Rocket max velocity"]},{"header":"Role Bonus","lines":["• Can fit Interdiction Sphere Launcher","25% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "32207" as ShipProfile["id"],
@@ -4200,7 +4200,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.75, thermal: 0.6, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.9, thermal: 0.675, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Frigate bonuses (per skill level)","lines":["12.5% bonus to Small Projectile Turret damage","30% bonus to Stasis Webifier optimal range"]},{"header":"Role Bonus","lines":["50% bonus to Small Projectile Turret optimal range","50% bonus to Small Projectile Turret falloff","75% reduction in Afterburner and Microwarpdrive activation cost","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Minmatar Frigate bonuses (per skill level)","lines":["12.5% bonus to Small Projectile Turret damage","30% bonus to Stasis Webifier optimal range"]},{"header":"Role Bonus","lines":["50% bonus to Small Projectile Turret optimal range","50% bonus to Small Projectile Turret falloff","75% reduction in Afterburner and Microwarpdrive activation cost","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "92824" as ShipProfile["id"],
@@ -4230,7 +4230,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.7, kinetic: 0.625, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.6, kinetic: 0.75, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Carrier bonuses (per skill level)","lines":["30% bonus to Support Fighter shield hitpoints","10% bonus to Siren Support Fighter warp disruption range","10% bonus to Siren Support Fighter afterburner speed bonus","20% Increase in Conduit Jump capacity"]},{"header":"Command Carrier bonuses (per skill level)","lines":["5% bonus to Armored Command and Skirmish Command burst strenght and duration","5% reduction in Capital Micro Jump Drive and Capital Micro Field Generator spool up"]},{"header":"Role Bonus","lines":["• Can fit Integrated Sensor Array","• Can fit Capital Micro Jump Drive And Capital Micro Jump Field Generator","• Can fit three Command Burst modules","200% bonus to Command Burst area of effect range","20% bonus to Capital Micro","Jump Field Generator maximum ship jump cap","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump capable","5x penalty to Endosis Link duration"]}],
+    bonuses: [{"header":"Gallente Carrier bonuses (per skill level)","lines":["30% bonus to Support Fighter shield hitpoints","10% bonus to Siren Support Fighter warp disruption range","10% bonus to Siren Support Fighter afterburner speed bonus","20% Increase in Conduit Jump capacity"]},{"header":"Command Carrier bonuses (per skill level)","lines":["5% bonus to Armored Command and Skirmish Command burst strenght and duration","5% reduction in Capital Micro Jump Drive and Capital Micro Field Generator spool up"]},{"header":"Role Bonus","lines":["• Can fit Integrated Sensor Array","• Can fit Capital Micro Jump Drive And Capital Micro Jump Field Generator","• Can fit three Command Burst modules","200% bonus to Command Burst area of effect range","20% bonus to Capital Micro","Jump Field Generator maximum ship jump cap","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump capable","5x penalty to Endosis Link duration"]}],
   },
   {
     id: "11129" as ShipProfile["id"],
@@ -4320,7 +4320,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.75, thermal: 0.6, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.9, thermal: 0.675, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"","lines":["Assault Frigate Bonuses per level","7.5% bonus to Light Missile and Rocket Launcher Rate of Fire","7.5% bonus to Light Missile and Rocket Explosion Velocity","Minmatar Frigate Bonuses per level","7.5% bonus to Light Missile and Rocket Damage","7.5% bonus to Shield Booster and Armor Repairer amount","Role Bonuses","500% bonus to Stasis Webifying Drone effectiveness","250% bonus to Stasis Webifying Drone hitpoints","50% bonus to Statis Webifying Drone velocity","50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Assault Frigate Bonuses per level","lines":["7.5% bonus to Light Missile and Rocket Launcher Rate of Fire","7.5% bonus to Light Missile and Rocket Explosion Velocity"]},{"header":"Minmatar Frigate Bonuses per level","lines":["7.5% bonus to Light Missile and Rocket Damage","7.5% bonus to Shield Booster and Armor Repairer amount"]},{"header":"Role Bonuses","lines":["500% bonus to Stasis Webifying Drone effectiveness","250% bonus to Stasis Webifying Drone hitpoints","50% bonus to Statis Webifying Drone velocity","50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "17715" as ShipProfile["id"],
@@ -4380,7 +4380,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.275, thermal: 0.275, kinetic: 0.275, explosive: 0.275 },
     armorResists: { em: 0.325, thermal: 0.325, kinetic: 0.325, explosive: 0.325 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Role Bonus","lines":["20% bonus to Medium Energy Turret, Medium Hybrid Turret and Medium Projectile Turret damage","50% bonus to Command Burst area of effect range","20% bonus to Heavy Missile and Heavy Assault Missile damage","50% bonus to Drone hitpoints and damage","37.5% bonus to Core and Combat Scanner Probe strength","• Can use one Command Burst module"]}],
+    bonuses: [{"header":"Role Bonus","lines":["20% bonus to Medium Energy Turret, Medium Hybrid Turret and Medium Projectile Turret damage","50% bonus to Command Burst area of effect range","20% bonus to Heavy Missile and Heavy Assault Missile damage","50% bonus to Drone hitpoints and damage","37.5% bonus to Core and Combat Scanner Probe strength","• Can use one Command Burst module"]}],
   },
   {
     id: "11940" as ShipProfile["id"],
@@ -4440,7 +4440,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.4, kinetic: 0.475, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.5875, kinetic: 0.34375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Marauders bonuses (per skill level)","lines":["7.5% bonus to Shield Booster amount","10% bonus to Target Painter effectiveness"]},{"header":"Caldari Battleship bonuses (per skill level)","lines":["10% bonus to Cruise Missile and Torpedo max velocity","5% bonus to Cruise Missile and Torpedo explosion velocity"]},{"header":"Role Bonus","lines":["100% bonus to Heavy Missile, Cruise Missile and Torpedo damage","100% bonus to Tractor Beam range and velocity","• Can fit Bastion modules"]}],
+    bonuses: [{"header":"Marauders bonuses (per skill level)","lines":["7.5% bonus to Shield Booster amount","10% bonus to Target Painter effectiveness"]},{"header":"Caldari Battleship bonuses (per skill level)","lines":["10% bonus to Cruise Missile and Torpedo max velocity","5% bonus to Cruise Missile and Torpedo explosion velocity"]},{"header":"Role Bonus","lines":["100% bonus to Heavy Missile, Cruise Missile and Torpedo damage","100% bonus to Tractor Beam range and velocity","• Can fit Bastion modules"]}],
   },
   {
     id: "21097" as ShipProfile["id"],
@@ -4590,7 +4590,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret damage","• Can deploy 1 additional drone"]}],
+    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret damage","• Can deploy 1 additional drone"]}],
   },
   {
     id: "21628" as ShipProfile["id"],
@@ -4650,7 +4650,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["10% reduction in Medium Energy Turret activation cost","10% bonus to Medium Energy Turret damage","Role Bonus:• Can use one Command Burst module","25% bonus to Medium Energy Turret optimal range and falloff","50% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["10% reduction in Medium Energy Turret activation cost","10% bonus to Medium Energy Turret damage"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","25% bonus to Medium Energy Turret optimal range and falloff","50% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "33155" as ShipProfile["id"],
@@ -4680,7 +4680,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Energy Turret tracking speed","10% bonus to Medium Energy Turret damage","10% bonus to Medium Energy Turret activation cost"]},{"header":"Role Bonus","lines":["• Can fit Warfare Link modules","25% bonus to Medium Energy Turret optimal range and falloff"]}],
+    bonuses: [{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Energy Turret tracking speed","10% bonus to Medium Energy Turret damage","10% bonus to Medium Energy Turret activation cost"]},{"header":"Role Bonus","lines":["• Can fit Warfare Link modules","25% bonus to Medium Energy Turret optimal range and falloff"]}],
   },
   {
     id: "11381" as ShipProfile["id"],
@@ -4710,7 +4710,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.8, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.8625, kinetic: 0.625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Frigate bonuses (per skill level)","lines":["10% bonus to Small Hybrid Turret optimal range","4% bonus to all shield resistances"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["10% bonus to Small Hybrid Turret optimal range","5% bonus to Small Hybrid Turret damage"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Caldari Frigate bonuses (per skill level)","lines":["10% bonus to Small Hybrid Turret optimal range","4% bonus to all shield resistances"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["10% bonus to Small Hybrid Turret optimal range","5% bonus to Small Hybrid Turret damage"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "11379" as ShipProfile["id"],
@@ -4740,7 +4740,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.8, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.8625, kinetic: 0.625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Frigate bonuses (per skill level)","lines":["10% bonus to kinetic Light Missile and Rocket damage","5% bonus to Light Missile and Rocket Launcher rate of fire"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["10% bonus to Light Missile and Rocket max velocity","7.5% bonus to Shield Booster amount"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Caldari Frigate bonuses (per skill level)","lines":["10% bonus to kinetic Light Missile and Rocket damage","5% bonus to Light Missile and Rocket Launcher rate of fire"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["10% bonus to Light Missile and Rocket max velocity","7.5% bonus to Shield Booster amount"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "35683" as ShipProfile["id"],
@@ -4770,7 +4770,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.4, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.5125, kinetic: 0.675, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Tactical Destroyer Bonuses Per Level","lines":["3% bonus to Small Hybrid Turret rate of fire","7.5% bonus to Small Hybrid Turret tracking speed","5% reduction module in heat damage amount taken"]},{"header":"Misc Bonus","lines":["33% bonus to Small Hybrid Turret damage","95% reduction in Scan Probe Launcher CPU requirements","• Additional bonuses are available when one of three Tactical Destroyer Modes are active. Modes may be changed no more than once every 10 seconds.","• Defense Mode","33.3% bonus to all armor and hull resistances while Defense Mode is enabled","33.3% reduction to armor repairer duration while Defense Mode is active","• Propulsion Mode","66.6% bonus to Microwarpdrive speed boost and reduction in Microwarpdrive capacitor use while Propulsion Mode is enabled","66.6% bonus to ship inertia modifier while Propulsion Mode is enabled","• Sharpshooter Mode","66.6% bonus to Small Hybrid Turret optimal range while Sharpshooter Mode is enabled","33.3% bonus to Small Hybrid Turret damage while Sharpshooter Mode is enabled","100% bonus to sensor strength and targeting range while Sharpshooter Mode is enabled","66.6% increased resistances against hostile Sensor Dampeners and Weapon Disruptors while Sharpshooter Mode is enabled"]}],
+    bonuses: [{"header":"Gallente Tactical Destroyer Bonuses Per Level","lines":["3% bonus to Small Hybrid Turret rate of fire","7.5% bonus to Small Hybrid Turret tracking speed","5% reduction module in heat damage amount taken"]},{"header":"Misc Bonus","lines":["33% bonus to Small Hybrid Turret damage","95% reduction in Scan Probe Launcher CPU requirements","• Additional bonuses are available when one of three Tactical Destroyer Modes are active. Modes may be changed no more than once every 10 seconds."]},{"header":"Defense Mode","lines":["33.3% bonus to all armor and hull resistances while Defense Mode is enabled","33.3% reduction to armor repairer duration while Defense Mode is active"]},{"header":"Propulsion Mode","lines":["66.6% bonus to Microwarpdrive speed boost and reduction in Microwarpdrive capacitor use while Propulsion Mode is enabled","66.6% bonus to ship inertia modifier while Propulsion Mode is enabled"]},{"header":"Sharpshooter Mode","lines":["66.6% bonus to Small Hybrid Turret optimal range while Sharpshooter Mode is enabled","33.3% bonus to Small Hybrid Turret damage while Sharpshooter Mode is enabled","100% bonus to sensor strength and targeting range while Sharpshooter Mode is enabled","66.6% increased resistances against hostile Sensor Dampeners and Weapon Disruptors while Sharpshooter Mode is enabled"]}],
   },
   {
     id: "22852" as ShipProfile["id"],
@@ -4800,7 +4800,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Carrier bonuses (per skill level)","lines":["10% bonus to Fighter damage","5% bonus to Fighter velocity","5+ bonus to ship warp core strength","5% reduction in Target Illumination Burst Projector cycle time","2% bonus to Shield Command and Skirmish Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Burst Projectors","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Heavy Fighters","• Can lock at extended ranges","400% bonus to Armor Plates and Shield Extenders","50% bonus to Remote Sensor Dampener resistance","50% bonus to Stasis effect resistance","50% increase to Remote Electronic Assistance impedance","• Conduit Jump capable","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Minmatar Carrier bonuses (per skill level)","lines":["10% bonus to Fighter damage","5% bonus to Fighter velocity","5+ bonus to ship warp core strength","5% reduction in Target Illumination Burst Projector cycle time","2% bonus to Shield Command and Skirmish Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Burst Projectors","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Heavy Fighters","• Can lock at extended ranges","400% bonus to Armor Plates and Shield Extenders","50% bonus to Remote Sensor Dampener resistance","50% bonus to Stasis effect resistance","50% increase to Remote Electronic Assistance impedance","• Conduit Jump capable","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "11172" as ShipProfile["id"],
@@ -4830,7 +4830,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.5, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.45, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Frigate bonuses (per skill level)","lines":["5% bonus to ship max velocity when using Cloaking Devices","15% reduction in warp drive capacitor need"]},{"header":"Covert Ops bonuses (per skill level)","lines":["20% reduction in Cloaking Devices CPU requirement","10% bonus to Core and Combat Scanner Probe strength","10% reduction in Survey Probe flight time"]},{"header":"Role Bonus","lines":["10+ bonus to Relic and Data Analyzer virus strength","• Cloak reactivation delay reduced to 5 seconds","60% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Gallente Frigate bonuses (per skill level)","lines":["5% bonus to ship max velocity when using Cloaking Devices","15% reduction in warp drive capacitor need"]},{"header":"Covert Ops bonuses (per skill level)","lines":["20% reduction in Cloaking Devices CPU requirement","10% bonus to Core and Combat Scanner Probe strength","10% reduction in Survey Probe flight time"]},{"header":"Role Bonus","lines":["10+ bonus to Relic and Data Analyzer virus strength","• Cloak reactivation delay reduced to 5 seconds","60% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "33079" as ShipProfile["id"],
@@ -4890,7 +4890,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.55, explosive: 0.75 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.4375, explosive: 0.6 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Interdictors bonuses (per skill level)","lines":["4% bonus to all armor resistances","10% reduction in Microwarpdrive signature radius penalty"]},{"header":"Amarr Destroyer bonuses (per skill level)","lines":["15% bonus to armor hitpoints","5% bonus to Light Missile launcher and Rocket launcher rate of fire"]},{"header":"Role Bonus","lines":["• Can fit Interdiction Sphere Launcher","25% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Interdictors bonuses (per skill level)","lines":["4% bonus to all armor resistances","10% reduction in Microwarpdrive signature radius penalty"]},{"header":"Amarr Destroyer bonuses (per skill level)","lines":["15% bonus to armor hitpoints","5% bonus to Light Missile launcher and Rocket launcher rate of fire"]},{"header":"Role Bonus","lines":["• Can fit Interdiction Sphere Launcher","25% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "605" as ShipProfile["id"],
@@ -5010,7 +5010,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.25, thermal: 0.3, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.7, thermal: 0.43125, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Frigate bonuses (per skill level)","lines":["10% bonus to Torpedo flight time","15% bonus to Torpedo max velocity"]},{"header":"Covert Ops bonuses (per skill level)","lines":["5% bonus to explosive Bomb damage","15% bonus to explosive Torpedo damage"]},{"header":"Role Bonus","lines":["99.65% reduction in Torpedo Launcher powergrid requirement","50% reduction in Cloaking Devices CPU requirement","• No targeting delay after Cloaking Device deactivation","• Can fit Covert Ops Cloaking Device, Covert Cynosural Field Generator and Bomb Launcher","• Cloak reactivation delay reduced to 15 seconds"]}],
+    bonuses: [{"header":"Minmatar Frigate bonuses (per skill level)","lines":["10% bonus to Torpedo flight time","15% bonus to Torpedo max velocity"]},{"header":"Covert Ops bonuses (per skill level)","lines":["5% bonus to explosive Bomb damage","15% bonus to explosive Torpedo damage"]},{"header":"Role Bonus","lines":["99.65% reduction in Torpedo Launcher powergrid requirement","50% reduction in Cloaking Devices CPU requirement","• No targeting delay after Cloaking Device deactivation","• Can fit Covert Ops Cloaking Device, Covert Cynosural Field Generator and Bomb Launcher","• Cloak reactivation delay reduced to 15 seconds"]}],
   },
   {
     id: "77281" as ShipProfile["id"],
@@ -5040,7 +5040,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.3, kinetic: 0.55, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.43125, kinetic: 0.5125, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Dreadnought bonuses (per skill level)","lines":["5% bonus to Capital Hybrid Turret rate of fire","5% reduction in Armor Repairer Cycle Time","5% bonus to all hull resistances"]},{"header":"Lancer Dreadnought bonuses (per skill level)","lines":["10% Bonus to Disruptive Lance damage","20% Bonus to Disruptive Lance maximum range"]},{"header":"Role Bonus","lines":["• Can fit a Siege module","• Can fit a Disruptor Lance","• 5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Gallente Dreadnought bonuses (per skill level)","lines":["5% bonus to Capital Hybrid Turret rate of fire","5% reduction in Armor Repairer Cycle Time","5% bonus to all hull resistances"]},{"header":"Lancer Dreadnought bonuses (per skill level)","lines":["10% Bonus to Disruptive Lance damage","20% Bonus to Disruptive Lance maximum range"]},{"header":"Role Bonus","lines":["• Can fit a Siege module","• Can fit a Disruptor Lance","• 5x penalty to Entosis Link duration"]}],
   },
   {
     id: "11961" as ShipProfile["id"],
@@ -5070,7 +5070,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.625, thermal: 0.5, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.85, thermal: 0.59375, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Projectile Turret rate of fire","10% bonus to Target Painter effectiveness"]},{"header":"Recon Ships bonuses (per skill level)","lines":["60% bonus to Stasis Webifier optimal range","5% bonus to Medium Projectile Turret damage","Role Bonus:• Cannot be detected by directional scanners"]}],
+    bonuses: [{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Projectile Turret rate of fire","10% bonus to Target Painter effectiveness"]},{"header":"Recon Ships bonuses (per skill level)","lines":["60% bonus to Stasis Webifier optimal range","5% bonus to Medium Projectile Turret damage"]},{"header":"Role Bonus","lines":["• Cannot be detected by directional scanners"]}],
   },
   {
     id: "22544" as ShipProfile["id"],
@@ -5130,7 +5130,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["5% bonus to Medium Projectile Turret damage","5% bonus to Medium Projectile Turret rate of fire"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","25% bonus to Medium Projectile Turret optimal range and falloff","50% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["5% bonus to Medium Projectile Turret damage","5% bonus to Medium Projectile Turret rate of fire"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","25% bonus to Medium Projectile Turret optimal range and falloff","50% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "33157" as ShipProfile["id"],
@@ -5160,7 +5160,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Projectile Turret damage","10% bonus to Medium Projectile Turret tracking speed","Role Bonus:• Can use one Command Burst module","50% bonus to Command Burst area of effect range","25% bonus to Medium Projectile Turret optimal range and falloff"]}],
+    bonuses: [{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Projectile Turret damage","10% bonus to Medium Projectile Turret tracking speed"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","50% bonus to Command Burst area of effect range","25% bonus to Medium Projectile Turret optimal range and falloff"]}],
   },
   {
     id: "48636" as ShipProfile["id"],
@@ -5760,7 +5760,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.85, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.675, kinetic: 0.8375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Assault Frigates bonuses (per skill level)","lines":["10% bonus to Small Hybrid Turret optimal range","7.5% bonus to armor repair amount"]},{"header":"Gallente Frigate bonuses (per skill level)","lines":["5% bonus to Small Hybrid Turret damage","10% bonus to Drone hitpoints"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Assault Frigates bonuses (per skill level)","lines":["10% bonus to Small Hybrid Turret optimal range","7.5% bonus to armor repair amount"]},{"header":"Gallente Frigate bonuses (per skill level)","lines":["5% bonus to Small Hybrid Turret damage","10% bonus to Drone hitpoints"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "12005" as ShipProfile["id"],
@@ -5790,7 +5790,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.85, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.675, kinetic: 0.8375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["5000m bonus to Drone operation range","5% bonus to Sentry Drone optimal range and tracking speed"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["7.5% bonus to Heavy Drone max velocity and tracking speed","10% bonus to Light, Medium, and Heavy Drone hit points and damage","5% bonus to Sentry Drone hit points and damage"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["5000m bonus to Drone operation range","5% bonus to Sentry Drone optimal range and tracking speed"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["7.5% bonus to Heavy Drone max velocity and tracking speed","10% bonus to Light, Medium, and Heavy Drone hit points and damage","5% bonus to Sentry Drone hit points and damage"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "657" as ShipProfile["id"],
@@ -5850,7 +5850,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.55, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.725, kinetic: 0.4375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Tactical Destroyer Bonuses Per Level","lines":["3% bonus to Rocket and Light Missile Launcher rate of fire","15% reduction in Missile Launcher reload time","5% reduction in heat damage generated by modules"]},{"header":"Misc Bonus","lines":["33% bonus to Rocket and Light Missile damage","95% reduction in Scan Probe Launcher CPU requirements","• Additional bonuses are available when one of three Tactical Destroyer Modes are active. Modes may be changed no more than once every 10 seconds.","• Defense Mode","33.3% bonus to all shield resistances while Defense Mode is active","33.3% reduction in ship signature radius while Defense Mode is active","• Propulsion Mode","33.3% bonus to max velocity while Propulsion Mode is active","66.6% bonus to ship inertia modifier while Propulsion Mode is active","• Sharpshooter Mode","66.6% bonus to Rocket and Light Missile velocity while Sharpshooter Mode is active","33.3% bonus to Rocket and Light Missile damage while Sharpshooter Mode is enabled","100% bonus to sensor strength and targeting range while Sharpshooter Mode is active","66.6% increased resistances against hostile Sensor Dampeners and Weapon Disruptors while Sharpshooter Mode is enabled"]}],
+    bonuses: [{"header":"Caldari Tactical Destroyer Bonuses Per Level","lines":["3% bonus to Rocket and Light Missile Launcher rate of fire","15% reduction in Missile Launcher reload time","5% reduction in heat damage generated by modules"]},{"header":"Misc Bonus","lines":["33% bonus to Rocket and Light Missile damage","95% reduction in Scan Probe Launcher CPU requirements","• Additional bonuses are available when one of three Tactical Destroyer Modes are active. Modes may be changed no more than once every 10 seconds."]},{"header":"Defense Mode","lines":["33.3% bonus to all shield resistances while Defense Mode is active","33.3% reduction in ship signature radius while Defense Mode is active"]},{"header":"Propulsion Mode","lines":["33.3% bonus to max velocity while Propulsion Mode is active","66.6% bonus to ship inertia modifier while Propulsion Mode is active"]},{"header":"Sharpshooter Mode","lines":["66.6% bonus to Rocket and Light Missile velocity while Sharpshooter Mode is active","33.3% bonus to Rocket and Light Missile damage while Sharpshooter Mode is enabled","100% bonus to sensor strength and targeting range while Sharpshooter Mode is active","66.6% increased resistances against hostile Sensor Dampeners and Weapon Disruptors while Sharpshooter Mode is enabled"]}],
   },
   {
     id: "11400" as ShipProfile["id"],
@@ -5880,7 +5880,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.75, thermal: 0.6, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.9, thermal: 0.675, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Frigate bonuses (per skill level)","lines":["5% bonus to Light Missile and Rocket Launcher rate of fire","7.5% bonus to Shield Booster amount"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["5% bonus to Light Missile and Rocket explosion velocity","5% bonus to Light Missile and Rocket damage"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Minmatar Frigate bonuses (per skill level)","lines":["5% bonus to Light Missile and Rocket Launcher rate of fire","7.5% bonus to Shield Booster amount"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["5% bonus to Light Missile and Rocket explosion velocity","5% bonus to Light Missile and Rocket damage"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "77284" as ShipProfile["id"],
@@ -5910,7 +5910,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.4, kinetic: 0.475, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.5875, kinetic: 0.34375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Dreadnought bonuses (per skill level)","lines":["5.0% bonus to Capital Hybrid Turret tracking speed","10.0% bonus to Capital Hybrid Turret Optimal Range"]},{"header":"Lancer Dreadnought bonuses (per skill level)","lines":["10% Bonus to Disruptive Lance damage","20% Bonus to Disruptive Lance maximum range"]},{"header":"Role Bonus","lines":["• Can fit a Siege module","• Can fit a Disruptor Lance","• 5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Caldari Dreadnought bonuses (per skill level)","lines":["5.0% bonus to Capital Hybrid Turret tracking speed","10.0% bonus to Capital Hybrid Turret Optimal Range"]},{"header":"Lancer Dreadnought bonuses (per skill level)","lines":["10% Bonus to Disruptive Lance damage","20% Bonus to Disruptive Lance maximum range"]},{"header":"Role Bonus","lines":["• Can fit a Siege module","• Can fit a Disruptor Lance","• 5x penalty to Entosis Link duration"]}],
   },
   {
     id: "11174" as ShipProfile["id"],
@@ -6000,7 +6000,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Projectile Turret Falloff"]},{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["5% Medium Projectile Turret damage"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","25% bonus to Medium Projectile Turret rate of fire","25% bonus to warp speed and warp acceleration","50% bonus to Command Burst area of effect range","25% bonus to Medium Projectile Turret optimal and falloff","75% reduction in projection weapon reload time"]}],
+    bonuses: [{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Projectile Turret Falloff"]},{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["5% Medium Projectile Turret damage"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","25% bonus to Medium Projectile Turret rate of fire","25% bonus to warp speed and warp acceleration","50% bonus to Command Burst area of effect range","25% bonus to Medium Projectile Turret optimal and falloff","75% reduction in projection weapon reload time"]}],
   },
   {
     id: "49710" as ShipProfile["id"],
@@ -6120,7 +6120,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Titan bonuses (per skill level)","lines":["50% bonus to thermal and kinetic XL Cruise, XL Torpedo and Torpedo damage","40% bonus to EM and explosive XL Cruise, XL Torpedo and Torpedo damage","6+ bonus to ship warp core strength"]},{"header":"Caldari Titan bonuses (per skill level)","lines":["4% bonus to all shield resistances","15% bonus to XL Cruise Missile and XL Torpedo Launcher rate of fire","6+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Doomsday devices","• Can fit a Phenomena Generator module","• Can fit Jump Portal Generator","• Can fit Clone Vat Bay","• Can use three Command Burst modules","• Can launch Light and Heavy Fighters","100% bonus to Fighter damage and hitpoints","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","100% bonus to Torpedo Velocity","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Gallente Titan bonuses (per skill level)","lines":["50% bonus to thermal and kinetic XL Cruise, XL Torpedo and Torpedo damage","40% bonus to EM and explosive XL Cruise, XL Torpedo and Torpedo damage","6+ bonus to ship warp core strength"]},{"header":"Caldari Titan bonuses (per skill level)","lines":["4% bonus to all shield resistances","15% bonus to XL Cruise Missile and XL Torpedo Launcher rate of fire","6+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Doomsday devices","• Can fit a Phenomena Generator module","• Can fit Jump Portal Generator","• Can fit Clone Vat Bay","• Can use three Command Burst modules","• Can launch Light and Heavy Fighters","100% bonus to Fighter damage and hitpoints","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","100% bonus to Torpedo Velocity","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "28661" as ShipProfile["id"],
@@ -6150,7 +6150,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.3, kinetic: 0.55, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.43125, kinetic: 0.5125, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Marauders bonuses (per skill level)","lines":["7.5% bonus to Armor Repairer amount","7.5% bonus to Large Hybrid Turret tracking speed"]},{"header":"Gallente Battleship bonuses (per skill level)","lines":["5% bonus to Large Hybrid Turret damage","10% bonus to Large Hybrid Turret falloff"]},{"header":"Role Bonus","lines":["100% bonus to Large Hybrid Turret damage","100% bonus to Tractor Beam range and velocity","• Can fit Bastion modules"]}],
+    bonuses: [{"header":"Marauders bonuses (per skill level)","lines":["7.5% bonus to Armor Repairer amount","7.5% bonus to Large Hybrid Turret tracking speed"]},{"header":"Gallente Battleship bonuses (per skill level)","lines":["5% bonus to Large Hybrid Turret damage","10% bonus to Large Hybrid Turret falloff"]},{"header":"Role Bonus","lines":["100% bonus to Large Hybrid Turret damage","100% bonus to Tractor Beam range and velocity","• Can fit Bastion modules"]}],
   },
   {
     id: "654" as ShipProfile["id"],
@@ -6210,7 +6210,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.5, kinetic: 0.775, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.59375, kinetic: 0.75625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret tracking","7.5% bonus to Remote Sensor Dampener effectiveness"]},{"header":"Recon Ships bonuses (per skill level)","lines":["20% bonus to Warp Scrambler and Warp Disruptor optimal range","10% bonus to Medium Hybrid Turret optimal range","Role Bonus:• Cannot be detected by directional scanners"]}],
+    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret tracking","7.5% bonus to Remote Sensor Dampener effectiveness"]},{"header":"Recon Ships bonuses (per skill level)","lines":["20% bonus to Warp Scrambler and Warp Disruptor optimal range","10% bonus to Medium Hybrid Turret optimal range"]},{"header":"Role Bonus","lines":["• Cannot be detected by directional scanners"]}],
   },
   {
     id: "60764" as ShipProfile["id"],
@@ -6240,7 +6240,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.8, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.8625, kinetic: 0.625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Heavy Interdiction Cruisers bonuses (per skill level)","lines":["20% bonus to Warp Disruption Field Generator scramble range"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["10% bonus to missile reload time"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["20% bonus to missile damage","5% bonus to Rapid Light Missile, Heavy Missile, and Heavy Assault Missile Launcher rate of fire","Role Bonus:• Can fit Warp Disruption Field Generator","20% bonus to all shield resistances","50% penalty to missile flight time","100% reduction to signature radius penalty from Warp Disruption Field Generator","200% bonus to missile velocity"]}],
+    bonuses: [{"header":"Heavy Interdiction Cruisers bonuses (per skill level)","lines":["20% bonus to Warp Disruption Field Generator scramble range"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["10% bonus to missile reload time"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["20% bonus to missile damage","5% bonus to Rapid Light Missile, Heavy Missile, and Heavy Assault Missile Launcher rate of fire"]},{"header":"Role Bonus","lines":["• Can fit Warp Disruption Field Generator","20% bonus to all shield resistances","50% penalty to missile flight time","100% reduction to signature radius penalty from Warp Disruption Field Generator","200% bonus to missile velocity"]}],
   },
   {
     id: "29986" as ShipProfile["id"],
@@ -6270,7 +6270,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.55, explosive: 0.75 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.4375, explosive: 0.6 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"","lines":["Amarr Defensive Systems bonuses (per skill level):• bonus to all Amarr Defensive Systems effectiveness","Amarr Offensive Systems bonuses (per skill level):• bonus to all Amarr Offensive Systems effectiveness","Amarr Propulsion Systems bonuses (per skill level):• bonus to all Amarr Propulsion Systems effectiveness","Amarr Core Systems bonuses (per skill level):• bonus to all Amarr Engineering Systems effectiveness","Amarr Strategic Cruiser bonuses (per skill level):• 5% reduction in module heat damage amount taken• 10% bonus to nanite repair paste repair speed","Role Bonus:• 99% reduction in Scan Probe Launcher CPU requirements• Rigs may be removed from this ship without being destroyed"]}],
+    bonuses: [{"header":"Amarr Defensive Systems bonuses (per skill level)","lines":["• bonus to all Amarr Defensive Systems effectiveness"]},{"header":"Amarr Offensive Systems bonuses (per skill level)","lines":["• bonus to all Amarr Offensive Systems effectiveness"]},{"header":"Amarr Propulsion Systems bonuses (per skill level)","lines":["• bonus to all Amarr Propulsion Systems effectiveness"]},{"header":"Amarr Core Systems bonuses (per skill level)","lines":["• bonus to all Amarr Engineering Systems effectiveness"]},{"header":"Amarr Strategic Cruiser bonuses (per skill level)","lines":["• 5% reduction in module heat damage amount taken","• 10% bonus to nanite repair paste repair speed"]},{"header":"Role Bonus","lines":["• 99% reduction in Scan Probe Launcher CPU requirements","• Rigs may be removed from this ship without being destroyed"]}],
   },
   {
     id: "33513" as ShipProfile["id"],
@@ -6300,7 +6300,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Role Bonus","lines":["300% bonus to warp speed and warp acceleration","90% reduction to effective distance traveled for jump fatigue","• Immune to Interdiction Sphere Launcher, Warp Disruption Field Generator and Mobile Small, Medium and Large Warp Disruptor"]}],
+    bonuses: [{"header":"Role Bonus","lines":["300% bonus to warp speed and warp acceleration","90% reduction to effective distance traveled for jump fatigue","• Immune to Interdiction Sphere Launcher, Warp Disruption Field Generator and Mobile Small, Medium and Large Warp Disruptor"]}],
   },
   {
     id: "47271" as ShipProfile["id"],
@@ -6360,7 +6360,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Titan bonuses (per skill level)","lines":["50% bonus to kinetic XL Cruise, XL Torpedo and Torpedo damage","40% bonus to EM, explosive and thermal XL Cruise, XL Torpedo and Torpedo damage","15% bonus to XL Cruise Missile Launchers and XL Torpedo Launchers rate of fire","10+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Doomsday devices","• Can fit Jump Portal Generator","• Can fit Clone Vat Bay","• Can use three Command Burst modules","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","100% bonus to Torpedo Velocity","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration","• Can fit one Phenomena Generator module"]}],
+    bonuses: [{"header":"Caldari Titan bonuses (per skill level)","lines":["50% bonus to kinetic XL Cruise, XL Torpedo and Torpedo damage","40% bonus to EM, explosive and thermal XL Cruise, XL Torpedo and Torpedo damage","15% bonus to XL Cruise Missile Launchers and XL Torpedo Launchers rate of fire","10+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Doomsday devices","• Can fit Jump Portal Generator","• Can fit Clone Vat Bay","• Can use three Command Burst modules","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","100% bonus to Torpedo Velocity","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration","• Can fit one Phenomena Generator module"]}],
   },
   {
     id: "37606" as ShipProfile["id"],
@@ -6390,7 +6390,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Carrier bonuses (per skill level)","lines":["5% bonus to Remote Armor Repairer and Remote Shield booster cycle time","7.5% bonus to Shield Booster amount","30% bonus to Capacitor Booster amount","1% bonus to Shield Command and Skirmish Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Triage modules","• Can use two Command Burst modules","50% reduction in CPU requirements for Command Burst modules","200% bonus to Command Burst area of effect range","200% bonus to Logistics Drone transfer amount","5x penalty to Entosis Link duration","• Can only online one Capacitor Booster module"]}],
+    bonuses: [{"header":"Minmatar Carrier bonuses (per skill level)","lines":["5% bonus to Remote Armor Repairer and Remote Shield booster cycle time","7.5% bonus to Shield Booster amount","30% bonus to Capacitor Booster amount","1% bonus to Shield Command and Skirmish Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Triage modules","• Can use two Command Burst modules","50% reduction in CPU requirements for Command Burst modules","200% bonus to Command Burst area of effect range","200% bonus to Logistics Drone transfer amount","5x penalty to Entosis Link duration","• Can only online one Capacitor Booster module"]}],
   },
   {
     id: "45645" as ShipProfile["id"],
@@ -6420,7 +6420,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Carrier bonuses (per skill level)","lines":["4% bonus to all shield resistances"]},{"header":"Gallente Carrier bonuses (per skill level)","lines":["5% bonus to Remote Shield Booster amount","20% bonus to Capacitor Booster amount"]},{"header":"Role Bonus","lines":["• Can fit Triage module","• Can use two Command Burst modules","50% reduction in CPU requirements for Command Burst modules","1000% bonus to Logistics Drone transfer amount and hitpoints","200% bonus to Command Burst area of effect range","5x penalty to Entosis Link cycle time","• Can only online one Capacitor Booster module"]}],
+    bonuses: [{"header":"Caldari Carrier bonuses (per skill level)","lines":["4% bonus to all shield resistances"]},{"header":"Gallente Carrier bonuses (per skill level)","lines":["5% bonus to Remote Shield Booster amount","20% bonus to Capacitor Booster amount"]},{"header":"Role Bonus","lines":["• Can fit Triage module","• Can use two Command Burst modules","50% reduction in CPU requirements for Command Burst modules","1000% bonus to Logistics Drone transfer amount and hitpoints","200% bonus to Command Burst area of effect range","5x penalty to Entosis Link cycle time","• Can only online one Capacitor Booster module"]}],
   },
   {
     id: "29990" as ShipProfile["id"],
@@ -6450,7 +6450,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.5, thermal: 0.4, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.8, thermal: 0.5125, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Core Systems bonuses (per skill level)","lines":["• bonus to all Minmatar Core Systems effectiveness"]},{"header":"Minmatar Defensive Systems bonuses (per skill level)","lines":["• bonus to all Minmatar Defensive Systems effectiveness"]},{"header":"Minmatar Offensive Systems bonuses (per skill level)","lines":["• bonus to all Minmatar Offensive Systems effectiveness"]},{"header":"Minmatar Propulsion Systems bonuses (per skill level)","lines":["• bonus to all Minmatar Propulsion Systems effectiveness"]},{"header":"Minmatar Strategic Cruiser bonuses (per skill level)","lines":["• 5% reduction in module heat damage amount taken","• 10% bonus to nanite repair paste repair speed"]},{"header":"Role Bonus","lines":["• 99% reduction in Scan Probe Launcher CPU requirements","• Rigs may be removed from this ship without being destroyed"]}],
+    bonuses: [{"header":"Minmatar Core Systems bonuses (per skill level)","lines":["• bonus to all Minmatar Core Systems effectiveness"]},{"header":"Minmatar Defensive Systems bonuses (per skill level)","lines":["• bonus to all Minmatar Defensive Systems effectiveness"]},{"header":"Minmatar Offensive Systems bonuses (per skill level)","lines":["• bonus to all Minmatar Offensive Systems effectiveness"]},{"header":"Minmatar Propulsion Systems bonuses (per skill level)","lines":["• bonus to all Minmatar Propulsion Systems effectiveness"]},{"header":"Minmatar Strategic Cruiser bonuses (per skill level)","lines":["• 5% reduction in module heat damage amount taken","• 10% bonus to nanite repair paste repair speed"]},{"header":"Role Bonus","lines":["• 99% reduction in Scan Probe Launcher CPU requirements","• Rigs may be removed from this ship without being destroyed"]}],
   },
   {
     id: "17738" as ShipProfile["id"],
@@ -6690,7 +6690,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.7, explosive: 0.875 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.625, explosive: 0.8 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Frigate bonuses (per skill level)","lines":["4% bonus to all armor resistances","20% bonus to Energy Nosferatur and Energy Neutralizer drain amount","20% bonus to Energy Vampire and Energy Neutralizer optimal range","10% bonus to Energy Vampire and Energy Neutralizer falloff range"]},{"header":"Role Bonus","lines":["100% bonus to Small Energy Turret damage","50% bonus to Small Energy Turret optimal range","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Amarr Frigate bonuses (per skill level)","lines":["4% bonus to all armor resistances","20% bonus to Energy Nosferatur and Energy Neutralizer drain amount","20% bonus to Energy Vampire and Energy Neutralizer optimal range","10% bonus to Energy Vampire and Energy Neutralizer falloff range"]},{"header":"Role Bonus","lines":["100% bonus to Small Energy Turret damage","50% bonus to Small Energy Turret optimal range","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "624" as ShipProfile["id"],
@@ -6810,7 +6810,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.4, kinetic: 0.475, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.5875, kinetic: 0.34375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Frigate bonuses (per skill level)","lines":["10% bonus to Torpedo flight time","15% bonus to Torpedo max velocity"]},{"header":"Covert Ops bonuses (per skill level)","lines":["5% bonus to kinetic Bomb damage","15% bonus to kinetic Torpedo damage"]},{"header":"Role Bonus","lines":["99.65% reduction in Torpedo Launcher powergrid requirement","50% reduction in Cloaking Devices CPU requirement","• No targeting delay after Cloaking Device deactivation","• Can fit Covert Ops Cloaking Device, Covert Cynosural Field Generator and Bomb Launcher","• Cloak reactivation delay reduced to 15 seconds"]}],
+    bonuses: [{"header":"Caldari Frigate bonuses (per skill level)","lines":["10% bonus to Torpedo flight time","15% bonus to Torpedo max velocity"]},{"header":"Covert Ops bonuses (per skill level)","lines":["5% bonus to kinetic Bomb damage","15% bonus to kinetic Torpedo damage"]},{"header":"Role Bonus","lines":["99.65% reduction in Torpedo Launcher powergrid requirement","50% reduction in Cloaking Devices CPU requirement","• No targeting delay after Cloaking Device deactivation","• Can fit Covert Ops Cloaking Device, Covert Cynosural Field Generator and Bomb Launcher","• Cloak reactivation delay reduced to 15 seconds"]}],
   },
   {
     id: "44996" as ShipProfile["id"],
@@ -6840,7 +6840,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.4, thermal: 0.4, kinetic: 0.4, explosive: 0.4 },
     armorResists: { em: 0.4, thermal: 0.4, kinetic: 0.4, explosive: 0.4 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Black Ops bonuses (per skill level)","lines":["10% bonus to Warp Scrambler and Warp Disruptor optimal range","20% to Stasis Webifier optimal range","10% bonus to warp speed and acceleration"]},{"header":"Gallente Battleship bonuses (per skill level)","lines":["10% bonus to Large Hybrid Turret damage","7.5% bonus to Large Hybrid Turret tracking speed"]},{"header":"Minmatar Battleship bonuses (per skill level)","lines":["10% bonus to Large Projectile Turret rate of fire","10% bonus to Large Projectile Turret falloff"]},{"header":"Caldari Battleship bonuses (per skill level)","lines":["7.5% bonus to Heavy Missile, Cruise Missile and Torpedo Launcher rate of fire","10% bonus to Cruise Missile and Torpedo flight time"]},{"header":"Amarr Battleship bonuses (per skill level)","lines":["10% bonus to Large Energy Turret damage","10% bonus to Large Energy Turret optimal range"]},{"header":"Role Bonus","lines":["• Can fit Covert Cynosural Field Generator and Covert Jump Portal Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","75% reduction to effective distance traveled for jump fatigue","10% bonus to security status gains from destruction of non-capsuleer pirates while flying this ship","• Armor Repairer and Shield Booster effectiveness increased by a percentage equal to 10x pilot security status, with a floor of 0% and ceiling of 50%","650% bonus to ship max velocity when using Cloaking Devices","100% bonus to Shield Extender hitpoints","50% bonus to Armor Plate hitpoints","5% Additional bonus to Reinforced Bulkhead hitpoints","50% bonus to Cynosural Field Generator duration"]}],
+    bonuses: [{"header":"Black Ops bonuses (per skill level)","lines":["10% bonus to Warp Scrambler and Warp Disruptor optimal range","20% to Stasis Webifier optimal range","10% bonus to warp speed and acceleration"]},{"header":"Gallente Battleship bonuses (per skill level)","lines":["10% bonus to Large Hybrid Turret damage","7.5% bonus to Large Hybrid Turret tracking speed"]},{"header":"Minmatar Battleship bonuses (per skill level)","lines":["10% bonus to Large Projectile Turret rate of fire","10% bonus to Large Projectile Turret falloff"]},{"header":"Caldari Battleship bonuses (per skill level)","lines":["7.5% bonus to Heavy Missile, Cruise Missile and Torpedo Launcher rate of fire","10% bonus to Cruise Missile and Torpedo flight time"]},{"header":"Amarr Battleship bonuses (per skill level)","lines":["10% bonus to Large Energy Turret damage","10% bonus to Large Energy Turret optimal range"]},{"header":"Role Bonus","lines":["• Can fit Covert Cynosural Field Generator and Covert Jump Portal Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","75% reduction to effective distance traveled for jump fatigue","10% bonus to security status gains from destruction of non-capsuleer pirates while flying this ship","• Armor Repairer and Shield Booster effectiveness increased by a percentage equal to 10x pilot security status, with a floor of 0% and ceiling of 50%","650% bonus to ship max velocity when using Cloaking Devices","100% bonus to Shield Extender hitpoints","50% bonus to Armor Plate hitpoints","5% Additional bonus to Reinforced Bulkhead hitpoints","50% bonus to Cynosural Field Generator duration"]}],
   },
   {
     id: "12747" as ShipProfile["id"],
@@ -7290,7 +7290,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.9, thermal: 0.675, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["20% bonus to Medium Projectile Turret damage","4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["50% bonus to Medium Projectile Turret optimal range and falloff","25% bonus to ship max velocity","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["20% bonus to Medium Projectile Turret damage","4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["50% bonus to Medium Projectile Turret optimal range and falloff","25% bonus to ship max velocity","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "11132" as ShipProfile["id"],
@@ -7350,7 +7350,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Carrier bonuses (per skill level)","lines":["5% bonus to Remote Capacitor Transmitter and Remote Shield Booster amount","4% bonus to all shield resistances","20% bonus to Capacitor Booster amount","1% bonus to Shield Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Triage modules","• Can use two Command Burst modules","50% reduction in CPU requirements for Command Burst modules","200% bonus to Command Burst area of effect range","200% bonus to Logistics Drone transfer amount","5x penalty to Entosis Link duration","• Can only online one Capacitor Booster module"]}],
+    bonuses: [{"header":"Caldari Carrier bonuses (per skill level)","lines":["5% bonus to Remote Capacitor Transmitter and Remote Shield Booster amount","4% bonus to all shield resistances","20% bonus to Capacitor Booster amount","1% bonus to Shield Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Triage modules","• Can use two Command Burst modules","50% reduction in CPU requirements for Command Burst modules","200% bonus to Command Burst area of effect range","200% bonus to Logistics Drone transfer amount","5x penalty to Entosis Link duration","• Can only online one Capacitor Booster module"]}],
   },
   {
     id: "623" as ShipProfile["id"],
@@ -7410,7 +7410,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Titan bonuses (per skill level)","lines":["20% bonus to Stasis Webifier optimal range","6+ bonus to ship warp core strength"]},{"header":"Amarr Titan bonuses (per skill level)","lines":["15% bonus to Energy Nosferatu and Energy Neutralizer drain amount","6+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Doomsday module","• Can fit Phenomena Generator module","• Can fit Jump Portal Generator module","• Can fit Clone Vat Bay module","• Can use three Command Burst modules","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","1400% bonus to Capital Energy Turret damage","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Minmatar Titan bonuses (per skill level)","lines":["20% bonus to Stasis Webifier optimal range","6+ bonus to ship warp core strength"]},{"header":"Amarr Titan bonuses (per skill level)","lines":["15% bonus to Energy Nosferatu and Energy Neutralizer drain amount","6+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Doomsday module","• Can fit Phenomena Generator module","• Can fit Jump Portal Generator module","• Can fit Clone Vat Bay module","• Can use three Command Burst modules","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","1400% bonus to Capital Energy Turret damage","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "45534" as ShipProfile["id"],
@@ -7440,7 +7440,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.9, thermal: 0.9, kinetic: 0.9, explosive: 0.9 },
     armorResists: { em: 0.9, thermal: 0.9, kinetic: 0.9, explosive: 0.9 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["5% bonus to ship agility"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["5% reduction in ship signature radius"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["5% bonus to ship shield hitpoints"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["5% bonus to armor hitpoints"]},{"header":"Flag Cruiser bonuses (per skill level)","lines":["4% bonus to all armor, shield, and hull resistances"]},{"header":"Role Bonus","lines":["• Can use Medium Micro Jump Drive modules","99% reduction in powergrid and cpu requirements for Afterburner, Microwarpdrive, and Micro Jump Drive modules","99.9% reduction in powergrid and cpu requirements for Scan Probe Launcher and Target Painter modules","300% bonus to Target Painter optimal range","99% reduction in Target Painter effectiveness","100% resistance to ECM effects","70% resistance to sensor dampener, target painter, energy neutralizer, and energy nosferatu effects"]}],
+    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["5% bonus to ship agility"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["5% reduction in ship signature radius"]},{"header":"Caldari Cruiser bonuses (per skill level)","lines":["5% bonus to ship shield hitpoints"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["5% bonus to armor hitpoints"]},{"header":"Flag Cruiser bonuses (per skill level)","lines":["4% bonus to all armor, shield, and hull resistances"]},{"header":"Role Bonus","lines":["• Can use Medium Micro Jump Drive modules","99% reduction in powergrid and cpu requirements for Afterburner, Microwarpdrive, and Micro Jump Drive modules","99.9% reduction in powergrid and cpu requirements for Scan Probe Launcher and Target Painter modules","300% bonus to Target Painter optimal range","99% reduction in Target Painter effectiveness","100% resistance to ECM effects","70% resistance to sensor dampener, target painter, energy neutralizer, and energy nosferatu effects"]}],
   },
   {
     id: "33395" as ShipProfile["id"],
@@ -7470,7 +7470,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.5, thermal: 0.4, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.8, thermal: 0.5125, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Recon Ships bonuses (per skill level)","lines":["30% bonus to Stasis Webifier optimal range","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["15% bonus to Medium Projectile Turret falloff"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["30% bonus to Medium Projectile Turret damage"]},{"header":"Role Bonus","lines":["• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","25% bonus to Medium Projectile Turret rate of fire","50% bonus to warp speed and warp acceleration","75% reduction in projection weapon reload time"]}],
+    bonuses: [{"header":"Recon Ships bonuses (per skill level)","lines":["30% bonus to Stasis Webifier optimal range","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Gallente Cruiser bonuses (per skill level)","lines":["15% bonus to Medium Projectile Turret falloff"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["30% bonus to Medium Projectile Turret damage"]},{"header":"Role Bonus","lines":["• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","25% bonus to Medium Projectile Turret rate of fire","50% bonus to warp speed and warp acceleration","75% reduction in projection weapon reload time"]}],
   },
   {
     id: "92283" as ShipProfile["id"],
@@ -7500,7 +7500,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Role bonus","lines":["100% bonus to to warp speed and warp accelaration","100% bonus to Interdiction Nullifier duration","100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device","805 reduction in Interdiction Nullifier reactivation delay and max lock rangepenalty"]}],
+    bonuses: [{"header":"Role bonus","lines":["100% bonus to to warp speed and warp accelaration","100% bonus to Interdiction Nullifier duration","100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device","805 reduction in Interdiction Nullifier reactivation delay and max lock rangepenalty"]}],
   },
   {
     id: "19724" as ShipProfile["id"],
@@ -7530,7 +7530,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Dreadnought bonuses (per skill level)","lines":["5% bonus to Capital Hybrid Turret damage","5% bonus to Capital Hybrid Turret rate of fire","5% bonus to Armor Repairer cycle time"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","• 5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Gallente Dreadnought bonuses (per skill level)","lines":["5% bonus to Capital Hybrid Turret damage","5% bonus to Capital Hybrid Turret rate of fire","5% bonus to Armor Repairer cycle time"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","• 5x penalty to Entosis Link duration"]}],
   },
   {
     id: "73792" as ShipProfile["id"],
@@ -7560,7 +7560,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Dreadnought bonuses (per skill level)","lines":["7.5% bonus to Capital Hybrid Turret damage","5% bonus to Capital Hybrid Turret rate of fire and optimal range","5% bonus to Armor Repairer amount and cycle time","20% bonus to Warp Scrambler and Warp Disruptor strength and optimal range"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","• 5x penalty to Entosis Link cycle time"]}],
+    bonuses: [{"header":"Gallente Dreadnought bonuses (per skill level)","lines":["7.5% bonus to Capital Hybrid Turret damage","5% bonus to Capital Hybrid Turret rate of fire and optimal range","5% bonus to Armor Repairer amount and cycle time","20% bonus to Warp Scrambler and Warp Disruptor strength and optimal range"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","• 5x penalty to Entosis Link cycle time"]}],
   },
   {
     id: "12015" as ShipProfile["id"],
@@ -7590,7 +7590,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.75, thermal: 0.6, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.9, thermal: 0.675, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["5% bonus to Heavy Missile and Heavy Assault Missile explosion velocity","5% bonus to Light Missile, Heavy Missile and Heavy Assault Missile launcher rate of fire"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["5% bonus to Light Missile, Heavy Missile and Heavy Assault Missile damage","3% bonus to all shield and armor resistances"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["5% bonus to Heavy Missile and Heavy Assault Missile explosion velocity","5% bonus to Light Missile, Heavy Missile and Heavy Assault Missile launcher rate of fire"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["5% bonus to Light Missile, Heavy Missile and Heavy Assault Missile damage","3% bonus to all shield and armor resistances"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "24700" as ShipProfile["id"],
@@ -7620,7 +7620,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Drone hitpoints and damage","7.5% bonus to Armor Repairer amount","Role Bonus:• Can use one Command Burst module","12.5% bonus to Drone microwarp velocity","50% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Drone hitpoints and damage","7.5% bonus to Armor Repairer amount"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","12.5% bonus to Drone microwarp velocity","50% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "72869" as ShipProfile["id"],
@@ -7650,7 +7650,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Drone hitpoints, tracking and damage","10% bonus to Stasis Webifier Drone factor of velocity decrease and hitpoints","10% bonus to Medium Hybrid Turret damage","10% bonus to Armor Repairer amount"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","50% bonus to Command Burst area of effect range","25% bonus to Medium Hybrid Turret optimal range and fallof","12.5% bonus to Drone microwarp velocity"]}],
+    bonuses: [{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Drone hitpoints, tracking and damage","10% bonus to Stasis Webifier Drone factor of velocity decrease and hitpoints","10% bonus to Medium Hybrid Turret damage","10% bonus to Armor Repairer amount"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","50% bonus to Command Burst area of effect range","25% bonus to Medium Hybrid Turret optimal range and fallof","12.5% bonus to Drone microwarp velocity"]}],
   },
   {
     id: "4306" as ShipProfile["id"],
@@ -7710,7 +7710,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Dreadnought bonuses (per skill level)","lines":["5% bonus to Capital Projectile Turret damage","5% bonus to Capital Projectile Turret rate of fire","5% bonus to Shield Booster cycle time"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","• 5x penalty to Entosis Link cycle time"]}],
+    bonuses: [{"header":"Minmatar Dreadnought bonuses (per skill level)","lines":["5% bonus to Capital Projectile Turret damage","5% bonus to Capital Projectile Turret rate of fire","5% bonus to Shield Booster cycle time"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","• 5x penalty to Entosis Link cycle time"]}],
   },
   {
     id: "73787" as ShipProfile["id"],
@@ -7740,7 +7740,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Dreadnought bonuses (per skill level)","lines":["7.5% bonus to Capital Projectile Turret damage","5% bonus to Capital Projectile Turret rate of fire","7.5% bonus to Shield Booster cycle and Armor Repairer amount","20% bonus to Heavy Stasis Grappler fallof ranger"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","5x penalty to Entosis Link cycle time"]}],
+    bonuses: [{"header":"Minmatar Dreadnought bonuses (per skill level)","lines":["7.5% bonus to Capital Projectile Turret damage","5% bonus to Capital Projectile Turret rate of fire","7.5% bonus to Shield Booster cycle and Armor Repairer amount","20% bonus to Heavy Stasis Grappler fallof ranger"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","5x penalty to Entosis Link cycle time"]}],
   },
   {
     id: "592" as ShipProfile["id"],
@@ -7830,7 +7830,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.3, kinetic: 0.55, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.43125, kinetic: 0.5125, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Frigate bonuses (per skill level)","lines":["10% bonus to Torpedo flight time","15% bonus to Torpedo max velocity"]},{"header":"Covert Ops bonuses (per skill level)","lines":["5% bonus to thermal Bomb damage","15% bonus to thermal Torpedo damage"]},{"header":"Role Bonus","lines":["99.65% reduction in Torpedo Launcher powergrid requirement","50% reduction in Cloaking Devices CPU requirement","• No targeting delay after Cloaking Device deactivation","• Can fit Covert Ops Cloaking Device, Covert Cynosural Field Generator and Bomb Launcher","• Cloak reactivation delay reduced to 15 seconds"]}],
+    bonuses: [{"header":"Gallente Frigate bonuses (per skill level)","lines":["10% bonus to Torpedo flight time","15% bonus to Torpedo max velocity"]},{"header":"Covert Ops bonuses (per skill level)","lines":["5% bonus to thermal Bomb damage","15% bonus to thermal Torpedo damage"]},{"header":"Role Bonus","lines":["99.65% reduction in Torpedo Launcher powergrid requirement","50% reduction in Cloaking Devices CPU requirement","• No targeting delay after Cloaking Device deactivation","• Can fit Covert Ops Cloaking Device, Covert Cynosural Field Generator and Bomb Launcher","• Cloak reactivation delay reduced to 15 seconds"]}],
   },
   {
     id: "650" as ShipProfile["id"],
@@ -7890,7 +7890,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.5, kinetic: 0.4, explosive: 0.85 },
     armorResists: { em: 0.5, thermal: 0.75, kinetic: 0.25, explosive: 0.65 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Assault Frigates bonuses (per skill level)","lines":["7.5% bonus to Light Entropic Disintegrator maximum range","20% bonus to Light Entropic Disintegrator maximum damage multiplier bonus"]},{"header":"Precursor Frigate bonuses (per skill level)","lines":["5% bonus to Light Entropic Disintegrator damage","4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls","50% reduced Energy Neutralizer capacitor need","50% reduced Remote Armor Repairer capacitor need","50% reduced Smart Bomb capacitor need","100% bonus to Remote Armor Repairer range"]}],
+    bonuses: [{"header":"Assault Frigates bonuses (per skill level)","lines":["7.5% bonus to Light Entropic Disintegrator maximum range","20% bonus to Light Entropic Disintegrator maximum damage multiplier bonus"]},{"header":"Precursor Frigate bonuses (per skill level)","lines":["5% bonus to Light Entropic Disintegrator damage","4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls","50% reduced Energy Neutralizer capacitor need","50% reduced Remote Armor Repairer capacitor need","50% reduced Smart Bomb capacitor need","100% bonus to Remote Armor Repairer range"]}],
   },
   {
     id: "33472" as ShipProfile["id"],
@@ -7950,7 +7950,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Carrier bonuses (per skill level)","lines":["5% bonus to Fighter damage","2.5% bonus to Fighter velocity","5% bonus to Dromi Support Fighter stasis webification range","2% bonus to Dromi Support Fighter stasis webification strenth","1% bonus to Shield Command and Skirmish Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Capital Micro Jump Drive and Capital Micro Jump Field Generator","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump Capable","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Minmatar Carrier bonuses (per skill level)","lines":["5% bonus to Fighter damage","2.5% bonus to Fighter velocity","5% bonus to Dromi Support Fighter stasis webification range","2% bonus to Dromi Support Fighter stasis webification strenth","1% bonus to Shield Command and Skirmish Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Capital Micro Jump Drive and Capital Micro Jump Field Generator","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump Capable","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "22470" as ShipProfile["id"],
@@ -7980,7 +7980,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.8, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.8625, kinetic: 0.625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["7.5% bonus to Heavy Missile and Heavy Assault Missile Launcher rate of fire","5% bonus to Heavy Missile and Heavy Assault Missile explosion radius","4% bonus to Shield Command and Information Command burst strength and duration"]},{"header":"Caldari Battlecruiser bonuses (per skill level)","lines":["10% bonus to kinetic Heavy Missile and Heavy Assault Missile damage","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","50% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["7.5% bonus to Heavy Missile and Heavy Assault Missile Launcher rate of fire","5% bonus to Heavy Missile and Heavy Assault Missile explosion radius","4% bonus to Shield Command and Information Command burst strength and duration"]},{"header":"Caldari Battlecruiser bonuses (per skill level)","lines":["10% bonus to kinetic Heavy Missile and Heavy Assault Missile damage","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","50% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "17736" as ShipProfile["id"],
@@ -8040,7 +8040,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Carrier bonuses (per skill level)","lines":["5% bonus to Remote Armor Repairer and Remote Shield booster cycle time","7.5% bonus to Armor Repairer amount","30% bonus to Capacitor Booster amount","1% bonus to Armored Command and Skirmish Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Triage modules","• Can use two Command Burst modules","50% reduction in CPU requirements for Command Burst modules","200% bonus to Command Burst area of effect range","200% bonus to Logistics Drone transfer amount","5x penalty to Entosis Link duration","• Can only online one Capacitor Booster module"]}],
+    bonuses: [{"header":"Gallente Carrier bonuses (per skill level)","lines":["5% bonus to Remote Armor Repairer and Remote Shield booster cycle time","7.5% bonus to Armor Repairer amount","30% bonus to Capacitor Booster amount","1% bonus to Armored Command and Skirmish Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Triage modules","• Can use two Command Burst modules","50% reduction in CPU requirements for Command Burst modules","200% bonus to Command Burst area of effect range","200% bonus to Logistics Drone transfer amount","5x penalty to Entosis Link duration","• Can only online one Capacitor Booster module"]}],
   },
   {
     id: "2998" as ShipProfile["id"],
@@ -8130,7 +8130,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Carrier bonuses (per skill level)","lines":["10% bonus to Fighter damage","5% bonus to Fighter hitpoints","5+ bonus to ship warp core strength","5% reduction in Sensor Dampening Burst Projector cycle time","2% bonus to Armored Command and Skirmish Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Burst Projectors","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Heavy Fighters","• Can lock at extended ranges","400% bonus to Armor Plates and Shield Extenders","50% bonus to Remote Sensor Dampener resistance","50% bonus to Stasis effect resistance","50% increase to Remote Electronic Assistance impedance","• Conduit Jump capable","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Gallente Carrier bonuses (per skill level)","lines":["10% bonus to Fighter damage","5% bonus to Fighter hitpoints","5+ bonus to ship warp core strength","5% reduction in Sensor Dampening Burst Projector cycle time","2% bonus to Armored Command and Skirmish Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Burst Projectors","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Heavy Fighters","• Can lock at extended ranges","400% bonus to Armor Plates and Shield Extenders","50% bonus to Remote Sensor Dampener resistance","50% bonus to Stasis effect resistance","50% increase to Remote Electronic Assistance impedance","• Conduit Jump capable","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "20187" as ShipProfile["id"],
@@ -8220,7 +8220,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["4% bonus to all armor resistances"]},{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Heavy Drone, Medium Drone and Light Drone hitpoints and damage"]},{"header":"Expedition Command Ships bonuses (per skill level)","lines":["50% bonus to Relic and Data Analyzer range","5% reduction in Gas Cloud Scoop duration","3% bonus to Expedition Command Burst effect strength and duration","1% bonus to Armor Command Burst effect strength and duration"]},{"header":"Role Bonus","lines":["100% bonus to Expedition Command Burst effect duration","50% reduction in Gas Cloud Scoop CPU requirement","50% bonus to Medium Energy Turret optimal range","50% bonus to Command Burst area of effect range","37.5% bonus to Core and Combat Scanner Probe strength","10+ bonus to Relic and Data Analyzer virus strength","• Can use two Command Burst modules","• Can fit Covert Ops Cloaking Device","• Cloak reactivation delay reduced to 15 seconds","• Can fit Zero-Point Mass Entangler","• This ship can receive bonus effects depending on the environment."]}],
+    bonuses: [{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["4% bonus to all armor resistances"]},{"header":"Gallente Battlecruiser bonuses (per skill level)","lines":["10% bonus to Heavy Drone, Medium Drone and Light Drone hitpoints and damage"]},{"header":"Expedition Command Ships bonuses (per skill level)","lines":["50% bonus to Relic and Data Analyzer range","5% reduction in Gas Cloud Scoop duration","3% bonus to Expedition Command Burst effect strength and duration","1% bonus to Armor Command Burst effect strength and duration"]},{"header":"Role Bonus","lines":["100% bonus to Expedition Command Burst effect duration","50% reduction in Gas Cloud Scoop CPU requirement","50% bonus to Medium Energy Turret optimal range","50% bonus to Command Burst area of effect range","37.5% bonus to Core and Combat Scanner Probe strength","10+ bonus to Relic and Data Analyzer virus strength","• Can use two Command Burst modules","• Can fit Covert Ops Cloaking Device","• Cloak reactivation delay reduced to 15 seconds","• Can fit Zero-Point Mass Entangler","• This ship can receive bonus effects depending on the environment."]}],
   },
   {
     id: "2006" as ShipProfile["id"],
@@ -8340,7 +8340,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.8, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.8625, kinetic: 0.625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Cruiser bonuses (per skill level)","lines":["5% bonus to kinetic Light Missile, Heavy Missile and Heavy Assault Missile damage","5% bonus to Rapid Light Missile, Heavy Missile and Heavy Assault Missile Launcher rate of fire"]},{"header":"Heavy Interdiction Cruisers bonuses (per skill level)","lines":["10% bonus to Heavy Missile and Heavy Assault Missile max velocity","5% bonus to Warp Disruption Field Generator scramble range"]},{"header":"Role Bonus","lines":["• Can fit Warp Disruption Field Generator and Cynosural Field Generator modules","20% bonus to all shield resistances"]}],
+    bonuses: [{"header":"Caldari Cruiser bonuses (per skill level)","lines":["5% bonus to kinetic Light Missile, Heavy Missile and Heavy Assault Missile damage","5% bonus to Rapid Light Missile, Heavy Missile and Heavy Assault Missile Launcher rate of fire"]},{"header":"Heavy Interdiction Cruisers bonuses (per skill level)","lines":["10% bonus to Heavy Missile and Heavy Assault Missile max velocity","5% bonus to Warp Disruption Field Generator scramble range"]},{"header":"Role Bonus","lines":["• Can fit Warp Disruption Field Generator and Cynosural Field Generator modules","20% bonus to all shield resistances"]}],
   },
   {
     id: "635" as ShipProfile["id"],
@@ -8370,7 +8370,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Role Bonus","lines":["• Can fit Covert Ops CLoaking Device","• Can fit Interdiction Nullifier"]}],
+    bonuses: [{"header":"Role Bonus","lines":["• Can fit Covert Ops CLoaking Device","• Can fit Interdiction Nullifier"]}],
   },
   {
     id: "4302" as ShipProfile["id"],
@@ -8430,7 +8430,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Industrial Command Ships bonuses (per skill level)","lines":["5% bonus to ship cargo and ore hold capacity","5% reduction in fuel consumption for Large Industrial Core","3% bonus to Mining Foreman Burst effect strength and duration","1% bonus to Shield Command Burst effect strength and duration","15% bonus to Drone hitpoints and damage","15% bonus to Drone ore mining yield","5% reduction in Drone ice harvesting cycle time","5% bonus in Mining Foreman Burst range"]},{"header":"Role Bonus","lines":["• Can fit Large Industrial Core","100% bonus to Drone damage","400% bonus to Remote Shield Booster optimal range","90% reduction to effective distance traveled for jump fatigue","• Can fit three Command Burst modules","50% bonus to Command and Mining Foreman Burst area of effect range","250% bonus to Tractor Beam range","100% bonus to Tractor Beam velocity","• Can connect to Mobile Phase Anchor deployables, providing 50 points of power"]}],
+    bonuses: [{"header":"Industrial Command Ships bonuses (per skill level)","lines":["5% bonus to ship cargo and ore hold capacity","5% reduction in fuel consumption for Large Industrial Core","3% bonus to Mining Foreman Burst effect strength and duration","1% bonus to Shield Command Burst effect strength and duration","15% bonus to Drone hitpoints and damage","15% bonus to Drone ore mining yield","5% reduction in Drone ice harvesting cycle time","5% bonus in Mining Foreman Burst range"]},{"header":"Role Bonus","lines":["• Can fit Large Industrial Core","100% bonus to Drone damage","400% bonus to Remote Shield Booster optimal range","90% reduction to effective distance traveled for jump fatigue","• Can fit three Command Burst modules","50% bonus to Command and Mining Foreman Burst area of effect range","250% bonus to Tractor Beam range","100% bonus to Tractor Beam velocity","• Can connect to Mobile Phase Anchor deployables, providing 50 points of power"]}],
   },
   {
     id: "33818" as ShipProfile["id"],
@@ -8580,7 +8580,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
     armorResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Covert Ops bonuses (per skill level)","lines":["10% bonus to Core and Combat Scanner Probe Strength","10% reduction in Survey Probe flight time","10% bonus to warp speed and acceleration"]},{"header":"Gallente Frigate bonuses (per skill level)","lines":["5% bonus to Small Hybrid Turret damage","7.5% bonus to Small Hybrid Turret tracking speed"]},{"header":"Minmatar Frigate bonuses (per skill level)","lines":["5% bonus to Small Projectile Turret rate of fire","10% bonus to Small Projectile Turret falloff"]},{"header":"Caldari Frigate bonuses (per skill level)","lines":["5% bonus to Light Missile and Rocket Launcher rate of fire","10% bonus to Light Missile and Rocket flight time"]},{"header":"Amarr Frigate bonuses (per skill level)","lines":["5% bonus to Small Energy Turret damage","10% bonus to Small Energy Turret optimal range"]},{"header":"Role Bonus","lines":["100% reduction in Cloaking Devices CPU requirement","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","10% bonus to security status gains from destruction of non-capsuleer pirates while flying this ship","• Armor Repairer and Shield Booster effectiveness increased by a percentage equal to 10x pilot security status, with a floor of 0% and ceiling of 50%"]}],
+    bonuses: [{"header":"Covert Ops bonuses (per skill level)","lines":["10% bonus to Core and Combat Scanner Probe Strength","10% reduction in Survey Probe flight time","10% bonus to warp speed and acceleration"]},{"header":"Gallente Frigate bonuses (per skill level)","lines":["5% bonus to Small Hybrid Turret damage","7.5% bonus to Small Hybrid Turret tracking speed"]},{"header":"Minmatar Frigate bonuses (per skill level)","lines":["5% bonus to Small Projectile Turret rate of fire","10% bonus to Small Projectile Turret falloff"]},{"header":"Caldari Frigate bonuses (per skill level)","lines":["5% bonus to Light Missile and Rocket Launcher rate of fire","10% bonus to Light Missile and Rocket flight time"]},{"header":"Amarr Frigate bonuses (per skill level)","lines":["5% bonus to Small Energy Turret damage","10% bonus to Small Energy Turret optimal range"]},{"header":"Role Bonus","lines":["100% reduction in Cloaking Devices CPU requirement","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","10% bonus to security status gains from destruction of non-capsuleer pirates while flying this ship","• Armor Repairer and Shield Booster effectiveness increased by a percentage equal to 10x pilot security status, with a floor of 0% and ceiling of 50%"]}],
   },
   {
     id: "28659" as ShipProfile["id"],
@@ -8610,7 +8610,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.475, explosive: 0.625 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.34375, explosive: 0.4 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Marauders bonuses (per skill level)","lines":["7.5% bonus to Armor Repairer amount","5% bonus to Large Energy Turret damage"]},{"header":"Amarr Battleship bonuses (per skill level)","lines":["10% reduction in Large Energy Turret activation cost","5% bonus to Large Energy Turret optimal range"]},{"header":"Role Bonus","lines":["100% bonus to Large Energy Turret damage","100% bonus to Tractor Beams range and velocity","• Can fit Bastion modules"]}],
+    bonuses: [{"header":"Marauders bonuses (per skill level)","lines":["7.5% bonus to Armor Repairer amount","5% bonus to Large Energy Turret damage"]},{"header":"Amarr Battleship bonuses (per skill level)","lines":["10% reduction in Large Energy Turret activation cost","5% bonus to Large Energy Turret optimal range"]},{"header":"Role Bonus","lines":["100% bonus to Large Energy Turret damage","100% bonus to Tractor Beams range and velocity","• Can fit Bastion modules"]}],
   },
   {
     id: "22440" as ShipProfile["id"],
@@ -8640,7 +8640,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.36, thermal: 0.37, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.74, thermal: 0.49, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Battleship bonuses (per skill level)","lines":["5% bonus to Large Projectile Turret rate of fire","10% bonus to Large Projectile Turret damage"]},{"header":"Black Ops bonuses (per skill level)","lines":["7.5% bonus to Large Projectile Turret tracking","7.5% bonus to Large Projectile Turret falloff","20% bonus to Heavy Stasis Grappler optimal range"]},{"header":"Role Bonus","lines":["• Can fit Covert Cynosural Field Generator and Covert Jump Portal Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","75% reduction to effective distance traveled for jump fatigue","50% reduction in Cynosural Field Generator duration","650% bonus to ship max velocity when using Cloaking Devices","5% Additional bonus to Reinforced Bulkhead hitpoints"]}],
+    bonuses: [{"header":"Minmatar Battleship bonuses (per skill level)","lines":["5% bonus to Large Projectile Turret rate of fire","10% bonus to Large Projectile Turret damage"]},{"header":"Black Ops bonuses (per skill level)","lines":["7.5% bonus to Large Projectile Turret tracking","7.5% bonus to Large Projectile Turret falloff","20% bonus to Heavy Stasis Grappler optimal range"]},{"header":"Role Bonus","lines":["• Can fit Covert Cynosural Field Generator and Covert Jump Portal Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","75% reduction to effective distance traveled for jump fatigue","50% reduction in Cynosural Field Generator duration","650% bonus to ship max velocity when using Cloaking Devices","5% Additional bonus to Reinforced Bulkhead hitpoints"]}],
   },
   {
     id: "91174" as ShipProfile["id"],
@@ -8730,7 +8730,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.85, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.675, kinetic: 0.8375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret rate of fire","10% bonus to Medium Hybrid Turret tracking speed"]},{"header":"Heavy Interdiction Cruisers bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret optimal range","5% bonus to Warp Disruption Field Generator scramble range","Role Bonus:• Can fit Warp Disruption Field Generator and Cynosural Field Generator modules","20% bonus to all armor resistances"]}],
+    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Hybrid Turret rate of fire","10% bonus to Medium Hybrid Turret tracking speed"]},{"header":"Heavy Interdiction Cruisers bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret optimal range","5% bonus to Warp Disruption Field Generator scramble range"]},{"header":"Role Bonus","lines":["• Can fit Warp Disruption Field Generator and Cynosural Field Generator modules","20% bonus to all armor resistances"]}],
   },
   {
     id: "19726" as ShipProfile["id"],
@@ -8760,7 +8760,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Dreadnought bonuses (per skill level)","lines":["4% bonus to all shield resistances","5% bonus to XL Cruise, XL Torpedo and Torpedo damage","10% reduction in missile launcher reload time","Role Bonus:• Can fit Siege modules• 5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Caldari Dreadnought bonuses (per skill level)","lines":["4% bonus to all shield resistances","5% bonus to XL Cruise, XL Torpedo and Torpedo damage","10% reduction in missile launcher reload time"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","• 5x penalty to Entosis Link duration"]}],
   },
   {
     id: "73793" as ShipProfile["id"],
@@ -8790,7 +8790,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Dreadnought bonuses (per skill level)","lines":["7.5% bonus to XL Cruise, XL Torpedo and Torpedo damage","4% bonus to all shield resistances","10% reduction in missile launcher reload time","7.5% bonus to Target Painter effectiveness"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","• 5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Caldari Dreadnought bonuses (per skill level)","lines":["7.5% bonus to XL Cruise, XL Torpedo and Torpedo damage","4% bonus to all shield resistances","10% reduction in missile launcher reload time","7.5% bonus to Target Painter effectiveness"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","• 5x penalty to Entosis Link duration"]}],
   },
   {
     id: "11965" as ShipProfile["id"],
@@ -8820,7 +8820,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.625, explosive: 0.8125 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.53125, explosive: 0.7 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Cruiser bonuses (per skill level)","lines":["7.5% bonus to Weapon Disruptor effectiveness","10% bonus to Drone hitpoints and damage"]},{"header":"Recon Ships bonuses (per skill level)","lines":["10% bonus to Energy Nosferatu and Energy Neutralizer drain amount","20% reduction in Cloaking Devices CPU requirement","20% bonus to Energy Nosferatu and Energy Neutralizer optimal range","10% bonus to Energy Nosferatu and Energy Neutralizer falloff range"]},{"header":"Role Bonus","lines":["80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator• Cloak reactivation delay reduced to 5 seconds"]}],
+    bonuses: [{"header":"Amarr Cruiser bonuses (per skill level)","lines":["7.5% bonus to Weapon Disruptor effectiveness","10% bonus to Drone hitpoints and damage"]},{"header":"Recon Ships bonuses (per skill level)","lines":["10% bonus to Energy Nosferatu and Energy Neutralizer drain amount","20% reduction in Cloaking Devices CPU requirement","20% bonus to Energy Nosferatu and Energy Neutralizer optimal range","10% bonus to Energy Nosferatu and Energy Neutralizer falloff range"]},{"header":"Role Bonus","lines":["80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds"]}],
   },
   {
     id: "89240" as ShipProfile["id"],
@@ -8940,7 +8940,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Industrial Command Ships bonuses (per skill level)","lines":["5% bonus to ship cargo and ore hold capacity","2% bonus to Mining Foreman Burst effect strength and duration","10% bonus to Drone hitpoints, damage and ore mining yield","5% reduction in Drone ice harvesting cycle time","5% bonus in Mining Foreman Burst range"]},{"header":"Role Bonus","lines":["• Can fit Medium Industrial Core","400% bonus to Remote Shield Booster optimal range","90% reduction in powergrid requirements for Command and Mining Foreman Burst Modules","90% reduction to effective distance traveled for jump fatigue","• Can use 2 Command Burst modules","100% bonus to Tractor Beam range","50% bonus to Tractor Beam velocity","• Can connect to Mobile Phase Anchor deployables, providing 35 points of power"]}],
+    bonuses: [{"header":"Industrial Command Ships bonuses (per skill level)","lines":["5% bonus to ship cargo and ore hold capacity","2% bonus to Mining Foreman Burst effect strength and duration","10% bonus to Drone hitpoints, damage and ore mining yield","5% reduction in Drone ice harvesting cycle time","5% bonus in Mining Foreman Burst range"]},{"header":"Role Bonus","lines":["• Can fit Medium Industrial Core","400% bonus to Remote Shield Booster optimal range","90% reduction in powergrid requirements for Command and Mining Foreman Burst Modules","90% reduction to effective distance traveled for jump fatigue","• Can use 2 Command Burst modules","100% bonus to Tractor Beam range","50% bonus to Tractor Beam velocity","• Can connect to Mobile Phase Anchor deployables, providing 35 points of power"]}],
   },
   {
     id: "47466" as ShipProfile["id"],
@@ -9120,7 +9120,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["10% bonus to Drone hitpoints and damage","4% bonus to all armor resistances","Role Bonus:• Can use one Command Burst module","12.5% bonus to Drone microwarp velocity","50% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["10% bonus to Drone hitpoints and damage","4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","12.5% bonus to Drone microwarp velocity","50% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "72872" as ShipProfile["id"],
@@ -9150,7 +9150,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Energy Turret damage","10% bonus to Medium Energy Turret optimal range","5% bonus to Drone hitpoints and damage","10% bonus to ship armor hitpoints"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","50% bonus to Command Burst area of effect range","12.5% bonus to Drone microwarp velocity","25% bonus to Medium Energy Turret optimal range and falloff"]}],
+    bonuses: [{"header":"Amarr Battlecruiser bonuses (per skill level)","lines":["7.5% bonus to Medium Energy Turret damage","10% bonus to Medium Energy Turret optimal range","5% bonus to Drone hitpoints and damage","10% bonus to ship armor hitpoints"]},{"header":"Role Bonus","lines":["• Can use one Command Burst module","50% bonus to Command Burst area of effect range","12.5% bonus to Drone microwarp velocity","25% bonus to Medium Energy Turret optimal range and falloff"]}],
   },
   {
     id: "12733" as ShipProfile["id"],
@@ -9180,7 +9180,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.7, explosive: 0.875 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.625, explosive: 0.8 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Hauler bonuses (per skill level)","lines":["5% bonus to ship cargo capacity","5% bonus to ship max velocity"]},{"header":"Transport Ships bonuses (per skill level)","lines":["5% bonus to warp speed and warp acceleration","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","• Immune to all Cargo Scanners","90% reduction to effective distance traveled for jump fatigue","75% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Amarr Hauler bonuses (per skill level)","lines":["5% bonus to ship cargo capacity","5% bonus to ship max velocity"]},{"header":"Transport Ships bonuses (per skill level)","lines":["5% bonus to warp speed and warp acceleration","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","• Immune to all Cargo Scanners","90% reduction to effective distance traveled for jump fatigue","75% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "33697" as ShipProfile["id"],
@@ -9210,7 +9210,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Mining Frigate bonuses (per skill level)","lines":["5% bonus to Mining yield","5% reduction in Gas Cloud Scoop duration"]},{"header":"Expedition Frigates bonuses (per skill level)","lines":["5% bonus to Mining yield","5% reduction in ship signature radius"]},{"header":"Role Bonus","lines":["100% bonus to Mining and Gas Cloud Scoop yield","100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds"]}],
+    bonuses: [{"header":"Mining Frigate bonuses (per skill level)","lines":["5% bonus to Mining yield","5% reduction in Gas Cloud Scoop duration"]},{"header":"Expedition Frigates bonuses (per skill level)","lines":["5% bonus to Mining yield","5% reduction in ship signature radius"]},{"header":"Role Bonus","lines":["100% bonus to Mining and Gas Cloud Scoop yield","100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds"]}],
   },
   {
     id: "29988" as ShipProfile["id"],
@@ -9240,7 +9240,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.4, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.5125, kinetic: 0.675, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Defensive Systems bonuses (per skill level)","lines":["• bonus to all Gallente Defensive Systems effectiveness"]},{"header":"Gallente Core Systems bonuses (per skill level)","lines":["• bonus to all Gallente Core Systems effectiveness"]},{"header":"Gallente Offensive Systems bonuses (per skill level)","lines":["• bonus to all Gallente Offensive Systems effectiveness"]},{"header":"Gallente Propulsion Systems bonuses (per skill level)","lines":["• bonus to all Gallente Propulsion Systems effectiveness"]},{"header":"Gallente Strategic Cruiser bonuses (per skill level)","lines":["• 5% reduction in module heat damage amount taken","• 10% bonus to nanite repair paste repair speed"]},{"header":"Role Bonus","lines":["• 99% reduction in Scan Probe Launcher CPU requirements","• Rigs may be removed from this ship without being destroyed"]}],
+    bonuses: [{"header":"Gallente Defensive Systems bonuses (per skill level)","lines":["• bonus to all Gallente Defensive Systems effectiveness"]},{"header":"Gallente Core Systems bonuses (per skill level)","lines":["• bonus to all Gallente Core Systems effectiveness"]},{"header":"Gallente Offensive Systems bonuses (per skill level)","lines":["• bonus to all Gallente Offensive Systems effectiveness"]},{"header":"Gallente Propulsion Systems bonuses (per skill level)","lines":["• bonus to all Gallente Propulsion Systems effectiveness"]},{"header":"Gallente Strategic Cruiser bonuses (per skill level)","lines":["• 5% reduction in module heat damage amount taken","• 10% bonus to nanite repair paste repair speed"]},{"header":"Role Bonus","lines":["• 99% reduction in Scan Probe Launcher CPU requirements","• Rigs may be removed from this ship without being destroyed"]}],
   },
   {
     id: "20183" as ShipProfile["id"],
@@ -9300,7 +9300,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.75, thermal: 0.6, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.9, thermal: 0.675, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Hauler bonuses (per skill level)","lines":["5% bonus to ship cargo capacity","5% bonus to ship max velocity"]},{"header":"Transport Ships bonuses (per skill level)","lines":["5% bonus to warp speed and warp acceleration","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","• Immune to all Cargo Scanners","90% reduction to effective distance traveled for jump fatigue","75% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Minmatar Hauler bonuses (per skill level)","lines":["5% bonus to ship cargo capacity","5% bonus to ship max velocity"]},{"header":"Transport Ships bonuses (per skill level)","lines":["5% bonus to warp speed and warp acceleration","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","• Immune to all Cargo Scanners","90% reduction to effective distance traveled for jump fatigue","75% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "597" as ShipProfile["id"],
@@ -9360,7 +9360,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.475, explosive: 0.625 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.34375, explosive: 0.4 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Frigate bonuses (per skill level)","lines":["10% bonus to Torpedo flight time","15% bonus to Torpedo max velocity"]},{"header":"Covert Ops bonuses (per skill level)","lines":["5% bonus to EM Bomb damage","15% bonus to EM Torpedo damage"]},{"header":"Role Bonus","lines":["99.65% reduction in Torpedo Launcher powergrid requirement","50% reduction in Cloaking Devices CPU requirement","• No targeting delay after Cloaking Device deactivation","• Can fit Covert Ops Cloaking Device, Covert Cynosural Field Generator and Bomb Launcher","• Cloak reactivation delay reduced to 15 seconds"]}],
+    bonuses: [{"header":"Amarr Frigate bonuses (per skill level)","lines":["10% bonus to Torpedo flight time","15% bonus to Torpedo max velocity"]},{"header":"Covert Ops bonuses (per skill level)","lines":["5% bonus to EM Bomb damage","15% bonus to EM Torpedo damage"]},{"header":"Role Bonus","lines":["99.65% reduction in Torpedo Launcher powergrid requirement","50% reduction in Cloaking Devices CPU requirement","• No targeting delay after Cloaking Device deactivation","• Can fit Covert Ops Cloaking Device, Covert Cynosural Field Generator and Bomb Launcher","• Cloak reactivation delay reduced to 15 seconds"]}],
   },
   {
     id: "85236" as ShipProfile["id"],
@@ -9390,7 +9390,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.4, thermal: 0.4, kinetic: 0.4, explosive: 0.4 },
     armorResists: { em: 0.4, thermal: 0.4, kinetic: 0.4, explosive: 0.4 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"","lines":["15% bonus to Large Energy Turret damage","10% bonus to Large Energy Turret optimal range","12.5% bonus to Rapid Heavy Missile, Cruise Missile and Torpedo Launcher rate of fire","10% bonus to Cruise Missile and Torpedo flight time","4% bonus to all shield resistances","15% bonus to Large Hybrid Turret damage","7.5% bonus to Large Hybrid Turret tracking speed","12.5% bonus to Large Projectile Turret rate of fire","10% bonus to Large Projectile Turret faloff","10% bonus to Warp Scrambler and Warp Disruptor optimal range","20% bonus to Stasis Webifier optimal range","10% bonus to warp speed and acceleration","• Can fit Covert Cynosural Field Generator and Covert Jump Portal Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","100% increase to Micro Warp Drive and Afterburner duration","• ECM Burst Jammer optimal range, falloff and strength increased by a percentage equal to -10x pilot negative security status with a floor of 0% and a ceiling of 75%","75% reduction to effective distance traveled for jump fatigue","650% bonus to ship max velocity when using Cloaking Devices","100% bonus to Shield Extender hitpoints","50% bonus to Armor Plate hitpoints","5% additional bonus to Reinforced Bulkhead hitpoints","50% reduction in Cynosural Field Generator duration"]}],
+    bonuses: [{"header":"","lines":["15% bonus to Large Energy Turret damage","10% bonus to Large Energy Turret optimal range","12.5% bonus to Rapid Heavy Missile, Cruise Missile and Torpedo Launcher rate of fire","10% bonus to Cruise Missile and Torpedo flight time","4% bonus to all shield resistances","15% bonus to Large Hybrid Turret damage","7.5% bonus to Large Hybrid Turret tracking speed","12.5% bonus to Large Projectile Turret rate of fire","10% bonus to Large Projectile Turret faloff","10% bonus to Warp Scrambler and Warp Disruptor optimal range","20% bonus to Stasis Webifier optimal range","10% bonus to warp speed and acceleration","• Can fit Covert Cynosural Field Generator and Covert Jump Portal Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","100% increase to Micro Warp Drive and Afterburner duration","• ECM Burst Jammer optimal range, falloff and strength increased by a percentage equal to -10x pilot negative security status with a floor of 0% and a ceiling of 75%","75% reduction to effective distance traveled for jump fatigue","650% bonus to ship max velocity when using Cloaking Devices","100% bonus to Shield Extender hitpoints","50% bonus to Armor Plate hitpoints","5% additional bonus to Reinforced Bulkhead hitpoints","50% reduction in Cynosural Field Generator duration"]}],
   },
   {
     id: "32846" as ShipProfile["id"],
@@ -9450,7 +9450,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.7, explosive: 0.875 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.625, explosive: 0.8 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Logistics Cruisers bonuses (per skill level)","lines":["20% bonus to Remote Armor Repairer optimal range and falloff","15% reduction in Remote Armor Repairer activation cost","2% reduction in Remote Armor Repairer cycle time","7.5% bonus to Armor Plate hitpoints"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["20% bonus to Logistic Drone transfer amount","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["20% bonus to Energy Nosferatu drain amount","35% bonus to Energy Nosferatu optimal range and falloff"]},{"header":"Role Bonus","lines":["• Cloak reactivation delay reduced to 5 seconds","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level","85% reduction in Remote Armor Repairer powergrid requirement","85% reduction in Energy Nosferatu CPU requirement","100% bonus to Remote Armor Repairer optimal range and falloff"]}],
+    bonuses: [{"header":"Logistics Cruisers bonuses (per skill level)","lines":["20% bonus to Remote Armor Repairer optimal range and falloff","15% reduction in Remote Armor Repairer activation cost","2% reduction in Remote Armor Repairer cycle time","7.5% bonus to Armor Plate hitpoints"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["20% bonus to Logistic Drone transfer amount","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["20% bonus to Energy Nosferatu drain amount","35% bonus to Energy Nosferatu optimal range and falloff"]},{"header":"Role Bonus","lines":["• Cloak reactivation delay reduced to 5 seconds","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Energy Nosferatu fitted to this ship will drain targeted ship's capacitor regardless of your own capacitor level","85% reduction in Remote Armor Repairer powergrid requirement","85% reduction in Energy Nosferatu CPU requirement","100% bonus to Remote Armor Repairer optimal range and falloff"]}],
   },
   {
     id: "23773" as ShipProfile["id"],
@@ -9480,7 +9480,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Titan bonuses (per skill level)","lines":["180% bonus to Capital Projectile Turret damage","5% bonus to Capital Projectile Turret rate of fire","10+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Doomsday devices","• Can fit Jump Portal Generator","• Can fit Clone Vat Bay","• Can use three Command Burst modules","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration","• Can fit one Phenomena Generator module"]}],
+    bonuses: [{"header":"Minmatar Titan bonuses (per skill level)","lines":["180% bonus to Capital Projectile Turret damage","5% bonus to Capital Projectile Turret rate of fire","10+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Doomsday devices","• Can fit Jump Portal Generator","• Can fit Clone Vat Bay","• Can use three Command Burst modules","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration","• Can fit one Phenomena Generator module"]}],
   },
   {
     id: "60765" as ShipProfile["id"],
@@ -9540,7 +9540,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.625, thermal: 0.5, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.85, thermal: 0.59375, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["10% bonus to missile damage","10% bonus to Target Painter effectiveness"]},{"header":"Recon Ships bonuses (per skill level)","lines":["60% bonus to Stasis Webifier optimal range","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator• Cloak reactivation delay reduced to 5 seconds"]}],
+    bonuses: [{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["10% bonus to missile damage","10% bonus to Target Painter effectiveness"]},{"header":"Recon Ships bonuses (per skill level)","lines":["60% bonus to Stasis Webifier optimal range","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds"]}],
   },
   {
     id: "11178" as ShipProfile["id"],
@@ -9780,7 +9780,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.53, explosive: 0.68 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.41, explosive: 0.49 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Battleship bonuses (per skill level)","lines":["10% reduction in Large Energy Turret activation cost","10% bonus to Large Energy Turret rate of fire"]},{"header":"Black Ops bonuses (per skill level)","lines":["7.5% bonus to Large Energy Turret tracking speed","10% bonus to Energy Nosferatu and Energy Neutralizer drain amount"]},{"header":"Role Bonus","lines":["• Can fit Covert Cynosural Field Generator and Covert Jump Portal Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","75% reduction to effective distance traveled for jump fatigue","50% reduction in Cynosural Field Generator duration","650% bonus to ship max velocity when using Cloaking Devices","5% Additional bonus to Reinforced Bulkhead hitpoints"]}],
+    bonuses: [{"header":"Amarr Battleship bonuses (per skill level)","lines":["10% reduction in Large Energy Turret activation cost","10% bonus to Large Energy Turret rate of fire"]},{"header":"Black Ops bonuses (per skill level)","lines":["7.5% bonus to Large Energy Turret tracking speed","10% bonus to Energy Nosferatu and Energy Neutralizer drain amount"]},{"header":"Role Bonus","lines":["• Can fit Covert Cynosural Field Generator and Covert Jump Portal Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","75% reduction to effective distance traveled for jump fatigue","50% reduction in Cynosural Field Generator duration","650% bonus to ship max velocity when using Cloaking Devices","5% Additional bonus to Reinforced Bulkhead hitpoints"]}],
   },
   {
     id: "17812" as ShipProfile["id"],
@@ -9840,7 +9840,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.7, explosive: 0.875 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.625, explosive: 0.8 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Frigate bonuses (per skill level)","lines":["10% reduction in Small Energy Turret activation cost","5% bonus to Small Energy Turret rate of fire"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["10% bonus to Small Energy Turret optimal range","5% bonus to Small Energy Turret damage"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Amarr Frigate bonuses (per skill level)","lines":["10% reduction in Small Energy Turret activation cost","5% bonus to Small Energy Turret rate of fire"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["10% bonus to Small Energy Turret optimal range","5% bonus to Small Energy Turret damage"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "17478" as ShipProfile["id"],
@@ -9900,7 +9900,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Dreadnought bonuses (per skill level)","lines":["10% reduction in Capital Energy Turret activation cost","5% bonus to Capital Energy Turret damage","4% bonus to all armor resistances","Role Bonus:• Can fit Siege modules","• 5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Amarr Dreadnought bonuses (per skill level)","lines":["10% reduction in Capital Energy Turret activation cost","5% bonus to Capital Energy Turret damage","4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","• 5x penalty to Entosis Link duration"]}],
   },
   {
     id: "73790" as ShipProfile["id"],
@@ -9930,7 +9930,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Dreadnought bonuses (per skill level)","lines":["7.5% bonus to Capital Energy Turret damage","4% bonus to all armor resistances","10% reduction in Capital Energy Turret activation cost","25% bonus to Energy Nosferatu drain amount and range"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","• 5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Amarr Dreadnought bonuses (per skill level)","lines":["7.5% bonus to Capital Energy Turret damage","4% bonus to all armor resistances","10% reduction in Capital Energy Turret activation cost","25% bonus to Energy Nosferatu drain amount and range"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","• 5x penalty to Entosis Link duration"]}],
   },
   {
     id: "3514" as ShipProfile["id"],
@@ -9960,7 +9960,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Carrier bonuses (per skill level)","lines":["5% bonus to Fighter damage","5% bonus to Fighter weapon explosion radius and explosion velocity","3+ bonus to ship warp core strength"]},{"header":"Caldari Carrier bonuses (per skill level)","lines":["5% bonus to Fighter damage","20% bonus to Afterburner velocity bonus","3+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Burst Projectors","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Heavy Fighters","• Can lock at extended ranges","400% bonus to Armor Plates and Shield Extenders","50% bonus to Remote Sensor Dampener resistance","50% bonus to Stasis effect resistance","50% increase to Remote Electronic Assistance impedance","• Conduit Jump capable","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Amarr Carrier bonuses (per skill level)","lines":["5% bonus to Fighter damage","5% bonus to Fighter weapon explosion radius and explosion velocity","3+ bonus to ship warp core strength"]},{"header":"Caldari Carrier bonuses (per skill level)","lines":["5% bonus to Fighter damage","20% bonus to Afterburner velocity bonus","3+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Burst Projectors","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Heavy Fighters","• Can lock at extended ranges","400% bonus to Armor Plates and Shield Extenders","50% bonus to Remote Sensor Dampener resistance","50% bonus to Stasis effect resistance","50% increase to Remote Electronic Assistance impedance","• Conduit Jump capable","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "28844" as ShipProfile["id"],
@@ -10050,7 +10050,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Role bonus","lines":["100% bonus to to warp speed and warp accelaration","100% bonus to Interdiction Nullifier duration","100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device","805 reduction in Interdiction Nullifier reactivation delay and max lock rangepenalty"]}],
+    bonuses: [{"header":"Role bonus","lines":["100% bonus to to warp speed and warp accelaration","100% bonus to Interdiction Nullifier duration","100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device","805 reduction in Interdiction Nullifier reactivation delay and max lock rangepenalty"]}],
   },
   {
     id: "49712" as ShipProfile["id"],
@@ -10140,7 +10140,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.7, kinetic: 0.625, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.79375, kinetic: 0.53125, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Cruiser bonuses (per skill level)","lines":["7.5% bonus to kinetic Light Missile, Heavy Missile and Heavy Assault Missile damage","10% reduction in ECM Target Jammer activation cost"]},{"header":"Recon Ships bonuses (per skill level)","lines":["30% bonus to ECM Target Jammer strength","10% bonus to Heavy Missile and Heavy Assault Missile max velocity","Role Bonus:• Cannot be detected by directional scanners"]}],
+    bonuses: [{"header":"Caldari Cruiser bonuses (per skill level)","lines":["7.5% bonus to kinetic Light Missile, Heavy Missile and Heavy Assault Missile damage","10% reduction in ECM Target Jammer activation cost"]},{"header":"Recon Ships bonuses (per skill level)","lines":["30% bonus to ECM Target Jammer strength","10% bonus to Heavy Missile and Heavy Assault Missile max velocity"]},{"header":"Role Bonus","lines":["• Cannot be detected by directional scanners"]}],
   },
   {
     id: "28352" as ShipProfile["id"],
@@ -10170,7 +10170,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Capital Industrial Ships bonuses (per skill level)","lines":["5% bonus to Mining Foreman burst effect strength and duration","3% bonus to Shield Command Burst effect strength and duration","5% reduction in fuel consumption for Capital Industrial Core","10% bonus to Drone hitpoints and damage","10% bonus to Drone ore mining yield","6% reduction in Drone ice harvesting cycle time"]},{"header":"Industrial Commandship bonuses (per skill level)","lines":["5% bonus in Mining Foreman Burst range"]},{"header":"Role Bonus","lines":["400% bonus to Capital Remote Shield Booster optimal range","90% reduction to effective distance traveled for jump fatigue","• Can fit Capital Industrial Core","• Can fit Clone Vat Bay","• Can operate 'Excavator' Drones","• Can fit 3 Command Burst modules","• Can fit one Pulse Activated Nexus Invulnerability Core module","50% bonus to command and mining foreman burst area of effect range","5x penalty to Entosis Link cycle time","200% bonus to Cargo Scanners range","• Can connect to Mobile Phase Anchor deployables, providing 100 points of power"]}],
+    bonuses: [{"header":"Capital Industrial Ships bonuses (per skill level)","lines":["5% bonus to Mining Foreman burst effect strength and duration","3% bonus to Shield Command Burst effect strength and duration","5% reduction in fuel consumption for Capital Industrial Core","10% bonus to Drone hitpoints and damage","10% bonus to Drone ore mining yield","6% reduction in Drone ice harvesting cycle time"]},{"header":"Industrial Commandship bonuses (per skill level)","lines":["5% bonus in Mining Foreman Burst range"]},{"header":"Role Bonus","lines":["400% bonus to Capital Remote Shield Booster optimal range","90% reduction to effective distance traveled for jump fatigue","• Can fit Capital Industrial Core","• Can fit Clone Vat Bay","• Can operate 'Excavator' Drones","• Can fit 3 Command Burst modules","• Can fit one Pulse Activated Nexus Invulnerability Core module","50% bonus to command and mining foreman burst area of effect range","5x penalty to Entosis Link cycle time","200% bonus to Cargo Scanners range","• Can connect to Mobile Phase Anchor deployables, providing 100 points of power"]}],
   },
   {
     id: "629" as ShipProfile["id"],
@@ -10230,7 +10230,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.5, thermal: 0.4, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.8, thermal: 0.5125, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Interdictors bonuses (per skill level)","lines":["10% bonus to Small Projectile Turret falloff","10% reduction in Microwarpdrive signature radius penalty"]},{"header":"Minmatar Destroyer bonuses (per skill level)","lines":["5% bonus to Small Projectile Turret damage","10% bonus to Small Projectile Turret tracking speed"]},{"header":"Role Bonus","lines":["• Can fit Interdiction Sphere Launcher","25% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Interdictors bonuses (per skill level)","lines":["10% bonus to Small Projectile Turret falloff","10% reduction in Microwarpdrive signature radius penalty"]},{"header":"Minmatar Destroyer bonuses (per skill level)","lines":["5% bonus to Small Projectile Turret damage","10% bonus to Small Projectile Turret tracking speed"]},{"header":"Role Bonus","lines":["• Can fit Interdiction Sphere Launcher","25% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "12019" as ShipProfile["id"],
@@ -10260,7 +10260,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.7, explosive: 0.875 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.625, explosive: 0.8 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["7.5% bonus to Heavy Missile and Heavy Assault Missile max velocity","5% bonus to Rapid Light Missile, Heavy Missile and Heavy Assault Missile Launcher rate of fire"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["5% bonus to Heavy Missile and Heavy Assault Missile damage","5% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["7.5% bonus to Heavy Missile and Heavy Assault Missile max velocity","5% bonus to Rapid Light Missile, Heavy Missile and Heavy Assault Missile Launcher rate of fire"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["5% bonus to Heavy Missile and Heavy Assault Missile damage","5% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "92822" as ShipProfile["id"],
@@ -10290,7 +10290,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.625, explosive: 0.8125 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.55, explosive: 0.7 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Carrier bonuses (per skill level)","lines":["4% bonus to all armor resistances","20% bonus to Support Fighter shield hitpoints","10% bonus to Cenobite Support Fighter neutralization strength and optimal range","20% increas in Conduit Jump capacity"]},{"header":"Command Carrier bonuses (per skill level)","lines":["5% bonus to Armor Command and Information Command burst strenght and duration","5% reduction in Capital Micro Jump Drive and Capital Micro Jump Field Generator spool up time"]},{"header":"Role Bonus","lines":["• Can fit Integrated Sensor Array","• Can fit Capital Micro Jump Drive And Capital Micro Jump Field Generator","• Can fit three Command Burst modules","200% bonus to Command Burst area of effect range","20% bonus to Capital Micro Jump Field Generator maximum ship jump cap","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump capable","5x penalty to Endosis Link duration"]}],
+    bonuses: [{"header":"Amarr Carrier bonuses (per skill level)","lines":["4% bonus to all armor resistances","20% bonus to Support Fighter shield hitpoints","10% bonus to Cenobite Support Fighter neutralization strength and optimal range","20% increas in Conduit Jump capacity"]},{"header":"Command Carrier bonuses (per skill level)","lines":["5% bonus to Armor Command and Information Command burst strenght and duration","5% reduction in Capital Micro Jump Drive and Capital Micro Jump Field Generator spool up time"]},{"header":"Role Bonus","lines":["• Can fit Integrated Sensor Array","• Can fit Capital Micro Jump Drive And Capital Micro Jump Field Generator","• Can fit three Command Burst modules","200% bonus to Command Burst area of effect range","20% bonus to Capital Micro Jump Field Generator maximum ship jump cap","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump capable","5x penalty to Endosis Link duration"]}],
   },
   {
     id: "87381" as ShipProfile["id"],
@@ -10320,7 +10320,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"","lines":["Gallente Dreadnought","10% bonus to Capital Projectile Turret falloff.","Minmatar Dreadnought","10% bonus to Capital Projectile Turret damage."]},{"header":"Role Bonus","lines":["• Can fit a Siege Module.","• Can move at 10% velocity while in Siege mode.","• Can fit a Capital Micro Jump Drive.","• Can activate Capital Micro Jump Drive while in Siege mode.","25% bonus to Warp Speed and Warp Acceleration.","25% bonus to Capital Projectile Turret damage.","5x Penalty to Entosis Link cycle time","75% reduction in projection weapon reload time"]}],
+    bonuses: [{"header":"Gallente Dreadnought","lines":["10% bonus to Capital Projectile Turret falloff."]},{"header":"Minmatar Dreadnought","lines":["10% bonus to Capital Projectile Turret damage."]},{"header":"Role Bonus","lines":["• Can fit a Siege Module.","• Can move at 10% velocity while in Siege mode.","• Can fit a Capital Micro Jump Drive.","• Can activate Capital Micro Jump Drive while in Siege mode.","25% bonus to Warp Speed and Warp Acceleration.","25% bonus to Capital Projectile Turret damage.","5x Penalty to Entosis Link cycle time","75% reduction in projection weapon reload time"]}],
   },
   {
     id: "32987" as ShipProfile["id"],
@@ -10620,7 +10620,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.85, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.675, kinetic: 0.8375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Assault Frigates bonuses (per skil level)","lines":["10% bonus to Armor Repair amount","10% bonus to Small Hybrid Turret tracking speed and optimal range"]},{"header":"Gallente Frigate bonuses (per skil level)","lines":["10% bonus to Small Hybrid Turret damage","10% bonus to Warp Scrambler and Warp Disruptor optimal range","10% bonus to the benefits of overheating Afterburners and Microwarpdrives"]},{"header":"Role bonus","lines":["100% reduction in Armor Plates mass penalty","50% reduction in module heat damage taken","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Assault Frigates bonuses (per skil level)","lines":["10% bonus to Armor Repair amount","10% bonus to Small Hybrid Turret tracking speed and optimal range"]},{"header":"Gallente Frigate bonuses (per skil level)","lines":["10% bonus to Small Hybrid Turret damage","10% bonus to Warp Scrambler and Warp Disruptor optimal range","10% bonus to the benefits of overheating Afterburners and Microwarpdrives"]},{"header":"Role bonus","lines":["100% reduction in Armor Plates mass penalty","50% reduction in module heat damage taken","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "85062" as ShipProfile["id"],
@@ -10650,7 +10650,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
     armorResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Frigate bonuses (per skill level)","lines":["10% bonus to Small Energy Turret optimal range"]},{"header":"Caldari Frigate bonuses (per skill level)","lines":["10% bonus to Light Missile and Rocket flight time","4% bonus to all shield resistances"]},{"header":"Gallente Frigate bonuses (per skill level)","lines":["7.5% bonus to Small Hybrid Turret tracking speed"]},{"header":"Minmatar Frigate bonuses (per skill level)","lines":["10% bonus to Small Projectile falloff"]},{"header":"Covert Ops bonuses (per skill level)","lines":["15% bonus to Core and Scanner Probe strength","10% reduction in Survey Probe flight time","15% bonus to warp speed and acceleration"]},{"header":"Role Bonus","lines":["100% reduction in Cloaking Devices CPU requirement","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","• No targeting delay after Cloaking Device deactivation","150% bonus to Light Combat Drones damage and hitpoints","• Small Hybrid Turret, Small Projectile Turret, Small Energy Turret, Light Missile and Rocket damage increased by a percentage equal to -7.5x pilot negative security status with a floor of 0% and a ceiling of 75%"]}],
+    bonuses: [{"header":"Amarr Frigate bonuses (per skill level)","lines":["10% bonus to Small Energy Turret optimal range"]},{"header":"Caldari Frigate bonuses (per skill level)","lines":["10% bonus to Light Missile and Rocket flight time","4% bonus to all shield resistances"]},{"header":"Gallente Frigate bonuses (per skill level)","lines":["7.5% bonus to Small Hybrid Turret tracking speed"]},{"header":"Minmatar Frigate bonuses (per skill level)","lines":["10% bonus to Small Projectile falloff"]},{"header":"Covert Ops bonuses (per skill level)","lines":["15% bonus to Core and Scanner Probe strength","10% reduction in Survey Probe flight time","15% bonus to warp speed and acceleration"]},{"header":"Role Bonus","lines":["100% reduction in Cloaking Devices CPU requirement","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","• No targeting delay after Cloaking Device deactivation","150% bonus to Light Combat Drones damage and hitpoints","• Small Hybrid Turret, Small Projectile Turret, Small Energy Turret, Light Missile and Rocket damage increased by a percentage equal to -7.5x pilot negative security status with a floor of 0% and a ceiling of 75%"]}],
   },
   {
     id: "19744" as ShipProfile["id"],
@@ -10740,7 +10740,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.7, kinetic: 0.625, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.75, kinetic: 0.55, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Carrier bonuses (per skill level)","lines":["4% bonus to all shield resistances","20% bonus to Support Fighter shield hitpoints","10% bonus to Scarab Support Fighter ECM strength and optimal range","20% Increase in Conduit Jump capacity"]},{"header":"Command Carrier bonuses (per skill level)","lines":["5% bonus to Shield Command and Information Command burst strenght and duration","5% reduction in Capital Micro Jump Drive and Capital Micro Field Generator spool up"]},{"header":"Role Bonus","lines":["• Can fit Integrated Sensor Array","• Can fit Capital Micro Jump Drive And Capital Micro Jump Field Generator","• Can fit three Command Burst modules","200% bonus to Command Burst area of effect range","20% bonus to Capital Micro Jump Field Generator maximum ship jump cap","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump capable","5x penalty to Endosis Link duration"]}],
+    bonuses: [{"header":"Caldari Carrier bonuses (per skill level)","lines":["4% bonus to all shield resistances","20% bonus to Support Fighter shield hitpoints","10% bonus to Scarab Support Fighter ECM strength and optimal range","20% Increase in Conduit Jump capacity"]},{"header":"Command Carrier bonuses (per skill level)","lines":["5% bonus to Shield Command and Information Command burst strenght and duration","5% reduction in Capital Micro Jump Drive and Capital Micro Field Generator spool up"]},{"header":"Role Bonus","lines":["• Can fit Integrated Sensor Array","• Can fit Capital Micro Jump Drive And Capital Micro Jump Field Generator","• Can fit three Command Burst modules","200% bonus to Command Burst area of effect range","20% bonus to Capital Micro Jump Field Generator maximum ship jump cap","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump capable","5x penalty to Endosis Link duration"]}],
   },
   {
     id: "22430" as ShipProfile["id"],
@@ -10770,7 +10770,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.35, kinetic: 0.64, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.47, kinetic: 0.6, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Battleship bonuses (per skill level)","lines":["20% bonus to Large Hybrid Turret damage","10% bonus to Drone hitpoints and damage"]},{"header":"Black Ops bonuses (per skill level)","lines":["10% bonus to Warp Scrambler range","7.5% bonus to Drone tracking and optimal range","1+ scramble strength to all Warp Scramblers"]},{"header":"Role Bonus","lines":["• Can fit Covert Cynosural Field Generator and Covert Jump Portal Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","75% reduction to effective distance traveled for jump fatigue","50% reduction in Cynosural Field Generator duration","650% bonus to ship max velocity when using Cloaking Devices","5% Additional bonus to Reinforced Bulkhead hitpoints"]}],
+    bonuses: [{"header":"Gallente Battleship bonuses (per skill level)","lines":["20% bonus to Large Hybrid Turret damage","10% bonus to Drone hitpoints and damage"]},{"header":"Black Ops bonuses (per skill level)","lines":["10% bonus to Warp Scrambler range","7.5% bonus to Drone tracking and optimal range","1+ scramble strength to all Warp Scramblers"]},{"header":"Role Bonus","lines":["• Can fit Covert Cynosural Field Generator and Covert Jump Portal Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","75% reduction to effective distance traveled for jump fatigue","50% reduction in Cynosural Field Generator duration","650% bonus to ship max velocity when using Cloaking Devices","5% Additional bonus to Reinforced Bulkhead hitpoints"]}],
   },
   {
     id: "22546" as ShipProfile["id"],
@@ -10830,7 +10830,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.55, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.725, kinetic: 0.4375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Tactical Destroyer bonuses (per skill level)","lines":["6% bonus to Light Missile launcher and Rocket launcher rate of fire","15% reduction in missile launcher reload time","5% reduction in module heat damage amount taken"]},{"header":"Command Destroyer bonuses (per skill level)","lines":["5% reduction in Micro Jump Field Generator spool up time","2% bonus to Shield Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["95% reduction in powergrid and CPU requirements for Command Busts","• Can fit Micro Jump Field Generators","• Can use one Command Burst module"]},{"header":"Misc Bonus","lines":["33% Bonus to Light Missile and Rockets damage","95% reduction in Scan Probe Launcher and Survey Probe Launcher CPU requirements","• Additional bonuses are available while one of three Tactical Destroyer Modes are active. Modes may be switched no more than once every 2 seconds.","• Defense Mode","33.3% bonus to all shield resistances while Defense Mode is enabled","33.3% reduction in ship signature radius while Defense Mode is enabled","33.3% bonus to shield recharge time while Defense Mode is enabled","• Propulsion Mode","66.6% bonus to Afterburner and Microwarpdrive speed boost while Propulsion Mode is enabled","66.6% bonus to ship inertia modifier while Propulsion Mode is enabled","• Sharpshooter Mode","66.6% bonus to Light Missile velocity while Sharpshooter Mode is active","250% bonus to Rocket velocity while Sharpshooter Mode is active","33.3% bonus to Light Missile and Rocket damage while Sharpshooter Mode is enabled","100% bonus to sensor strength and targeting range  while Sharpshooter Mode is enabled","66.6% increased resistance against hostile Sensor Dampeners and Weapon Disruptors while Sharpshooter Mode is enabled"]}],
+    bonuses: [{"header":"Caldari Tactical Destroyer bonuses (per skill level)","lines":["6% bonus to Light Missile launcher and Rocket launcher rate of fire","15% reduction in missile launcher reload time","5% reduction in module heat damage amount taken"]},{"header":"Command Destroyer bonuses (per skill level)","lines":["5% reduction in Micro Jump Field Generator spool up time","2% bonus to Shield Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["95% reduction in powergrid and CPU requirements for Command Busts","• Can fit Micro Jump Field Generators","• Can use one Command Burst module"]},{"header":"Misc Bonus","lines":["33% Bonus to Light Missile and Rockets damage","95% reduction in Scan Probe Launcher and Survey Probe Launcher CPU requirements","• Additional bonuses are available while one of three Tactical Destroyer Modes are active. Modes may be switched no more than once every 2 seconds."]},{"header":"Defense Mode","lines":["33.3% bonus to all shield resistances while Defense Mode is enabled","33.3% reduction in ship signature radius while Defense Mode is enabled","33.3% bonus to shield recharge time while Defense Mode is enabled"]},{"header":"Propulsion Mode","lines":["66.6% bonus to Afterburner and Microwarpdrive speed boost while Propulsion Mode is enabled","66.6% bonus to ship inertia modifier while Propulsion Mode is enabled"]},{"header":"Sharpshooter Mode","lines":["66.6% bonus to Light Missile velocity while Sharpshooter Mode is active","250% bonus to Rocket velocity while Sharpshooter Mode is active","33.3% bonus to Light Missile and Rocket damage while Sharpshooter Mode is enabled","100% bonus to sensor strength and targeting range  while Sharpshooter Mode is enabled","66.6% increased resistance against hostile Sensor Dampeners and Weapon Disruptors while Sharpshooter Mode is enabled"]}],
   },
   {
     id: "54731" as ShipProfile["id"],
@@ -10920,7 +10920,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.75, thermal: 0.6, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.9, thermal: 0.675, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["10% bonus to Medium Projectile Turret damage","10% bonus to Medium Projectile Turret falloff","4% bonus to Shield Command and Skirmish Command burst strength and duration"]},{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Projectile Turret damage","7.5% bonus to Shield Booster amount"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","50% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["10% bonus to Medium Projectile Turret damage","10% bonus to Medium Projectile Turret falloff","4% bonus to Shield Command and Skirmish Command burst strength and duration"]},{"header":"Minmatar Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Projectile Turret damage","7.5% bonus to Shield Booster amount"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","50% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "81008" as ShipProfile["id"],
@@ -11130,7 +11130,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["10% bonus to Drone hitpoints and damage"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["50% bonus to Medium Energy Turret optimal range and damage","37.5% bonus to Core and Combat Scanner Probe strength","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device","• Cloak reactivation delay reduced to 15 seconds"]}],
+    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["10% bonus to Drone hitpoints and damage"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["50% bonus to Medium Energy Turret optimal range and damage","37.5% bonus to Core and Combat Scanner Probe strength","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device","• Cloak reactivation delay reduced to 15 seconds"]}],
   },
   {
     id: "33553" as ShipProfile["id"],
@@ -11160,7 +11160,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["10% bonus to Drone hitpoints and damage"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["50% bonus to Medium Energy Turret optimal range","37.5% bonus to Core and Combat Scanner Probe strength","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device","• Cloak reactivation delay reduced to 15 seconds"]}],
+    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["10% bonus to Drone hitpoints and damage"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["4% bonus to all armor resistances"]},{"header":"Role Bonus","lines":["50% bonus to Medium Energy Turret optimal range","37.5% bonus to Core and Combat Scanner Probe strength","10+ bonus to Relic and Data Analyzer virus strength","• Can fit Covert Ops Cloaking Device","• Cloak reactivation delay reduced to 15 seconds"]}],
   },
   {
     id: "17924" as ShipProfile["id"],
@@ -11280,7 +11280,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.5, thermal: 0.4, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.8, thermal: 0.5125, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Tactical Destroyer Bonuses Per Level","lines":["7.5% bonus to Small Projectile Turret damage","10% bonus to Small Projectile Turret optimal range","5% reduction in heat damage generated by modules"]},{"header":"Misc Bonus","lines":["+33% Small Projectile Turret Damage","95% reduction in Scan Probe Launcher CPU requirements","• Additional bonuses are available when one of three Tactical Destroyer Modes are active. Modes may be changed no more than once every 10 seconds.","• Defense Mode","33.3% bonus to all shield and armor resistances while Defense Mode is active","66.6% reduction in Microwarpdrive signature radius penalty while Defense Mode is active","33.3% bonus to Remote Shield Booster amount, and reduction in activation cost  while Defense Mode is enabled","• Propulsion Mode","66.6% bonus to Afterburner and Microwarpdrive speed boost while Propulsion Mode is enabled","33.3% bonus to ship inertia modifier while Propulsion Mode is active","• Sharpshooter Mode","33.3% bonus to Small Projectile Turret tracking while Sharpshooter Mode is active","33.3% bonus to Small Projectile Turret damage while Sharpshooter Mode is enabled","100% bonus to sensor strength and targeting range while Sharpshooter Mode is active","66.6% increased resistances against hostile Sensor Dampeners and Weapon Disruptors while Sharpshooter Mode is enabled"]}],
+    bonuses: [{"header":"Minmatar Tactical Destroyer Bonuses Per Level","lines":["7.5% bonus to Small Projectile Turret damage","10% bonus to Small Projectile Turret optimal range","5% reduction in heat damage generated by modules"]},{"header":"Misc Bonus","lines":["+33% Small Projectile Turret Damage","95% reduction in Scan Probe Launcher CPU requirements","• Additional bonuses are available when one of three Tactical Destroyer Modes are active. Modes may be changed no more than once every 10 seconds."]},{"header":"Defense Mode","lines":["33.3% bonus to all shield and armor resistances while Defense Mode is active","66.6% reduction in Microwarpdrive signature radius penalty while Defense Mode is active","33.3% bonus to Remote Shield Booster amount, and reduction in activation cost  while Defense Mode is enabled"]},{"header":"Propulsion Mode","lines":["66.6% bonus to Afterburner and Microwarpdrive speed boost while Propulsion Mode is enabled","33.3% bonus to ship inertia modifier while Propulsion Mode is active"]},{"header":"Sharpshooter Mode","lines":["33.3% bonus to Small Projectile Turret tracking while Sharpshooter Mode is active","33.3% bonus to Small Projectile Turret damage while Sharpshooter Mode is enabled","100% bonus to sensor strength and targeting range while Sharpshooter Mode is active","66.6% increased resistances against hostile Sensor Dampeners and Weapon Disruptors while Sharpshooter Mode is enabled"]}],
   },
   {
     id: "33081" as ShipProfile["id"],
@@ -11610,7 +11610,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.55, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.725, kinetic: 0.4375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"","lines":["Caldari Defensive Systems bonuses (per skill level):• bonus to all Caldari Defensive Systems effectiveness","Caldari Core Systems bonuses (per skill level):• bonus to all Caldari Core Systems effectiveness","Caldari Offensive Systems bonuses (per skill level):• bonus to all Caldari Offensive Systems effectiveness","Caldari Propulsion Systems bonuses (per skill level):• bonus to all Caldari Propulsion Systems effectiveness","Caldari Strategic Cruiser bonuses (per skill level):• 5% reduction in module heat damage amount taken• 10% bonus to nanite repair paste repair speed","Role Bonus:• 99% reduction in Scan Probe Launcher CPU requirements• Rigs may be removed from this ship without being destroyed"]}],
+    bonuses: [{"header":"Caldari Defensive Systems bonuses (per skill level)","lines":["• bonus to all Caldari Defensive Systems effectiveness"]},{"header":"Caldari Core Systems bonuses (per skill level)","lines":["• bonus to all Caldari Core Systems effectiveness"]},{"header":"Caldari Offensive Systems bonuses (per skill level)","lines":["• bonus to all Caldari Offensive Systems effectiveness"]},{"header":"Caldari Propulsion Systems bonuses (per skill level)","lines":["• bonus to all Caldari Propulsion Systems effectiveness"]},{"header":"Caldari Strategic Cruiser bonuses (per skill level)","lines":["• 5% reduction in module heat damage amount taken","• 10% bonus to nanite repair paste repair speed"]},{"header":"Role Bonus","lines":["• 99% reduction in Scan Probe Launcher CPU requirements","• Rigs may be removed from this ship without being destroyed"]}],
   },
   {
     id: "92282" as ShipProfile["id"],
@@ -11640,7 +11640,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Role bonus","lines":["100% bonus to to warp speed and warp accelaration","100% bonus to Interdiction Nullifier duration","100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device","805 reduction in Interdiction Nullifier reactivation delay and max lock rangepenalty"]}],
+    bonuses: [{"header":"Role bonus","lines":["100% bonus to to warp speed and warp accelaration","100% bonus to Interdiction Nullifier duration","100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device","805 reduction in Interdiction Nullifier reactivation delay and max lock rangepenalty"]}],
   },
   {
     id: "37459" as ShipProfile["id"],
@@ -11700,7 +11700,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Carrier bonuses (per skill level)","lines":["5% bonus to Fighter damage","2.5% bonus to Fighter hitpoints","5% bonus to Siren Support Fighter warp disruption range","2% bonus to Siren Support Fighter warp afterburner speed bonus","1% bonus to Armored Command and Skirmish Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Capital Micro Jump Drive and Capital Micro Jump Field Generator","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump Capable","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Gallente Carrier bonuses (per skill level)","lines":["5% bonus to Fighter damage","2.5% bonus to Fighter hitpoints","5% bonus to Siren Support Fighter warp disruption range","2% bonus to Siren Support Fighter warp afterburner speed bonus","1% bonus to Armored Command and Skirmish Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Capital Micro Jump Drive and Capital Micro Jump Field Generator","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump Capable","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "85087" as ShipProfile["id"],
@@ -11730,7 +11730,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.6, thermal: 0.35, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Destroyer bonuses (per skill level)","lines":["7.5% bonus to Shield Booster amount"]},{"header":"Minmatar Destroyer bonuses (per skill level)","lines":["5% bonus to ship Stasis Webifier resistance"]},{"header":"Role Bonus","lines":["150% bonus to Small Projectile Turret and Rocket damage","• can fit one Small Breacher Pod Launcher","• can fit Covert Ops Cloaking Device","100% reduction in Cloaking Devices CPU requirement","• cloak reactivation delay reduced to 15 seconds","• immune to all cargo scanners"]}],
+    bonuses: [{"header":"Caldari Destroyer bonuses (per skill level)","lines":["7.5% bonus to Shield Booster amount"]},{"header":"Minmatar Destroyer bonuses (per skill level)","lines":["5% bonus to ship Stasis Webifier resistance"]},{"header":"Role Bonus","lines":["150% bonus to Small Projectile Turret and Rocket damage","• can fit one Small Breacher Pod Launcher","• can fit Covert Ops Cloaking Device","100% reduction in Cloaking Devices CPU requirement","• cloak reactivation delay reduced to 15 seconds","• immune to all cargo scanners"]}],
   },
   {
     id: "627" as ShipProfile["id"],
@@ -11880,7 +11880,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.35, thermal: 0.35, kinetic: 0.35, explosive: 0.35 },
     armorResists: { em: 0.45, thermal: 0.45, kinetic: 0.45, explosive: 0.45 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Recon Ship bonuses (per skill level)","lines":["20% bonus in Reduction in Cloaking Devices CPU Requirement","0.75% additional bonus to Heavy Entropic Disintegrator damage multiplier bonus per cycle","10% bonus to Core and Combat Scanner Probe strength"]},{"header":"Precursor Cruiser bonuses (per skill level)","lines":["7.5% bonus to Heavy Entropic Disintegrator damage","5% bonus to Heavy Entropic Disintegrator tracking speed"]},{"header":"Role Bonus","lines":["100% bonus to Remote Armor Repairer range","50% reduced Energy Neutralizer capacitor need","50% reduced Remote Armor Repairer capacitor need","50% redduced Smart Bomb capacitor need","• Can Fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak Reactivation delay reduced to 5 seconds","50% reduction in Cynosural Field Generator duration","80% reduction in Cynosural Field Generator liquid ozone consumption"]}],
+    bonuses: [{"header":"Recon Ship bonuses (per skill level)","lines":["20% bonus in Reduction in Cloaking Devices CPU Requirement","0.75% additional bonus to Heavy Entropic Disintegrator damage multiplier bonus per cycle","10% bonus to Core and Combat Scanner Probe strength"]},{"header":"Precursor Cruiser bonuses (per skill level)","lines":["7.5% bonus to Heavy Entropic Disintegrator damage","5% bonus to Heavy Entropic Disintegrator tracking speed"]},{"header":"Role Bonus","lines":["100% bonus to Remote Armor Repairer range","50% reduced Energy Neutralizer capacitor need","50% reduced Remote Armor Repairer capacitor need","50% redduced Smart Bomb capacitor need","• Can Fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak Reactivation delay reduced to 5 seconds","50% reduction in Cynosural Field Generator duration","80% reduction in Cynosural Field Generator liquid ozone consumption"]}],
   },
   {
     id: "591" as ShipProfile["id"],
@@ -11970,7 +11970,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.2, thermal: 0.8, kinetic: 0.5, explosive: 0.75 },
     armorResists: { em: 0.5, thermal: 0.8625, kinetic: 0.25, explosive: 0.55 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Upwell Hauler bonuses (per skill level)","lines":["10% bonus to infrastructure hold capacity","25% bonus to missile damage"]},{"header":"Transport Ships bonuses (per skill level)","lines":["5% bonus to Fleet Hangar capacity","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["90% reduction in heavy missile launcher, heavy assault missile launcher and rapid light missile launcher powergrid and CPU fitting requirements","• 2+ bonus to ship warp core strength","100% bonus to the benefits of overheating Afterburners, Microwarpdrives, Local Repair Modules, Resistance Modules, Nosferatu Modules and Energy Neutralizer Modules.","90% reduction to effective distance traveled for jump fatigue","• Can link to Orbital Skyhook reagent silos bypassing the normal ship restrictions"]}],
+    bonuses: [{"header":"Upwell Hauler bonuses (per skill level)","lines":["10% bonus to infrastructure hold capacity","25% bonus to missile damage"]},{"header":"Transport Ships bonuses (per skill level)","lines":["5% bonus to Fleet Hangar capacity","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["90% reduction in heavy missile launcher, heavy assault missile launcher and rapid light missile launcher powergrid and CPU fitting requirements","• 2+ bonus to ship warp core strength","100% bonus to the benefits of overheating Afterburners, Microwarpdrives, Local Repair Modules, Resistance Modules, Nosferatu Modules and Energy Neutralizer Modules.","90% reduction to effective distance traveled for jump fatigue","• Can link to Orbital Skyhook reagent silos bypassing the normal ship restrictions"]}],
   },
   {
     id: "593" as ShipProfile["id"],
@@ -12090,7 +12090,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.85, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.675, kinetic: 0.8375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Frigate bonuses (per skill level)","lines":["10% bonus to Drone damage","10% bonus to Warp Scrambler and Warp Disruptor optimal range"]},{"header":"Role Bonus","lines":["50% bonus to Small Hybrid Turret optimal range","50% bonus to Small Hybrid Turret tracking speed","50% reduction in module heat damage amount taken","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Gallente Frigate bonuses (per skill level)","lines":["10% bonus to Drone damage","10% bonus to Warp Scrambler and Warp Disruptor optimal range"]},{"header":"Role Bonus","lines":["50% bonus to Small Hybrid Turret optimal range","50% bonus to Small Hybrid Turret tracking speed","50% reduction in module heat damage amount taken","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "11999" as ShipProfile["id"],
@@ -12120,7 +12120,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.75, thermal: 0.6, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.9, thermal: 0.675, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["12.5% bonus to Medium Projectile Turret falloff","5% bonus to Medium Projectile Turret damage"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Projectile Turret rate of fire","7.5% bonus to Shield Booster amount"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["12.5% bonus to Medium Projectile Turret falloff","5% bonus to Medium Projectile Turret damage"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["5% bonus to Medium Projectile Turret rate of fire","7.5% bonus to Shield Booster amount"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "77288" as ShipProfile["id"],
@@ -12150,7 +12150,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.25, thermal: 0.3, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.7, thermal: 0.43125, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Dreadnought bonuses (per skill level)","lines":["10% bonus to Capital Projectile Turret falloff range","5% bonus to Shield Booster and Armor Repairer amount"]},{"header":"Lancer Dreadnought bonuses (per skill level)","lines":["10% Bonus to Disruptive Lance damage","20% Bonus to Disruptive Lance maximum range"]},{"header":"Role Bonus","lines":["• Can fit a Siege module","• Can fit a Disruptor Lance","• 5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Minmatar Dreadnought bonuses (per skill level)","lines":["10% bonus to Capital Projectile Turret falloff range","5% bonus to Shield Booster and Armor Repairer amount"]},{"header":"Lancer Dreadnought bonuses (per skill level)","lines":["10% Bonus to Disruptive Lance damage","20% Bonus to Disruptive Lance maximum range"]},{"header":"Role Bonus","lines":["• Can fit a Siege module","• Can fit a Disruptor Lance","• 5x penalty to Entosis Link duration"]}],
   },
   {
     id: "3518" as ShipProfile["id"],
@@ -12180,7 +12180,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.7, explosive: 0.875 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.625, explosive: 0.8 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Cruiser bonuses (per skill level)","lines":["4% bonus to all armor resistances","20% bonus to Energy Nosferatu and Energy Neutralizer drain amount","20% bonus to Energy Nosferatu and Energy Neutralizer optimal range","10% bonus to Energy Nosferatu and Energy Neutralizer falloff range"]},{"header":"Role Bonus","lines":["50% bonus to Rapid Light Missile, Heavy Missile and Heavy Assault Missile Launcher rate of fire","50% bonus to Armor Repairer amount","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Amarr Cruiser bonuses (per skill level)","lines":["4% bonus to all armor resistances","20% bonus to Energy Nosferatu and Energy Neutralizer drain amount","20% bonus to Energy Nosferatu and Energy Neutralizer optimal range","10% bonus to Energy Nosferatu and Energy Neutralizer falloff range"]},{"header":"Role Bonus","lines":["50% bonus to Rapid Light Missile, Heavy Missile and Heavy Assault Missile Launcher rate of fire","50% bonus to Armor Repairer amount","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "42126" as ShipProfile["id"],
@@ -12210,7 +12210,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Titan bonuses (per skill level)","lines":["5% bonus to Capital Hybrid Turret rate of fire","6+ bonus to ship warp core strength"]},{"header":"Minmatar Titan bonuses (per skill level)","lines":["10% bonus to Stasis Webifier effectiveness","6+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit a Doomsday devices","• Can fit a Phenomena Generator module","• Can fit a Jump Portal Generator","• Can fit a Clone Vat Bay","• Can use three Command Burst modules","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","1000% bonus to Capital Hybrid Turret damage","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Gallente Titan bonuses (per skill level)","lines":["5% bonus to Capital Hybrid Turret rate of fire","6+ bonus to ship warp core strength"]},{"header":"Minmatar Titan bonuses (per skill level)","lines":["10% bonus to Stasis Webifier effectiveness","6+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit a Doomsday devices","• Can fit a Phenomena Generator module","• Can fit a Jump Portal Generator","• Can fit a Clone Vat Bay","• Can use three Command Burst modules","200% bonus to Command Burst area of effect range","500% bonus to Armor Plates and Shield Extenders","1000% bonus to Capital Hybrid Turret damage","80% bonus to Sensor Dampener resistance","80% bonus to Weapon Disruption resistance","80% bonus to Stasis effect resistance","80% increase to Remote Electronic Assistance impedance","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "28665" as ShipProfile["id"],
@@ -12240,7 +12240,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.25, thermal: 0.3, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.7, thermal: 0.43125, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Marauders bonuses (per skill level)","lines":["5% bonus to Shield Booster and Armor Repairer amount","7.5% bonus to Large Projectile Turret tracking speed"]},{"header":"Minmatar Battleship bonuses (per skill level)","lines":["7.5% bonus to Large Projectile Turret damage","5% bonus to Large Projectile Turret falloff"]},{"header":"Role Bonus","lines":["100% bonus to Large Projectile Turret damage","100% bonus to Tractor Beam range and velocity","• Can fit Bastion modules"]}],
+    bonuses: [{"header":"Marauders bonuses (per skill level)","lines":["5% bonus to Shield Booster and Armor Repairer amount","7.5% bonus to Large Projectile Turret tracking speed"]},{"header":"Minmatar Battleship bonuses (per skill level)","lines":["7.5% bonus to Large Projectile Turret damage","5% bonus to Large Projectile Turret falloff"]},{"header":"Role Bonus","lines":["100% bonus to Large Projectile Turret damage","100% bonus to Tractor Beam range and velocity","• Can fit Bastion modules"]}],
   },
   {
     id: "47270" as ShipProfile["id"],
@@ -12300,7 +12300,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Dreadnought bonuses (per skill level)","lines":["5% bonus to Capital Hybrid Turret rate of fire"]},{"header":"Minmatar Dreadnought bonuses (per skill level)","lines":["10% bonus to Stasis Webifier effectiveness"]},{"header":"Role Bonus","lines":["• Can fit a Siege Modules","50% bonus to Capital Hybrid Turret damage","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Gallente Dreadnought bonuses (per skill level)","lines":["5% bonus to Capital Hybrid Turret rate of fire"]},{"header":"Minmatar Dreadnought bonuses (per skill level)","lines":["10% bonus to Stasis Webifier effectiveness"]},{"header":"Role Bonus","lines":["• Can fit a Siege Modules","50% bonus to Capital Hybrid Turret damage","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "606" as ShipProfile["id"],
@@ -12360,7 +12360,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Carrier bonuses (per skill level)","lines":["10% bonus to Fighter damage","5% bonus to Fighter hitpoints","3+ bonus to ship warp core strength"]},{"header":"Minmatar Carrier bonuses (per skill level)","lines":["5% bonus to Fighter velocity","10% bonus to Stasis Webification Burst Projector effectiveness","3+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Burst Projectors","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Heavy Fighters","• Can lock at extended ranges","400% bonus to Armor Plates and Shield Extenders","50% bonus to Remote Sensor Dampener resistance","50% bonus to Stasis effect resistance","50% increase to Remote Electronic Assistance impedance","• Conduit Jump capable","5x penalty to Entosis Link duration"]}],
+    bonuses: [{"header":"Gallente Carrier bonuses (per skill level)","lines":["10% bonus to Fighter damage","5% bonus to Fighter hitpoints","3+ bonus to ship warp core strength"]},{"header":"Minmatar Carrier bonuses (per skill level)","lines":["5% bonus to Fighter velocity","10% bonus to Stasis Webification Burst Projector effectiveness","3+ bonus to ship warp core strength"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Burst Projectors","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Heavy Fighters","• Can lock at extended ranges","400% bonus to Armor Plates and Shield Extenders","50% bonus to Remote Sensor Dampener resistance","50% bonus to Stasis effect resistance","50% increase to Remote Electronic Assistance impedance","• Conduit Jump capable","5x penalty to Entosis Link duration"]}],
   },
   {
     id: "11365" as ShipProfile["id"],
@@ -12390,7 +12390,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.7, explosive: 0.875 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.625, explosive: 0.8 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Amarr Frigate bonuses (per skill level)","lines":["7.5% bonus to Rocket damage","5% bonus to Light Missile and Rocket Launcher rate of fire"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["4% bonus to all armor resistances","5% bonus to ship capacitor recharge rate"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Amarr Frigate bonuses (per skill level)","lines":["7.5% bonus to Rocket damage","5% bonus to Light Missile and Rocket Launcher rate of fire"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["4% bonus to all armor resistances","5% bonus to ship capacitor recharge rate"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "32880" as ShipProfile["id"],
@@ -12570,7 +12570,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.6, kinetic: 0.85, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.675, kinetic: 0.8375, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Hauler bonuses (per skill level)","lines":["5% bonus to ship cargo capacity","5% bonus to ship max velocity"]},{"header":"Transport Ships bonuses (per skill level)","lines":["5% bonus to warp speed and warp acceleration","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","• Immune to all Cargo Scanners","90% reduction to effective distance traveled for jump fatigue","75% bonus to warp speed and warp acceleration"]}],
+    bonuses: [{"header":"Gallente Hauler bonuses (per skill level)","lines":["5% bonus to ship cargo capacity","5% bonus to ship max velocity"]},{"header":"Transport Ships bonuses (per skill level)","lines":["5% bonus to warp speed and warp acceleration","20% reduction in Cloaking Devices CPU requirement"]},{"header":"Role Bonus","lines":["• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","• Immune to all Cargo Scanners","90% reduction to effective distance traveled for jump fatigue","75% bonus to warp speed and warp acceleration"]}],
   },
   {
     id: "45531" as ShipProfile["id"],
@@ -12600,7 +12600,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.5, kinetic: 0.775, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.59375, kinetic: 0.75625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret falloff"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["10% bonus to Stasis Webifier effectiveness"]},{"header":"Recon Ships bonuses (per skill level)","lines":["7.5% bonus to Armor Repairer effectiveness","10% bonus to Medium Hybrid Turret damage","20% bonus to Stasis Webifier optimal range"]},{"header":"Role Bonus","lines":["30% reduction in the potency of booster side effects","100% bonus to Medium Hybrid Turret damage","100% reduction in Cloaking Devices CPU requirement• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator• Cloak reactivation delay reduced to 5 seconds","80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration"]}],
+    bonuses: [{"header":"Gallente Cruiser bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret falloff"]},{"header":"Minmatar Cruiser bonuses (per skill level)","lines":["10% bonus to Stasis Webifier effectiveness"]},{"header":"Recon Ships bonuses (per skill level)","lines":["7.5% bonus to Armor Repairer effectiveness","10% bonus to Medium Hybrid Turret damage","20% bonus to Stasis Webifier optimal range"]},{"header":"Role Bonus","lines":["30% reduction in the potency of booster side effects","100% bonus to Medium Hybrid Turret damage","100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device and Covert Cynosural Field Generator","• Cloak reactivation delay reduced to 5 seconds","80% reduction in Cynosural Field Generator liquid ozone consumption","50% reduction in Cynosural Field Generator duration"]}],
   },
   {
     id: "34590" as ShipProfile["id"],
@@ -12630,7 +12630,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Role Bonuses","lines":["100% bonus to warp speed and warp acceleration","100% bonus to Interdiction Nullifier duration","100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device","80% reduction in Interdiction Nullifier reactivation delay and max lock range penalty"]}],
+    bonuses: [{"header":"Role Bonuses","lines":["100% bonus to warp speed and warp acceleration","100% bonus to Interdiction Nullifier duration","100% reduction in Cloaking Devices CPU requirement","• Can fit Covert Ops Cloaking Device","80% reduction in Interdiction Nullifier reactivation delay and max lock range penalty"]}],
   },
   {
     id: "3766" as ShipProfile["id"],
@@ -12810,7 +12810,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.3, kinetic: 0.55, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.43125, kinetic: 0.5125, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Covert Ops bonuses (per skill level)","lines":["7.5% bonus to Armor Repairer effectiveness","10% bonus to Small Hybrid Turret damage","15% bonus to thermal and explosive Torpedo damage","5% bonus to thermal and explosive Bomb damage"]},{"header":"Gallente Frigate bonuses (per skill level)","lines":["10% bonus to Small Hybrid Turret falloff","20% bonus to Torpedo max velocity"]},{"header":"Minmatar Frigate bonuses (per skill level)","lines":["10% bonus to Stasis Webifier effectiveness","10% bonus to Torpedo explosion velocity and flight time"]},{"header":"Role Bonus","lines":["25% reduction in the potency of booster side effects","300% bonus to Small Hybrid Turret damage","33% bonus to Torpedo Launcher rate of fire","100% reduction in Cloaking Devices CPU requirement","100% reduction in Bomb Launcher powergrid and CPU requirements","99.8% reduction in Torpedo Launcher powergrid requirement","90% reduction in Torpedo Launcher CPU requirement• No targeting delay after Cloaking Device deactivation• Can fit Covert Ops Cloaking Device, Covert Cynosural Field Generator and Bomb Launcher• Cloak reactivation delay reduced to 15 seconds"]}],
+    bonuses: [{"header":"Covert Ops bonuses (per skill level)","lines":["7.5% bonus to Armor Repairer effectiveness","10% bonus to Small Hybrid Turret damage","15% bonus to thermal and explosive Torpedo damage","5% bonus to thermal and explosive Bomb damage"]},{"header":"Gallente Frigate bonuses (per skill level)","lines":["10% bonus to Small Hybrid Turret falloff","20% bonus to Torpedo max velocity"]},{"header":"Minmatar Frigate bonuses (per skill level)","lines":["10% bonus to Stasis Webifier effectiveness","10% bonus to Torpedo explosion velocity and flight time"]},{"header":"Role Bonus","lines":["25% reduction in the potency of booster side effects","300% bonus to Small Hybrid Turret damage","33% bonus to Torpedo Launcher rate of fire","100% reduction in Cloaking Devices CPU requirement","100% reduction in Bomb Launcher powergrid and CPU requirements","99.8% reduction in Torpedo Launcher powergrid requirement","90% reduction in Torpedo Launcher CPU requirement","• No targeting delay after Cloaking Device deactivation","• Can fit Covert Ops Cloaking Device, Covert Cynosural Field Generator and Bomb Launcher","• Cloak reactivation delay reduced to 15 seconds"]}],
   },
   {
     id: "22446" as ShipProfile["id"],
@@ -12840,7 +12840,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.8, kinetic: 0.7, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.8625, kinetic: 0.625, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["10% bonus to shield hitpoints","10% bonus to Medium Hybrid Turret damage","3% bonus to Shield Command and Information Command burst strength and duration"]},{"header":"Caldari Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret optimal range","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","100% bonus to Command Burst area of effect range"]}],
+    bonuses: [{"header":"Command Ships bonuses (per skill level)","lines":["10% bonus to shield hitpoints","10% bonus to Medium Hybrid Turret damage","3% bonus to Shield Command and Information Command burst strength and duration"]},{"header":"Caldari Battlecruiser bonuses (per skill level)","lines":["10% bonus to Medium Hybrid Turret optimal range","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["• Can use 2 Command Burst modules","100% bonus to Command Burst area of effect range"]}],
   },
   {
     id: "33673" as ShipProfile["id"],
@@ -12900,7 +12900,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.5, kinetic: 0.51, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.67, kinetic: 0.39, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Battleship bonuses (per skill level)","lines":["10% bonus to Rapid Heavy Missile, Cruise Missile and Torpedo Launcher rate of fire","10% bonus to Cruise Missile and Torpedo max velocity"]},{"header":"Black Ops bonuses (per skill level)","lines":["40% bonus to ECM Target Jammer and ECM Burst Jammer strength","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["• Can fit Covert Cynosural Field Generator and Covert Jump Portal Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","75% reduction to effective distance traveled for jump fatigue","50% reduction in Cynosural Field Generator duration","650% bonus to ship max velocity when using Cloaking Devices","5% Additional bonus to Reinforced Bulkhead hitpoints"]}],
+    bonuses: [{"header":"Caldari Battleship bonuses (per skill level)","lines":["10% bonus to Rapid Heavy Missile, Cruise Missile and Torpedo Launcher rate of fire","10% bonus to Cruise Missile and Torpedo max velocity"]},{"header":"Black Ops bonuses (per skill level)","lines":["40% bonus to ECM Target Jammer and ECM Burst Jammer strength","4% bonus to all shield resistances"]},{"header":"Role Bonus","lines":["• Can fit Covert Cynosural Field Generator and Covert Jump Portal Generator","• No targeting delay after Cloaking Device deactivation","• Cloak reactivation delay reduced to 5 seconds","75% reduction to effective distance traveled for jump fatigue","50% reduction in Cynosural Field Generator duration","650% bonus to ship max velocity when using Cloaking Devices","5% Additional bonus to Reinforced Bulkhead hitpoints"]}],
   },
   {
     id: "11371" as ShipProfile["id"],
@@ -12930,7 +12930,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.75, thermal: 0.6, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.9, thermal: 0.675, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Frigate bonuses (per skill level)","lines":["5% bonus to Small Projectile Turret damage","7.5% bonus to Small Projectile Turret tracking speed"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["10% bonus to Small Projectile Turret falloff","5% bonus to Small Projectile Turret damage"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Minmatar Frigate bonuses (per skill level)","lines":["5% bonus to Small Projectile Turret damage","7.5% bonus to Small Projectile Turret tracking speed"]},{"header":"Assault Frigates bonuses (per skill level)","lines":["10% bonus to Small Projectile Turret falloff","5% bonus to Small Projectile Turret damage"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "17930" as ShipProfile["id"],
@@ -13020,7 +13020,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.45, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Caldari Carrier bonuses (per skill level)","lines":["7.5% bonus to Fighter damage","4% bonus to all shield resistances","5+ bonus to ship warp core strength","5% reduction in ECM Jammer Burst Projector cycle time","2% bonus to Shield Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Burst Projectors","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Heavy Fighters","• Can lock at extended ranges","400% bonus to Armor Plates and Shield Extenders","50% bonus to Remote Sensor Dampener resistance","50% bonus to Stasis effect resistance","• Conduit Jump capable","50% increase to Remote Electronic Assistance impedance"]}],
+    bonuses: [{"header":"Caldari Carrier bonuses (per skill level)","lines":["7.5% bonus to Fighter damage","4% bonus to all shield resistances","5+ bonus to ship warp core strength","5% reduction in ECM Jammer Burst Projector cycle time","2% bonus to Shield Command and Information Command burst strength and duration"]},{"header":"Role Bonus","lines":["• Can fit Networked Sensor Array","• Can fit Burst Projectors","• Can use two Command Burst modules","200% bonus to Command Burst area of effect range","• Can launch Light and Heavy Fighters","• Can lock at extended ranges","400% bonus to Armor Plates and Shield Extenders","50% bonus to Remote Sensor Dampener resistance","50% bonus to Stasis effect resistance","• Conduit Jump capable","50% increase to Remote Electronic Assistance impedance"]}],
   },
   {
     id: "92825" as ShipProfile["id"],
@@ -13050,7 +13050,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0.625, thermal: 0.5, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.85, thermal: 0.6, kinetic: 0.25, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Minmatar Carrier bonuses (per skill level)","lines":["10% bonus to Support Fighter velocity","20% bonus to Support Fighter shield hitpoints","10% bonus to Dromi Support Fighter stasis webification strenght and range","20% Increase in Conduit Jump capacity"]},{"header":"Command Carrier bonuses (per skill level)","lines":["5% bonus to Shiel Command and Skirmish Command burst strenght and duration","5% reduction in Capital Micro Jump Drive and Capital Micro Field Generator spool up"]},{"header":"Role Bonus","lines":["• Can fit Integrated Sensor Array","• Can fit Capital Micro Jump Drive And Capital Micro Jump Field Generator","• Can fit three Command Burst modules","200% bonus to Command Burst area of effect range","20% bonus to Capital Micro Jump Field Generator maximum ship jump cap","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump capable","5x penalty to Endosis Link duration"]}],
+    bonuses: [{"header":"Minmatar Carrier bonuses (per skill level)","lines":["10% bonus to Support Fighter velocity","20% bonus to Support Fighter shield hitpoints","10% bonus to Dromi Support Fighter stasis webification strenght and range","20% Increase in Conduit Jump capacity"]},{"header":"Command Carrier bonuses (per skill level)","lines":["5% bonus to Shiel Command and Skirmish Command burst strenght and duration","5% reduction in Capital Micro Jump Drive and Capital Micro Field Generator spool up"]},{"header":"Role Bonus","lines":["• Can fit Integrated Sensor Array","• Can fit Capital Micro Jump Drive And Capital Micro Jump Field Generator","• Can fit three Command Burst modules","200% bonus to Command Burst area of effect range","20% bonus to Capital Micro Jump Field Generator maximum ship jump cap","• Can launch Light and Support Fighters","• Can lock at extended ranges","• Conduit Jump capable","5x penalty to Endosis Link duration"]}],
   },
   {
     id: "49713" as ShipProfile["id"],
@@ -13110,7 +13110,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.7, explosive: 0.875 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.625, explosive: 0.8 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["10% bonus to Medium Energy Turret optimal range","5% bonus to Medium Energy Turret damage"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["10% reduction in Medium Energy Turret activation cost","7.5% bonus to Medium Energy Turret damage"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
+    bonuses: [{"header":"Heavy Assault Cruisers bonuses (per skill level)","lines":["10% bonus to Medium Energy Turret optimal range","5% bonus to Medium Energy Turret damage"]},{"header":"Amarr Cruiser bonuses (per skill level)","lines":["10% reduction in Medium Energy Turret activation cost","7.5% bonus to Medium Energy Turret damage"]},{"header":"Role Bonus","lines":["50% reduction in Microwarpdrive signature radius penalty","• Can fit Assault Damage Controls"]}],
   },
   {
     id: "2078" as ShipProfile["id"],
@@ -13140,7 +13140,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.35, explosive: 0.1 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Role Bonus","lines":["• Can fit Prototype Iris Probe Launcher","• Will not be targeted by Sleeper Drones in Wormhole Systems"]}],
+    bonuses: [{"header":"Role Bonus","lines":["• Can fit Prototype Iris Probe Launcher","• Will not be targeted by Sleeper Drones in Wormhole Systems"]}],
   },
   {
     id: "52907" as ShipProfile["id"],
@@ -13170,6 +13170,6 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
     shieldResists: { em: 0, thermal: 0.2, kinetic: 0.4, explosive: 0.5 },
     armorResists: { em: 0.5, thermal: 0.35, kinetic: 0.25, explosive: 0.2 },
     hullResists: { em: 0.33, thermal: 0.33, kinetic: 0.33, explosive: 0.33 },
-    bonuses: [{"header":"Precursor Dreadnought (per skill level)","lines":["5% bonus to Ultratidal Entropic Disintegrator damage","4% bonus to all armor resistances","3% bonus to Ultratidal Entropic Disintegrator rate of fire"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","5x penalty to Entosis Link cycle time","100% bonus to Remote Armor Repairer repair range","50% reduced Energy Neutralizer capacitor need","50% reduced Remote Armor Repairer cap need","50% reduced Smart Bomb capacitor need"]}],
+    bonuses: [{"header":"Precursor Dreadnought (per skill level)","lines":["5% bonus to Ultratidal Entropic Disintegrator damage","4% bonus to all armor resistances","3% bonus to Ultratidal Entropic Disintegrator rate of fire"]},{"header":"Role Bonus","lines":["• Can fit Siege modules","5x penalty to Entosis Link cycle time","100% bonus to Remote Armor Repairer repair range","50% reduced Energy Neutralizer capacitor need","50% reduced Remote Armor Repairer cap need","50% reduced Smart Bomb capacitor need"]}],
   },
 ] as const;
