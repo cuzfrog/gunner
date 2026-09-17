@@ -73,7 +73,7 @@ test.describe.serial("ship hint geometry", () => {
     expect(box).not.toBeNull();
     expect(box!.x).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(990);
-    expect(box!.width).toBeLessThanOrEqual(420);
+    expect(box!.width).toBeLessThanOrEqual(560);
   });
 
   test("scrollable hint keeps the thin scrollbar and stays visible at a short height", async () => {

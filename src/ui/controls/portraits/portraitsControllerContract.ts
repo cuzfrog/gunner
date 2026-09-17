@@ -11,6 +11,8 @@ export interface PortraitsEls {
   readonly shipB: HTMLElement;
   readonly shipAImage: HTMLImageElement;
   readonly shipBImage: HTMLImageElement;
+  readonly shipAWrap: HTMLElement;
+  readonly shipBWrap: HTMLElement;
   readonly shipAEffects: HTMLElement;
   readonly shipBEffects: HTMLElement;
   readonly shipAHpBars: HTMLElement;

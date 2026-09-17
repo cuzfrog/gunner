@@ -35,7 +35,7 @@
   --shadow-color: rgba(0, 0, 0, 0.45);
   --gap-field: 9px;
   --hint-viewport-gap: 12px;
-  --hover-hint-max-width: 420px;
+  --hover-hint-max-width: 560px;
   --z-canvas-overlay: 5;
   --z-popup: 30;
   --canvas-overlay-inset: 26px;

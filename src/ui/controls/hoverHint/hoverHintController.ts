@@ -149,7 +149,9 @@ export class HoverHintControllerImpl implements HoverHintController {
 
   // Tall hints become scrollable and interactive; short hints keep pointer-events: none so they
   // never block hovering the elements beneath them. The cap is the larger of the spaces above and
-  // below the anchor, so the flipped or default placement always fits the viewport.
+  // below the anchor, so the flipped or default placement always fits the viewport. The anchor is
+  // marked bridged while scrollable so the CSS bridge strips cover the placement gap between the
+  // anchor and the hint, letting the pointer travel between them without hiding the hint.
   private applyScrollable(): void {
     const anchor = this.currentAnchor;
     if (anchor === undefined) return;
@@ -158,18 +160,23 @@ export class HoverHintControllerImpl implements HoverHintController {
     const available = Math.max(viewportHeight - rect.bottom - HINT_VIEWPORT_GAP_PX, rect.top - HINT_VIEWPORT_GAP_PX);
     const overflow = this.hintEl.scrollHeight > available;
     this.hintEl.classList.toggle("hover-hint-scrollable", overflow);
+    anchor.classList.toggle("hover-hint-anchor-bridged", overflow);
     if (overflow) this.hintEl.style.setProperty("--hover-hint-max-height", `${available}px`);
     else this.hintEl.style.removeProperty("--hover-hint-max-height");
   }
 
   private scheduleShow(anchor: HTMLElement): void {
+    if (this.currentAnchor === anchor) return;
     if (this.showTimer !== undefined && this.pendingAnchor === anchor) return;
     this.clearShowTimer();
     this.pendingAnchor = anchor;
     this.showTimer = this.timer.setTimeout(() => { this.pendingAnchor = undefined; this.show(anchor); }, this.showDelayMs);
   }
 
+  // Re-showing the anchor that is already visible would re-render and reset the scroll of a
+  // tall hint, so it is skipped; view updates keep the visible content fresh via refresh().
   private show(anchor: HTMLElement): void {
+    if (this.currentAnchor === anchor) return;
     this.clearShowTimer();
     this.clearHideTimer();
     const contentKey = anchor.getAttribute(CONTENT_ATTR);
@@ -227,6 +234,7 @@ export class HoverHintControllerImpl implements HoverHintController {
   private releaseAnchor(): void {
     if (this.currentAnchor === undefined) return;
     this.currentAnchor.classList.remove("hover-hint-anchor");
+    this.currentAnchor.classList.remove("hover-hint-anchor-bridged");
     if (this.previousDescribedBy === null) this.currentAnchor.removeAttribute("aria-describedby");
     else this.currentAnchor.setAttribute("aria-describedby", this.previousDescribedBy);
     this.previousDescribedBy = null;

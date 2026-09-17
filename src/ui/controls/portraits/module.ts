@@ -38,6 +38,10 @@ function collectPortraitsEls(els: ControlsElements): PortraitsEls {
   }
   const shipBImage = els.shipB.portrait.querySelector(".portrait-image");
   if (!shipBImage || !isHtmlImageElement(shipBImage)) throw new Error("Missing .portrait-image in #ship-b-portrait");
+  const shipAWrap = els.shipA.portrait.querySelector<HTMLElement>(".portrait-image-wrap");
+  if (!shipAWrap) throw new Error("Missing .portrait-image-wrap in #ship-a-portrait");
+  const shipBWrap = els.shipB.portrait.querySelector<HTMLElement>(".portrait-image-wrap");
+  if (!shipBWrap) throw new Error("Missing .portrait-image-wrap in #ship-b-portrait");
   const shipAEffects = els.shipA.portrait.querySelector<HTMLElement>(".portrait-effects");
   if (!shipAEffects) throw new Error("Missing .portrait-effects in #ship-a-portrait");
   const shipBEffects = els.shipB.portrait.querySelector<HTMLElement>(".portrait-effects");
@@ -55,6 +59,8 @@ function collectPortraitsEls(els: ControlsElements): PortraitsEls {
     shipB: els.shipB.portrait,
     shipAImage,
     shipBImage,
+    shipAWrap,
+    shipBWrap,
     shipAEffects,
     shipBEffects,
     shipAHpBars,

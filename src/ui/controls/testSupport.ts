@@ -94,10 +94,14 @@ export function addSigResButtons(document: Document): void {
 function addPortraitChildren(document: Document): void {
   for (const id of ["ship-a-portrait", "ship-b-portrait"]) {
     const root = getFake(document, id);
+    const wrap = new FakeElement();
+    wrap.tagName = "DIV";
+    wrap.className = "portrait-image-wrap";
     const image = new FakeElement();
     image.tagName = "IMG";
     image.className = "portrait-image";
-    root.appendChild(image);
+    wrap.appendChild(image);
+    root.appendChild(wrap);
     const lockBadge = new FakeElement();
     lockBadge.tagName = "DIV";
     lockBadge.className = "portrait-lock-badge";

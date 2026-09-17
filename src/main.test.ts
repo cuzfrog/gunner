@@ -107,10 +107,14 @@ function fakeDocument(): Document {
         const el = id === "scene" ? new FakeCanvas() : new FakeElement();
         if (id in DEFAULT_VALUES) el.value = DEFAULT_VALUES[id];
         if (id === "ship-a-portrait" || id === "ship-b-portrait") {
+          const wrap = new FakeElement();
+          wrap.tagName = "DIV";
+          wrap.className = "portrait-image-wrap";
           const img = new FakeElement();
           img.tagName = "IMG";
           img.className = "portrait-image";
-          el.appendChild(img);
+          wrap.appendChild(img);
+          el.appendChild(wrap);
           const lockBadge = new FakeElement();
           lockBadge.tagName = "DIV";
           lockBadge.className = "portrait-lock-badge";

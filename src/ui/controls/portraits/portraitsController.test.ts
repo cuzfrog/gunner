@@ -72,9 +72,12 @@ const SHIP_B_PROFILE: ShipProfile = {
 
 function createFakePortraitEls(document: Document): PortraitsEls {
   const shipARoot = getFake(document, "ship-a-portrait");
+  const shipAWrap = document.createElement("div");
+  shipAWrap.className = "portrait-image-wrap";
   const shipAImage = document.createElement("img");
   shipAImage.className = "portrait-image";
-  shipARoot.appendChild(shipAImage);
+  shipAWrap.appendChild(shipAImage);
+  shipARoot.appendChild(shipAWrap);
   const shipALockBadge = document.createElement("div");
   shipALockBadge.className = "portrait-lock-badge";
   shipALockBadge.hidden = true;
@@ -94,9 +97,12 @@ function createFakePortraitEls(document: Document): PortraitsEls {
   shipAEffects.className = "portrait-effects";
   shipARoot.appendChild(shipAEffects);
   const shipBRoot = getFake(document, "ship-b-portrait");
+  const shipBWrap = document.createElement("div");
+  shipBWrap.className = "portrait-image-wrap";
   const shipBImage = document.createElement("img");
   shipBImage.className = "portrait-image";
-  shipBRoot.appendChild(shipBImage);
+  shipBWrap.appendChild(shipBImage);
+  shipBRoot.appendChild(shipBWrap);
   const shipBLockBadge = document.createElement("div");
   shipBLockBadge.className = "portrait-lock-badge";
   shipBLockBadge.hidden = true;
@@ -120,6 +126,8 @@ function createFakePortraitEls(document: Document): PortraitsEls {
     shipB: shipBRoot as unknown as HTMLElement,
     shipAImage: shipAImage as unknown as HTMLImageElement,
     shipBImage: shipBImage as unknown as HTMLImageElement,
+    shipAWrap,
+    shipBWrap,
     shipAEffects,
     shipBEffects,
     shipAHpBars,
@@ -237,16 +245,16 @@ describe("PortraitsController", () => {
     expect(els.shipAEffects.hidden).toBe(true);
   });
 
-  test("assigned profile sets the ship profile hint content and value on the image", () => {
+  test("assigned profile sets the ship profile hint content and value on the wrap", () => {
     const { controller, els, profiles } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     controller.update();
-    expect(els.shipAImage.getAttribute("data-hint-content")).toBe("shipProfile");
-    expect(els.shipAImage.getAttribute("data-value")).toBe(SHIP_A_PROFILE.id);
+    expect(els.shipAWrap.getAttribute("data-hint-content")).toBe("shipProfile");
+    expect(els.shipAWrap.getAttribute("data-value")).toBe(SHIP_A_PROFILE.id);
     profiles.shipB = SHIP_B_PROFILE;
     controller.update();
-    expect(els.shipBImage.getAttribute("data-hint-content")).toBe("shipProfile");
-    expect(els.shipBImage.getAttribute("data-value")).toBe(SHIP_B_PROFILE.id);
+    expect(els.shipBWrap.getAttribute("data-hint-content")).toBe("shipProfile");
+    expect(els.shipBWrap.getAttribute("data-value")).toBe(SHIP_B_PROFILE.id);
   });
 
   test("switching to a different hull updates the hint data-value", () => {
@@ -256,7 +264,7 @@ describe("PortraitsController", () => {
     const other = { ...SHIP_B_PROFILE, id: "621" as ShipId };
     profiles.shipA = other;
     controller.update();
-    expect(els.shipAImage.getAttribute("data-value")).toBe("621");
+    expect(els.shipAWrap.getAttribute("data-value")).toBe("621");
   });
 
   test("removing a profile clears the hint attributes from the image", () => {
@@ -265,8 +273,8 @@ describe("PortraitsController", () => {
     controller.update();
     profiles.shipA = undefined;
     controller.update();
-    expect(els.shipAImage.getAttribute("data-hint-content")).toBeNull();
-    expect(els.shipAImage.getAttribute("data-value")).toBeNull();
+    expect(els.shipAWrap.getAttribute("data-hint-content")).toBeNull();
+    expect(els.shipAWrap.getAttribute("data-value")).toBeNull();
   });
 
   test("shipImageUrl returning undefined sets an empty src without crashing", () => {

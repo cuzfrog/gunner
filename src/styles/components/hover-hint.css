@@ -52,6 +52,31 @@
   anchor-name: --hover-hint-anchor;
 }
 
+/* Bridge strips on the anchor while a scrollable hint is open: they extend the anchor's hit
+   area across the 4px placement gap on both vertical sides, so the pointer can travel between
+   the anchor and the hint without crossing a dead zone that would hide it. Events on a pseudo
+   element target the host anchor, which the controller already treats as the anchor. The anchor
+   re-enables pointer events because portrait overlays keep their subtree pointer-neutral and
+   only the portrait image opts back in. Short hints stay pointer-neutral, so the strips are
+   scoped to scrollable hints only. */
+.hover-hint-anchor-bridged {
+  position: relative;
+  pointer-events: auto;
+}
+
+.hover-hint-anchor-bridged::before,
+.hover-hint-anchor-bridged::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.hover-hint-anchor-bridged::before { bottom: 100%; }
+
+.hover-hint-anchor-bridged::after { top: 100%; }
+
 @supports not (anchor-name: --hover-hint-anchor) {
   .hover-hint {
     position: fixed;

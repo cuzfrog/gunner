@@ -129,7 +129,7 @@ export class FakeElement {
         const attrValue = attrMatch[2];
         return findWithClassAndAttr(this, className, attrName, attrValue) ?? null;
       }
-      return this.children.find((c) => c.className.split(" ").includes(className)) ?? null;
+      return collectByClassName(this, className)[0] ?? null;
     }
     return this.children[0] ?? null;
   }
