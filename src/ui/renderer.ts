@@ -14,7 +14,7 @@ export interface RangeOverlay {
 }
 
 export interface OptimalFalloffRange {
-  readonly kind: "turret" | "drone";
+  readonly kind: "turret";
   readonly optimal: number;
   readonly falloff: number;
 }

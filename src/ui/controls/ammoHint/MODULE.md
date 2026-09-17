@@ -1,10 +1,7 @@
----
 no-new-exports:
   - ammoHintProvider.ts
   - module.ts
   - ammoHintProvider.test.ts
-  - ammoHintRenderer.test.ts
-  - ammoHintRenderer.ts
   - index.ts
 ---
 
@@ -13,8 +10,11 @@ no-new-exports:
 
 Hover hint content provider for ammo/missile popup list items. Implements
 `HintContentProvider` with key `"ammo-hint"`. Renders a structured damage
-breakdown: per-damage-type rows with icons and values, a total damage row,
-and a modifiers row (range/track/falloff) for charges.
+breakdown through the shared `statHint` renderer: a damage section with a
+total row and per-damage-type rows with icons, followed by an attribute
+section (range/falloff/tracking multipliers for charges, explosion and
+flight attributes for missiles). Labels are localized via the `ammoHint.*`,
+`dpsHint.*`, and `unit.*` i18n keys.
 
 The provider reads `data-value` (the item id) from the anchor element and
 looks up the item in `FittingDb.charges` or `FittingDb.missiles` to

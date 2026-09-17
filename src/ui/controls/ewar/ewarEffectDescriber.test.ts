@@ -187,37 +187,7 @@ describe("EwarEffectDescriber", () => {
     expect(describer.scramblerHint(scramblerProjection)).toBe("Disables MWD · range 10.8 km");
   });
 
-  test("webModuleEffect reports the speed reduction from the spec", () => {
-    const spec: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.55, overloadRangeBonusPercent: 30 };
-    expect(describer.webModuleEffect(spec)).toBe("Reduce speed by 55%");
-  });
-
-  test("webModuleEffect reports out-of-range when speedFactor is 0", () => {
-    const spec: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0, overloadRangeBonusPercent: 30 };
-    expect(describer.webModuleEffect(spec)).toBe("No effect at this range");
-  });
-
-  test("grapplerModuleEffect reports the speed reduction from the spec", () => {
-    const spec: StasisGrapplerSpec = { moduleName: "Stasis Grappler II", moduleId: toTypeId("449"), optimal: 20000, falloff: 10000, speedFactor: 0.45, overloadOptimalBonusPercent: 30 };
-    expect(describer.grapplerModuleEffect(spec)).toBe("Reduce speed by 45%");
-  });
-
-  test("disruptorModuleEffect reports per-channel percentages without a script", () => {
-    const spec: TrackingDisruptorSpec = { moduleName: "Tracking Disruptor II", moduleId: toTypeId("2109"), optimal: 48000, falloff: 24000, disruption: 0.1719, defaultScript: undefined, overloadStrengthBonusPercent: 20 };
-    expect(describer.disruptorModuleEffect(spec, undefined)).toBe("Tracking -17% · Optimal -17% · Falloff -17%");
-  });
-
-  test("disruptorModuleEffect applies script multipliers to the disruption strength", () => {
-    const spec: TrackingDisruptorSpec = { moduleName: "Tracking Disruptor II", moduleId: toTypeId("2109"), optimal: 48000, falloff: 24000, disruption: 0.1719, defaultScript: undefined, overloadStrengthBonusPercent: 20 };
-    const script: DisruptionScriptSpec = { name: "Optimal Range Script", moduleId: toTypeId("28999"), trackingMultiplier: 0, optimalMultiplier: 1.5, falloffMultiplier: 1.5 };
-    expect(describer.disruptorModuleEffect(spec, script)).toBe("Tracking -0% · Optimal -26% · Falloff -26%");
-  });
-
-  test("scramblerModuleEffect reports MWD disabled", () => {
-    expect(describer.scramblerModuleEffect()).toBe("Disables MWD");
-  });
-
-  test("webModuleEffect agrees with webHint for a single-web projection at point-blank range", () => {
+  test("webHint reports the speed reduction for a single-web projection at point-blank range", () => {
     const speedFactor = 0.6;
     const webSpec: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor, overloadRangeBonusPercent: 30 };
     const webProj = {
@@ -225,8 +195,7 @@ describe("EwarEffectDescriber", () => {
       activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
     } as EwarProjection;
     resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, speedMultiplier: 1 - speedFactor });
-    const hintEffect = describer.webHint(webProj).split(" · ")[0];
-    expect(describer.webModuleEffect(webSpec)).toBe(hintEffect);
+    expect(describer.webHint(webProj).split(" · ")[0]).toBe("Reduce speed by 60%");
   });
 
   test("painterHint reports signature bonus and range", () => {
@@ -248,11 +217,6 @@ describe("EwarEffectDescriber", () => {
     expect(describer.painterHint(painterProj)).toBe("No effect at this range · range 0 m");
   });
 
-  test("painterModuleEffect reports signature bonus percentage", () => {
-    const painterSpec: TargetPainterSpec = { moduleName: "Target Painter II", moduleId: toTypeId("12275"), maxRange: 36000, falloff: 90000, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 20 };
-    expect(describer.painterModuleEffect(painterSpec)).toBe("Signature radius +30%");
-  });
-
   test("dampenerHint reports scan resolution and targeting range reductions and range", () => {
     const dampenerSpec: SensorDampenerSpec = { moduleName: "Sensor Dampener II", moduleId: toTypeId("2120"), optimal: 48000, falloff: 24000, scanResolutionBonusPercent: -40, maxTargetRangeBonusPercent: -40, overloadStrengthBonusPercent: 20, defaultScript: undefined };
     const dampenerProj = {
@@ -270,21 +234,5 @@ describe("EwarEffectDescriber", () => {
     } as EwarProjection;
     resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 });
     expect(describer.dampenerHint(dampenerProj)).toBe("No effect at this range · range 0 m");
-  });
-
-  test("dampenerModuleEffect reports scan resolution and targeting range reductions", () => {
-    const dampenerSpec: SensorDampenerSpec = { moduleName: "Sensor Dampener II", moduleId: toTypeId("2120"), optimal: 48000, falloff: 24000, scanResolutionBonusPercent: -36, maxTargetRangeBonusPercent: -48, overloadStrengthBonusPercent: 20, defaultScript: undefined };
-    expect(describer.dampenerModuleEffect(dampenerSpec, undefined)).toBe("Scan resolution -36% · Targeting range -48%");
-  });
-
-  test("dampenerModuleEffect reports out of range when both bonuses are zero", () => {
-    const dampenerSpec: SensorDampenerSpec = { moduleName: "Sensor Dampener II", moduleId: toTypeId("2120"), optimal: 48000, falloff: 24000, scanResolutionBonusPercent: 0, maxTargetRangeBonusPercent: 0, overloadStrengthBonusPercent: 20, defaultScript: undefined };
-    expect(describer.dampenerModuleEffect(dampenerSpec, undefined)).toBe("No effect at this range");
-  });
-
-  test("dampenerModuleEffect applies scan resolution script multipliers", () => {
-    const dampenerSpec: SensorDampenerSpec = { moduleName: "Sensor Dampener II", moduleId: toTypeId("2120"), optimal: 48000, falloff: 24000, scanResolutionBonusPercent: -36, maxTargetRangeBonusPercent: -48, overloadStrengthBonusPercent: 20, defaultScript: undefined };
-    const script: SensorDampenerScriptSpec = { name: "Scan Resolution Dampening Script", moduleId: toTypeId("42532"), scanResolutionMultiplier: 2, maxTargetRangeMultiplier: 0 };
-    expect(describer.dampenerModuleEffect(dampenerSpec, script)).toBe("Scan resolution -72% · Targeting range -0%");
   });
 });

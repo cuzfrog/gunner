@@ -54,8 +54,6 @@ export class EwarControllerImpl implements EwarController {
   private readonly rowRefs = new Map<Side, EwarRowRef[]>();
   private starvedModuleIds: Record<Side, readonly TypeId[]> = { shipA: [], shipB: [] };
   private readonly scriptSections: Record<Side, ScriptSection<EwarScriptKey>>;
-  private readonly disruptorNameSpans = new Map<Side, HTMLSpanElement[]>();
-  private readonly dampenerNameSpans = new Map<Side, HTMLSpanElement[]>();
   private readonly overloadAction: IconActionImpl;
   private readonly sectionBlock: SectionBlockImpl;
 
@@ -172,8 +170,6 @@ export class EwarControllerImpl implements EwarController {
     const state = this.states.get(side);
     const modulesLabel = this.i18n.t("label.modules");
     this.scriptSections[side].close();
-    this.disruptorNameSpans.delete(side);
-    this.dampenerNameSpans.delete(side);
     this.rowRefs.set(side, []);
     section.innerHTML = "";
     if (!state || this.isEmpty(state.loadout)) {
@@ -345,7 +341,7 @@ export class EwarControllerImpl implements EwarController {
   private renderWebs(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.webs.length; i++) {
       const web = state.loadout.webs[i];
-      const { button } = this.createModuleButton(state.activation.webs[i].active, web, this.ewarEffectDescriber.webModuleEffect(web));
+      const button = this.createModuleButton(state.activation.webs[i].active, web);
       const overloadButton = this.createOverloadButton(state.activation.webs[i].active, state.activation.webs[i].overloaded, i, web, () => this.toggleWebOverload(side, i, overloadButton));
       button.addEventListener("click", () => this.toggleWeb(side, i, button));
       section.appendChild(this.createRow(side, "webs", i, web.moduleId, () => state.activation.webs[i].active, [button, overloadButton]));
@@ -355,7 +351,7 @@ export class EwarControllerImpl implements EwarController {
   private renderGrapplers(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.grapplers.length; i++) {
       const grappler: StasisGrapplerSpec = state.loadout.grapplers[i];
-      const { button } = this.createModuleButton(state.activation.grapplers[i].active, grappler, this.ewarEffectDescriber.grapplerModuleEffect(grappler));
+      const button = this.createModuleButton(state.activation.grapplers[i].active, grappler);
       const overloadButton = this.createOverloadButton(state.activation.grapplers[i].active, state.activation.grapplers[i].overloaded, i, grappler, () => this.toggleGrapplerOverload(side, i, overloadButton));
       button.addEventListener("click", () => this.toggleGrappler(side, i, button));
       section.appendChild(this.createRow(side, "grapplers", i, grappler.moduleId, () => state.activation.grapplers[i].active, [button, overloadButton]));
@@ -363,12 +359,10 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private renderDisruptors(side: Side, state: EwarState, section: HTMLElement): void {
-    const nameSpans: HTMLSpanElement[] = [];
     for (let i = 0; i < state.loadout.disruptors.length; i++) {
       const disruptor = state.loadout.disruptors[i];
       const activation = state.activation.disruptors[i];
-      const { button, nameSpan } = this.createModuleButton(activation.active, disruptor, this.ewarEffectDescriber.disruptorModuleEffect(disruptor, activation.script));
-      nameSpans.push(nameSpan);
+      const button = this.createModuleButton(activation.active, disruptor);
       const onToggle = () => this.toggleDisruptorOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, disruptor, onToggle);
       const key: EwarScriptKey = { kind: "disruptor", index: i };
@@ -380,13 +374,12 @@ export class EwarControllerImpl implements EwarController {
       button.addEventListener("click", () => this.toggleDisruptor(side, i, button));
       section.appendChild(this.createRow(side, "disruptors", i, disruptor.moduleId, () => state.activation.disruptors[i].active, [button, overloadButton, gear]));
     }
-    this.disruptorNameSpans.set(side, nameSpans);
   }
 
   private renderScramblers(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.scramblers.length; i++) {
       const scrambler: WarpScramblerSpec = state.loadout.scramblers[i];
-      const { button } = this.createModuleButton(state.activation.scramblers[i].active, scrambler, this.ewarEffectDescriber.scramblerModuleEffect());
+      const button = this.createModuleButton(state.activation.scramblers[i].active, scrambler);
       const overloadButton = this.createOverloadButton(state.activation.scramblers[i].active, state.activation.scramblers[i].overloaded, i, scrambler, () => this.toggleScramblerOverload(side, i, overloadButton));
       button.addEventListener("click", () => this.toggleScrambler(side, i, button));
       section.appendChild(this.createRow(side, "scramblers", i, scrambler.moduleId, () => state.activation.scramblers[i].active, [button, overloadButton]));
@@ -396,7 +389,7 @@ export class EwarControllerImpl implements EwarController {
   private renderPainters(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.painters.length; i++) {
       const painter: TargetPainterSpec = state.loadout.painters[i];
-      const { button } = this.createModuleButton(state.activation.painters[i].active, painter, this.ewarEffectDescriber.painterModuleEffect(painter));
+      const button = this.createModuleButton(state.activation.painters[i].active, painter);
       const overloadButton = this.createOverloadButton(state.activation.painters[i].active, state.activation.painters[i].overloaded, i, painter, () => this.togglePainterOverload(side, i, overloadButton));
       button.addEventListener("click", () => this.togglePainter(side, i, button));
       section.appendChild(this.createRow(side, "painters", i, painter.moduleId, () => state.activation.painters[i].active, [button, overloadButton]));
@@ -404,12 +397,10 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private renderDampeners(side: Side, state: EwarState, section: HTMLElement): void {
-    const nameSpans: HTMLSpanElement[] = [];
     for (let i = 0; i < state.loadout.dampeners.length; i++) {
       const dampener: SensorDampenerSpec = state.loadout.dampeners[i];
       const activation = state.activation.dampeners[i];
-      const { button, nameSpan } = this.createModuleButton(activation.active, dampener, this.ewarEffectDescriber.dampenerModuleEffect(dampener, activation.script));
-      nameSpans.push(nameSpan);
+      const button = this.createModuleButton(activation.active, dampener);
       const onToggle = () => this.toggleDampenerOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, dampener, onToggle);
       const key: EwarScriptKey = { kind: "dampener", index: i };
@@ -421,13 +412,12 @@ export class EwarControllerImpl implements EwarController {
       button.addEventListener("click", () => this.toggleDampener(side, i, button));
       section.appendChild(this.createRow(side, "dampeners", i, dampener.moduleId, () => state.activation.dampeners[i].active, [button, overloadButton, gear]));
     }
-    this.dampenerNameSpans.set(side, nameSpans);
   }
 
   private renderNeutralizers(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.neutralizers.length; i++) {
       const neutralizer: EnergyNeutralizerSpec = state.loadout.neutralizers[i];
-      const { button } = this.createModuleButton(state.activation.neutralizers[i].active, neutralizer, this.ewarEffectDescriber.neutralizerModuleEffect(neutralizer));
+      const button = this.createModuleButton(state.activation.neutralizers[i].active, neutralizer);
       button.addEventListener("click", () => this.toggleNeutralizer(side, i, button));
       section.appendChild(this.createRow(side, "neutralizers", i, neutralizer.moduleId, () => state.activation.neutralizers[i].active, [button]));
     }
@@ -436,7 +426,7 @@ export class EwarControllerImpl implements EwarController {
   private renderNosferatu(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.nosferatu.length; i++) {
       const nosferatu: NosferatuSpec = state.loadout.nosferatu[i];
-      const { button } = this.createModuleButton(state.activation.nosferatu[i].active, nosferatu, this.ewarEffectDescriber.nosferatuModuleEffect(nosferatu));
+      const button = this.createModuleButton(state.activation.nosferatu[i].active, nosferatu);
       button.addEventListener("click", () => this.toggleNosferatu(side, i, button));
       section.appendChild(this.createRow(side, "nosferatu", i, nosferatu.moduleId, () => state.activation.nosferatu[i].active, [button]));
     }
@@ -480,14 +470,13 @@ export class EwarControllerImpl implements EwarController {
     return this.fittingImport.itemNameForId(script.moduleId, this.i18n.current());
   }
 
-  private createModuleButton(active: boolean, spec: { readonly moduleId: TypeId }, effectTitle: string): { button: HTMLButtonElement; nameSpan: HTMLSpanElement } {
+  private createModuleButton(active: boolean, spec: { readonly moduleId: TypeId }): HTMLButtonElement {
     const displayName = this.moduleDisplayName(spec);
     const iconUrl = this.imageCatalog.itemIconUrl(spec.moduleId);
     const img = html`<img class="ewar-module-icon" alt="" src=${iconUrl}>` as unknown as HTMLImageElement;
     if (iconUrl === undefined) img.hidden = true;
-    const nameSpan = html`<span class="ewar-module-name truncate" data-hint=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
-    const button = html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName}>${img}${nameSpan}</button>` as unknown as HTMLButtonElement;
-    return { button, nameSpan };
+    const nameSpan = html`<span class="ewar-module-name truncate">${displayName}</span>` as unknown as HTMLSpanElement;
+    return html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName} data-hint-content="module" data-value=${String(spec.moduleId)}>${img}${nameSpan}</button>` as unknown as HTMLButtonElement;
   }
 
   private createOverloadButton(
@@ -549,9 +538,6 @@ export class EwarControllerImpl implements EwarController {
         if (script === undefined) return;
         state.activation.disruptors[key.index].script = script;
       }
-      const script = state.activation.disruptors[key.index].script;
-      const nameSpan = this.disruptorNameSpans.get(side)?.[key.index];
-      if (nameSpan) nameSpan.setAttribute("data-hint", this.ewarEffectDescriber.disruptorModuleEffect(state.loadout.disruptors[key.index], script));
     } else {
       if (value === "none") {
         state.activation.dampeners[key.index].script = undefined;
@@ -562,9 +548,6 @@ export class EwarControllerImpl implements EwarController {
         if (script === undefined) return;
         state.activation.dampeners[key.index].script = script;
       }
-      const script = state.activation.dampeners[key.index].script;
-      const nameSpan = this.dampenerNameSpans.get(side)?.[key.index];
-      if (nameSpan) nameSpan.setAttribute("data-hint", this.ewarEffectDescriber.dampenerModuleEffect(state.loadout.dampeners[key.index], script));
     }
     this.updateSummary(side);
     this.events.emitConfigInvalidated();

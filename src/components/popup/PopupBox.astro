@@ -27,7 +27,7 @@ const classes = [extraClass, "popup"];
 if (position) classes.push(`popup-${position}`);
 if (align === "both") { classes.push("popup-left"); classes.push("popup-right"); }
 else if (align) classes.push(`popup-${align}`);
-if (scroll) classes.push("popup-scroll");
+if (scroll) { classes.push("popup-scroll"); classes.push("thin-scrollbar"); }
 const classString = classes.filter(Boolean).join(" ");
 ---
 

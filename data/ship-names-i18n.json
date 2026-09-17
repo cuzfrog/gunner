@@ -604,11 +604,6 @@
     "zh": "回声级",
     "ja": "エコー"
   },
-  "Eidolon": {
-    "en": "Eidolon",
-    "zh": "",
-    "ja": ""
-  },
   "Endurance": {
     "en": "Endurance",
     "zh": "永恒者级",
@@ -719,11 +714,6 @@
     "zh": "加姆级",
     "ja": "ガルム"
   },
-  "Gecko": {
-    "en": "Gecko",
-    "zh": "壁虎级",
-    "ja": "ゲッコー"
-  },
   "Geri": {
     "en": "Geri",
     "zh": "格里级",
@@ -818,11 +808,6 @@
     "en": "Hematos",
     "zh": "未来人类级",
     "ja": "ヘマトス"
-  },
-  "Herald": {
-    "en": "Herald",
-    "zh": "",
-    "ja": ""
   },
   "Heretic": {
     "en": "Heretic",
@@ -983,11 +968,6 @@
     "en": "Iteron Mark V",
     "zh": "伊特龙级MKV",
     "ja": "イタロンマークV"
-  },
-  "Ixion": {
-    "en": "Ixion",
-    "zh": "伊克西翁级",
-    "ja": "イクシオン"
   },
   "Jackdaw": {
     "en": "Jackdaw",
@@ -1459,11 +1439,6 @@
     "zh": "黑豹级",
     "ja": "パンサー"
   },
-  "Penitence": {
-    "en": "Penitence",
-    "zh": "",
-    "ja": ""
-  },
   "Perseverance": {
     "en": "Perseverance",
     "zh": "坚毅者级",
@@ -1473,11 +1448,6 @@
     "en": "Phantasm",
     "zh": "幽灵级",
     "ja": "ファンタズム"
-  },
-  "Phantom": {
-    "en": "Phantom",
-    "zh": "",
-    "ja": ""
   },
   "Phobos": {
     "en": "Phobos",
@@ -1849,11 +1819,6 @@
     "zh": "斯雷普尼级",
     "ja": "スレイプニル"
   },
-  "Specter": {
-    "en": "Specter",
-    "zh": "",
-    "ja": ""
-  },
   "Squall": {
     "en": "Squall",
     "zh": "狂风级",
@@ -2169,11 +2134,6 @@
     "zh": "收藏家级",
     "ja": "バーチュオソ"
   },
-  "Visitant": {
-    "en": "Visitant",
-    "zh": "",
-    "ja": ""
-  },
   "Vulture": {
     "en": "Vulture",
     "zh": "兀鹫级",
@@ -2198,11 +2158,6 @@
     "en": "Worm",
     "zh": "潜龙级",
     "ja": "ワーム"
-  },
-  "Wraith": {
-    "en": "Wraith",
-    "zh": "",
-    "ja": ""
   },
   "Wreathe": {
     "en": "Wreathe",

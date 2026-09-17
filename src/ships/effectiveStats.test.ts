@@ -30,6 +30,7 @@ const frigate: ShipProfile = {
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  bonuses: [],
 };
 
 const battleship: ShipProfile = {
@@ -59,6 +60,7 @@ const battleship: ShipProfile = {
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  bonuses: [],
 };
 
 const mwd5 = fittingOptions("small").find((m) => m.id === "mwd-5mn")!;
@@ -141,6 +143,7 @@ describe("naked hull", () => {
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  bonuses: [],
     };
     const compactAB10: PropulsionStats = { thrust: 15_000_000, speedBonus: 1.25, massAddition: 5_000_000, sigBloom: 0, capacitorNeed: 80 };
     const stats = fittedStats(thrasher, undefined, compactAB10, conditions(5));
@@ -197,6 +200,7 @@ describe("naked hull", () => {
   shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
   hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+  bonuses: [],
     };
     const stats = fittedStats(profile, undefined, ab1, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(stats.maxSpeed).toBeCloseTo(1258.10, 2);

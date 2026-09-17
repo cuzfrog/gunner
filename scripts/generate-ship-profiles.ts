@@ -3,17 +3,12 @@ import { dirname, join } from "node:path";
 import type { ShipProfile } from "../src/ships";
 import type { FactionId, HullTypeId, ShipId } from "../src/gamedata/ids";
 
+type ShipBonusGroup = ShipProfile["bonuses"][number];
+
 interface ShipIdentity {
   readonly name: string;
   readonly faction: string;
   readonly hullType: string;
-}
-
-interface RawProfile extends ShipIdentity {
-  readonly navigation: Readonly<Record<string, string>>;
-  readonly structure: Readonly<Record<string, string>>;
-  readonly targeting: Readonly<Record<string, string>>;
-  readonly drones?: Readonly<Record<string, string>>;
 }
 
 export interface SdeType {
@@ -23,6 +18,7 @@ export interface SdeType {
   typeName_ja?: string;
   groupID: number;
   published: number;
+  mass: number;
 }
 
 export interface SdeGroup {
@@ -47,32 +43,10 @@ const DATA_PATH = "data/ship-profiles.json";
 const SDE_DIR = process.argv[2] ?? join(import.meta.dir, "..", "sde");
 const OUTPUT_PATH = "src/gamedata/shipProfiles/profiles.ts";
 const SHIP_CATEGORY_ID = 6;
-const LEGACY_PREFIX = "legacy";
-const DEFAULT_MAX_ACTIVE_DRONES = 5;
 const SHIELD_RECHARGE_RATE_MS = 1_000; // SDE stores shieldRechargeRate in milliseconds
-
-function parseNumber(input: string): number {
-  const match = input.match(/[\d,.]+(?:\.\d+)?/);
-  if (!match) throw new Error(`Cannot parse number from "${input}"`);
-  const cleaned = match[0].replaceAll(",", "");
-  const value = Number(cleaned);
-  if (Number.isNaN(value)) throw new Error(`Cannot parse number from "${input}"`);
-  return value;
-}
-
-function parseDistance(input: string): number {
-  const value = parseNumber(input);
-  if (input.toLowerCase().includes("km")) return value * 1000;
-  return value;
-}
-
-function hasObject(value: unknown, key: string): Record<string, unknown> {
-  if (!value || typeof value !== "object") throw new Error(`Entry is not an object`);
-  const record = value as Record<string, unknown>;
-  const child = record[key];
-  if (!child || typeof child !== "object") throw new Error(`Missing ${key}`);
-  return child as Record<string, unknown>;
-}
+// The SDE snapshot carries no per-type maxActiveDrones dogma attribute; 5 is the standard hull limit.
+const MAX_ACTIVE_DRONES_FALLBACK = 5;
+const EXTRACT_REQUIRED_ATTRIBUTES: readonly string[] = ["hp", "armorHP", "shieldCapacity", "capacitorCapacity", "rechargeRate"];
 
 function hasString(value: Record<string, unknown>, key: string, context: string): string {
   const field = value[key];
@@ -80,34 +54,9 @@ function hasString(value: Record<string, unknown>, key: string, context: string)
   return field;
 }
 
-function hasNumber(value: Record<string, unknown>, key: string, context: string): number {
+function optionalString(value: Record<string, unknown>, key: string): string | undefined {
   const field = value[key];
-  if (typeof field !== "number") throw new Error(`${context}: missing or invalid ${key}`);
-  return field;
-}
-
-interface DroneLimits {
-  readonly bandwidth: number;
-  readonly capacity: number;
-  readonly maxActive: number;
-}
-
-function parseDroneLimits(dronesBlock: unknown, shipName: string): DroneLimits {
-  if (!dronesBlock || typeof dronesBlock !== "object") return { bandwidth: 0, capacity: 0, maxActive: 0 };
-  const drones = dronesBlock as Record<string, unknown>;
-  const bandwidthRaw = hasString(drones, "droneBandwidth", `${shipName} drones`);
-  const capacityRaw = hasString(drones, "droneCapacity", `${shipName} drones`);
-  const bandwidth = bandwidthRaw.trim() === "" ? 0 : parseRangeValue(bandwidthRaw);
-  const capacity = capacityRaw.trim() === "" ? 0 : parseRangeValue(capacityRaw);
-  if (bandwidth <= 0 && capacity <= 0) return { bandwidth: 0, capacity: 0, maxActive: 0 };
-  return { bandwidth, capacity, maxActive: DEFAULT_MAX_ACTIVE_DRONES };
-}
-
-function parseRangeValue(input: string): number {
-  const matches = input.match(/[\d,.]+(?:\.\d+)?/g);
-  if (!matches || matches.length === 0) throw new Error(`Cannot parse number from "${input}"`);
-  const values = matches.map((m) => Number(m.replaceAll(",", "")));
-  return Math.max(...values);
+  return typeof field === "string" && field.length > 0 ? field : undefined;
 }
 
 function slugify(input: string): string {
@@ -116,14 +65,6 @@ function slugify(input: string): string {
     .replaceAll("'", "")
     .replaceAll(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-}
-
-function makeLegacyShipId(name: string): ShipId {
-  return `${LEGACY_PREFIX}-${slugify(name)}` as ShipId;
-}
-
-function makeLegacyHullTypeId(hullType: string): HullTypeId {
-  return `${LEGACY_PREFIX}-${slugify(hullType)}` as HullTypeId;
 }
 
 async function loadMerged<T>(prefix: string, sdeDir = SDE_DIR): Promise<Record<string, T>> {
@@ -172,8 +113,7 @@ interface CapacitorData {
 
 function extractCapacitorData(typeId: string, typedogmas: Record<string, SdeTypeDogma>, attributeNames: Map<number, string>): CapacitorData {
   const typeDogma = typedogmas[typeId];
-  // Legacy entries (ships absent from the SDE ship index) have no dogma to read; generation warns for them.
-  if (!typeDogma) return { capacitorCapacity: 0, capacitorRechargeTime: 0 };
+  if (!typeDogma) throw new Error(`${typeId}: missing typedogma`);
   const values = buildAttributeValues(attributeNames, typeDogma);
   const capacity = values.get("capacitorCapacity");
   const rechargeRate = values.get("rechargeRate");
@@ -215,6 +155,7 @@ interface DefenseData {
 
 function extractDefenseData(typeId: string, typedogmas: Record<string, SdeTypeDogma>, attributeNames: Map<number, string>): DefenseData {
   const typeDogma = typedogmas[typeId];
+  if (!typeDogma) throw new Error(`${typeId}: missing typedogma`);
   const values = buildAttributeValues(attributeNames, typeDogma);
   const shieldHp = values.get("shieldCapacity") ?? 0;
   const armorHp = values.get("armorHP") ?? 0;
@@ -276,25 +217,74 @@ function buildShipNameToType(
   return map;
 }
 
-function resolveShipIds(
-  profile: ShipIdentity,
-  shipNameToType: ReadonlyMap<string, SdeType>,
-): { id: ShipId; factionId: FactionId; hullTypeId: HullTypeId; matched: boolean } {
+interface ResolvedShip {
+  readonly id: ShipId;
+  readonly factionId: FactionId;
+  readonly hullTypeId: HullTypeId;
+  readonly type: SdeType;
+}
+
+function resolveShipIds(profile: ShipIdentity, shipNameToType: ReadonlyMap<string, SdeType>): ResolvedShip {
   const ship = shipNameToType.get(profile.name);
-  if (ship) {
-    return {
-      id: String(ship.typeID) as ShipId,
-      factionId: slugify(profile.faction) as FactionId,
-      hullTypeId: String(ship.groupID) as HullTypeId,
-      matched: true,
-    };
-  }
+  if (!ship) throw new Error(`No SDE ship for "${profile.name}"`);
   return {
-    id: makeLegacyShipId(profile.name),
+    id: String(ship.typeID) as ShipId,
     factionId: slugify(profile.faction) as FactionId,
-    hullTypeId: makeLegacyHullTypeId(profile.hullType),
-    matched: false,
+    hullTypeId: String(ship.groupID) as HullTypeId,
+    type: ship,
   };
+}
+
+function requiredPositive(values: Map<string, number>, attribute: string, shipName: string): number {
+  const value = values.get(attribute);
+  if (value === undefined || value <= 0) throw new Error(`${shipName}: SDE attribute "${attribute}" is missing or not positive.`);
+  return value;
+}
+
+function requiredPositiveMass(mass: number, shipName: string): number {
+  if (!(mass > 0)) throw new Error(`${shipName}: SDE type record "mass" is missing or not positive.`);
+  return mass;
+}
+
+function fallbackMaxActiveDrones(droneCapacity: number, droneBandwidth: number): number {
+  return droneCapacity > 0 || droneBandwidth > 0 ? MAX_ACTIVE_DRONES_FALLBACK : 0;
+}
+
+// Breaks glued one-line wiki blobs: lower-to-upper word joins ("speedRole"), lower-to-digit joins
+// ("speed10%"), paren-glued numbers ("level)20% bonus"), glued bullets ("duration• Can fit"), and
+// colon-glued statements ("level):10% bonus").
+const GLUED_BREAK_PATTERN = /(?<=[a-z])(?=[A-Z0-9])|(?<=[\)])(?=[0-9])|(?<=[a-z\):])(?=• )|(?<=:)(?=[A-Z0-9])/g;
+
+function parseBonuses(raw: string | undefined): readonly ShipBonusGroup[] {
+  if (raw === undefined) return [];
+  const drafts: { header: string; lines: string[] }[] = [];
+  let current: { header: string; lines: string[] } | undefined;
+  for (const line of bonusLines(raw)) {
+    if (isBonusHeader(line)) {
+      current = { header: bonusHeaderText(line), lines: [] };
+      drafts.push(current);
+      continue;
+    }
+    if (current === undefined) {
+      current = { header: "", lines: [] };
+      drafts.push(current);
+    }
+    current.lines.push(line);
+  }
+  return drafts.filter((draft) => draft.lines.length > 0).map((draft) => ({ header: draft.header, lines: [...draft.lines] }));
+}
+
+// Wiki text glues bullets to the previous word with a non-breaking space; normalize before splitting.
+function bonusLines(raw: string): readonly string[] {
+  return raw.replace(/\u00a0/g, " ").split("\n").flatMap((line) => line.split(GLUED_BREAK_PATTERN)).map((line) => line.trim()).filter((line) => line.length > 0);
+}
+
+function isBonusHeader(line: string): boolean {
+  return line.endsWith(":") || /^• .+ Mode$/i.test(line) || /bonuses( per level)?$/i.test(line) || /bonuses \(per skill level\)$/i.test(line) || /^[A-Z][A-Za-z]+( [A-Z][A-Za-z]+){1,3}$/.test(line);
+}
+
+function bonusHeaderText(line: string): string {
+  return line.replace(/:$/, "").replace(/^• /, "");
 }
 
 function parseProfile(
@@ -312,36 +302,39 @@ function parseProfile(
   const faction = hasString(record, "faction", name);
   const hullType = hasString(record, "hullType", name);
 
-  const navigation = hasObject(raw, "navigation");
-  const structure = hasObject(raw, "structure");
-  const targeting = hasObject(raw, "targeting");
-
-  const { id, factionId, hullTypeId } = resolveShipIds({ name, faction, hullType }, shipNameToType);
-
-  const droneLimits = parseDroneLimits(record["drones"], name);
+  const { id, factionId, hullTypeId, type } = resolveShipIds({ name, faction, hullType }, shipNameToType);
+  const values = buildAttributeValues(attributeNames, typedogmas[String(id)]);
+  const mass = requiredPositiveMass(type.mass, name);
+  for (const attribute of EXTRACT_REQUIRED_ATTRIBUTES) requiredPositive(values, attribute, name);
+  const inertiaModifier = requiredPositive(values, "agility", name);
+  const baseSpeed = requiredPositive(values, "maxVelocity", name);
+  const sigRadius = requiredPositive(values, "signatureRadius", name);
+  const droneCapacity = values.get("droneCapacity") ?? 0;
+  const droneBandwidth = values.get("droneBandwidth") ?? 0;
   const defense = extractDefenseData(String(id), typedogmas, attributeNames);
   const capacitor = extractCapacitorData(String(id), typedogmas, attributeNames);
   const slots = extractSlotData(String(id), typedogmas, attributeNames);
+  const bonuses = parseBonuses(optionalString(record, "shipBonuses"));
 
   return {
     id,
     name,
     factionId,
     hullTypeId,
-    mass: parseNumber(hasString(structure, "mass", name)),
-    inertiaModifier: parseNumber(hasString(navigation, "inertiaModifier", name)),
-    baseSpeed: parseNumber(hasString(navigation, "maxVelocity", name)),
-    sigRadius: parseNumber(hasString(targeting, "sigRadius", name)),
-    scanResolution: parseNumber(hasString(targeting, "scanResolution", name)),
-    maxTargetingRange: parseDistance(hasString(targeting, "maxTargetingRange", name)),
-    maxLockedTargets: hasNumber(targeting, "maxLockedTargets", name),
+    mass,
+    inertiaModifier,
+    baseSpeed,
+    sigRadius,
+    scanResolution: values.get("scanResolution") ?? 0,
+    maxTargetingRange: values.get("maxTargetRange") ?? 0,
+    maxLockedTargets: values.get("maxLockedTargets") ?? 0,
     highSlots: slots.highSlots,
     medSlots: slots.medSlots,
     lowSlots: slots.lowSlots,
     rigSlots: slots.rigSlots,
-    droneBandwidth: droneLimits.bandwidth,
-    droneCapacity: droneLimits.capacity,
-    maxActiveDrones: droneLimits.maxActive,
+    droneBandwidth,
+    droneCapacity,
+    maxActiveDrones: values.get("maxActiveDrones") ?? fallbackMaxActiveDrones(droneCapacity, droneBandwidth),
     shieldHp: defense.shieldHp,
     shieldRechargeTime: defense.shieldRechargeTime,
     armorHp: defense.armorHp,
@@ -351,6 +344,7 @@ function parseProfile(
     shieldResists: defense.shieldResists,
     armorResists: defense.armorResists,
     hullResists: defense.hullResists,
+    bonuses,
   };
 }
 
@@ -391,6 +385,7 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push(`    shieldResists: ${formatResists(p.shieldResists)},`);
     lines.push(`    armorResists: ${formatResists(p.armorResists)},`);
     lines.push(`    hullResists: ${formatResists(p.hullResists)},`);
+    lines.push(`    bonuses: ${JSON.stringify(p.bonuses)},`);
     lines.push("  },");
   }
 
@@ -412,15 +407,15 @@ async function main(): Promise<void> {
   const shipNameToType = buildShipNameToType(types, groups);
 
   const profiles: ShipProfile[] = [];
+  const errors: string[] = [];
   for (let i = 0; i < raw.length; i++) {
-    profiles.push(parseProfile(raw[i], i, shipNameToType, typedogmas, attributeNames));
-  }
-
-  for (const profile of profiles) {
-    if (!shipNameToType.has(profile.name)) {
-      console.warn(`No SDE match for ship "${profile.name}"; using legacy id.`);
+    try {
+      profiles.push(parseProfile(raw[i], i, shipNameToType, typedogmas, attributeNames));
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : String(error));
     }
   }
+  if (errors.length > 0) throw new Error(`Ship profile generation failed:\n${errors.join("\n")}`);
 
   await mkdir(dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(OUTPUT_PATH, buildSource(profiles));
@@ -432,10 +427,9 @@ export {
   buildShipNameToType as _buildShipNameToType,
   extractCapacitorData as _extractCapacitorData,
   extractDefenseData as _extractDefenseData,
-  parseDroneLimits as _parseDroneLimits,
+  parseBonuses as _parseBonuses,
   parseProfile as _parseProfile,
   resolveShipIds as _resolveShipIds,
-  slugify as _slugify,
 };
 
 if (import.meta.main) {

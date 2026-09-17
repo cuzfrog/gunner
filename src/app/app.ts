@@ -89,13 +89,13 @@ export class AppImpl implements App {
 
   private refreshCameraRanges(): void {
     const weapons = this.controls.getEngineConfig().weapons;
-    this.cameraRanges = { shipA: configuredWeaponRange(weapons.shipA[0]), shipB: configuredWeaponRange(weapons.shipB[0]) };
+    this.cameraRanges = { shipA: configuredWeaponRange(firstMountedWeapon(weapons.shipA)), shipB: configuredWeaponRange(firstMountedWeapon(weapons.shipB)) };
   }
 
   private rendererWeaponRanges(view: EngineView): WeaponRanges {
     return {
-      shipA: this.weaponRangeForRenderer(view.effectiveWeapons.shipA, "shipA"),
-      shipB: this.weaponRangeForRenderer(view.effectiveWeapons.shipB, "shipB"),
+      shipA: this.shipWeaponRange(view, "shipA"),
+      shipB: this.shipWeaponRange(view, "shipB"),
     };
   }
 
@@ -113,11 +113,12 @@ export class AppImpl implements App {
     };
   }
 
-  private weaponRangeForRenderer(weapon: WeaponSpec | undefined, side: Side): WeaponRange {
-    if (weapon) return configuredWeaponRange(weapon);
-    const fallback = this.controls.getWeapon(side);
-    if (fallback?.kind === "missile") return { kind: "missile", range: fallback.flightRange };
-    return ZERO_RANGE;
+  // The ship-centered weapon ring represents ship-mounted weapons only. Drone optimal/falloff is
+  // measured from the drone, not the ship, so drone weapons never produce this ring; drone
+  // envelopes render through DroneRenderInfo group rings and the drone control range ring.
+  private shipWeaponRange(view: EngineView, side: Side): WeaponRange {
+    const mounted = view.weaponAttacks[side].find((attack) => attack.weapon.kind !== "drone");
+    return mounted ? configuredWeaponRange(mounted.assessment.effectiveWeapon) : ZERO_RANGE;
   }
 }
 
@@ -125,9 +126,12 @@ const ZERO_RANGE: WeaponRange = { kind: "turret", optimal: 0, falloff: 0 };
 
 function configuredWeaponRange(weapon: WeaponSpec | undefined): WeaponRange {
   if (weapon?.kind === "turret") return { kind: "turret", optimal: weapon.optimal, falloff: weapon.falloff };
-  if (weapon?.kind === "drone") return { kind: "drone", optimal: weapon.optimal, falloff: weapon.falloff };
   if (weapon?.kind === "missile") return { kind: "missile", range: weapon.flightRange };
   return ZERO_RANGE;
+}
+
+function firstMountedWeapon(weapons: readonly WeaponSpec[]): WeaponSpec | undefined {
+  return weapons.find((weapon) => weapon.kind !== "drone");
 }
 
 function droneGroupRenderInfo(states: readonly DroneRuntimeState[], specs: readonly DroneSpec[]): readonly DroneGroupRenderInfo[] {

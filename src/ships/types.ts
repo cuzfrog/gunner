@@ -15,6 +15,11 @@ export type PropulsionId =
   | "mwd-500mn"
   | "mwd-50000mn";
 
+export interface ShipBonusGroup {
+  readonly header: string;
+  readonly lines: readonly string[];
+}
+
 export interface ShipProfile {
   readonly id: ShipId;
   readonly name: string;
@@ -43,6 +48,7 @@ export interface ShipProfile {
   readonly shieldResists: DamageResists;
   readonly armorResists: DamageResists;
   readonly hullResists: DamageResists;
+  readonly bonuses: readonly ShipBonusGroup[];
 }
 
 export type SkillLevel = 0 | 1 | 2 | 3 | 4 | 5;

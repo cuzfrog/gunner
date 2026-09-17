@@ -355,8 +355,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.restoreDrone("shipB", settings.shipB.fitting, settings.shipB.droneGroups);
     this.weaponSystemSwitches.shipA.setActiveKind(settings.shipA.weaponKind ?? "turret");
     this.weaponSystemSwitches.shipB.setActiveKind(settings.shipB.weaponKind ?? "turret");
-    this.weaponSystemSwitches.shipA.autoToggle(this.turretControllers.shipA.turret() !== undefined, this.launcherControllers.shipA.launcher() !== undefined, this.droneControllers.shipA.drone() !== undefined);
-    this.weaponSystemSwitches.shipB.autoToggle(this.turretControllers.shipB.turret() !== undefined, this.launcherControllers.shipB.launcher() !== undefined, this.droneControllers.shipB.drone() !== undefined);
+    this.selectPrimaryWeaponSystem("shipA");
+    this.selectPrimaryWeaponSystem("shipB");
     this.restoreEwar("shipA", settings.shipA.fitting, settings.shipA.ewarActivation);
     this.restoreEwar("shipB", settings.shipB.fitting, settings.shipB.ewarActivation);
     this.restoreBooster("shipA", settings.shipA.fitting, settings.shipA.boosterActivation);
@@ -391,6 +391,15 @@ export class SessionCodecImpl implements SessionCodec {
   private applyStoredPreferences(): void {
     this.preferencesController.applyPreferences(this.settingsStore.loadPreferences());
     this.i18n.translateDocument();
+  }
+
+  private selectPrimaryWeaponSystem(side: Side): void {
+    const systems = {
+      turret: this.turretControllers[side].turret(),
+      launcher: this.launcherControllers[side].launcher(),
+      drones: this.droneControllers[side].currentDroneSpecs(),
+    };
+    this.weaponSystemSwitches[side].autoSelectPrimary(systems);
   }
 
   private applyDefaultStartup(): void {

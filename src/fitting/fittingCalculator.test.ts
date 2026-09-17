@@ -103,6 +103,7 @@ function sensorProfile(overrides: { maxTargetingRange?: number } = {}): ShipProf
     shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
     armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
     hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+    bonuses: [],
   };
 }
 

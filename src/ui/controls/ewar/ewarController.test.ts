@@ -143,8 +143,6 @@ function buildEwarController(
     webHint: vi.fn(() => "web-hint"),
     neutralizerDescription: vi.fn(() => "neutralizer-title"),
     nosferatuDescription: vi.fn(() => "nosferatu-title"),
-    neutralizerModuleEffect: vi.fn(() => "neutralizer-effect"),
-    nosferatuModuleEffect: vi.fn(() => "nosferatu-effect"),
     neutralizerHint: vi.fn(() => "neutralizer-hint"),
     nosferatuHint: vi.fn(() => "nosferatu-hint"),
     grapplerDescription: vi.fn(() => "grappler-title"),
@@ -155,12 +153,6 @@ function buildEwarController(
     scramblerHint: vi.fn(() => "scrambler-hint"),
     painterHint: vi.fn(() => "painter-hint"),
     dampenerHint: vi.fn(() => "dampener-hint"),
-    painterModuleEffect: vi.fn(() => "painter-effect"),
-    dampenerModuleEffect: vi.fn(() => "dampener-effect"),
-    webModuleEffect: vi.fn(() => "web-effect"),
-    grapplerModuleEffect: vi.fn(() => "grappler-effect"),
-    disruptorModuleEffect: vi.fn(() => "disruptor-effect"),
-    scramblerModuleEffect: vi.fn(() => "scrambler-effect"),
   });
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
@@ -269,7 +261,7 @@ describe("EwarController", () => {
     expect(webButton.children[0].tagName).toBe("IMG");
     expect(webButton.children[0].hidden).toBe(false);
     expect(webButton.children[1].textContent).toBe(WEB2.moduleName);
-    expect(webButton.children[1].getAttribute("data-hint")).toBe("web-effect");
+    expect(webButton.getAttribute("data-hint-content")).toBe("module");
 
     const disruptors = disruptorSection(document, "shipA")!;
     expect(disruptors.className).toBe("preview-section");
@@ -594,23 +586,23 @@ describe("EwarController", () => {
     });
   });
 
-  test("selecting a disruptor script updates the module button title to reflect the script multipliers", () => {
-    const { controller, document, ewarEffectDescriber } = buildEwarController();
+  test("selecting a script keeps the row hint anchored to the module", () => {
+    const { controller, document } = buildEwarController();
     controller.setLoadout("shipA", { webs: [], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], neutralizers: [], nosferatu: [], });
-    ewarEffectDescriber.disruptorModuleEffect.mockReturnValue("disruptor-with-optimal");
     const popup = getFake(document, "ship-a-ewar-popup");
     popup.hidden = false;
     const section = disruptorSection(document, "shipA")!;
     const row = section.children[1];
     const button = row.children[0];
     const gear = gearFor(row);
-    expect(button.children[1].getAttribute("data-hint")).toBe("disruptor-effect");
+    expect(button.getAttribute("data-hint-content")).toBe("module");
+    expect(button.getAttribute("data-value")).toBe(DISRUPTOR2.moduleId);
     gear.trigger("click");
     const scriptPopup = scriptPopupFor(document, "shipA");
-    ewarEffectDescriber.disruptorModuleEffect.mockReturnValue("disruptor-with-tracking");
     scriptOptionFor(scriptPopup, String(TRACKING_SCRIPT.moduleId))!.trigger("click");
-    expect(button.children[1].getAttribute("data-hint")).toBe("disruptor-with-tracking");
-    expect(ewarEffectDescriber.disruptorModuleEffect).toHaveBeenCalledWith(DISRUPTOR2, TRACKING_SCRIPT);
+    expect(button.getAttribute("data-hint-content")).toBe("module");
+    expect(button.getAttribute("data-value")).toBe(DISRUPTOR2.moduleId);
+    expect(button.children[1].getAttribute("data-hint")).toBeNull();
   });
 
   test("setLoadout renders translated module names and keeps icon inputs canonical", () => {
@@ -620,7 +612,8 @@ describe("EwarController", () => {
     const webButton = webSectionEl.children[1].children[0];
     const overloadButton = overloadFor(webSectionEl.children[1]);
     expect(webButton.children[1].textContent).toBe(`${WEB.moduleName} (zh)`);
-    expect(webButton.children[1].getAttribute("data-hint")).toBe("web-effect");
+    expect(webButton.getAttribute("data-hint-content")).toBe("module");
+    expect(webButton.children[1].getAttribute("data-hint")).toBeNull();
     expect(webButton.getAttribute("aria-label")).toBe(`${WEB.moduleName} (zh)`);
     expect(overloadButton.getAttribute("aria-label")).toContain(`${WEB.moduleName} (zh)`);
     expect(fittingImport.itemNameForId).toHaveBeenCalledWith(WEB.moduleId, "zh");
@@ -628,21 +621,21 @@ describe("EwarController", () => {
     expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith(`${WEB.moduleName} (zh)`);
   });
 
-  test("module button title shows the effect description instead of the module name", () => {
-    const { controller, document, ewarEffectDescriber } = buildEwarController();
+  test("module rows carry the module hint provider attributes", () => {
+    const { controller, document } = buildEwarController();
     controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [GRAPPLER], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], neutralizers: [], nosferatu: [], });
     const webButton = webSection(document, "shipA")!.children[1].children[0];
-    expect(webButton.children[1].getAttribute("data-hint")).toBe("web-effect");
-    expect(ewarEffectDescriber.webModuleEffect).toHaveBeenCalledWith(WEB);
+    expect(webButton.getAttribute("data-hint-content")).toBe("module");
+    expect(webButton.getAttribute("data-value")).toBe(WEB.moduleId);
     const grapplerButton = grapplerSection(document, "shipA")!.children[1].children[0];
-    expect(grapplerButton.children[1].getAttribute("data-hint")).toBe("grappler-effect");
-    expect(ewarEffectDescriber.grapplerModuleEffect).toHaveBeenCalledWith(GRAPPLER);
+    expect(grapplerButton.getAttribute("data-hint-content")).toBe("module");
+    expect(grapplerButton.getAttribute("data-value")).toBe(GRAPPLER.moduleId);
     const disruptorButton = disruptorSection(document, "shipA")!.children[1].children[0];
-    expect(disruptorButton.children[1].getAttribute("data-hint")).toBe("disruptor-effect");
-    expect(ewarEffectDescriber.disruptorModuleEffect).toHaveBeenCalledWith(DISRUPTOR, undefined);
+    expect(disruptorButton.getAttribute("data-hint-content")).toBe("module");
+    expect(disruptorButton.getAttribute("data-value")).toBe(DISRUPTOR.moduleId);
     const scramblerButton = scramblerSection(document, "shipA")!.children[1].children[0];
-    expect(scramblerButton.children[1].getAttribute("data-hint")).toBe("scrambler-effect");
-    expect(ewarEffectDescriber.scramblerModuleEffect).toHaveBeenCalled();
+    expect(scramblerButton.getAttribute("data-hint-content")).toBe("module");
+    expect(scramblerButton.getAttribute("data-value")).toBe(SCRAMBLER.moduleId);
   });
 
   test("summary hides an icon when no icon URL is available", () => {
@@ -939,8 +932,8 @@ describe("EwarController", () => {
     const button = row.children[0];
     expect(button.getAttribute("aria-pressed")).toBe("true");
     expect(button.children[1].textContent).toBe(DAMPENER2.moduleName);
-    expect(button.children[1].getAttribute("data-hint")).toBe("dampener-effect");
-    expect(ewarEffectDescriber.dampenerModuleEffect).toHaveBeenCalledWith(DAMPENER2, SCAN_RES_SCRIPT);
+    expect(button.getAttribute("data-hint-content")).toBe("module");
+    expect(button.children[1].getAttribute("data-hint")).toBeNull();
     const gear = gearFor(row);
     expect(gear.getAttribute("data-hint")).toBe("Scan Resolution Dampening Script");
     expect(gear.disabled).toBe(false);
@@ -1075,23 +1068,23 @@ describe("EwarController", () => {
     expect(controller.projection("shipA")!.activation!.dampeners[0]!.overloaded).toBe(true);
   });
 
-  test("selecting a dampener script updates the module button hint by calling dampenerModuleEffect with the selected script", () => {
-    const { controller, document, ewarEffectDescriber } = buildEwarController();
+  test("selecting a dampener script keeps the row hint anchored to the module", () => {
+    const { controller, document } = buildEwarController();
     controller.setLoadout("shipA", { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [], dampeners: [DAMPENER2], scripts: [], dampenerScripts: DAMPENER_SCRIPTS, neutralizers: [], nosferatu: [] });
-    ewarEffectDescriber.dampenerModuleEffect.mockReturnValue("dampener-with-scan");
     const popup = getFake(document, "ship-a-ewar-popup");
     popup.hidden = false;
     const section = dampenerSection(document, "shipA")!;
     const row = section.children[1];
     const button = row.children[0];
     const gear = gearFor(row);
-    expect(button.children[1].getAttribute("data-hint")).toBe("dampener-effect");
+    expect(button.getAttribute("data-hint-content")).toBe("module");
+    expect(button.getAttribute("data-value")).toBe(DAMPENER2.moduleId);
     gear.trigger("click");
     const scriptPopup = scriptPopupFor(document, "shipA");
-    ewarEffectDescriber.dampenerModuleEffect.mockReturnValue("dampener-with-target");
     scriptOptionFor(scriptPopup, String(TARGET_RANGE_SCRIPT.moduleId))!.trigger("click");
-    expect(button.children[1].getAttribute("data-hint")).toBe("dampener-with-target");
-    expect(ewarEffectDescriber.dampenerModuleEffect).toHaveBeenCalledWith(DAMPENER2, TARGET_RANGE_SCRIPT);
+    expect(button.getAttribute("data-hint-content")).toBe("module");
+    expect(button.getAttribute("data-value")).toBe(DAMPENER2.moduleId);
+    expect(button.children[1].getAttribute("data-hint")).toBeNull();
   });
 });
 

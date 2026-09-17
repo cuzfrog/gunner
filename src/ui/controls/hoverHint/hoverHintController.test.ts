@@ -1,4 +1,5 @@
 import { fakeDocument, getFake } from "../../testing";
+import type { FakeElement } from "../../testing";
 import type { TimeoutId, Timer } from "../../timer";
 import type { EngineView } from "../../../sim";
 import type { ViewStream } from "../../viewStream";
@@ -35,6 +36,31 @@ class ControllableTimer implements Timer {
 
 function dispatch(document: Document, type: string, target: unknown, relatedTarget: unknown = null): void {
   document.dispatchEvent({ type, target, relatedTarget } as unknown as Event);
+}
+
+function setViewportWidth(document: Document, width: number): void {
+  (document.documentElement as unknown as { clientWidth: number }).clientWidth = width;
+}
+
+function stubAnchorRect(anchor: HTMLElement, rect: { left: number; width: number; bottom: number }): void {
+  (anchor as unknown as FakeElement).getBoundingClientRect = () => ({
+    left: rect.left,
+    top: rect.bottom - 40,
+    right: rect.left + rect.width,
+    bottom: rect.bottom,
+    width: rect.width,
+    height: 40,
+    x: rect.left,
+    y: rect.bottom - 40,
+  });
+}
+
+function renderingProvider(): HintContentProvider {
+  return {
+    render: vi.fn((_anchor: HTMLElement, container: HTMLElement) => {
+      container.appendChild(globalThis.document.createElement("span"));
+    }),
+  };
 }
 
 describe("HoverHintControllerImpl", () => {
@@ -114,6 +140,154 @@ describe("HoverHintControllerImpl", () => {
     timer.fire();
     expect(hintEl.hidden).toBe(false);
     expect(hintEl.textContent).toBe("effect text");
+  });
+
+  test("marks tall hints scrollable and clears the class when hidden", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    hintEl.scrollHeight = 5000;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.classList.toggle).toHaveBeenCalledWith("hover-hint-scrollable", true);
+    dispatch(document, "pointerout", anchor, { tagName: "BODY" });
+    expect(hintEl.hidden).toBe(true);
+    expect(hintEl.classList.remove).toHaveBeenCalledWith("hover-hint-scrollable");
+  });
+
+  test("marks the anchor bridged while a scrollable hint is open and clears it on hide", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    hintEl.scrollHeight = 5000;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+    expect(anchor.classList.toggle).toHaveBeenCalledWith("hover-hint-anchor-bridged", true);
+
+    dispatch(document, "pointerout", anchor, { tagName: "BODY" });
+    timer.fire();
+    expect(anchor.classList.remove).toHaveBeenCalledWith("hover-hint-anchor-bridged");
+  });
+
+  test("keeps short hints unbridged", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(anchor.classList.toggle).toHaveBeenCalledWith("hover-hint-anchor-bridged", false);
+  });
+
+  test("keeps short hints non-scrollable", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.classList.toggle).toHaveBeenCalledWith("hover-hint-scrollable", false);
+  });
+
+  test("keeps the hint open while the pointer is over it and hides when it leaves", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint-content", "shipProfile");
+    const provider = renderingProvider();
+    const controller = new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+    controller.registerContentProvider("shipProfile", provider);
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+    expect(hintEl.hidden).toBe(false);
+    const insideHint = hintEl.children[0];
+
+    dispatch(document, "pointerover", insideHint);
+    expect(hintEl.hidden).toBe(false);
+
+    dispatch(document, "pointerout", insideHint, { tagName: "BODY" });
+    expect(hintEl.hidden).toBe(true);
+  });
+
+  test("keeps the hint open when the pointer moves from the anchor onto the hint", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint-content", "shipProfile");
+    const provider = renderingProvider();
+    const controller = new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+    controller.registerContentProvider("shipProfile", provider);
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+    const insideHint = hintEl.children[0];
+
+    dispatch(document, "pointerout", anchor, insideHint);
+    expect(hintEl.hidden).toBe(false);
+  });
+
+  // Events on pseudo elements (the CSS gap bridges) and on the hint padding target the hint
+  // element itself; the controller must treat the host as part of the hint.
+  test("keeps the hint open when the pointer crosses onto the hint element itself", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint-content", "shipProfile");
+    const provider = renderingProvider();
+    const controller = new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+    controller.registerContentProvider("shipProfile", provider);
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    dispatch(document, "pointerout", anchor, hintEl as unknown as HTMLElement);
+    expect(hintEl.hidden).toBe(false);
+    dispatch(document, "pointerover", hintEl as unknown as HTMLElement);
+    expect(hintEl.hidden).toBe(false);
+  });
+
+  test("does not re-render when the pointer returns from the hint to the current anchor", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint-content", "shipProfile");
+    const provider = renderingProvider();
+    const controller = new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+    controller.registerContentProvider("shipProfile", provider);
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+    dispatch(document, "pointerout", anchor, hintEl as unknown as HTMLElement);
+    dispatch(document, "pointerover", hintEl as unknown as HTMLElement);
+    dispatch(document, "pointerout", hintEl as unknown as HTMLElement, anchor);
+    dispatch(document, "pointerover", anchor);
+
+    expect(timer.hasPending()).toBe(false);
+    timer.fire();
+    expect(provider.render).toHaveBeenCalledTimes(1);
+    expect(hintEl.hidden).toBe(false);
   });
 
   test("scheduleShow does not reset timer when same anchor is hovered again", () => {
@@ -292,7 +466,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
-    const provider: HintContentProvider = { render: vi.fn() };
+    const provider = renderingProvider();
     const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
@@ -304,13 +478,31 @@ describe("HoverHintControllerImpl", () => {
     expect(anchor.getAttribute("aria-describedby")).toBe("hover-hint");
   });
 
+  test("keeps hint hidden when provider renders no content", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint-content", "dps");
+    anchor.setAttribute("data-value", "42");
+    const provider: HintContentProvider = { render: vi.fn() };
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
+    controller.registerContentProvider("dps", provider);
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.hidden).toBe(true);
+    expect(anchor.getAttribute("aria-describedby")).toBe(null);
+  });
+
   test("delegates content rendering to registered provider on focus", () => {
     const document = globalThis.document;
     const timer = new ControllableTimer();
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
-    const provider: HintContentProvider = { render: vi.fn() };
+    const provider = renderingProvider();
     const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
@@ -319,6 +511,23 @@ describe("HoverHintControllerImpl", () => {
     expect(timer.hasPending()).toBe(false);
     expect(hintEl.hidden).toBe(false);
     expect(provider.render).toHaveBeenCalledWith(anchor, hintEl);
+  });
+
+  test("does not re-render on focusin when the same anchor is already showing", () => {
+    const document = globalThis.document;
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint-content", "dps");
+    const provider = renderingProvider();
+    const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
+    controller.registerContentProvider("dps", provider);
+
+    dispatch(document, "focusin", anchor);
+    dispatch(document, "focusin", anchor);
+
+    expect(provider.render).toHaveBeenCalledTimes(1);
+    expect(hintEl.hidden).toBe(false);
   });
 
   test("does not show when content key has no registered provider", () => {
@@ -392,7 +601,7 @@ describe("HoverHintControllerImpl", () => {
     anchor.setAttribute("data-hint-content", "dps");
     const child = document.createElement("svg");
     anchor.appendChild(child);
-    const provider: HintContentProvider = { render: vi.fn() };
+    const provider = renderingProvider();
     const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
@@ -423,7 +632,7 @@ describe("HoverHintControllerImpl", () => {
     const hintEl = getFake(document, "hover-hint") as unknown as HTMLElement;
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
-    const provider: HintContentProvider = { render: vi.fn() };
+    const provider = renderingProvider();
     const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
@@ -499,7 +708,7 @@ describe("HoverHintControllerImpl", () => {
     const anchor = document.createElement("button");
     anchor.setAttribute("data-hint-content", "dps");
     anchor.setAttribute("aria-describedby", "existing-description");
-    const provider: HintContentProvider = { render: vi.fn() };
+    const provider = renderingProvider();
     const controller = new HoverHintControllerImpl({ hintEl, timer, viewStream: makeViewStream() });
     controller.registerContentProvider("dps", provider);
 
@@ -558,5 +767,57 @@ describe("HoverHintControllerImpl", () => {
 
     expect(provider.render).not.toHaveBeenCalled();
     expect(hintEl.hidden).toBe(true);
+  });
+
+  test("centers the hint on the anchor when it fits the viewport", () => {
+    const document = globalThis.document;
+    setViewportWidth(document, 1540);
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    hintEl.offsetWidth = 300;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    stubAnchorRect(anchor, { left: 500, width: 100, bottom: 200 });
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.style.left).toBe("550px");
+    expect(hintEl.style.top).toBe("200px");
+  });
+
+  test("clamps the hint inside the right viewport edge", () => {
+    const document = globalThis.document;
+    setViewportWidth(document, 990);
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    hintEl.offsetWidth = 420;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    stubAnchorRect(anchor, { left: 900, width: 100, bottom: 200 });
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.style.left).toBe("768px");
+  });
+
+  test("clamps the hint inside the left viewport edge", () => {
+    const document = globalThis.document;
+    setViewportWidth(document, 990);
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    hintEl.offsetWidth = 420;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    stubAnchorRect(anchor, { left: 0, width: 60, bottom: 200 });
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.style.left).toBe("222px");
   });
 });

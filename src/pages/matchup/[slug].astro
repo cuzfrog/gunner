@@ -91,7 +91,7 @@ const soloLinkB = simulatorDeepLink(shipWire(b.profile, eftB));
     <article class="content-fitting">
       <h3 class="content-fitting-title">{a.presets[0]?.name ?? nameA}</h3>
       <a class="btn content-cta" href={soloLinkA}>Load the {nameA} alone</a>
-      {eftA !== undefined && <pre class="content-eft"><code>{eftA}</code></pre>}
+      {eftA !== undefined && <pre class="content-eft thin-scrollbar"><code>{eftA}</code></pre>}
     </article>
   </section>
 
@@ -100,7 +100,7 @@ const soloLinkB = simulatorDeepLink(shipWire(b.profile, eftB));
     <article class="content-fitting">
       <h3 class="content-fitting-title">{b.presets[0]?.name ?? nameB}</h3>
       <a class="btn content-cta" href={soloLinkB}>Load the {nameB} alone</a>
-      {eftB !== undefined && <pre class="content-eft"><code>{eftB}</code></pre>}
+      {eftB !== undefined && <pre class="content-eft thin-scrollbar"><code>{eftB}</code></pre>}
     </article>
   </section>
 

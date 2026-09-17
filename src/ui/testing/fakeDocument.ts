@@ -20,7 +20,7 @@ export function fakeDocument(): Document {
   globalThis.Element = FakeElement as unknown as typeof Element;
   globalThis.HTMLElement = FakeElement as unknown as typeof HTMLElement;
   return {
-    documentElement: { lang: "en" } as unknown as HTMLElement,
+    documentElement: { lang: "en", clientHeight: 1000 } as unknown as HTMLElement,
     getElementById: (id: string) => {
       if (!elements.has(id)) {
         const el = new FakeElement();

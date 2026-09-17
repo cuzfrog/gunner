@@ -1,6 +1,7 @@
 import { container } from "./container";
 import { ClipboardUnavailableError } from "./appstate";
 import { DEFAULT_VALUES, TAG_BY_ID } from "./ui/controls";
+import { FakeElement } from "./ui/testing";
 
 const DEFAULT_SETTINGS = {
   version: 5 as const,
@@ -31,83 +32,6 @@ const DEFAULT_SETTINGS = {
   simSpeed: 4,
   language: "en" as const,
 };
-
-class FakeElement {
-  value = "";
-  checked = false;
-  hidden = false;
-  disabled = false;
-  textContent = "";
-  innerHTML = "";
-  placeholder = "";
-  src = "";
-  tagName = "";
-  className = "";
-  nodeType = 1;
-  dataset: Record<string, string> = {};
-  style: Record<string, string> = {};
-  classList = { add: vi.fnUntracked(), remove: vi.fnUntracked(), toggle: vi.fnUntracked() };
-  children: FakeElement[] = [];
-  get options(): FakeElement[] { return this.children; }
-  private readonly handlers: Record<string, Array<() => void>> = {};
-  private readonly attributes: Record<string, string | null> = {};
-
-  getAttribute(qualifiedName: string): string | null {
-    return this.attributes[qualifiedName] ?? null;
-  }
-
-  setAttribute(qualifiedName: string, value: string): void {
-    this.attributes[qualifiedName] = value;
-  }
-
-  addEventListener(event: string, handler: () => void): void {
-    this.handlers[event] ??= [];
-    this.handlers[event].push(handler);
-  }
-
-  trigger(event: string): void {
-    this.handlers[event]?.forEach((handler) => handler());
-  }
-
-  dispatchEvent(event: { type: string }): void {
-    this.trigger(event.type);
-  }
-
-  appendChild(child: unknown): void {
-    this.children.push(child as FakeElement);
-  }
-
-  focus = vi.fnUntracked();
-
-  closest(): FakeElement | null {
-    return null;
-  }
-
-  querySelector(selector: string): FakeElement | null {
-    if (selector.startsWith(".")) {
-      const className = selector.slice(1).split(/[.:\s>+~\[]/)[0];
-      const attrMatch = selector.match(/\[([^\]=]+)(?:="([^"]*)")?\]/);
-      if (attrMatch) {
-        return findWithClassAndAttr(this, className, attrMatch[1], attrMatch[2]) ?? null;
-      }
-      return this.children.find((c) => c.className.split(" ").includes(className)) ?? null;
-    }
-    return this.children[0] ?? null;
-  }
-
-  querySelectorAll(selector: string): FakeElement[] {
-    if (selector.startsWith(".")) {
-      const className = selector.slice(1).split(/[.:\s>+~\[]/)[0];
-      return collectByClassName(this, className);
-    }
-    return [];
-  }
-
-  contains(shipB: FakeElement): boolean {
-    if (shipB === this) return true;
-    return this.children.some((child) => child.contains(shipB));
-  }
-}
 
 type Mocked = ReturnType<typeof vi.fn>;
 
@@ -183,10 +107,14 @@ function fakeDocument(): Document {
         const el = id === "scene" ? new FakeCanvas() : new FakeElement();
         if (id in DEFAULT_VALUES) el.value = DEFAULT_VALUES[id];
         if (id === "ship-a-portrait" || id === "ship-b-portrait") {
+          const wrap = new FakeElement();
+          wrap.tagName = "DIV";
+          wrap.className = "portrait-image-wrap";
           const img = new FakeElement();
           img.tagName = "IMG";
           img.className = "portrait-image";
-          el.appendChild(img);
+          wrap.appendChild(img);
+          el.appendChild(wrap);
           const lockBadge = new FakeElement();
           lockBadge.tagName = "DIV";
           lockBadge.className = "portrait-lock-badge";
@@ -339,24 +267,3 @@ describe("main", () => {
     await expect(container.cradle.clipboard.readText()).rejects.toThrow(ClipboardUnavailableError);
   });
 });
-
-function collectByClassName(root: FakeElement, className: string): FakeElement[] {
-  const results: FakeElement[] = [];
-  for (const child of root.children) {
-    if (child.className.split(" ").includes(className)) results.push(child);
-    results.push(...collectByClassName(child, className));
-  }
-  return results;
-}
-
-function findWithClassAndAttr(root: FakeElement, className: string, attrName: string, attrValue: string | undefined): FakeElement | undefined {
-  for (const child of root.children) {
-    if (child.className.split(" ").includes(className)) {
-      const actual = child.getAttribute(attrName);
-      if (actual !== null && (attrValue === undefined || actual === attrValue)) return child;
-    }
-    const found = findWithClassAndAttr(child, className, attrName, attrValue);
-    if (found) return found;
-  }
-  return undefined;
-}

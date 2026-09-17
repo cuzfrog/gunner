@@ -9,13 +9,13 @@ const rifter: I18nProfile = {
   hullTypeId: "25" as I18nProfile["hullTypeId"],
 };
 
-const eidolon: I18nProfile = {
-  id: "legacy-eidolon" as I18nProfile["id"],
-  name: "Eidolon",
-  faction: "Jovian Directorate",
-  factionId: "jovian-directorate" as I18nProfile["factionId"],
+const absolution: I18nProfile = {
+  id: "22448" as I18nProfile["id"],
+  name: "Absolution",
+  faction: "Amarr Empire",
+  factionId: "amarr-empire" as I18nProfile["factionId"],
   hullType: "Standard Battleships",
-  hullTypeId: "legacy-standard-battleships" as I18nProfile["hullTypeId"],
+  hullTypeId: "811" as I18nProfile["hullTypeId"],
 };
 
 const pack = {
@@ -26,12 +26,12 @@ const pack = {
 
 describe("buildShipNameI18n", () => {
   test("rekeys by ship id and fills missing localizations with the canonical name", () => {
-    const result = buildShipNameI18n([rifter, eidolon], {
+    const result = buildShipNameI18n([rifter, absolution], {
       Rifter: pack,
-      Eidolon: { en: "Eidolon", zh: "", ja: "" },
+      Absolution: { en: "Absolution", zh: "", ja: "" },
     });
     expect(result["587" as I18nProfile["id"]]).toEqual({ en: "Rifter", zh: "裂谷级", ja: "リフター" });
-    expect(result["legacy-eidolon" as I18nProfile["id"]]).toEqual({ en: "Eidolon", zh: "Eidolon", ja: "Eidolon" });
+    expect(result["22448" as I18nProfile["id"]]).toEqual({ en: "Absolution", zh: "Absolution", ja: "Absolution" });
   });
 
   test("throws when a profile has no i18n entry", () => {
@@ -41,9 +41,9 @@ describe("buildShipNameI18n", () => {
 
 describe("buildFactionNameI18n", () => {
   test("rekeys by faction id and deduplicates repeated factions", () => {
-    const result = buildFactionNameI18n([rifter, eidolon], {
+    const result = buildFactionNameI18n([rifter, absolution], {
       "Minmatar Republic": { en: "Minmatar Republic", zh: "米玛塔尔", ja: "ミンマター共和国" },
-      "Jovian Directorate": { en: "Jovian Directorate", zh: "朱庇特", ja: "ジョビアン" },
+      "Amarr Empire": { en: "Amarr Empire", zh: "艾玛帝国", ja: "アマー帝国" },
     });
     expect(result["minmatar-republic" as I18nProfile["factionId"]]).toEqual({
       en: "Minmatar Republic",
@@ -56,7 +56,7 @@ describe("buildFactionNameI18n", () => {
 
 describe("buildHullTypeNameI18n", () => {
   test("rekeys by hull type id and picks the standard base name", () => {
-    const result = buildHullTypeNameI18n([rifter, eidolon], {
+    const result = buildHullTypeNameI18n([rifter, absolution], {
       "Standard Frigates": { en: "Standard Frigates", zh: "护卫舰", ja: "フリゲート" },
       "Standard Battleships": { en: "Standard Battleships", zh: "战列舰", ja: "戦艦" },
     });
@@ -65,7 +65,7 @@ describe("buildHullTypeNameI18n", () => {
       zh: "护卫舰",
       ja: "フリゲート",
     });
-    expect(result["legacy-standard-battleships" as I18nProfile["hullTypeId"]]).toEqual({
+    expect(result["811" as I18nProfile["hullTypeId"]]).toEqual({
       en: "Standard Battleships",
       zh: "战列舰",
       ja: "戦艦",

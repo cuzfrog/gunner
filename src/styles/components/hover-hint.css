@@ -2,13 +2,18 @@
 .hover-hint {
   position: absolute;
   position-anchor: --hover-hint-anchor;
-  left: anchor(center);
   top: anchor(bottom);
-  translate: -50% 4px;
+
+  /* anchor-center centers the hint on its anchor and safe alignment shifts it back inside the
+     viewport near the edges; the inline margins reserve the edge gap. Keep the gap in sync with
+     --hint-viewport-gap usage in hoverHintController.ts. */
+  justify-self: anchor-center;
+  margin-top: 4px;
+  margin-inline: var(--hint-viewport-gap);
   /* stylelint-disable-next-line declaration-property-value-no-unknown -- valid CSS anchor positioning, not yet in stylelint-config-standard */
-  position-try-fallbacks: --hover-hint-above, shift-inline;
+  position-try-fallbacks: --hover-hint-above;
   z-index: var(--z-popup);
-  max-width: 308px;
+  max-width: min(var(--hover-hint-max-width), calc(100% - 2 * var(--hint-viewport-gap)));
   padding: 7px 9px;
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
@@ -26,20 +31,59 @@
 
 .hover-hint[hidden] { display: none; }
 
+/* Tall hints (e.g. ship hints with long bonus lists) become scrollable and interactive so the
+   whole content stays reachable; the controller toggles this class and passes the fitting
+   max-height (larger of the spaces around the anchor) via --hover-hint-max-height. */
+.hover-hint-scrollable {
+  max-height: var(--hover-hint-max-height, 60vh);
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
 @position-try --hover-hint-above {
-  top: anchor(top);
-  /* stylelint-disable-next-line at-rule-descriptor-no-unknown -- valid CSS anchor positioning, not yet in stylelint-config-standard */
-  translate: -50% calc(-100% - 4px);
+  top: auto;
+  /* stylelint-disable-next-line declaration-property-value-no-unknown -- valid CSS anchor positioning, not yet in stylelint-config-standard */
+  bottom: anchor(top);
+  margin-top: 0;
+  margin-bottom: 4px;
 }
 
 .hover-hint-anchor {
   anchor-name: --hover-hint-anchor;
 }
 
+/* Bridge strips on the anchor while a scrollable hint is open: they extend the anchor's hit
+   area across the 4px placement gap on both vertical sides, so the pointer can travel between
+   the anchor and the hint without crossing a dead zone that would hide it. Events on a pseudo
+   element target the host anchor, which the controller already treats as the anchor. The anchor
+   re-enables pointer events because portrait overlays keep their subtree pointer-neutral and
+   only the portrait image opts back in. Short hints stay pointer-neutral, so the strips are
+   scoped to scrollable hints only. */
+.hover-hint-anchor-bridged {
+  position: relative;
+  pointer-events: auto;
+}
+
+.hover-hint-anchor-bridged::before,
+.hover-hint-anchor-bridged::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.hover-hint-anchor-bridged::before { bottom: 100%; }
+
+.hover-hint-anchor-bridged::after { top: 100%; }
+
 @supports not (anchor-name: --hover-hint-anchor) {
   .hover-hint {
     position: fixed;
     translate: -50% 0;
+
+    /* The JS fallback owns the horizontal gap via clamping; the vertical gap stays in CSS. */
+    margin-inline: 0;
     position-anchor: none;
     position-try-fallbacks: none;
   }

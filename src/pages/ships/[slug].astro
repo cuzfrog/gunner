@@ -87,7 +87,7 @@ const firstDeepLink = simulatorDeepLink(shipWire(profile, firstFit === undefined
         <article class="content-fitting">
           <h3 class="content-fitting-title">{fit.name}</h3>
           <a class="btn content-cta" href={simulatorDeepLink(shipWire(profile, eftTextFor(shipName, fit)))}>Load this {shipName} fit</a>
-          <pre class="content-eft"><code>{eftTextFor(shipName, fit)}</code></pre>
+          <pre class="content-eft thin-scrollbar"><code>{eftTextFor(shipName, fit)}</code></pre>
         </article>
       ))}
     </section>

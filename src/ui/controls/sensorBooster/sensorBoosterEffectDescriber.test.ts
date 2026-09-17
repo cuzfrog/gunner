@@ -115,29 +115,4 @@ describe("SensorBoosterEffectDescriber", () => {
     };
     expect(describer.amplifierHint(projection)).toBe("No effect");
   });
-
-  test("boosterModuleEffect reports per-spec bonuses with overload", () => {
-    const effect = describer.boosterModuleEffect(SB_II, undefined, false);
-    expect(effect).toContain("Scan resolution");
-    expect(effect).toContain("+30.0%");
-
-    const effectOverloaded = describer.boosterModuleEffect(SB_II, undefined, true);
-    expect(effectOverloaded).not.toBe(effect);
-  });
-
-  test("boosterModuleEffect applies script multipliers", () => {
-    const effectNoScript = describer.boosterModuleEffect(SB_II, undefined, false);
-    const effectScan = describer.boosterModuleEffect(SB_II, SCAN_SCRIPT, false);
-    expect(effectNoScript).not.toBe(effectScan);
-  });
-
-  test("amplifierModuleEffect reports per-spec bonuses", () => {
-    const effect = describer.amplifierModuleEffect(SA_II);
-    expect(effect).toContain("Scan resolution");
-    expect(effect).toContain("+15.0%");
-    expect(effect).toContain("Targeting range");
-    expect(effect).toContain("+30.0%");
-    expect(effect).toContain("Max locked targets");
-    expect(effect).toContain("+2");
-  });
 });

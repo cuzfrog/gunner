@@ -1,0 +1,116 @@
+@layer components {
+.stat-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 200px;
+}
+
+.stat-hint-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 5px;
+}
+
+.stat-hint-name {
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.stat-hint-subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.stat-hint-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-hint-section-divided {
+  border-top: 1px solid var(--border-dim);
+  padding-top: 4px;
+}
+
+.stat-hint-section-label {
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-bottom: 1px;
+}
+
+.stat-hint-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px;
+  align-items: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-hint-row-icon {
+  grid-template-columns: 18px 1fr auto;
+}
+
+.stat-hint-row-statement {
+  grid-template-columns: 1fr;
+}
+
+.stat-hint-row-statement .stat-hint-value {
+  text-align: left;
+  color: var(--text-secondary);
+}
+
+.stat-hint-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.stat-hint-label {
+  color: var(--text-secondary);
+}
+
+.stat-hint-value {
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.stat-hint-row-emphasis .stat-hint-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-hint-row-emphasis .stat-hint-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-hint-resists {
+  display: grid;
+  grid-template-columns: auto repeat(4, 1fr);
+  gap: 2px 8px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-hint-resists-col {
+  text-align: right;
+  color: var(--text-dim);
+}
+
+.stat-hint-resists-layer {
+  color: var(--text-secondary);
+}
+
+.stat-hint-resists-value {
+  text-align: right;
+  color: var(--text-primary);
+}
+}

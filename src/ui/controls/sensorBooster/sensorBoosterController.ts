@@ -35,7 +35,6 @@ export class SensorBoosterControllerImpl implements SensorBoosterController {
   private readonly describer: SensorBoosterEffectDescriber;
   private readonly states = new Map<Side, SensorBoosterState>();
   private readonly scriptSections: Record<Side, ScriptSection<number>>;
-  private readonly boosterNameSpans = new Map<Side, HTMLSpanElement[]>();
   private readonly overloadAction: IconActionImpl;
   private readonly sectionBlock: SectionBlockImpl;
 
@@ -128,7 +127,6 @@ export class SensorBoosterControllerImpl implements SensorBoosterController {
     const summary = this.els.summaries[side];
     const state = this.states.get(side);
     this.scriptSections[side].close();
-    this.boosterNameSpans.delete(side);
     section.innerHTML = "";
     if (!state || this.isEmpty(state.loadout)) {
       section.hidden = true;
@@ -210,13 +208,11 @@ export class SensorBoosterControllerImpl implements SensorBoosterController {
   }
 
   private renderBoosters(side: Side, state: SensorBoosterState, section: HTMLElement): void {
-    const nameSpans: HTMLSpanElement[] = [];
     for (let i = 0; i < state.loadout.boosters.length; i++) {
       const booster = state.loadout.boosters[i];
       const activation = state.activation[i];
       const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}></div>` as unknown as HTMLDivElement;
-      const { button, nameSpan } = this.createModuleButton(activation.active, booster, activation.script, activation.overloaded);
-      nameSpans.push(nameSpan);
+      const button = this.createModuleButton(activation.active, booster);
       button.addEventListener("click", () => this.toggleBooster(side, i, button, row));
       row.appendChild(button);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, booster, () => this.toggleBoosterOverload(side, i, overloadButton));
@@ -229,14 +225,14 @@ export class SensorBoosterControllerImpl implements SensorBoosterController {
       row.appendChild(gear);
       section.appendChild(row);
     }
-    this.boosterNameSpans.set(side, nameSpans);
   }
 
   private renderAmplifiers(side: Side, state: SensorBoosterState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.amplifiers.length; i++) {
       const amplifier = state.loadout.amplifiers[i];
-      const { button } = this.createAmplifierButton(amplifier);
-      const row = html`<div class="ewar-row">${button}</div>` as unknown as HTMLDivElement;
+      const button = this.createAmplifierButton(amplifier);
+      const row = html`<div class="ewar-row"></div>` as unknown as HTMLDivElement;
+      row.appendChild(button);
       section.appendChild(row);
     }
   }
@@ -250,21 +246,18 @@ export class SensorBoosterControllerImpl implements SensorBoosterController {
     return this.fittingImport.itemNameForId(script.moduleId, this.i18n.current());
   }
 
-  private createModuleButton(active: boolean, booster: SensorBoosterSpec, script: SensorBoosterScriptSpec | undefined, overloaded: boolean): { button: HTMLButtonElement; nameSpan: HTMLSpanElement } {
+  private createModuleButton(active: boolean, booster: SensorBoosterSpec): HTMLButtonElement {
     const displayName = this.moduleDisplayName(booster);
-    const effectTitle = this.describer.boosterModuleEffect(booster, script, overloaded);
     const iconUrl = this.imageCatalog.itemIconUrl(booster.moduleId);
-    const nameSpan = html`<span class="truncate" data-hint=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
-    const button = html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
-    return { button, nameSpan };
+    const nameSpan = html`<span class="truncate">${displayName}</span>` as unknown as HTMLSpanElement;
+    return html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName} data-hint-content="module" data-value=${String(booster.moduleId)}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
   }
 
-  private createAmplifierButton(amplifier: SignalAmplifierSpec): { button: HTMLButtonElement } {
+  private createAmplifierButton(amplifier: SignalAmplifierSpec): HTMLButtonElement {
     const displayName = this.moduleDisplayName(amplifier);
-    const effectTitle = this.describer.amplifierModuleEffect(amplifier);
     const iconUrl = this.imageCatalog.itemIconUrl(amplifier.moduleId);
-    const button = html`<button type="button" class="ewar-module-toggle" aria-disabled="true" aria-label=${displayName}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}><span class="truncate" data-hint=${effectTitle}>${displayName}</span></button>` as unknown as HTMLButtonElement;
-    return { button };
+    const nameSpan = html`<span class="truncate">${displayName}</span>` as unknown as HTMLSpanElement;
+    return html`<button type="button" class="ewar-module-toggle" aria-disabled="true" aria-label=${displayName} data-hint-content="module" data-value=${String(amplifier.moduleId)}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
   }
 
   private createOverloadButton(active: boolean, overloaded: boolean, index: number, spec: { readonly moduleId: TypeId }, onToggle: () => void): HTMLButtonElement {
@@ -315,9 +308,6 @@ export class SensorBoosterControllerImpl implements SensorBoosterController {
       if (script === undefined) return;
       state.activation[index].script = script;
     }
-    const script = state.activation[index].script;
-    const nameSpan = this.boosterNameSpans.get(side)?.[index];
-    if (nameSpan) nameSpan.setAttribute("data-hint", this.describer.boosterModuleEffect(state.loadout.boosters[index], script, state.activation[index].overloaded));
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }
@@ -335,8 +325,6 @@ export class SensorBoosterControllerImpl implements SensorBoosterController {
         else child.setAttribute("disabled", "");
       }
     }
-    const nameSpan = this.boosterNameSpans.get(side)?.[index];
-    if (nameSpan) nameSpan.setAttribute("data-hint", this.describer.boosterModuleEffect(state.loadout.boosters[index], activation.script, activation.overloaded));
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }
@@ -347,8 +335,6 @@ export class SensorBoosterControllerImpl implements SensorBoosterController {
     const overloaded = !state.activation[index].overloaded;
     state.activation[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
-    const nameSpan = this.boosterNameSpans.get(side)?.[index];
-    if (nameSpan) nameSpan.setAttribute("data-hint", this.describer.boosterModuleEffect(state.loadout.boosters[index], state.activation[index].script, overloaded));
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }

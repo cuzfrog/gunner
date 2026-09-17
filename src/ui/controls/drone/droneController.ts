@@ -225,6 +225,7 @@ export class DroneControllerImpl implements DroneController {
       const items: SelectableItem[] = options.map((opt) => ({
         value: opt.id,
         label: opt.name,
+        hintContent: "drone",
         iconUrl: this.imageCatalog.itemIconUrl(opt.id),
         selected: false,
       }));

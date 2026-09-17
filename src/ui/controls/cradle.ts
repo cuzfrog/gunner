@@ -44,9 +44,12 @@ import type { SelectionSession } from "../selectionSession";
 import type { DpsHintProvider } from "./dpsHint";
 import type { DpsHintRenderer } from "./dpsHint";
 import type { AmmoHintProvider } from "./ammoHint";
-import type { AmmoHintRenderer } from "./ammoHint";
 import type { AppliedDpsHintProvider, AppliedDpsHintRenderer } from "./appliedDpsHint";
 import type { InflictedDpsHintProvider, InflictedDpsHintRenderer } from "./inflictedDpsHint";
+import type { ShipHintProvider } from "./shipHint";
+import type { DroneHintProvider } from "./droneHint";
+import type { ModuleHintProvider } from "./moduleHint";
+import type { StatHintRenderer } from "./statHint";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -141,7 +144,7 @@ export interface ControlsCradle {
   readonly hoverHintController: HoverHintController;
   readonly dpsHintRenderer: DpsHintRenderer;
   readonly dpsHintProvider: DpsHintProvider;
-  readonly ammoHintRenderer: AmmoHintRenderer;
+  readonly statHintRenderer: StatHintRenderer;
   readonly ammoHintProvider: AmmoHintProvider;
   readonly viewStream: ViewStream;
   readonly readoutPresenter: ReadoutPresenter;
@@ -149,4 +152,7 @@ export interface ControlsCradle {
   readonly appliedDpsHintProvider: AppliedDpsHintProvider;
   readonly inflictedDpsHintRenderer: InflictedDpsHintRenderer;
   readonly inflictedDpsHintProvider: InflictedDpsHintProvider;
+  readonly shipHintProvider: ShipHintProvider;
+  readonly droneHintProvider: DroneHintProvider;
+  readonly moduleHintProvider: ModuleHintProvider;
 }
