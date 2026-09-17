@@ -81,12 +81,12 @@ function droneSimulatorState(): DroneSimulatorState {
 }
 
 function missileSimulatorState(): MissileSimulatorState {
-  const side = { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), lastPaintedSig: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
+  const side = { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
   return { sides: { shipA: side, shipB: { ...side } }, time: 0, lastFrameShipA: new Vec2(0, 0), lastFrameShipB: new Vec2(0, 0) };
 }
 
 function weaponClockState(): WeaponClockState {
-  const side = { cooldowns: new Map(), weaponSignature: "" };
+  const side = { cooldowns: new Map() };
   return { seed: 0, sides: { shipA: side, shipB: { ...side } } };
 }
 
@@ -389,6 +389,19 @@ describe("EngagementEngineImpl", () => {
     const input = deps.live.lockClock.step.mock.calls[deps.live.lockClock.step.mock.calls.length - 1][1];
     expect(input.sigA).toBe(80);
     expect(input.sigB).toBe(80);
+  });
+
+  test("compose input paints each side's sig with only the opponent's painters", () => {
+    const deps = makeEngine();
+    const painterProjection: EwarProjection = { loadout: { ...EMPTY_EWAR_LOADOUT, painters: [{ moduleName: "Painter", moduleId: toTypeId("12709"), maxRange: 30000, falloff: 7500, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 0, capacitorNeed: 8, cycleTime: 5 }] }, activation: undefined };
+    const withEwar: SimSnapshot = { ...snapshot, shipA: { ...snapshot.shipA, sig: 100, ewar: painterProjection }, shipB: { ...snapshot.shipB, sig: 40 } };
+    deps.live.simulation.snapshot.mockReturnValue(withEwar);
+    deps.ewarResolver.sigMultiplier.mockImplementation((candidate) => (candidate === painterProjection ? 1.3 : 1));
+    deps.engine.reset(engineConfig());
+    deps.engagementFrameComposer.compose.mockClear();
+    deps.engine.step(0.1);
+    const input = deps.engagementFrameComposer.compose.mock.calls[deps.engagementFrameComposer.compose.mock.calls.length - 1][1];
+    expect(input.paintedSigRadii).toEqual({ shipA: 100, shipB: 52 });
   });
 
   test("step throws if called before reset", () => {

@@ -81,8 +81,9 @@ export class EngagementEngineImpl implements EngagementEngine {
     this.config = config;
     this.destroyedSides.clear();
     this.live.simulation.reset(config.sim);
+    const spawn = this.live.simulation.snapshot();
     this.live.droneSimulator.reset(droneSimConfigFrom(config));
-    this.live.missileSimulator.reset(missileSimConfigFrom(config));
+    this.live.missileSimulator.reset(missileSimConfigFrom(config), { shipA: spawn.shipA.position, shipB: spawn.shipB.position });
     this.live.weaponClock.reset();
     this.live.lockClock.reset();
     this.live.defenseSimulator.reset(config.defense);
@@ -157,7 +158,8 @@ export class EngagementEngineImpl implements EngagementEngine {
     const config = this.config;
     if (!config) throw new Error("composeView called before config set");
     const snapshot = this.live.simulation.snapshot();
-    const input = this.engagementInput(this.live, snapshot, this.live.lockClock.states(), config);
+    const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
+    const input = this.engagementInput(this.live, snapshot, this.live.lockClock.states(), config, this.paintedSigRadii(snapshot, distance));
     const composed = this.engagementFrameComposer.compose(snapshot, input);
     return this.buildView(composed, snapshot);
   }
@@ -227,11 +229,12 @@ export class EngagementEngineImpl implements EngagementEngine {
     });
     const snapshot = world.simulation.snapshot();
     const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
-    const locks = world.lockClock.step(dt, this.lockStepInput(snapshot, distance));
-    const input = this.engagementInput(world, snapshot, locks, config);
+    const painted = this.paintedSigRadii(snapshot, distance);
+    const locks = world.lockClock.step(dt, this.lockStepInput(snapshot, distance, painted));
+    const input = this.engagementInput(world, snapshot, locks, config, painted);
     const composed = this.engagementFrameComposer.compose(snapshot, input);
     world.droneSimulator.step(dt, composed.frame);
-    const missileEvents = world.missileSimulator.step(dt, composed.frame, this.missileLaunchSpecs(composed, locks));
+    const missileEvents = world.missileSimulator.step(dt, composed.frame, this.missileLaunchSpecs(composed, locks, painted));
     const weaponEvents = world.weaponClock.step(dt, composed, world.capacitorSimulator);
     const events: DamageEvent[] = [...missileEvents, ...weaponEvents];
     world.defenseSimulator.step(dt, events, world.capacitorSimulator);
@@ -241,7 +244,7 @@ export class EngagementEngineImpl implements EngagementEngine {
   private initializeLocks(): void {
     const snapshot = this.live.simulation.snapshot();
     const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
-    this.live.lockClock.step(0, this.lockStepInput(snapshot, distance));
+    this.live.lockClock.step(0, this.lockStepInput(snapshot, distance, this.paintedSigRadii(snapshot, distance)));
   }
 
   /** Engagement facts for the capacitor: own hard-range modules that apply nothing, own lock state, opponent suppression. Uses the pre-step snapshot, one frame of latency like the incoming-drain inputs. */
@@ -254,22 +257,30 @@ export class EngagementEngineImpl implements EngagementEngine {
     };
   }
 
-  private lockStepInput(snapshot: SimSnapshot, distance: number): LockStepInput {
+  private lockStepInput(snapshot: SimSnapshot, distance: number, painted: Record<Side, number>): LockStepInput {
     return {
       distance,
       sensorA: this.effectiveSensorSpec(snapshot.shipA, snapshot.shipB, distance),
       sensorB: this.effectiveSensorSpec(snapshot.shipB, snapshot.shipA, distance),
-      sigA: this.paintedSig(snapshot.shipB, snapshot.shipA, distance),
-      sigB: this.paintedSig(snapshot.shipA, snapshot.shipB, distance),
+      sigA: painted.shipA,
+      sigB: painted.shipB,
     };
   }
 
-  private engagementInput(world: SimWorld, snapshot: SimSnapshot, locks: Record<Side, LockState>, config: EngineConfig): EngagementInput {
+  /** Painted signature of each side's ship, applied by its opponent's target painters; the single per-frame derivation consumed by locks, weapon assessment, and missile launches. */
+  private paintedSigRadii(snapshot: SimSnapshot, distance: number): Record<Side, number> {
+    return {
+      shipA: this.paintedSig(snapshot.shipB, snapshot.shipA, distance),
+      shipB: this.paintedSig(snapshot.shipA, snapshot.shipB, distance),
+    };
+  }
+
+  private engagementInput(world: SimWorld, snapshot: SimSnapshot, locks: Record<Side, LockState>, config: EngineConfig, painted: Record<Side, number>): EngagementInput {
     return {
       weapons: config.weapons,
-      sigRadii: { shipA: snapshot.shipA.sig ?? 1, shipB: snapshot.shipB.sig ?? 1 },
+      paintedSigRadii: painted,
       droneStates: { shipA: world.droneSimulator.states("shipA"), shipB: world.droneSimulator.states("shipB") },
-      missileFacts: { shipA: this.missileFactsFor(world, "shipA", config), shipB: this.missileFactsFor(world, "shipB", config) },
+      missileFacts: { shipA: this.missileFactsFor(world, "shipA", config, painted.shipB), shipB: this.missileFactsFor(world, "shipB", config, painted.shipA) },
       spoolCycles: { shipA: this.spoolCyclesFor(world, "shipA", config), shipB: this.spoolCyclesFor(world, "shipB", config) },
       defenses: { shipA: config.defense.shipA, shipB: config.defense.shipB },
       overloaded: config.overloaded,
@@ -292,36 +303,33 @@ export class EngagementEngineImpl implements EngagementEngine {
     return baseSig * this.ewarResolver.sigMultiplier(ship.ewar, distance);
   }
 
-  private missileFactsFor(world: SimWorld, side: Side, config: EngineConfig): readonly MissileAttackFacts[] {
+  private missileFactsFor(world: SimWorld, side: Side, config: EngineConfig, paintedTargetSig: number): readonly MissileAttackFacts[] {
     const facts: MissileAttackFacts[] = [];
     let missileIndex = 0;
     for (const weapon of config.weapons[side]) {
       if (weapon.kind === "missile") {
-        facts.push(world.missileSimulator.facts(side, missileIndex));
+        facts.push(world.missileSimulator.facts(side, missileIndex, weapon, paintedTargetSig));
         missileIndex++;
       }
     }
     return facts;
   }
 
-  private missileLaunchSpecs(view: EngagementView, locks: Record<Side, LockState>): Record<Side, readonly MissileLaunchSpec[]> {
+  private missileLaunchSpecs(view: EngagementView, locks: Record<Side, LockState>, painted: Record<Side, number>): Record<Side, readonly MissileLaunchSpec[]> {
     return {
-      shipA: locks.shipA.status === "locked" ? this.buildLaunchSpecs("shipA", view) : [],
-      shipB: locks.shipB.status === "locked" ? this.buildLaunchSpecs("shipB", view) : [],
+      shipA: locks.shipA.status === "locked" ? this.buildLaunchSpecs("shipA", view, painted.shipB) : [],
+      shipB: locks.shipB.status === "locked" ? this.buildLaunchSpecs("shipB", view, painted.shipA) : [],
     };
   }
 
-  private buildLaunchSpecs(side: Side, view: EngagementView): readonly MissileLaunchSpec[] {
-    const shipState = side === "shipA" ? view.frame.shipA : view.frame.shipB;
-    const opponent = side === "shipA" ? view.frame.shipB : view.frame.shipA;
-    const painted = this.paintedSig(shipState, opponent, view.frame.distance);
+  private buildLaunchSpecs(side: Side, view: EngagementView, paintedTargetSig: number): readonly MissileLaunchSpec[] {
     const specs: MissileLaunchSpec[] = [];
     let missileIndex = 0;
     for (const attack of view.weaponAttacks[side]) {
       const boosted = attack.assessment.boostedWeapon;
       if (boosted.kind !== "missile") continue;
       const baseVolleyByType = attack.assessment.damage.baseVolleyByType;
-      specs.push({ weaponIndex: missileIndex, boosted, paintedTargetSig: painted, baseVolleyByType });
+      specs.push({ weaponIndex: missileIndex, boosted, paintedTargetSig, baseVolleyByType });
       missileIndex++;
     }
     return specs;

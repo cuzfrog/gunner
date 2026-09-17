@@ -58,11 +58,11 @@ describe("missile volley count-scaling integration", () => {
     const multiMissile: MissileSpec = { ...missile, launcherCount: 3 };
 
     const simSingle = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
-    simSingle.reset({ shipA: [singleMissile], shipB: [] });
+    simSingle.reset({ shipA: [singleMissile], shipB: [] }, { shipA: shipA.position, shipB: shipB.position });
     const singleEvents = runUntilImpact(simSingle, { shipA: [launchSpec(0, singleMissile, 40)], shipB: [] });
 
     const simMulti = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
-    simMulti.reset({ shipA: [multiMissile], shipB: [] });
+    simMulti.reset({ shipA: [multiMissile], shipB: [] }, { shipA: shipA.position, shipB: shipB.position });
     const multiEvents = runUntilImpact(simMulti, { shipA: [launchSpec(0, multiMissile, 40)], shipB: [] });
 
     expect(singleEvents.length).toBe(1);

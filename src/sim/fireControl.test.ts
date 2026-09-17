@@ -8,7 +8,7 @@ import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
 import { toTypeId } from "../gamedata/ids";
-import { type DamageAssessment, type DroneDamageBreakdown, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileAttackFacts, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
+import { type DamageAssessment, type DroneDamageBreakdown, type DroneRuntimeState, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileAttackFacts, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const boostedTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("2"), tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
@@ -140,7 +140,7 @@ function makeEvaluator(): {
 describe("EngagementEvaluatorImpl", () => {
   test("evaluates shipA turret attack using shipB ewar", () => {
     const { hitChance, ewarResolver, evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 40 } });
     expect(result.shipA?.boostedWeapon).toEqual(boostedTurret);
     expect(result.shipA?.effectiveWeapon).toEqual(effectiveTurret);
     expect(result.shipA?.turret?.hit).toEqual(hit);
@@ -155,7 +155,7 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("evaluates shipB turret attack using shipA ewar", () => {
     const { hitChance, ewarResolver, evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipB: { weapon: turret, opponentSigRadius: 30 } });
+    const result = evaluator.evaluate(frame, { shipB: { weapon: turret, paintedTargetSig: 30 } });
     expect(result.shipB?.effectiveWeapon).toEqual(effectiveTurret);
     expect(result.shipB?.turret?.hit).toEqual(hit);
     expect(result.shipA).toBeUndefined();
@@ -169,7 +169,7 @@ describe("EngagementEvaluatorImpl", () => {
     vi.mocked(turretBoosterResolver.boostedTurret).mockReturnValue(boosted);
     const shipAWithBoosts = { ...shipA, boosts: { loadout: { computers: [], scripts: [] } } };
     const frameWithBoosts = { ...frame, shipA: shipAWithBoosts };
-    const result = evaluator.evaluate(frameWithBoosts, { shipA: { weapon: turret, opponentSigRadius: 40 } });
+    const result = evaluator.evaluate(frameWithBoosts, { shipA: { weapon: turret, paintedTargetSig: 40 } });
     expect(result.shipA?.boostedWeapon).toEqual(boosted);
     expect(result.shipA?.effectiveWeapon).toEqual(effectiveTurret);
     expect(turretBoosterResolver.boostedTurret).toHaveBeenCalledWith(turret, shipAWithBoosts.boosts);
@@ -178,7 +178,7 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("evaluates missile attack from missile facts without boost or ewar", () => {
     const { ewarResolver, turretBoosterResolver, missileBoosterResolver, evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, paintedTargetSig: 40, missileFacts } });
     expect(result.shipA?.missile).toEqual(missileBreakdown);
     expect(result.shipA?.damage.nominalDps).toBeCloseTo((200 * 2) / 10, 10);
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(((200 * 2) / 10) * 0.8, 10);
@@ -192,15 +192,22 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("throws when missile facts are missing", () => {
     const { evaluator } = makeEvaluator();
-    expect(() => evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40 } })).toThrow("MissileAttackFacts are required to assess a missile weapon");
+    expect(() => evaluator.evaluate(frame, { shipA: { weapon: missile, paintedTargetSig: 40 } })).toThrow("MissileAttackFacts are required to assess a missile weapon");
   });
 
-  test("applies painter sig multiplier to opponentSigRadius for turret assessment", () => {
+  test("passes the painted target sig to turret hit chance without re-applying painters", () => {
     const { ewarResolver, hitChance, evaluator } = makeEvaluator();
-    vi.mocked(ewarResolver.sigMultiplier).mockReturnValue(1.3);
-    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 100 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 130 } });
     expect(hitChance.compute).toHaveBeenCalledWith(frame, effectiveTurret, 130);
-    expect(ewarResolver.sigMultiplier).toHaveBeenCalledWith(frame.shipA.ewar, 6000);
+    expect(ewarResolver.sigMultiplier).not.toHaveBeenCalled();
+  });
+
+  test("passes the painted target sig to drone application without re-applying painters", () => {
+    const { ewarResolver, droneApplication, evaluator } = makeEvaluator();
+    const droneState: DroneRuntimeState = { mode: "engaging", positions: [], distanceToTarget: 1500, distanceToSlot: 0, inControlRange: true };
+    const result = evaluator.evaluate(frame, { shipA: { weapon: drone, paintedTargetSig: 130, droneState } });
+    expect(droneApplication.compute).toHaveBeenCalledWith(frame, drone, 130, droneState);
+    expect(ewarResolver.sigMultiplier).not.toHaveBeenCalled();
   });
 
   test("passes ship missileBoosts to missileBoosterResolver", () => {
@@ -208,7 +215,7 @@ describe("EngagementEvaluatorImpl", () => {
     const projection = { loadout: { computers: [], enhancers: [], scripts: [] } };
     const shipAWithMissileBoosts = { ...shipA, missileBoosts: projection };
     const frameWithBoosts = { ...frame, shipA: shipAWithMissileBoosts };
-    evaluator.evaluate(frameWithBoosts, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts } });
+    evaluator.evaluate(frameWithBoosts, { shipA: { weapon: missile, paintedTargetSig: 40, missileFacts } });
     expect(missileBoosterResolver.boostedMissile).toHaveBeenCalledWith(missile, projection);
   });
 
@@ -216,7 +223,7 @@ describe("EngagementEvaluatorImpl", () => {
     const { missileBoosterResolver, evaluator } = makeEvaluator();
     const boostedMissile: MissileSpec = { ...missile, cycleTime: 5 };
     vi.mocked(missileBoosterResolver.boostedMissile).mockReturnValue(boostedMissile);
-    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, paintedTargetSig: 40, missileFacts } });
     expect(result.shipA?.damage.nominalDps).toBeCloseTo((200 * 2) / 5, 10);
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(((200 * 2) / 5) * 0.8, 10);
   });
@@ -224,7 +231,7 @@ describe("EngagementEvaluatorImpl", () => {
   test("zeros missile applied DPS when not interceptable", () => {
     const { evaluator } = makeEvaluator();
     const outOfRangeFacts: MissileAttackFacts = { ...missileFacts, interceptable: false, predicted: { application: 0, signatureTerm: 1, velocityTerm: 0.8 } };
-    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: outOfRangeFacts } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, paintedTargetSig: 40, missileFacts: outOfRangeFacts } });
     expect(result.shipA?.damage.appliedDps).toBe(0);
     expect(result.shipA?.damage.application).toBe(0);
     expect(result.shipA?.damage.nominalDps).toBeCloseTo(40, 10);
@@ -233,7 +240,7 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("missile appliedVolleyByType carries per-cycle volley scaled by application", () => {
     const { evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, paintedTargetSig: 40, missileFacts } });
     const expected = damageVectorScale(missile.damagePerMissile, missile.launcherCount * 0.8);
     expect(result.shipA?.damage.appliedVolleyByType).toEqual(expected);
     expect(damageVectorSum(result.shipA!.damage.appliedVolleyByType)).toBeCloseTo(result.shipA!.damage.volley * 0.8, 10);
@@ -242,14 +249,14 @@ describe("EngagementEvaluatorImpl", () => {
   test("missile appliedVolleyByType is zero when not interceptable", () => {
     const { evaluator } = makeEvaluator();
     const outOfRangeFacts: MissileAttackFacts = { ...missileFacts, interceptable: false, predicted: { application: 0, signatureTerm: 1, velocityTerm: 0.8 } };
-    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: outOfRangeFacts } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, paintedTargetSig: 40, missileFacts: outOfRangeFacts } });
     expect(result.shipA?.damage.appliedVolleyByType).toEqual(ZERO_DAMAGE);
   });
 
   test("missile appliedVolleyByType uses facts application when facts provided", () => {
     const { evaluator } = makeEvaluator();
     const facts = { inFlightCount: 2, nearestTimeToImpact: 1.5, predicted: { application: 0.5, signatureTerm: 1, velocityTerm: 0.6 }, interceptable: true };
-    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: facts } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, paintedTargetSig: 40, missileFacts: facts } });
     const expected = damageVectorScale(missile.damagePerMissile, missile.launcherCount * 0.5);
     expect(result.shipA?.damage.appliedVolleyByType).toEqual(expected);
   });
@@ -257,7 +264,7 @@ describe("EngagementEvaluatorImpl", () => {
   test("uses missile facts for applied DPS when facts are provided", () => {
     const { evaluator } = makeEvaluator();
     const facts = { inFlightCount: 2, nearestTimeToImpact: 1.5, predicted: { application: 0.5, signatureTerm: 1, velocityTerm: 0.6 }, interceptable: true };
-    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: facts } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, paintedTargetSig: 40, missileFacts: facts } });
     const nominalDps = (200 * 2) / 10;
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(nominalDps * 0.5, 10);
     expect(result.shipA?.damage.application).toBeCloseTo(0.5, 10);
@@ -271,7 +278,7 @@ describe("EngagementEvaluatorImpl", () => {
   test("uses missile facts with zero predicted application", () => {
     const { evaluator } = makeEvaluator();
     const facts = { inFlightCount: 1, nearestTimeToImpact: 2.0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: true };
-    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40, missileFacts: facts } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, paintedTargetSig: 40, missileFacts: facts } });
     expect(result.shipA?.damage.appliedDps).toBe(0);
     expect(result.shipA?.missile?.application).toBe(0);
     expect(result.shipA?.missile?.signatureTerm).toBe(1);
@@ -291,27 +298,27 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("uses effective weapon for renderer and hit for readout", () => {
     const { evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 40 } });
     expect(result.shipA!.effectiveWeapon).not.toEqual(turret);
     expect(result.shipA?.turret?.hit).toEqual(hit);
   });
 
   test("turret breakdown reports out of optimal beyond the effective optimal", () => {
     const { evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 40 } });
     expect(result.shipA?.turret?.inOptimal).toBe(false);
   });
 
   test("turret breakdown reports in optimal at the effective optimal", () => {
     const { evaluator } = makeEvaluator();
     const closeFrame = { ...frame, distance: 4000 };
-    const result = evaluator.evaluate(closeFrame, { shipA: { weapon: turret, opponentSigRadius: 40 } });
+    const result = evaluator.evaluate(closeFrame, { shipA: { weapon: turret, paintedTargetSig: 40 } });
     expect(result.shipA?.turret?.inOptimal).toBe(true);
   });
 
   test("locked=false zeros appliedDps while preserving nominalDps", () => {
     const { evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40, locked: false } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 40, locked: false } });
     expect(result.shipA?.damage.nominalDps).toBe(turretDamageResult.nominalDps);
     expect(result.shipA?.damage.appliedDps).toBe(0);
     expect(result.shipA?.damage.application).toBe(0);
@@ -321,13 +328,13 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("locked=true preserves appliedDps", () => {
     const { evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40, locked: true } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 40, locked: true } });
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(turretDamageResult.appliedDps, 10);
   });
 
   test("locked omitted preserves appliedDps (backward compatible)", () => {
     const { evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 40 } });
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(turretDamageResult.appliedDps, 10);
   });
 
@@ -335,7 +342,7 @@ describe("EngagementEvaluatorImpl", () => {
     const { ewarResolver, evaluator } = makeEvaluator();
     vi.mocked(ewarResolver.disruptedTurret).mockReturnValue({ ...effectiveTurret, spool: { perCycle: 0.1, max: 0.5 } });
     const closeFrame = { ...frame, distance: 4000 };
-    const result = evaluator.evaluate(closeFrame, { shipA: { weapon: turret, opponentSigRadius: 40, spoolCycles: 3 } });
+    const result = evaluator.evaluate(closeFrame, { shipA: { weapon: turret, paintedTargetSig: 40, spoolCycles: 3 } });
     expect(result.shipA?.damage.nominalDps).toBeCloseTo(26, 10); // 100 * 1.3 / 5
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(26 * expectedMultiplier, 10);
     expect(result.shipA?.turret?.spoolFactor).toBeCloseTo(1.3, 10);
@@ -344,7 +351,7 @@ describe("EngagementEvaluatorImpl", () => {
   test("spool multiplier caps at the spool max", () => {
     const { ewarResolver, evaluator } = makeEvaluator();
     vi.mocked(ewarResolver.disruptedTurret).mockReturnValue({ ...effectiveTurret, spool: { perCycle: 0.1, max: 0.5 } });
-    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40, spoolCycles: 10 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 40, spoolCycles: 10 } });
     expect(result.shipA?.damage.nominalDps).toBeCloseTo(30, 10); // 100 * 1.5 / 5
     expect(result.shipA?.turret?.spoolFactor).toBeCloseTo(1.5, 10);
   });
@@ -352,7 +359,7 @@ describe("EngagementEvaluatorImpl", () => {
   test("deactivated spooling turret zeroes applied DPS but keeps spool-inclusive nominalDps", () => {
     const { ewarResolver, evaluator } = makeEvaluator();
     vi.mocked(ewarResolver.disruptedTurret).mockReturnValue({ ...effectiveTurret, spool: { perCycle: 0.1, max: 0.5 } });
-    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40, spoolCycles: 3 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 40, spoolCycles: 3 } });
     expect(result.shipA?.turret?.inOptimal).toBe(false);
     expect(result.shipA?.damage.nominalDps).toBeCloseTo(26, 10);
     expect(result.shipA?.damage.appliedDps).toBe(0);
@@ -363,14 +370,14 @@ describe("EngagementEvaluatorImpl", () => {
     const { ewarResolver, evaluator } = makeEvaluator();
     vi.mocked(ewarResolver.disruptedTurret).mockReturnValue({ ...effectiveTurret, spool: { perCycle: 0.1, max: 0.5 } });
     const closeFrame = { ...frame, distance: 4000 };
-    const result = evaluator.evaluate(closeFrame, { shipA: { weapon: turret, opponentSigRadius: 40, spoolCycles: 2 } });
+    const result = evaluator.evaluate(closeFrame, { shipA: { weapon: turret, paintedTargetSig: 40, spoolCycles: 2 } });
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(24 * expectedMultiplier, 10);
     expect(result.shipA?.turret?.spoolFactor).toBeCloseTo(1.2, 10);
   });
 
   test("non-spooling turret ignores spoolCycles", () => {
     const { evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40, spoolCycles: 5 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 40, spoolCycles: 5 } });
     expect(result.shipA?.damage.nominalDps).toBe(turretDamageResult.nominalDps);
     expect(result.shipA?.turret?.spoolFactor).toBe(1);
   });
@@ -378,7 +385,7 @@ describe("EngagementEvaluatorImpl", () => {
   test("spoolCycles omitted defaults to factor 1", () => {
     const { ewarResolver, evaluator } = makeEvaluator();
     vi.mocked(ewarResolver.disruptedTurret).mockReturnValue({ ...effectiveTurret, spool: { perCycle: 0.1, max: 0.5 } });
-    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 40 } });
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 40 } });
     expect(result.shipA?.damage.nominalDps).toBe(turretDamageResult.nominalDps);
     expect(result.shipA?.turret?.spoolFactor).toBe(1);
   });

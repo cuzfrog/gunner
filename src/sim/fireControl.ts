@@ -24,7 +24,8 @@ import { ZERO_DAMAGE, spoolMultiplier } from "./types";
 
 export interface AttackState {
   readonly weapon: WeaponSpec;
-  readonly opponentSigRadius: number;
+  /** Signature radius of the target after the attacker's target painters; derived once per frame by the engine and consumed as-is. */
+  readonly paintedTargetSig: number;
   readonly droneState?: DroneRuntimeState;
   readonly missileFacts?: MissileAttackFacts;
   readonly spoolCycles?: number;
@@ -78,9 +79,9 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   private assess(frame: EngagementFrame, ship: ShipState, opponent: ShipState, attack: AttackState): AttackAssessment {
     let assessment: AttackAssessment;
     if (attack.weapon.kind === "turret") {
-      assessment = this.assessTurret(frame, ship, opponent, attack.weapon, attack.opponentSigRadius, attack.spoolCycles);
+      assessment = this.assessTurret(frame, ship, opponent, attack.weapon, attack.paintedTargetSig, attack.spoolCycles);
     } else if (attack.weapon.kind === "drone") {
-      assessment = this.assessDrone(frame, ship, opponent, attack.weapon, attack.opponentSigRadius, attack.droneState);
+      assessment = this.assessDrone(frame, attack.weapon, attack.paintedTargetSig, attack.droneState);
     } else {
       if (!attack.missileFacts) throw new Error("MissileAttackFacts are required to assess a missile weapon");
       assessment = this.assessMissile(ship, attack.weapon, attack.missileFacts);
@@ -89,11 +90,10 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     return assessment;
   }
 
-  private assessTurret(frame: EngagementFrame, ship: ShipState, opponent: ShipState, turret: TurretSpec, opponentSigRadius: number, spoolCycles: number | undefined): AttackAssessment {
-    const paintedSig = opponentSigRadius * this.ewarResolver.sigMultiplier(ship.ewar, frame.distance);
+  private assessTurret(frame: EngagementFrame, ship: ShipState, opponent: ShipState, turret: TurretSpec, paintedTargetSig: number, spoolCycles: number | undefined): AttackAssessment {
     const boosted = this.boosters.boostedTurret(turret, ship.boosts);
     const effectiveTurret = this.ewarResolver.disruptedTurret(boosted, opponent.ewar, frame.distance);
-    const hit = this.hitChance.compute(frame, effectiveTurret, paintedSig);
+    const hit = this.hitChance.compute(frame, effectiveTurret, paintedTargetSig);
     const expectedMultiplier = computeExpectedMultiplier(hit.chance);
     const inOptimal = frame.distance <= effectiveTurret.optimal;
     const spoolFactor = spoolMultiplier(effectiveTurret.spool, spoolCycles ?? 0);
@@ -118,9 +118,8 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     return { boostedWeapon: boosted, effectiveWeapon: boosted, damage, missile: breakdown };
   }
 
-  private assessDrone(frame: EngagementFrame, ship: ShipState, opponent: ShipState, drone: DroneSpec, opponentSigRadius: number, droneState: DroneRuntimeState | undefined): AttackAssessment {
-    const paintedSig = opponentSigRadius * this.ewarResolver.sigMultiplier(ship.ewar, frame.distance);
-    const breakdown = this.droneApplication.compute(frame, drone, opponentSigRadius, droneState);
+  private assessDrone(frame: EngagementFrame, drone: DroneSpec, paintedTargetSig: number, droneState: DroneRuntimeState | undefined): AttackAssessment {
+    const breakdown = this.droneApplication.compute(frame, drone, paintedTargetSig, droneState);
     return { boostedWeapon: drone, effectiveWeapon: drone, damage: breakdown, drone: breakdown };
   }
 }
