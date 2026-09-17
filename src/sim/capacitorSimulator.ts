@@ -539,10 +539,9 @@ function applyIncomingEvent(sides: Record<Side, SideRuntime>, side: Side, entry:
 }
 
 function transferIncoming(runtime: SideRuntime, opponent: SideRuntime, entry: IncomingRuntime): number {
-  const attackerCap = opponent.infinite || !hasPool(opponent) ? Number.POSITIVE_INFINITY : opponent.cap;
-  if (attackerCap >= runtime.cap) return entry.interval;
-  const headroom = hasPool(opponent) && !opponent.infinite ? capacityOf(opponent.spec) - opponent.cap : 0;
-  const transfer = Math.min(entry.amount, runtime.cap, headroom);
+  // EVE parity: a nosferatu only drains while the attacker's capacitor is lower, and never below its own level.
+  if (!hasPool(opponent) || opponent.infinite || opponent.cap >= runtime.cap) return entry.interval;
+  const transfer = Math.min(entry.amount, runtime.cap - opponent.cap, capacityOf(opponent.spec) - opponent.cap);
   if (transfer <= 0) return entry.interval;
   runtime.cap -= transfer;
   opponent.cap = Math.min(opponent.cap + transfer, capacityOf(opponent.spec));

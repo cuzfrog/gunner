@@ -480,15 +480,16 @@ describe("CapacitorSimulatorImpl incoming cap warfare drains", () => {
     expect(sim2.view().shipB.cap).toBeCloseTo(regenClosedForm(1036, 5), 6);
   });
 
-  test("nosferatu transfer is capped by the victim capacitor and attacker headroom", () => {
+  test("nosferatu drains the victim only down to the attacker capacitor level", () => {
     const sim = new CapacitorSimulatorImpl();
     sim.reset(makeConfig());
     sim.attemptDebit("shipA", SPEC.capacity - 20);
     sim.attemptDebit("shipB", SPEC.capacity - 10);
     sim.incomingDrains("shipA", [incoming("600", 36, 5, true)]);
     sim.step(5, ENGAGED);
-    expect(sim.view().shipA.cap).toBeCloseTo(regenClosedForm(0, 5), 6);
-    expect(sim.view().shipB.cap).toBeCloseTo(regenClosedForm(30, 5), 6);
+    // EVE parity: the victim stops at the attacker's pre-transfer level (10 + 10 gained), both regen for the rest of the step.
+    expect(sim.view().shipA.cap).toBeCloseTo(regenClosedForm(10, 5), 6);
+    expect(sim.view().shipB.cap).toBeCloseTo(regenClosedForm(20, 5), 6);
   });
 
   test("infinite victim never loses capacitor to incoming drains", () => {
