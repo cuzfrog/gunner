@@ -847,6 +847,7 @@ function applyRigDrawbackReduction(drawback: RigDrawback, reductions: readonly R
 
 export { applyRigDrawbackReduction as _applyRigDrawbackReduction };
 
+// EVE: base droneControlDistance 20000 plus Drone Avionics 5000/level and Advanced Drone Avionics 3000/level; the uniform skill level trains both, hence 8000 per level.
 const DRONE_CONTROL_RANGE_BASE = 20000;
 const DRONE_CONTROL_RANGE_PER_SKILL_LEVEL = 8000;
 
