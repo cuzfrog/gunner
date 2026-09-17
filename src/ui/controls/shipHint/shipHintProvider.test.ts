@@ -21,6 +21,8 @@ const PROFILE: ShipProfile = {
   medSlots: 4,
   lowSlots: 3,
   rigSlots: 3,
+  powerGrid: 1000,
+  cpuOutput: 400,
   droneBandwidth: 10,
   droneCapacity: 10,
   maxActiveDrones: 5,
@@ -127,6 +129,8 @@ describe("ShipHintProviderImpl", () => {
       { label: "shipHint.medSlots", value: "4" },
       { label: "shipHint.lowSlots", value: "3" },
       { label: "shipHint.rigSlots", value: "3" },
+      { label: "shipHint.powerGrid", value: "1,000 unit.megawatt" },
+      { label: "shipHint.cpuOutput", value: "400 unit.teraflop" },
     ]);
     expect(rowsOf(model, "shipHint.section.navigation")).toEqual([
       { label: "label.maxVelocity", value: "365 unit.meterPerSecond" },

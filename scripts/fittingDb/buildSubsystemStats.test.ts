@@ -1,10 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { buildSubsystemStats } from "./buildSubsystemStats";
-import { toTypeId } from "../../src/gamedata/ids";
+import { toTypeId, type TypeId } from "../../src/gamedata/ids";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
 }
+
+const requiredSkillIds: readonly TypeId[] = [toTypeId("3318")];
 
 describe("buildSubsystemStats", () => {
   test("builds launcher offensive subsystem stats from SDE attributes", () => {
@@ -13,6 +15,7 @@ describe("buildSubsystemStats", () => {
       name: "Tengu Offensive - Accelerated Ejection Bay",
       groupId: 956,
       values: values({ hiSlotModifier: 7, launcherHardPointModifier: 6, powerOutput: 190, cpuOutput: 160 }),
+      requiredSkillIds,
     });
     expect(result).toEqual({
       id: toTypeId("35682"),
@@ -23,6 +26,7 @@ describe("buildSubsystemStats", () => {
       lowSlots: 0,
       turretHardpoints: 0,
       launcherHardpoints: 6,
+      requiredSkillIds,
     });
   });
 
@@ -32,6 +36,7 @@ describe("buildSubsystemStats", () => {
       name: "Tengu Core - Electronic Efficiency Gate",
       groupId: 958,
       values: values({ medSlotModifier: 3, lowSlotModifier: 1 }),
+      requiredSkillIds,
     });
     expect(result).toEqual({
       id: toTypeId("35686"),
@@ -42,10 +47,11 @@ describe("buildSubsystemStats", () => {
       lowSlots: 1,
       turretHardpoints: 0,
       launcherHardpoints: 0,
+      requiredSkillIds,
     });
   });
 
   test("returns undefined for non-subsystem groups", () => {
-    expect(buildSubsystemStats({ typeId: toTypeId("1"), name: "x", groupId: 963, values: values({}) })).toBeUndefined();
+    expect(buildSubsystemStats({ typeId: toTypeId("1"), name: "x", groupId: 963, values: values({}), requiredSkillIds })).toBeUndefined();
   });
 });

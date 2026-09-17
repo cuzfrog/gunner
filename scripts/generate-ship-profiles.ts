@@ -332,6 +332,8 @@ function parseProfile(
     medSlots: slots.medSlots,
     lowSlots: slots.lowSlots,
     rigSlots: slots.rigSlots,
+    powerGrid: values.get("powerOutput") ?? 0,
+    cpuOutput: values.get("cpuOutput") ?? 0,
     droneBandwidth,
     droneCapacity,
     maxActiveDrones: values.get("maxActiveDrones") ?? fallbackMaxActiveDrones(droneCapacity, droneBandwidth),
@@ -373,6 +375,8 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push(`    medSlots: ${p.medSlots},`);
     lines.push(`    lowSlots: ${p.lowSlots},`);
     lines.push(`    rigSlots: ${p.rigSlots},`);
+    lines.push(`    powerGrid: ${p.powerGrid},`);
+    lines.push(`    cpuOutput: ${p.cpuOutput},`);
     lines.push(`    droneBandwidth: ${p.droneBandwidth},`);
     lines.push(`    droneCapacity: ${p.droneCapacity},`);
     lines.push(`    maxActiveDrones: ${p.maxActiveDrones},`);

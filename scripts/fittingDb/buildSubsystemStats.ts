@@ -6,6 +6,7 @@ export interface BuildSubsystemStatsContext {
   readonly name: string;
   readonly groupId: number;
   readonly values: Map<string, number>;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 const SLOT_KIND_BY_GROUP_ID: Readonly<Record<number, SubsystemSlotKind>> = { 958: "core", 956: "offensive", 954: "defensive", 957: "propulsion" };
@@ -22,5 +23,6 @@ export function buildSubsystemStats(ctx: BuildSubsystemStatsContext): SubsystemS
     lowSlots: ctx.values.get("lowSlotModifier") ?? 0,
     turretHardpoints: ctx.values.get("turretHardPointModifier") ?? 0,
     launcherHardpoints: ctx.values.get("launcherHardPointModifier") ?? 0,
+    requiredSkillIds: ctx.requiredSkillIds,
   };
 }

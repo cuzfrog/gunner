@@ -1,4 +1,4 @@
-import type { SkillBonus, SkillBonusType } from "../gamedata/fittingDb";
+import type { RigDrawback, RigDrawbackReduction, SkillBonus, SkillBonusType } from "../gamedata/fittingDb";
 import type { TypeId } from "../gamedata/ids";
 import type { SkillLevel } from "../ships";
 
@@ -19,4 +19,13 @@ export function moduleSkillMultiplier(
     multiplier *= 1 + (bonus.magnitudePerLevel * skillLevel) / 100;
   }
   return multiplier;
+}
+
+/** Percent remaining after the matching rigging skill reduces the rig's fitting drawback. */
+export function applyRigDrawbackReduction(drawback: RigDrawback, reductions: readonly RigDrawbackReduction[], skillLevel: SkillLevel): number {
+  let reductionPercent = 0;
+  for (const reduction of reductions) {
+    if (reduction.groupId === drawback.groupId) reductionPercent += reduction.magnitudePerLevel * skillLevel;
+  }
+  return drawback.percent * (1 + reductionPercent / 100);
 }

@@ -93,6 +93,9 @@ export interface RigDrawback {
   readonly kind: RigDrawbackKind;
   readonly percent: number;
   readonly groupId: number;
+  // Scope of need drawbacks (powerNeed/cpuNeed): the affected module group or required skill. Undefined for other kinds.
+  readonly targetGroupId?: number;
+  readonly targetSkillId?: TypeId;
 }
 
 export interface RigDrawbackReduction {
@@ -109,6 +112,10 @@ export interface FittingModuleStats {
   readonly sigRadiusAdd?: number;
   readonly sigBonusPercent?: number;
   readonly rigDrawback?: RigDrawback;
+  readonly powerGridOutputPercent?: number;
+  readonly cpuOutputPercent?: number;
+  readonly requiredSkillIds?: readonly TypeId[];
+  readonly groupID?: number;
   readonly turretTrackingPercent?: number;
   readonly turretOptimalPercent?: number;
   readonly turretFalloffPercent?: number;
@@ -176,14 +183,15 @@ export interface TurretStats {
 }
 
 export type PropulsionBonusAttribute = "maxVelocity" | "agility" | "mwdSigBloom";
+export type ShipOutputBonusAttribute = "powerGridOutputPercent" | "cpuOutputPercent";
 export type TurretBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "turretDamage" | "turretRoF" | "turretSpoolMax";
 export type MissileBonusAttribute = "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity";
 export type DroneBonusAttribute = "droneDamage";
 export type DefenseBonusAttribute = "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
-export type ModuleBonusAttribute = "capUse" | "duration";
+export type ModuleBonusAttribute = "capUse" | "duration" | "cpuNeed" | "powerGridNeed";
 // Flat additions applied to the base ship stat before percent modifiers (strategic cruiser subsystems).
-export type ShipStatFlatAttribute = "shieldHpFlat" | "armorHpFlat" | "hullHpFlat" | "capacitorCapacityFlat" | "sigRadiusFlat" | "maxTargetingRangeFlat" | "droneCapacityFlat" | "droneBandwidthFlat";
-export type HullBonusAttribute = PropulsionBonusAttribute | TurretBonusAttribute | MissileBonusAttribute | DroneBonusAttribute | DefenseBonusAttribute | ModuleBonusAttribute | ShipStatFlatAttribute;
+export type ShipStatFlatAttribute = "shieldHpFlat" | "armorHpFlat" | "hullHpFlat" | "capacitorCapacityFlat" | "sigRadiusFlat" | "maxTargetingRangeFlat" | "droneCapacityFlat" | "droneBandwidthFlat" | "powerGridFlat" | "cpuFlat";
+export type HullBonusAttribute = PropulsionBonusAttribute | ShipOutputBonusAttribute | TurretBonusAttribute | MissileBonusAttribute | DroneBonusAttribute | DefenseBonusAttribute | ModuleBonusAttribute | ShipStatFlatAttribute;
 
 export interface HullBonus {
   readonly attribute: HullBonusAttribute;
@@ -480,12 +488,31 @@ export interface SubsystemStats {
   readonly lowSlots: number;
   readonly turretHardpoints: number;
   readonly launcherHardpoints: number;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 export type SubsystemSlotKind = "core" | "offensive" | "defensive" | "propulsion";
 
+/** Ship powergrid/CPU fitting resources: used by fitted modules versus the ship's modified output. */
+export interface FittingResource {
+  readonly used: number;
+  readonly output: number;
+}
+
+export interface FittingResources {
+  readonly powerGrid: FittingResource;
+  readonly cpu: FittingResource;
+}
+
+/** Per-type powergrid (MW) and CPU (tf) needs of a fittable item. */
+export interface ModuleFittingNeeds {
+  readonly powerGrid: number;
+  readonly cpu: number;
+}
+
 export interface FittingDbData {
   readonly modules: Readonly<Record<string, FittingModuleStats>>;
+  readonly needs: Readonly<Record<string, ModuleFittingNeeds>>;
   readonly turrets: Readonly<Record<string, TurretStats>>;
   readonly charges: Readonly<Record<string, ChargeStats>>;
   readonly commandBursts: Readonly<Record<string, CommandBurstStats>>;

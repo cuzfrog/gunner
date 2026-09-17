@@ -131,6 +131,8 @@ export const RIFTER: ShipProfile = {
   medSlots: 4,
   lowSlots: 3,
   rigSlots: 3,
+  powerGrid: 1000,
+  cpuOutput: 400,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -203,6 +205,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   defense: EMPTY_DEFENSE_SPEC,
   commandBursts: [],
   capacitor: { spec: { capacity: 0, rechargeTime: 0 }, peakRecharge: 0, rows: [], usagePerSecond: 0, weaponsPerSecond: 0, boosters: [], stablePercent: 100 },
+  resources: { powerGrid: { used: 0, output: 1000 }, cpu: { used: 0, output: 400 } },
   sensorSpec: { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4 },
   sensorBoosts: EMPTY_SENSOR_BOOST_LOADOUT,
 };

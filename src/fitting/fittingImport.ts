@@ -24,9 +24,10 @@ import type { DroneCatalog } from "./droneCatalog";
 import type { DroneSkillModel } from "./droneStats";
 import { FittingStateFactory, type FittingState, type FittingModuleEntry, type CargoEntry } from "./fittingState";
 import { FittingCalculatorImpl, type FittingCalculator } from "./fittingCalculator";
+import { FittingResourcesCalculatorImpl, type FittingResourcesCalculator } from "./fittingResourcesCalculator";
 import { DefenseCalculatorImpl, type DefenseCalculator } from "./defenseCalculator";
 import { CapacitorCalculatorImpl, type CapacitorDrainSources, type CapacitorStats } from "./capacitorCalculator";
-import type { FittingDb, FittingModuleStats, HullBonus } from "../gamedata/fittingDb";
+import type { FittingDb, FittingModuleStats, FittingResources, HullBonus } from "../gamedata/fittingDb";
 import type { DefenseSpec } from "../sim";
 
 export type { FittingDb } from "../gamedata/fittingDb";
@@ -60,6 +61,8 @@ export interface FittingSummary {
     readonly stablePercent?: number;
     readonly depletesInSeconds?: number;
   };
+  // Static powergrid/CPU readout for the preview, at level-5-skill conditions.
+  readonly resources?: FittingResources;
 }
 
 export interface ImportedFitting {
@@ -83,6 +86,7 @@ export interface ImportedFitting {
   readonly defense: DefenseSpec;
   readonly commandBursts: readonly CommandBurstSpec[];
   readonly capacitor: CapacitorStats;
+  readonly resources: FittingResources;
 }
 
 export interface PropulsionVariant {
@@ -113,6 +117,7 @@ export class FittingImportImpl implements FittingImport {
   private readonly calculator: FittingCalculator;
   private readonly defenseCalculator: DefenseCalculator;
   private readonly capacitorCalculator: CapacitorCalculatorImpl;
+  private readonly resourcesCalculator: FittingResourcesCalculator;
 
   constructor({
     ships,
@@ -150,6 +155,7 @@ export class FittingImportImpl implements FittingImport {
     this.calculator = new FittingCalculatorImpl({ fittingDb, ships, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog });
     this.defenseCalculator = new DefenseCalculatorImpl({ fittingDb, stackingPenalty });
     this.capacitorCalculator = new CapacitorCalculatorImpl({ fittingDb, stackingPenalty });
+    this.resourcesCalculator = new FittingResourcesCalculatorImpl({ fittingDb, stackingPenalty });
   }
 
   propulsionVariantNames(module: PropulsionModule): readonly PropulsionVariant[] {
@@ -212,6 +218,7 @@ export class FittingImportImpl implements FittingImport {
     const turretDrains = turrets.map((turret) => ({ moduleId: turret.moduleId, capacitorNeed: turret.capacitorNeed, cycleTime: turret.cycleTime, count: turret.turretCount }));
     const commandBursts = resolveCommandBurstSpecs(fittingState, this.db);
     const capacitor = this.capacitorCalculator.resolve(fittingState, conditions, { defense, turretDrains, ewar, boosts, missileBoosts, sensorBoosts, commandBursts, propulsionModuleId: fittingState.propulsionModule?.moduleId });
+    const resources = this.resourcesCalculator.resolve(fittingState, conditions);
 
     return {
       profile: resolved.profile,
@@ -234,6 +241,7 @@ export class FittingImportImpl implements FittingImport {
       defense,
       commandBursts,
       capacitor,
+      resources,
     };
   }
 
@@ -246,11 +254,13 @@ export class FittingImportImpl implements FittingImport {
 
     const imported = this.importFitting(text, PREVIEW_CONDITIONS);
     const capacitor = imported ? capacitorSummaryFrom(imported.capacitor) : undefined;
+    const resources = imported ? imported.resources : undefined;
     return {
       hullName: resolved.profile.name,
       fittingName: resolved.fittingName,
       sections: buildSections(resolved),
       ...(capacitor ? { capacitor } : {}),
+      ...(resources ? { resources } : {}),
     };
   }
 

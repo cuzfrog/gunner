@@ -36,6 +36,8 @@ export interface ShipProfile {
   readonly medSlots: number;
   readonly lowSlots: number;
   readonly rigSlots: number;
+  readonly powerGrid: number; // MW output
+  readonly cpuOutput: number; // tf output
   readonly droneBandwidth: number;
   readonly droneCapacity: number;
   readonly maxActiveDrones: number;

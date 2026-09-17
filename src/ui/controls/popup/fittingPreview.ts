@@ -1,4 +1,4 @@
-import type { FittingImport, FittingRow, FittingSection, FittingSummary } from "../../../fitting";
+import type { FittingImport, FittingResources, FittingRow, FittingSection, FittingSummary } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { formatWithCommas } from "../controlsFormat";
@@ -40,6 +40,7 @@ export class DomFittingPreview implements FittingPreview {
       this.container.appendChild(renderSection(this.i18n, this.imageCatalog, this.fittingImport, section));
     }
     if (summary.capacitor) this.container.appendChild(renderCapacitor(this.i18n, summary.capacitor));
+    if (summary.resources) this.container.appendChild(renderResources(this.i18n, summary.resources));
     this.container.hidden = false;
     this.container.setAttribute("aria-hidden", "false");
     positionPreview(this.container, anchor, this.viewport());
@@ -120,6 +121,19 @@ function renderCapacitor(i18n: I18n, capacitor: NonNullable<FittingSummary["capa
   if (capacitor.depletesInSeconds !== undefined) parts.push(i18n.t("capacitor.depletes").replace("{time}", formatDuration(capacitor.depletesInSeconds)));
   const row = html`<div class="preview-capacitor"><span class="preview-capacitor-value mono">${parts.join(" \u00b7 ")}</span></div>` as unknown as HTMLElement;
   return new SectionBlockImpl().create(i18n.t("fitting.preview.capacitor"), [row]);
+}
+
+function renderResources(i18n: I18n, resources: FittingResources): HTMLElement {
+  const rows = [resourceRow(i18n, "fitting.preview.powerGrid", resources.powerGrid, "MW"), resourceRow(i18n, "fitting.preview.cpu", resources.cpu, "tf")];
+  return new SectionBlockImpl().create(i18n.t("fitting.preview.resources"), rows);
+}
+
+function resourceRow(i18n: I18n, labelKey: string, resource: FittingResources["powerGrid"], unit: string): HTMLElement {
+  const overBudget = resource.used > resource.output;
+  const value = `${formatWithCommas(Math.round(resource.used))} / ${formatWithCommas(Math.round(resource.output))} ${unit}`;
+  const row = html`<div class="preview-resource"><span class="preview-resource-label">${i18n.t(labelKey)}</span><span class="preview-resource-value mono">${value}</span></div>` as unknown as HTMLElement;
+  if (overBudget) row.classList.add("is-over");
+  return row;
 }
 
 function formatDuration(seconds: number): string {

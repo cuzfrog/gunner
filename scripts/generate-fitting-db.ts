@@ -6,6 +6,8 @@ import {
   TURRET_WEAPON_GROUP_BY_ID,
   type CommandBurstStats,
   type HullBonusAttribute,
+  type ModuleFittingNeeds,
+  type ShipOutputBonusAttribute,
   type ShipStatFlatAttribute,
   type SkillBonusType,
   type RigDrawback,
@@ -123,21 +125,25 @@ const SUBSYSTEM_SHIP_STAT_ATTRIBUTES: Readonly<Record<number, HullBonusAttribute
   37: "maxVelocity", 70: "agility", 263: "shieldHpPercent", 265: "armorHpPercent", 554: "mwdSigBloom",
 };
 
+// Flat percent ship-output bonuses (op 6, non-per-level): powergrid/CPU output modifiers on core subsystems.
+const SUBSYSTEM_OUTPUT_SHIP_STAT_ATTRIBUTES: Readonly<Record<number, ShipOutputBonusAttribute>> = {
+  11: "powerGridOutputPercent", 48: "cpuOutputPercent",
+};
+
 // Flat ship-stat additions preassigned on the subsystem (op != 6), applied to the base stat before percent modifiers.
 const SUBSYSTEM_FLAT_SHIP_STAT_ATTRIBUTES: Readonly<Record<number, ShipStatFlatAttribute>> = {
   9: "hullHpFlat", 76: "maxTargetingRangeFlat", 263: "shieldHpFlat", 265: "armorHpFlat",
   283: "droneCapacityFlat", 482: "capacitorCapacityFlat", 552: "sigRadiusFlat", 1271: "droneBandwidthFlat",
+  11: "powerGridFlat", 48: "cpuFlat",
 };
 
 const SUBSYSTEM_FLAT_ADDITION_REASONS: Readonly<Record<number, string>> = {
-  11: "flat powergrid addition is a fitting stat", 38: "flat cargo capacity addition is not modeled",
-  48: "flat CPU addition is a fitting stat", 70: "flat inertia addition is not modeled",
+  38: "flat cargo capacity addition is not modeled", 70: "flat inertia addition is not modeled",
   192: "flat max locked targets addition is not modeled",
   3320: "black ops jump system access flag", 3322: "black ops jump drive flag",
 };
 
 const SUBSYSTEM_PERCENT_SKIP_REASONS: Readonly<Record<number, string>> = {
-  11: "powergrid output percent bonus is a fitting stat", 48: "CPU output percent bonus is a fitting stat",
   55: "capacitor recharge rate bonus is not modeled", 76: "max targeting range bonus is not modeled",
   153: "warp capacitor need bonus is not modeled", 2045: "capacitor warfare resistance bonus is not modeled",
   208: "RADAR sensor strength bonus is not modeled", 209: "LADAR sensor strength bonus is not modeled",
@@ -147,8 +153,7 @@ const SUBSYSTEM_PERCENT_SKIP_REASONS: Readonly<Record<number, string>> = {
 };
 
 const SUBSYSTEM_SKILL_FILTERED_SKIP_REASONS: Readonly<Record<number, string>> = {
-  20: "propulsion module speed factor is not modeled", 30: "powergrid usage reduction is a fitting stat",
-  50: "CPU usage reduction is a fitting stat", 68: "armor repair amount bonus is not modeled",
+  20: "propulsion module speed factor is not modeled", 68: "armor repair amount bonus is not modeled",
   84: "shield transfer amount bonus is not modeled", 90: "energy transfer amount bonus is not modeled",
   97: "energy neutralizer amount bonus is not modeled", 669: "module reactivation delay bonus is not modeled",
   1211: "heat damage bonus is not modeled", 1371: "scan probe strength bonus is not modeled",
@@ -199,6 +204,8 @@ const MODULE_GROUPS = new Set([
   786, // Rig Electronic Systems
   1308, // Rig Anchor
   647, // Drone Control Range Module
+  285, // CPU Enhancer (Co-Processor)
+  769, // Reactor Control Unit
   // Defense modules
   60, // Damage Control
   62, // Armor Repair Unit
@@ -267,6 +274,8 @@ const TURRET_SKILL_IDS = new Set([
 ]);
 const TURRET_SUPPORT_SKILL_IDS = new Set([3300, 3310, 3311, 3312, 3315, 3317]);
 const LAUNCHER_GROUP_IDS = new Set([506, 507, 508, 509, 510, 511, 512, 771, 1245, 1579, 1624]);
+// Subsystem/hauler role bonuses reduce launcher/energy-warfare fitting needs per GROUP; module-level scoping is not modeled.
+const GROUP_SCOPED_FITTING_REDUCTION_GROUP_IDS = new Set([68, 71, 508, 510, 511, 771]);
 
 const CHARGE_GROUPS = new Set([
   83, 85, 86,
@@ -303,6 +312,7 @@ const LEGACY_ROF_EFFECT = 1851;
 function stringifyWithTypeIds<T>(value: T): string {
   return JSON.stringify(value)
     .replace(/"id":"(\d+)"/g, '"id":"$1" as TypeId')
+    .replace(/"(targetSkillId)":"(\d+)"/g, '"$1":"$2" as TypeId')
     .replace(/"requiredSkillIds":\[(.*?)\]/g, (match, inner) => `"requiredSkillIds":[${inner.replace(/"(\d+)"/g, '"$1" as TypeId')}]`);
 }
 
@@ -520,6 +530,7 @@ function resolveSkillBonusAttribute(
   }
   if (base === "turretTracking" || base === "turretFalloff") return { kind: "mapped", bonusType: base };
   if (base === "capUse" || base === "duration") return { kind: "mapped", bonusType: base };
+  if (base === "cpuNeed" || base === "powerGridNeed") return { kind: "mapped", bonusType: base };
   if (base === "missileDamage" || base === "missileFlightTime" || base === "missileExplosionRadius" || base === "missileExplosionVelocity") return { kind: "mapped", bonusType: base };
   return { kind: "skip", reason: "attribute not applicable as a skill bonus" };
 }
@@ -611,6 +622,10 @@ interface FittingModuleStats {
   readonly missileCycleTimeMultiplier?: number;
   readonly droneDamageBonus?: number;
   readonly droneControlRangeBonus?: number;
+  readonly powerGridOutputPercent?: number;
+  readonly cpuOutputPercent?: number;
+  readonly requiredSkillIds?: readonly TypeId[];
+  readonly groupID?: number;
 }
 
 interface TurretStats {
@@ -902,10 +917,25 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>, gro
     for (const effectID of effects) {
       const kind = effectDrawbackKind(effectID);
       if (kind !== undefined) {
-        stats.rigDrawback = { kind, percent: drawback, groupId };
+        const target = drawbackTarget(dogmaEffects[String(effectID)]);
+        stats.rigDrawback = { kind, percent: drawback, groupId, ...target };
         break;
       }
     }
+  }
+
+  // Powergrid/CPU output modifiers: multiplier attrs (145/202) on low/mid modules, percent attrs (313/424) on rigs.
+  const powerGridOutputPercent = values.get("powerOutputMultiplier") ?? values.get("powerEngineeringOutputBonus");
+  if (powerGridOutputPercent !== undefined) {
+    stats.powerGridOutputPercent = values.get("powerOutputMultiplier") !== undefined
+      ? (powerGridOutputPercent - 1) * 100
+      : powerGridOutputPercent;
+  }
+  const cpuOutputPercent = values.get("cpuMultiplier") ?? values.get("cpuOutputBonus2");
+  if (cpuOutputPercent !== undefined) {
+    stats.cpuOutputPercent = values.get("cpuMultiplier") !== undefined
+      ? (cpuOutputPercent - 1) * 100
+      : cpuOutputPercent;
   }
 
   const combatStats = buildCombatModuleStats({ values, effects, dogmaEffects, typeDogma });
@@ -925,6 +955,15 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>, gro
 
   if (Object.keys(stats).length === 0) return undefined;
   return { ...stats };
+}
+
+// Need drawbacks scope either a module group (LocationGroupModifier, e.g. lasers) or a required skill (LocationRequiredSkillModifier, e.g. launchers).
+function drawbackTarget(effect: SdeDogmaEffect | undefined): { targetGroupId?: number; targetSkillId?: TypeId } {
+  const modifier = effect?.modifierInfo?.[0];
+  if (!modifier) return {};
+  if (modifier.func === "LocationGroupModifier" && modifier.groupID !== undefined) return { targetGroupId: modifier.groupID };
+  if (modifier.func === "LocationRequiredSkillModifier" && modifier.skillTypeID !== undefined) return { targetSkillId: String(modifier.skillTypeID) as TypeId };
+  return {};
 }
 
 function buildDefenseStats(
@@ -1194,6 +1233,8 @@ function resolveHullBonusAttribute(
   if (base === "turretOptimal" && modifier.groupID === WARP_SCRAMBLER_GROUP) return { kind: "skip", reason: "warp scrambler maxRange is not a turret bonus" };
   // capacitorNeed hull bonuses only apply to turret groups/skills (e.g. Harbinger effect 5332).
   if (base === "capUse" && !((skillId !== undefined && TURRET_SKILL_IDS.has(skillId)) || (modifier.groupID !== undefined && TURRET_GROUPS.has(modifier.groupID)))) return { kind: "skip", reason: "capacitorNeed bonus outside turret skills/groups" };
+  // Need reductions scoped to a whole module group (Legion subsystems, Upwell hauler role bonus) are not modeled.
+  if ((base === "powerGridNeed" || base === "cpuNeed") && modifier.groupID !== undefined && GROUP_SCOPED_FITTING_REDUCTION_GROUP_IDS.has(modifier.groupID)) return { kind: "skip", reason: "module-group fitting need reduction is not modeled" };
   if (base === "duration") return { kind: "skip", reason: "module duration is not a hull bonus" };
   // Skip maxRange bonuses filtered by non-turret skills (e.g. Leadership for command bursts).
   if (base === "turretOptimal" && skillId !== undefined && !TURRET_SKILL_IDS.has(skillId)) return { kind: "skip", reason: "maxRange bonus for non-turret skill" };
@@ -1227,7 +1268,7 @@ function isNonScalingAttribute(attrName: string): boolean {
 }
 
 type SubsystemModifierResolution =
-  | { kind: "mapped"; attribute: HullBonusAttribute; damageType?: DamageType; flat?: boolean }
+  | { kind: "mapped"; attribute: HullBonusAttribute; damageType?: DamageType; flat?: boolean; nonScaling?: boolean }
   | { kind: "skip"; reason: string }
   | { kind: "unmapped"; attributeId: number };
 
@@ -1264,7 +1305,7 @@ function buildSubsystemBonuses(
       const key = `${resolution.attribute}:${resolution.damageType ?? ""}:${filter.chargeSkillId ?? ""}:${filter.moduleSkillId ?? ""}:${filter.moduleGroupId ?? ""}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      const bonus: HullBonus = { attribute: resolution.attribute, magnitude, scalesWithHullSkill: !resolution.flat, sourceId: String(subsystemTypeId) as TypeId, ...filter };
+      const bonus: HullBonus = { attribute: resolution.attribute, magnitude, scalesWithHullSkill: !resolution.flat && !resolution.nonScaling, sourceId: String(subsystemTypeId) as TypeId, ...filter };
       bonuses.push(resolution.damageType !== undefined ? { ...bonus, damageType: resolution.damageType } : bonus);
     }
   }
@@ -1292,6 +1333,8 @@ function resolveSubsystemItemModifier(modifier: SdeDogmaEffectModifier, attribut
   }
   const percentReason = SUBSYSTEM_PERCENT_SKIP_REASONS[attributeId];
   if (percentReason) return { kind: "skip", reason: percentReason };
+  const outputStat = SUBSYSTEM_OUTPUT_SHIP_STAT_ATTRIBUTES[attributeId];
+  if (outputStat) return { kind: "mapped", attribute: outputStat, nonScaling: true };
   const modifyingAttrName = attributeNames.get(modifier.modifyingAttributeID) ?? "";
   const isPerLevel = modifyingAttrName.startsWith("subsystemBonus");
   const shipStat = SUBSYSTEM_SHIP_STAT_ATTRIBUTES[attributeId];
@@ -1370,6 +1413,24 @@ function specializationSkillFromRequired(
     if (name?.includes("Specialization")) return name;
   }
   return undefined;
+}
+
+// Powergrid (attr 30, MW) and CPU (attr 50, tf) needs of every fittable type; entries with both zero are omitted.
+function buildNeeds(typedogmas: Record<string, SdeTypeDogma>, types: Record<string, unknown>): Record<string, ModuleFittingNeeds> {
+  const needs: Record<string, ModuleFittingNeeds> = {};
+  for (const id of Object.keys(types)) {
+    const typeDogma = typedogmas[id];
+    if (!typeDogma) continue;
+    let powerGrid = 0;
+    let cpu = 0;
+    for (const { attributeID, value } of typeDogma.dogmaAttributes) {
+      if (attributeID === 30) powerGrid = value;
+      else if (attributeID === 50) cpu = value;
+    }
+    if (powerGrid === 0 && cpu === 0) continue;
+    needs[id] = { powerGrid, cpu };
+  }
+  return needs;
 }
 
 function buildRequiredSkillIds(requiredSkills: Record<string, Record<string, number>>, typeID: number): readonly TypeId[] {
@@ -1593,7 +1654,7 @@ async function main() {
           bonuses.push({ attribute: "hullHpFlat", magnitude: structureAddition, scalesWithHullSkill: false, sourceId: id });
         }
         if (bonuses.length > 0) subsystemBonuses[id] = bonuses;
-        const stats = buildSubsystemStats({ typeId: id, name: enName ?? String(type.typeID), groupId: type.groupID, values });
+        const stats = buildSubsystemStats({ typeId: id, name: enName ?? String(type.typeID), groupId: type.groupID, values, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID) });
         if (stats) subsystems[id] = stats;
       }
       continue;
@@ -1749,7 +1810,7 @@ async function main() {
       const stats = buildStasisWebStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         stasisWebs[id] = { ...stats, id, name: enName };
-        fittingModules[id] = { stasisWeb: stats, id, name: enName };
+        fittingModules[id] = { stasisWeb: stats, id, name: enName, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID), groupID: type.groupID };
         addItemName(itemNames, id, type);
       }
       continue;
@@ -1759,7 +1820,7 @@ async function main() {
       const stats = buildStasisGrapplerStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         stasisGrapplers[id] = { ...stats, id, name: enName };
-        fittingModules[id] = { stasisGrappler: stats, id, name: enName };
+        fittingModules[id] = { stasisGrappler: stats, id, name: enName, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID), groupID: type.groupID };
         addItemName(itemNames, id, type);
       }
       continue;
@@ -1769,7 +1830,7 @@ async function main() {
       const stats = buildTrackingDisruptorStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         trackingDisruptors[id] = { ...stats, id, name: enName };
-        fittingModules[id] = { trackingDisruptor: stats, id, name: enName };
+        fittingModules[id] = { trackingDisruptor: stats, id, name: enName, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID), groupID: type.groupID };
         addItemName(itemNames, id, type);
       }
       continue;
@@ -1788,7 +1849,7 @@ async function main() {
       const stats = buildWarpScramblerStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         warpScramblers[id] = { ...stats, id, name: enName };
-        fittingModules[id] = { warpScrambler: stats, id, name: enName };
+        fittingModules[id] = { warpScrambler: stats, id, name: enName, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID), groupID: type.groupID };
         addItemName(itemNames, id, type);
       }
       continue;
@@ -1798,7 +1859,7 @@ async function main() {
       const stats = buildTargetPainterStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         targetPainters[id] = { ...stats, id, name: enName };
-        fittingModules[id] = { targetPainter: stats, id, name: enName };
+        fittingModules[id] = { targetPainter: stats, id, name: enName, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID), groupID: type.groupID };
         addItemName(itemNames, id, type);
       }
       continue;
@@ -1853,7 +1914,7 @@ async function main() {
       const stats = buildSensorDampenerStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         sensorDampeners[id] = { ...stats, id, name: enName };
-        fittingModules[id] = { sensorDampener: stats, id, name: enName };
+        fittingModules[id] = { sensorDampener: stats, id, name: enName, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID), groupID: type.groupID };
         addItemName(itemNames, id, type);
       }
       continue;
@@ -1863,7 +1924,7 @@ async function main() {
       const stats = buildSensorBoosterStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         sensorBoosters[id] = { ...stats, id, name: enName };
-        fittingModules[id] = { sensorBooster: stats, id, name: enName };
+        fittingModules[id] = { sensorBooster: stats, id, name: enName, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID), groupID: type.groupID };
         addItemName(itemNames, id, type);
       }
       continue;
@@ -1873,7 +1934,7 @@ async function main() {
       const stats = buildSignalAmplifierStats(values);
       if (stats) {
         signalAmplifiers[id] = { ...stats, id, name: enName };
-        fittingModules[id] = { signalAmplifier: stats, id, name: enName };
+        fittingModules[id] = { signalAmplifier: stats, id, name: enName, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID), groupID: type.groupID };
         addItemName(itemNames, id, type);
       }
       continue;
@@ -1909,7 +1970,7 @@ async function main() {
     if (MODULE_GROUPS.has(type.groupID)) {
       const effects = buildEffectSet(typeDogma);
       if (type.groupID === 46) {
-        fittingModules[id] = { ...buildPropulsionStats(values, type, buildRequiredSkillIds(requiredSkills, type.typeID)), id, name: enName };
+        fittingModules[id] = { ...buildPropulsionStats(values, type, buildRequiredSkillIds(requiredSkills, type.typeID)), id, name: enName, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID), groupID: type.groupID };
         addItemName(itemNames, id, type);
       } else {
         const stats = buildModuleStats(values, effects, type.groupID, typeDogma, dogmaEffects);
@@ -1917,7 +1978,7 @@ async function main() {
         const capacitor = buildCapacitorStatsFromIntents({ values, effects, groupId: type.groupID, dogmaEffects, chargeCapacity: type.capacity ?? 0 });
         const warfare = buildCapWarfareStatsFromIntents({ values, effects, groupId: type.groupID, dogmaEffects, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID) });
         if (stats || defense || capacitor || warfare || RIG_GROUPS.has(type.groupID) || type.groupID === CLOAKING_DEVICE_GROUP) {
-          fittingModules[id] = { ...(stats ?? {}), defense, capacitor, neutralizer: warfare?.neutralizer, nosferatu: warfare?.nosferatu, id, name: enName };
+          fittingModules[id] = { ...(stats ?? {}), defense, capacitor, neutralizer: warfare?.neutralizer, nosferatu: warfare?.nosferatu, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID), groupID: type.groupID, id, name: enName };
           addItemName(itemNames, id, type);
         }
       }
@@ -1925,6 +1986,8 @@ async function main() {
   }
 
   assertTurretChargeCoverage(turrets, charges);
+
+  const needs = buildNeeds(typedogmas, { ...fittingModules, ...turrets, ...launchers, ...subsystems, ...commandBursts });
 
   const sortedDrones = Object.fromEntries(
     Object.entries(drones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
@@ -1942,7 +2005,7 @@ async function main() {
     `import type { ShipId, TypeId } from "../../ids";\n` +
     `import type {\n` +
     `  ChargeStats, CommandBurstStats, DisruptionScriptStats, DroneStats, FittingModuleStats, HullBonus, LauncherStats,\n` +
-    `  MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats,\n` +
+    `  MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, ModuleFittingNeeds,\n` +
     `  OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, RigDrawbackReduction,\n` +
     `  SensorBoosterScriptStats, SensorBoosterStats, SensorDampenerScriptStats, SensorDampenerStats,\n` +
     `  SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, SubsystemStats, TargetPainterStats,\n` +
@@ -1994,6 +2057,8 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     header,
     scriptDefinitions,
     `export const FITTING_MODULES: Readonly<Record<string, FittingModuleStats>> = ${stringifyWithTypeIds(fittingModules)};`,
+    ``,
+    `export const NEEDS: Readonly<Record<string, ModuleFittingNeeds>> = ${stringifyWithTypeIds(needs)};`,
     ``,
     `export const TURRETS: Readonly<Record<string, TurretStats>> = ${stringifyWithTypeIds(turrets)};`,
     ``,
