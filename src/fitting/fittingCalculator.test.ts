@@ -1,4 +1,4 @@
-import { _computeDroneControlRange, _applyRigDrawbackReduction, _resolveSensorStats } from "./fittingCalculator";
+import { _computeDroneControlRange, _resolveSensorStats } from "./fittingCalculator";
 import type { HullBonus, FittingModuleStats, RigDrawback, RigDrawbackReduction } from "../gamedata/fittingDb";
 import type { FittedModule } from "./fittingState";
 import { toTypeId, type TypeId, type ShipId, type FactionId, type HullTypeId } from "../gamedata/ids";
@@ -44,36 +44,6 @@ describe("_computeDroneControlRange", () => {
   });
 });
 
-describe("_applyRigDrawbackReduction", () => {
-  const shieldDrawback: RigDrawback = { kind: "signature", percent: 10, groupId: 774 };
-  const armorDrawback: RigDrawback = { kind: "agility", percent: 10, groupId: 773 };
-  const reductions: readonly RigDrawbackReduction[] = [
-    { skillId: toTypeId("26261"), groupId: 774, magnitudePerLevel: -10 },
-    { skillId: toTypeId("26253"), groupId: 773, magnitudePerLevel: -10 },
-  ];
-
-  test("no reduction at skill level 0", () => {
-    expect(_applyRigDrawbackReduction(shieldDrawback, reductions, 0)).toBe(10);
-  });
-
-  test("shield rigging 5 reduces signature drawback by 50%", () => {
-    expect(_applyRigDrawbackReduction(shieldDrawback, reductions, 5)).toBe(5);
-  });
-
-  test("armor rigging 5 reduces agility drawback by 50%", () => {
-    expect(_applyRigDrawbackReduction(armorDrawback, reductions, 5)).toBe(5);
-  });
-
-  test("no matching reduction returns original percent", () => {
-    const navDrawback: RigDrawback = { kind: "signature", percent: 10, groupId: 782 };
-    expect(_applyRigDrawbackReduction(navDrawback, reductions, 5)).toBe(10);
-  });
-
-  test("empty reductions returns original percent", () => {
-    expect(_applyRigDrawbackReduction(shieldDrawback, [], 5)).toBe(10);
-  });
-});
-
 function sensorProfile(overrides: { maxTargetingRange?: number } = {}): ShipProfile {
   return {
     id: "29984" as ShipId,
@@ -91,6 +61,8 @@ function sensorProfile(overrides: { maxTargetingRange?: number } = {}): ShipProf
     medSlots: 0,
     lowSlots: 0,
     rigSlots: 3,
+    powerGrid: 1000,
+    cpuOutput: 400,
     droneBandwidth: 0,
     droneCapacity: 0,
     maxActiveDrones: 0,

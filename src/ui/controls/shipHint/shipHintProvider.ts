@@ -69,6 +69,8 @@ export class ShipHintProviderImpl implements ShipHintProvider {
         { label: this.t("shipHint.medSlots"), value: String(profile.medSlots) },
         { label: this.t("shipHint.lowSlots"), value: String(profile.lowSlots) },
         { label: this.t("shipHint.rigSlots"), value: String(profile.rigSlots) },
+        { label: this.t("shipHint.powerGrid"), value: `${formatWithCommas(profile.powerGrid)} ${this.t("unit.megawatt")}` },
+        { label: this.t("shipHint.cpuOutput"), value: `${formatWithCommas(profile.cpuOutput)} ${this.t("unit.teraflop")}` },
       ],
     };
   }

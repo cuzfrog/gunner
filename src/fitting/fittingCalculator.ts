@@ -13,8 +13,6 @@ import {
   type OmnidirectionalTrackingEnhancerStats,
   type OmnidirectionalTrackingLinkStats,
   type PropulsionBonusAttribute,
-  type RigDrawback,
-  type RigDrawbackReduction,
   type SensorBoosterStats,
   type SensorDampenerStats,
   type SensorBoosterScriptStats,
@@ -46,7 +44,7 @@ import type { DroneSkillModel } from "./droneStats";
 import { sigResolutionClassFromChargeSize, toTrackingRadPerSecond } from "./turretStats";
 import type { FittingState, FittedModule } from "./fittingState";
 import type { ItemNameCatalog } from "../gamedata/itemNames";
-import { moduleSkillMultiplier } from "./skillMultiplier";
+import { moduleSkillMultiplier, applyRigDrawbackReduction } from "./skillMultiplier";
 import { type DamageBreakdown, type DamageFactor, chargeDamageByType, droneDamageByType, missileDamageByType } from "./damageBreakdown";
 
 export interface PropulsionResult extends PropulsionStats {
@@ -834,18 +832,6 @@ interface SubsystemDamageMultiplier {
   readonly sourceId: TypeId;
   readonly multiplier: number;
 }
-
-function applyRigDrawbackReduction(drawback: RigDrawback, reductions: readonly RigDrawbackReduction[], skillLevel: SkillLevel): number {
-  let reductionPercent = 0;
-  for (const r of reductions) {
-    if (r.groupId === drawback.groupId) {
-      reductionPercent += r.magnitudePerLevel * skillLevel;
-    }
-  }
-  return drawback.percent * (1 + reductionPercent / 100);
-}
-
-export { applyRigDrawbackReduction as _applyRigDrawbackReduction };
 
 // EVE: base droneControlDistance 20000 plus Drone Avionics 5000/level and Advanced Drone Avionics 3000/level; the uniform skill level trains both, hence 8000 per level.
 const DRONE_CONTROL_RANGE_BASE = 20000;

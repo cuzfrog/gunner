@@ -101,6 +101,8 @@ const profile: ShipProfile = {
   medSlots: 4,
   lowSlots: 3,
   rigSlots: 3,
+  powerGrid: 1000,
+  cpuOutput: 400,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -131,6 +133,8 @@ const frigateProfile: ShipProfile = {
   medSlots: 4,
   lowSlots: 3,
   rigSlots: 3,
+  powerGrid: 1000,
+  cpuOutput: 400,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -161,6 +165,8 @@ const bonusProfile: ShipProfile = {
   medSlots: 4,
   lowSlots: 3,
   rigSlots: 3,
+  powerGrid: 1000,
+  cpuOutput: 400,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -191,6 +197,8 @@ const roleBonusProfile: ShipProfile = {
   medSlots: 4,
   lowSlots: 3,
   rigSlots: 3,
+  powerGrid: 1000,
+  cpuOutput: 400,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -221,6 +229,8 @@ const abaddonProfile: ShipProfile = {
   medSlots: 4,
   lowSlots: 3,
   rigSlots: 3,
+  powerGrid: 1000,
+  cpuOutput: 400,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -251,6 +261,8 @@ const harbingerProfile: ShipProfile = {
   medSlots: 4,
   lowSlots: 3,
   rigSlots: 3,
+  powerGrid: 1000,
+  cpuOutput: 400,
   droneBandwidth: 75,
   droneCapacity: 75,
   maxActiveDrones: 5,
@@ -314,6 +326,8 @@ const kestrelProfile: ShipProfile = {
   medSlots: 4,
   lowSlots: 3,
   rigSlots: 3,
+  powerGrid: 1000,
+  cpuOutput: 400,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -344,6 +358,8 @@ const stilettoProfile: ShipProfile = {
   medSlots: 4,
   lowSlots: 3,
   rigSlots: 3,
+  powerGrid: 1000,
+  cpuOutput: 400,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
@@ -384,6 +400,7 @@ const ships = vi.mocked<Ships>({
 } as unknown as Ships);
 
 const db: FittingDb = {
+  needs: {},
   subsystemBonuses: {},
   subsystems: {},
   commandBursts: {},
@@ -525,6 +542,7 @@ const skillBonusDb: FittingDb = {
 };
 
 const fullFittingDb: FittingDb = {
+  needs: {},
   subsystemBonuses: SUBSYSTEM_BONUSES,
   subsystems: SUBSYSTEMS,
   modules: FITTING_MODULES,
@@ -2026,7 +2044,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, commandBursts: {}, subsystems: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES };
+  return { modules: {}, needs: {}, commandBursts: {}, subsystems: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {

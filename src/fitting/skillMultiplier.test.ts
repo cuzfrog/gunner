@@ -1,7 +1,7 @@
 import { toTypeId } from "../gamedata/ids";
-import type { SkillBonus } from "../gamedata/fittingDb";
+import type { RigDrawback, RigDrawbackReduction, SkillBonus } from "../gamedata/fittingDb";
 import { type SkillLevel } from "../ships";
-import { moduleSkillMultiplier } from "./skillMultiplier";
+import { applyRigDrawbackReduction, moduleSkillMultiplier } from "./skillMultiplier";
 
 const TURRET_MODULE_SKILLS = ["3300", "3306"].map((id) => toTypeId(id));
 
@@ -58,5 +58,35 @@ describe("moduleSkillMultiplier", () => {
     const bonuses = [bonus({ skillId: toTypeId("3450"), bonusType: "duration", magnitudePerLevel: -5, requiredSkillId: toTypeId("3450") })];
     expect(moduleSkillMultiplier(bonuses, ["3450"].map((id) => toTypeId(id)), "duration", 5 as SkillLevel)).toBe(0.75);
     expect(moduleSkillMultiplier(bonuses, TURRET_MODULE_SKILLS, "duration", 5 as SkillLevel)).toBe(1);
+  });
+});
+
+describe("applyRigDrawbackReduction", () => {
+  const shieldDrawback: RigDrawback = { kind: "signature", percent: 10, groupId: 774 };
+  const armorDrawback: RigDrawback = { kind: "agility", percent: 10, groupId: 773 };
+  const reductions: readonly RigDrawbackReduction[] = [
+    { skillId: toTypeId("26261"), groupId: 774, magnitudePerLevel: -10 },
+    { skillId: toTypeId("26253"), groupId: 773, magnitudePerLevel: -10 },
+  ];
+
+  test("no reduction at skill level 0", () => {
+    expect(applyRigDrawbackReduction(shieldDrawback, reductions, 0)).toBe(10);
+  });
+
+  test("shield rigging 5 reduces signature drawback by 50%", () => {
+    expect(applyRigDrawbackReduction(shieldDrawback, reductions, 5)).toBe(5);
+  });
+
+  test("armor rigging 5 reduces agility drawback by 50%", () => {
+    expect(applyRigDrawbackReduction(armorDrawback, reductions, 5)).toBe(5);
+  });
+
+  test("no matching reduction returns original percent", () => {
+    const navDrawback: RigDrawback = { kind: "signature", percent: 10, groupId: 782 };
+    expect(applyRigDrawbackReduction(navDrawback, reductions, 5)).toBe(10);
+  });
+
+  test("empty reductions returns original percent", () => {
+    expect(applyRigDrawbackReduction(shieldDrawback, [], 5)).toBe(10);
   });
 });

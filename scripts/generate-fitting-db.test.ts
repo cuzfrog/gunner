@@ -1269,7 +1269,7 @@ describe("_buildSubsystemBonuses", () => {
     expect(bonuses).toContainEqual({ attribute: "maxVelocity", magnitude: 5, scalesWithHullSkill: true, sourceId: toTypeId("45702") });
   });
 
-  test("maps flat ship-stat additions and skips out-of-scope percent bonuses without unmapped entries", () => {
+  test("maps output percents and flat ship-stat additions and skips out-of-scope percent bonuses without unmapped entries", () => {
     const names = attrNames({ 424: "cpuOutputBonus", 1441: "subsystemBonusCaldariCoreCapacitorCapacity", 340: "shieldCapacityBonus" });
     const attrs = [{ attributeID: 424, value: 30 }, { attributeID: 1441, value: 5 }, { attributeID: 340, value: 100 }];
     const typeDogma = subsystemDogma(attrs, [397, 4158, 3769]);
@@ -1281,7 +1281,10 @@ describe("_buildSubsystemBonuses", () => {
     const unmapped: UnmappedAttribute[] = [];
     const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45671, "Tengu Core - Dissolution Sequencer", unmapped);
     expect(unmapped.length).toBe(0);
-    expect(bonuses).toEqual([{ attribute: "shieldHpFlat", magnitude: 100, scalesWithHullSkill: false, sourceId: toTypeId("45671") }]);
+    expect(bonuses).toEqual([
+      { attribute: "cpuOutputPercent", magnitude: 30, scalesWithHullSkill: false, sourceId: toTypeId("45671") },
+      { attribute: "shieldHpFlat", magnitude: 100, scalesWithHullSkill: false, sourceId: toTypeId("45671") },
+    ]);
   });
 
   test("skips drone HP and propulsion module bonuses", () => {

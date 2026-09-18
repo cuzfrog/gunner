@@ -5,7 +5,7 @@ import { _computeDroneLimits } from "./validate-fittings";
 const PROFILE = { droneCapacity: 75, droneBandwidth: 75 };
 
 function subsystem(id: string, name: string): SubsystemStats {
-  return { id: toTypeId(id), name, slotKind: "offensive", highSlots: 0, medSlots: 0, lowSlots: 0, turretHardpoints: 0, launcherHardpoints: 0 };
+  return { id: toTypeId(id), name, slotKind: "offensive", highSlots: 0, medSlots: 0, lowSlots: 0, turretHardpoints: 0, launcherHardpoints: 0, requiredSkillIds: [] };
 }
 
 describe("_computeDroneLimits", () => {

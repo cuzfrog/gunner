@@ -59,7 +59,8 @@ describe("build", () => {
     const jsFiles = readdirSync(astroDir).filter((name) => name.endsWith(".js"));
     const totalJsSize = jsFiles.reduce((sum, name) => sum + statSync(join(astroDir, name)).size, 0);
     // Re-baselined at v0.39.0: ship bonus texts (~200 KB) now ship inside the profile data.
-    const baseline = 4_123_301;
+    // Re-baselined for the fitting-resources needs table and ship profile powergrid/CPU fields.
+    const baseline = 4_127_579;
     const limit = Math.ceil(baseline * 1.05);
     expect(totalJsSize).toBeLessThanOrEqual(limit);
   });

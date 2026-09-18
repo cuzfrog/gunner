@@ -123,3 +123,19 @@
   font-size: 12px;
   margin-left: 4px;
 }
+
+.preview-resource {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.preview-resource-label { color: var(--text-dim); }
+
+.preview-resource-value {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.preview-resource.is-over .preview-resource-value { color: var(--danger-red); }

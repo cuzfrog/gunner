@@ -19,6 +19,8 @@ const profile: ShipProfile = {
   medSlots: 4,
   lowSlots: 3,
   rigSlots: 3,
+  powerGrid: 1000,
+  cpuOutput: 400,
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,

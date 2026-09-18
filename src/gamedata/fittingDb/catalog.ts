@@ -47,6 +47,7 @@ import {
   MISSILE_GUIDANCE_COMPUTERS,
   MISSILE_GUIDANCE_ENHANCERS,
   MISSILE_SCRIPTS,
+  NEEDS,
   OMNIDIRECTIONAL_TRACKING_ENHANCERS,
   OMNIDIRECTIONAL_TRACKING_LINKS,
   RIG_DRAWBACK_REDUCTIONS,
@@ -106,6 +107,7 @@ export type { FittingDbData, FittingDb } from "./types";
 
 export const FITTING_DB: FittingDbData = {
   modules: FITTING_MODULES,
+  needs: NEEDS,
   turrets: TURRETS,
   charges: CHARGES,
   launchers: LAUNCHERS,

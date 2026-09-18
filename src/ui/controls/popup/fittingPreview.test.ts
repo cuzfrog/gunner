@@ -458,4 +458,45 @@ describe("DomFittingPreview", () => {
     preview.show(anchor as unknown as HTMLElement, SUMMARY);
     expect(findCapacitorSection(container)).toBeUndefined();
   });
+
+  function findResourcesSection(container: FakeElement): FakeElement | undefined {
+    return container.children.find((child) => child.children[0]?.textContent === "fitting.preview.resources");
+  }
+
+  test("renders the resources section with powergrid and cpu usage vs output", () => {
+    const { container, anchor, preview } = buildPreview();
+    const summary: FittingSummary = {
+      ...SUMMARY,
+      resources: { powerGrid: { used: 1042.4, output: 1100.25 }, cpu: { used: 412, output: 419 } },
+    };
+    preview.show(anchor as unknown as HTMLElement, summary);
+    const section = findResourcesSection(container);
+    expect(section).toBeDefined();
+    const rows = [section!.children[1], section!.children[2]];
+    expect(section!.children.length).toBe(3);
+    expect(rows[0].children[0].textContent).toBe("fitting.preview.powerGrid");
+    expect(rows[0].children[1].textContent).toBe("1,042 / 1,100 MW");
+    expect(rows[1].children[0].textContent).toBe("fitting.preview.cpu");
+    expect(rows[1].children[1].textContent).toBe("412 / 419 tf");
+    expect(rows[0].className.includes("is-over")).toBe(false);
+    expect(rows[1].className.includes("is-over")).toBe(false);
+  });
+
+  test("marks resource rows over budget with the is-over state class", () => {
+    const { container, anchor, preview } = buildPreview();
+    const summary: FittingSummary = {
+      ...SUMMARY,
+      resources: { powerGrid: { used: 1200, output: 1100 }, cpu: { used: 419, output: 419 } },
+    };
+    preview.show(anchor as unknown as HTMLElement, summary);
+    const rows = [findResourcesSection(container)!.children[1], findResourcesSection(container)!.children[2]];
+    expect(rows[0].className.includes("is-over")).toBe(true);
+    expect(rows[1].className.includes("is-over")).toBe(false);
+  });
+
+  test("omits the resources section when the summary has no resources", () => {
+    const { container, anchor, preview } = buildPreview();
+    preview.show(anchor as unknown as HTMLElement, SUMMARY);
+    expect(findResourcesSection(container)).toBeUndefined();
+  });
 });

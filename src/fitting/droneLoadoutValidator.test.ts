@@ -45,6 +45,8 @@ function makeProfile(overrides: { droneBandwidth?: number; droneCapacity?: numbe
     medSlots: 4,
     lowSlots: 4,
     rigSlots: 3,
+    powerGrid: 1000,
+    cpuOutput: 400,
     droneBandwidth: overrides.droneBandwidth ?? 75,
     droneCapacity: overrides.droneCapacity ?? 75,
     maxActiveDrones: overrides.maxActiveDrones ?? 5,

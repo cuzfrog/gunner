@@ -24,6 +24,8 @@ function makeProfile(): ShipProfile {
     medSlots: 4,
     lowSlots: 4,
     rigSlots: 3,
+    powerGrid: 1000,
+    cpuOutput: 400,
     droneBandwidth: 75,
     droneCapacity: 75,
     maxActiveDrones: 5,
