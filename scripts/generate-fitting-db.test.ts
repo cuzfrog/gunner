@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { toTypeId, type TypeId } from "../src/gamedata/ids";
-import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses, _buildSubsystemBonuses, _buildSkillBonuses, _buildDroneSkillIds } from "./generate-fitting-db";
+import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _assertCombatDroneSkillChain, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses, _buildSubsystemBonuses, _buildSkillBonuses, _buildDroneSkillIds } from "./generate-fitting-db";
 import type { SdeGroup } from "./fittingDb/dogmaTypes";
 import type { UnmappedAttribute } from "./generate-fitting-db";
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./fittingDb/dogmaTypes";
@@ -1352,6 +1352,20 @@ describe("_buildDroneSkillIds", () => {
   test("throws when multiple skill groups are named Drones", () => {
     const groups = { "273": skillGroup(273, "Drones", 16), "274": skillGroup(274, "Drones", 16) };
     expect(() => _buildDroneSkillIds({}, groups)).toThrow();
+  });
+});
+
+describe("_assertCombatDroneSkillChain", () => {
+  test("accepts a chain containing the Drones skill", () => {
+    expect(() => _assertCombatDroneSkillChain("Acolyte II", droneSkills(3436, 12484, 24241))).not.toThrow();
+  });
+
+  test("throws on an empty chain", () => {
+    expect(() => _assertCombatDroneSkillChain("Acolyte II", [])).toThrow(/no required-skill chain/);
+  });
+
+  test("throws when the chain lacks the Drones skill (interfacing filter would silently miss)", () => {
+    expect(() => _assertCombatDroneSkillChain("Acolyte II", droneSkills(24241))).toThrow(/Drones skill/);
   });
 });
 

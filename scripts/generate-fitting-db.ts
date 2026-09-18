@@ -1581,6 +1581,15 @@ export function buildDroneStats(values: Map<string, number>, type: SdeType, requ
   };
 }
 
+// A combat drone without a required-skill chain would silently receive no drone skill bonuses at
+// runtime (the chain drives every skill multiplier), and a chain missing the Drones skill would
+// silently drop interfacing/sharpshooting/navigation bonuses, which are filtered by that skill.
+// Both reproduce the understated-damage bug class, so fail the generation instead.
+function assertCombatDroneSkillChain(name: string, requiredSkillIds: readonly TypeId[]): void {
+  if (requiredSkillIds.length === 0) throw new Error(`Combat drone ${name} has no required-skill chain in the SDE; drone skill bonuses would silently not apply`);
+  if (!requiredSkillIds.includes(String(DRONES_SKILL_FILTER_ID) as TypeId)) throw new Error(`Combat drone ${name} does not require the Drones skill (${DRONES_SKILL_FILTER_ID}); verify the SDE requiredskillsfortypes data`);
+}
+
 // Every drone-piloting skill lives in the "Drones" skill group (category 16). Ship and charge
 // modifiers filtered by a skill of this group target drones/fighters, so classification must
 // check membership instead of a hand-maintained skill list that drifts out of date.
@@ -1850,8 +1859,12 @@ async function main() {
     if (groups[String(type.groupID)]?.categoryID === DRONE_CATEGORY_ID) {
       drones[id] = { id, name: enName };
       if (type.groupID === COMBAT_DRONE_GROUP) {
-        const stats = buildDroneStats(values, type, buildRequiredSkillIds(requiredSkills, type.typeID));
-        if (stats) combatDrones[id] = { ...stats, id, name: enName };
+        const requiredSkillIds = buildRequiredSkillIds(requiredSkills, type.typeID);
+        const stats = buildDroneStats(values, type, requiredSkillIds);
+        if (stats) {
+          assertCombatDroneSkillChain(enName ?? String(type.typeID), requiredSkillIds);
+          combatDrones[id] = { ...stats, id, name: enName };
+        }
       }
       addItemName(itemNames, id, type);
       continue;
@@ -2495,7 +2508,7 @@ async function writeI18nFiles(
   await writeFile(collisionJaFile, collisionJaContent);
 }
 
-export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses, buildSubsystemBonuses as _buildSubsystemBonuses, buildPropulsionStats as _buildPropulsionStats, buildSkillBonuses as _buildSkillBonuses, buildDroneSkillIds as _buildDroneSkillIds };
+export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses, buildSubsystemBonuses as _buildSubsystemBonuses, buildPropulsionStats as _buildPropulsionStats, buildSkillBonuses as _buildSkillBonuses, buildDroneSkillIds as _buildDroneSkillIds, assertCombatDroneSkillChain as _assertCombatDroneSkillChain };
 
 if (import.meta.main) {
   main().catch((error) => {
