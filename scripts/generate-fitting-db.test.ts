@@ -1,8 +1,9 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { toTypeId } from "../src/gamedata/ids";
-import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses, _buildSubsystemBonuses } from "./generate-fitting-db";
+import { toTypeId, type TypeId } from "../src/gamedata/ids";
+import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses, _buildSubsystemBonuses, _buildSkillBonuses, _buildDroneSkillIds } from "./generate-fitting-db";
+import type { SdeGroup } from "./fittingDb/dogmaTypes";
 import type { UnmappedAttribute } from "./generate-fitting-db";
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./fittingDb/dogmaTypes";
 
@@ -59,6 +60,11 @@ function sdeType(metaLevel = 0, metaGroupID = 1, volume?: number): { typeID: num
 }
 
 const WEB_SKILLS = ["3435"].map((id) => toTypeId(id));
+// Skill typeIDs of the "Drones" skill group (category 16), as derived by buildDroneSkillIds.
+const DRONE_SKILL_IDS = new Set([3436, 3442, 12305, 12484, 23594, 23606, 24241, 33699, 3441, 23069].map(Number));
+function droneSkills(...ids: number[]): readonly TypeId[] {
+  return ids.map((id) => toTypeId(String(id)));
+}
 const TURRET_MODULE_SKILLS = ["3300", "3306"].map((id) => toTypeId(id));
 
 describe("buildStasisWebStats", () => {
@@ -558,14 +564,14 @@ describe("buildMissileStats", () => {
 
 describe("buildDroneStats", () => {
   test("returns undefined when damageMultiplier is missing", () => {
-    expect(buildDroneStats(values({ trackingSpeed: 2, optimalSigRadius: 25, maxRange: 2100, speed: 4000 }), sdeType())).toBeUndefined();
+    expect(buildDroneStats(values({ trackingSpeed: 2, optimalSigRadius: 25, maxRange: 2100, speed: 4000 }), sdeType(), [])).toBeUndefined();
   });
 
   test("returns undefined when all damage attributes are zero", () => {
     expect(buildDroneStats(values({
       damageMultiplier: 1.92, trackingSpeed: 2.178, optimalSigRadius: 25, maxRange: 2100, speed: 4000,
       emDamage: 0, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 0,
-    }), sdeType())).toBeUndefined();
+    }), sdeType(), [])).toBeUndefined();
   });
 
   test("builds a light combat drone (Hobgoblin II) with both speed fields", () => {
@@ -573,14 +579,14 @@ describe("buildDroneStats", () => {
       damageMultiplier: 1.92, trackingSpeed: 2.178, optimalSigRadius: 25, maxRange: 2100, speed: 4000,
       emDamage: 0, thermalDamage: 20, kineticDamage: 0, explosiveDamage: 0,
       falloff: 2000, maxVelocity: 3360, entityCruiseSpeed: 660, entityFlyRange: 1000, droneBandwidthUsed: 5,
-    }), sdeType(5, 2, 5));
+    }), sdeType(5, 2, 5), droneSkills(3436, 24241));
     expect(stats).toEqual({
       sizeClass: "light",
       damageMultiplier: 1.92,
       emDamage: 0, thermalDamage: 20, kineticDamage: 0, explosiveDamage: 0,
       tracking: 2.178, sigResolution: 25, optimal: 2100, falloff: 2000,
       maxVelocity: 3360, orbitSpeed: 660, orbitRange: 1000, cycleTime: 4, bandwidth: 5, volume: 5,
-      metaLevel: 5, metaGroupID: 2,
+      metaLevel: 5, metaGroupID: 2, requiredSkillIds: droneSkills(3436, 24241),
     });
   });
 
@@ -589,7 +595,7 @@ describe("buildDroneStats", () => {
       damageMultiplier: 1.65, trackingSpeed: 0.0336, optimalSigRadius: 400, maxRange: 18000, speed: 4000,
       emDamage: 0, thermalDamage: 64, kineticDamage: 0, explosiveDamage: 0,
       falloff: 30000, maxVelocity: 0.00001, entityCruiseSpeed: 0, droneBandwidthUsed: 25,
-    }), sdeType(5, 2, 25));
+    }), sdeType(5, 2, 25), droneSkills(3436, 23594));
     expect(stats?.sizeClass).toBe("sentry");
     expect(stats?.maxVelocity).toBe(0.00001);
     expect(stats?.orbitSpeed).toBe(0);
@@ -599,7 +605,7 @@ describe("buildDroneStats", () => {
     const stats = buildDroneStats(values({
       damageMultiplier: 1.92, trackingSpeed: 1.2, optimalSigRadius: 50, maxRange: 3000, speed: 4000,
       thermalDamage: 24, maxVelocity: 1500, entityCruiseSpeed: 500, droneBandwidthUsed: 10,
-    }), sdeType());
+    }), sdeType(), droneSkills(3436, 24241));
     expect(stats?.sizeClass).toBe("medium");
   });
 
@@ -607,7 +613,7 @@ describe("buildDroneStats", () => {
     const stats = buildDroneStats(values({
       damageMultiplier: 1.92, trackingSpeed: 0.6, optimalSigRadius: 100, maxRange: 4000, speed: 4000,
       thermalDamage: 48, maxVelocity: 1000, entityCruiseSpeed: 400, droneBandwidthUsed: 25,
-    }), sdeType());
+    }), sdeType(), droneSkills(3436, 24241));
     expect(stats?.sizeClass).toBe("heavy");
   });
 
@@ -615,7 +621,7 @@ describe("buildDroneStats", () => {
     const stats = buildDroneStats(values({
       damageMultiplier: 1.92, trackingSpeed: 2.178, optimalSigRadius: 25, maxRange: 2100, speed: 4000,
       thermalDamage: 20, droneBandwidthUsed: 5,
-    }), sdeType());
+    }), sdeType(), droneSkills(3436, 24241));
     expect(stats?.volume).toBe(5);
   });
 });
@@ -1100,54 +1106,54 @@ describe("_resolveHullBonusAttribute", () => {
   }
 
   test("returns mapped for a known combat attribute (turretDamage)", () => {
-    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 4, skillTypeID: 3302 }, attrNames({ 64: "damageMultiplier" }));
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 64, modifyingAttributeID: 204, operation: 4, skillTypeID: 3302 }, attrNames({ 64: "damageMultiplier" }), DRONE_SKILL_IDS);
     expect(result.kind).toBe("mapped");
     if (result.kind === "mapped") expect(result.attribute).toBe("turretDamage");
   });
 
   test("returns skip for target painter signatureRadiusBonus (attribute 554 with painter skill)", () => {
-    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 554, modifyingAttributeID: 568, operation: 4, skillTypeID: 19921 }, attrNames({ 554: "signatureRadiusBonus" }));
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 554, modifyingAttributeID: 568, operation: 4, skillTypeID: 19921 }, attrNames({ 554: "signatureRadiusBonus" }), DRONE_SKILL_IDS);
     expect(result.kind).toBe("skip");
   });
 
   test("returns skip for out-of-scope attribute (cargo capacity, attribute 38)", () => {
-    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 38, modifyingAttributeID: 38, operation: 4 }, attrNames({ 38: "capacity" }));
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 38, modifyingAttributeID: 38, operation: 4 }, attrNames({ 38: "capacity" }), DRONE_SKILL_IDS);
     expect(result.kind).toBe("skip");
   });
 
   test("returns unmapped for an unknown attribute not in COMBAT_ATTRIBUTE_MAP or OUT_OF_SCOPE", () => {
-    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 99999, modifyingAttributeID: 99999, operation: 4 }, attrNames({ 99999: "unknownNewAttr" }));
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 99999, modifyingAttributeID: 99999, operation: 4 }, attrNames({ 99999: "unknownNewAttr" }), DRONE_SKILL_IDS);
     expect(result.kind).toBe("unmapped");
     if (result.kind === "unmapped") expect(result.attributeId).toBe(99999);
   });
 
   test("returns mapped for mwdSigBloom when not from target painter context", () => {
-    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 554, modifyingAttributeID: 568, operation: 4, skillTypeID: 3454 }, attrNames({ 554: "signatureRadiusBonus" }));
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 554, modifyingAttributeID: 568, operation: 4, skillTypeID: 3454 }, attrNames({ 554: "signatureRadiusBonus" }), DRONE_SKILL_IDS);
     expect(result.kind).toBe("mapped");
     if (result.kind === "mapped") expect(result.attribute).toBe("mwdSigBloom");
   });
 
   test("returns mapped capUse for a turret skill filter (Harbinger energy turret capacitor bonus)", () => {
-    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 6, modifyingAttributeID: 795, operation: 6, skillTypeID: 3306 }, attrNames({ 6: "capacitorNeed" }));
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 6, modifyingAttributeID: 795, operation: 6, skillTypeID: 3306 }, attrNames({ 6: "capacitorNeed" }), DRONE_SKILL_IDS);
     expect(result.kind).toBe("mapped");
     if (result.kind === "mapped") expect(result.attribute).toBe("capUse");
   });
 
   test("returns mapped capUse for a turret module group filter", () => {
-    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationGroupModifier", modifiedAttributeID: 6, modifyingAttributeID: 795, operation: 6, groupID: 53 }, attrNames({ 6: "capacitorNeed" }));
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationGroupModifier", modifiedAttributeID: 6, modifyingAttributeID: 795, operation: 6, groupID: 53 }, attrNames({ 6: "capacitorNeed" }), DRONE_SKILL_IDS);
     expect(result.kind).toBe("mapped");
     if (result.kind === "mapped") expect(result.attribute).toBe("capUse");
   });
 
   test("returns skip capUse for non-turret skills and unfiltered modifiers", () => {
-    const skillResult = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 6, modifyingAttributeID: 795, operation: 6, skillTypeID: 3435 }, attrNames({ 6: "capacitorNeed" }));
+    const skillResult = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 6, modifyingAttributeID: 795, operation: 6, skillTypeID: 3435 }, attrNames({ 6: "capacitorNeed" }), DRONE_SKILL_IDS);
     expect(skillResult.kind).toBe("skip");
-    const unfilteredResult = _resolveHullBonusAttribute({ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 6, modifyingAttributeID: 795, operation: 6 }, attrNames({ 6: "capacitorNeed" }));
+    const unfilteredResult = _resolveHullBonusAttribute({ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 6, modifyingAttributeID: 795, operation: 6 }, attrNames({ 6: "capacitorNeed" }), DRONE_SKILL_IDS);
     expect(unfilteredResult.kind).toBe("skip");
   });
 
   test("returns skip duration (module cycle duration is not a hull bonus)", () => {
-    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 73, modifyingAttributeID: 66, operation: 6, skillTypeID: 3450 }, attrNames({ 73: "duration" }));
+    const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 73, modifyingAttributeID: 66, operation: 6, skillTypeID: 3450 }, attrNames({ 73: "duration" }), DRONE_SKILL_IDS);
     expect(result.kind).toBe("skip");
   });
 });
@@ -1170,7 +1176,7 @@ describe("_buildHullBonuses audit", () => {
       { domain: "shipID", func: "ItemModifier", modifiedAttributeID: 99999, modifyingAttributeID: 99999, operation: 4 },
     ])]);
     const unmapped: UnmappedAttribute[] = [];
-    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 12345, "TestShip", unmapped);
+    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 12345, "TestShip", unmapped, DRONE_SKILL_IDS);
     expect(bonuses.length).toBe(1);
     expect(bonuses[0].attribute).toBe("turretTracking");
     expect(unmapped.length).toBe(1);
@@ -1184,7 +1190,7 @@ describe("_buildHullBonuses audit", () => {
     const typeDogma: SdeTypeDogma = { dogmaAttributes: [{ attributeID: 38, value: 100 }], dogmaEffects: [{ effectID: 9998 }] };
     const effects = dogmaEffectsMap([combatEffect(9998, 4, [{ domain: "shipID", func: "ItemModifier", modifiedAttributeID: 38, modifyingAttributeID: 38, operation: 4 }])]);
     const unmapped: UnmappedAttribute[] = [];
-    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 12345, "TestShip", unmapped);
+    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 12345, "TestShip", unmapped, DRONE_SKILL_IDS);
     expect(bonuses.length).toBe(0);
     expect(unmapped.length).toBe(0);
   });
@@ -1199,7 +1205,7 @@ describe("_buildHullBonuses audit", () => {
       combatEffect(9002, 4, [ownerSkillMod(64, 462, 6, 3436)]),
     ]);
     const unmapped: UnmappedAttribute[] = [];
-    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 593, "Tristan", unmapped);
+    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 593, "Tristan", unmapped, DRONE_SKILL_IDS);
     expect(unmapped.length).toBe(0);
     expect(bonuses).toEqual([{ attribute: "droneDamage", magnitude: 10, scalesWithHullSkill: false, chargeSkillId: toTypeId("3436") }]);
   });
@@ -1213,7 +1219,7 @@ describe("_buildHullBonuses audit", () => {
       skillMod(64, 1510, 6, 3302),
     ])]);
     const unmapped: UnmappedAttribute[] = [];
-    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 12345, "TestShip", unmapped);
+    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 12345, "TestShip", unmapped, DRONE_SKILL_IDS);
     expect(unmapped.length).toBe(0);
     expect(bonuses).toContainEqual({ attribute: "missileDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3321"), damageType: "kinetic" });
     expect(bonuses).toContainEqual({ attribute: "turretDamage", magnitude: 5, scalesWithHullSkill: true, moduleSkillId: toTypeId("3302") });
@@ -1243,7 +1249,7 @@ describe("_buildSubsystemBonuses", () => {
       combatEffect(4331, 4, [ownerSkillMod(37, 1533, 6, 3324), ownerSkillMod(37, 1533, 6, 25719)]),
     ]);
     const unmapped: UnmappedAttribute[] = [];
-    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45601, "Tengu Offensive - Accelerated Ejection Bay", unmapped);
+    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45601, "Tengu Offensive - Accelerated Ejection Bay", unmapped, DRONE_SKILL_IDS);
     expect(unmapped.length).toBe(0);
     expect(bonuses).toContainEqual({ attribute: "missileDamage", magnitude: -7.5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3321"), damageType: "kinetic", sourceId: toTypeId("45601") });
     expect(bonuses).toContainEqual({ attribute: "missileRoF", magnitude: -7.5, scalesWithHullSkill: true, moduleGroupId: 511, sourceId: toTypeId("45601") });
@@ -1261,7 +1267,7 @@ describe("_buildSubsystemBonuses", () => {
       combatEffect(3859, 4, [itemMod(37, 1445, 6)]),
     ]);
     const unmapped: UnmappedAttribute[] = [];
-    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45702, "Proteus Offensive - Drone Synthesis Projector", unmapped);
+    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45702, "Proteus Offensive - Drone Synthesis Projector", unmapped, DRONE_SKILL_IDS);
     expect(unmapped.length).toBe(0);
     expect(bonuses).toContainEqual({ attribute: "turretOptimal", magnitude: 7.5, scalesWithHullSkill: true, moduleSkillId: toTypeId("3304"), sourceId: toTypeId("45702") });
     expect(bonuses).toContainEqual({ attribute: "droneDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("3436"), sourceId: toTypeId("45702") });
@@ -1279,7 +1285,7 @@ describe("_buildSubsystemBonuses", () => {
       combatEffect(3769, 4, [itemMod(263, 340, 2)]),
     ]);
     const unmapped: UnmappedAttribute[] = [];
-    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45671, "Tengu Core - Dissolution Sequencer", unmapped);
+    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45671, "Tengu Core - Dissolution Sequencer", unmapped, DRONE_SKILL_IDS);
     expect(unmapped.length).toBe(0);
     expect(bonuses).toEqual([
       { attribute: "cpuOutputPercent", magnitude: 30, scalesWithHullSkill: false, sourceId: toTypeId("45671") },
@@ -1296,7 +1302,7 @@ describe("_buildSubsystemBonuses", () => {
       combatEffect(3861, 4, [skillMod(20, 1446, 6, 3450)]),
     ]);
     const unmapped: UnmappedAttribute[] = [];
-    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45691, "Legion Offensive - Drone Synthesis Projector", unmapped);
+    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45691, "Legion Offensive - Drone Synthesis Projector", unmapped, DRONE_SKILL_IDS);
     expect(bonuses.length).toBe(0);
     expect(unmapped.length).toBe(0);
   });
@@ -1307,7 +1313,7 @@ describe("_buildSubsystemBonuses", () => {
     const typeDogma = subsystemDogma(attrs, [3999]);
     const effects = dogmaEffectsMap([combatEffect(3999, 4, [itemMod(263, 424, 6)])]);
     const unmapped: UnmappedAttribute[] = [];
-    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45671, "Tengu Core - Test Subsystem", unmapped);
+    const bonuses = _buildSubsystemBonuses(names, typeDogma, effects, 45671, "Tengu Core - Test Subsystem", unmapped, DRONE_SKILL_IDS);
     expect(bonuses.length).toBe(0);
     expect(unmapped.length).toBe(0);
   });
@@ -1318,9 +1324,92 @@ describe("_buildSubsystemBonuses", () => {
     const typeDogma = subsystemDogma(attrs, [9500]);
     const effects = dogmaEffectsMap([combatEffect(9500, 4, [itemMod(99999, 99999, 6)])]);
     const unmapped: UnmappedAttribute[] = [];
-    _buildSubsystemBonuses(names, typeDogma, effects, 45671, "Tengu Core - Test Subsystem", unmapped);
+    _buildSubsystemBonuses(names, typeDogma, effects, 45671, "Tengu Core - Test Subsystem", unmapped, DRONE_SKILL_IDS);
     expect(unmapped.length).toBe(1);
     expect(unmapped[0].attributeId).toBe(99999);
     expect(unmapped[0].shipTypeId).toBe(45671);
+  });
+});
+
+describe("_buildDroneSkillIds", () => {
+  function skillGroup(id: number, name: string, categoryID: number): SdeGroup {
+    return { groupID: id, categoryID, "groupName_en-us": name };
+  }
+
+  test("derives the drone skill set from the Drones skill group", () => {
+    const groups = { "273": skillGroup(273, "Drones", 16), "255": skillGroup(255, "Gunnery", 16) };
+    const types = { "3436": { typeID: 3436, "typeName_en-us": "Drones", groupID: 273, published: 1 }, "3300": { typeID: 3300, "typeName_en-us": "Gunnery", groupID: 255, published: 1 } };
+    const ids = _buildDroneSkillIds(types, groups);
+    expect(ids.has(3436)).toBe(true);
+    expect(ids.has(3300)).toBe(false);
+  });
+
+  test("throws when the Drones skill group is missing", () => {
+    const groups = { "255": skillGroup(255, "Gunnery", 16) };
+    expect(() => _buildDroneSkillIds({}, groups)).toThrow();
+  });
+
+  test("throws when multiple skill groups are named Drones", () => {
+    const groups = { "273": skillGroup(273, "Drones", 16), "274": skillGroup(274, "Drones", 16) };
+    expect(() => _buildDroneSkillIds({}, groups)).toThrow();
+  });
+});
+
+describe("_buildSkillBonuses drone skills", () => {
+  const groups = {
+    "273": { groupID: 273, categoryID: 16, "groupName_en-us": "Drones" },
+    "255": { groupID: 255, categoryID: 16, "groupName_en-us": "Gunnery" },
+  };
+  const attributeNames = new Map<number, string>([[292, "damageMultiplierBonus"], [294, "rangeSkillBonus"], [2603, "maxVelocityBonus"]]);
+
+  function skillType(id: number, groupID: number): Record<string, { typeID: number; "typeName_en-us": string; groupID: number; published: number }> {
+    return { [String(id)]: { typeID: id, "typeName_en-us": `Skill ${id}`, groupID, published: 1 } };
+  }
+
+  function skillDogma(id: number, attrs: readonly { attributeID: number; value: number }[], effectIds: readonly number[]): Record<string, SdeTypeDogma> {
+    return { [String(id)]: { dogmaAttributes: attrs, dogmaEffects: effectIds.map((effectID) => ({ effectID })) } };
+  }
+
+  function dogmaEffect(eid: number, modifiers: readonly SdeDogmaEffectModifier[]): SdeDogmaEffect {
+    return { effectID: eid, effectName: "", effectCategory: 0, modifierInfo: modifiers };
+  }
+
+  test("emits drone damage, optimal and velocity bonuses from legacy effects with chain filters", () => {
+    const types = { ...skillType(3442, 273), ...skillType(24241, 273), ...skillType(12484, 273), ...skillType(23606, 273), ...skillType(12305, 273) };
+    const typedogmas = {
+      ...skillDogma(3442, [{ attributeID: 292, value: 10 }], [6663]),
+      ...skillDogma(24241, [{ attributeID: 292, value: 5 }], [1730]),
+      ...skillDogma(12484, [{ attributeID: 292, value: 2 }], [1730]),
+      ...skillDogma(23606, [{ attributeID: 294, value: 5 }], [6664]),
+      ...skillDogma(12305, [{ attributeID: 2603, value: 5 }], [6667]),
+    };
+    const dogmaEffects = {
+      "1730": dogmaEffect(1730, []),
+      "6663": dogmaEffect(6663, [ownerSkillMod(64, 292, 6, 3436)]),
+      "6664": dogmaEffect(6664, [ownerSkillMod(54, 294, 6, 3436)]),
+      "6667": dogmaEffect(6667, [ownerSkillMod(37, 2603, 6, 3436)]),
+    };
+    const bonuses = _buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, DRONE_SKILL_IDS, []);
+    expect(bonuses).toEqual([
+      { skillId: toTypeId("3442"), bonusType: "droneDamage", magnitudePerLevel: 10, requiredSkillId: toTypeId("3436"), appliesTo: "charge" },
+      { skillId: toTypeId("12305"), bonusType: "droneVelocity", magnitudePerLevel: 5, requiredSkillId: toTypeId("3436"), appliesTo: "charge" },
+      { skillId: toTypeId("12484"), bonusType: "droneDamage", magnitudePerLevel: 2, requiredSkillId: toTypeId("12484"), appliesTo: "charge" },
+      { skillId: toTypeId("23606"), bonusType: "droneOptimal", magnitudePerLevel: 5, requiredSkillId: toTypeId("3436"), appliesTo: "charge" },
+      { skillId: toTypeId("24241"), bonusType: "droneDamage", magnitudePerLevel: 5, requiredSkillId: toTypeId("24241"), appliesTo: "charge" },
+    ]);
+  });
+
+  test("does not treat non-drone legacy effects as drone bonuses", () => {
+    const types = skillType(3306, 255);
+    const typedogmas = skillDogma(3306, [{ attributeID: 292, value: 5 }], [1730]);
+    const dogmaEffects = { "1730": dogmaEffect(1730, []) };
+    expect(() => _buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, DRONE_SKILL_IDS, [])).toThrow(/not in the "Drones" skill group/);
+  });
+
+  test("throws when a drone skill lacks the magnitude attribute", () => {
+    const types = skillType(24241, 273);
+    const typedogmas = skillDogma(24241, [], [1730]);
+    const dogmaEffects = { "1730": dogmaEffect(1730, []) };
+    expect(() => _buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, DRONE_SKILL_IDS, [])).toThrow(/without attribute 292/);
   });
 });

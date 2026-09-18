@@ -60,7 +60,8 @@ describe("build", () => {
     const totalJsSize = jsFiles.reduce((sum, name) => sum + statSync(join(astroDir, name)).size, 0);
     // Re-baselined at v0.39.0: ship bonus texts (~200 KB) now ship inside the profile data.
     // Re-baselined for the fitting-resources needs table and ship profile powergrid/CPU fields.
-    const baseline = 4_127_579;
+    // Re-baselined for drone skill bonuses (specialization skills) and drone required-skill chains.
+    const baseline = 4_337_992;
     const limit = Math.ceil(baseline * 1.05);
     expect(totalJsSize).toBeLessThanOrEqual(limit);
   });

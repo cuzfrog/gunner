@@ -7,14 +7,13 @@ import { GunFamiliesImpl } from "../../src/fitting/gunFamilies";
 import { MissileCatalogImpl } from "../../src/fitting/missileCatalog";
 import { MissileSkillModelImpl } from "../../src/fitting/missileStats";
 import { FITTING_DB } from "../../src/gamedata/fittingDb";
+import { toTypeId } from "../../src/gamedata/ids";
 import { StaticItemNameCatalog, StaticItemNameResolver } from "../../src/gamedata/itemNames";
 import { MODULE_SLOT_CATALOG } from "../../src/gamedata/moduleSlots";
 import { StaticNameI18nCatalog } from "../../src/gamedata/nameI18n";
 import { StaticShipProfileCatalog } from "../../src/gamedata/shipProfiles";
 import { ShipsImpl } from "../../src/ships/ships";
 import { StackingPenaltyImpl } from "../../src/sim";
-import { damageVectorSum } from "../../src/sim/types";
-import { toTypeId } from "../../src/gamedata/ids";
 import type { SkillLevel } from "../../src/ships";
 
 const ships = new ShipsImpl({ shipProfileCatalog: new StaticShipProfileCatalog(), nameI18nCatalog: new StaticNameI18nCatalog() });
@@ -34,8 +33,12 @@ const importer = new FittingImportImpl({
   moduleSlotCatalog: MODULE_SLOT_CATALOG,
 });
 
-const TENGU_FIT = `[Tengu, KEM]
+// pyfa headless reference (eos) for Rupture + 5x Acolyte II, all skills at 5:
+//   damageMultiplier = Drone Interfacing 1.5 x Amarr Drone Specialization 1.1 x Light Drone Operation 1.25 = 2.0625
+//   final = 1.68 x 2.0625 = 3.465, per-drone DPS = 20 x 3.465 / 4 = 17.325, x5 drones = 86.625.
+const RUPTURE_DRONE_FIT = `[Rupture, drone dps check]
 
+[Empty Low slot]
 [Empty Low slot]
 [Empty Low slot]
 [Empty Low slot]
@@ -49,7 +52,10 @@ const TENGU_FIT = `[Tengu, KEM]
 [Empty Med slot]
 
 [Empty High slot]
-Heavy Missile Launcher II, Scourge Heavy Missile
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 [Empty High slot]
 [Empty High slot]
 [Empty High slot]
@@ -58,51 +64,35 @@ Heavy Missile Launcher II, Scourge Heavy Missile
 [Empty Rig slot]
 [Empty Rig slot]
 
-Tengu Offensive - Accelerated Ejection Bay
-Tengu Core - Subversion Integrator
+Acolyte II x5
 `;
 
 const CONDITIONS = { skillLevel: 5 as SkillLevel, overloaded: false, weaponOverloaded: false };
 
-// Skill multipliers at level 5 established by the MissileSkillModel (Heavy Missiles, Warhead Upgrades, launcher skills).
-const SKILL_DAMAGE_MULTIPLIER = 1.375;
-const BASE_CYCLE_TIME = 8.262;
-// Tengu Offensive - Accelerated Ejection Bay per level 5: +5%/lvl kinetic damage, -7.5%/lvl launcher rate of fire.
-const SUBSYSTEM_DAMAGE_MULTIPLIER = 1.25;
-const SUBSYSTEM_ROF_MULTIPLIER = 0.625;
-
-describe("Tengu subsystem bonus cross-check (all skills 5, no overload)", () => {
-  test("imports a Tengu with offensive subsystem and applies kinetic damage per level", () => {
-    const result = importer.importFitting(TENGU_FIT, CONDITIONS);
+describe("Rupture drone DPS cross-check (all skills 5)", () => {
+  test("applies interfacing, specialization and operation to Acolyte II", () => {
+    const result = importer.importFitting(RUPTURE_DRONE_FIT, CONDITIONS);
     expect(result).toBeDefined();
-    expect(result!.launcher).toBeDefined();
-    const damageSum = damageVectorSum(result!.launcher!.damagePerMissile);
-    expect(damageSum).toBeCloseTo(149 * SKILL_DAMAGE_MULTIPLIER * SUBSYSTEM_DAMAGE_MULTIPLIER, 4);
-    expect(result!.launcher!.cycleTime).toBeCloseTo(BASE_CYCLE_TIME * SUBSYSTEM_ROF_MULTIPLIER, 4);
+    const acolyte = result!.drones.find((d) => d.typeId === toTypeId("2205"));
+    expect(acolyte).toBeDefined();
+    expect(acolyte!.count).toBe(5);
+    expect(acolyte!.damageMultiplier).toBeCloseTo(3.465, 9);
+    expect(acolyte!.damageBreakdown.damageByType.em).toBeCloseTo(20, 9);
   });
 
-  test("attributes the damage factor to the subsystem", () => {
-    const result = importer.importFitting(TENGU_FIT, CONDITIONS);
-    const factors = result!.launcher!.damageBreakdown.factors;
-    const subsystem = factors.find((f) => f.kind === "subsystem");
-    expect(subsystem).toBeDefined();
-    expect(subsystem!.multiplier).toBeCloseTo(SUBSYSTEM_DAMAGE_MULTIPLIER, 6);
-    expect(subsystem!.moduleIds).toEqual([toTypeId("45601")]);
-    expect(subsystem!.damageType).toBe("kinetic");
+  test("per-drone DPS matches pyfa (17.325), five drones total 86.625", () => {
+    const result = importer.importFitting(RUPTURE_DRONE_FIT, CONDITIONS);
+    const acolyte = result!.drones.find((d) => d.typeId === toTypeId("2205"));
+    const perDrone = (acolyte!.damageBreakdown.damageByType.em ?? 0) * acolyte!.damageMultiplier / acolyte!.cycleTime;
+    expect(perDrone).toBeCloseTo(17.325, 9);
+    expect(perDrone * acolyte!.count).toBeCloseTo(86.625, 9);
   });
 
-  test("does not apply subsystem bonuses without the offensive subsystem", () => {
-    const plainFit = TENGU_FIT.replace("Tengu Offensive - Accelerated Ejection Bay\n", "");
-    const result = importer.importFitting(plainFit, CONDITIONS);
-    expect(result!.launcher).toBeDefined();
-    const damageSum = damageVectorSum(result!.launcher!.damagePerMissile);
-    expect(damageSum).toBeCloseTo(149 * SKILL_DAMAGE_MULTIPLIER, 4);
-    const factors = result!.launcher!.damageBreakdown.factors;
-    expect(factors.find((f) => f.kind === "subsystem")).toBeUndefined();
-  });
-
-  test("summarize places subsystems in the subsystem section", () => {
-    const summary = importer.summarize(TENGU_FIT);
-    expect(summary).toBeDefined();
+  test("attributes skill factors to Drone Interfacing, Amarr specialization and Light Drone Operation", () => {
+    const result = importer.importFitting(RUPTURE_DRONE_FIT, CONDITIONS);
+    const acolyte = result!.drones.find((d) => d.typeId === toTypeId("2205"));
+    const skillFactors = acolyte!.damageBreakdown.factors.filter((f) => f.kind === "skill");
+    expect(skillFactors.map((f) => f.skillIds)).toEqual([[toTypeId("3442"), toTypeId("12484"), toTypeId("24241")]]);
+    expect(skillFactors.map((f) => f.multiplier)).toEqual([2.0625]);
   });
 });

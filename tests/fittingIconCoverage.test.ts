@@ -25,7 +25,7 @@ const chargeCatalog = new ChargeCatalogImpl({ fittingDb: FITTING_DB });
 const stackingPenalty = new StackingPenaltyImpl();
 const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonuses: FITTING_DB.skillBonuses });
 const missileCatalog = new MissileCatalogImpl({ fittingDb: FITTING_DB, missileSkillModel });
-const droneSkillModel = new DroneSkillModelImpl();
+const droneSkillModel = new DroneSkillModelImpl({ skillBonuses: FITTING_DB.skillBonuses });
 const droneCatalog = new DroneCatalogImpl({ fittingDb: FITTING_DB });
 const fittingImport = new FittingImportImpl({
   ships,

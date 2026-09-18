@@ -206,7 +206,7 @@ export interface HullBonus {
   readonly sourceId?: TypeId;
 }
 
-export type SkillBonusType = "turretDamage" | "turretRoF" | "turretTracking" | "turretOptimal" | "turretFalloff" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity" | ModuleBonusAttribute;
+export type SkillBonusType = "turretDamage" | "turretRoF" | "turretTracking" | "turretOptimal" | "turretFalloff" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity" | "droneDamage" | "droneOptimal" | "droneVelocity" | ModuleBonusAttribute;
 
 export interface SkillBonus {
   readonly skillId: TypeId;
@@ -464,6 +464,7 @@ export interface DroneStats {
   readonly volume: number;
   readonly metaLevel: number;
   readonly metaGroupID: number;
+  readonly requiredSkillIds: readonly TypeId[];
   readonly id: TypeId;
   readonly name: string;
 }

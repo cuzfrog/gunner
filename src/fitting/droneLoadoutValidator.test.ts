@@ -23,6 +23,7 @@ function makeDroneStats(overrides: { id: string; bandwidth: number; volume: numb
     volume: overrides.volume,
     metaLevel: 0,
     metaGroupID: 1,
+    requiredSkillIds: [toTypeId("3436"), toTypeId("24241")],
     id: toTypeId(overrides.id),
     name: `Drone ${overrides.id}`,
   };

@@ -521,7 +521,7 @@ const gunFamilies = new GunFamiliesImpl({ fittingDb: db });
 const chargeCatalog = new ChargeCatalogImpl({ fittingDb: db });
 const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonuses: db.skillBonuses });
 const missileCatalog = new MissileCatalogImpl({ fittingDb: db, missileSkillModel });
-const droneSkillModel = new DroneSkillModelImpl();
+const droneSkillModel = new DroneSkillModelImpl({ skillBonuses: db.skillBonuses });
 const droneCatalog = new DroneCatalogImpl({ fittingDb: db });
 
 const mockSkillBonuses: readonly SkillBonus[] = [
@@ -579,7 +579,7 @@ const fullGunFamilies = new GunFamiliesImpl({ fittingDb: fullFittingDb });
 const fullChargeCatalog = new ChargeCatalogImpl({ fittingDb: fullFittingDb });
 const fullMissileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonuses: fullFittingDb.skillBonuses });
 const fullMissileCatalog = new MissileCatalogImpl({ fittingDb: fullFittingDb, missileSkillModel: fullMissileSkillModel });
-const fullDroneSkillModel = new DroneSkillModelImpl();
+const fullDroneSkillModel = new DroneSkillModelImpl({ skillBonuses: fullFittingDb.skillBonuses });
 const fullDroneCatalog = new DroneCatalogImpl({ fittingDb: fullFittingDb });
 
 const conditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: false };
