@@ -22,6 +22,7 @@ function drone(overrides: Partial<DroneStats> = {}): DroneStats {
     volume: 5,
     metaLevel: 5,
     metaGroupID: 2,
+    requiredSkillIds: [toTypeId("3436"), toTypeId("24241")],
     id: toTypeId("2456"),
     name: "Hobgoblin II",
     ...overrides,

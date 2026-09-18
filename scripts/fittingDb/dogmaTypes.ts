@@ -49,6 +49,7 @@ export interface SdeType {
 export interface SdeGroup {
   readonly groupID: number;
   readonly categoryID: number;
+  readonly "groupName_en-us"?: string;
 }
 
 export const OPERATION_PRE_ASSIGN = 0;

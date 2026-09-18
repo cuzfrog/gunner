@@ -802,3 +802,61 @@ describe("fittingDb", () => {
     });
   });
 });
+
+describe("drone skill chain data", () => {
+  function droneByName(name: string): DroneStatsRow | undefined {
+    return rowByName(COMBAT_DRONES, name);
+  }
+
+  interface DroneStatsRow {
+    readonly requiredSkillIds: readonly TypeId[];
+    readonly damageMultiplier: number;
+  }
+
+  function skillBonusRows(bonusType: string): readonly { readonly skillId: TypeId; readonly bonusType: string; readonly magnitudePerLevel: number; readonly requiredSkillId?: TypeId }[] {
+    return SKILL_BONUSES.filter((b) => b.bonusType === bonusType);
+  }
+
+  test("carries required skill chains on combat drones", () => {
+    // T2: Drones 5, faction specialization 1, size operation 5.
+    const acolyteII = droneByName("Acolyte II");
+    expect(acolyteII?.requiredSkillIds).toContain(toTypeId("3436"));
+    expect(acolyteII?.requiredSkillIds).toContain(toTypeId("12484"));
+    expect(acolyteII?.requiredSkillIds).toContain(toTypeId("24241"));
+    // T1: no specialization.
+    const acolyteI = droneByName("Acolyte I");
+    expect(acolyteI?.requiredSkillIds).toContain(toTypeId("24241"));
+    expect(acolyteI?.requiredSkillIds).not.toContain(toTypeId("12484"));
+    // Navy faction: no specialization either.
+    const navyAcolyte = droneByName("Imperial Navy Acolyte");
+    expect(navyAcolyte?.requiredSkillIds).not.toContain(toTypeId("12484"));
+    // Civilian: Drones skill only.
+    const civilian = droneByName("Civilian Hobgoblin");
+    expect(civilian?.requiredSkillIds).toEqual([toTypeId("3436")]);
+  });
+
+  test("emits drone skill bonuses with pyfa-verified magnitudes", () => {
+    const damageRows = skillBonusRows("droneDamage");
+    const bySkill = new Map(damageRows.map((r) => [r.skillId, r]));
+    // Drone Interfacing boosts every drone (Drones skill filter).
+    expect(bySkill.get(toTypeId("3442"))).toMatchObject({ magnitudePerLevel: 10, requiredSkillId: toTypeId("3436") });
+    // Size operations and sentry interfacing filter by the skill itself.
+    expect(bySkill.get(toTypeId("24241"))).toMatchObject({ magnitudePerLevel: 5, requiredSkillId: toTypeId("24241") });
+    expect(bySkill.get(toTypeId("3441"))).toMatchObject({ magnitudePerLevel: 5, requiredSkillId: toTypeId("3441") });
+    expect(bySkill.get(toTypeId("23594"))).toMatchObject({ magnitudePerLevel: 5, requiredSkillId: toTypeId("23594") });
+    // Faction specializations: 2% per level.
+    for (const id of ["12484", "12485", "12486", "12487", "60515"]) {
+      expect(bySkill.get(toTypeId(id))).toMatchObject({ magnitudePerLevel: 2, requiredSkillId: toTypeId(id) });
+    }
+    expect(skillBonusRows("droneOptimal")).toContainEqual(expect.objectContaining({ skillId: toTypeId("23606"), magnitudePerLevel: 5, requiredSkillId: toTypeId("3436") }));
+    expect(skillBonusRows("droneVelocity")).toContainEqual(expect.objectContaining({ skillId: toTypeId("12305"), magnitudePerLevel: 5, requiredSkillId: toTypeId("3436") }));
+  });
+
+  test("classifies heavy-drone hull bonuses as droneDamage", () => {
+    const eosBonuses = HULL_BONUSES["22442" as ShipId] ?? [];
+    expect(eosBonuses).toContainEqual(expect.objectContaining({ attribute: "droneDamage", magnitude: 10, scalesWithHullSkill: true, chargeSkillId: toTypeId("3441") }));
+    const rattlesnakeBonuses = HULL_BONUSES["17918" as ShipId] ?? [];
+    expect(rattlesnakeBonuses).toContainEqual(expect.objectContaining({ attribute: "droneDamage", magnitude: 275, scalesWithHullSkill: false, chargeSkillId: toTypeId("3441") }));
+    expect(rattlesnakeBonuses).toContainEqual(expect.objectContaining({ attribute: "droneDamage", magnitude: 275, scalesWithHullSkill: false, chargeSkillId: toTypeId("23594") }));
+  });
+});

@@ -1,5 +1,5 @@
-import type { DroneBonusAttribute, DroneSizeClass, DroneStats, HullBonus } from "../gamedata/fittingDb";
-import { toTypeId, type TypeId } from "../gamedata/ids";
+import type { DroneStats, HullBonus, SkillBonus } from "../gamedata/fittingDb";
+import { type TypeId } from "../gamedata/ids";
 import type { SkillLevel } from "../ships";
 
 export interface DroneSkillOutput {
@@ -21,42 +21,38 @@ export interface DroneSkillModel {
   compute(drone: DroneStats, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): DroneSkillOutput;
 }
 
-const DRONE_INTERFACING_BONUS = 0.10;
-const SIZE_SKILL_BONUS = 0.05;
-const DRONE_NAVIGATION_BONUS = 0.05;
-const DRONE_SHARPSHOOTING_BONUS = 0.05;
-
-const DRONE_INTERFACING_ID = toTypeId("3442");
-const LIGHT_DRONE_OPERATION_ID = toTypeId("24241");
-const MEDIUM_DRONE_OPERATION_ID = toTypeId("33699");
-const HEAVY_DRONE_OPERATION_ID = toTypeId("3441");
-const SENTRY_DRONE_INTERFACING_ID = toTypeId("23594");
-const DRONES_SKILL_ID = toTypeId("3436");
+interface DroneSkillModelDeps {
+  readonly skillBonuses: readonly SkillBonus[];
+}
 
 export class DroneSkillModelImpl implements DroneSkillModel {
-  compute(drone: DroneStats, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): DroneSkillOutput {
-    const sizeSkillId = sizeSkillIdForClass(drone.sizeClass);
-    const interfacingMultiplier = 1 + DRONE_INTERFACING_BONUS * skillLevel;
-    const sizeSkillMultiplier = sizeSkillId !== undefined ? 1 + SIZE_SKILL_BONUS * skillLevel : 1;
-    const skillDamageMultiplier = interfacingMultiplier * sizeSkillMultiplier;
-    const skillDamageIds: TypeId[] = [DRONE_INTERFACING_ID];
-    if (sizeSkillId !== undefined) skillDamageIds.push(sizeSkillId);
+  private readonly droneSkillBonuses: readonly (SkillBonus & { readonly requiredSkillId: TypeId })[];
 
-    const droneHullBonuses = hullBonuses.filter((b) => isDroneBonusAttribute(b.attribute) && b.attribute === "droneDamage" && (b.chargeSkillId === undefined || b.chargeSkillId === sizeSkillId || b.chargeSkillId === DRONES_SKILL_ID));
+  constructor({ skillBonuses }: DroneSkillModelDeps) {
+    this.droneSkillBonuses = skillBonuses.filter(isChainScopedDroneBonus);
+  }
+
+  compute(drone: DroneStats, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): DroneSkillOutput {
+    const matching = this.droneSkillBonuses.filter((b) => drone.requiredSkillIds.includes(b.requiredSkillId));
+    const damageBonuses = matching.filter((b) => b.bonusType === "droneDamage");
+    const skillDamageMultiplier = multiplyPerLevel(damageBonuses, skillLevel);
+    const skillDamageIds = damageBonuses.map((b) => b.skillId);
+    const skillOptimalMultiplier = multiplyPerLevel(matching.filter((b) => b.bonusType === "droneOptimal"), skillLevel);
+    const skillVelocityMultiplier = multiplyPerLevel(matching.filter((b) => b.bonusType === "droneVelocity"), skillLevel);
+
+    const droneHullBonuses = hullBonuses.filter((b) => b.attribute === "droneDamage" && (b.chargeSkillId === undefined || drone.requiredSkillIds.includes(b.chargeSkillId)));
     const shipBonuses = droneHullBonuses.filter((b) => b.sourceId === undefined);
     const hullDamageMultiplier = shipBonuses.length > 0 ? shipBonuses.reduce((acc, b) => acc * (1 + (b.magnitude * (b.scalesWithHullSkill ? skillLevel : 1)) / 100), 1) : 1;
     const subsystemDamageMultipliers = subsystemDamageMultipliersFrom(droneHullBonuses, skillLevel);
 
     const totalDamageMultiplier = drone.damageMultiplier * skillDamageMultiplier * hullDamageMultiplier * subsystemDamageMultipliers.reduce((acc, s) => acc * s.multiplier, 1);
-    const navigationMultiplier = 1 + DRONE_NAVIGATION_BONUS * skillLevel;
-    const sharpshootingMultiplier = 1 + DRONE_SHARPSHOOTING_BONUS * skillLevel;
 
     return {
       damageMultiplier: totalDamageMultiplier,
       tracking: drone.tracking,
-      optimal: drone.optimal * sharpshootingMultiplier,
+      optimal: drone.optimal * skillOptimalMultiplier,
       falloff: drone.falloff,
-      maxVelocity: drone.maxVelocity * navigationMultiplier,
+      maxVelocity: drone.maxVelocity * skillVelocityMultiplier,
       orbitSpeed: drone.orbitSpeed,
       skillDamageMultiplier,
       skillDamageIds,
@@ -64,6 +60,16 @@ export class DroneSkillModelImpl implements DroneSkillModel {
       ...(subsystemDamageMultipliers.length > 0 ? { subsystemDamageMultipliers } : {}),
     };
   }
+}
+
+const DRONE_BONUS_TYPES = ["droneDamage", "droneOptimal", "droneVelocity"] as const;
+
+function isChainScopedDroneBonus(bonus: SkillBonus): bonus is SkillBonus & { readonly requiredSkillId: TypeId } {
+  return (DRONE_BONUS_TYPES as readonly string[]).includes(bonus.bonusType) && bonus.requiredSkillId !== undefined;
+}
+
+function multiplyPerLevel(bonuses: readonly SkillBonus[], skillLevel: SkillLevel): number {
+  return bonuses.reduce((acc, b) => acc * (1 + (b.magnitudePerLevel * skillLevel) / 100), 1);
 }
 
 function subsystemDamageMultipliersFrom(bonuses: readonly HullBonus[], skillLevel: SkillLevel): readonly { readonly sourceId: TypeId; readonly multiplier: number }[] {
@@ -74,19 +80,4 @@ function subsystemDamageMultipliersFrom(bonuses: readonly HullBonus[], skillLeve
     bySource.set(bonus.sourceId, (bySource.get(bonus.sourceId) ?? 1) * multiplier);
   }
   return [...bySource.entries()].map(([sourceId, multiplier]) => ({ sourceId, multiplier }));
-}
-
-function sizeSkillIdForClass(sizeClass: DroneSizeClass): TypeId | undefined {
-  switch (sizeClass) {
-    case "light": return LIGHT_DRONE_OPERATION_ID;
-    case "medium": return MEDIUM_DRONE_OPERATION_ID;
-    case "heavy": return HEAVY_DRONE_OPERATION_ID;
-    case "sentry": return SENTRY_DRONE_INTERFACING_ID;
-  }
-}
-
-const DRONE_BONUS_ATTRIBUTES: Record<DroneBonusAttribute, true> = { droneDamage: true };
-
-function isDroneBonusAttribute(attr: HullBonus["attribute"]): attr is DroneBonusAttribute {
-  return attr in DRONE_BONUS_ATTRIBUTES;
 }

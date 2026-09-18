@@ -267,7 +267,6 @@ const SENSOR_DAMPENER_SCRIPT_GROUP = 911;
 const TURRET_GROUPS = new Set(Object.keys(TURRET_WEAPON_GROUP_BY_ID).map(Number));
 
 const MISSILE_HULL_SKILL_IDS = new Set([3319, 3320, 3321, 3322, 3323, 3324, 3325, 3326, 25719, 20209, 20210, 20211, 20212, 20213, 25718, 41409, 41410, 21071, 20315, 12441, 12442, 20314]);
-const DRONE_HULL_SKILL_IDS = new Set([3436, 3442, 24241, 33699, 23594, 23069]);
 const TURRET_SKILL_IDS = new Set([
   3301, 3302, 3303, 3304, 3305, 3306, 3307, 3308, 3309, 20327, 21666, 21667,
   47870, 47871, 47872, 52998,
@@ -301,13 +300,27 @@ const TARGET_PAINTING_SKILL_ID = 19921;
 
 // Skill typeIDs that provide turret damage or rate-of-fire bonuses. The bonus attribute
 // on the skill item is a percentage per level; it is applied as an unpenalized boost.
-// Drone skill typeIDs referenced by DroneSkillModelImpl (src/fitting/droneStats.ts).
-// These must stay in sync with the runtime constants so that addSkillNames includes them
-// in the item name packs for display-time resolution via ItemNameCatalog.
-const DRONE_SKILL_IDS = ["3442", "24241", "33699", "3441", "23594"];
 // Legacy effects with empty modifierInfo that need special handling in buildSkillBonuses.
 const LEGACY_MISSILE_DAMAGE_EFFECTS = new Set([660, 661, 662, 668]);
 const LEGACY_ROF_EFFECT = 1851;
+
+// Skill-category name of the group holding every drone-piloting skill (Drones, size operations,
+// specializations, Fighters). Ship/charge modifiers filtered by a skill of this group target
+// drones or fighters, not turret modules; the runtime applies them via drone required-skill chains.
+const DRONE_SKILL_GROUP_NAME = "Drones";
+// Legacy drone skill effects are implemented in the live client and carry no (or partial) SDE
+// modifierInfo, so their boost semantics cannot be derived from the SDE alone. pyfa's
+// eos/effects.py (Effect1730/6663/6664/6667) is the reference implementation: each boosts a
+// drone attribute by a percent attribute on the skill item, per skill level, for drones
+// requiring the skill itself ("self") or the Drones skill ("drones"). Skills with these
+// effects are emitted as drone skill bonuses; new skills flow in automatically.
+const DRONE_SKILL_BONUS_EFFECTS: Readonly<Record<number, { readonly bonusType: "droneDamage" | "droneOptimal" | "droneVelocity"; readonly filter: "self" | "drones"; readonly magnitudeAttributeId: number }>> = {
+  1730: { bonusType: "droneDamage", filter: "self", magnitudeAttributeId: 292 },
+  6663: { bonusType: "droneDamage", filter: "drones", magnitudeAttributeId: 292 },
+  6664: { bonusType: "droneOptimal", filter: "drones", magnitudeAttributeId: 294 },
+  6667: { bonusType: "droneVelocity", filter: "drones", magnitudeAttributeId: 2603 },
+};
+const DRONES_SKILL_FILTER_ID = 3436;
 
 function stringifyWithTypeIds<T>(value: T): string {
   return JSON.stringify(value)
@@ -414,6 +427,7 @@ function buildSkillBonuses(
   types: Record<string, SdeType>,
   groups: Record<string, SdeGroup>,
   dogmaEffects: Record<string, SdeDogmaEffect>,
+  droneSkillIds: ReadonlySet<number>,
   unmappedCollector: UnmappedAttribute[],
 ): readonly RawSkillBonus[] {
   const skillGroupIds = new Set<number>();
@@ -432,6 +446,18 @@ function buildSkillBonuses(
     for (const eid of effectIds) {
       const eff = dogmaEffects[String(eid)];
       if (!eff) continue;
+      const droneBonus = DRONE_SKILL_BONUS_EFFECTS[eid];
+      if (droneBonus) {
+        if (!droneSkillIds.has(skillId)) throw new Error(`Drone skill ${type["typeName_en-us"]} (${sid}) uses legacy drone effect ${eid} but is not in the "${DRONE_SKILL_GROUP_NAME}" skill group`);
+        const magnitude = skillAttrValues.get(droneBonus.magnitudeAttributeId);
+        if (magnitude === undefined || !Number.isFinite(magnitude) || magnitude === 0) throw new Error(`Drone skill ${type["typeName_en-us"]} (${sid}) uses legacy drone effect ${eid} without attribute ${droneBonus.magnitudeAttributeId}`);
+        const key = `${droneBonus.bonusType}:${sid}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const requiredSkillId = droneBonus.filter === "self" ? sid : String(DRONES_SKILL_FILTER_ID);
+        bonuses.push({ skillId: sid, bonusType: droneBonus.bonusType, magnitudePerLevel: magnitude, requiredSkillId, appliesTo: "charge" });
+        continue;
+      }
       if (LEGACY_MISSILE_DAMAGE_EFFECTS.has(eid)) {
         const magnitude = skillAttrValues.get(292);
         if (magnitude === undefined || magnitude === 0) continue;
@@ -460,7 +486,7 @@ function buildSkillBonuses(
           }
           continue;
         }
-        const resolution = resolveSkillBonusAttribute(base, modifier, attributeNames);
+        const resolution = resolveSkillBonusAttribute(base, modifier, attributeNames, droneSkillIds);
         if (resolution.kind === "skip") continue;
         if (resolution.kind === "unmapped") {
           unmappedCollector.push({ shipTypeId: skillId, shipName: type["typeName_en-us"] ?? String(skillId), effectId: eid, attributeId: resolution.attributeId, attributeName: attributeNames.get(resolution.attributeId) ?? "unknown", func: modifier.func });
@@ -507,6 +533,7 @@ function resolveSkillBonusAttribute(
   base: HullBonusAttribute,
   modifier: SdeDogmaEffectModifier,
   attributeNames: Map<number, string>,
+  droneSkillIds: ReadonlySet<number>,
 ): SkillBonusResolution {
   const skillId = modifier.skillTypeID;
   if (base === "turretRoF") {
@@ -514,18 +541,18 @@ function resolveSkillBonusAttribute(
     return { kind: "mapped", bonusType: "turretRoF" };
   }
   if (base === "maxVelocity") {
-    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return { kind: "skip", reason: "maxVelocity for drone skill is not a skill bonus" };
+    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && droneSkillIds.has(skillId)) return { kind: "skip", reason: "maxVelocity for drone skill is not a skill bonus" };
     if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return { kind: "mapped", bonusType: "missileVelocity" };
     return { kind: "skip", reason: "maxVelocity is not a skill bonus in this context" };
   }
   if (base === "turretOptimal") {
-    if (skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return { kind: "skip", reason: "maxRange for drone skill is not a turret skill bonus" };
+    if (skillId !== undefined && droneSkillIds.has(skillId)) return { kind: "skip", reason: "maxRange for drone skill is not a turret skill bonus" };
     if (skillId !== undefined && !TURRET_SKILL_IDS.has(skillId) && !TURRET_SUPPORT_SKILL_IDS.has(skillId) && !MISSILE_HULL_SKILL_IDS.has(skillId)) return { kind: "skip", reason: "maxRange for non-turret skill is not a turret skill bonus" };
     if (modifier.groupID !== undefined && !TURRET_GROUPS.has(modifier.groupID)) return { kind: "skip", reason: "maxRange for non-turret group is not a turret skill bonus" };
     return { kind: "mapped", bonusType: "turretOptimal" };
   }
   if (base === "turretDamage") {
-    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return { kind: "skip", reason: "damageMultiplier for drone skill is not a turret skill bonus" };
+    if (modifier.func === "OwnerRequiredSkillModifier" && skillId !== undefined && droneSkillIds.has(skillId)) return { kind: "skip", reason: "damageMultiplier for drone skill is not a turret skill bonus" };
     return { kind: "mapped", bonusType: base };
   }
   if (base === "turretTracking" || base === "turretFalloff") return { kind: "mapped", bonusType: base };
@@ -850,6 +877,7 @@ interface DroneStats {
   readonly volume: number;
   readonly metaLevel: number;
   readonly metaGroupID: number;
+  readonly requiredSkillIds: readonly TypeId[];
 }
 
 function optionalNumber(value: number | undefined): number | undefined {
@@ -1177,6 +1205,7 @@ function buildHullBonuses(
   shipTypeId: number,
   shipName: string,
   unmappedCollector: UnmappedAttribute[],
+  droneSkillIds: ReadonlySet<number>,
 ): readonly HullBonus[] {
   if (!typeDogma) return [];
   const effects = buildEffectSet(typeDogma);
@@ -1188,7 +1217,7 @@ function buildHullBonuses(
     const effectNonScaling = isNonScalingEffect(effectID);
     const specialMagnitude = SPECIAL_MAGNITUDES[effectID];
     for (const modifier of effect.modifierInfo) {
-      const resolution = resolveHullBonusAttribute(modifier, attributeNames);
+      const resolution = resolveHullBonusAttribute(modifier, attributeNames, droneSkillIds);
       if (resolution.kind === "skip") continue;
       if (resolution.kind === "unmapped") {
         unmappedCollector.push({ shipTypeId, shipName, effectId: effectID, attributeId: resolution.attributeId, attributeName: attributeNames.get(resolution.attributeId) ?? "unknown", func: modifier.func });
@@ -1215,6 +1244,7 @@ function buildHullBonuses(
 function resolveHullBonusAttribute(
   modifier: SdeDogmaEffectModifier,
   attributeNames: Map<number, string>,
+  droneSkillIds: ReadonlySet<number>,
 ): HullBonusResolution {
   const base = semanticAttributeToHullBonus(modifier.modifiedAttributeID);
   if (!base) {
@@ -1224,12 +1254,12 @@ function resolveHullBonusAttribute(
   const skillId = modifier.skillTypeID;
   const func = modifier.func;
   // Drone-skill modifiers only contribute damage (attr 64); drone velocity/tracking/HP bonuses are not modeled.
-  if (skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId) && modifier.modifiedAttributeID !== 64) return { kind: "skip", reason: "drone context outside damage is not modeled" };
+  if (skillId !== undefined && droneSkillIds.has(skillId) && modifier.modifiedAttributeID !== 64) return { kind: "skip", reason: "drone context outside damage is not modeled" };
   // Disambiguate context-dependent attributes.
   if (base === "turretRoF" && skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return { kind: "mapped", attribute: "missileRoF" };
   if (base === "turretRoF" && modifier.groupID !== undefined && LAUNCHER_GROUP_IDS.has(modifier.groupID)) return { kind: "mapped", attribute: "missileRoF" };
   if (base === "maxVelocity" && func === "OwnerRequiredSkillModifier" && skillId !== undefined && MISSILE_HULL_SKILL_IDS.has(skillId)) return { kind: "mapped", attribute: "missileVelocity" };
-  if (base === "turretDamage" && func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId)) return { kind: "mapped", attribute: "droneDamage" };
+  if (base === "turretDamage" && func === "OwnerRequiredSkillModifier" && skillId !== undefined && droneSkillIds.has(skillId)) return { kind: "mapped", attribute: "droneDamage" };
   if (base === "turretOptimal" && modifier.groupID === WARP_SCRAMBLER_GROUP) return { kind: "skip", reason: "warp scrambler maxRange is not a turret bonus" };
   // capacitorNeed hull bonuses only apply to turret groups/skills (e.g. Harbinger effect 5332).
   if (base === "capUse" && !((skillId !== undefined && TURRET_SKILL_IDS.has(skillId)) || (modifier.groupID !== undefined && TURRET_GROUPS.has(modifier.groupID)))) return { kind: "skip", reason: "capacitorNeed bonus outside turret skills/groups" };
@@ -1241,7 +1271,7 @@ function resolveHullBonusAttribute(
   // Skip turret attribute bonuses for non-turret module groups (tractor beams, remote repairers, etc.).
   if ((base === "turretOptimal" || base === "turretDamage" || base === "turretRoF" || base === "turretTracking" || base === "turretFalloff") && modifier.groupID !== undefined && !TURRET_GROUPS.has(modifier.groupID)) return { kind: "skip", reason: "turret attribute on non-turret module group" };
   // Skip drone HP/resist bonuses (OwnerRequiredSkillModifier on ship HP attributes with drone skill).
-  if (func === "OwnerRequiredSkillModifier" && skillId !== undefined && DRONE_HULL_SKILL_IDS.has(skillId) && (base === "hullHpPercent" || base === "armorHpPercent" || base === "shieldHpPercent" || base === "armorResist" || base === "shieldResist")) return { kind: "skip", reason: "drone HP/resist bonus on ship attribute" };
+  if (func === "OwnerRequiredSkillModifier" && skillId !== undefined && droneSkillIds.has(skillId) && (base === "hullHpPercent" || base === "armorHpPercent" || base === "shieldHpPercent" || base === "armorResist" || base === "shieldResist")) return { kind: "skip", reason: "drone HP/resist bonus on ship attribute" };
   // signatureRadiusBonus is shared between MWD sig bloom and target painter sig bonus; skip painter bonuses.
   if (base === "mwdSigBloom" && skillId === TARGET_PAINTING_SKILL_ID) return { kind: "skip", reason: "target painter signature bonus is not MWD sig bloom" };
   if (base === "mwdSigBloom" && modifier.groupID === TARGET_PAINTER_GROUP) return { kind: "skip", reason: "target painter group signature bonus is not MWD sig bloom" };
@@ -1279,6 +1309,7 @@ function buildSubsystemBonuses(
   subsystemTypeId: number,
   subsystemName: string,
   unmappedCollector: UnmappedAttribute[],
+  droneSkillIds: ReadonlySet<number>,
 ): readonly HullBonus[] {
   const attributeValues = buildAttributeValueMap(typeDogma);
   const bonuses: HullBonus[] = [];
@@ -1292,7 +1323,7 @@ function buildSubsystemBonuses(
       continue;
     }
     for (const modifier of effect.modifierInfo) {
-      const resolution = resolveSubsystemModifier(modifier, attributeNames);
+      const resolution = resolveSubsystemModifier(modifier, attributeNames, droneSkillIds);
       if (resolution.kind === "skip") continue;
       if (resolution.kind === "unmapped") {
         unmappedCollector.push({ shipTypeId: subsystemTypeId, shipName: subsystemName, effectId: effectID, attributeId: resolution.attributeId, attributeName: attributeNames.get(resolution.attributeId) ?? "unknown", func: modifier.func });
@@ -1312,18 +1343,18 @@ function buildSubsystemBonuses(
   return bonuses;
 }
 
-function resolveSubsystemModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>): SubsystemModifierResolution {
-  if (modifier.func === "ItemModifier") return resolveSubsystemItemModifier(modifier, attributeNames);
+function resolveSubsystemModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>, droneSkillIds: ReadonlySet<number>): SubsystemModifierResolution {
+  if (modifier.func === "ItemModifier") return resolveSubsystemItemModifier(modifier, attributeNames, droneSkillIds);
   if (modifier.func === "LocationRequiredSkillModifier" || modifier.func === "OwnerRequiredSkillModifier") {
     if (modifier.skillTypeID !== undefined && PROPULSION_SKILL_IDS.has(modifier.skillTypeID)) return resolveSubsystemPropulsionModifier(modifier);
-    return resolveSubsystemSkillModifier(modifier, attributeNames);
+    return resolveSubsystemSkillModifier(modifier, attributeNames, droneSkillIds);
   }
-  if (modifier.func === "LocationGroupModifier") return resolveSubsystemGroupModifier(modifier, attributeNames);
+  if (modifier.func === "LocationGroupModifier") return resolveSubsystemGroupModifier(modifier, attributeNames, droneSkillIds);
   if (modifier.func === "LocationModifier") return resolveSubsystemLocationModifier(modifier);
   return { kind: "unmapped", attributeId: modifier.modifiedAttributeID };
 }
 
-function resolveSubsystemItemModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>): SubsystemModifierResolution {
+function resolveSubsystemItemModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>, droneSkillIds: ReadonlySet<number>): SubsystemModifierResolution {
   const attributeId = modifier.modifiedAttributeID;
   if (modifier.operation !== 6) {
     const flatAttribute = SUBSYSTEM_FLAT_SHIP_STAT_ATTRIBUTES[attributeId];
@@ -1342,7 +1373,7 @@ function resolveSubsystemItemModifier(modifier: SdeDogmaEffectModifier, attribut
     if (!isPerLevel) return { kind: "skip", reason: "non-per-level subsystem fitting bonus" };
     return { kind: "mapped", attribute: shipStat };
   }
-  const base = resolveHullBonusAttribute(modifier, attributeNames);
+  const base = resolveHullBonusAttribute(modifier, attributeNames, droneSkillIds);
   if (base.kind === "skip") return base;
   if (base.kind === "unmapped") return { kind: "unmapped", attributeId };
   if (!isPerLevel) return { kind: "skip", reason: "non-per-level subsystem fitting bonus" };
@@ -1358,9 +1389,9 @@ function resolveSubsystemPropulsionModifier(modifier: SdeDogmaEffectModifier): S
   return { kind: "unmapped", attributeId };
 }
 
-function resolveSubsystemSkillModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>): SubsystemModifierResolution {
+function resolveSubsystemSkillModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>, droneSkillIds: ReadonlySet<number>): SubsystemModifierResolution {
   const attributeId = modifier.modifiedAttributeID;
-  const base = resolveHullBonusAttribute(modifier, attributeNames);
+  const base = resolveHullBonusAttribute(modifier, attributeNames, droneSkillIds);
   if (base.kind === "mapped") {
     const damageType = DAMAGE_TYPE_BY_ATTRIBUTE[attributeId];
     return { kind: "mapped", attribute: base.attribute, ...(damageType !== undefined ? { damageType } : {}) };
@@ -1371,12 +1402,12 @@ function resolveSubsystemSkillModifier(modifier: SdeDogmaEffectModifier, attribu
   return { kind: "unmapped", attributeId };
 }
 
-function resolveSubsystemGroupModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>): SubsystemModifierResolution {
+function resolveSubsystemGroupModifier(modifier: SdeDogmaEffectModifier, attributeNames: Map<number, string>, droneSkillIds: ReadonlySet<number>): SubsystemModifierResolution {
   const attributeId = modifier.modifiedAttributeID;
   if (attributeId === 51 && modifier.groupID !== undefined && LAUNCHER_GROUP_IDS.has(modifier.groupID)) return { kind: "mapped", attribute: "missileRoF" };
   const reason = SUBSYSTEM_SKILL_FILTERED_SKIP_REASONS[attributeId];
   if (reason) return { kind: "skip", reason };
-  const base = resolveHullBonusAttribute(modifier, attributeNames);
+  const base = resolveHullBonusAttribute(modifier, attributeNames, droneSkillIds);
   if (base.kind === "skip") return base;
   return { kind: "unmapped", attributeId };
 }
@@ -1507,7 +1538,7 @@ function damageTypeFromValues(em: number, thermal: number, kinetic: number, expl
   return "explosive";
 }
 
-export function buildDroneStats(values: Map<string, number>, type: SdeType): DroneStats | undefined {
+export function buildDroneStats(values: Map<string, number>, type: SdeType, requiredSkillIds: readonly TypeId[]): DroneStats | undefined {
   const damageMultiplier = values.get("damageMultiplier");
   const tracking = values.get("trackingSpeed");
   const sigResolution = values.get("optimalSigRadius");
@@ -1546,7 +1577,35 @@ export function buildDroneStats(values: Map<string, number>, type: SdeType): Dro
     volume,
     metaLevel: type.metaLevel ?? 0,
     metaGroupID: type.metaGroupID ?? 1,
+    requiredSkillIds,
   };
+}
+
+// A combat drone without a required-skill chain would silently receive no drone skill bonuses at
+// runtime (the chain drives every skill multiplier), and a chain missing the Drones skill would
+// silently drop interfacing/sharpshooting/navigation bonuses, which are filtered by that skill.
+// Both reproduce the understated-damage bug class, so fail the generation instead.
+function assertCombatDroneSkillChain(name: string, requiredSkillIds: readonly TypeId[]): void {
+  if (requiredSkillIds.length === 0) throw new Error(`Combat drone ${name} has no required-skill chain in the SDE; drone skill bonuses would silently not apply`);
+  if (!requiredSkillIds.includes(String(DRONES_SKILL_FILTER_ID) as TypeId)) throw new Error(`Combat drone ${name} does not require the Drones skill (${DRONES_SKILL_FILTER_ID}); verify the SDE requiredskillsfortypes data`);
+}
+
+// Every drone-piloting skill lives in the "Drones" skill group (category 16). Ship and charge
+// modifiers filtered by a skill of this group target drones/fighters, so classification must
+// check membership instead of a hand-maintained skill list that drifts out of date.
+function buildDroneSkillIds(types: Record<string, SdeType>, groups: Record<string, SdeGroup>): ReadonlySet<number> {
+  const droneGroupIds = new Set<number>();
+  for (const group of Object.values(groups)) {
+    if (group.categoryID === 16 && group["groupName_en-us"] === DRONE_SKILL_GROUP_NAME) droneGroupIds.add(group.groupID);
+  }
+  if (droneGroupIds.size !== 1) throw new Error(`Expected exactly one "${DRONE_SKILL_GROUP_NAME}" skill group in category 16, found ${droneGroupIds.size}`);
+  const droneGroupId = [...droneGroupIds][0];
+  const ids = new Set<number>();
+  for (const type of Object.values(types)) {
+    if (type.groupID === droneGroupId) ids.add(type.typeID);
+  }
+  if (ids.size === 0) throw new Error(`No skills found in the "${DRONE_SKILL_GROUP_NAME}" skill group ${droneGroupId}`);
+  return ids;
 }
 
 function droneSizeClassFromStats(maxVelocity: number, orbitSpeed: number, bandwidth: number): DroneSizeClass {
@@ -1593,6 +1652,7 @@ async function main() {
   const groups = await loadMerged<SdeGroup>(SDE_DIR, "groups.");
   const requiredSkills = await loadMerged<Record<string, number>>(SDE_DIR, "requiredskillsfortypes.");
   const attributeNames = buildAttributeNameMap(attributes);
+  const droneSkillIds = buildDroneSkillIds(types, groups);
   const shipGroupIds = new Set(Object.values(groups).filter((group) => group.categoryID === SHIP_CATEGORY_ID).map((group) => group.groupID));
 
   const fittingModules: Record<string, Row<FittingModuleStats>> = {};
@@ -1639,7 +1699,7 @@ async function main() {
 
     if (shipGroupIds.has(type.groupID)) {
       const attributeValueMap = buildAttributeValueMap(typeDogma);
-      const bonuses = buildHullBonuses(attributeNames, attributeValueMap, typeDogma, dogmaEffects, type.typeID, enName ?? String(type.typeID), unmappedHullAttributes);
+      const bonuses = buildHullBonuses(attributeNames, attributeValueMap, typeDogma, dogmaEffects, type.typeID, enName ?? String(type.typeID), unmappedHullAttributes, droneSkillIds);
       const shipId = resolveShipId(enName, type, shipNameToId);
       if (bonuses.length > 0) hullBonuses[shipId] = bonuses;
       continue;
@@ -1648,7 +1708,7 @@ async function main() {
     if (SUBSYSTEM_GROUP_IDS.has(type.groupID)) {
       if (typeDogma) {
         // Structure HP addition (+40 per subsystem) is preassigned on the subsystem dogma without a modifier effect.
-        const bonuses = [...buildSubsystemBonuses(attributeNames, typeDogma, dogmaEffects, type.typeID, enName ?? String(type.typeID), unmappedHullAttributes)];
+        const bonuses = [...buildSubsystemBonuses(attributeNames, typeDogma, dogmaEffects, type.typeID, enName ?? String(type.typeID), unmappedHullAttributes, droneSkillIds)];
         const structureAddition = values.get("hp");
         if (structureAddition !== undefined && structureAddition !== 0 && !bonuses.some((b) => b.attribute === "hullHpFlat")) {
           bonuses.push({ attribute: "hullHpFlat", magnitude: structureAddition, scalesWithHullSkill: false, sourceId: id });
@@ -1799,8 +1859,12 @@ async function main() {
     if (groups[String(type.groupID)]?.categoryID === DRONE_CATEGORY_ID) {
       drones[id] = { id, name: enName };
       if (type.groupID === COMBAT_DRONE_GROUP) {
-        const stats = buildDroneStats(values, type);
-        if (stats) combatDrones[id] = { ...stats, id, name: enName };
+        const requiredSkillIds = buildRequiredSkillIds(requiredSkills, type.typeID);
+        const stats = buildDroneStats(values, type, requiredSkillIds);
+        if (stats) {
+          assertCombatDroneSkillChain(enName ?? String(type.typeID), requiredSkillIds);
+          combatDrones[id] = { ...stats, id, name: enName };
+        }
       }
       addItemName(itemNames, id, type);
       continue;
@@ -1996,7 +2060,7 @@ async function main() {
     Object.entries(combatDrones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
   );
 
-  const skillBonuses = buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, unmappedHullAttributes);
+  const skillBonuses = buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, droneSkillIds, unmappedHullAttributes);
   const rigDrawbackReductions = buildRigDrawbackReductions(typedogmas, types, dogmaEffects);
 
   const header =
@@ -2227,27 +2291,14 @@ function relevantSkillIds(skillBonuses: readonly RawSkillBonus[]): readonly stri
     ids.add(String(bonus.skillId));
     if (bonus.requiredSkillId !== undefined) ids.add(String(bonus.requiredSkillId));
   }
-  for (const id of DRONE_SKILL_IDS) ids.add(id);
   return [...ids];
 }
-
-// Localized names for skill IDs that are not present in the SDE types table.
-// These skills were introduced in expansions after the SDE snapshot used by this script.
-// When the SDE is updated and these IDs appear in types.0.json, this fallback becomes
-// a no-op because addSkillNames checks the SDE first.
-const SKILL_NAME_FALLBACKS: Readonly<Record<string, LocalizedName>> = {
-  "24241": { en: "Light Drone Operation", zh: "轻型无人机操控理论", ja: "ライトドローンオペレーション" },
-  "33699": { en: "Medium Drone Operation", zh: "中型无人机操控理论", ja: "ミディアムドローンオペレーション" },
-  "23594": { en: "Sentry Drone Interfacing", zh: "岗哨无人机操控理论", ja: "セントリードローンインターフェイス" },
-};
 
 function addSkillNames(itemNames: Record<string, LocalizedName>, types: Readonly<Record<string, SdeType>>, skillBonuses: readonly RawSkillBonus[]): void {
   for (const id of relevantSkillIds(skillBonuses)) {
     if (id in itemNames) continue;
     const type = types[id];
-    if (type) { addItemName(itemNames, id, type); continue; }
-    const fallback = SKILL_NAME_FALLBACKS[id];
-    if (fallback) itemNames[id] = fallback;
+    if (type) addItemName(itemNames, id, type);
   }
 }
 
@@ -2457,7 +2508,7 @@ async function writeI18nFiles(
   await writeFile(collisionJaFile, collisionJaContent);
 }
 
-export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses, buildSubsystemBonuses as _buildSubsystemBonuses, buildPropulsionStats as _buildPropulsionStats };
+export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses, buildSubsystemBonuses as _buildSubsystemBonuses, buildPropulsionStats as _buildPropulsionStats, buildSkillBonuses as _buildSkillBonuses, buildDroneSkillIds as _buildDroneSkillIds, assertCombatDroneSkillChain as _assertCombatDroneSkillChain };
 
 if (import.meta.main) {
   main().catch((error) => {

@@ -37,6 +37,7 @@ function makeDroneStats(overrides: Partial<DroneStats> = {}): DroneStats {
     volume: 5,
     metaLevel: 5,
     metaGroupID: 2,
+    requiredSkillIds: ["3436" as DroneStats["id"], "24241" as DroneStats["id"]],
     id: "2456" as DroneStats["id"],
     name: "Hobgoblin II",
     ...overrides,
