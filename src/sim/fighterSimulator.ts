@@ -24,7 +24,7 @@ export interface FighterSimulatorState {
 export interface FighterSimulator extends Restorable<FighterSimulatorState> {
   reset(config: FighterSimConfig): void;
   update(config: FighterSimConfig): void;
-  step(dt: number, frame: EngagementFrame): void;
+  step(dt: number, frame: EngagementFrame, operational: Record<Side, boolean>): void;
   states(side: Side): readonly FighterRuntimeState[];
 }
 
@@ -59,9 +59,9 @@ export class FighterSimulatorImpl implements FighterSimulator {
     };
   }
 
-  step(dt: number, frame: EngagementFrame): void {
-    stepSide(this.groups.shipA, frame.shipA.position, frame.shipB.position, dt);
-    stepSide(this.groups.shipB, frame.shipB.position, frame.shipA.position, dt);
+  step(dt: number, frame: EngagementFrame, operational: Record<Side, boolean>): void {
+    if (operational.shipA) stepSide(this.groups.shipA, frame.shipA.position, frame.shipB.position, dt);
+    if (operational.shipB) stepSide(this.groups.shipB, frame.shipB.position, frame.shipA.position, dt);
   }
 
   states(side: Side): readonly FighterRuntimeState[] {

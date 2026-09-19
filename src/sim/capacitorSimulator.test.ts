@@ -24,8 +24,8 @@ function sideConfig(overrides: Partial<CapacitorSideConfig> = {}): CapacitorSide
 }
 
 const ENGAGED: Record<Side, CapacitorEngagement> = {
-  shipA: { propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
-  shipB: { propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
+  shipA: { operational: true, propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
+  shipB: { operational: true, propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
 };
 
 function engagement(overrides: Partial<CapacitorEngagement>): Record<Side, CapacitorEngagement> {
@@ -96,6 +96,27 @@ describe("CapacitorSimulatorImpl", () => {
     const view = sim.view().shipA;
     expect(view.cap).toBeCloseTo(SPEC.capacity, 6);
     expect(view.drains[0].running).toBe(false);
+  });
+
+  test("non-operational side is frozen: no regen, no drain debit, no incoming debit", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({ drains: [drain("1", 100, 10)] }));
+    sim.incomingDrains("shipA", [incoming("2", 300, 10)]);
+    sim.step(10, ENGAGED);
+    const frozenCap = sim.view().shipA.cap;
+    expect(frozenCap).toBeLessThan(SPEC.capacity - 100);
+    sim.step(25, engagement({ operational: false }));
+    expect(sim.view().shipA.cap).toBe(frozenCap);
+  });
+
+  test("non-operational side resumes with an immediate debit when operational again", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({ drains: [drain("1", 100, 10)] }));
+    sim.step(10, ENGAGED);
+    const frozenCap = sim.view().shipA.cap;
+    sim.step(25, engagement({ operational: false }));
+    sim.step(10, ENGAGED);
+    expect(sim.view().shipA.cap).toBeCloseTo(regenClosedForm(frozenCap - 100, 10), 6);
   });
 
   test("drain above peak regen starves and retries until cap recovers", () => {

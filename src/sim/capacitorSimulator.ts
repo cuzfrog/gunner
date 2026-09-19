@@ -376,6 +376,10 @@ function stepSide(sides: Record<Side, SideRuntime>, side: Side, dt: number, enga
   const runtime = sides[side];
   runtime.anyStarved = false;
   runtime.starvedModuleIds = [];
+  if (!engagement.operational) {
+    runtime.weaponsEngaged = false;
+    return;
+  }
   runtime.weaponsEngaged = engagement.weaponsEngaged;
   if (!hasPool(runtime) || runtime.infinite) {
     stepFreeSide(runtime, dt, engagement);

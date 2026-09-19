@@ -206,6 +206,44 @@ describe("SimulationImpl", () => {
     expect(snapshot.shipA.maxSpeed).toBe(100);
   });
 
+  test("disabled ewar on a side removes its web effect on the opponent's movement", () => {
+    const resolver: EwarResolver = {
+      speedMultiplier: (projection, distance) => projection?.loadout.webs.length ? (distance <= 5000 ? 0.4 : 1) : 1,
+      speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret,
+      disruptedTurretIgnoringRange: (turret) => turret,
+      propulsionSuppressed: () => false,
+      propulsionSuppressedIgnoringRange: () => false,
+      appliedEffects: () => [],
+      speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
+      disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }), disruptionMultipliers: () => ({ tracking: 1, optimal: 1, falloff: 1 }),
+      dampenedSensorSpec: (spec) => spec,
+      dampenedSensorSpecIgnoringRange: (spec) => spec,
+      dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
+      reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, }),
+      potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
+    };
+    const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
+    const shipAWeb: EwarProjection = {
+      loadout: {
+        webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
+        grapplers: [],
+        disruptors: [],
+        scramblers: [],
+        painters: [],
+        dampeners: [],
+        scripts: [],
+        dampenerScripts: [], neutralizers: [], nosferatu: [],
+      },
+      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+    };
+    const config = { ...simConfig("orbit"), shipA: { ...shipConfig("shipA", "midships"), ewar: shipAWeb } };
+    const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver: resolver, simConfig: config });
+    const active = sim.snapshot();
+    expect(active.shipB.maxSpeed).toBeCloseTo(40, 6);
+    sim.step(1, { propulsionStarved: { shipA: false, shipB: false }, ewarActive: { shipA: false, shipB: true } });
+    expect(sim.snapshot().shipB.maxSpeed).toBe(100);
+  });
+
   test("snapshot swaps to base max speed while propulsion is suppressed", () => {
     const resolver: EwarResolver = {
       speedMultiplier: () => 1,
@@ -241,9 +279,9 @@ describe("SimulationImpl", () => {
       initialDistance: 5000,
     };
     const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver, simConfig: config });
-    sim.step(1, { propulsionStarved: { shipA: false, shipB: true } });
+    sim.step(1, { propulsionStarved: { shipA: false, shipB: true }, ewarActive: { shipA: true, shipB: true } });
     expect(sim.snapshot().shipB.maxSpeed).toBe(200);
-    sim.step(1, { propulsionStarved: { shipA: false, shipB: false } });
+    sim.step(1, { propulsionStarved: { shipA: false, shipB: false }, ewarActive: { shipA: true, shipB: true } });
     expect(sim.snapshot().shipB.maxSpeed).toBe(1000);
   });
 

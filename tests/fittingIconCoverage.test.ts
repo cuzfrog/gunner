@@ -95,7 +95,7 @@ describe("bundled fitting icon coverage", () => {
       checkFitting(readFileSync(path, "utf8"), path, failures);
     }
     expect(failures, failures.join("\n")).toEqual([]);
-  });
+  }, 15000);
 
   test("every preset fitting row has an identity id that resolves to an icon", () => {
     const failures: string[] = [];

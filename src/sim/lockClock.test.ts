@@ -1,13 +1,13 @@
 import { LockClockImpl } from "./lockClock";
 import type { LockStepInput } from "./lockClock";
-import type { SensorSpec } from "./types";
+import type { SensorSpec, Side } from "./types";
 import { IDLE_LOCK } from "./types";
 
 const sensor: SensorSpec = { scanResolution: 200, maxTargetingRange: 50000, maxLockedTargets: 4 };
 const targetSig = 40;
 
-function stepInput(distance: number, sensorA: SensorSpec | undefined = sensor, sensorB: SensorSpec | undefined = sensor, sigA = targetSig, sigB = targetSig): LockStepInput {
-  return { distance, sensorA, sensorB, sigA, sigB };
+function stepInput(distance: number, sensorA: SensorSpec | undefined = sensor, sensorB: SensorSpec | undefined = sensor, sigA = targetSig, sigB = targetSig, operational: Record<Side, boolean> = { shipA: true, shipB: true }): LockStepInput {
+  return { distance, sensorA, sensorB, sigA, sigB, operational };
 }
 
 describe("LockClockImpl", () => {
@@ -60,6 +60,19 @@ describe("LockClockImpl", () => {
     expect(states.shipA.status).toBe("idle");
   });
 
+  test("non-operational side loses its lock and cannot relock; the other side keeps its lock", () => {
+    const clock = new LockClockImpl();
+    clock.step(0.1, stepInput(10000));
+    clock.step(100, stepInput(10000));
+    expect(clock.states().shipA.status).toBe("locked");
+    expect(clock.states().shipB.status).toBe("locked");
+    const states = clock.step(0.1, stepInput(10000, sensor, sensor, targetSig, targetSig, { shipA: false, shipB: true }));
+    expect(states.shipA).toEqual(IDLE_LOCK);
+    expect(states.shipB.status).toBe("locked");
+    const still = clock.step(5, stepInput(10000, sensor, sensor, targetSig, targetSig, { shipA: false, shipB: true }));
+    expect(still.shipA).toEqual(IDLE_LOCK);
+  });
+
   test("recomputes lock time each tick when damps change", () => {
     const clock = new LockClockImpl();
     clock.step(0.1, stepInput(10000));
@@ -80,7 +93,7 @@ describe("LockClockImpl", () => {
 
   test("undefined sensor spec results in locked state (backward compatible)", () => {
     const clock = new LockClockImpl();
-    const states = clock.step(0.1, { distance: 10000, sensorA: undefined, sensorB: undefined, sigA: targetSig, sigB: targetSig });
+    const states = clock.step(0.1, { distance: 10000, sensorA: undefined, sensorB: undefined, sigA: targetSig, sigB: targetSig, operational: { shipA: true, shipB: true } });
     expect(states.shipA.status).toBe("locked");
     expect(states.shipB.status).toBe("locked");
   });
