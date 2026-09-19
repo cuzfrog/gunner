@@ -1,7 +1,7 @@
 import type { ShipId, TypeId } from "../ids";
 import { toTypeId } from "../ids";
 import { PRECURSOR_WEAPON_GROUP, turretWeaponGroupForGroupId } from "./types";
-import { CHARGES, COMBAT_DRONES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, RIG_DRAWBACK_REDUCTIONS, SCRIPTS, SENSOR_BOOSTERS, SENSOR_BOOSTER_SCRIPTS, SENSOR_DAMPENERS, SENSOR_DAMPENER_SCRIPTS, SIGNAL_AMPLIFIERS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS } from "./generated/fittingDb.data";
+import { CHARGES, COMBAT_DRONES, DISRUPTION_SCRIPTS, DRONES, FIGHTERS, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, OMNIDIRECTIONAL_TRACKING_ENHANCERS, OMNIDIRECTIONAL_TRACKING_LINKS, RIG_DRAWBACK_REDUCTIONS, SCRIPTS, SENSOR_BOOSTERS, SENSOR_BOOSTER_SCRIPTS, SENSOR_DAMPENERS, SENSOR_DAMPENER_SCRIPTS, SIGNAL_AMPLIFIERS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, SUBSYSTEM_BONUSES, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS } from "./generated/fittingDb.data";
 import type { FittingModuleStats } from "./types";
 
 function moduleByName(name: string): FittingModuleStats | undefined {
@@ -280,6 +280,75 @@ describe("fittingDb", () => {
   test("excludes non-combat drones from the combat drone table", () => {
     expect(rowByName(COMBAT_DRONES, "Mining Drone I")).toBeUndefined();
     expect(rowByName(COMBAT_DRONES, "Salvage Drone I")).toBeUndefined();
+  });
+
+  test("includes the Templar I light fighter with its Attack M squadron stats", () => {
+    expect(rowByName(FIGHTERS, "Templar I")).toMatchObject({
+      kind: "light",
+      squadronMaxSize: 6,
+      orbitRange: 6500,
+      maxVelocity: 833,
+      refuelingTime: 5,
+      volume: 1000,
+      metaLevel: 0,
+      metaGroupID: 1,
+      requiredSkillIds: ["23069", "40572"],
+      attack: {
+        emDamage: 97.5, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 0, damageMultiplier: 1,
+        cycleTime: 5, explosionRadius: 185, explosionVelocity: 105, damageReductionFactor: 3,
+        damageReductionSensitivity: 5.5, optimal: 8000, falloff: 5000, numShots: 12, rearmTime: 4,
+      },
+    });
+  });
+
+  test("includes superiority fighters with the Missile Attack ability and unlimited magazine", () => {
+    const equite = rowByName(FIGHTERS, "Equite I");
+    expect(equite?.kind).toBe("light");
+    expect(equite?.attack).toMatchObject({ cycleTime: 3.5, optimal: 18000, falloff: 0, numShots: 0, rearmTime: 0 });
+  });
+
+  test("includes heavy fighters with role magazines and long-range optimal", () => {
+    const ametat = rowByName(FIGHTERS, "Ametat I");
+    expect(ametat?.kind).toBe("heavy");
+    expect(ametat?.attack).toMatchObject({ optimal: 34000, falloff: 8000, numShots: 3, rearmTime: 20 });
+    const shadow = rowByName(FIGHTERS, "Shadow");
+    expect(shadow?.kind).toBe("heavy");
+    expect(shadow?.attack).toMatchObject({ numShots: 6, rearmTime: 6 });
+  });
+
+  test("includes support fighters without an attack", () => {
+    const cenobite = rowByName(FIGHTERS, "Cenobite I");
+    expect(cenobite?.kind).toBe("support");
+    expect(cenobite?.attack).toBeUndefined();
+    expect(cenobite?.requiredSkillIds).toContain(toTypeId("23069"));
+  });
+
+  test("emits fighter skill bonuses from the Fighters skill chain", () => {
+    const fightersSkill = SKILL_BONUSES.find((b) => b.skillId === "23069" && b.bonusType === "fighterDamage");
+    expect(fightersSkill).toMatchObject({ magnitudePerLevel: 5, requiredSkillId: "23069", appliesTo: "charge" });
+    const interfacing = SKILL_BONUSES.find((b) => b.skillId === "3442" && b.bonusType === "fighterDamage");
+    expect(interfacing).toMatchObject({ magnitudePerLevel: 10, requiredSkillId: "23069", appliesTo: "charge" });
+    const sharpshooting = SKILL_BONUSES.find((b) => b.skillId === "23606" && b.bonusType === "fighterOptimal");
+    expect(sharpshooting).toMatchObject({ magnitudePerLevel: 5, requiredSkillId: "23069", appliesTo: "charge" });
+    const lightFighters = SKILL_BONUSES.find((b) => b.skillId === "40572" && b.bonusType === "fighterVelocity");
+    expect(lightFighters).toMatchObject({ magnitudePerLevel: 5, requiredSkillId: "40572", appliesTo: "charge" });
+  });
+
+  test("emits fighter damage hull bonuses for carriers and supercarriers", () => {
+    const carrierFighterDamage = HULL_BONUSES["23911" as ShipId]?.find((b) => b.attribute === "fighterDamage");
+    expect(carrierFighterDamage).toMatchObject({ magnitude: 5, scalesWithHullSkill: true, chargeSkillId: "23069" });
+    // Chimera (23915, Caldari) carries no fighter damage hull effect; neither does Archon (23757, Amarr).
+    expect(HULL_BONUSES["23757" as ShipId]?.some((b) => b.attribute === "fighterDamage") ?? false).toBe(false);
+    expect(HULL_BONUSES["23915" as ShipId]?.some((b) => b.attribute === "fighterDamage") ?? false).toBe(false);
+  });
+
+  test("carries explosion radius and velocity bonuses on tracking links and enhancers", () => {
+    const link = rowByName(OMNIDIRECTIONAL_TRACKING_LINKS, "Omnidirectional Tracking Link II");
+    expect(link?.aoeVelocityBonusPercent).toBe(8.25);
+    expect(link?.aoeCloudSizeBonusPercent).toBe(-8.25);
+    const enhancer = rowByName(OMNIDIRECTIONAL_TRACKING_ENHANCERS, "Omnidirectional Tracking Enhancer II");
+    expect(enhancer?.aoeVelocityBonusPercent).toBe(6);
+    expect(enhancer?.aoeCloudSizeBonusPercent).toBe(-6);
   });
 
   test("includes warp scramblers with propulsion block and non-blocking long warp disruptors", () => {

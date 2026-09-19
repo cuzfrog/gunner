@@ -18,6 +18,7 @@ const ATTRIBUTE_NAMES = new Map<number, string>([
   [504, "scanResolution"], [505, "maxTargetRange"], [506, "maxLockedTargets"],
   [507, "hiSlots"], [508, "medSlots"], [509, "lowSlots"], [510, "rigSlots"],
   [511, "droneCapacity"], [512, "droneBandwidth"], [513, "maxActiveDrones"],
+  [530, "fighterCapacity"], [531, "fighterTubes"], [532, "fighterLightSlots"], [533, "fighterHeavySlots"], [534, "fighterSupportSlots"],
   [520, "hp"], [521, "armorHP"], [522, "shieldCapacity"], [523, "capacitorCapacity"], [524, "rechargeRate"], [525, "shieldRechargeRate"],
 ]);
 
@@ -181,6 +182,25 @@ describe("_parseProfile", () => {
     };
     const profile = _parseProfile({ name: "Rifter", faction: "Minmatar Republic", hullType: "Standard Frigates" }, 0, SHIP_NAME_TO_TYPE, typedogmas, ATTRIBUTE_NAMES);
     expect(profile.maxActiveDrones).toBe(7);
+  });
+
+  test("extracts fighter bay fields from the SDE and defaults them to zero", () => {
+    const carrierDogma: Record<string, SdeTypeDogma> = {
+      "587": dogmaFor({ ...MINIMAL_DOGMA, fighterCapacity: 65000, fighterTubes: 4, fighterLightSlots: 3, fighterHeavySlots: 0, fighterSupportSlots: 2 }),
+    };
+    const carrier = _parseProfile({ name: "Rifter", faction: "Minmatar Republic", hullType: "Standard Frigates" }, 0, SHIP_NAME_TO_TYPE, carrierDogma, ATTRIBUTE_NAMES);
+    expect(carrier.fighterCapacity).toBe(65000);
+    expect(carrier.fighterTubes).toBe(4);
+    expect(carrier.fighterLightSlots).toBe(3);
+    expect(carrier.fighterHeavySlots).toBe(0);
+    expect(carrier.fighterSupportSlots).toBe(2);
+    const typedogmas: Record<string, SdeTypeDogma> = { "587": dogmaFor(MINIMAL_DOGMA) };
+    const frigate = _parseProfile({ name: "Rifter", faction: "Minmatar Republic", hullType: "Standard Frigates" }, 0, SHIP_NAME_TO_TYPE, typedogmas, ATTRIBUTE_NAMES);
+    expect(frigate.fighterCapacity).toBe(0);
+    expect(frigate.fighterTubes).toBe(0);
+    expect(frigate.fighterLightSlots).toBe(0);
+    expect(frigate.fighterHeavySlots).toBe(0);
+    expect(frigate.fighterSupportSlots).toBe(0);
   });
 
   test("throws for a ship name that has no SDE match", () => {

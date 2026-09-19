@@ -58,6 +58,18 @@ describe("SHIP_PROFILES data contract", () => {
     expect(profileByName("Rifter").maxActiveDrones).toBe(0);
   });
 
+  test("extracts fighter bay fields from the SDE snapshot", () => {
+    expect(profileByName("Archon").fighterCapacity).toBe(65000);
+    expect(profileByName("Archon").fighterTubes).toBe(4);
+    expect(profileByName("Archon").fighterLightSlots).toBe(3);
+    expect(profileByName("Archon").fighterSupportSlots).toBe(2);
+    expect(profileByName("Archon").fighterHeavySlots).toBe(0);
+    expect(profileByName("Hel").fighterHeavySlots).toBe(4);
+    expect(profileByName("Hel").fighterTubes).toBe(5);
+    expect(profileByName("Rifter").fighterCapacity).toBe(0);
+    expect(profileByName("Rifter").fighterTubes).toBe(0);
+  });
+
   test("allows zeros only where the SDE lacks the attribute", () => {
     const shuttle = profileByName("Amarr Shuttle");
     expect(shuttle.scanResolution).toBe(0);

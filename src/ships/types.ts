@@ -41,6 +41,11 @@ export interface ShipProfile {
   readonly droneBandwidth: number;
   readonly droneCapacity: number;
   readonly maxActiveDrones: number;
+  readonly fighterCapacity: number; // m3 hangar volume
+  readonly fighterTubes: number; // simultaneous squadron launches
+  readonly fighterLightSlots: number;
+  readonly fighterHeavySlots: number;
+  readonly fighterSupportSlots: number;
   readonly shieldHp: number;
   readonly shieldRechargeTime: number; // seconds
   readonly armorHp: number;

@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { toTypeId, type TypeId } from "../src/gamedata/ids";
-import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _assertCombatDroneSkillChain, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses, _buildSubsystemBonuses, _buildSkillBonuses, _buildDroneSkillIds } from "./generate-fitting-db";
+import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildFighterStats, buildLauncherStats, buildMissileStats, buildOmnidirectionalTrackingEnhancerStats, buildOmnidirectionalTrackingLinkStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _assertCombatDroneSkillChain, _assertFighterSkillChain, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses, _buildSubsystemBonuses, _buildSkillBonuses, _buildDroneSkillIds } from "./generate-fitting-db";
 import type { SdeGroup } from "./fittingDb/dogmaTypes";
 import type { UnmappedAttribute } from "./generate-fitting-db";
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./fittingDb/dogmaTypes";
@@ -61,7 +61,8 @@ function sdeType(metaLevel = 0, metaGroupID = 1, volume?: number): { typeID: num
 
 const WEB_SKILLS = ["3435"].map((id) => toTypeId(id));
 // Skill typeIDs of the "Drones" skill group (category 16), as derived by buildDroneSkillIds.
-const DRONE_SKILL_IDS = new Set([3436, 3442, 12305, 12484, 23594, 23606, 24241, 33699, 3441, 23069].map(Number));
+// Includes the fighter skills (Fighters, Light/Heavy Fighters, racial specializations).
+const DRONE_SKILL_IDS = new Set([3436, 3442, 12305, 12484, 23594, 23606, 24241, 33699, 3441, 23069, 40572, 32339, 92397, 92398, 92399, 92400].map(Number));
 function droneSkills(...ids: number[]): readonly TypeId[] {
   return ids.map((id) => toTypeId(String(id)));
 }
@@ -1152,6 +1153,19 @@ describe("_resolveHullBonusAttribute", () => {
     expect(unfilteredResult.kind).toBe("skip");
   });
 
+  test("returns mapped fighterDamage for a carrier fighter damage modifier on a drone skill", () => {
+    const result = _resolveHullBonusAttribute({ domain: "charID", func: "OwnerRequiredSkillModifier", modifiedAttributeID: 2226, modifyingAttributeID: 2367, operation: 6, skillTypeID: 23069 }, attrNames({ 2226: "fighterAbilityAttackMissileDamageMultiplier" }), DRONE_SKILL_IDS);
+    expect(result.kind).toBe("mapped");
+    if (result.kind === "mapped") expect(result.attribute).toBe("fighterDamage");
+  });
+
+  test("returns skip for fighter damage modifiers outside the OwnerRequiredSkillModifier drone context", () => {
+    const skillResult = _resolveHullBonusAttribute({ domain: "charID", func: "OwnerRequiredSkillModifier", modifiedAttributeID: 2226, modifyingAttributeID: 2367, operation: 6, skillTypeID: 3300 }, attrNames({ 2226: "fighterAbilityAttackMissileDamageMultiplier" }), DRONE_SKILL_IDS);
+    expect(skillResult.kind).toBe("skip");
+    const locationResult = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 2226, modifyingAttributeID: 2367, operation: 6, skillTypeID: 23069 }, attrNames({ 2226: "fighterAbilityAttackMissileDamageMultiplier" }), DRONE_SKILL_IDS);
+    expect(locationResult.kind).toBe("skip");
+  });
+
   test("returns skip duration (module cycle duration is not a hull bonus)", () => {
     const result = _resolveHullBonusAttribute({ domain: "shipID", func: "LocationRequiredSkillModifier", modifiedAttributeID: 73, modifyingAttributeID: 66, operation: 6, skillTypeID: 3450 }, attrNames({ 73: "duration" }), DRONE_SKILL_IDS);
     expect(result.kind).toBe("skip");
@@ -1208,6 +1222,21 @@ describe("_buildHullBonuses audit", () => {
     const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 593, "Tristan", unmapped, DRONE_SKILL_IDS);
     expect(unmapped.length).toBe(0);
     expect(bonuses).toEqual([{ attribute: "droneDamage", magnitude: 10, scalesWithHullSkill: false, chargeSkillId: toTypeId("3436") }]);
+  });
+
+  test("emits a single fighterDamage hull bonus from carrier fighter damage modifiers", () => {
+    const names = attrNames({ 2226: "fighterAbilityAttackMissileDamageMultiplier", 2178: "fighterAbilityAttackTurretDamageMultiplier", 2130: "fighterAbilityMissilesDamageMultiplier" });
+    const vals = attrValues({ 2367: 5 });
+    const typeDogma: SdeTypeDogma = { dogmaAttributes: [{ attributeID: 2367, value: 5 }], dogmaEffects: [{ effectID: 6601 }] };
+    const effects = dogmaEffectsMap([combatEffect(6601, 4, [
+      ownerSkillMod(2226, 2367, 6, 23069),
+      ownerSkillMod(2178, 2367, 6, 23069),
+      ownerSkillMod(2130, 2367, 6, 23069),
+    ])]);
+    const unmapped: UnmappedAttribute[] = [];
+    const bonuses = _buildHullBonuses(names, vals, typeDogma, effects, 23911, "Thanatos", unmapped, DRONE_SKILL_IDS);
+    expect(unmapped.length).toBe(0);
+    expect(bonuses).toEqual([{ attribute: "fighterDamage", magnitude: 5, scalesWithHullSkill: true, chargeSkillId: toTypeId("23069") }]);
   });
 
   test("attaches damageType to per-type missile damage bonuses", () => {
@@ -1406,9 +1435,12 @@ describe("_buildSkillBonuses drone skills", () => {
     const bonuses = _buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, DRONE_SKILL_IDS, []);
     expect(bonuses).toEqual([
       { skillId: toTypeId("3442"), bonusType: "droneDamage", magnitudePerLevel: 10, requiredSkillId: toTypeId("3436"), appliesTo: "charge" },
+      { skillId: toTypeId("3442"), bonusType: "fighterDamage", magnitudePerLevel: 10, requiredSkillId: toTypeId("23069"), appliesTo: "charge" },
       { skillId: toTypeId("12305"), bonusType: "droneVelocity", magnitudePerLevel: 5, requiredSkillId: toTypeId("3436"), appliesTo: "charge" },
+      { skillId: toTypeId("12305"), bonusType: "fighterVelocity", magnitudePerLevel: 5, requiredSkillId: toTypeId("23069"), appliesTo: "charge" },
       { skillId: toTypeId("12484"), bonusType: "droneDamage", magnitudePerLevel: 2, requiredSkillId: toTypeId("12484"), appliesTo: "charge" },
       { skillId: toTypeId("23606"), bonusType: "droneOptimal", magnitudePerLevel: 5, requiredSkillId: toTypeId("3436"), appliesTo: "charge" },
+      { skillId: toTypeId("23606"), bonusType: "fighterOptimal", magnitudePerLevel: 5, requiredSkillId: toTypeId("23069"), appliesTo: "charge" },
       { skillId: toTypeId("24241"), bonusType: "droneDamage", magnitudePerLevel: 5, requiredSkillId: toTypeId("24241"), appliesTo: "charge" },
     ]);
   });
@@ -1425,5 +1457,221 @@ describe("_buildSkillBonuses drone skills", () => {
     const typedogmas = skillDogma(24241, [], [1730]);
     const dogmaEffects = { "1730": dogmaEffect(1730, []) };
     expect(() => _buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, DRONE_SKILL_IDS, [])).toThrow(/without attribute 292/);
+  });
+});
+
+describe("_buildSkillBonuses fighter skills", () => {
+  const groups = {
+    "273": { groupID: 273, categoryID: 16, "groupName_en-us": "Drones" },
+    "255": { groupID: 255, categoryID: 16, "groupName_en-us": "Gunnery" },
+  };
+  const attributeNames = new Map<number, string>([[292, "damageMultiplierBonus"], [2603, "maxVelocityBonus"]]);
+
+  function skillType(id: number, groupID: number): Record<string, { typeID: number; "typeName_en-us": string; groupID: number; published: number }> {
+    return { [String(id)]: { typeID: id, "typeName_en-us": `Skill ${id}`, groupID, published: 1 } };
+  }
+
+  function skillDogma(id: number, attrs: readonly { attributeID: number; value: number }[], effectIds: readonly number[]): Record<string, SdeTypeDogma> {
+    return { [String(id)]: { dogmaAttributes: attrs, dogmaEffects: effectIds.map((effectID) => ({ effectID })) } };
+  }
+
+  function dogmaEffect(eid: number, modifiers: readonly SdeDogmaEffectModifier[]): SdeDogmaEffect {
+    return { effectID: eid, effectName: "", effectCategory: 0, modifierInfo: modifiers };
+  }
+
+  test("emits fighter damage from the Fighters skill legacy effect filtered by the skill itself", () => {
+    const types = skillType(23069, 273);
+    const typedogmas = skillDogma(23069, [{ attributeID: 292, value: 5 }], [6560]);
+    const dogmaEffects = { "6560": dogmaEffect(6560, [ownerSkillMod(2226, 292, 6, 23069)]) };
+    expect(_buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, DRONE_SKILL_IDS, [])).toEqual([
+      { skillId: toTypeId("23069"), bonusType: "fighterDamage", magnitudePerLevel: 5, requiredSkillId: toTypeId("23069"), appliesTo: "charge" },
+    ]);
+  });
+
+  test("emits fighter velocity from the Light Fighters skill legacy effect", () => {
+    const types = skillType(40572, 273);
+    const typedogmas = skillDogma(40572, [{ attributeID: 2603, value: 5 }], [6561]);
+    const dogmaEffects = { "6561": dogmaEffect(6561, []) };
+    expect(_buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, DRONE_SKILL_IDS, [])).toEqual([
+      { skillId: toTypeId("40572"), bonusType: "fighterVelocity", magnitudePerLevel: 5, requiredSkillId: toTypeId("40572"), appliesTo: "charge" },
+    ]);
+  });
+
+  test("emits fighter damage from the Heavy Fighters and racial specialization legacy effects", () => {
+    const types = { ...skillType(32339, 273), ...skillType(92397, 273) };
+    const typedogmas = {
+      ...skillDogma(32339, [{ attributeID: 292, value: 5 }], [6563]),
+      ...skillDogma(92397, [{ attributeID: 292, value: 2 }], [12844]),
+    };
+    const dogmaEffects = { "6563": dogmaEffect(6563, []), "12844": dogmaEffect(12844, []) };
+    const bonuses = _buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, DRONE_SKILL_IDS, []);
+    expect(bonuses).toContainEqual({ skillId: toTypeId("32339"), bonusType: "fighterDamage", magnitudePerLevel: 5, requiredSkillId: toTypeId("32339"), appliesTo: "charge" });
+    expect(bonuses).toContainEqual({ skillId: toTypeId("92397"), bonusType: "fighterDamage", magnitudePerLevel: 2, requiredSkillId: toTypeId("92397"), appliesTo: "charge" });
+  });
+
+  test("emits fighter rows alongside drone rows for shared drone-family effects", () => {
+    const types = skillType(3442, 273);
+    const typedogmas = skillDogma(3442, [{ attributeID: 292, value: 10 }], [6663]);
+    const dogmaEffects = { "6663": dogmaEffect(6663, [ownerSkillMod(64, 292, 6, 3436)]) };
+    expect(_buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, DRONE_SKILL_IDS, [])).toEqual([
+      { skillId: toTypeId("3442"), bonusType: "droneDamage", magnitudePerLevel: 10, requiredSkillId: toTypeId("3436"), appliesTo: "charge" },
+      { skillId: toTypeId("3442"), bonusType: "fighterDamage", magnitudePerLevel: 10, requiredSkillId: toTypeId("23069"), appliesTo: "charge" },
+    ]);
+  });
+
+  test("throws when a fighter legacy effect lands on a skill outside the Drones group", () => {
+    const types = skillType(3306, 255);
+    const typedogmas = skillDogma(3306, [{ attributeID: 292, value: 5 }], [6560]);
+    const dogmaEffects = { "6560": dogmaEffect(6560, []) };
+    expect(() => _buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, DRONE_SKILL_IDS, [])).toThrow(/not in the "Drones" skill group/);
+  });
+
+  test("throws when a fighter legacy effect lacks the magnitude attribute", () => {
+    const types = skillType(23069, 273);
+    const typedogmas = skillDogma(23069, [], [6560]);
+    const dogmaEffects = { "6560": dogmaEffect(6560, []) };
+    expect(() => _buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, DRONE_SKILL_IDS, [])).toThrow(/without attribute 292/);
+  });
+});
+
+describe("buildFighterStats", () => {
+  const FIGHTER_SKILLS = droneSkills(23069, 40572);
+  const ATTACK_M_ATTRS = {
+    fighterAbilityAttackMissileDamageEM: 97.5, fighterAbilityAttackMissileDamageTherm: 0, fighterAbilityAttackMissileDamageKin: 0, fighterAbilityAttackMissileDamageExp: 0,
+    fighterAbilityAttackMissileDamageMultiplier: 1, fighterAbilityAttackMissileDuration: 5000,
+    fighterAbilityAttackMissileExplosionRadius: 185, fighterAbilityAttackMissileExplosionVelocity: 105,
+    fighterAbilityAttackMissileReductionFactor: 3, fighterAbilityAttackMissileReductionSensitivity: 5.5,
+    fighterAbilityAttackMissileRangeOptimal: 8000, fighterAbilityAttackMissileRangeFalloff: 5000,
+  };
+  const MISSILE_ATTACK_ATTRS = {
+    fighterAbilityMissilesDamageEM: 100, fighterAbilityMissilesDamageTherm: 0, fighterAbilityMissilesDamageKin: 0, fighterAbilityMissilesDamageExp: 0,
+    fighterAbilityMissilesDamageMultiplier: 1, fighterAbilityMissilesDuration: 3500,
+    fighterAbilityMissilesExplosionRadius: 400, fighterAbilityMissilesExplosionVelocity: 70,
+    fighterAbilityMissilesDamageReductionFactor: 5, fighterAbilityMissilesDamageReductionSensitivity: 5.5,
+    fighterAbilityMissilesRange: 18000,
+  };
+
+  function fighterEffects(...effectIds: number[]): Set<number> {
+    return new Set(effectIds);
+  }
+
+  test("builds a light fighter (Templar I) with the Attack M ability and role magazine", () => {
+    const valuesMap = values({ maxVelocity: 833, signatureRadius: 110, fighterSquadronRole: 2, fighterSquadronMaxSize: 6, fighterSquadronOrbitRange: 6500, fighterRefuelingTime: 5000, ...ATTACK_M_ATTRS });
+    const stats = buildFighterStats(valuesMap, sdeType(0, 1, 1000), 1652, fighterEffects(6465, 6431, 6440, 6554), FIGHTER_SKILLS);
+    expect(stats).toEqual({
+      kind: "light",
+      squadronMaxSize: 6,
+      orbitRange: 6500,
+      maxVelocity: 833,
+      signatureRadius: 110,
+      refuelingTime: 5,
+      volume: 1000,
+      metaLevel: 0,
+      metaGroupID: 1,
+      requiredSkillIds: FIGHTER_SKILLS,
+      attack: {
+        emDamage: 97.5, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 0, damageMultiplier: 1,
+        cycleTime: 5, explosionRadius: 185, explosionVelocity: 105, damageReductionFactor: 3,
+        damageReductionSensitivity: 5.5, optimal: 8000, falloff: 5000, numShots: 12, rearmTime: 4,
+      },
+    });
+  });
+
+  test("builds a superiority fighter (role 1) with the Missile Attack ability and unlimited magazine", () => {
+    const valuesMap = values({ maxVelocity: 900, signatureRadius: 120, fighterSquadronRole: 1, fighterSquadronMaxSize: 6, fighterSquadronOrbitRange: 3000, fighterRefuelingTime: 2000, ...MISSILE_ATTACK_ATTRS });
+    const stats = buildFighterStats(valuesMap, sdeType(), 1652, fighterEffects(6431, 6440), FIGHTER_SKILLS);
+    expect(stats?.attack).toEqual({
+      emDamage: 100, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 0, damageMultiplier: 1,
+      cycleTime: 3.5, explosionRadius: 400, explosionVelocity: 70, damageReductionFactor: 5,
+      damageReductionSensitivity: 5.5, optimal: 18000, falloff: 0, numShots: 0, rearmTime: 0,
+    });
+  });
+
+  test("builds a heavy long-range fighter (role 5) with 3 shots and 20s rearm", () => {
+    const valuesMap = values({ maxVelocity: 700, signatureRadius: 200, fighterSquadronRole: 5, fighterSquadronMaxSize: 3, fighterSquadronOrbitRange: 5000, fighterRefuelingTime: 10000, fighterAbilityAttackMissileDamageEM: 0, fighterAbilityAttackMissileDamageTherm: 0, fighterAbilityAttackMissileDamageKin: 210, fighterAbilityAttackMissileDamageExp: 0, fighterAbilityAttackMissileDamageMultiplier: 1, fighterAbilityAttackMissileDuration: 8000, fighterAbilityAttackMissileExplosionRadius: 320, fighterAbilityAttackMissileExplosionVelocity: 86, fighterAbilityAttackMissileReductionFactor: 4.5, fighterAbilityAttackMissileReductionSensitivity: 5.5, fighterAbilityAttackMissileRangeOptimal: 34000, fighterAbilityAttackMissileRangeFalloff: 8000 });
+    const stats = buildFighterStats(valuesMap, sdeType(), 1653, fighterEffects(6465, 6440), FIGHTER_SKILLS);
+    expect(stats?.kind).toBe("heavy");
+    expect(stats?.attack?.numShots).toBe(3);
+    expect(stats?.attack?.rearmTime).toBe(20);
+    expect(stats?.attack?.optimal).toBe(34000);
+    expect(stats?.attack?.falloff).toBe(8000);
+  });
+
+  test("builds a support fighter without an attack", () => {
+    const valuesMap = values({ maxVelocity: 750, signatureRadius: 130, fighterSquadronMaxSize: 6, fighterSquadronOrbitRange: 6000, fighterRefuelingTime: 5000 });
+    const stats = buildFighterStats(valuesMap, sdeType(), 1537, fighterEffects(6434, 6441), FIGHTER_SKILLS);
+    expect(stats?.kind).toBe("support");
+    expect(stats?.attack).toBeUndefined();
+  });
+
+  test("throws when an attack fighter has no damage ability", () => {
+    const valuesMap = values({ maxVelocity: 833, signatureRadius: 110, fighterSquadronRole: 2, fighterSquadronMaxSize: 6, fighterSquadronOrbitRange: 6500, fighterRefuelingTime: 5000 });
+    expect(() => buildFighterStats(valuesMap, sdeType(), 1652, fighterEffects(6440), FIGHTER_SKILLS)).toThrow(/no damage ability/);
+  });
+
+  test("throws when a support fighter carries a damage ability", () => {
+    const valuesMap = values({ maxVelocity: 750, signatureRadius: 130, fighterSquadronMaxSize: 6, fighterSquadronOrbitRange: 6000, fighterRefuelingTime: 5000, ...ATTACK_M_ATTRS });
+    expect(() => buildFighterStats(valuesMap, sdeType(), 1537, fighterEffects(6465), FIGHTER_SKILLS)).toThrow(/Support fighter .* carries a damage ability/);
+  });
+
+  test("throws when the squadron role is unknown", () => {
+    const valuesMap = values({ maxVelocity: 833, signatureRadius: 110, fighterSquadronRole: 9, fighterSquadronMaxSize: 6, fighterSquadronOrbitRange: 6500, fighterRefuelingTime: 5000, ...ATTACK_M_ATTRS });
+    expect(() => buildFighterStats(valuesMap, sdeType(), 1652, fighterEffects(6465), FIGHTER_SKILLS)).toThrow(/unknown fighterSquadronRole/);
+  });
+
+  test("throws when core navigation attributes are missing", () => {
+    expect(() => buildFighterStats(values({ maxVelocity: 833 }), sdeType(), 1652, fighterEffects(6465), FIGHTER_SKILLS)).toThrow(/missing core attribute\(s\) .*fighterSquadronMaxSize/);
+  });
+
+  test("throws when attack application attributes are missing", () => {
+    const valuesMap = values({ maxVelocity: 833, signatureRadius: 110, fighterSquadronRole: 2, fighterSquadronMaxSize: 6, fighterSquadronOrbitRange: 6500, fighterRefuelingTime: 5000, fighterAbilityAttackMissileDamageEM: 97.5, fighterAbilityAttackMissileDamageTherm: 0, fighterAbilityAttackMissileDamageKin: 0, fighterAbilityAttackMissileDamageExp: 0, fighterAbilityAttackMissileDamageMultiplier: 1, fighterAbilityAttackMissileDuration: 5000, fighterAbilityAttackMissileExplosionVelocity: 105, fighterAbilityAttackMissileReductionFactor: 3, fighterAbilityAttackMissileReductionSensitivity: 5.5, fighterAbilityAttackMissileRangeOptimal: 8000, fighterAbilityAttackMissileRangeFalloff: 5000 });
+    expect(() => buildFighterStats(valuesMap, sdeType(), 1652, fighterEffects(6465), FIGHTER_SKILLS)).toThrow(/missing attack application attribute/);
+  });
+});
+
+describe("_assertFighterSkillChain", () => {
+  test("accepts a chain containing the Fighters skill", () => {
+    expect(() => _assertFighterSkillChain("Templar I", droneSkills(23069, 40572))).not.toThrow();
+  });
+
+  test("throws on an empty chain", () => {
+    expect(() => _assertFighterSkillChain("Templar I", [])).toThrow(/no required-skill chain/);
+  });
+
+  test("throws when the chain lacks the Fighters skill (shared bonus filters would silently miss)", () => {
+    expect(() => _assertFighterSkillChain("Templar I", droneSkills(40572))).toThrow(/Fighters skill/);
+  });
+});
+
+describe("buildOmnidirectionalTrackingLinkStats", () => {
+  test("builds explosion radius and velocity bonuses alongside tracking bonuses", () => {
+    expect(buildOmnidirectionalTrackingLinkStats(values({ trackingSpeedBonus: 15, maxRangeBonus: 7.5, falloffBonus: 15, aoeVelocityBonus: 8.25, aoeCloudSizeBonus: -8.25, overloadTrackingModuleStrengthBonus: 15, capacitorNeed: 24, duration: 10000 }))).toEqual({
+      trackingBonusPercent: 15,
+      optimalBonusPercent: 7.5,
+      falloffBonusPercent: 15,
+      aoeVelocityBonusPercent: 8.25,
+      aoeCloudSizeBonusPercent: -8.25,
+      overloadStrengthBonusPercent: 15,
+      capacitorNeed: 24,
+      cycleTime: 10,
+    });
+  });
+
+  test("defaults explosion bonuses to zero when the SDE lacks them", () => {
+    const stats = buildOmnidirectionalTrackingLinkStats(values({ trackingSpeedBonus: 10, maxRangeBonus: 5, falloffBonus: 10 }));
+    expect(stats?.aoeVelocityBonusPercent).toBe(0);
+    expect(stats?.aoeCloudSizeBonusPercent).toBe(0);
+  });
+});
+
+describe("buildOmnidirectionalTrackingEnhancerStats", () => {
+  test("builds explosion radius and velocity bonuses alongside tracking bonuses", () => {
+    expect(buildOmnidirectionalTrackingEnhancerStats(values({ trackingSpeedBonus: 9.5, maxRangeBonus: 10, falloffBonus: 20, aoeVelocityBonus: 6, aoeCloudSizeBonus: -6 }))).toEqual({
+      trackingBonusPercent: 9.5,
+      optimalBonusPercent: 10,
+      falloffBonusPercent: 20,
+      aoeVelocityBonusPercent: 6,
+      aoeCloudSizeBonusPercent: -6,
+    });
   });
 });

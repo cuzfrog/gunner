@@ -311,6 +311,11 @@ function parseProfile(
   const sigRadius = requiredPositive(values, "signatureRadius", name);
   const droneCapacity = values.get("droneCapacity") ?? 0;
   const droneBandwidth = values.get("droneBandwidth") ?? 0;
+  const fighterCapacity = values.get("fighterCapacity") ?? 0;
+  const fighterTubes = values.get("fighterTubes") ?? 0;
+  const fighterLightSlots = values.get("fighterLightSlots") ?? 0;
+  const fighterHeavySlots = values.get("fighterHeavySlots") ?? 0;
+  const fighterSupportSlots = values.get("fighterSupportSlots") ?? 0;
   const defense = extractDefenseData(String(id), typedogmas, attributeNames);
   const capacitor = extractCapacitorData(String(id), typedogmas, attributeNames);
   const slots = extractSlotData(String(id), typedogmas, attributeNames);
@@ -337,6 +342,11 @@ function parseProfile(
     droneBandwidth,
     droneCapacity,
     maxActiveDrones: values.get("maxActiveDrones") ?? fallbackMaxActiveDrones(droneCapacity, droneBandwidth),
+    fighterCapacity,
+    fighterTubes,
+    fighterLightSlots,
+    fighterHeavySlots,
+    fighterSupportSlots,
     shieldHp: defense.shieldHp,
     shieldRechargeTime: defense.shieldRechargeTime,
     armorHp: defense.armorHp,
@@ -380,6 +390,11 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push(`    droneBandwidth: ${p.droneBandwidth},`);
     lines.push(`    droneCapacity: ${p.droneCapacity},`);
     lines.push(`    maxActiveDrones: ${p.maxActiveDrones},`);
+    lines.push(`    fighterCapacity: ${p.fighterCapacity},`);
+    lines.push(`    fighterTubes: ${p.fighterTubes},`);
+    lines.push(`    fighterLightSlots: ${p.fighterLightSlots},`);
+    lines.push(`    fighterHeavySlots: ${p.fighterHeavySlots},`);
+    lines.push(`    fighterSupportSlots: ${p.fighterSupportSlots},`);
     lines.push(`    shieldHp: ${p.shieldHp},`);
     lines.push(`    shieldRechargeTime: ${p.shieldRechargeTime},`);
     lines.push(`    armorHp: ${p.armorHp},`);
