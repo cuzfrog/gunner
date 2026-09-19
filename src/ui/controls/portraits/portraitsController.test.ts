@@ -173,6 +173,7 @@ function defenseRuntime(percentages: Readonly<Record<"shield" | "armor" | "hull"
     repairers: { shipA: [], shipB: [] },
     repairMode: { shipA: "auto", shipB: "auto" },
     rah: { shipA: undefined, shipB: undefined },
+    hardeners: { shipA: [], shipB: [] },
   };
 }
 

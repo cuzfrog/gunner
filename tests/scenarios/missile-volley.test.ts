@@ -2,6 +2,7 @@ import { toTypeId } from "../../src/gamedata/ids";
 import { MissileApplicationImpl } from "../../src/sim/missileApplication";
 import { MissileSimulatorImpl } from "../../src/sim/missileSimulator";
 import { DefenseSimulatorImpl } from "../../src/sim/defenseSimulator";
+import { StackingPenaltyImpl } from "../../src/sim/stackingPenalty";
 import { Vec2 } from "../../src/sim/vec2";
 import { ZERO_RESISTS, damageVectorScale, damageVectorSum, type DamageEvent, type DefenseSpec, type EngagementFrame, type MissileLaunchSpec, type MissileSpec, type ShipState } from "../../src/sim/types";
 
@@ -33,6 +34,8 @@ const targetDefense: DefenseSpec = {
     hull: { hp: 10000, resists: ZERO_RESISTS },
   },
   shieldRechargeTime: 10000,
+  baseResists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS },
+  hardeners: [],
   repairers: [],
   signaturePenalty: 0,
   shieldUniformity: 0,
@@ -71,13 +74,13 @@ describe("missile volley count-scaling integration", () => {
     const multiDamage = damageVectorSum(multiEvents[0].rawByType);
     expect(multiDamage).toBeCloseTo(singleDamage * 3, 6);
 
-    const defenseSingle = new DefenseSimulatorImpl();
-    defenseSingle.reset({ shipA: targetDefense, shipB: targetDefense, damageEnabled: { shipA: true, shipB: true }, repairMode: { shipA: "auto", shipB: "auto" }, repairerActivation: { shipA: [], shipB: [] }, rahActivation: { shipA: undefined, shipB: undefined } });
+    const defenseSingle = new DefenseSimulatorImpl({ stackingPenalty: new StackingPenaltyImpl() });
+    defenseSingle.reset({ shipA: targetDefense, shipB: targetDefense, damageEnabled: { shipA: true, shipB: true }, repairMode: { shipA: "auto", shipB: "auto" }, repairerActivation: { shipA: [], shipB: [] }, rahActivation: { shipA: undefined, shipB: undefined }, overloaded: { shipA: false, shipB: false } });
     defenseSingle.step(0.1, singleEvents);
     const singleView = defenseSingle.view();
 
-    const defenseMulti = new DefenseSimulatorImpl();
-    defenseMulti.reset({ shipA: targetDefense, shipB: targetDefense, damageEnabled: { shipA: true, shipB: true }, repairMode: { shipA: "auto", shipB: "auto" }, repairerActivation: { shipA: [], shipB: [] }, rahActivation: { shipA: undefined, shipB: undefined } });
+    const defenseMulti = new DefenseSimulatorImpl({ stackingPenalty: new StackingPenaltyImpl() });
+    defenseMulti.reset({ shipA: targetDefense, shipB: targetDefense, damageEnabled: { shipA: true, shipB: true }, repairMode: { shipA: "auto", shipB: "auto" }, repairerActivation: { shipA: [], shipB: [] }, rahActivation: { shipA: undefined, shipB: undefined }, overloaded: { shipA: false, shipB: false } });
     defenseMulti.step(0.1, multiEvents);
     const multiView = defenseMulti.view();
 

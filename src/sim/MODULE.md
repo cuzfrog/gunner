@@ -64,6 +64,8 @@ Gate relaxed: `defenseSimulator.ts` was removed from `no-new-exports` to add the
 
 
 
+Gate relaxed (active hardener lifecycle): `types.ts` and `index.ts` gained `ActiveHardenerSpec` (moduleId, layer, compensation-applied resistBonus, overloadBonusMultiplier, capacitorNeed, cycleTime) as a cross-boundary defense DTO produced by `fitting/defenseCalculator` and consumed by the sim; `defenseSimulator.ts` (ungated) gained `HardenerViewState`. `DefenseSpec` was split: `baseResists` holds every active hardener offline (passive coatings, damage control, hull bonuses, skills stay baked) and `hardeners` lists the active modules, with the invariant that `layers[].resists` is the all-on composition `1-(1-base)*stacking(online hardener resonances)`; `RahSpec.armorResistsWithoutRah` was dropped because the armor base now carries that role. `DefenseSimulatorImpl` takes `StackingPenalty` by constructor injection, steps hardeners as capacitor-gated per-cycle debits through `CapacitorGate.attemptDebit` (pay at activation and renewal, drop offline while starved, reactivate and pay on recovery, freeze with the dead side), recomputes applied resists from the online set every frame, and exposes per-hardener online/starved/cycleProgress via `DefenseView.hardeners`; `DefenseSimConfig` gained a side-level `overloaded` toggle so an overloaded hardener applies its overload bonus. `fitting/capacitorCalculator` emits one usage row per hardener (amount = capacitorNeed, count 1), completing the fitted-drain figure for active tanks.
+
 
 # sim
 

@@ -256,6 +256,7 @@ describe("SimConfigSourceImpl", () => {
     expect(engineConfig.defense.shipB).toBe(EMPTY_DEFENSE_SPEC);
     expect(engineConfig.defense.damageEnabled).toEqual({ shipA: true, shipB: true });
     expect(engineConfig.defense.repairMode).toEqual({ shipA: "auto", shipB: "auto" });
+    expect(engineConfig.defense.overloaded).toEqual({ shipA: true, shipB: true });
     expect(engineConfig.overloaded).toEqual({ shipA: true, shipB: true });
   });
 

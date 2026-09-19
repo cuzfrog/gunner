@@ -1,6 +1,7 @@
-import { type DamageEvent, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type LayerDamage, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS } from "./types";
+import { type ActiveHardenerSpec, type DamageEvent, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type LayerDamage, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS } from "./types";
 import type { CapacitorGate } from "./capacitorSimulator";
 import type { Restorable } from "./restorable";
+import type { StackingPenalty } from "./stackingPenalty";
 
 export type RepairMode = "auto" | "manual";
 
@@ -31,6 +32,14 @@ export interface RahViewState {
   readonly starved: boolean;
 }
 
+export interface HardenerViewState {
+  readonly moduleId: ActiveHardenerSpec["moduleId"];
+  readonly layer: DefenseLayer;
+  readonly online: boolean;
+  readonly starved: boolean;
+  readonly cycleProgress: number;
+}
+
 export interface DefenseView {
   readonly pools: Record<Side, DefensePoolState>;
   readonly poolMaxes: Record<Side, DefensePoolState>;
@@ -42,6 +51,7 @@ export interface DefenseView {
   readonly repairers: Record<Side, readonly RepairerViewState[]>;
   readonly repairMode: Record<Side, RepairMode>;
   readonly rah: Record<Side, RahViewState | undefined>;
+  readonly hardeners: Record<Side, readonly HardenerViewState[]>;
 }
 
 export interface RepairerActivationEntry {
@@ -61,6 +71,8 @@ export interface DefenseSimConfig {
   readonly repairMode: Record<Side, RepairMode>;
   readonly repairerActivation: Record<Side, readonly RepairerActivationEntry[]>;
   readonly rahActivation: Record<Side, RahActivationEntry | undefined>;
+  /** Side-level overload toggle; an overloaded hardener applies its overload bonus to the resists. */
+  readonly overloaded: Record<Side, boolean>;
 }
 
 export interface RepairerStateSnapshot {
@@ -83,6 +95,13 @@ export interface RahStateSnapshot {
   readonly armorDamageAccumulator: DamageVector;
 }
 
+export interface HardenerStateSnapshot {
+  readonly timer: number;
+  readonly online: boolean;
+  readonly needsPayment: boolean;
+  readonly starved: boolean;
+}
+
 export interface SidePoolsSnapshot {
   readonly shield: number;
   readonly armor: number;
@@ -92,7 +111,10 @@ export interface SidePoolsSnapshot {
   readonly hullMax: number;
   readonly shieldRechargeTime: number;
   readonly shieldUniformity: number;
-  readonly baseArmorResists: DamageResists;
+  readonly baseResists: Readonly<Record<DefenseLayer, DamageResists>>;
+  readonly hardeners: readonly ActiveHardenerSpec[];
+  readonly hardenerStates: readonly HardenerStateSnapshot[];
+  readonly overloaded: boolean;
   readonly resists: Readonly<Record<DefenseLayer, Readonly<Record<DamageType, number>>>>;
   readonly dead: boolean;
   readonly deadAt: number | undefined;
@@ -149,6 +171,13 @@ interface RahState {
   armorDamageAccumulator: MutableDamageVector;
 }
 
+interface HardenerState {
+  timer: number;
+  online: boolean;
+  needsPayment: boolean;
+  starved: boolean;
+}
+
 interface SidePools {
   shield: number;
   armor: number;
@@ -158,7 +187,10 @@ interface SidePools {
   hullMax: number;
   shieldRechargeTime: number;
   shieldUniformity: number;
-  baseArmorResists: DamageResists;
+  baseResists: Readonly<Record<DefenseLayer, DamageResists>>;
+  hardeners: readonly ActiveHardenerSpec[];
+  hardenerStates: HardenerState[];
+  overloaded: boolean;
   resists: Readonly<Record<DefenseLayer, Readonly<Record<DamageType, number>>>>;
   dead: boolean;
   deadAt: number | undefined;
@@ -176,8 +208,10 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
   private time: number;
   private eventBuffer: DamageEvent[];
   private nextTickBoundary: number;
+  private readonly stacking: StackingPenalty;
 
-  constructor() {
+  constructor({ stackingPenalty }: { readonly stackingPenalty: StackingPenalty }) {
+    this.stacking = stackingPenalty;
     this.time = 0;
     this.eventBuffer = [];
     this.nextTickBoundary = 1;
@@ -185,8 +219,8 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
 
   reset(config: DefenseSimConfig): void {
     this.sides = {
-      shipA: poolsFromSpec(config.shipA, config.damageEnabled.shipA, config.repairMode.shipA, config.repairerActivation.shipA, config.rahActivation.shipA),
-      shipB: poolsFromSpec(config.shipB, config.damageEnabled.shipB, config.repairMode.shipB, config.repairerActivation.shipB, config.rahActivation.shipB),
+      shipA: poolsFromSpec(config.shipA, config.damageEnabled.shipA, config.repairMode.shipA, config.repairerActivation.shipA, config.rahActivation.shipA, config.overloaded.shipA, this.stacking),
+      shipB: poolsFromSpec(config.shipB, config.damageEnabled.shipB, config.repairMode.shipB, config.repairerActivation.shipB, config.rahActivation.shipB, config.overloaded.shipB, this.stacking),
     };
     this.time = 0;
     this.eventBuffer = [];
@@ -195,8 +229,8 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
 
   update(config: DefenseSimConfig): void {
     this.sides = {
-      shipA: mergePools(this.sides.shipA, config.shipA, config.damageEnabled.shipA, config.repairMode.shipA, config.repairerActivation.shipA, config.rahActivation.shipA),
-      shipB: mergePools(this.sides.shipB, config.shipB, config.damageEnabled.shipB, config.repairMode.shipB, config.repairerActivation.shipB, config.rahActivation.shipB),
+      shipA: mergePools(this.sides.shipA, config.shipA, config.damageEnabled.shipA, config.repairMode.shipA, config.repairerActivation.shipA, config.rahActivation.shipA, config.overloaded.shipA, this.stacking),
+      shipB: mergePools(this.sides.shipB, config.shipB, config.damageEnabled.shipB, config.repairMode.shipB, config.repairerActivation.shipB, config.rahActivation.shipB, config.overloaded.shipB, this.stacking),
     };
   }
 
@@ -244,6 +278,7 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
       },
       repairMode: { shipA: this.sides.shipA.repairMode, shipB: this.sides.shipB.repairMode },
       rah: { shipA: rahView(this.sides.shipA), shipB: rahView(this.sides.shipB) },
+      hardeners: { shipA: hardenerViews(this.sides.shipA), shipB: hardenerViews(this.sides.shipB) },
     };
   }
 
@@ -284,11 +319,11 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
   }
 
   private stepSide(side: Side, dt: number, events: readonly DamageEvent[], capacitor?: CapacitorGate): void {
-    stepSidePools(this.sides[side], dt, events, this.time, side, capacitor);
+    stepSidePools(this.sides[side], dt, events, this.time, side, capacitor, this.stacking);
   }
 }
 
-function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEvent[], time: number, side: Side, capacitor: CapacitorGate | undefined): void {
+function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEvent[], time: number, side: Side, capacitor: CapacitorGate | undefined, stacking: StackingPenalty): void {
   if (pools.dead) return;
   if (!pools.damageEnabled) {
     pools.shield = pools.shieldMax;
@@ -296,7 +331,8 @@ function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEven
     pools.hull = pools.hullMax;
     return;
   }
-  updateRahResists(pools);
+  stepHardeners(pools, dt, side, capacitor);
+  updateAppliedResists(pools, stacking);
   applyShieldRegen(pools, dt);
   const armorDamageByType = applyEvents(pools, events);
   stepRepairers(pools, dt, side, capacitor);
@@ -314,7 +350,8 @@ function emptyPools(): SidePools {
     shieldMax: 0, armorMax: 0, hullMax: 0,
     shieldRechargeTime: 0,
     shieldUniformity: 0,
-    baseArmorResists: ZERO_RESISTS,
+    baseResists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS },
+    hardeners: [], hardenerStates: [], overloaded: false,
     resists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS },
     dead: false, deadAt: undefined, damageEnabled: true,
     repairers: [], repairerStates: [],
@@ -324,13 +361,10 @@ function emptyPools(): SidePools {
   };
 }
 
-function poolsFromSpec(spec: DefenseSpec, damageEnabled: boolean, repairMode: RepairMode, repairerActivation: readonly RepairerActivationEntry[], rahActivation: RahActivationEntry | undefined): SidePools {
-  const armorResists = spec.layers.armor.resists;
+function poolsFromSpec(spec: DefenseSpec, damageEnabled: boolean, repairMode: RepairMode, repairerActivation: readonly RepairerActivationEntry[], rahActivation: RahActivationEntry | undefined, overloaded: boolean, stacking: StackingPenalty): SidePools {
   const rahSpec = spec.rah;
-  const baseArmorResists = rahSpec ? rahSpec.armorResistsWithoutRah : armorResists;
   const rahState = rahSpec ? createRahState(rahSpec, rahActivation) : undefined;
-  const liveArmorResists = rahState && rahState.active ? computeLiveArmorResists(baseArmorResists, rahState.resists) : armorResists;
-  return {
+  const pools: SidePools = {
     shield: spec.layers.shield.hp,
     armor: spec.layers.armor.hp,
     hull: spec.layers.hull.hp,
@@ -339,8 +373,11 @@ function poolsFromSpec(spec: DefenseSpec, damageEnabled: boolean, repairMode: Re
     hullMax: spec.layers.hull.hp,
     shieldRechargeTime: spec.shieldRechargeTime,
     shieldUniformity: spec.shieldUniformity,
-    baseArmorResists,
-    resists: { shield: spec.layers.shield.resists, armor: liveArmorResists, hull: spec.layers.hull.resists },
+    baseResists: spec.baseResists,
+    hardeners: spec.hardeners,
+    hardenerStates: spec.hardeners.map((hardener) => ({ timer: hardener.cycleTime, online: true, needsPayment: true, starved: false })),
+    overloaded,
+    resists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS },
     dead: false, deadAt: undefined, damageEnabled,
     repairers: spec.repairers,
     repairerStates: createRepairerStates(spec.repairers, repairerActivation),
@@ -349,18 +386,17 @@ function poolsFromSpec(spec: DefenseSpec, damageEnabled: boolean, repairMode: Re
     rahState,
     inflicted: { shield: 0, armor: 0, hull: 0 },
   };
+  updateAppliedResists(pools, stacking);
+  return pools;
 }
 
-function mergePools(prev: SidePools, spec: DefenseSpec, damageEnabled: boolean, repairMode: RepairMode, repairerActivation: readonly RepairerActivationEntry[], rahActivation: RahActivationEntry | undefined): SidePools {
-  const armorResists = spec.layers.armor.resists;
+function mergePools(prev: SidePools, spec: DefenseSpec, damageEnabled: boolean, repairMode: RepairMode, repairerActivation: readonly RepairerActivationEntry[], rahActivation: RahActivationEntry | undefined, overloaded: boolean, stacking: StackingPenalty): SidePools {
   const rahSpec = spec.rah;
-  const baseArmorResists = rahSpec ? rahSpec.armorResistsWithoutRah : armorResists;
   const rahState = rahSpec ? mergeRahState(prev.rahState, rahSpec, rahActivation) : undefined;
-  const liveArmorResists = rahState && rahState.active ? computeLiveArmorResists(baseArmorResists, rahState.resists) : armorResists;
   const shieldMax = spec.layers.shield.hp;
   const armorMax = spec.layers.armor.hp;
   const hullMax = spec.layers.hull.hp;
-  return {
+  const merged: SidePools = {
     shield: mergePool(prev.shield, prev.shieldMax, shieldMax),
     armor: mergePool(prev.armor, prev.armorMax, armorMax),
     hull: mergePool(prev.hull, prev.hullMax, hullMax),
@@ -369,8 +405,11 @@ function mergePools(prev: SidePools, spec: DefenseSpec, damageEnabled: boolean, 
     hullMax,
     shieldRechargeTime: spec.shieldRechargeTime,
     shieldUniformity: spec.shieldUniformity,
-    baseArmorResists,
-    resists: { shield: spec.layers.shield.resists, armor: liveArmorResists, hull: spec.layers.hull.resists },
+    baseResists: spec.baseResists,
+    hardeners: spec.hardeners,
+    hardenerStates: mergeHardenerStates(prev.hardeners, prev.hardenerStates, spec.hardeners),
+    overloaded,
+    resists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS },
     dead: prev.dead,
     deadAt: prev.deadAt,
     damageEnabled,
@@ -381,6 +420,16 @@ function mergePools(prev: SidePools, spec: DefenseSpec, damageEnabled: boolean, 
     rahState,
     inflicted: { ...prev.inflicted },
   };
+  updateAppliedResists(merged, stacking);
+  return merged;
+}
+
+function mergeHardenerStates(prevHardeners: readonly ActiveHardenerSpec[], prev: HardenerState[], specs: readonly ActiveHardenerSpec[]): HardenerState[] {
+  return specs.map((spec, i) => {
+    const existing = prev[i];
+    if (existing && prevHardeners[i]?.moduleId === spec.moduleId) return existing;
+    return { timer: spec.cycleTime, online: true, needsPayment: true, starved: false };
+  });
 }
 
 function mergePool(current: number, prevMax: number, newMax: number): number {
@@ -458,12 +507,62 @@ function clampPool(current: number, max: number): number {
   return current;
 }
 
-function updateRahResists(pools: SidePools): void {
-  if (!pools.rahState || !pools.rahSpec) return;
+function updateAppliedResists(pools: SidePools, stacking: StackingPenalty): void {
+  const shield = layerAppliedResists(pools, "shield", stacking);
+  const armor = layerAppliedResists(pools, "armor", stacking);
+  const hull = layerAppliedResists(pools, "hull", stacking);
   pools.resists = {
-    ...pools.resists,
-    armor: pools.rahState.active ? computeLiveArmorResists(pools.baseArmorResists, pools.rahState.resists) : pools.baseArmorResists,
+    shield,
+    armor: pools.rahState && pools.rahState.active ? computeLiveArmorResists(armor, pools.rahState.resists) : armor,
+    hull,
   };
+}
+
+function layerAppliedResists(pools: SidePools, layer: DefenseLayer, stacking: StackingPenalty): DamageResists {
+  const result: Record<DamageType, number> = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
+  for (const type of DAMAGE_TYPES) {
+    const hardenerResonances = pools.hardeners.flatMap((hardener, i) => (pools.hardenerStates[i]?.online ? [hardenerResonance(hardener, type, pools.overloaded)] : []));
+    const stacked = stacking.apply(hardenerResonances);
+    result[type] = clampResist(1 - (1 - pools.baseResists[layer][type]) * stacked);
+  }
+  return result;
+}
+
+function hardenerResonance(hardener: ActiveHardenerSpec, type: DamageType, overloaded: boolean): number {
+  const bonus = overloaded ? hardener.resistBonus[type] * hardener.overloadBonusMultiplier : hardener.resistBonus[type];
+  return 1 - bonus;
+}
+
+function stepHardeners(pools: SidePools, dt: number, side: Side, capacitor: CapacitorGate | undefined): void {
+  for (let i = 0; i < pools.hardeners.length; i++) {
+    stepHardener(dt, side, pools.hardeners[i], pools.hardenerStates[i], capacitor);
+  }
+}
+
+function stepHardener(dt: number, side: Side, spec: ActiveHardenerSpec, state: HardenerState, capacitor: CapacitorGate | undefined): void {
+  if (state.online) {
+    if (state.needsPayment && !payHardener(side, spec, state, capacitor)) return;
+    state.timer -= dt;
+    if (state.timer <= 0) {
+      state.timer += spec.cycleTime;
+      state.needsPayment = true;
+    }
+  } else if (payHardener(side, spec, state, capacitor)) {
+    state.timer = spec.cycleTime;
+  }
+}
+
+function payHardener(side: Side, spec: ActiveHardenerSpec, state: HardenerState, capacitor: CapacitorGate | undefined): boolean {
+  if (capacitor && spec.capacitorNeed > 0 && !capacitor.attemptDebit(side, spec.capacitorNeed, spec.moduleId)) {
+    state.online = false;
+    state.starved = true;
+    state.needsPayment = true;
+    return false;
+  }
+  state.online = true;
+  state.starved = false;
+  state.needsPayment = false;
+  return true;
 }
 
 function computeLiveArmorResists(baseResists: DamageResists, rahResists: DamageResists): DamageResists {
@@ -713,6 +812,19 @@ function shiftRahResists(rah: RahState, rahSpec: RahSpec): void {
   rah.resists = { em: current.em, thermal: current.thermal, kinetic: current.kinetic, explosive: current.explosive };
 }
 
+function hardenerViews(pools: SidePools): readonly HardenerViewState[] {
+  return pools.hardeners.map((spec, i) => {
+    const state = pools.hardenerStates[i];
+    return {
+      moduleId: spec.moduleId,
+      layer: spec.layer,
+      online: state.online,
+      starved: state.starved,
+      cycleProgress: state.online ? 1 - Math.max(state.timer, 0) / spec.cycleTime : 0,
+    };
+  });
+}
+
 function repairerViews(pools: SidePools): readonly RepairerViewState[] {
   return pools.repairers.map((spec, i) => {
     const state = pools.repairerStates[i];
@@ -770,7 +882,10 @@ function snapshotPools(pools: SidePools): SidePoolsSnapshot {
     shieldMax: pools.shieldMax, armorMax: pools.armorMax, hullMax: pools.hullMax,
     shieldRechargeTime: pools.shieldRechargeTime,
     shieldUniformity: pools.shieldUniformity,
-    baseArmorResists: pools.baseArmorResists,
+    baseResists: pools.baseResists,
+    hardeners: pools.hardeners,
+    hardenerStates: pools.hardenerStates.map(snapshotHardenerState),
+    overloaded: pools.overloaded,
     resists: pools.resists,
     dead: pools.dead, deadAt: pools.deadAt, damageEnabled: pools.damageEnabled,
     repairers: pools.repairers,
@@ -788,7 +903,10 @@ function materializePools(snapshot: SidePoolsSnapshot): SidePools {
     shieldMax: snapshot.shieldMax, armorMax: snapshot.armorMax, hullMax: snapshot.hullMax,
     shieldRechargeTime: snapshot.shieldRechargeTime,
     shieldUniformity: snapshot.shieldUniformity,
-    baseArmorResists: snapshot.baseArmorResists,
+    baseResists: snapshot.baseResists,
+    hardeners: snapshot.hardeners,
+    hardenerStates: snapshot.hardenerStates.map(materializeHardenerState),
+    overloaded: snapshot.overloaded,
     resists: snapshot.resists,
     dead: snapshot.dead, deadAt: snapshot.deadAt, damageEnabled: snapshot.damageEnabled,
     repairers: snapshot.repairers,
@@ -798,6 +916,14 @@ function materializePools(snapshot: SidePoolsSnapshot): SidePools {
     rahState: snapshot.rahState ? materializeRahState(snapshot.rahState) : undefined,
     inflicted: { ...snapshot.inflicted },
   };
+}
+
+function snapshotHardenerState(state: HardenerState): HardenerStateSnapshot {
+  return { timer: state.timer, online: state.online, needsPayment: state.needsPayment, starved: state.starved };
+}
+
+function materializeHardenerState(snapshot: HardenerStateSnapshot): HardenerState {
+  return { timer: snapshot.timer, online: snapshot.online, needsPayment: snapshot.needsPayment, starved: snapshot.starved };
 }
 
 function snapshotRepairerState(state: RepairerState): RepairerStateSnapshot {

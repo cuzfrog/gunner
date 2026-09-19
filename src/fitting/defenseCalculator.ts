@@ -1,7 +1,7 @@
 import type { DefenseBonusAttribute, FittingDb, HullBonus, DefenseModuleStats, ShipStatFlatAttribute } from "../gamedata/fittingDb";
 import type { TypeId } from "../gamedata/ids";
 import { type DefenseSkills, type ShipProfile, type SkillLevel, type StatConditions, defaultDefenseSkills } from "../ships";
-import { type DamageResists, type DefenseLayer, type DefenseSpec, type RahSpec, type RepairerSpec, type StackingPenalty, DAMAGE_TYPES, ZERO_RESISTS } from "../sim";
+import { type ActiveHardenerSpec, type DamageResists, type DefenseLayer, type DefenseSpec, type RahSpec, type RepairerSpec, type StackingPenalty, DAMAGE_TYPES, ZERO_RESISTS } from "../sim";
 import type { FittingState } from "./fittingState";
 
 export interface DefenseCalculator {
@@ -32,21 +32,24 @@ export class DefenseCalculatorImpl implements DefenseCalculator {
     const hullHp = resolveHullHp(profile, modules, fitting.hullBonuses, skills, conditions.skillLevel);
     const shieldRechargeTime = resolveShieldRecharge(profile, modules, skills, this.stacking);
 
+    const hardeners = resolveHardeners(modules, skills);
     const shieldResists = resolveLayerResists("shield", profile.shieldResists, modules, fitting.hullBonuses, skills, conditions.skillLevel, conditions.overloaded, this.stacking);
     const armorResists = resolveLayerResists("armor", profile.armorResists, modules, fitting.hullBonuses, skills, conditions.skillLevel, conditions.overloaded, this.stacking);
     const hullResists = resolveLayerResists("hull", profile.hullResists, modules, fitting.hullBonuses, skills, conditions.skillLevel, conditions.overloaded, this.stacking);
 
     const repairers = resolveRepairers(modules, skills, this.stacking);
     const signaturePenalty = resolveSignaturePenalty(modules);
-    const rah = resolveRahSpec(modules, skills, armorResists);
+    const rah = resolveRahSpec(modules, skills);
     const shieldUniformity = resolveShieldUniformity(skills);
 
     return {
       layers: {
-        shield: { hp: shieldHp, resists: shieldResists },
-        armor: { hp: armorHp, resists: armorResists },
-        hull: { hp: hullHp, resists: hullResists },
+        shield: { hp: shieldHp, resists: shieldResists.resists },
+        armor: { hp: armorHp, resists: armorResists.resists },
+        hull: { hp: hullHp, resists: hullResists.resists },
       },
+      baseResists: { shield: shieldResists.base, armor: armorResists.base, hull: hullResists.base },
+      hardeners,
       shieldRechargeTime,
       repairers,
       signaturePenalty,
@@ -143,6 +146,13 @@ function resolveShieldRecharge(profile: ShipProfile, modules: readonly DefenseMo
   return profile.shieldRechargeTime * rechargeMultiplier * shieldOperationMultiplier;
 }
 
+interface LayerResistResult {
+  /** All fitted hardeners online: the display value for the layer. */
+  readonly resists: DamageResists;
+  /** Every active hardener offline: base hull, passive coatings, damage control, hull bonuses, skills. */
+  readonly base: DamageResists;
+}
+
 function resolveLayerResists(
   layer: DefenseLayer,
   baseResists: DamageResists,
@@ -152,12 +162,15 @@ function resolveLayerResists(
   skillLevel: SkillLevel,
   overloaded: boolean,
   stacking: StackingPenalty,
-): DamageResists {
+): LayerResistResult {
   const result: Record<keyof DamageResists, number> = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
+  const base: Record<keyof DamageResists, number> = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
   for (const type of DAMAGE_TYPES) {
-    result[type] = resolveResistForType(layer, type, baseResists[type], modules, hullBonuses, skills, skillLevel, overloaded, stacking);
+    const applied = resolveResistForType(layer, type, baseResists[type], modules, hullBonuses, skills, skillLevel, overloaded, stacking, false);
+    result[type] = applied;
+    base[type] = resolveResistForType(layer, type, baseResists[type], modules, hullBonuses, skills, skillLevel, overloaded, stacking, true);
   }
-  return result;
+  return { resists: result, base };
 }
 
 function resolveResistForType(
@@ -170,6 +183,7 @@ function resolveResistForType(
   skillLevel: SkillLevel,
   overloaded: boolean,
   stacking: StackingPenalty,
+  excludeActiveHardeners: boolean,
 ): number {
   const baseResonance = 1 - baseResist;
   const hardenerMultipliers: number[] = [];
@@ -184,6 +198,7 @@ function resolveResistForType(
         dcResonanceMultiplier = (dcResonanceMultiplier ?? 1) * (1 - dcResist);
       }
     } else if (stats.kind === "resistModule" && stats.layer === layer && stats.resistBonus) {
+      if (excludeActiveHardeners && stats.active) continue;
       let bonus = stats.resistBonus[type];
       if (overloaded && stats.overloadBonusMultiplier !== undefined) {
         bonus = bonus * stats.overloadBonusMultiplier;
@@ -201,6 +216,33 @@ function resolveResistForType(
   const dcTerm = dcResonanceMultiplier ?? 1;
   const resonance = baseResonance * stackedHardener * dcTerm * hullBonusResist;
   return clampResist(1 - resonance);
+}
+
+function resolveHardeners(modules: readonly DefenseModuleEntry[], skills: DefenseSkills): readonly ActiveHardenerSpec[] {
+  const hardeners: ActiveHardenerSpec[] = [];
+  for (const mod of modules) {
+    const stats = mod.stats;
+    if (stats.kind !== "resistModule" || !stats.active || !stats.resistBonus || !stats.layer) continue;
+    hardeners.push({
+      moduleId: mod.moduleId,
+      layer: stats.layer,
+      resistBonus: {
+        em: compensatedBonus(stats, "em", skills),
+        thermal: compensatedBonus(stats, "thermal", skills),
+        kinetic: compensatedBonus(stats, "kinetic", skills),
+        explosive: compensatedBonus(stats, "explosive", skills),
+      },
+      overloadBonusMultiplier: stats.overloadBonusMultiplier ?? 1,
+      capacitorNeed: stats.capacitorNeed ?? 0,
+      cycleTime: stats.cycleTime ?? 10,
+    });
+  }
+  return hardeners;
+}
+
+function compensatedBonus(stats: DefenseModuleStats, type: keyof DamageResists, skills: DefenseSkills): number {
+  const bonus = stats.resistBonus?.[type] ?? 0;
+  return stats.compensationApplies && stats.layer ? applyCompensationSkill(bonus, stats.layer, type, skills) : bonus;
 }
 
 function resolveRepairers(modules: readonly DefenseModuleEntry[], skills: DefenseSkills, stacking: StackingPenalty): readonly RepairerSpec[] {
@@ -238,7 +280,7 @@ function resolveRepairers(modules: readonly DefenseModuleEntry[], skills: Defens
   return repairers;
 }
 
-function resolveRahSpec(modules: readonly DefenseModuleEntry[], skills: DefenseSkills, armorResistsWithoutRah: DamageResists): RahSpec | undefined {
+function resolveRahSpec(modules: readonly DefenseModuleEntry[], skills: DefenseSkills): RahSpec | undefined {
   const rahModule = modules.find((mod) => mod.stats.kind === "rah");
   if (!rahModule) return undefined;
   const stats = rahModule.stats;
@@ -249,7 +291,7 @@ function resolveRahSpec(modules: readonly DefenseModuleEntry[], skills: DefenseS
   const phasingReduction = 1 - ARMOR_RESISTANCE_PHASING_BONUS * skills.armorResistancePhasing;
   const cycleTime = rawCycleTime * phasingReduction;
   const overloadCycleTimeMultiplier = stats.overloadCycleTimeMultiplier ?? 1;
-  return { cycleTime, shiftAmount, baseResists, overloadCycleTimeMultiplier, armorResistsWithoutRah, ...(stats.capacitorNeed !== undefined ? { capacitorNeed: stats.capacitorNeed } : {}), moduleId: rahModule.moduleId };
+  return { cycleTime, shiftAmount, baseResists, overloadCycleTimeMultiplier, ...(stats.capacitorNeed !== undefined ? { capacitorNeed: stats.capacitorNeed } : {}), moduleId: rahModule.moduleId };
 }
 
 function hullBonusMultiplier(hullBonuses: readonly HullBonus[], attribute: DefenseBonusAttribute, skillLevel: number): number {

@@ -210,6 +210,7 @@ class TraceParamsParserImpl implements TraceParamsParser {
         repairMode: { shipA: "auto", shipB: "auto" },
         repairerActivation: { shipA: repairerActivationFrom(shipAImport), shipB: repairerActivationFrom(shipBImport) },
         rahActivation: { shipA: undefined, shipB: undefined },
+        overloaded: { shipA: false, shipB: false },
       },
       overloaded: { shipA: false, shipB: false },
       capacitor: {

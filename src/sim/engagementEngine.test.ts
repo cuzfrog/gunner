@@ -58,6 +58,7 @@ const emptyDefenseView: DefenseView = {
   pools: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
   poolMaxes: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
   poolPercentages: { shipA: { shield: 0, armor: 0, hull: 0 }, shipB: { shield: 0, armor: 0, hull: 0 } },
+  hardeners: { shipA: [], shipB: [] },
   dead: { shipA: false, shipB: false },
   deadAt: { shipA: undefined, shipB: undefined },
   damageEnabled: { shipA: true, shipB: true },
@@ -98,7 +99,9 @@ function weaponClockState(): WeaponClockState {
 function emptyPoolsSnapshot(): SidePoolsSnapshot {
   return {
     shield: 0, armor: 0, hull: 0, shieldMax: 0, armorMax: 0, hullMax: 0,
-    shieldRechargeTime: 0, shieldUniformity: 0.25, baseArmorResists: ZERO_DAMAGE,
+    shieldRechargeTime: 0, shieldUniformity: 0.25,
+    baseResists: { shield: ZERO_DAMAGE, armor: ZERO_DAMAGE, hull: ZERO_DAMAGE },
+    hardeners: [], hardenerStates: [], overloaded: false,
     resists: { shield: ZERO_DAMAGE, armor: ZERO_DAMAGE, hull: ZERO_DAMAGE },
     dead: false, deadAt: undefined, damageEnabled: true,
     repairers: [], repairerStates: [], repairMode: "auto", rahSpec: undefined, rahState: undefined,
@@ -176,6 +179,7 @@ function engineConfig(): import("./engagementEngine").EngineConfig {
       repairMode: { shipA: "auto", shipB: "auto" },
       repairerActivation: { shipA: [], shipB: [] },
       rahActivation: { shipA: undefined, shipB: undefined },
+      overloaded: { shipA: false, shipB: false },
     },
     overloaded: { shipA: false, shipB: false },
     capacitor: { shipA: EMPTY_CAPACITOR_SIDE, shipB: EMPTY_CAPACITOR_SIDE },
