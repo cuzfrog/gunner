@@ -1,8 +1,9 @@
 import type { CapacitorSimConfig, CapacitorView } from "./capacitorSimulator";
-import type { AppliedEwarEffect, CapacitorEngagement, DamageEvent, DroneRuntimeState, DroneSpec, EwarProjection, InflictedDps, IncomingDrain, LayerDamage, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec, CapacitorSideConfig } from "./types";
+import type { AppliedEwarEffect, CapacitorEngagement, DamageEvent, DroneRuntimeState, DroneSpec, EwarProjection, FighterRuntimeState, FighterSpec, InflictedDps, IncomingDrain, LayerDamage, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec, CapacitorSideConfig } from "./types";
 import type { TypeId } from "../gamedata/ids";
 import type { DefenseSimConfig, DefenseView } from "./defenseSimulator";
 import type { DroneSimConfig } from "./droneSimulator";
+import type { FighterSimConfig } from "./fighterSimulator";
 import type { EngagementFrameComposer, EngagementInput, EngagementView } from "./engagementFrameComposer";
 import type { EwarResolver } from "./ewarResolver";
 import type { LockStepInput } from "./lockClock";
@@ -24,6 +25,8 @@ export interface EngineView extends EngagementView {
   readonly inflicted: Record<Side, InflictedDps>;
   readonly drones: Record<Side, readonly DroneRuntimeState[]>;
   readonly droneSpecs: Record<Side, readonly DroneSpec[]>;
+  readonly fighters: Record<Side, readonly FighterRuntimeState[]>;
+  readonly fighterSpecs: Record<Side, readonly FighterSpec[]>;
   readonly missiles: Record<Side, readonly MissileRuntimeState[]>;
 }
 
@@ -83,6 +86,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     this.live.simulation.reset(config.sim);
     const spawn = this.live.simulation.snapshot();
     this.live.droneSimulator.reset(droneSimConfigFrom(config));
+    this.live.fighterSimulator.reset(fighterSimConfigFrom(config));
     this.live.missileSimulator.reset(missileSimConfigFrom(config), { shipA: spawn.shipA.position, shipB: spawn.shipB.position });
     this.live.weaponClock.reset();
     this.live.lockClock.reset();
@@ -99,6 +103,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     this.config = config;
     this.live.simulation.update(config.sim);
     this.live.droneSimulator.update(droneSimConfigFrom(config));
+    this.live.fighterSimulator.update(fighterSimConfigFrom(config));
     this.live.missileSimulator.update(missileSimConfigFrom(config));
     this.live.defenseSimulator.update(config.defense);
     this.live.capacitorSimulator.update(capacitorSimConfigFrom(config));
@@ -176,6 +181,8 @@ export class EngagementEngineImpl implements EngagementEngine {
       inflicted: this.projectedInflicted(snapshot.time),
       drones: { shipA: this.live.droneSimulator.states("shipA"), shipB: this.live.droneSimulator.states("shipB") },
       droneSpecs: { shipA: droneSpecsFrom(config.weapons.shipA), shipB: droneSpecsFrom(config.weapons.shipB) },
+      fighters: { shipA: this.live.fighterSimulator.states("shipA"), shipB: this.live.fighterSimulator.states("shipB") },
+      fighterSpecs: { shipA: fighterSpecsFrom(config.weapons.shipA), shipB: fighterSpecsFrom(config.weapons.shipB) },
       missiles: { shipA: this.live.missileSimulator.states("shipA"), shipB: this.live.missileSimulator.states("shipB") },
     };
   }
@@ -196,6 +203,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     world.simulation.restore(this.live.simulation.capture());
     world.lockClock.restore(this.live.lockClock.capture());
     world.droneSimulator.restore(this.live.droneSimulator.capture());
+    world.fighterSimulator.restore(this.live.fighterSimulator.capture());
     world.missileSimulator.restore(this.live.missileSimulator.capture());
     world.weaponClock.restore(this.live.weaponClock.capture());
     world.defenseSimulator.restore(this.live.defenseSimulator.capture());
@@ -234,6 +242,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     const input = this.engagementInput(world, snapshot, locks, config, painted);
     const composed = this.engagementFrameComposer.compose(snapshot, input);
     world.droneSimulator.step(dt, composed.frame);
+    world.fighterSimulator.step(dt, composed.frame);
     const missileEvents = world.missileSimulator.step(dt, composed.frame, this.missileLaunchSpecs(composed, locks, painted));
     const weaponEvents = world.weaponClock.step(dt, composed, world.capacitorSimulator);
     const events: DamageEvent[] = [...missileEvents, ...weaponEvents];
@@ -340,6 +349,10 @@ function droneSimConfigFrom(config: EngineConfig): DroneSimConfig {
   return { shipA: droneSpecsFrom(config.weapons.shipA), shipB: droneSpecsFrom(config.weapons.shipB) };
 }
 
+function fighterSimConfigFrom(config: EngineConfig): FighterSimConfig {
+  return { shipA: fighterSpecsFrom(config.weapons.shipA), shipB: fighterSpecsFrom(config.weapons.shipB) };
+}
+
 function missileSimConfigFrom(config: EngineConfig): MissileSimConfig {
   return { shipA: missileSpecsFrom(config.weapons.shipA), shipB: missileSpecsFrom(config.weapons.shipB) };
 }
@@ -350,6 +363,10 @@ function capacitorSimConfigFrom(config: EngineConfig): CapacitorSimConfig {
 
 function droneSpecsFrom(weapons: readonly WeaponSpec[]): readonly DroneSpec[] {
   return weapons.filter((w): w is DroneSpec => w.kind === "drone");
+}
+
+function fighterSpecsFrom(weapons: readonly WeaponSpec[]): readonly FighterSpec[] {
+  return weapons.filter((w): w is FighterSpec => w.kind === "fighter");
 }
 
 function missileSpecsFrom(weapons: readonly WeaponSpec[]): readonly MissileSpec[] {

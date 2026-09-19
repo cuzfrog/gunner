@@ -1,7 +1,9 @@
 import { WeaponClockImpl } from "./weaponClock";
 import type { CapacitorGate } from "./capacitorSimulator";
+import type { HitRollStrategy } from "./hitRoll";
 import { expectedHitRoll, sampledHitRoll } from "./hitRoll";
 import { Mulberry32RngFactory } from "./rng";
+import type { Rng } from "./rng";
 import { EMPTY_DEFENSE_ASSESSMENT, Vec2 } from "./index";
 import { toTypeId } from "../gamedata/ids";
 import type { AttackAssessment } from "./fireControl";
@@ -432,5 +434,63 @@ describe("WeaponClockImpl", () => {
     const events = clock.step(4, view, gate);
     expect(events).toHaveLength(1);
     expect(debits).toHaveLength(0);
+  });
+
+  test("fighter squadron fires deterministic volleys without hit roll", () => {
+    const weapon: WeaponSpec = { kind: "fighter", moduleId: toTypeId("34359"), damagePerVolley: { em: 100, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime: 5, fighterCount: 1, maxVelocity: 1300, orbitRange: 6500, explosionRadius: 185, explosionVelocity: 105, damageReductionFactor: 0.64, optimal: 8000, falloff: 5000, magazine: { numShots: 3, rearmTime: 4, refuelingTime: 5 } };
+    const assessment: AttackAssessment = {
+      boostedWeapon: weapon,
+      effectiveWeapon: weapon,
+      damage: { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: { em: 100, thermal: 0, kinetic: 0, explosive: 0 } },
+      fighter: { application: 1, rangeFactor: 1, signatureTerm: 1, velocityTerm: 1, inRange: true },
+    };
+    const view = makeView([{ weapon, assessment }]);
+    const rolls: number[] = [];
+    const hitRoll: HitRollStrategy = (_rng: Rng, chance: number, _expectedMultiplier: number) => { rolls.push(chance); return chance; };
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll });
+    const events = clock.step(5, view);
+    expect(events).toHaveLength(1);
+    expect(events[0].kind).toBe("fighter");
+    expect(events[0].rawByType).toEqual({ em: 100, thermal: 0, kinetic: 0, explosive: 0 });
+    expect(rolls).toHaveLength(0);
+  });
+
+  test("fighter magazine exhausts, refuels and rearms before the next run", () => {
+    const weapon: WeaponSpec = { kind: "fighter", moduleId: toTypeId("34359"), damagePerVolley: { em: 100, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime: 5, fighterCount: 1, maxVelocity: 1300, orbitRange: 6500, explosionRadius: 185, explosionVelocity: 105, damageReductionFactor: 0.64, optimal: 8000, falloff: 5000, magazine: { numShots: 12, rearmTime: 4, refuelingTime: 5 } };
+    const assessment: AttackAssessment = {
+      boostedWeapon: weapon,
+      effectiveWeapon: weapon,
+      damage: { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: { em: 100, thermal: 0, kinetic: 0, explosive: 0 } },
+      fighter: { application: 1, rangeFactor: 1, signatureTerm: 1, velocityTerm: 1, inRange: true },
+    };
+    const view = makeView([{ weapon, assessment }]);
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
+    let volleys = 0;
+    for (let i = 0; i < 60; i++) volleys += clock.step(1, view).length;
+    expect(volleys).toBe(12);
+    // Reload: 53s refuel+rearm, then one full attack cycle before the next volley (pyfa CycleSequence semantics).
+    for (let i = 0; i < 57; i++) volleys += clock.step(1, view).length;
+    expect(volleys).toBe(12);
+    const events = clock.step(1, view);
+    expect(events).toHaveLength(1);
+    expect(events[0].kind).toBe("fighter");
+  });
+
+  test("fighter snapshot survives clock capture and restore", () => {
+    const weapon: WeaponSpec = { kind: "fighter", moduleId: toTypeId("34359"), damagePerVolley: { em: 100, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime: 5, fighterCount: 1, maxVelocity: 1300, orbitRange: 6500, explosionRadius: 185, explosionVelocity: 105, damageReductionFactor: 0.64, optimal: 8000, falloff: 5000, magazine: { numShots: 3, rearmTime: 4, refuelingTime: 5 } };
+    const assessment: AttackAssessment = {
+      boostedWeapon: weapon,
+      effectiveWeapon: weapon,
+      damage: { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: { em: 100, thermal: 0, kinetic: 0, explosive: 0 } },
+      fighter: { application: 1, rangeFactor: 1, signatureTerm: 1, velocityTerm: 1, inRange: true },
+    };
+    const view = makeView([{ weapon, assessment }]);
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
+    clock.step(5, view);
+    const state = clock.capture();
+    for (let i = 0; i < 30; i++) clock.step(5, view);
+    clock.restore(state);
+    const events = clock.step(5, view);
+    expect(events).toHaveLength(1);
   });
 });

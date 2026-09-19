@@ -5,6 +5,8 @@ import { DefenseSimulatorImpl } from "./defenseSimulator";
 import type { DefenseSimulator } from "./defenseSimulator";
 import { DroneSimulatorImpl } from "./droneSimulator";
 import type { DroneSimulator } from "./droneSimulator";
+import { FighterSimulatorImpl } from "./fighterSimulator";
+import type { FighterSimulator } from "./fighterSimulator";
 import type { EwarResolver } from "./ewarResolver";
 import { expectedHitRoll, sampledHitRoll, type HitRollStrategy } from "./hitRoll";
 import type { Kinematics } from "./kinematics";
@@ -25,6 +27,7 @@ export interface SimWorld {
   readonly simulation: Simulation;
   readonly lockClock: LockClock;
   readonly droneSimulator: DroneSimulator;
+  readonly fighterSimulator: FighterSimulator;
   readonly missileSimulator: MissileSimulator;
   readonly weaponClock: WeaponClock;
   readonly defenseSimulator: DefenseSimulator;
@@ -67,6 +70,7 @@ export class SimWorldFactoryImpl implements SimWorldFactory {
       simulation: new SimulationImpl({ shipASteering, shipBSteering, ewarResolver: this.ewarResolver, simConfig: this.simConfig }),
       lockClock: new LockClockImpl(),
       droneSimulator: new DroneSimulatorImpl(),
+      fighterSimulator: new FighterSimulatorImpl(),
       missileSimulator: new MissileSimulatorImpl({ missileApplication: this.missileApplication }),
       weaponClock: new WeaponClockImpl({ rngFactory: this.rngFactory, hitRoll }),
       defenseSimulator: new DefenseSimulatorImpl(),

@@ -11,6 +11,7 @@ export interface WeaponCooldownSnapshot {
   readonly cycleTime: number;
   readonly spoolCycles: number;
   readonly identity: string;
+  readonly magazine?: WeaponMagazineState;
 }
 
 export interface SideClockSnapshot {
@@ -28,11 +29,18 @@ export interface WeaponClock extends Restorable<WeaponClockState> {
   spoolCycles(side: Side, weaponIndex: number): number;
 }
 
+interface WeaponMagazineState {
+  readonly numShots: number;
+  readonly refuelSeconds: number;
+  readonly shotsLeft: number;
+}
+
 interface WeaponCooldown {
   timer: number;
   cycleTime: number;
   spoolCycles: number;
   identity: string;
+  magazine?: WeaponMagazineState;
 }
 
 interface SideClock {
@@ -108,7 +116,7 @@ export class WeaponClockImpl implements WeaponClock {
         // The weapon at this slot changed (ammo swap, reorder, refit): restart only its cycle and spool.
         clock.cooldowns.delete(i);
       }
-      const breakdown = attack.assessment.turret ?? attack.assessment.drone;
+      const breakdown = attack.assessment.turret ?? attack.assessment.drone ?? attack.assessment.fighter;
       if (!breakdown) continue;
       if (attack.assessment.drone && !attack.assessment.drone.inRange) continue;
       const cycleTime = attack.weapon.cycleTime;
@@ -127,7 +135,7 @@ export class WeaponClockImpl implements WeaponClock {
         // Activation denied: no cooldown entry, the debit is retried next frame.
         continue;
       }
-      const cooldown = clock.cooldowns.get(i) ?? { timer: cycleTime, cycleTime, spoolCycles: 0, identity };
+      const cooldown = clock.cooldowns.get(i) ?? { timer: cycleTime, cycleTime, spoolCycles: 0, identity, magazine: fighterMagazineState(attack.weapon) };
       cooldown.timer -= dt;
       if (cooldown.timer <= 0) {
         if (capacitor && capNeed > 0 && !capacitor.attemptDebit(source, capNeed, attack.weapon.moduleId)) {
@@ -136,15 +144,30 @@ export class WeaponClockImpl implements WeaponClock {
           clock.cooldowns.set(i, cooldown);
           continue;
         }
-        cooldown.timer += cycleTime;
-        if (cooldown.timer < 0) cooldown.timer = cycleTime;
-        const event = this.rollEvent(source, target, i, kind, attack, breakdown.hit.chance, breakdown.expectedMultiplier, clock.rng);
-        if (event) events.push(event);
-        if (spoolSpec !== undefined) cooldown.spoolCycles += 1;
+        if (kind === "fighter") {
+          // Fighters apply through missile math: no hit-quality roll, deterministic volley.
+          const event = this.fighterEvent(source, target, i, attack);
+          if (event) events.push(event);
+          advanceFighterCycle(cooldown, attack.weapon);
+        } else {
+          cooldown.timer += cycleTime;
+          if (cooldown.timer < 0) cooldown.timer = cycleTime;
+          const rolled = attack.assessment.turret ?? attack.assessment.drone;
+          if (!rolled) continue;
+          const event = this.rollEvent(source, target, i, kind, attack, rolled.hit.chance, rolled.expectedMultiplier, clock.rng);
+          if (event) events.push(event);
+          if (spoolSpec !== undefined) cooldown.spoolCycles += 1;
+        }
       }
       clock.cooldowns.set(i, cooldown);
     }
     return events;
+  }
+
+  private fighterEvent(source: Side, target: Side, weaponIndex: number, attack: WeaponAttack): DamageEvent | undefined {
+    const appliedVolley = attack.assessment.damage.appliedVolleyByType;
+    if (damageVectorSum(appliedVolley) <= 0) return undefined;
+    return { target, source, weaponIndex, kind: "fighter", rawByType: appliedVolley };
   }
 
   private rollEvent(source: Side, target: Side, weaponIndex: number, kind: WeaponKind, attack: WeaponAttack, hitChance: number, expectedMultiplier: number, rng: Rng): DamageEvent | undefined {
@@ -165,16 +188,41 @@ function emptySide(createRng: () => Rng): SideClock {
   return { cooldowns: new Map(), rng: createRng() };
 }
 
+function fighterMagazineState(weapon: WeaponSpec): WeaponMagazineState | undefined {
+  if (weapon.kind !== "fighter" || weapon.magazine === undefined) return undefined;
+  return { numShots: weapon.magazine.numShots, refuelSeconds: weapon.magazine.refuelingTime + weapon.magazine.numShots * weapon.magazine.rearmTime, shotsLeft: weapon.magazine.numShots };
+}
+
+function advanceFighterCycle(cooldown: WeaponCooldown, weapon: WeaponSpec): void {
+  const magazine = cooldown.magazine;
+  if (weapon.kind !== "fighter" || magazine === undefined) {
+    cooldown.timer += cooldown.cycleTime;
+    if (cooldown.timer < 0) cooldown.timer = cooldown.cycleTime;
+    return;
+  }
+  const shotsLeft = magazine.shotsLeft - 1;
+  if (shotsLeft > 0) {
+    cooldown.timer += cooldown.cycleTime;
+    if (cooldown.timer < 0) cooldown.timer = cooldown.cycleTime;
+    cooldown.magazine = { ...magazine, shotsLeft };
+    return;
+  }
+  // Magazine exhausted: the squadron refuels and rearms, then the next attack run needs a full cycle.
+  cooldown.timer += magazine.refuelSeconds + cooldown.cycleTime;
+  if (cooldown.timer < 0) cooldown.timer = cooldown.cycleTime;
+  cooldown.magazine = { ...magazine, shotsLeft: magazine.numShots };
+}
+
 function snapshotClock(clock: SideClock): SideClockSnapshot {
   const cooldowns = [...clock.cooldowns].map(
-    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime, spoolCycles: cooldown.spoolCycles, identity: cooldown.identity }] as const,
+    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime, spoolCycles: cooldown.spoolCycles, identity: cooldown.identity, ...(cooldown.magazine ? { magazine: { ...cooldown.magazine } } : {}) }] as const,
   );
   return { cooldowns: new Map(cooldowns) };
 }
 
 function materializeClock(snapshot: SideClockSnapshot, createRng: () => Rng): SideClock {
   const cooldowns = [...snapshot.cooldowns].map(
-    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime, spoolCycles: cooldown.spoolCycles, identity: cooldown.identity }] as const,
+    ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime, spoolCycles: cooldown.spoolCycles, identity: cooldown.identity, ...(cooldown.magazine ? { magazine: { ...cooldown.magazine } } : {}) }] as const,
   );
   return { cooldowns: new Map(cooldowns), rng: createRng() };
 }

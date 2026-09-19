@@ -18,6 +18,9 @@ export { CapacitorSimulatorImpl } from "./capacitorSimulator";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { DroneApplication } from "./droneApplication";
 export type { DroneSimulator, DroneSimConfig } from "./droneSimulator";
+export type { FighterApplication } from "./fighterApplication";
+export type { FighterSimulator, FighterSimConfig } from "./fighterSimulator";
+export type { MissileApplication } from "./missileApplication";
 export type { MissileSimulator } from "./missileSimulator";
 export type { Rng, RngFactory } from "./rng";
 export type { WeaponDamageAssessor } from "./weaponDamageAssessor";
@@ -68,6 +71,11 @@ export type {
   EwarLoadout,
   EwarProjection,
   EwarReach,
+  FighterDamageBreakdown,
+  FighterMagazine,
+  FighterReadoutValues,
+  FighterRuntimeState,
+  FighterSpec,
   GrapplerActivation,
   HitChanceBreakdown,
   LockState,
