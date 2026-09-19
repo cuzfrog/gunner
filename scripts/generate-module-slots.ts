@@ -8,6 +8,8 @@ import {
   FITTING_MODULES,
   MISSILE_GUIDANCE_COMPUTERS,
   MISSILE_GUIDANCE_ENHANCERS,
+  OMNIDIRECTIONAL_TRACKING_ENHANCERS,
+  OMNIDIRECTIONAL_TRACKING_LINKS,
   STASIS_GRAPPLERS,
   STASIS_WEBS,
   SUBSYSTEMS,
@@ -98,7 +100,11 @@ const GROUP_SLOTS: Readonly<Record<string, ModuleSlot>> = {
   "Entropic Radiation Sink": "low",
   "Hull Repair Unit": "high",
   "Mutadaptive Remote Armor Repairer": "high",
+  "CPU Enhancer": "low",
+  "Drone Tracking Enhancer": "low",
+  "Drone Tracking Modules": "mid",
   "Power Diagnostic System": "low",
+  "Reactor Control Unit": "low",
   "Precursor Weapon": "high",
   "Remote Armor Repairer": "high",
   "Remote Capacitor Transmitter": "high",
@@ -187,6 +193,8 @@ function main(): void {
   for (const stats of Object.values(TARGET_PAINTERS)) modulesByName.set(stats.name, stats.id);
   for (const stats of Object.values(MISSILE_GUIDANCE_COMPUTERS)) modulesByName.set(stats.name, stats.id);
   for (const stats of Object.values(MISSILE_GUIDANCE_ENHANCERS)) modulesByName.set(stats.name, stats.id);
+  for (const stats of Object.values(OMNIDIRECTIONAL_TRACKING_LINKS)) modulesByName.set(stats.name, stats.id);
+  for (const stats of Object.values(OMNIDIRECTIONAL_TRACKING_ENHANCERS)) modulesByName.set(stats.name, stats.id);
   for (const stats of Object.values(COMMAND_BURSTS)) modulesByName.set(stats.name, stats.id);
   for (const stats of Object.values(SUBSYSTEMS)) modulesByName.set(stats.name, stats.id);
   const modules: NamedTypeId[] = [...modulesByName.entries()].map(([name, id]) => ({ name, id })).sort((a, b) => a.name.localeCompare(b.name));

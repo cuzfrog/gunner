@@ -22,6 +22,8 @@ import type { MissileCatalog } from "./missileCatalog";
 import type { MissileSkillModel } from "./missileStats";
 import type { DroneCatalog } from "./droneCatalog";
 import type { DroneSkillModel } from "./droneStats";
+import type { FighterSkillModel } from "./fighterStats";
+import type { ImportedFighter } from "./fighterCatalog";
 import { FittingStateFactory, type FittingState, type FittingModuleEntry, type CargoEntry } from "./fittingState";
 import { FittingCalculatorImpl, type FittingCalculator } from "./fittingCalculator";
 import { FittingResourcesCalculatorImpl, type FittingResourcesCalculator } from "./fittingResourcesCalculator";
@@ -75,6 +77,7 @@ export interface ImportedFitting {
   readonly turrets?: readonly ImportedTurret[];
   readonly launcher?: ImportedLauncher;
   readonly drones: readonly ImportedDrone[];
+  readonly fighters: readonly ImportedFighter[];
   readonly cargoCharges: readonly CargoCharge[];
   readonly ewar: EwarLoadout;
   readonly energyWarfareResistancePercent: number;
@@ -128,6 +131,7 @@ export class FittingImportImpl implements FittingImport {
     missileSkillModel,
     droneCatalog,
     droneSkillModel,
+    fighterSkillModel,
     stackingPenalty,
     itemNameCatalog,
     itemNameResolver,
@@ -141,6 +145,7 @@ export class FittingImportImpl implements FittingImport {
     missileSkillModel: MissileSkillModel;
     droneCatalog: DroneCatalog;
     droneSkillModel: DroneSkillModel;
+    fighterSkillModel: FighterSkillModel;
     stackingPenalty: StackingPenalty;
     itemNameCatalog: ItemNameCatalog;
     itemNameResolver: ItemNameResolver;
@@ -152,7 +157,7 @@ export class FittingImportImpl implements FittingImport {
     this.itemNameResolver = itemNameResolver;
     this.moduleSlotCatalog = moduleSlotCatalog;
     this.fittingStateFactory = new FittingStateFactory(fittingDb);
-    this.calculator = new FittingCalculatorImpl({ fittingDb, ships, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog });
+    this.calculator = new FittingCalculatorImpl({ fittingDb, ships, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog });
     this.defenseCalculator = new DefenseCalculatorImpl({ fittingDb, stackingPenalty });
     this.capacitorCalculator = new CapacitorCalculatorImpl({ fittingDb, stackingPenalty });
     this.resourcesCalculator = new FittingResourcesCalculatorImpl({ fittingDb, stackingPenalty });
@@ -200,13 +205,14 @@ export class FittingImportImpl implements FittingImport {
     if (!resolved) return undefined;
 
     const hullBonuses = this.db.hullBonuses[resolved.profile.id] ?? [];
-    const fittingState = this.fittingStateFactory.create(resolved.profile, hullBonuses, collectModuleEntries(resolved), collectCargoEntries(resolved.drones), collectCargoEntries(resolved.cargo));
+    const fittingState = this.fittingStateFactory.create(resolved.profile, hullBonuses, collectModuleEntries(resolved), collectCargoEntries(resolved.drones), collectCargoEntries(resolved.fighters), collectCargoEntries(resolved.cargo));
     const hullSide = this.calculator.resolveHull(fittingState, conditions);
     const propulsion = this.calculator.resolvePropulsion(fittingState);
     const turrets = this.calculator.resolveTurrets(fittingState, conditions);
     const turret = turrets.length > 0 ? turrets[0] : undefined;
     const launcher = this.calculator.resolveLauncher(fittingState, conditions);
     const drones = this.calculator.resolveDrones(fittingState, conditions);
+    const fighters = this.calculator.resolveFighters(fittingState, conditions);
     const cargoCharges = this.calculator.resolveCargoCharges(fittingState);
     const ewar = this.calculator.resolveEwar(fittingState, conditions);
     const energyWarfareResistancePercent = this.calculator.resolveEnergyWarfareResistance(fittingState);
@@ -230,6 +236,7 @@ export class FittingImportImpl implements FittingImport {
       turrets: turrets.length > 0 ? turrets : undefined,
       launcher,
       drones,
+      fighters,
       cargoCharges,
       ewar,
       energyWarfareResistancePercent,
@@ -299,17 +306,19 @@ export class FittingImportImpl implements FittingImport {
       const candidates = this.itemNameResolver.idsForName(item.name, language);
       const droneId = candidates.find((id) => this.db.drones[id] !== undefined);
       const chargeId = candidates.find((id) => isChargeRole(id, this.db));
+      const fighterId = candidates.find((id) => this.db.fighters[id] !== undefined);
       // Classification is type-driven; the source band (preferDrone) only breaks ties when a
       // name resolves to both a drone and a charge. Items that are neither follow the band,
       // which the parser flags as ambiguous when it could be either the drone bay or the cargo hold.
       if (droneId !== undefined && chargeId !== undefined) {
         const id = preferDrone ? droneId : chargeId;
-        return { kind: "resolved", id, name: this.itemNameCatalog.nameForId(id, "en"), quantity: item.quantity, isDrone: preferDrone };
+        return { kind: "resolved", id, name: this.itemNameCatalog.nameForId(id, "en"), quantity: item.quantity, bay: preferDrone ? "drone" : "cargo" };
       }
-      if (droneId !== undefined) return { kind: "resolved", id: droneId, name: this.itemNameCatalog.nameForId(droneId, "en"), quantity: item.quantity, isDrone: true };
-      if (chargeId !== undefined) return { kind: "resolved", id: chargeId, name: this.itemNameCatalog.nameForId(chargeId, "en"), quantity: item.quantity, isDrone: false };
-      if (candidates.length > 0) return { kind: "resolved", id: candidates[0], name: this.itemNameCatalog.nameForId(candidates[0], "en"), quantity: item.quantity, isDrone: preferDrone };
-      return { kind: "unrecognized", name: item.name, quantity: item.quantity, isDrone: preferDrone };
+      if (droneId !== undefined) return { kind: "resolved", id: droneId, name: this.itemNameCatalog.nameForId(droneId, "en"), quantity: item.quantity, bay: "drone" };
+      if (chargeId !== undefined) return { kind: "resolved", id: chargeId, name: this.itemNameCatalog.nameForId(chargeId, "en"), quantity: item.quantity, bay: "cargo" };
+      if (fighterId !== undefined) return { kind: "resolved", id: fighterId, name: this.itemNameCatalog.nameForId(fighterId, "en"), quantity: item.quantity, bay: "fighter" };
+      if (candidates.length > 0) return { kind: "resolved", id: candidates[0], name: this.itemNameCatalog.nameForId(candidates[0], "en"), quantity: item.quantity, bay: preferDrone ? "drone" : "cargo" };
+      return { kind: "unrecognized", name: item.name, quantity: item.quantity, bay: preferDrone ? "drone" : "cargo" };
     };
 
     const resolvedDrones: ResolvedQuantity[] = [];
@@ -320,11 +329,12 @@ export class FittingImportImpl implements FittingImport {
     for (const item of document.cargo) resolvedCargo.push(resolveQuantity(item, false));
 
     const drones: ResolvedQuantity[] = [];
+    const fighters: ResolvedQuantity[] = [];
     const cargo: ResolvedQuantity[] = [];
-    for (const item of resolvedDrones) (item.isDrone ? drones : cargo).push(item);
-    for (const item of resolvedCargo) (item.isDrone ? drones : cargo).push(item);
+    for (const item of resolvedDrones) pushByBay(item, drones, fighters, cargo);
+    for (const item of resolvedCargo) pushByBay(item, drones, fighters, cargo);
 
-    return { profile, language, fittingName: document.fittingName, banks, drones, cargo };
+    return { profile, language, fittingName: document.fittingName, banks, drones, fighters, cargo };
   }
 
   private detectLanguage(document: EftDocument): ShipNameLanguage | undefined {
@@ -347,6 +357,7 @@ interface ResolvedEft {
   readonly fittingName: string;
   readonly banks: readonly ResolvedBank[];
   readonly drones: readonly ResolvedQuantity[];
+  readonly fighters: readonly ResolvedQuantity[];
   readonly cargo: readonly ResolvedQuantity[];
 }
 
@@ -361,8 +372,12 @@ type ResolvedLine =
   | { readonly kind: "unrecognized"; readonly bank: BankKind; readonly name: string; readonly charge?: string; readonly offline: boolean; readonly id?: TypeId; readonly chargeId?: TypeId };
 
 type ResolvedQuantity =
-  | { readonly kind: "resolved"; readonly id: TypeId; readonly name: string; readonly quantity: number; readonly isDrone: boolean }
-  | { readonly kind: "unrecognized"; readonly name: string; readonly quantity: number; readonly isDrone: boolean; readonly id?: TypeId };
+  | { readonly kind: "resolved"; readonly id: TypeId; readonly name: string; readonly quantity: number; readonly bay: QuantityBay }
+  | { readonly kind: "unrecognized"; readonly name: string; readonly quantity: number; readonly bay: QuantityBay; readonly id?: TypeId };
+
+// Quantity items land in the drone bay, the fighter hangar, or the cargo hold. Fighters display
+// inside the drones section of summaries.
+type QuantityBay = "drone" | "fighter" | "cargo";
 
 function resolveLine(
   line: EftLine,
@@ -410,6 +425,8 @@ function isModuleRole(id: TypeId, db: FittingDb): boolean {
     db.targetPainters[id] !== undefined ||
     db.missileGuidanceComputers[id] !== undefined ||
     db.missileGuidanceEnhancers[id] !== undefined ||
+    db.omnidirectionalTrackingLinks[id] !== undefined ||
+    db.omnidirectionalTrackingEnhancers[id] !== undefined ||
     db.commandBursts[id] !== undefined
   );
 }
@@ -454,6 +471,7 @@ function buildSections(resolved: ResolvedEft): readonly FittingSection[] {
   }
 
   for (const item of resolved.drones) classifyQuantity(buckets, item);
+  for (const item of resolved.fighters) classifyQuantity(buckets, item);
   for (const item of resolved.cargo) classifyQuantity(buckets, item);
 
   const sections: FittingSection[] = [];
@@ -465,9 +483,9 @@ function buildSections(resolved: ResolvedEft): readonly FittingSection[] {
 
 function classifyQuantity(buckets: Record<FittingSectionKind, FittingRow[]>, item: ResolvedQuantity): void {
   if (item.kind === "resolved") {
-    buckets[item.isDrone ? "drones" : "cargo"].push({ name: item.name, id: item.id, quantity: item.quantity });
+    buckets[item.bay === "cargo" ? "cargo" : "drones"].push({ name: item.name, id: item.id, quantity: item.quantity });
   } else {
-    buckets[item.isDrone ? "drones" : "cargo"].push({ name: item.name, quantity: item.quantity });
+    buckets[item.bay === "cargo" ? "cargo" : "drones"].push({ name: item.name, quantity: item.quantity });
   }
 }
 
@@ -486,7 +504,7 @@ function serializeEftDocument(resolved: ResolvedEft): string {
     for (const text of bankLines[kind]) lines.push(text);
   }
 
-  if (resolved.drones.length > 0 || resolved.cargo.length > 0) {
+  if (resolved.drones.length > 0 || resolved.fighters.length > 0 || resolved.cargo.length > 0) {
     if (lines.length > 1) {
       lines.push("");
       lines.push("");
@@ -494,7 +512,9 @@ function serializeEftDocument(resolved: ResolvedEft): string {
       lines.push("");
     }
     for (const item of resolved.drones) lines.push(`${item.name} x${item.quantity}`);
-    if (resolved.drones.length > 0 && resolved.cargo.length > 0) {
+    if (resolved.drones.length > 0 && resolved.fighters.length > 0) lines.push("");
+    for (const item of resolved.fighters) lines.push(`${item.name} x${item.quantity}`);
+    if ((resolved.drones.length > 0 || resolved.fighters.length > 0) && resolved.cargo.length > 0) {
       lines.push("");
       lines.push("");
     }
@@ -566,6 +586,12 @@ function collectCargoEntries(items: readonly ResolvedQuantity[]): readonly Cargo
     if (item.kind === "resolved") entries.push({ id: item.id, quantity: item.quantity });
   }
   return entries;
+}
+
+function pushByBay(item: ResolvedQuantity, drones: ResolvedQuantity[], fighters: ResolvedQuantity[], cargo: ResolvedQuantity[]): void {
+  if (item.bay === "drone") drones.push(item);
+  else if (item.bay === "fighter") fighters.push(item);
+  else cargo.push(item);
 }
 
 function resolveCommandBurstSpecs(fitting: FittingState, db: FittingDb): readonly CommandBurstSpec[] {

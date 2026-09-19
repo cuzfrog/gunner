@@ -30,9 +30,11 @@ function createWeaponSystemSwitch(side: Side, deps: ControlsCradle): WeaponSyste
     turretButton: deps.els[side].weaponSystemTurret,
     missileButton: deps.els[side].weaponSystemMissile,
     droneButton: deps.els[side].weaponSystemDrone,
+    fighterButton: deps.els[side].weaponSystemFighter,
     turretPanel: deps.els[side].turretPanel,
     launcherPanel: deps.els[side].launcherPanel,
     dronePanel: deps.els[side].dronePanel,
+    fighterPanel: deps.els[side].fighterPanel,
     events: deps.uiEvents,
   });
 }

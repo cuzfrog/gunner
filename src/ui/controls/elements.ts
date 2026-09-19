@@ -114,6 +114,7 @@ interface CombatantEls {
   readonly weaponSystemTurret: HTMLButtonElement;
   readonly weaponSystemMissile: HTMLButtonElement;
   readonly weaponSystemDrone: HTMLButtonElement;
+  readonly weaponSystemFighter: HTMLButtonElement;
   readonly launcherAmmoTrigger: HTMLButtonElement;
   readonly launcherAmmoSummary: HTMLElement;
   readonly launcherAmmoSummaryIcon: HTMLImageElement;
@@ -160,6 +161,28 @@ interface CombatantEls {
   readonly droneCatalogMedium: HTMLElement;
   readonly droneCatalogHeavy: HTMLElement;
   readonly droneCatalogSentry: HTMLElement;
+  readonly fighterPanel: HTMLElement;
+  readonly fighterTrigger: HTMLButtonElement;
+  readonly fighterSummary: HTMLElement;
+  readonly fighterSummaryIcon: HTMLImageElement;
+  readonly fighterPopup: HTMLElement;
+  readonly fighterField: HTMLElement;
+  readonly fighterOptimal: HTMLElement;
+  readonly fighterFalloff: HTMLElement;
+  readonly fighterDamage: HTMLElement;
+  readonly fighterCycleTime: HTMLElement;
+  readonly fighterMaxVelocity: HTMLElement;
+  readonly fighterCount: HTMLElement;
+  readonly fighterLoadoutSection: HTMLElement;
+  readonly fighterLoadoutList: HTMLElement;
+  readonly fighterSummaryBar: HTMLElement;
+  readonly fighterSummarySquadrons: HTMLElement;
+  readonly fighterSummaryCount: HTMLElement;
+  readonly fighterSummaryHangar: HTMLElement;
+  readonly fighterCatalogSection: HTMLElement;
+  readonly fighterCatalogLight: HTMLElement;
+  readonly fighterCatalogHeavy: HTMLElement;
+  readonly fighterCatalogSupport: HTMLElement;
 }
 
 interface ControlsElements extends GlobalControlsEls {
@@ -383,6 +406,7 @@ function createCombatantEls(side: Side): CombatantEls {
     weaponSystemTurret: elOf(combatantElementId("weaponSystemTurret", side), isHtmlButtonElement),
     weaponSystemMissile: elOf(combatantElementId("weaponSystemMissile", side), isHtmlButtonElement),
     weaponSystemDrone: elOf(combatantElementId("weaponSystemDrone", side), isHtmlButtonElement),
+    weaponSystemFighter: elOf(combatantElementId("weaponSystemFighter", side), isHtmlButtonElement),
     launcherAmmoTrigger: elOf(combatantElementId("launcherAmmoTrigger", side), isHtmlButtonElement),
     launcherAmmoSummary: el(combatantElementId("launcherAmmoSummary", side)),
     launcherAmmoSummaryIcon: elOf(combatantElementId("launcherAmmoSummaryIcon", side), isHtmlImageElement),
@@ -429,5 +453,27 @@ function createCombatantEls(side: Side): CombatantEls {
     droneCatalogMedium: el(combatantElementId("droneCatalogMedium", side)),
     droneCatalogHeavy: el(combatantElementId("droneCatalogHeavy", side)),
     droneCatalogSentry: el(combatantElementId("droneCatalogSentry", side)),
+    fighterPanel: el(combatantElementId("fighterPanel", side)),
+    fighterTrigger: elOf(combatantElementId("fighterTrigger", side), isHtmlButtonElement),
+    fighterSummary: el(combatantElementId("fighterSummary", side)),
+    fighterSummaryIcon: elOf(combatantElementId("fighterSummaryIcon", side), isHtmlImageElement),
+    fighterPopup: el(combatantElementId("fighterPopup", side)),
+    fighterField: el(combatantElementId("fighterField", side)),
+    fighterOptimal: el(combatantElementId("fighterOptimal", side)),
+    fighterFalloff: el(combatantElementId("fighterFalloff", side)),
+    fighterDamage: el(combatantElementId("fighterDamage", side)),
+    fighterCycleTime: el(combatantElementId("fighterCycleTime", side)),
+    fighterMaxVelocity: el(combatantElementId("fighterMaxVelocity", side)),
+    fighterCount: el(combatantElementId("fighterCount", side)),
+    fighterLoadoutSection: el(combatantElementId("fighterLoadoutSection", side)),
+    fighterLoadoutList: el(combatantElementId("fighterLoadoutList", side)),
+    fighterSummaryBar: el(combatantElementId("fighterSummaryBar", side)),
+    fighterSummarySquadrons: el(combatantElementId("fighterSummarySquadrons", side)),
+    fighterSummaryCount: el(combatantElementId("fighterSummaryCount", side)),
+    fighterSummaryHangar: el(combatantElementId("fighterSummaryHangar", side)),
+    fighterCatalogSection: el(combatantElementId("fighterCatalogSection", side)),
+    fighterCatalogLight: el(combatantElementId("fighterCatalogLight", side)),
+    fighterCatalogHeavy: el(combatantElementId("fighterCatalogHeavy", side)),
+    fighterCatalogSupport: el(combatantElementId("fighterCatalogSupport", side)),
   };
 }

@@ -187,11 +187,12 @@ export type ShipOutputBonusAttribute = "powerGridOutputPercent" | "cpuOutputPerc
 export type TurretBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "turretDamage" | "turretRoF" | "turretSpoolMax";
 export type MissileBonusAttribute = "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity";
 export type DroneBonusAttribute = "droneDamage";
+export type FighterBonusAttribute = "fighterDamage";
 export type DefenseBonusAttribute = "armorResist" | "shieldResist" | "shieldHpPercent" | "armorHpPercent" | "hullHpPercent" | "plateHpPercent" | "extenderHpPercent";
 export type ModuleBonusAttribute = "capUse" | "duration" | "cpuNeed" | "powerGridNeed";
 // Flat additions applied to the base ship stat before percent modifiers (strategic cruiser subsystems).
 export type ShipStatFlatAttribute = "shieldHpFlat" | "armorHpFlat" | "hullHpFlat" | "capacitorCapacityFlat" | "sigRadiusFlat" | "maxTargetingRangeFlat" | "droneCapacityFlat" | "droneBandwidthFlat" | "powerGridFlat" | "cpuFlat";
-export type HullBonusAttribute = PropulsionBonusAttribute | ShipOutputBonusAttribute | TurretBonusAttribute | MissileBonusAttribute | DroneBonusAttribute | DefenseBonusAttribute | ModuleBonusAttribute | ShipStatFlatAttribute;
+export type HullBonusAttribute = PropulsionBonusAttribute | ShipOutputBonusAttribute | TurretBonusAttribute | MissileBonusAttribute | DroneBonusAttribute | FighterBonusAttribute | DefenseBonusAttribute | ModuleBonusAttribute | ShipStatFlatAttribute;
 
 export interface HullBonus {
   readonly attribute: HullBonusAttribute;
@@ -206,7 +207,7 @@ export interface HullBonus {
   readonly sourceId?: TypeId;
 }
 
-export type SkillBonusType = "turretDamage" | "turretRoF" | "turretTracking" | "turretOptimal" | "turretFalloff" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity" | "droneDamage" | "droneOptimal" | "droneVelocity" | ModuleBonusAttribute;
+export type SkillBonusType = "turretDamage" | "turretRoF" | "turretTracking" | "turretOptimal" | "turretFalloff" | "missileDamage" | "missileRoF" | "missileVelocity" | "missileFlightTime" | "missileExplosionRadius" | "missileExplosionVelocity" | "droneDamage" | "droneOptimal" | "droneVelocity" | "fighterDamage" | "fighterOptimal" | "fighterVelocity" | ModuleBonusAttribute;
 
 export interface SkillBonus {
   readonly skillId: TypeId;
@@ -382,6 +383,8 @@ export interface OmnidirectionalTrackingLinkStats {
   readonly trackingBonusPercent: number;
   readonly optimalBonusPercent: number;
   readonly falloffBonusPercent: number;
+  readonly aoeVelocityBonusPercent: number;
+  readonly aoeCloudSizeBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
   readonly capacitorNeed: number; // GJ per cycle
   readonly cycleTime: number; // seconds
@@ -393,6 +396,8 @@ export interface OmnidirectionalTrackingEnhancerStats {
   readonly trackingBonusPercent: number;
   readonly optimalBonusPercent: number;
   readonly falloffBonusPercent: number;
+  readonly aoeVelocityBonusPercent: number;
+  readonly aoeCloudSizeBonusPercent: number;
   readonly id: TypeId;
   readonly name: string;
 }
@@ -444,6 +449,42 @@ export interface SensorDampenerScriptStats {
 }
 
 export type DroneSizeClass = "light" | "medium" | "heavy" | "sentry";
+
+export type FighterKind = "light" | "heavy" | "support";
+
+/** One fighter attack ability (missile-typed); every published damage fighter uses missiles. */
+export interface FighterAttackStats {
+  readonly emDamage: number;
+  readonly thermalDamage: number;
+  readonly kineticDamage: number;
+  readonly explosiveDamage: number;
+  readonly damageMultiplier: number;
+  readonly cycleTime: number; // seconds
+  readonly explosionRadius: number; // m
+  readonly explosionVelocity: number; // m/s
+  readonly damageReductionFactor: number;
+  readonly damageReductionSensitivity: number;
+  readonly optimal: number; // m
+  readonly falloff: number; // m
+  readonly numShots: number; // squadron magazine size, 0 = unlimited
+  readonly rearmTime: number; // seconds per spent shot
+}
+
+export interface FighterStats {
+  readonly kind: FighterKind;
+  readonly squadronMaxSize: number;
+  readonly orbitRange: number; // m
+  readonly maxVelocity: number; // m/s
+  readonly signatureRadius: number; // m
+  readonly refuelingTime: number; // seconds per refuel cycle
+  readonly volume: number; // m3 per fighter
+  readonly attack?: FighterAttackStats;
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
+  readonly requiredSkillIds: readonly TypeId[];
+  readonly id: TypeId;
+  readonly name: string;
+}
 
 export interface DroneStats {
   readonly sizeClass: DroneSizeClass;
@@ -544,6 +585,7 @@ export interface FittingDbData {
   readonly rigDrawbackReductions: readonly RigDrawbackReduction[];
   readonly drones: Readonly<Record<string, { readonly id: TypeId; readonly name: string }>>;
   readonly combatDrones: Readonly<Record<string, DroneStats>>;
+  readonly fighters: Readonly<Record<string, FighterStats>>;
 }
 
 export type FittingDb = FittingDbData;

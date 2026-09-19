@@ -1,5 +1,5 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser, SettingsStore } from "../../appstate";
-import type { CapacitorStats, ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, ImportedFitting, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
+import type { CapacitorStats, ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FighterCatalog, FighterLoadoutResolver, FighterLoadoutValidator, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, ImportedFitting, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
 import type { EwarResolver, HitChance, SensorBoosterResolver, SimValueParser, DefenseAssessor, WeaponDamageAssessor } from "../../sim";
 import type { Ships } from "../../ships";
 import type { ItemNameCatalog, ItemNameLoader } from "../../gamedata";
@@ -35,6 +35,7 @@ import type { SidePanel, WeaponSystemSwitch } from "./sidePanel";
 import type { TurretController, TurretOverrides } from "./turret";
 import type { LauncherController } from "./launcher";
 import type { DroneController } from "./drone";
+import type { FighterController } from "./fighter";
 import type { RangeOverlayController } from "./rangeOverlay";
 import type { PortraitsController } from "./portraits";
 import type { HoverHintController } from "./hoverHint";
@@ -48,6 +49,7 @@ import type { AppliedDpsHintProvider, AppliedDpsHintRenderer } from "./appliedDp
 import type { InflictedDpsHintProvider, InflictedDpsHintRenderer } from "./inflictedDpsHint";
 import type { ShipHintProvider } from "./shipHint";
 import type { DroneHintProvider } from "./droneHint";
+import type { FighterHintProvider } from "./fighterHint";
 import type { ModuleHintProvider } from "./moduleHint";
 import type { StatHintRenderer } from "./statHint";
 
@@ -100,12 +102,18 @@ export interface ControlsCradle {
   readonly shipADroneController: DroneController;
   readonly shipBDroneController: DroneController;
   readonly droneControllers: Record<Side, DroneController>;
+  readonly shipAFighterController: FighterController;
+  readonly shipBFighterController: FighterController;
+  readonly fighterControllers: Record<Side, FighterController>;
   readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   readonly fittingDb: FittingDb;
   readonly missileCatalog: MissileCatalog;
   readonly droneCatalog: DroneCatalog;
   readonly droneLoadoutResolver: DroneLoadoutResolver;
   readonly droneLoadoutValidator: DroneLoadoutValidator;
+  readonly fighterCatalog: FighterCatalog;
+  readonly fighterLoadoutResolver: FighterLoadoutResolver;
+  readonly fighterLoadoutValidator: FighterLoadoutValidator;
   readonly launcherClasses: LauncherClasses;
   readonly shipASide: SidePanel;
   readonly shipBSide: SidePanel;
@@ -154,5 +162,6 @@ export interface ControlsCradle {
   readonly inflictedDpsHintProvider: InflictedDpsHintProvider;
   readonly shipHintProvider: ShipHintProvider;
   readonly droneHintProvider: DroneHintProvider;
+  readonly fighterHintProvider: FighterHintProvider;
   readonly moduleHintProvider: ModuleHintProvider;
 }

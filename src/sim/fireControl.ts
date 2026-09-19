@@ -5,12 +5,15 @@ import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import type { WeaponDamageAssessor } from "./weaponDamageAssessor";
 import type { DroneApplication } from "./droneApplication";
+import type { FighterApplication } from "./fighterApplication";
 import type {
   DamageAssessment,
   DroneDamageBreakdown,
   DroneRuntimeState,
   DroneSpec,
   EngagementFrame,
+  FighterDamageBreakdown,
+  FighterSpec,
   MissileAttackFacts,
   MissileDamageBreakdown,
   MissileSpec,
@@ -39,6 +42,7 @@ export interface AttackAssessment {
   readonly turret?: TurretDamageBreakdown;
   readonly missile?: MissileDamageBreakdown;
   readonly drone?: DroneDamageBreakdown;
+  readonly fighter?: FighterDamageBreakdown;
 }
 
 export interface EngagementEvaluator {
@@ -52,14 +56,16 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   private readonly missileBoosters: MissileBoosterResolver;
   private readonly weaponDamageAssessor: WeaponDamageAssessor;
   private readonly droneApplication: DroneApplication;
+  private readonly fighterApplication: FighterApplication;
 
-  constructor({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, droneApplication }: {
+  constructor({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, droneApplication, fighterApplication }: {
     hitChance: HitChance;
     ewarResolver: EwarResolver;
     turretBoosterResolver: TurretBoosterResolver;
     missileBoosterResolver: MissileBoosterResolver;
     weaponDamageAssessor: WeaponDamageAssessor;
     droneApplication: DroneApplication;
+    fighterApplication: FighterApplication;
   }) {
     this.hitChance = hitChance;
     this.ewarResolver = ewarResolver;
@@ -67,6 +73,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     this.missileBoosters = missileBoosterResolver;
     this.weaponDamageAssessor = weaponDamageAssessor;
     this.droneApplication = droneApplication;
+    this.fighterApplication = fighterApplication;
   }
 
   evaluate(frame: EngagementFrame, attacks: { readonly shipA?: AttackState; readonly shipB?: AttackState }): Record<Side, AttackAssessment | undefined> {
@@ -82,6 +89,8 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
       assessment = this.assessTurret(frame, ship, opponent, attack.weapon, attack.paintedTargetSig, attack.spoolCycles);
     } else if (attack.weapon.kind === "drone") {
       assessment = this.assessDrone(frame, attack.weapon, attack.paintedTargetSig, attack.droneState);
+    } else if (attack.weapon.kind === "fighter") {
+      assessment = this.assessFighter(frame, opponent, attack.weapon, attack.paintedTargetSig);
     } else {
       if (!attack.missileFacts) throw new Error("MissileAttackFacts are required to assess a missile weapon");
       assessment = this.assessMissile(ship, attack.weapon, attack.missileFacts);
@@ -121,6 +130,11 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   private assessDrone(frame: EngagementFrame, drone: DroneSpec, paintedTargetSig: number, droneState: DroneRuntimeState | undefined): AttackAssessment {
     const breakdown = this.droneApplication.compute(frame, drone, paintedTargetSig, droneState);
     return { boostedWeapon: drone, effectiveWeapon: drone, damage: breakdown, drone: breakdown };
+  }
+
+  private assessFighter(frame: EngagementFrame, opponent: ShipState, fighter: FighterSpec, paintedTargetSig: number): AttackAssessment {
+    const breakdown = this.fighterApplication.compute(fighter, opponent.velocity.len(), frame.distance, paintedTargetSig);
+    return { boostedWeapon: fighter, effectiveWeapon: fighter, damage: breakdown, fighter: breakdown };
   }
 }
 

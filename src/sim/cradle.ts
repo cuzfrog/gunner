@@ -5,8 +5,10 @@ import type {
   EwarResolver,
   EngagementEvaluator,
   EngagementFrameComposer,
+  FighterApplication,
   HitChance,
   Kinematics,
+  MissileApplication,
   MissileBoosterResolver,
   RngFactory,
   SensorBoosterResolver,
@@ -28,6 +30,8 @@ export interface SimCradle {
   readonly kinematics: Kinematics;
   readonly hitChance: HitChance;
   readonly droneApplication: DroneApplication;
+  readonly fighterApplication: FighterApplication;
+  readonly missileApplication: MissileApplication;
   readonly weaponDamageAssessor: WeaponDamageAssessor;
   readonly engagementEvaluator: EngagementEvaluator;
   readonly engagementFrameComposer: EngagementFrameComposer;

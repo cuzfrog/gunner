@@ -8,6 +8,7 @@ import { MissileCatalogImpl } from "../src/fitting/missileCatalog";
 import { MissileSkillModelImpl } from "../src/fitting/missileStats";
 import { DroneCatalogImpl } from "../src/fitting/droneCatalog";
 import { DroneSkillModelImpl } from "../src/fitting/droneStats";
+import { FighterSkillModelImpl } from "../src/fitting/fighterStats";
 import { parseEft } from "../src/fitting/eft";
 import { ShipsImpl } from "../src/ships/ships";
 import { StaticShipProfileCatalog } from "../src/gamedata/shipProfiles";
@@ -26,6 +27,7 @@ const stackingPenalty = new StackingPenaltyImpl();
 const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonuses: FITTING_DB.skillBonuses });
 const missileCatalog = new MissileCatalogImpl({ fittingDb: FITTING_DB, missileSkillModel });
 const droneSkillModel = new DroneSkillModelImpl({ skillBonuses: FITTING_DB.skillBonuses });
+const fighterSkillModel = new FighterSkillModelImpl({ skillBonuses: FITTING_DB.skillBonuses });
 const droneCatalog = new DroneCatalogImpl({ fittingDb: FITTING_DB });
 const fittingImport = new FittingImportImpl({
   ships,
@@ -35,7 +37,7 @@ const fittingImport = new FittingImportImpl({
   missileCatalog,
   missileSkillModel,
   droneCatalog,
-  droneSkillModel,
+  droneSkillModel, fighterSkillModel,
   stackingPenalty,
   itemNameCatalog: new StaticItemNameCatalog(),
   itemNameResolver: new StaticItemNameResolver(),

@@ -140,6 +140,9 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
     if (effectiveWeapon?.kind === "drone") {
       return { kind: "drone", speed: ship.maxSpeed, tracking: effectiveWeapon.tracking, optimal: effectiveWeapon.optimal, falloff: effectiveWeapon.falloff, sigResolution: effectiveWeapon.sigResolution, speedBreakdown };
     }
+    if (effectiveWeapon?.kind === "fighter") {
+      return { kind: "fighter", speed: ship.maxSpeed, maxVelocity: effectiveWeapon.maxVelocity, optimal: effectiveWeapon.optimal, falloff: effectiveWeapon.falloff, explosionRadius: effectiveWeapon.explosionRadius, explosionVelocity: effectiveWeapon.explosionVelocity, speedBreakdown };
+    }
     return { kind: "none", speed: ship.maxSpeed, speedBreakdown };
   }
 

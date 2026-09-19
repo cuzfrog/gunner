@@ -27,6 +27,11 @@ function profile(overrides: Partial<ShipProfile> = {}): ShipProfile {
     droneBandwidth: 75,
     droneCapacity: 100,
     maxActiveDrones: 5,
+    fighterCapacity: 0,
+    fighterTubes: 0,
+    fighterLightSlots: 0,
+    fighterHeavySlots: 0,
+    fighterSupportSlots: 0,
     shieldHp: 0,
     shieldRechargeTime: 0,
     armorHp: 0,
@@ -67,7 +72,7 @@ function emptyDb(): FittingDb {
     stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {},
     targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {},
     omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {},
-    sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: {}, combatDrones: {},
+    sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: {}, combatDrones: {}, fighters: {},
   };
 }
 
@@ -91,6 +96,7 @@ function fittingState(overrides: Partial<FittingState> = {}): FittingState {
     sensorAmplifierModules: [],
     commandBurstModules: [],
     droneGroups: [],
+    fighterGroups: [],
     drones: [],
     cargo: [],
     ...overrides,

@@ -24,6 +24,11 @@ const profile: ShipProfile = {
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  fighterCapacity: 0,
+  fighterTubes: 0,
+  fighterLightSlots: 0,
+  fighterHeavySlots: 0,
+  fighterSupportSlots: 0,
   shieldHp: 0,
   shieldRechargeTime: 0,
   armorHp: 0,
@@ -63,7 +68,7 @@ function baseState(): FittingState {
     entry("Heavy Pulse Laser II", "Conflagration M"),
     entry("Heat Sink II"),
     entry("100MN Y-S8 Compact Afterburner"),
-  ], [], []);
+  ], [], [], []);
 }
 
 describe("FittingOverridesStoreImpl", () => {
@@ -200,7 +205,7 @@ describe("applyFittingOverrides", () => {
     const state = factory.create(profile, hullBonuses, [
       entry("Heavy Missile Launcher II", "Scourge Heavy Missile"),
       entry("Heavy Missile Launcher II", "Scourge Heavy Missile"),
-    ], [], []);
+    ], [], [], []);
     const original = moduleId("Heavy Missile Launcher II");
     const replacement = moduleId("Heavy Missile Launcher I");
     const overrides: FittingOverrides = { turretModuleReplacements: new Map(), turretChargeReplacements: new Map(), launcherModuleReplacements: new Map([[original, replacement]]), launcherChargeReplacements: new Map(), propulsionModuleReplacement: undefined };
@@ -213,7 +218,7 @@ describe("applyFittingOverrides", () => {
   test("replaces launcher charge in launcher groups", () => {
     const state = factory.create(profile, hullBonuses, [
       entry("Heavy Missile Launcher II", "Scourge Heavy Missile"),
-    ], [], []);
+    ], [], [], []);
     const launcherModule = moduleId("Heavy Missile Launcher II");
     const newCharge = chargeId("Nova Heavy Missile");
     const overrides: FittingOverrides = { turretModuleReplacements: new Map(), turretChargeReplacements: new Map(), launcherModuleReplacements: new Map(), launcherChargeReplacements: new Map([[launcherModule, newCharge]]), propulsionModuleReplacement: undefined };
@@ -225,7 +230,7 @@ describe("applyFittingOverrides", () => {
     const state = factory.create(profile, hullBonuses, [
       entry("Heavy Missile Launcher II", "Scourge Heavy Missile"),
       entry("Heavy Missile Launcher I", "Nova Heavy Missile"),
-    ], [], []);
+    ], [], [], []);
     const overrides: FittingOverrides = { turretModuleReplacements: new Map(), turretChargeReplacements: new Map(), launcherModuleReplacements: new Map([[moduleId("Heavy Missile Launcher II"), moduleId("Heavy Missile Launcher I")]]), launcherChargeReplacements: new Map(), propulsionModuleReplacement: undefined };
     const result = applyFittingOverrides(state, overrides);
     expect(result.launcherGroups.length).toBe(1);
@@ -245,7 +250,7 @@ describe("applyFittingOverrides", () => {
     const state = factory.create(profile, hullBonuses, [
       entry("Heavy Pulse Laser II", "Conflagration M"),
       entry("Heavy Pulse Laser I", "Scorch M"),
-    ], [], []);
+    ], [], [], []);
     const overrides: FittingOverrides = { turretModuleReplacements: new Map([[moduleId("Heavy Pulse Laser II"), moduleId("Heavy Pulse Laser I")]]), turretChargeReplacements: new Map(), launcherModuleReplacements: new Map(), launcherChargeReplacements: new Map(), propulsionModuleReplacement: undefined };
     const result = applyFittingOverrides(state, overrides);
     expect(result.turretGroups.length).toBe(1);

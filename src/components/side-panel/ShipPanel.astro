@@ -8,6 +8,7 @@ import PanelHeading from "./PanelHeading.astro";
 import TurretPanel from "./TurretPanel.astro";
 import LauncherPanel from "./LauncherPanel.astro";
 import DronePanel from "./DronePanel.astro";
+import FighterPanel from "./FighterPanel.astro";
 import EwarField from "./EwarField.astro";
 import DefenseField from "./DefenseField.astro";
 import CapacitorField from "./CapacitorField.astro";
@@ -46,6 +47,8 @@ const modeSecond = side === "shipA"
     <LauncherPanel idPrefix={idPrefix} />
 
     <DronePanel idPrefix={idPrefix} />
+
+    <FighterPanel idPrefix={idPrefix} />
 
     <EwarField idPrefix={idPrefix} />
     <DefenseField idPrefix={idPrefix} />

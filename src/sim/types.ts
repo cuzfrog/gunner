@@ -170,8 +170,35 @@ export interface DroneRuntimeState {
   readonly inControlRange: boolean; // ship-to-target <= controlRange
 }
 
-export type WeaponSpec = TurretSpec | MissileSpec | DroneSpec;
-export type WeaponKind = "turret" | "missile" | "drone";
+export interface FighterMagazine {
+  readonly numShots: number; // attack cycles the squadron flies before refueling
+  readonly rearmTime: number; // seconds to rearm one attack cycle worth of missiles
+  readonly refuelingTime: number; // seconds to return to the hangar
+}
+
+export interface FighterSpec {
+  readonly kind: "fighter";
+  readonly moduleId: TypeId;
+  readonly damagePerVolley: DamageVector; // per fighter per cycle, skill/hull multipliers applied
+  readonly cycleTime: number; // seconds per attack run
+  readonly fighterCount: number; // fighters in the squadron
+  readonly maxVelocity: number; // m/s
+  readonly orbitRange: number; // m, squadron orbits the target
+  readonly explosionRadius: number;
+  readonly explosionVelocity: number;
+  readonly damageReductionFactor: number; // aggregated exponent ln(DRF)/ln(DRS)
+  readonly optimal: number; // m, attack range optimal
+  readonly falloff: number; // m, attack range falloff
+  readonly magazine: FighterMagazine | undefined; // undefined = unlimited (superiority/attack role)
+}
+
+export interface FighterRuntimeState {
+  readonly positions: readonly Vec2[]; // individual fighter positions
+  readonly distanceToTarget: number; // m, group-average fighter-to-target
+}
+
+export type WeaponSpec = TurretSpec | MissileSpec | DroneSpec | FighterSpec;
+export type WeaponKind = "turret" | "missile" | "drone" | "fighter";
 
 export interface DamageAssessment {
   readonly nominalDps: number;
@@ -247,6 +274,14 @@ export interface DroneDamageBreakdown {
   readonly mode: DroneMode;
   readonly distanceToTarget: number; // m, drone-to-target
   readonly inControlRange: boolean; // ship-to-target <= controlRange
+}
+
+export interface FighterDamageBreakdown {
+  readonly application: number; // rangeFactor * missile application, 0..1
+  readonly rangeFactor: number; // range strength factor; 1 when the fighter outruns the target
+  readonly signatureTerm: number; // S/E
+  readonly velocityTerm: number;
+  readonly inRange: boolean; // target within optimal + 3*falloff (slow-fighter mode)
 }
 
 export interface EngagementFrame {
@@ -681,13 +716,24 @@ export interface DroneReadoutValues {
   readonly speedBreakdown?: SpeedBreakdown;
 }
 
+export interface FighterReadoutValues {
+  readonly kind: "fighter";
+  readonly speed: number;
+  readonly maxVelocity: number;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly explosionRadius: number;
+  readonly explosionVelocity: number;
+  readonly speedBreakdown?: SpeedBreakdown;
+}
+
 export interface NoWeaponReadoutValues {
   readonly kind: "none";
   readonly speed: number;
   readonly speedBreakdown?: SpeedBreakdown;
 }
 
-export type SideReadoutValues = TurretReadoutValues | MissileReadoutValues | DroneReadoutValues | NoWeaponReadoutValues;
+export type SideReadoutValues = TurretReadoutValues | MissileReadoutValues | DroneReadoutValues | FighterReadoutValues | NoWeaponReadoutValues;
 
 export interface BoosterActivation {
   readonly active: boolean;

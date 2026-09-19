@@ -37,6 +37,7 @@ import type { CapacitorController } from "../capacitor";
 import type { TargetingController } from "../targeting";
 import type { LauncherController } from "../launcher";
 import type { DroneController } from "../drone";
+import type { FighterController } from "../fighter";
 import type { WeaponSystemSwitch } from "../sidePanel";
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 
@@ -344,6 +345,25 @@ function mockLauncherControllers(): Record<Side, LauncherController> {
   return { shipA: make(), shipB: make() };
 }
 
+function mockFighterControllers(): Record<Side, FighterController> {
+  const make = (): FighterController => ({
+    side: "shipA",
+    popup: mockPopup(),
+    fighters: vi.fn(() => []),
+    currentFighterSpecs: vi.fn(() => []),
+    validation: vi.fn(() => undefined),
+    applyImported: vi.fn(),
+    restore: vi.fn(),
+    clear: vi.fn(),
+    capture: vi.fn(() => ({ fighterGroups: [] })),
+    isPopupOpen: vi.fn(() => false),
+    openPopup: vi.fn(),
+    closePopup: vi.fn(),
+    render: vi.fn(),
+  });
+  return { shipA: make(), shipB: make() };
+}
+
 function mockDroneControllers(): Record<Side, DroneController> {
   const make = (): DroneController => ({
     side: "shipA",
@@ -383,6 +403,7 @@ function buildCodec(options: {
   turretOverridesBySide?: Record<Side, TurretOverrides>;
   launcherControllers?: Record<Side, LauncherController>;
   droneControllers?: Record<Side, DroneController>;
+  fighterControllers?: Record<Side, FighterController>;
   weaponSystemSwitches?: Record<Side, WeaponSystemSwitch>;
   preferences?: Partial<PreferencesController>;
   profileController?: Partial<ProfileController>;
@@ -452,6 +473,7 @@ function buildCodec(options: {
     turretOverridesBySide,
     launcherControllers,
     droneControllers: options.droneControllers ?? mockDroneControllers(),
+    fighterControllers: options.fighterControllers ?? mockFighterControllers(),
     weaponSystemSwitches,
     preferences,
     profileController,
@@ -471,7 +493,7 @@ function buildCodec(options: {
     fittingImport,
     parser,
   });
-  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, sensorBoosterController, defenseController, capacitorController, capacitorStatsSource, targetingController, fittingImport, parser };
+  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, droneControllers: options.droneControllers ?? mockDroneControllers(), fighterControllers: options.fighterControllers ?? mockFighterControllers(), weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, sensorBoosterController, defenseController, capacitorController, capacitorStatsSource, targetingController, fittingImport, parser };
 }
 
 function makeProfile(): ProfileSettings {
@@ -667,8 +689,8 @@ describe("SessionCodec", () => {
     expect(launcherControllers.shipB.restore).toHaveBeenCalledWith(settings.shipBFitting, { skillLevel: 5, overloaded: true }, undefined);
     expect(weaponSystemSwitches.shipA.setActiveKind).toHaveBeenCalledWith("missile");
     expect(weaponSystemSwitches.shipB.setActiveKind).toHaveBeenCalledWith("turret");
-    expect(weaponSystemSwitches.shipA.autoSelectPrimary).toHaveBeenCalledWith({ turret: undefined, launcher: undefined, drones: [] });
-    expect(weaponSystemSwitches.shipB.autoSelectPrimary).toHaveBeenCalledWith({ turret: undefined, launcher: undefined, drones: [] });
+    expect(weaponSystemSwitches.shipA.autoSelectPrimary).toHaveBeenCalledWith({ turret: undefined, launcher: undefined, drones: [], fighters: [] });
+    expect(weaponSystemSwitches.shipB.autoSelectPrimary).toHaveBeenCalledWith({ turret: undefined, launcher: undefined, drones: [], fighters: [] });
   });
 
   test("restore defaults absent weapon kind to turret", () => {

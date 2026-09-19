@@ -32,6 +32,7 @@ import {
   isOptionalBoolean,
   isOptionalDefenseSkills,
   isOptionalDroneGroups,
+  isOptionalFighterGroups,
   isOptionalEwarActivation,
   isOptionalFittedHullSummary,
   isFiniteNumber,
@@ -251,6 +252,7 @@ export class SettingsParser {
       isOptionalWeaponKind(s[`${p}WeaponKind`]) &&
       isOptionalNonEmptyString(s[`${p}MissileAmmo`]) &&
       isOptionalDroneGroups(s[`${p}DroneGroups`]) &&
+      isOptionalFighterGroups(s[`${p}FighterGroups`]) &&
       (side === "shipA" ? isOptionalPositive(s[`${p}Sig`]) : isPositive(s[`${p}Sig`]))
     );
   }
@@ -549,6 +551,7 @@ function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSetti
   if (combatant.weaponKind !== undefined) wire[`${p}WeaponKind` as const] = combatant.weaponKind;
   if (combatant.missileAmmo !== undefined) wire[`${p}MissileAmmo` as const] = combatant.missileAmmo;
   if (combatant.droneGroups !== undefined) wire[`${p}DroneGroups` as const] = combatant.droneGroups;
+  if (combatant.fighterGroups !== undefined) wire[`${p}FighterGroups` as const] = combatant.fighterGroups;
   if (combatant.sig !== undefined && side === "shipA") wire.shipASig = combatant.sig;
 }
 
@@ -593,6 +596,7 @@ function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"
     weaponKind: sideValue(side, settings.shipAWeaponKind, settings.shipBWeaponKind),
     missileAmmo: sideValue(side, settings.shipAMissileAmmo, settings.shipBMissileAmmo),
     droneGroups: sideValue(side, settings.shipADroneGroups, settings.shipBDroneGroups),
+    fighterGroups: sideValue(side, settings.shipAFighterGroups, settings.shipBFighterGroups),
   };
 }
 

@@ -3,6 +3,7 @@ import type {
   DisruptionScriptStats,
   DroneSizeClass,
   DroneStats,
+  FighterStats,
   FittingDbData,
   FittingModuleStats,
   FittingPropulsionStats,
@@ -40,6 +41,7 @@ import {
   COMMAND_BURSTS,
   DISRUPTION_SCRIPTS,
   DRONES,
+  FIGHTERS,
   FITTING_MODULES,
   HULL_BONUSES,
   LAUNCHERS,
@@ -138,4 +140,5 @@ export const FITTING_DB: FittingDbData = {
   rigDrawbackReductions: RIG_DRAWBACK_REDUCTIONS,
   drones: DRONES,
   combatDrones: COMBAT_DRONES,
+  fighters: FIGHTERS,
 };

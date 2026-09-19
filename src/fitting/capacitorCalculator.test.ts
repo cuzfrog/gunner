@@ -28,6 +28,11 @@ const profile: ShipProfile = {
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  fighterCapacity: 0,
+  fighterTubes: 0,
+  fighterLightSlots: 0,
+  fighterHeavySlots: 0,
+  fighterSupportSlots: 0,
   shieldHp: 7700,
   shieldRechargeTime: 1250,
   armorHp: 9350,
@@ -75,7 +80,7 @@ interface DrainLoadouts {
 }
 
 function resolve(entries: readonly FittingModuleEntry[], conditions: StatConditions = emptyConditions, turrets: readonly ImportedTurret[] = [], loadouts: DrainLoadouts = {}, propulsionModuleId: TypeId | undefined = undefined): ReturnType<CapacitorCalculatorImpl["resolve"]> {
-  const state = factory.create(profile, [] as readonly HullBonus[], entries, [], [] as readonly CargoEntry[]);
+  const state = factory.create(profile, [] as readonly HullBonus[], entries, [], [], [] as readonly CargoEntry[]);
   const defense = defenseCalculator.resolve(state, conditions);
   const turretDrains = turrets.map((turret) => ({ moduleId: turret.moduleId, capacitorNeed: turret.capacitorNeed, cycleTime: turret.cycleTime, count: turret.turretCount }));
   const sources: CapacitorDrainSources = { defense, turretDrains, ewar: loadouts.ewar ?? EMPTY_EWAR_LOADOUT, boosts: loadouts.boosts ?? EMPTY_BOOST_LOADOUT, missileBoosts: loadouts.missileBoosts ?? EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: loadouts.sensorBoosts ?? EMPTY_SENSOR_BOOST_LOADOUT, commandBursts: loadouts.commandBursts ?? [], propulsionModuleId };
@@ -319,7 +324,7 @@ describe("capacitorCalculator", () => {
 
   test("cap booster with charge produces an injector drain, not a usage row", () => {
     const entries = [moduleEntry("Medium Capacitor Booster II", "Cap Booster 200")];
-    const state = factory.create(profile, [] as readonly HullBonus[], entries, [], [] as readonly CargoEntry[]);
+    const state = factory.create(profile, [] as readonly HullBonus[], entries, [], [], [] as readonly CargoEntry[]);
     const injectorDrains = buildInjectorDrains(state, FITTING_DB);
     expect(injectorDrains).toHaveLength(1);
     expect(injectorDrains[0]?.amount).toBeCloseTo(200, 3);
@@ -333,7 +338,7 @@ describe("capacitorCalculator", () => {
   });
 
   test("cap booster without charge injects nothing", () => {
-    const state = factory.create(profile, [] as readonly HullBonus[], [moduleEntry("Medium Capacitor Booster II")], [], [] as readonly CargoEntry[]);
+    const state = factory.create(profile, [] as readonly HullBonus[], [moduleEntry("Medium Capacitor Booster II")], [], [], [] as readonly CargoEntry[]);
     expect(buildInjectorDrains(state, FITTING_DB)).toHaveLength(0);
   });
 
@@ -407,7 +412,7 @@ describe("capacitorCalculator", () => {
 
 describe("CapacitorCalculatorImpl - subsystem flat bonuses", () => {
   function resolveWithBonuses(hullBonuses: readonly HullBonus[], entries: readonly FittingModuleEntry[] = []) {
-    const state = factory.create(profile, hullBonuses, entries, [], [] as readonly CargoEntry[]);
+    const state = factory.create(profile, hullBonuses, entries, [], [], [] as readonly CargoEntry[]);
     const defense = defenseCalculator.resolve(state, emptyConditions);
     const sources: CapacitorDrainSources = { defense, turretDrains: [], ewar: EMPTY_EWAR_LOADOUT, boosts: EMPTY_BOOST_LOADOUT, missileBoosts: EMPTY_MISSILE_BOOSTER_LOADOUT, sensorBoosts: EMPTY_SENSOR_BOOST_LOADOUT, commandBursts: [], propulsionModuleId: undefined };
     return calculator.resolve(state, emptyConditions, sources);

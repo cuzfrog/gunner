@@ -7,6 +7,7 @@ import type { AttackAssessment } from "./fireControl";
 import type { DefenseSimulator, DefenseSimulatorState, DefenseView, SidePoolsSnapshot } from "./defenseSimulator";
 import type { InflictedDps } from "./types";
 import type { DroneSimulator, DroneSimulatorState } from "./droneSimulator";
+import type { FighterSimulator, FighterSimulatorState } from "./fighterSimulator";
 import type { EngagementFrameComposer, EngagementView } from "./engagementFrameComposer";
 import type { EwarResolver } from "./ewarResolver";
 import type { LockClock, LockClockState } from "./lockClock";
@@ -80,6 +81,10 @@ function droneSimulatorState(): DroneSimulatorState {
   return { groups: { shipA: [], shipB: [] } };
 }
 
+function fighterSimulatorState(): FighterSimulatorState {
+  return { groups: { shipA: [], shipB: [] } };
+}
+
 function missileSimulatorState(): MissileSimulatorState {
   const side = { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
   return { sides: { shipA: side, shipB: { ...side } }, time: 0, lastFrameShipA: new Vec2(0, 0), lastFrameShipB: new Vec2(0, 0) };
@@ -115,6 +120,7 @@ function mockWorld() {
     simulation: vi.mocked<Simulation>({ step: vi.fnUntracked(), snapshot: vi.fnUntracked(() => snapshot), reset: vi.fnUntracked(), update: vi.fnUntracked(), capture: vi.fnUntracked(simulationState), restore: vi.fnUntracked() }),
     lockClock: vi.mocked<LockClock>({ reset: vi.fnUntracked(), step: vi.fnUntracked(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), states: vi.fnUntracked(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), capture: vi.fnUntracked(lockClockState), restore: vi.fnUntracked() }),
     droneSimulator: vi.mocked<DroneSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), states: vi.fnUntracked(() => []), capture: vi.fnUntracked(droneSimulatorState), restore: vi.fnUntracked() }),
+    fighterSimulator: vi.mocked<FighterSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), states: vi.fnUntracked(() => []), capture: vi.fnUntracked(fighterSimulatorState), restore: vi.fnUntracked() }),
     missileSimulator: vi.mocked<MissileSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(() => []), states: vi.fnUntracked(() => []), facts: vi.fnUntracked(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })), capture: vi.fnUntracked(missileSimulatorState), restore: vi.fnUntracked() }),
     weaponClock: vi.mocked<WeaponClock>({ reset: vi.fnUntracked(), step: vi.fnUntracked(() => []), capture: vi.fnUntracked(weaponClockState), restore: vi.fnUntracked(), spoolCycles: vi.fnUntracked(() => 0) }),
     defenseSimulator: vi.mocked<DefenseSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), flushPendingDamage: vi.fnUntracked(), view: vi.fnUntracked(() => emptyDefenseView), inflictedTotals: vi.fnUntracked(zeroTotals), capture: vi.fnUntracked(defenseSimulatorState), restore: vi.fnUntracked() }),

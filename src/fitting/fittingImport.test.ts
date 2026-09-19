@@ -6,6 +6,7 @@ import { damageVectorSum } from "../sim";
 import { ChargeCatalogImpl } from "./chargeCatalog";
 import { DroneCatalogImpl } from "./droneCatalog";
 import { DroneSkillModelImpl } from "./droneStats";
+import { FighterSkillModelImpl } from "./fighterStats";
 import { FittingImportImpl } from "./fittingImport";
 import { GunFamiliesImpl } from "./gunFamilies";
 import { MissileCatalogImpl } from "./missileCatalog";
@@ -16,6 +17,7 @@ import {
   COMBAT_DRONES,
   DISRUPTION_SCRIPTS,
   DRONES,
+  FIGHTERS,
   FITTING_MODULES,
   HULL_BONUSES,
   LAUNCHERS,
@@ -106,6 +108,11 @@ const profile: ShipProfile = {
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  fighterCapacity: 0,
+  fighterTubes: 0,
+  fighterLightSlots: 0,
+  fighterHeavySlots: 0,
+  fighterSupportSlots: 0,
   shieldHp: 0,
   shieldRechargeTime: 0,
   armorHp: 0,
@@ -138,6 +145,11 @@ const frigateProfile: ShipProfile = {
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  fighterCapacity: 0,
+  fighterTubes: 0,
+  fighterLightSlots: 0,
+  fighterHeavySlots: 0,
+  fighterSupportSlots: 0,
   shieldHp: 0,
   shieldRechargeTime: 0,
   armorHp: 0,
@@ -170,6 +182,11 @@ const bonusProfile: ShipProfile = {
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  fighterCapacity: 0,
+  fighterTubes: 0,
+  fighterLightSlots: 0,
+  fighterHeavySlots: 0,
+  fighterSupportSlots: 0,
   shieldHp: 0,
   shieldRechargeTime: 0,
   armorHp: 0,
@@ -202,6 +219,11 @@ const roleBonusProfile: ShipProfile = {
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  fighterCapacity: 0,
+  fighterTubes: 0,
+  fighterLightSlots: 0,
+  fighterHeavySlots: 0,
+  fighterSupportSlots: 0,
   shieldHp: 0,
   shieldRechargeTime: 0,
   armorHp: 0,
@@ -234,6 +256,11 @@ const abaddonProfile: ShipProfile = {
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  fighterCapacity: 0,
+  fighterTubes: 0,
+  fighterLightSlots: 0,
+  fighterHeavySlots: 0,
+  fighterSupportSlots: 0,
   shieldHp: 0,
   shieldRechargeTime: 0,
   armorHp: 0,
@@ -266,6 +293,11 @@ const harbingerProfile: ShipProfile = {
   droneBandwidth: 75,
   droneCapacity: 75,
   maxActiveDrones: 5,
+  fighterCapacity: 0,
+  fighterTubes: 0,
+  fighterLightSlots: 0,
+  fighterHeavySlots: 0,
+  fighterSupportSlots: 0,
   shieldHp: 0,
   shieldRechargeTime: 0,
   armorHp: 0,
@@ -331,6 +363,11 @@ const kestrelProfile: ShipProfile = {
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  fighterCapacity: 0,
+  fighterTubes: 0,
+  fighterLightSlots: 0,
+  fighterHeavySlots: 0,
+  fighterSupportSlots: 0,
   shieldHp: 0,
   shieldRechargeTime: 0,
   armorHp: 0,
@@ -363,6 +400,11 @@ const stilettoProfile: ShipProfile = {
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  fighterCapacity: 0,
+  fighterTubes: 0,
+  fighterLightSlots: 0,
+  fighterHeavySlots: 0,
+  fighterSupportSlots: 0,
   shieldHp: 0,
   shieldRechargeTime: 0,
   armorHp: 0,
@@ -479,6 +521,7 @@ const db: FittingDb = {
   rigDrawbackReductions: [],
   drones: {},
   combatDrones: {},
+  fighters: {},
   omnidirectionalTrackingLinks: {},
   omnidirectionalTrackingEnhancers: {},
   sensorDampeners: {},
@@ -523,6 +566,7 @@ const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skillBonu
 const missileCatalog = new MissileCatalogImpl({ fittingDb: db, missileSkillModel });
 const droneSkillModel = new DroneSkillModelImpl({ skillBonuses: db.skillBonuses });
 const droneCatalog = new DroneCatalogImpl({ fittingDb: db });
+const fighterSkillModel = new FighterSkillModelImpl({ skillBonuses: db.skillBonuses });
 
 const mockSkillBonuses: readonly SkillBonus[] = [
   { skillId: "3300" as TypeId, bonusType: "turretRoF", magnitudePerLevel: -2, appliesTo: "module" },
@@ -566,6 +610,7 @@ const fullFittingDb: FittingDb = {
   rigDrawbackReductions: RIG_DRAWBACK_REDUCTIONS,
   drones: DRONES,
   combatDrones: COMBAT_DRONES,
+  fighters: FIGHTERS,
   omnidirectionalTrackingLinks: OMNIDIRECTIONAL_TRACKING_LINKS,
   omnidirectionalTrackingEnhancers: OMNIDIRECTIONAL_TRACKING_ENHANCERS,
   sensorDampeners: SENSOR_DAMPENERS,
@@ -581,6 +626,7 @@ const fullMissileSkillModel = new MissileSkillModelImpl({ stackingPenalty, skill
 const fullMissileCatalog = new MissileCatalogImpl({ fittingDb: fullFittingDb, missileSkillModel: fullMissileSkillModel });
 const fullDroneSkillModel = new DroneSkillModelImpl({ skillBonuses: fullFittingDb.skillBonuses });
 const fullDroneCatalog = new DroneCatalogImpl({ fittingDb: fullFittingDb });
+const fullFighterSkillModel = new FighterSkillModelImpl({ skillBonuses: fullFittingDb.skillBonuses });
 
 const conditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: false };
 
@@ -593,18 +639,18 @@ describe("FittingImportImpl", () => {
   });
 
   test("returns undefined for non-EFT text", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     expect(importer.importFitting("not a fitting", conditions)).toBeUndefined();
   });
 
   test("returns undefined when hull is unknown", () => {
     ships.findHullByName.mockReturnValue(undefined);
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     expect(importer.importFitting("[Unknown Hull, fit]\n5MN Microwarpdrive I", conditions)).toBeUndefined();
   });
 
   test("resolves hull and fitting name", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting("[Harbinger, Brawler]\n5MN Microwarpdrive I", conditions);
     expect(result).toBeDefined();
     expect(result!.profile).toBe(profile);
@@ -612,7 +658,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("sums flat mass from plates without bulkhead item mass fallback", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Tank]\n1600mm Steel Plates II\nReinforced Bulkheads II`,
       conditions,
@@ -622,7 +668,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("shield extender signature radius is included in fitted hull add and attributed by defense calculator", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Shieldy]\nMedium Shield Extender II`, conditions);
     expect(result!.fitted.sigRadiusAdd).toBe(7);
     expect(result!.fitted.sigMultiplier).toBe(1);
@@ -630,7 +676,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("applies stacking penalty to two agility modules", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Agile]\nInertial Stabilizers II\nNanofiber Internal Structure II`,
       conditions,
@@ -640,7 +686,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("two inertial stabilizers apply stacking-penalized signature bonus", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Siggy]\nInertial Stabilizers II\nInertial Stabilizers II`,
       conditions,
@@ -650,7 +696,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("three trimarks stack-penalize agility drawback", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Armor]\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II`,
       conditions,
@@ -661,7 +707,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("shield extender rig multiplies signature by 1.1", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Shield Rig]\nMedium Core Defense Field Extender I`, conditions);
     const expected = stackingPenalty.apply([1.1]);
     expect(result!.fitted.sigMultiplier).toBeCloseTo(expected, 6);
@@ -669,7 +715,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("inertial stabilizer and trimarks share the same agility stacking chain", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Mixed]\nInertial Stabilizers II\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II`,
       conditions,
@@ -679,7 +725,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("inertial stabilizer and shield rig share the same signature stacking chain", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Sig Rig]\nInertial Stabilizers II\nMedium Core Defense Field Extender I`,
       conditions,
@@ -689,39 +735,39 @@ describe("FittingImportImpl", () => {
   });
 
   test("overdrive applies speed bonus percent", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Kiter]\nOverdrive Injector System II`, conditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.125, 6);
   });
 
   test("nanofiber in defenseModules applies speed and agility bonuses", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Nano]\nNanofiber Internal Structure II`, conditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.095, 6);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.8425, 6);
   });
 
   test("armor plate in defenseModules applies mass addition", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Armor]\n1600mm Steel Plates II`, conditions);
     expect(result!.fitted.mass).toBe(profile.mass + 3_750_000);
   });
 
   test("bulkhead in defenseModules applies agility multiplier", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Bulk]\nReinforced Bulkheads II`, conditions);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(1.05, 6);
   });
 
   test("nanofiber and overdrive speed bonuses stack", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Harbinger, Fast]\nOverdrive Injector System II\nNanofiber Internal Structure II`, conditions);
     const expected = stackingPenalty.apply([1.125, 1.095]);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(expected, 6);
   });
 
   test("applies mass percentage bonuses with stacking penalty", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Heavy]\nMedium Higgs Anchor I\n1600mm Steel Plates II`,
       conditions,
@@ -733,7 +779,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("maps exact propulsion to a generic propulsion id", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, AB]\n100MN Y-S8 Compact Afterburner`,
       conditions,
@@ -747,19 +793,19 @@ describe("FittingImportImpl", () => {
   });
 
   test("propulsionVariantNames returns matching module names and ids", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const mwd = propulsionModules.find((m) => m.id === "mwd-5mn")!;
     expect(importer.propulsionVariantNames(mwd)).toEqual([{ id: "5MN Microwarpdrive I" as TypeId, name: "5MN Microwarpdrive I" }]);
   });
 
   test("propulsionVariantNames returns an empty list when no variants match", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const ab10 = propulsionModules.find((m) => m.id === "ab-10mn")!;
     expect(importer.propulsionVariantNames(ab10)).toEqual([]);
   });
 
   test("propulsionStats returns stats for a named propulsion module", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     expect(importer.propulsionStats("5MN Microwarpdrive I")).toEqual({
       thrust: 1_500_000,
       speedBonus: 5,
@@ -777,13 +823,13 @@ describe("FittingImportImpl", () => {
   });
 
   test("propulsionStats returns undefined for an unknown or non-propulsion module", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     expect(importer.propulsionStats("1600mm Steel Plates II")).toBeUndefined();
     expect(importer.propulsionStats("Unknown")).toBeUndefined();
   });
 
   test("propulsionStatsById returns stats for a known propulsion module id", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     expect(importer.propulsionStatsById("100MN Y-S8 Compact Afterburner" as TypeId)).toEqual({
       thrust: 150_000_000,
       speedBonus: 1.25,
@@ -795,7 +841,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("skips unknown module names", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Mixed]\n1600mm Steel Plates II\nUnknown module that does not exist\nMedium Shield Extender II`,
       conditions,
@@ -806,7 +852,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("resolves the first turret and charge", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II, Conflagration M\nMedium Shield Extender II`,
       conditions,
@@ -826,7 +872,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("turret skill level scales tracking, optimal and falloff", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II, Conflagration M`,
       skillConditions,
@@ -837,7 +883,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("turret without loaded charge selects the usual ammo", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II\nHeavy Pulse Laser II, Conflagration M`,
       conditions,
@@ -853,7 +899,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("unknown loaded charge is replaced by the usual ammo", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II, Mjolnir Rocket`,
       conditions,
@@ -864,7 +910,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("cargoCharges filters cargo to known charges in EFT order", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Lasers]
 Heavy Pulse Laser II, Conflagration M
@@ -880,7 +926,7 @@ Conflagration M x100`,
   });
 
   test("three metastasis rigs stack-penalize tracking", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Rigs]
 Heavy Pulse Laser II, Conflagration M
@@ -896,7 +942,7 @@ Medium Energy Metastasis Adjuster II`,
   });
 
   test("two tracking enhancers and a rig share one stacking chain per attribute", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Tracking]
 Heavy Pulse Laser II, Conflagration M
@@ -914,7 +960,7 @@ Medium Energy Metastasis Adjuster II`,
   });
 
   test("offline turret line is skipped and a later online turret is resolved", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Offline]\nHeavy Pulse Laser II /OFFLINE\n200mm AutoCannon II, EMP S`,
       conditions,
@@ -924,7 +970,7 @@ Medium Energy Metastasis Adjuster II`,
   });
 
   test("all-offline propulsion is not applied", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Offline]\n100MN Y-S8 Compact Afterburner /OFFLINE\n5MN Microwarpdrive I /OFFLINE`,
       conditions,
@@ -934,7 +980,7 @@ Medium Energy Metastasis Adjuster II`,
 
   test("maps small turret to S sig resolution class", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, AC]\n200mm AutoCannon II, EMP S`,
       conditions,
@@ -945,7 +991,7 @@ Medium Energy Metastasis Adjuster II`,
 
   test("autocannon without a charge picks a projectile charge, not a hybrid charge", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Merlin, Autocannon]\n200mm AutoCannon I`,
       conditions,
@@ -956,7 +1002,7 @@ Medium Energy Metastasis Adjuster II`,
 
   test("disintegrator without a charge picks exotic plasma, not navy hybrid ammo", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Damavik, Entropic]\nLight Entropic Disintegrator I`,
       conditions,
@@ -967,21 +1013,21 @@ Medium Energy Metastasis Adjuster II`,
 
   test("disintegrator exposes resolved spool spec (per-cycle and max, unboosted by default)", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Damavik, Entropic]\nLight Entropic Disintegrator I, Tetryon Exotic Plasma S`, conditions);
     expect(result!.turret!.spool).toEqual({ perCycle: 0.07, max: 2.125 });
   });
 
   test("Ikitursa boosts disintegrator spool max via turretSpoolMax hull bonus", () => {
     ships.findHullByName.mockReturnValue({ ...profile, id: "52252" as ShipId, name: "Ikitursa" });
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(`[Ikitursa, Spool]\nHeavy Entropic Disintegrator II`, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(result!.turret!.spool).toEqual({ perCycle: 0.07, max: 4.25 });
   });
 
   test("disintegrator overloads for damage, not rate of fire", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const normal = importer.importFitting(`[Damavik, Entropic]\nLight Entropic Disintegrator I, Tetryon Exotic Plasma S`, conditions);
     const overloaded = importer.importFitting(`[Damavik, Entropic]\nLight Entropic Disintegrator I, Tetryon Exotic Plasma S`, { skillLevel: 0, overloaded: false, weaponOverloaded: true });
     expect(overloaded!.turret!.damageMultiplier).toBeCloseTo(normal!.turret!.damageMultiplier * 1.15, 6);
@@ -989,7 +1035,7 @@ Medium Energy Metastasis Adjuster II`,
   });
 
   test("Entropic Radiation Sink applies to a disintegrator and not to an energy turret", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     ships.findHullByName.mockReturnValue(frigateProfile);
     const bare = importer.importFitting(`[Damavik, Entropic]\nLight Entropic Disintegrator I, Tetryon Exotic Plasma S`, conditions);
     const withSink = importer.importFitting(`[Damavik, Entropic]\nLight Entropic Disintegrator I, Tetryon Exotic Plasma S\nEntropic Radiation Sink II`, conditions);
@@ -1002,7 +1048,7 @@ Medium Energy Metastasis Adjuster II`,
 
   test("skill-scaled hull velocity and agility bonuses apply", () => {
     ships.findHullByName.mockReturnValue(bonusProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting("[Vagabond, Bonuses]\n200mm AutoCannon II, EMP S", skillConditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.2, 6);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.84, 6);
@@ -1010,7 +1056,7 @@ Medium Energy Metastasis Adjuster II`,
 
   test("hull velocity and agility bonuses are flat without a skill", () => {
     ships.findHullByName.mockReturnValue(roleBonusProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting("[Muninn, Role]\n200mm AutoCannon II, EMP S", conditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.5, 6);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.95, 6);
@@ -1018,7 +1064,7 @@ Medium Energy Metastasis Adjuster II`,
 
   test("Stiletto interceptor MWD sig bloom reduction applies at skill level 5", () => {
     ships.findHullByName.mockReturnValue(stilettoProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting("[Stiletto, Speed]\n5MN Microwarpdrive I", { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(result).toBeDefined();
     expect(result!.fitted.mwdSigBloomMultiplier).toBeCloseTo(0.25, 6);
@@ -1026,7 +1072,7 @@ Medium Energy Metastasis Adjuster II`,
 
   test("Stiletto interceptor MWD sig bloom reduction is 1 without the skill", () => {
     ships.findHullByName.mockReturnValue(stilettoProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting("[Stiletto, Speed]\n5MN Microwarpdrive I", conditions);
     expect(result).toBeDefined();
     expect(result!.fitted.mwdSigBloomMultiplier).toBeCloseTo(1, 6);
@@ -1034,7 +1080,7 @@ Medium Energy Metastasis Adjuster II`,
 
   test("hull turret bonuses match turret skill and share the module stacking chain", () => {
     ships.findHullByName.mockReturnValue(bonusProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Vagabond, Turrets]
 200mm AutoCannon II, EMP S
@@ -1049,7 +1095,7 @@ Tracking Enhancer II`,
   });
 
   test("Heat Sink damage and RoF modifiers apply to energy turrets", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Lasers]
 Heavy Pulse Laser II, Conflagration M
@@ -1063,7 +1109,7 @@ Heat Sink II`,
 
   test("Heat Sink does not affect projectile turrets", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, AC]
 200mm AutoCannon II, EMP S
@@ -1077,7 +1123,7 @@ Heat Sink II`,
 
   test("Gyrostabilizer damage and RoF modifiers apply to projectile turrets", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, AC]
 200mm AutoCannon II, EMP S
@@ -1091,7 +1137,7 @@ Gyrostabilizer II`,
 
   test("multiple turret groups are retained in turrets array", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Mixed]
 200mm AutoCannon II, EMP S
@@ -1106,7 +1152,7 @@ Heavy Pulse Laser II, Conflagration M`,
   });
 
   test("turret field points to the most-counted group", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Mixed]
 Heavy Pulse Laser II, Conflagration M
@@ -1120,7 +1166,7 @@ Heavy Pulse Laser II, Conflagration M
   });
 
   test("hull turret damage bonus applies to matching turret skill", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Damage]
 Heavy Pulse Laser II, Conflagration M`,
@@ -1132,7 +1178,7 @@ Heavy Pulse Laser II, Conflagration M`,
 
   test("hull turret damage bonus does not apply to non-matching hull", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Damage]
 200mm AutoCannon II, EMP S`,
@@ -1143,7 +1189,7 @@ Heavy Pulse Laser II, Conflagration M`,
   });
 
   test("skill damage bonuses apply to matching turret skill and specialization", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: skillBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: skillBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Skills]
 Heavy Pulse Laser II, Conflagration M`,
@@ -1154,7 +1200,7 @@ Heavy Pulse Laser II, Conflagration M`,
   });
 
   test("skill RoF bonuses apply to all turrets", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: skillBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: skillBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Skills]
 Heavy Pulse Laser II, Conflagration M`,
@@ -1165,7 +1211,7 @@ Heavy Pulse Laser II, Conflagration M`,
   });
 
   test("multiple Heat Sinks are stacking-penalized for damage", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Lasers]
 Heavy Pulse Laser II, Conflagration M
@@ -1180,7 +1226,7 @@ Heat Sink II`,
   });
 
   test("Heat Sink and hull damage bonus apply as separate unpenalized multipliers", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Damage]
 Heavy Pulse Laser II, Conflagration M
@@ -1204,7 +1250,7 @@ Heat Sink II`,
       },
       skillBonuses: [],
     };
-    const importer = new FittingImportImpl({ ships, fittingDb: hullRoFDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullRoFDb, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, RoF]
 Heavy Pulse Laser II, Conflagration M`,
@@ -1218,7 +1264,7 @@ Heavy Pulse Laser II, Conflagration M`,
 
   test("mixed weapon groups with mixed damage mods apply per-group", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Mixed]
 200mm AutoCannon II, EMP S
@@ -1244,7 +1290,7 @@ Gyrostabilizer II`,
   test("resolves stasis webs and tracking disruptors with converted fractions and scripts", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Ewar]
 Stasis Webifier II
@@ -1271,7 +1317,7 @@ Tracking Disruptor II, Optimal Range Disruption Script`,
   test("capacitor rows derive from the resolved turrets, ewar loadout, and defense spec", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Cap Sources]
 Heavy Pulse Laser II, Conflagration M
@@ -1302,7 +1348,7 @@ Reactive Armor Hardener`,
   test("ignores offline ewar and returns empty ewar loadout when none are fitted", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, No Ewar]
 200mm AutoCannon I, Hail S
@@ -1319,7 +1365,7 @@ Stasis Webifier II/OFFLINE`,
   test("resolves energy neutralizers and nosferatu into the ewar loadout", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Cap Warfare]
 Heavy Energy Neutralizer II
@@ -1338,7 +1384,7 @@ Medium Energy Nosferatu II`,
   test("cap batteries raise the energy warfare resistance percent with stacking penalties", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const none = importer.importFitting(`[Rifter, Bare]`, conditions);
     expect(none!.energyWarfareResistancePercent).toBe(0);
     const one = importer.importFitting(`[Rifter, Battery]
@@ -1358,7 +1404,7 @@ Large Cap Battery II`, conditions);
   test("preserves duplicate ewar instances and mixed variants", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Duplicates]
 200mm AutoCannon I, Hail S
@@ -1379,7 +1425,7 @@ Balmer Series Compact Tracking Disruptor I, Tracking Speed Disruption Script`,
   test("tracking disruptor without a charge defaults to none", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Unscripted TD]
 200mm AutoCannon I, Hail S
@@ -1403,7 +1449,7 @@ Tracking Disruptor II`,
   test("resolves warp scramblers and non-blocking long warp disruptors", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Scram]
 Warp Scrambler II
@@ -1424,7 +1470,7 @@ Warp Disruptor II`,
   test("resolves heavy stasis grapplers with falloff and optimal overload", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Grappler]
 200mm AutoCannon I, Hail S
@@ -1443,7 +1489,7 @@ Heavy Stasis Grappler I`,
   test("resolves a tracking computer and its default script", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Tc]
 200mm AutoCannon I, Hail S
@@ -1463,7 +1509,7 @@ Tracking Computer I, Optimal Range Script`,
   test("resolves a sensor booster with a scan resolution script", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Sb]
 200mm AutoCannon I, Hail S
@@ -1485,7 +1531,7 @@ Sensor Booster II, Scan Resolution Script`,
   test("resolves a sensor dampener with a scan resolution dampening script", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Sd]
 200mm AutoCannon I, Hail S
@@ -1502,7 +1548,7 @@ Remote Sensor Dampener II, Scan Resolution Dampening Script`,
   test("ignores an offline tracking computer", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Tc]
 200mm AutoCannon I, Hail S
@@ -1516,7 +1562,7 @@ Tracking Computer I/OFFLINE`,
   test("resolves a warp scrambler with a charge line", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, ScramCharge]
 Warp Scrambler II, Gremlin K5`,
@@ -1533,7 +1579,7 @@ Warp Scrambler II, Gremlin K5`,
   test("resolves target painter from EFT fitting", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Painter]
 Target Painter II`,
@@ -1548,7 +1594,7 @@ Target Painter II`,
   test("resolves missile guidance computer with precision script", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, MGC]
 Missile Guidance Computer II, Missile Precision Script`,
@@ -1565,7 +1611,7 @@ Missile Guidance Computer II, Missile Precision Script`,
   test("resolves missile guidance enhancer as passive missile booster", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, MGE]
 Missile Guidance Enhancer II`,
@@ -1581,7 +1627,7 @@ Missile Guidance Enhancer II`,
   test("resolves empty missile boosts when no MGC or MGE fitted", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Empty]
 Heat Sink II`,
@@ -1595,7 +1641,7 @@ Heat Sink II`,
   test("applies Ballistic Control System damage and cycle time modifiers to launcher stats", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const withoutBcs = importer.importFitting(
       `[Rifter, NoBCS]
 Heavy Missile Launcher II, Scourge Heavy Missile`,
@@ -1623,7 +1669,7 @@ Ballistic Control System I`,
   test("launcher damage breakdown records per-type damage and BCS module factor", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const withBcs = importer.importFitting(
       `[Rifter, BCS]
 Heavy Missile Launcher II, Scourge Heavy Missile
@@ -1645,7 +1691,7 @@ Ballistic Control System I`,
   test("launcher damage breakdown omits module factor when no BCS fitted", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, NoBCS]
 Heavy Missile Launcher II, Scourge Heavy Missile`,
@@ -1658,7 +1704,7 @@ Heavy Missile Launcher II, Scourge Heavy Missile`,
   test("turret damage breakdown records per-type damage from charge", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Turret]
 150mm Railgun I, Antimatter Charge S`,
@@ -1674,7 +1720,7 @@ Heavy Missile Launcher II, Scourge Heavy Missile`,
   test("turret damage breakdown includes overload factor only when weapon overloaded", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const normal = importer.importFitting(
       `[Rifter, Turret]
 125mm Gatling AutoCannon I, EMP S`,
@@ -1694,7 +1740,7 @@ Heavy Missile Launcher II, Scourge Heavy Missile`,
   test("turret damage breakdown includes skill factor when skill damage bonus applies", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Turret]
 125mm Gatling AutoCannon I, EMP S`,
@@ -1709,7 +1755,7 @@ Heavy Missile Launcher II, Scourge Heavy Missile`,
   test("turret damage breakdown includes hull factor when hull damage bonus applies", () => {
     ships.findHullByName.mockReturnValue(kestrelProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Kestrel, Missile]
 Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile`,
@@ -1723,7 +1769,7 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile`,
   test("turret damage breakdown includes module factor when Heat Sink fitted", () => {
     ships.findHullByName.mockReturnValue(abaddonProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Abaddon, Pulse]
 Heavy Pulse Laser II, Conflagration Heavy M
@@ -1742,7 +1788,7 @@ Heat Sink II`,
     const text = await Bun.file(path).text();
     ships.findHullByName.mockReturnValue(abaddonProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(text, conditions);
     expect(result).toBeDefined();
     const names = result!.cargoCharges.map((charge) => importer.itemNameForId(charge.id, "en"));
@@ -1753,7 +1799,7 @@ Heat Sink II`,
   test("killmail Harbinger reproduces pyfa capacitor ground truth at all-fives", () => {
     ships.findHullByName.mockReturnValue(harbingerProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const allFives: StatConditions = { skillLevel: 5 as SkillLevel, overloaded: false, weaponOverloaded: false };
     const result = importer.importFitting(KILLMAIL_HARBINGER, allFives);
     expect(result).toBeDefined();
@@ -1772,7 +1818,7 @@ Heat Sink II`,
   test("killmail Harbinger capacitor at all-zero skills matches pyfa", () => {
     ships.findHullByName.mockReturnValue(harbingerProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(KILLMAIL_HARBINGER, conditions);
     expect(result).toBeDefined();
     // pyfa ground truth at all-zero: raw drains, no skill or pool bonuses.
@@ -1787,7 +1833,7 @@ Heat Sink II`,
   test("classifies charges in a first quantity block as cargo", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK, conditions);
     expect(result).toBeDefined();
     const names = result!.cargoCharges.map((charge) => importer.itemNameForId(charge.id, "en"));
@@ -1797,7 +1843,7 @@ Heat Sink II`,
   test("cargo-only fit with a damage missile first line classifies everything as cargo", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const text = `[Rifter, Missile Cargo]
 Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
 
@@ -1818,7 +1864,7 @@ Nanite Repair Paste x18`;
   test("multi-line drone band keeps every drone and cargo after it", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const text = `[Rifter, Drone Brawler]
 200mm AutoCannon I, Hail S
 
@@ -1837,7 +1883,7 @@ Navy Cap Booster 800 x4`;
   test("classifies cargo before drones by item kind", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(RIFTER_DRONE_AFTER_CARGO, conditions);
     expect(result).toBeDefined();
     const names = result!.cargoCharges.map((charge) => importer.itemNameForId(charge.id, "en"));
@@ -1847,7 +1893,7 @@ Navy Cap Booster 800 x4`;
   test("itemNameForId delegates to ItemNameCatalog", () => {
     const mock = new TestItemNames();
     const mockResolver: ItemNameResolver = { idsForName: (name: string) => [name as TypeId] };
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog: mock, itemNameResolver: mockResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog: mock, itemNameResolver: mockResolver, moduleSlotCatalog });
     expect(importer.itemNameForId("X" as TypeId, "zh")).toBe("X (zh)");
     expect(importer.itemNameForId("X" as TypeId, "ja")).toBe("X (ja)");
     expect(importer.itemNameForId("X" as TypeId, "en")).toBe("X");
@@ -1856,7 +1902,7 @@ Navy Cap Booster 800 x4`;
   test("pure missile fit resolves launcher with count and charge", () => {
     ships.findHullByName.mockReturnValue(kestrelProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Kestrel, Missile]
 Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
@@ -1881,7 +1927,7 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
   test("missile fit with skills applies damage and ROF bonuses", () => {
     ships.findHullByName.mockReturnValue(kestrelProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Kestrel, Missile]
 Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
@@ -1901,7 +1947,7 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
   test("mixed fit resolves both turret and launcher", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Mixed]
 200mm AutoCannon I, EMP S
@@ -1917,7 +1963,7 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
   test("gun-less drone boat resolves neither turret nor launcher", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Rifter, Drones]
 1MN Afterburner II
@@ -1931,7 +1977,7 @@ Stasis Webifier II`,
   test("multiple launcher types picks the most numerous", () => {
     ships.findHullByName.mockReturnValue(kestrelProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Kestrel, Mixed Launchers]
 Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
@@ -1947,7 +1993,7 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
 
   test("weapon overload increases short-range turret damage multiplier", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const weaponOverloadConditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: true };
     const result = importer.importFitting(
       `[Rifter, AC]
@@ -1961,7 +2007,7 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
 
   test("weapon overload decreases long-range turret cycle time", () => {
     ships.findHullByName.mockReturnValue(abaddonProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const normalConditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: false };
     const weaponOverloadConditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: true };
     const normal = importer.importFitting(`[Abaddon, Beams]\nHeavy Beam Laser II, Aurora M`, normalConditions);
@@ -1975,7 +2021,7 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
   test("weapon overload decreases launcher cycle time", () => {
     ships.findHullByName.mockReturnValue(kestrelProfile);
     ships.fittingOptions.mockReturnValue(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const normalConditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: false };
     const weaponOverloadConditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: true };
     const normal = importer.importFitting(
@@ -1997,7 +2043,7 @@ Light Missile Launcher I, Caldari Navy Inferno Light Missile
 
   test("weapon overload is independent from propulsion overload for turrets", () => {
     ships.findHullByName.mockReturnValue(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const propulsionOnly: StatConditions = { skillLevel: 0, overloaded: true, weaponOverloaded: false };
     const weaponOnly: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: true };
     const propulsionResult = importer.importFitting(`[Rifter, AC]\n200mm AutoCannon II, EMP S`, propulsionOnly);
@@ -2044,7 +2090,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, needs: {}, commandBursts: {}, subsystems: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES };
+  return { modules: {}, needs: {}, commandBursts: {}, subsystems: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES, fighters: {} };
 }
 
 describe("FittingImportImpl.summarize", () => {
@@ -2054,7 +2100,7 @@ describe("FittingImportImpl.summarize", () => {
   });
 
   test("parses hull and fitting names", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(RIFTER_BRAWLER);
     expect(summary).toBeDefined();
     expect(summary!.hullName).toBe("Rifter");
@@ -2062,7 +2108,7 @@ describe("FittingImportImpl.summarize", () => {
   });
 
   test("groups modules by slot in fixed order", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(RIFTER_BRAWLER);
     expect(summary).toBeDefined();
     const kinds = summary!.sections.map((section) => section.kind);
@@ -2070,7 +2116,7 @@ describe("FittingImportImpl.summarize", () => {
   });
 
   test("captures charges and ids on module rows", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(RIFTER_BRAWLER);
     const high = summary!.sections.find((section) => section.kind === "high");
     expect(high!.rows[0].charge).toBe("Hail S");
@@ -2083,7 +2129,7 @@ describe("FittingImportImpl.summarize", () => {
 
   test("includes the capacitor block from the imported stats", () => {
     ships.findHullByName.mockReturnValue({ ...frigateProfile, capacitorCapacity: 6375, capacitorRechargeTime: 1250 });
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(RIFTER_BRAWLER);
     expect(summary?.capacitor).toBeDefined();
     expect(summary!.capacitor!.capacity).toBeCloseTo(6375 * 1.25, 3); // Energy Management V
@@ -2092,7 +2138,7 @@ describe("FittingImportImpl.summarize", () => {
   });
 
   test("captures cargo quantities with resolved ids", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(RIFTER_BRAWLER);
     const cargo = summary!.sections.find((section) => section.kind === "cargo");
     expect(cargo!.rows).toEqual([
@@ -2104,7 +2150,7 @@ describe("FittingImportImpl.summarize", () => {
   });
 
   test("captures drone quantities with resolved ids", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(RIFTER_BRAWLER);
     const drones = summary!.sections.find((section) => section.kind === "drones");
     expect(drones!.rows).toEqual([expect.objectContaining({ name: "Hobgoblin I", quantity: 3 })]);
@@ -2120,7 +2166,7 @@ Republic Fleet EMP S x500
 
 Hobgoblin I x3
 `;
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(text);
     const cargo = summary!.sections.find((section) => section.kind === "cargo");
     const drones = summary!.sections.find((section) => section.kind === "drones");
@@ -2133,7 +2179,7 @@ Hobgoblin I x3
   test("places shield extenders in the mid section", async () => {
     const path = join(import.meta.dir, "..", "..", "data", "ship-fittings", "Widow", "Missile_Shield_Widow.txt");
     const text = await Bun.file(path).text();
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(text);
     const mid = summary!.sections.find((section) => section.kind === "mid");
     expect(mid).toBeDefined();
@@ -2156,7 +2202,7 @@ Tengu Engineering - Capacitor Regenerative Matrix
 
 Hobgoblin II x5
 `;
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(text);
     const kinds = summary!.sections.map((section) => section.kind);
     expect(kinds).toEqual(["high", "mid", "low", "subsystem", "drones"]);
@@ -2172,7 +2218,7 @@ Hobgoblin II x5
   });
 
   test("moves charge quantity items from the first quantity block to cargo", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK);
     const kinds = summary!.sections.map((section) => section.kind);
     expect(kinds).toEqual(["high", "mid", "cargo"]);
@@ -2186,13 +2232,13 @@ Hobgoblin II x5
   });
 
   test("returns undefined for unparseable text", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     expect(importer.summarize(INVALID_TEXT)).toBeUndefined();
   });
 
   test("places unknown module names in the block's intended bank", () => {
     const text = `[Rifter, Unknown]\nUnknown Module Name\n5MN Microwarpdrive I\n`;
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(text);
     expect(summary!.sections).toHaveLength(2);
     expect(summary!.sections[0].kind).toBe("mid");
@@ -2231,7 +2277,7 @@ Unknown Drone I x3
 Hail S x1000`;
 
   test("separates drone and cargo blocks with two blank lines", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const canonical = importer.canonicalEftText(RIFTER_BRAWLER);
     expect(canonical).toBeDefined();
     const parts = canonical!.split("\n\n\n");
@@ -2241,7 +2287,7 @@ Hail S x1000`;
   });
 
   test("drone-only fit has no stray blank lines", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const canonical = importer.canonicalEftText(RIFTER_DRONE_ONLY);
     expect(canonical).toBeDefined();
     const parts = canonical!.split("\n\n\n");
@@ -2250,7 +2296,7 @@ Hail S x1000`;
   });
 
   test("cargo-only fit has no stray blank lines", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const canonical = importer.canonicalEftText(RIFTER_CARGO_ONLY);
     expect(canonical).toBeDefined();
     const parts = canonical!.split("\n\n\n");
@@ -2259,7 +2305,7 @@ Hail S x1000`;
   });
 
   test("unrecognized drone name stays in the drone section", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const canonical = importer.canonicalEftText(RIFTER_UNKNOWN_DRONE);
     expect(canonical).toBeDefined();
     const parts = canonical!.split("\n\n\n");
@@ -2269,7 +2315,7 @@ Hail S x1000`;
   });
 
   test("round-trip preserves the drone and cargo partition", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const original = parseEft(RIFTER_BRAWLER);
     const canonical = importer.canonicalEftText(RIFTER_BRAWLER);
     expect(canonical).toBeDefined();
@@ -2279,7 +2325,7 @@ Hail S x1000`;
   });
 
   test("moves a charge in the first quantity block to the cargo section", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const canonical = importer.canonicalEftText(RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK);
     expect(canonical).toBeDefined();
     const parts = canonical!.split("\n\n\n");
@@ -2288,7 +2334,7 @@ Hail S x1000`;
   });
 
   test("moves a drone in the second quantity block to the drone section", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const canonical = importer.canonicalEftText(RIFTER_DRONE_AFTER_CARGO);
     expect(canonical).toBeDefined();
     const parts = canonical!.split("\n\n\n");
@@ -2298,7 +2344,7 @@ Hail S x1000`;
   });
 
   test("adds one blank line between the header and the first module bank", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const canonical = importer.canonicalEftText(`[Rifter, Header]\n200mm AutoCannon I, Hail S\n`);
     expect(canonical).toBe(`[Rifter, Header]\n\n200mm AutoCannon I, Hail S`);
   });
@@ -2343,7 +2389,7 @@ describe("FittingImportImpl localization", () => {
   });
 
   test("imports a Chinese EFT to the same canonical result as English", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const english = importer.importFitting(RIFTER_BRAWLER, conditions);
     const chinese = importer.importFitting(RIFTER_BRAWLER_ZH, conditions);
     expect(chinese).toBeDefined();
@@ -2353,7 +2399,7 @@ describe("FittingImportImpl localization", () => {
   });
 
   test("imports a Japanese EFT to the same canonical result as English", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const english = importer.importFitting(RIFTER_BRAWLER, conditions);
     const japanese = importer.importFitting(RIFTER_BRAWLER_JA, conditions);
     expect(japanese).toBeDefined();
@@ -2363,7 +2409,7 @@ describe("FittingImportImpl localization", () => {
   });
 
   test("summarize canonicalizes localized item names to English and resolves ids", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(RIFTER_BRAWLER_ZH);
     expect(summary).toBeDefined();
     const high = summary!.sections.find((section) => section.kind === "high");
@@ -2377,7 +2423,7 @@ describe("FittingImportImpl localization", () => {
   });
 
   test("canonicalEftText produces English-only EFT from localized input", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const canonical = importer.canonicalEftText(RIFTER_BRAWLER_ZH);
     expect(canonical).toBeDefined();
     expect(canonical).not.toContain("200mm自动加农炮 I");
@@ -2392,7 +2438,7 @@ describe("FittingImportImpl localization", () => {
 Unknown Custom Module I
 5MN微型跃迁推进器 I
 `;
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const canonical = importer.canonicalEftText(text);
     expect(canonical).toBeDefined();
     expect(canonical).toContain("Brawler");
@@ -2411,6 +2457,7 @@ describe("FittingImportImpl identity resolution", () => {
     missileSkillModel: fullMissileSkillModel,
     droneCatalog: fullDroneCatalog,
     droneSkillModel: fullDroneSkillModel,
+    fighterSkillModel: fullFighterSkillModel,
     stackingPenalty,
     itemNameCatalog,
     itemNameResolver: fullResolver,
@@ -2526,5 +2573,125 @@ describe("_detectionOrder", () => {
   test("fitting name is excluded from language detection", () => {
     expect(_detectionOrder({ ...eftDocument("Rifter"), fittingName: "裂谷级" })).toEqual(["en", "zh", "ja"]);
     expect(_detectionOrder({ ...eftDocument("Rifter"), fittingName: "リフター" })).toEqual(["en", "zh", "ja"]);
+  });
+});
+
+describe("FittingImportImpl.fighters", () => {
+  const carrierProfile: ShipProfile = {
+    id: "23757" as ShipId,
+    name: "Archon",
+    factionId: "amarr-empire" as FactionId,
+    hullTypeId: "547" as HullTypeId,
+    mass: 1_260_000_000,
+    inertiaModifier: 0.041,
+    baseSpeed: 80,
+    sigRadius: 9920,
+    scanResolution: 70,
+    maxTargetingRange: 315000,
+    maxLockedTargets: 14,
+    highSlots: 5,
+    medSlots: 4,
+    lowSlots: 7,
+    rigSlots: 3,
+    powerGrid: 775000,
+    cpuOutput: 625,
+    droneBandwidth: 0,
+    droneCapacity: 0,
+    maxActiveDrones: 0,
+    fighterCapacity: 65000,
+    fighterTubes: 4,
+    fighterLightSlots: 3,
+    fighterHeavySlots: 0,
+    fighterSupportSlots: 2,
+    shieldHp: 53000,
+    shieldRechargeTime: 15000,
+    armorHp: 72000,
+    hullHp: 86000,
+    capacitorCapacity: 45000,
+    capacitorRechargeTime: 750000,
+    shieldResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+    armorResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+    hullResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+    bonuses: [],
+  };
+  const thanatosProfile: ShipProfile = { ...carrierProfile, id: "23911" as ShipId, name: "Thanatos" };
+
+  const CARRIER_PLAIN = `[Archon, Fighters]
+
+Templar I x6
+Cenobite I x6`;
+
+  const CARRIER_OTL = `[Archon, Fighters]
+Omnidirectional Tracking Link II
+
+Templar I x6`;
+
+  const allFive: StatConditions = { skillLevel: 5 as SkillLevel, overloaded: false, weaponOverloaded: false };
+
+  function carrierImporter(): FittingImportImpl {
+    return new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, droneCatalog: fullDroneCatalog, droneSkillModel: fullDroneSkillModel, fighterSkillModel: fullFighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+  }
+
+  beforeEach(() => {
+    ships.findHullByName.mockReturnValue(carrierProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+  });
+
+  test("resolves attack fighters with skill multipliers at all-5 (pyfa golden: Templar I squadron 219.375 DPS)", () => {
+    const result = carrierImporter().importFitting(CARRIER_PLAIN, allFive);
+    expect(result).toBeDefined();
+    expect(result!.drones).toEqual([]);
+    const templar = result!.fighters.find((fighter) => fighter.name === "Templar I");
+    expect(templar).toBeDefined();
+    expect(templar!.kind).toBe("light");
+    expect(templar!.count).toBe(6);
+    expect(templar!.squadronMaxSize).toBe(6);
+    expect(templar!.attack).toBeDefined();
+    expect(templar!.attack!.damageMultiplier).toBeCloseTo(1.875, 9);
+    expect(templar!.attack!.emDamage).toBeCloseTo(97.5, 9);
+    expect(templar!.attack!.cycleTime).toBeCloseTo(5, 9);
+    expect(templar!.attack!.optimal).toBeCloseTo(10000, 9);
+    expect(templar!.attack!.explosionVelocity).toBeCloseTo(105, 9);
+    expect(templar!.maxVelocity).toBeCloseTo(833 * 1.5625, 9);
+    expect(templar!.attack!.explosionRadius).toBeCloseTo(185, 9);
+    expect(templar!.attack!.explosionVelocity).toBeCloseTo(105, 9);
+    const squadronDps = templar!.attack!.emDamage * templar!.attack!.damageMultiplier * templar!.count / templar!.attack!.cycleTime;
+    expect(squadronDps).toBeCloseTo(219.375, 9);
+  });
+
+  test("imports support fighters without attack stats", () => {
+    const result = carrierImporter().importFitting(CARRIER_PLAIN, conditions);
+    const cenobite = result!.fighters.find((fighter) => fighter.name === "Cenobite I");
+    expect(cenobite).toBeDefined();
+    expect(cenobite!.kind).toBe("support");
+    expect(cenobite!.count).toBe(6);
+    expect(cenobite!.attack).toBeUndefined();
+  });
+
+  test("applies hull fighterDamage bonus on a Thanatos (pyfa golden: 1.25 per level)", () => {
+    ships.findHullByName.mockReturnValue(thanatosProfile);
+    const result = carrierImporter().importFitting(CARRIER_PLAIN, allFive);
+    const templar = result!.fighters.find((fighter) => fighter.name === "Templar I");
+    expect(templar!.attack!.damageMultiplier).toBeCloseTo(1.875 * 1.25, 9);
+  });
+
+  test("omnidirectional tracking links multiply fighter explosion and range stats", () => {
+    const result = carrierImporter().importFitting(CARRIER_OTL, conditions);
+    const templar = result!.fighters.find((fighter) => fighter.name === "Templar I");
+    expect(templar!.attack!.explosionVelocity).toBeCloseTo(105 * 1.0825, 9);
+    expect(templar!.attack!.explosionRadius).toBeCloseTo(185 * 0.9175, 9);
+    expect(templar!.attack!.optimal).toBeCloseTo(8000 * 1.075, 9);
+    expect(templar!.attack!.falloff).toBeCloseTo(5000 * 1.15, 9);
+    expect(templar!.attack!.damageMultiplier).toBe(1);
+  });
+
+  test("classifies fighter rows into the drones section and serializes them back", () => {
+    const importer = carrierImporter();
+    const summary = importer.summarize(CARRIER_PLAIN);
+    const droneRows = summary?.sections.find((section) => section.kind === "drones")?.rows ?? [];
+    expect(droneRows.map((row) => `${row.name} x${row.quantity}`)).toEqual(["Templar I x6", "Cenobite I x6"]);
+    const canonical = importer.canonicalEftText(CARRIER_PLAIN);
+    expect(canonical).toBeDefined();
+    expect(canonical).toContain("Templar I x6\nCenobite I x6");
   });
 });

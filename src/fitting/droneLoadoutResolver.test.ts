@@ -29,6 +29,11 @@ function makeProfile(): ShipProfile {
     droneBandwidth: 75,
     droneCapacity: 75,
     maxActiveDrones: 5,
+    fighterCapacity: 0,
+    fighterTubes: 0,
+    fighterLightSlots: 0,
+    fighterHeavySlots: 0,
+    fighterSupportSlots: 0,
     shieldHp: 0,
     shieldRechargeTime: 0,
     armorHp: 0,
@@ -90,6 +95,7 @@ function mockCalculator(): FittingCalculator {
     resolveDrones: vi.fn((fitting: FittingState, _conditions: StatConditions): readonly ImportedDrone[] => {
       return fitting.droneGroups.map((g) => makeImportedDrone(String(g.typeId), g.count));
     }),
+    resolveFighters: vi.fn(() => []),
     resolveCargoCharges: vi.fn(() => []),
     resolveEnergyWarfareResistance: vi.fn(() => 0),
   };

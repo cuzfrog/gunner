@@ -1,0 +1,68 @@
+---
+import PopupBox from "../popup/PopupBox.astro";
+import TriggerButton from "../popup/TriggerButton.astro";
+
+interface Props {
+  readonly idPrefix: string;
+}
+const { idPrefix } = Astro.props;
+
+const ROWS = [
+  { i18n: "label.optimalRange", text: "Optimal range", idSuffix: "fighter-optimal" },
+  { i18n: "label.falloffRange", text: "Falloff range", idSuffix: "fighter-falloff" },
+  { i18n: "label.volleyDamage", text: "Volley damage", idSuffix: "fighter-damage" },
+  { i18n: "label.rateOfFire", text: "Cycle time", idSuffix: "fighter-cycle-time" },
+  { i18n: "label.fighterCount", text: "Fighter count", idSuffix: "fighter-count" },
+  { i18n: "label.maxVelocity", text: "Max velocity", idSuffix: "fighter-max-velocity" },
+] as const;
+---
+
+<div class="drone-panel" id={`${idPrefix}-fighter-panel`} hidden>
+  <div class="form-field-group drone-attributes-group" id={`${idPrefix}-fighter-attributes-field`}>
+    {ROWS.map((row) => (
+      <div class="drone-telemetry-row">
+        <span class="drone-telemetry-label" data-i18n={row.i18n}>{row.text}</span>
+        <span class="drone-telemetry-value mono" id={`${idPrefix}-${row.idSuffix}`}>-</span>
+      </div>
+    ))}
+  </div>
+  <div class="form-field-group" id={`${idPrefix}-fighter-field`}>
+    <TriggerButton id={`${idPrefix}-fighter-trigger`} popupId={`${idPrefix}-fighter-popup`}
+            hintI18n="button.selectFighter" ariaLabelI18n="button.selectFighter"
+            data-hint="Select fighter" ariaLabel="Select fighter" ariaHaspopup="listbox">
+      <span class="trigger-summary">
+        <img id={`${idPrefix}-fighter-summary-icon`} class="ammo-summary-icon" alt="" hidden>
+        <span class="trigger-summary-value mono truncate" id={`${idPrefix}-fighter-summary`}></span>
+      </span>
+    </TriggerButton>
+    <PopupBox id={`${idPrefix}-fighter-popup`} extraClass="drone-popup popup-stretch" position="below" align="both" scroll>
+      <div class="drone-loadout-section" id={`${idPrefix}-fighter-loadout-section`}>
+        <span class="fitting-group-label" data-i18n="fighter.activeLoadout">Active loadout</span>
+        <div class="drone-loadout-list" id={`${idPrefix}-fighter-loadout-list`}></div>
+        <div class="drone-summary-bar" id={`${idPrefix}-fighter-summary-bar`}>
+          <span class="drone-summary-item">
+            <span class="drone-summary-label" data-i18n="fighter.squadrons">Squadrons</span>
+            <span class="drone-summary-value mono" id={`${idPrefix}-fighter-summary-squadrons`}>0/0</span>
+          </span>
+          <span class="drone-summary-item">
+            <span class="drone-summary-label" data-i18n="fighter.count">Fighters</span>
+            <span class="drone-summary-value mono" id={`${idPrefix}-fighter-summary-count`}>0/0</span>
+          </span>
+          <span class="drone-summary-item">
+            <span class="drone-summary-label" data-i18n="fighter.hangar">Hangar</span>
+            <span class="drone-summary-value mono" id={`${idPrefix}-fighter-summary-hangar`}>0/0</span>
+          </span>
+        </div>
+      </div>
+      <div class="drone-catalog-section" id={`${idPrefix}-fighter-catalog-section`}>
+        <span class="fitting-group-label" data-i18n="fighter.addFighter">Add fighter</span>
+        <span class="drone-size-class-label" data-i18n="fighter.light">Light</span>
+        <ul class="drone-catalog-list" id={`${idPrefix}-fighter-catalog-light`} role="listbox"></ul>
+        <span class="drone-size-class-label" data-i18n="fighter.heavy">Heavy</span>
+        <ul class="drone-catalog-list" id={`${idPrefix}-fighter-catalog-heavy`} role="listbox"></ul>
+        <span class="drone-size-class-label" data-i18n="fighter.support">Support</span>
+        <ul class="drone-catalog-list" id={`${idPrefix}-fighter-catalog-support`} role="listbox"></ul>
+      </div>
+    </PopupBox>
+  </div>
+</div>

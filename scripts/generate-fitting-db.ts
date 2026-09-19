@@ -295,6 +295,23 @@ const OMNIDIRECTIONAL_TRACKING_LINK_GROUP = 646;
 const OMNIDIRECTIONAL_TRACKING_ENHANCER_GROUP = 1292;
 const DRONE_CONTROL_RANGE_MODULE_GROUP = 647;
 
+// Fighter groups (category 87): light/heavy attack squadrons and support squadrons.
+const FIGHTER_GROUP_KINDS: Readonly<Record<number, FighterKind>> = { 1652: "light", 1653: "heavy", 1537: "support" };
+const FIGHTER_ATTACK_M_EFFECT = 6465;
+const FIGHTER_MISSILE_ATTACK_EFFECT = 6431;
+const FIGHTERS_SKILL_ID = 23069;
+// pyfa eos/saveddata/fighterAbility.py: magazine shots and rearm time are not SDE attributes; they
+// are keyed by the fighterSquadronRole attribute. 0 shots = unlimited magazine (superiority fighters).
+const FIGHTER_MAGAZINE_BY_ROLE: Readonly<Record<number, { readonly numShots: number; readonly rearmTime: number }>> = {
+  1: { numShots: 0, rearmTime: 0 },
+  2: { numShots: 12, rearmTime: 4 },
+  4: { numShots: 6, rearmTime: 6 },
+  5: { numShots: 3, rearmTime: 20 },
+};
+// Fighter ability damage multiplier attributes (all damage abilities are missile-typed). Carrier and
+// supercarrier hull bonuses (effects 6601-6606) modify these for fighters requiring the Fighters skill.
+const FIGHTER_DAMAGE_ATTRIBUTES = new Set([2130, 2178, 2226]);
+
 const SHIP_CATEGORY_ID = 6;
 const TARGET_PAINTING_SKILL_ID = 19921;
 
@@ -321,6 +338,26 @@ const DRONE_SKILL_BONUS_EFFECTS: Readonly<Record<number, { readonly bonusType: "
   6667: { bonusType: "droneVelocity", filter: "drones", magnitudeAttributeId: 2603 },
 };
 const DRONES_SKILL_FILTER_ID = 3436;
+// Fighter legacy skill effects (pyfa eos/effects.py Effect6560/6561/6563/12844-12848) boost fighter
+// ability attributes per skill level for fighters requiring the skill itself. All fighter skills live
+// in the Drones skill group, so membership is guarded against droneSkillIds like drone effects.
+const FIGHTER_SKILL_BONUS_EFFECTS: Readonly<Record<number, { readonly bonusType: "fighterDamage" | "fighterVelocity"; readonly magnitudeAttributeId: number }>> = {
+  6560: { bonusType: "fighterDamage", magnitudeAttributeId: 292 },
+  6561: { bonusType: "fighterVelocity", magnitudeAttributeId: 2603 },
+  6563: { bonusType: "fighterDamage", magnitudeAttributeId: 292 },
+  12844: { bonusType: "fighterDamage", magnitudeAttributeId: 292 },
+  12845: { bonusType: "fighterDamage", magnitudeAttributeId: 292 },
+  12846: { bonusType: "fighterDamage", magnitudeAttributeId: 292 },
+  12847: { bonusType: "fighterDamage", magnitudeAttributeId: 292 },
+  12848: { bonusType: "fighterDamage", magnitudeAttributeId: 292 },
+};
+// Shared drone-family effects also boost fighters (pyfa filters fighters by the Fighters skill), so
+// each of them emits an additional fighter-family row filtered by the Fighters skill.
+const FIGHTER_SHARED_BONUS_EFFECTS: Readonly<Record<number, { readonly bonusType: "fighterDamage" | "fighterOptimal" | "fighterVelocity"; readonly magnitudeAttributeId: number }>> = {
+  6663: { bonusType: "fighterDamage", magnitudeAttributeId: 292 },
+  6664: { bonusType: "fighterOptimal", magnitudeAttributeId: 294 },
+  6667: { bonusType: "fighterVelocity", magnitudeAttributeId: 2603 },
+};
 
 function stringifyWithTypeIds<T>(value: T): string {
   return JSON.stringify(value)
@@ -452,10 +489,30 @@ function buildSkillBonuses(
         const magnitude = skillAttrValues.get(droneBonus.magnitudeAttributeId);
         if (magnitude === undefined || !Number.isFinite(magnitude) || magnitude === 0) throw new Error(`Drone skill ${type["typeName_en-us"]} (${sid}) uses legacy drone effect ${eid} without attribute ${droneBonus.magnitudeAttributeId}`);
         const key = `${droneBonus.bonusType}:${sid}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          const requiredSkillId = droneBonus.filter === "self" ? sid : String(DRONES_SKILL_FILTER_ID);
+          bonuses.push({ skillId: sid, bonusType: droneBonus.bonusType, magnitudePerLevel: magnitude, requiredSkillId, appliesTo: "charge" });
+        }
+        const fighterShared = FIGHTER_SHARED_BONUS_EFFECTS[eid];
+        if (fighterShared) {
+          const fighterKey = `fighter:${fighterShared.bonusType}:${sid}`;
+          if (!seen.has(fighterKey)) {
+            seen.add(fighterKey);
+            bonuses.push({ skillId: sid, bonusType: fighterShared.bonusType, magnitudePerLevel: magnitude, requiredSkillId: String(FIGHTERS_SKILL_ID), appliesTo: "charge" });
+          }
+        }
+        continue;
+      }
+      const fighterBonus = FIGHTER_SKILL_BONUS_EFFECTS[eid];
+      if (fighterBonus) {
+        if (!droneSkillIds.has(skillId)) throw new Error(`Fighter skill ${type["typeName_en-us"]} (${sid}) uses legacy fighter effect ${eid} but is not in the "${DRONE_SKILL_GROUP_NAME}" skill group`);
+        const magnitude = skillAttrValues.get(fighterBonus.magnitudeAttributeId);
+        if (magnitude === undefined || !Number.isFinite(magnitude) || magnitude === 0) throw new Error(`Fighter skill ${type["typeName_en-us"]} (${sid}) uses legacy fighter effect ${eid} without attribute ${fighterBonus.magnitudeAttributeId}`);
+        const key = `fighter:${fighterBonus.bonusType}:${sid}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        const requiredSkillId = droneBonus.filter === "self" ? sid : String(DRONES_SKILL_FILTER_ID);
-        bonuses.push({ skillId: sid, bonusType: droneBonus.bonusType, magnitudePerLevel: magnitude, requiredSkillId, appliesTo: "charge" });
+        bonuses.push({ skillId: sid, bonusType: fighterBonus.bonusType, magnitudePerLevel: magnitude, requiredSkillId: sid, appliesTo: "charge" });
         continue;
       }
       if (LEGACY_MISSILE_DAMAGE_EFFECTS.has(eid)) {
@@ -809,6 +866,8 @@ interface OmnidirectionalTrackingLinkStats {
   readonly trackingBonusPercent: number;
   readonly optimalBonusPercent: number;
   readonly falloffBonusPercent: number;
+  readonly aoeVelocityBonusPercent: number;
+  readonly aoeCloudSizeBonusPercent: number;
   readonly overloadStrengthBonusPercent: number;
   readonly capacitorNeed: number;
   readonly cycleTime: number;
@@ -818,6 +877,8 @@ interface OmnidirectionalTrackingEnhancerStats {
   readonly trackingBonusPercent: number;
   readonly optimalBonusPercent: number;
   readonly falloffBonusPercent: number;
+  readonly aoeVelocityBonusPercent: number;
+  readonly aoeCloudSizeBonusPercent: number;
 }
 
 interface SensorDampenerStats {
@@ -857,6 +918,39 @@ interface SensorDampenerScriptStats {
 }
 
 type DroneSizeClass = "light" | "medium" | "heavy" | "sentry";
+
+type FighterKind = "light" | "heavy" | "support";
+
+interface FighterAttackStats {
+  readonly emDamage: number;
+  readonly thermalDamage: number;
+  readonly kineticDamage: number;
+  readonly explosiveDamage: number;
+  readonly damageMultiplier: number;
+  readonly cycleTime: number;
+  readonly explosionRadius: number;
+  readonly explosionVelocity: number;
+  readonly damageReductionFactor: number;
+  readonly damageReductionSensitivity: number;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly numShots: number;
+  readonly rearmTime: number;
+}
+
+interface FighterStats {
+  readonly kind: FighterKind;
+  readonly squadronMaxSize: number;
+  readonly orbitRange: number;
+  readonly maxVelocity: number;
+  readonly signatureRadius: number;
+  readonly refuelingTime: number;
+  readonly volume: number;
+  readonly attack?: FighterAttackStats;
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
+  readonly requiredSkillIds: readonly TypeId[];
+}
 
 interface DroneStats {
   readonly sizeClass: DroneSizeClass;
@@ -1246,6 +1340,10 @@ function resolveHullBonusAttribute(
   attributeNames: Map<number, string>,
   droneSkillIds: ReadonlySet<number>,
 ): HullBonusResolution {
+  // Carrier/supercarrier fighter damage bonuses (effects 6601-6606) modify the fighter ability damage
+  // multipliers (attrs 2130/2178/2226) via OwnerRequiredSkillModifier on a Drones-group skill (Fighters).
+  // Checked before the semantic attribute lookup because the ability attrs are classified out of scope.
+  if (FIGHTER_DAMAGE_ATTRIBUTES.has(modifier.modifiedAttributeID) && modifier.func === "OwnerRequiredSkillModifier" && modifier.skillTypeID !== undefined && droneSkillIds.has(modifier.skillTypeID)) return { kind: "mapped", attribute: "fighterDamage" };
   const base = semanticAttributeToHullBonus(modifier.modifiedAttributeID);
   if (!base) {
     if (isOutOfScopeAttribute(modifier.modifiedAttributeID)) return { kind: "skip", reason: "out of scope" };
@@ -1608,6 +1706,88 @@ function buildDroneSkillIds(types: Record<string, SdeType>, groups: Record<strin
   return ids;
 }
 
+function fighterAttackPrefix(effects: ReadonlySet<number>): "fighterAbilityAttackMissile" | "fighterAbilityMissiles" | undefined {
+  if (effects.has(FIGHTER_ATTACK_M_EFFECT)) return "fighterAbilityAttackMissile";
+  if (effects.has(FIGHTER_MISSILE_ATTACK_EFFECT)) return "fighterAbilityMissiles";
+  return undefined;
+}
+
+// pyfa getFighterAbilityMult reads DRF as {prefix}ReductionFactor with a fallback to
+// {prefix}DamageReductionFactor; only the legacy "Missiles" ability (6431) carries the
+// Damage-qualified attribute names in the SDE.
+function fighterReductionAttributeNames(prefix: "fighterAbilityAttackMissile" | "fighterAbilityMissiles"): { readonly factor: string; readonly sensitivity: string } {
+  if (prefix === "fighterAbilityMissiles") return { factor: `${prefix}DamageReductionFactor`, sensitivity: `${prefix}DamageReductionSensitivity` };
+  return { factor: `${prefix}ReductionFactor`, sensitivity: `${prefix}ReductionSensitivity` };
+}
+
+function buildFighterAttackStats(values: Map<string, number>, prefix: "fighterAbilityAttackMissile" | "fighterAbilityMissiles", role: number): FighterAttackStats {
+  const magazine = FIGHTER_MAGAZINE_BY_ROLE[role];
+  if (!magazine) throw new Error(`Fighter with unknown fighterSquadronRole ${role}; magazine cannot be derived`);
+  const reduction = fighterReductionAttributeNames(prefix);
+  const rangeAttribute = prefix === "fighterAbilityAttackMissile" ? `${prefix}RangeOptimal` : `${prefix}Range`;
+  const required = ["DamageEM", "DamageTherm", "DamageKin", "DamageExp", "DamageMultiplier", "Duration", "ExplosionRadius", "ExplosionVelocity"].map((suffix) => `${prefix}${suffix}`).concat([reduction.factor, reduction.sensitivity, rangeAttribute]);
+  const missing = required.filter((name) => values.get(name) === undefined);
+  if (missing.length > 0) throw new Error(`Fighter is missing attack application attribute(s) ${missing.join(", ")}`);
+  return {
+    emDamage: values.get(`${prefix}DamageEM`) ?? 0,
+    thermalDamage: values.get(`${prefix}DamageTherm`) ?? 0,
+    kineticDamage: values.get(`${prefix}DamageKin`) ?? 0,
+    explosiveDamage: values.get(`${prefix}DamageExp`) ?? 0,
+    damageMultiplier: values.get(`${prefix}DamageMultiplier`) ?? 1,
+    cycleTime: (values.get(`${prefix}Duration`) ?? 0) / 1000,
+    explosionRadius: values.get(`${prefix}ExplosionRadius`) ?? 0,
+    explosionVelocity: values.get(`${prefix}ExplosionVelocity`) ?? 0,
+    damageReductionFactor: values.get(reduction.factor) ?? 0,
+    damageReductionSensitivity: values.get(reduction.sensitivity) ?? 0,
+    optimal: values.get(prefix === "fighterAbilityAttackMissile" ? `${prefix}RangeOptimal` : `${prefix}Range`) ?? 0,
+    falloff: prefix === "fighterAbilityAttackMissile" ? values.get(`${prefix}RangeFalloff`) ?? 0 : 0,
+    numShots: magazine.numShots,
+    rearmTime: magazine.rearmTime,
+  };
+}
+
+export function buildFighterStats(values: Map<string, number>, type: SdeType, groupId: number, effects: ReadonlySet<number>, requiredSkillIds: readonly TypeId[]): FighterStats {
+  const kind = FIGHTER_GROUP_KINDS[groupId];
+  if (!kind) throw new Error(`Unknown fighter group ${groupId}`);
+  const squadronMaxSize = values.get("fighterSquadronMaxSize");
+  const orbitRange = values.get("fighterSquadronOrbitRange");
+  const maxVelocity = values.get("maxVelocity");
+  const signatureRadius = values.get("signatureRadius");
+  const refuelingTime = values.get("fighterRefuelingTime");
+  const missing = [
+    squadronMaxSize === undefined ? "fighterSquadronMaxSize" : undefined,
+    orbitRange === undefined ? "fighterSquadronOrbitRange" : undefined,
+    maxVelocity === undefined ? "maxVelocity" : undefined,
+    signatureRadius === undefined ? "signatureRadius" : undefined,
+    refuelingTime === undefined ? "fighterRefuelingTime" : undefined,
+  ].filter((name) => name !== undefined);
+  if (missing.length > 0) throw new Error(`Fighter ${type["typeName_en-us"]} is missing core attribute(s) ${missing.join(", ")}`);
+  const prefix = fighterAttackPrefix(effects);
+  if (kind === "support" && prefix !== undefined) throw new Error(`Support fighter ${type["typeName_en-us"]} carries a damage ability; support fighters must not deal damage`);
+  if (kind !== "support" && prefix === undefined) throw new Error(`Attack fighter ${type["typeName_en-us"]} has no damage ability (expected effect ${FIGHTER_ATTACK_M_EFFECT} or ${FIGHTER_MISSILE_ATTACK_EFFECT})`);
+  const attack = prefix ? buildFighterAttackStats(values, prefix, values.get("fighterSquadronRole") ?? 0) : undefined;
+  return {
+    kind,
+    squadronMaxSize: squadronMaxSize ?? 0,
+    orbitRange: orbitRange ?? 0,
+    maxVelocity: maxVelocity ?? 0,
+    signatureRadius: signatureRadius ?? 0,
+    refuelingTime: (refuelingTime ?? 0) / 1000,
+    volume: type.volume ?? 0,
+    ...(attack ? { attack } : {}),
+    metaLevel: type.metaLevel ?? 0,
+    metaGroupID: type.metaGroupID ?? 1,
+    requiredSkillIds,
+  };
+}
+
+// Every fighter (including support) is filtered by the Fighters skill for shared drone-family skill
+// bonuses and carrier hull bonuses; a chain missing it would silently lose those multipliers.
+function assertFighterSkillChain(name: string, requiredSkillIds: readonly TypeId[]): void {
+  if (requiredSkillIds.length === 0) throw new Error(`Fighter ${name} has no required-skill chain in the SDE; fighter skill bonuses would silently not apply`);
+  if (!requiredSkillIds.includes(String(FIGHTERS_SKILL_ID) as TypeId)) throw new Error(`Fighter ${name} does not require the Fighters skill (${FIGHTERS_SKILL_ID}); verify the SDE requiredskillsfortypes data`);
+}
+
 function droneSizeClassFromStats(maxVelocity: number, orbitSpeed: number, bandwidth: number): DroneSizeClass {
   if (maxVelocity <= 1 && orbitSpeed <= 1) return "sentry";
   if (bandwidth <= 5) return "light";
@@ -1625,6 +1805,8 @@ export function buildOmnidirectionalTrackingLinkStats(values: Map<string, number
     trackingBonusPercent,
     optimalBonusPercent,
     falloffBonusPercent,
+    aoeVelocityBonusPercent: values.get("aoeVelocityBonus") ?? 0,
+    aoeCloudSizeBonusPercent: values.get("aoeCloudSizeBonus") ?? 0,
     overloadStrengthBonusPercent,
     capacitorNeed: values.get("capacitorNeed") ?? 0,
     cycleTime: (values.get("duration") ?? 0) / 1000,
@@ -1636,7 +1818,13 @@ export function buildOmnidirectionalTrackingEnhancerStats(values: Map<string, nu
   const optimalBonusPercent = values.get("maxRangeBonus");
   const falloffBonusPercent = values.get("falloffBonus");
   if (trackingBonusPercent === undefined || optimalBonusPercent === undefined || falloffBonusPercent === undefined) return undefined;
-  return { trackingBonusPercent, optimalBonusPercent, falloffBonusPercent };
+  return {
+    trackingBonusPercent,
+    optimalBonusPercent,
+    falloffBonusPercent,
+    aoeVelocityBonusPercent: values.get("aoeVelocityBonus") ?? 0,
+    aoeCloudSizeBonusPercent: values.get("aoeCloudSizeBonus") ?? 0,
+  };
 }
 
 async function main() {
@@ -1684,6 +1872,7 @@ async function main() {
   const subsystemBonuses: Record<string, readonly HullBonus[]> = {};
   const drones: Record<string, DroneEntry> = {};
   const combatDrones: Record<string, Row<DroneStats>> = {};
+  const fighters: Record<string, Row<FighterStats>> = {};
   const itemNames: Record<string, LocalizedName> = {};
   const idToType = new Map<string, SdeType>();
   const shipNameToId = buildShipNameToId();
@@ -1866,6 +2055,15 @@ async function main() {
           combatDrones[id] = { ...stats, id, name: enName };
         }
       }
+      addItemName(itemNames, id, type);
+      continue;
+    }
+
+    if (FIGHTER_GROUP_KINDS[type.groupID]) {
+      const requiredSkillIds = buildRequiredSkillIds(requiredSkills, type.typeID);
+      assertFighterSkillChain(enName ?? String(type.typeID), requiredSkillIds);
+      const stats = buildFighterStats(values, type, type.groupID, buildEffectSet(typeDogma), requiredSkillIds);
+      fighters[id] = { ...stats, id, name: enName };
       addItemName(itemNames, id, type);
       continue;
     }
@@ -2059,6 +2257,9 @@ async function main() {
   const sortedCombatDrones = Object.fromEntries(
     Object.entries(combatDrones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
   );
+  const sortedFighters = Object.fromEntries(
+    Object.entries(fighters).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
+  );
 
   const skillBonuses = buildSkillBonuses(attributeNames, typedogmas, types, groups, dogmaEffects, droneSkillIds, unmappedHullAttributes);
   const rigDrawbackReductions = buildRigDrawbackReductions(typedogmas, types, dogmaEffects);
@@ -2068,7 +2269,7 @@ async function main() {
     `/* eslint-disable */\n\n` +
     `import type { ShipId, TypeId } from "../../ids";\n` +
     `import type {\n` +
-    `  ChargeStats, CommandBurstStats, DisruptionScriptStats, DroneStats, FittingModuleStats, HullBonus, LauncherStats,\n` +
+    `  ChargeStats, CommandBurstStats, DisruptionScriptStats, DroneStats, FighterStats, FittingModuleStats, HullBonus, LauncherStats,\n` +
     `  MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, ModuleFittingNeeds,\n` +
     `  OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, RigDrawbackReduction,\n` +
     `  SensorBoosterScriptStats, SensorBoosterStats, SensorDampenerScriptStats, SensorDampenerStats,\n` +
@@ -2144,6 +2345,8 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     ``,
     `export const COMBAT_DRONES: Readonly<Record<string, DroneStats>> = ${stringifyWithTypeIds(sortedCombatDrones)};`,
     ``,
+    `export const FIGHTERS: Readonly<Record<string, FighterStats>> = ${stringifyWithTypeIds(sortedFighters)};`,
+    ``,
   ];
 
   addInScopeItemNames(itemNames, types, groups, IN_SCOPE_CATEGORY_IDS);
@@ -2175,6 +2378,7 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     sensorDampenerScripts,
     drones,
     combatDrones,
+    fighters,
     skillBonuses,
   );
   const filteredItemNames = filterItemNames(itemNames, idToType, groups, dbTableNames);
@@ -2227,6 +2431,7 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     `${Object.keys(hullBonuses).length} hull bonus sets`,
     `${Object.keys(sortedDrones).length} drones`,
     `${Object.keys(sortedCombatDrones).length} combat drones`,
+    `${Object.keys(sortedFighters).length} fighters`,
   ];
   console.log(`Wrote ${counts.join(", ")} to ${OUT_FILE}`);
   console.log(`Wrote ${Object.keys(filteredItemNames).length} item names to ${I18N_EN_FILE}, ${I18N_ZH_FILE}, ${I18N_JA_FILE}`);
@@ -2328,6 +2533,7 @@ function collectDbTableNames(
   sensorDampenerScripts: Record<string, Row<SensorDampenerScriptStats>>,
   drones: Record<string, DroneEntry>,
   combatDrones: Record<string, Row<DroneStats>>,
+  fighters: Record<string, Row<FighterStats>>,
   skillBonuses: readonly RawSkillBonus[],
 ): Set<string> {
   return new Set([
@@ -2356,6 +2562,7 @@ function collectDbTableNames(
     ...Object.keys(sensorDampenerScripts),
     ...Object.keys(drones),
     ...Object.keys(combatDrones),
+    ...Object.keys(fighters),
     ...relevantSkillIds(skillBonuses),
   ]);
 }
@@ -2508,7 +2715,7 @@ async function writeI18nFiles(
   await writeFile(collisionJaFile, collisionJaContent);
 }
 
-export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses, buildSubsystemBonuses as _buildSubsystemBonuses, buildPropulsionStats as _buildPropulsionStats, buildSkillBonuses as _buildSkillBonuses, buildDroneSkillIds as _buildDroneSkillIds, assertCombatDroneSkillChain as _assertCombatDroneSkillChain };
+export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses, buildSubsystemBonuses as _buildSubsystemBonuses, buildPropulsionStats as _buildPropulsionStats, buildSkillBonuses as _buildSkillBonuses, buildDroneSkillIds as _buildDroneSkillIds, assertCombatDroneSkillChain as _assertCombatDroneSkillChain, assertFighterSkillChain as _assertFighterSkillChain };
 
 if (import.meta.main) {
   main().catch((error) => {

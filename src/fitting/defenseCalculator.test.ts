@@ -25,6 +25,11 @@ const profile: ShipProfile = {
   droneBandwidth: 0,
   droneCapacity: 0,
   maxActiveDrones: 5,
+  fighterCapacity: 0,
+  fighterTubes: 0,
+  fighterLightSlots: 0,
+  fighterHeavySlots: 0,
+  fighterSupportSlots: 0,
   shieldHp: 7700,
   shieldRechargeTime: 1250,
   armorHp: 9350,
@@ -63,6 +68,11 @@ const rokhProfile: ShipProfile = {
   droneBandwidth: 75,
   droneCapacity: 125,
   maxActiveDrones: 5,
+  fighterCapacity: 0,
+  fighterTubes: 0,
+  fighterLightSlots: 0,
+  fighterHeavySlots: 0,
+  fighterSupportSlots: 0,
   shieldHp: 9350,
   shieldRechargeTime: 2500,
   armorHp: 7700,
@@ -84,12 +94,12 @@ function moduleEntry(name: string): FittingModuleEntry {
 }
 
 function resolve(modules: readonly FittingModuleEntry[]) {
-  const state = factory.create(profile, hullBonuses, modules, [], [] as readonly CargoEntry[]);
+  const state = factory.create(profile, hullBonuses, modules, [], [], [] as readonly CargoEntry[]);
   return calculator.resolve(state, conditions);
 }
 
 function resolveRokh(modules: readonly FittingModuleEntry[], overrides: { overloaded?: boolean } = {}) {
-  const state = factory.create(rokhProfile, rokhHullBonuses, modules, [], [] as readonly CargoEntry[]);
+  const state = factory.create(rokhProfile, rokhHullBonuses, modules, [], [], [] as readonly CargoEntry[]);
   return calculator.resolve(state, { skillLevel: 5 as const, overloaded: overrides.overloaded ?? false, weaponOverloaded: false });
 }
 
@@ -156,7 +166,7 @@ describe("DefenseCalculatorImpl", () => {
   });
 
   test("overloaded repairer applies overload multipliers", () => {
-    const state = factory.create(profile, hullBonuses, [moduleEntry("Large Armor Repairer II")], [], [] as readonly CargoEntry[]);
+    const state = factory.create(profile, hullBonuses, [moduleEntry("Large Armor Repairer II")], [], [], [] as readonly CargoEntry[]);
     const overloadedConditions = { skillLevel: 5 as const, overloaded: true, weaponOverloaded: false };
     const spec = calculator.resolve(state, overloadedConditions);
     expect(spec.repairers[0].overload.amountMultiplier).toBeGreaterThan(1);
@@ -226,18 +236,18 @@ describe("DefenseCalculatorImpl", () => {
     const rig = moduleEntry("Small EM Shield Reinforcer II");
     const skillsLevel0: DefenseSkills = { ...defaultDefenseSkills(5), shieldCompensationEm: 0 };
     const skillsLevel5: DefenseSkills = { ...defaultDefenseSkills(5), shieldCompensationEm: 5 };
-    const state0 = factory.create(profile, hullBonuses, [amplifier], [], [] as readonly CargoEntry[]);
-    const state5 = factory.create(profile, hullBonuses, [amplifier], [], [] as readonly CargoEntry[]);
+    const state0 = factory.create(profile, hullBonuses, [amplifier], [], [], [] as readonly CargoEntry[]);
+    const state5 = factory.create(profile, hullBonuses, [amplifier], [], [], [] as readonly CargoEntry[]);
     const amplifier0 = calculator.resolve(state0, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skillsLevel0 });
     const amplifier5 = calculator.resolve(state5, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skillsLevel5 });
     expect(amplifier5.layers.shield.resists.em).toBeGreaterThan(amplifier0.layers.shield.resists.em);
-    const hardenerState0 = factory.create(profile, hullBonuses, [hardener], [], [] as readonly CargoEntry[]);
-    const hardenerState5 = factory.create(profile, hullBonuses, [hardener], [], [] as readonly CargoEntry[]);
+    const hardenerState0 = factory.create(profile, hullBonuses, [hardener], [], [], [] as readonly CargoEntry[]);
+    const hardenerState5 = factory.create(profile, hullBonuses, [hardener], [], [], [] as readonly CargoEntry[]);
     const hardener0 = calculator.resolve(hardenerState0, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skillsLevel0 });
     const hardener5 = calculator.resolve(hardenerState5, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skillsLevel5 });
     expect(hardener5.layers.shield.resists.em).toBeCloseTo(hardener0.layers.shield.resists.em, 5);
-    const rigState0 = factory.create(profile, hullBonuses, [rig], [], [] as readonly CargoEntry[]);
-    const rigState5 = factory.create(profile, hullBonuses, [rig], [], [] as readonly CargoEntry[]);
+    const rigState0 = factory.create(profile, hullBonuses, [rig], [], [], [] as readonly CargoEntry[]);
+    const rigState5 = factory.create(profile, hullBonuses, [rig], [], [], [] as readonly CargoEntry[]);
     const rig0 = calculator.resolve(rigState0, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skillsLevel0 });
     const rig5 = calculator.resolve(rigState5, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skillsLevel5 });
     expect(rig5.layers.shield.resists.em).toBeCloseTo(rig0.layers.shield.resists.em, 5);
@@ -258,8 +268,8 @@ describe("DefenseCalculatorImpl", () => {
   test("RAH cycle time is reduced by Armor Resistance Phasing skill", () => {
     const skillsLevel0: DefenseSkills = { ...defaultDefenseSkills(5), armorResistancePhasing: 0 };
     const skillsLevel5: DefenseSkills = { ...defaultDefenseSkills(5), armorResistancePhasing: 5 };
-    const state0 = factory.create(profile, hullBonuses, [moduleEntry("Reactive Armor Hardener")], [], [] as readonly CargoEntry[]);
-    const state5 = factory.create(profile, hullBonuses, [moduleEntry("Reactive Armor Hardener")], [], [] as readonly CargoEntry[]);
+    const state0 = factory.create(profile, hullBonuses, [moduleEntry("Reactive Armor Hardener")], [], [], [] as readonly CargoEntry[]);
+    const state5 = factory.create(profile, hullBonuses, [moduleEntry("Reactive Armor Hardener")], [], [], [] as readonly CargoEntry[]);
     const spec0 = calculator.resolve(state0, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skillsLevel0 });
     const spec5 = calculator.resolve(state5, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skillsLevel5 });
     expect(spec5.rah?.cycleTime).toBeLessThan(spec0.rah?.cycleTime ?? Infinity);
@@ -273,7 +283,7 @@ describe("DefenseCalculatorImpl", () => {
 
   test("shieldHpPercent hull bonus uses general skill level, not shieldManagement", () => {
     const shieldHpBonus: readonly HullBonus[] = [{ attribute: "shieldHpPercent", magnitude: 5, scalesWithHullSkill: true }];
-    const state = factory.create(rokhProfile, shieldHpBonus, [], [], [] as readonly CargoEntry[]);
+    const state = factory.create(rokhProfile, shieldHpBonus, [], [], [], [] as readonly CargoEntry[]);
     const withManagement0 = calculator.resolve(state, { skillLevel: 4, overloaded: false, weaponOverloaded: false, defenseSkills: { ...defaultDefenseSkills(4), shieldManagement: 0 } });
     const withManagement5 = calculator.resolve(state, { skillLevel: 4, overloaded: false, weaponOverloaded: false, defenseSkills: { ...defaultDefenseSkills(4), shieldManagement: 5 } });
     const hullBonusMultiplier = 1 + (5 * 4) / 100;
@@ -284,20 +294,20 @@ describe("DefenseCalculatorImpl", () => {
 
   test("shieldUniformity is 0.25 at TSM 0", () => {
     const skills: DefenseSkills = { ...defaultDefenseSkills(5), tacticalShieldManipulation: 0 };
-    const state = factory.create(profile, hullBonuses, [], [], [] as readonly CargoEntry[]);
+    const state = factory.create(profile, hullBonuses, [], [], [], [] as readonly CargoEntry[]);
     const spec = calculator.resolve(state, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skills });
     expect(spec.shieldUniformity).toBeCloseTo(0.25, 5);
   });
 
   test("shieldUniformity is 0 at TSM 5", () => {
     const skills: DefenseSkills = { ...defaultDefenseSkills(5), tacticalShieldManipulation: 5 };
-    const state = factory.create(profile, hullBonuses, [], [], [] as readonly CargoEntry[]);
+    const state = factory.create(profile, hullBonuses, [], [], [], [] as readonly CargoEntry[]);
     const spec = calculator.resolve(state, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skills });
     expect(spec.shieldUniformity).toBe(0);
   });
 
   test("shieldUniformity decreases by 0.05 per TSM level", () => {
-    const state = factory.create(profile, hullBonuses, [], [], [] as readonly CargoEntry[]);
+    const state = factory.create(profile, hullBonuses, [], [], [], [] as readonly CargoEntry[]);
     for (let level = 0; level <= 5; level++) {
       const skills: DefenseSkills = { ...defaultDefenseSkills(5), tacticalShieldManipulation: level as SkillLevel };
       const spec = calculator.resolve(state, { skillLevel: 5, overloaded: false, weaponOverloaded: false, defenseSkills: skills });
@@ -362,7 +372,7 @@ function resolveWithCustomDefense(defenseModules: readonly { id: string; defense
   const factory = new FittingStateFactory(db);
   const calc = new DefenseCalculatorImpl({ fittingDb: db, stackingPenalty: new StackingPenaltyImpl() });
   const entries: FittingModuleEntry[] = defenseModules.map(({ id }) => ({ moduleId: id as TypeId, offline: false }));
-  const state = factory.create(profile, hullBonuses, entries, [], [] as readonly CargoEntry[]);
+  const state = factory.create(profile, hullBonuses, entries, [], [], [] as readonly CargoEntry[]);
   return calc.resolve(state, conditions);
 }
 
@@ -376,7 +386,7 @@ function resolveMixedDefense(namedModules: readonly string[], defenseModules: re
     ...namedModules.map((name) => moduleEntry(name)),
     ...defenseModules.map(({ id }) => ({ moduleId: id as TypeId, offline: false })),
   ];
-  const state = factory.create(profile, hullBonuses, entries, [], [] as readonly CargoEntry[]);
+  const state = factory.create(profile, hullBonuses, entries, [], [], [] as readonly CargoEntry[]);
   return calc.resolve(state, conditions);
 }
 
@@ -471,7 +481,7 @@ describe("DefenseCalculatorImpl - subsystem flat bonuses", () => {
   }
 
   function resolveWithBonuses(bonuses: readonly HullBonus[]) {
-    const state = factory.create(profile, bonuses, [], [], [] as readonly CargoEntry[]);
+    const state = factory.create(profile, bonuses, [], [], [], [] as readonly CargoEntry[]);
     return calculator.resolve(state, neutralConditions);
   }
 

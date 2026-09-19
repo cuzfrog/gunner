@@ -2,13 +2,14 @@ import { Vec2 } from "./vec2";
 import { computeExpectedMultiplier } from "./expectedHitMultiplier";
 import { EngagementEvaluatorImpl } from "./fireControl";
 import type { DroneApplication } from "./droneApplication";
+import type { FighterApplication } from "./fighterApplication";
 import type { EwarResolver } from "./ewarResolver";
 import type { HitChance } from "./hitChance";
 import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
 import { toTypeId } from "../gamedata/ids";
-import { type DamageAssessment, type DroneDamageBreakdown, type DroneRuntimeState, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileAttackFacts, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
+import { type DamageAssessment, type DroneDamageBreakdown, type FighterDamageBreakdown, type DroneRuntimeState, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileAttackFacts, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const boostedTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("2"), tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
@@ -103,6 +104,20 @@ const droneBreakdownResult: DroneDamageBreakdown & DamageAssessment = {
   appliedVolleyByType: ZERO_DAMAGE,
 };
 
+const fighterBreakdownResult: FighterDamageBreakdown & DamageAssessment = {
+  rangeFactor: 1,
+  signatureTerm: 1,
+  velocityTerm: 1,
+  inRange: true,
+  nominalDps: 0,
+  appliedDps: 0,
+  application: 1.0,
+  volley: 0,
+  baseVolleyByType: ZERO_DAMAGE,
+  appliedByType: ZERO_DAMAGE,
+  appliedVolleyByType: ZERO_DAMAGE,
+};
+
 function makeEvaluator(): {
   hitChance: HitChance;
   ewarResolver: EwarResolver;
@@ -133,7 +148,8 @@ function makeEvaluator(): {
   const missileBoosterResolver = vi.mocked<MissileBoosterResolver>({ boostedMissile: vi.fn((m) => m) });
   const weaponDamageAssessor = new WeaponDamageAssessorImpl();
   const droneApplication = vi.mocked<DroneApplication>({ compute: vi.fn(() => droneBreakdownResult) });
-  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, droneApplication });
+  const fighterApplication = vi.mocked<FighterApplication>({ compute: vi.fn(() => fighterBreakdownResult) });
+  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, droneApplication, fighterApplication });
   return { hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, droneApplication, evaluator };
 }
 

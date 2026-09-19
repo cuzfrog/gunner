@@ -76,6 +76,8 @@ function baseView(): EngineView {
     inflicted: ZERO_INFLICTED,
     drones: { shipA: [], shipB: [] },
     droneSpecs: { shipA: [], shipB: [] },
+    fighters: { shipA: [], shipB: [] },
+    fighterSpecs: { shipA: [], shipB: [] },
     missiles: { shipA: [], shipB: [] },
   };
 }

@@ -1,5 +1,5 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
-import type { ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FittingCalculator, FittingImport, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, FighterCatalog, FighterLoadoutResolver, FighterLoadoutValidator, FittingCalculator, FittingImport, PresetFittings } from "../../fitting";
 import { toTypeId, type TypeId } from "../../gamedata/ids";
 import type { Ships } from "../../ships";
 import { registerSimModule, type EwarResolver, type HitChance, type SimCradle, type EngineView } from "../../sim";
@@ -257,6 +257,10 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     droneCatalog: asValue(mockDroneCatalog()),
     droneLoadoutResolver: asValue(vi.mocked<DroneLoadoutResolver>({ resolve: vi.fn(() => []) })),
     droneLoadoutValidator: asValue(vi.mocked<DroneLoadoutValidator>({ validate: vi.fn(() => ({ valid: true, totalCount: 0, totalBandwidth: 0, totalVolume: 0, bandwidthLimit: 0, capacityLimit: 0, violations: [] })) })),
+    fighterCatalog: asValue(mockFighterCatalog()),
+    fighterLoadoutResolver: asValue(vi.mocked<FighterLoadoutResolver>({ resolve: vi.fn(() => []) })),
+    fighterLoadoutValidator: asValue(vi.mocked<FighterLoadoutValidator>({ validate: vi.fn(() => ({ valid: true, totalFighters: 0, totalSquadrons: 0, totalVolume: 0, hangarCapacity: 0, violations: [] })) })),
+    fighterHintProvider: asValue({ render: vi.fn() }),
     launcherClasses: asValue(mockLauncherClasses()),
     fittingCalculator: asValue(vi.mocked<FittingCalculator>({
       resolveTurrets: vi.fn(() => []),
@@ -265,7 +269,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
       resolvePropulsion: vi.fn(() => undefined),
       resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], })),
       resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
-      resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], })), resolveSensorSpec: vi.fn(() => ({ scanResolution: 0, maxTargetingRange: 0, maxLockedTargets: 0 })), resolveDrones: vi.fn(() => []), resolveCargoCharges: vi.fn(() => []), resolveEnergyWarfareResistance: vi.fn(() => 0),
+      resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], })), resolveSensorSpec: vi.fn(() => ({ scanResolution: 0, maxTargetingRange: 0, maxLockedTargets: 0 })), resolveDrones: vi.fn(() => []), resolveFighters: vi.fn(() => []), resolveCargoCharges: vi.fn(() => []), resolveEnergyWarfareResistance: vi.fn(() => 0),
     })),
     profileEquality: asValue<ProfileEquality>({ equal() { return true; } }),
     itemNameLoader: asValue({ ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) }),
@@ -478,6 +482,14 @@ function mockDroneCatalog(): DroneCatalog {
   return {
     dronesByClass: vi.fn(() => []),
     usualForClass: vi.fn(() => undefined),
+    has: vi.fn(() => false),
+    idForName: vi.fn(() => undefined),
+  };
+}
+
+function mockFighterCatalog(): FighterCatalog {
+  return {
+    fightersByKind: vi.fn(() => []),
     has: vi.fn(() => false),
     idForName: vi.fn(() => undefined),
   };

@@ -183,7 +183,7 @@ export function buildLauncher(
     resolvePropulsion: vi.fn(() => undefined),
     resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], })),
     resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
-    resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], })), resolveSensorSpec: vi.fn(() => ({ scanResolution: 0, maxTargetingRange: 0, maxLockedTargets: 0 })), resolveDrones: vi.fn(() => []), resolveCargoCharges: vi.fn(() => []), resolveEnergyWarfareResistance: vi.fn(() => 0),
+    resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], })), resolveSensorSpec: vi.fn(() => ({ scanResolution: 0, maxTargetingRange: 0, maxLockedTargets: 0 })), resolveDrones: vi.fn(() => []), resolveFighters: vi.fn(() => []), resolveCargoCharges: vi.fn(() => []), resolveEnergyWarfareResistance: vi.fn(() => 0),
   });
   const controller = new LauncherControllerImpl({
     side,
