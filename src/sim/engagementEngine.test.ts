@@ -238,10 +238,10 @@ describe("EngagementEngineImpl", () => {
     deps.engine.reset(engineConfig());
     deps.engine.step(0.1);
     expect(deps.live.capacitorSimulator.step).toHaveBeenCalledWith(0.1, {
-      shipA: { propulsionSuppressed: true, weaponsEngaged: true, disengagedModuleIds: [] },
-      shipB: { propulsionSuppressed: true, weaponsEngaged: true, disengagedModuleIds: [] },
+      shipA: { operational: true, propulsionSuppressed: true, weaponsEngaged: true, disengagedModuleIds: [] },
+      shipB: { operational: true, propulsionSuppressed: true, weaponsEngaged: true, disengagedModuleIds: [] },
     });
-    expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: false, shipB: false } });
+    expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: false, shipB: false }, ewarActive: { shipA: true, shipB: true } });
   });
 
   test("capacitor.step receives disengaged ids for own ewar modules without an applied effect and weapons engagement from the lock", () => {
@@ -262,8 +262,8 @@ describe("EngagementEngineImpl", () => {
     deps.engine.reset(engineConfig());
     deps.engine.step(0.1);
     expect(deps.live.capacitorSimulator.step).toHaveBeenCalledWith(0.1, {
-      shipA: { propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [painterId] },
-      shipB: { propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
+      shipA: { operational: true, propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [painterId] },
+      shipB: { operational: true, propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
     });
   });
 
@@ -274,8 +274,8 @@ describe("EngagementEngineImpl", () => {
     deps.engine.reset(engineConfig());
     deps.engine.step(0.1);
     expect(deps.live.capacitorSimulator.step).toHaveBeenCalledWith(0.1, {
-      shipA: { propulsionSuppressed: false, weaponsEngaged: false, disengagedModuleIds: [] },
-      shipB: { propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
+      shipA: { operational: true, propulsionSuppressed: false, weaponsEngaged: false, disengagedModuleIds: [] },
+      shipB: { operational: true, propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
     });
   });
 
@@ -284,7 +284,7 @@ describe("EngagementEngineImpl", () => {
     deps.live.capacitorSimulator.propulsionStarved = vi.fnUntracked((side: "shipA" | "shipB") => side === "shipA");
     deps.engine.reset(engineConfig());
     deps.engine.step(0.1);
-    expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: true, shipB: false } });
+    expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: true, shipB: false }, ewarActive: { shipA: true, shipB: true } });
   });
 
   test("weaponClock.step and defenseSimulator.step receive the capacitor gate", () => {
@@ -598,6 +598,50 @@ describe("EngagementEngineImpl", () => {
         { moduleId: NEUT_ID, amount: 900, interval: 24, transfer: false, count: 2 },
         { moduleId: NOS_ID, amount: 27, interval: 5, transfer: true, count: 1 },
       ]);
+    });
+  });
+
+  describe("destroyed side gating", () => {
+    const NEUT_ID = toTypeId("12271");
+    const NEUT: EnergyNeutralizerSpec = { moduleName: "Heavy Energy Neutralizer II", moduleId: NEUT_ID, amount: 600, cycleTime: 24, capacitorNeed: 500, maxRange: 20000, falloff: 10000 };
+
+    function ewarProjection(): EwarProjection {
+      return { loadout: { ...EMPTY_EWAR_LOADOUT, neutralizers: [NEUT] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [{ active: true }], nosferatu: [] } };
+    }
+
+    function stepWithDestroyedShipB(deps: ReturnType<typeof makeEngine>): void {
+      const projection = ewarProjection();
+      const withEwar: SimSnapshot = { ...snapshot, shipB: { ...snapshot.shipB, ewar: projection } };
+      const deadView: DefenseView = { ...emptyDefenseView, dead: { shipA: false, shipB: true } };
+      deps.live.simulation.snapshot.mockReturnValue(withEwar);
+      deps.projection.simulation.snapshot.mockReturnValue(withEwar);
+      deps.live.defenseSimulator.view.mockReturnValue(deadView);
+      deps.projection.defenseSimulator.view.mockReturnValue(deadView);
+      deps.ewarResolver.appliedEffects.mockImplementation((candidate) => (candidate === projection ? [{ family: "neutralizer", moduleId: NEUT_ID, amountPerCycle: 600, cycleTime: 24 }] : []));
+      deps.engine.reset(engineConfig());
+      deps.engine.step(0.1);
+    }
+
+    test("a destroyed side is frozen in the capacitor and its ewar projects nothing", () => {
+      const deps = makeEngine();
+      stepWithDestroyedShipB(deps);
+      expect(deps.live.capacitorSimulator.step).toHaveBeenCalledWith(0.1, {
+        shipA: { operational: true, propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
+        shipB: { operational: false, propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
+      });
+      // shipB is destroyed: its neutralizers no longer drain shipA.
+      expect(deps.live.capacitorSimulator.incomingDrains).toHaveBeenCalledWith("shipA", []);
+      expect(deps.live.capacitorSimulator.incomingDrains).toHaveBeenCalledWith("shipB", []);
+    });
+
+    test("a destroyed side loses its locks, its propulsion, and its drones freeze", () => {
+      const deps = makeEngine();
+      stepWithDestroyedShipB(deps);
+      const lockInput = deps.live.lockClock.step.mock.calls[0][1];
+      expect(lockInput.operational).toEqual({ shipA: true, shipB: false });
+      expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: false, shipB: true }, ewarActive: { shipA: true, shipB: false } });
+      expect(deps.live.droneSimulator.step).toHaveBeenCalledWith(0.1, expect.anything(), { shipA: true, shipB: false });
+      expect(deps.live.fighterSimulator.step).toHaveBeenCalledWith(0.1, expect.anything(), { shipA: true, shipB: false });
     });
   });
 });

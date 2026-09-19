@@ -826,6 +826,8 @@ export interface ScheduledDrain {
 
 /** Per-frame engagement facts the engine derives from geometry and lock state: modules unable to act on the target are excluded from cap consumption. */
 export interface CapacitorEngagement {
+  /** False while the side's ship is destroyed: the pool freezes (no regen, no debits, no timers). */
+  readonly operational: boolean;
   readonly propulsionSuppressed: boolean;
   readonly weaponsEngaged: boolean;
   /** Module ids of this side's own hard-range modules currently applying nothing to the target (family granularity). */

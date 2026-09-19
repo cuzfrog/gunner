@@ -1,7 +1,7 @@
 import type { CapacitorSimConfig, CapacitorView } from "./capacitorSimulator";
 import type { AppliedEwarEffect, CapacitorEngagement, DamageEvent, DroneRuntimeState, DroneSpec, EwarProjection, FighterRuntimeState, FighterSpec, InflictedDps, IncomingDrain, LayerDamage, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec, CapacitorSideConfig } from "./types";
 import type { TypeId } from "../gamedata/ids";
-import type { DefenseSimConfig, DefenseView } from "./defenseSimulator";
+import type { DefenseSimConfig, DefenseSimulator, DefenseView } from "./defenseSimulator";
 import type { DroneSimConfig } from "./droneSimulator";
 import type { FighterSimConfig } from "./fighterSimulator";
 import type { EngagementFrameComposer, EngagementInput, EngagementView } from "./engagementFrameComposer";
@@ -220,29 +220,31 @@ export class EngagementEngineImpl implements EngagementEngine {
   }
 
   private runStep(world: SimWorld, config: EngineConfig, dt: number): { composed: EngagementView; snapshot: SimSnapshot } {
-    const preSnapshot = world.simulation.snapshot();
+    const operational = operationalSides(world.defenseSimulator);
+    const preSnapshot = mutedDestroyedSnapshot(world.simulation.snapshot(), operational);
     const preDistance = preSnapshot.shipB.position.sub(preSnapshot.shipA.position).len();
     world.capacitorSimulator.incomingDrains("shipA", incomingDrains(this.ewarResolver.appliedEffects(preSnapshot.shipB.ewar, preDistance), config.sim.shipA.energyWarfareResistancePercent ?? 0));
     world.capacitorSimulator.incomingDrains("shipB", incomingDrains(this.ewarResolver.appliedEffects(preSnapshot.shipA.ewar, preDistance), config.sim.shipB.energyWarfareResistancePercent ?? 0));
     const locksBeforeStep = world.lockClock.states();
     world.capacitorSimulator.step(dt, {
-      shipA: this.capacitorEngagement(preSnapshot, "shipA", preDistance, locksBeforeStep),
-      shipB: this.capacitorEngagement(preSnapshot, "shipB", preDistance, locksBeforeStep),
+      shipA: this.capacitorEngagement(preSnapshot, "shipA", preDistance, locksBeforeStep, operational),
+      shipB: this.capacitorEngagement(preSnapshot, "shipB", preDistance, locksBeforeStep, operational),
     });
     world.simulation.step(dt, {
       propulsionStarved: {
-        shipA: world.capacitorSimulator.propulsionStarved("shipA"),
-        shipB: world.capacitorSimulator.propulsionStarved("shipB"),
+        shipA: !operational.shipA || world.capacitorSimulator.propulsionStarved("shipA"),
+        shipB: !operational.shipB || world.capacitorSimulator.propulsionStarved("shipB"),
       },
+      ewarActive: operational,
     });
-    const snapshot = world.simulation.snapshot();
+    const snapshot = mutedDestroyedSnapshot(world.simulation.snapshot(), operational);
     const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
     const painted = this.paintedSigRadii(snapshot, distance);
-    const locks = world.lockClock.step(dt, this.lockStepInput(snapshot, distance, painted));
+    const locks = world.lockClock.step(dt, this.lockStepInput(snapshot, distance, painted, operational));
     const input = this.engagementInput(world, snapshot, locks, config, painted);
     const composed = this.engagementFrameComposer.compose(snapshot, input);
-    world.droneSimulator.step(dt, composed.frame);
-    world.fighterSimulator.step(dt, composed.frame);
+    world.droneSimulator.step(dt, composed.frame, operational);
+    world.fighterSimulator.step(dt, composed.frame, operational);
     const missileEvents = world.missileSimulator.step(dt, composed.frame, this.missileLaunchSpecs(composed, locks, painted));
     const weaponEvents = world.weaponClock.step(dt, composed, world.capacitorSimulator);
     const events: DamageEvent[] = [...missileEvents, ...weaponEvents];
@@ -253,26 +255,28 @@ export class EngagementEngineImpl implements EngagementEngine {
   private initializeLocks(): void {
     const snapshot = this.live.simulation.snapshot();
     const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
-    this.live.lockClock.step(0, this.lockStepInput(snapshot, distance, this.paintedSigRadii(snapshot, distance)));
+    this.live.lockClock.step(0, this.lockStepInput(snapshot, distance, this.paintedSigRadii(snapshot, distance), operationalSides(this.live.defenseSimulator)));
   }
 
   /** Engagement facts for the capacitor: own hard-range modules that apply nothing, own lock state, opponent suppression. Uses the pre-step snapshot, one frame of latency like the incoming-drain inputs. */
-  private capacitorEngagement(snapshot: SimSnapshot, side: Side, distance: number, locks: Record<Side, LockState>): CapacitorEngagement {
+  private capacitorEngagement(snapshot: SimSnapshot, side: Side, distance: number, locks: Record<Side, LockState>, operational: Record<Side, boolean>): CapacitorEngagement {
     const opponent = side === "shipA" ? "shipB" : "shipA";
     return {
+      operational: operational[side],
       propulsionSuppressed: this.ewarResolver.propulsionSuppressed(snapshot[opponent].ewar, distance),
       weaponsEngaged: locks[side].status === "locked",
       disengagedModuleIds: disengagedModuleIds(snapshot[side].ewar, distance, this.ewarResolver),
     };
   }
 
-  private lockStepInput(snapshot: SimSnapshot, distance: number, painted: Record<Side, number>): LockStepInput {
+  private lockStepInput(snapshot: SimSnapshot, distance: number, painted: Record<Side, number>, operational: Record<Side, boolean>): LockStepInput {
     return {
       distance,
       sensorA: this.effectiveSensorSpec(snapshot.shipA, snapshot.shipB, distance),
       sensorB: this.effectiveSensorSpec(snapshot.shipB, snapshot.shipA, distance),
       sigA: painted.shipA,
       sigB: painted.shipB,
+      operational,
     };
   }
 
@@ -343,6 +347,25 @@ export class EngagementEngineImpl implements EngagementEngine {
     }
     return specs;
   }
+}
+
+/** A side whose ship is destroyed stops acting: it projects no ewar and every outgoing gate treats it as offline. */
+function operationalSides(defense: DefenseSimulator): Record<Side, boolean> {
+  const dead = defense.view().dead;
+  return { shipA: !dead.shipA, shipB: !dead.shipB };
+}
+
+function mutedDestroyedSnapshot(snapshot: SimSnapshot, operational: Record<Side, boolean>): SimSnapshot {
+  if (operational.shipA && operational.shipB) return snapshot;
+  return {
+    ...snapshot,
+    shipA: operational.shipA ? snapshot.shipA : withoutEwar(snapshot.shipA),
+    shipB: operational.shipB ? snapshot.shipB : withoutEwar(snapshot.shipB),
+  };
+}
+
+function withoutEwar(ship: ShipState): ShipState {
+  return { ...ship, ewar: undefined };
 }
 
 function droneSimConfigFrom(config: EngineConfig): DroneSimConfig {

@@ -43,12 +43,36 @@ describe("DroneSimulatorImpl", () => {
     expect(states[0].inControlRange).toBe(false);
   });
 
+  test("non-operational side freezes its drones in place and resumes on the next step", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [lightDrone()], shipB: [] });
+    const shipPos = new Vec2(0, 0);
+    const targetPos = new Vec2(50000, 0);
+    sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
+    sim.step(2, frame(shipPos, targetPos), { shipA: true, shipB: true });
+    const before = sim.states("shipA")[0].positions.map((p) => new Vec2(p.x, p.y));
+    sim.step(2, frame(shipPos, targetPos), { shipA: true, shipB: true });
+    const atFreeze = sim.states("shipA")[0].positions.map((p) => new Vec2(p.x, p.y));
+    const displacement = atFreeze.some((p, i) => p.x !== before[i].x || p.y !== before[i].y);
+    expect(displacement).toBe(true);
+    sim.step(2, frame(shipPos, targetPos), { shipA: false, shipB: true });
+    const frozen = sim.states("shipA")[0].positions;
+    for (let i = 0; i < atFreeze.length; i++) {
+      expect(frozen[i].x).toBe(atFreeze[i].x);
+      expect(frozen[i].y).toBe(atFreeze[i].y);
+    }
+    sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
+    const resumed = sim.states("shipA")[0].positions;
+    const resumedDisplacement = resumed.some((p, i) => p.x !== atFreeze[i].x || p.y !== atFreeze[i].y);
+    expect(resumedDisplacement).toBe(true);
+  });
+
   test("target within control range transitions idle to engaging", () => {
     const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone()], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
-    sim.step(0.1, frame(shipPos, targetPos));
+    sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const states = sim.states("shipA");
     expect(states[0].mode).toBe("engaging");
     expect(states[0].inControlRange).toBe(true);
@@ -59,7 +83,7 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ controlRange: 40000 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
-    sim.step(0.1, frame(shipPos, targetPos));
+    sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const states = sim.states("shipA");
     expect(states[0].mode).toBe("idle");
     expect(states[0].inControlRange).toBe(false);
@@ -70,7 +94,7 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 3000, optimal: 1000, droneCount: 5 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
-    sim.step(0.001, frame(shipPos, targetPos));
+    sim.step(0.001, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const states = sim.states("shipA");
     expect(states[0].mode).toBe("engaging");
     for (const pos of states[0].positions) {
@@ -85,14 +109,14 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 3000, optimal: 1000, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
-    sim.step(0.001, frame(shipPos, targetPos));
+    sim.step(0.001, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const afterDeploy = sim.states("shipA")[0].positions[0];
-    sim.step(1, frame(shipPos, targetPos));
+    sim.step(1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const after1s = sim.states("shipA")[0].positions[0];
     const traveled = after1s.x - afterDeploy.x;
     expect(traveled).toBeGreaterThan(0);
     expect(traveled).toBeLessThan(3000);
-    sim.step(1, frame(shipPos, targetPos));
+    sim.step(1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const after2s = sim.states("shipA")[0].positions[0];
     const traveled2 = after2s.x - after1s.x;
     expect(traveled2).toBeGreaterThan(traveled);
@@ -103,7 +127,7 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 3000, optimal: 1000 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
-    sim.step(1, frame(shipPos, targetPos));
+    sim.step(1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const states = sim.states("shipA");
     expect(states[0].mode).toBe("engaging");
     expect(states[0].distanceToTarget).toBeGreaterThan(1000);
@@ -114,7 +138,7 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1000, orbitRange: 1000, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos));
+    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const states = sim.states("shipA");
     expect(states[0].mode).toBe("engaging");
     expect(states[0].distanceToTarget).toBeLessThan(3000);
@@ -126,11 +150,11 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1000, orbitRange: 1000, orbitSpeed: 1000, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 30; i++) sim.step(0.1, frame(shipPos, targetPos));
+    for (let i = 0; i < 30; i++) sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const states = sim.states("shipA");
     expect(states[0].mode).toBe("engaging");
     const pos1 = states[0].positions[0];
-    sim.step(0.5, frame(shipPos, targetPos));
+    sim.step(0.5, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const pos2 = sim.states("shipA")[0].positions[0];
     const moved = pos1.dist(pos2);
     expect(moved).toBeGreaterThan(10);
@@ -141,7 +165,7 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 5 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos));
+    for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const states = sim.states("shipA");
     expect(states[0].mode).toBe("engaging");
     const positions = states[0].positions;
@@ -158,7 +182,7 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos));
+    for (let i = 0; i < 200; i++) sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const states = sim.states("shipA");
     expect(states[0].mode).toBe("engaging");
     const pos = states[0].positions[0];
@@ -172,10 +196,10 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 1000, optimal: 1000, controlRange: 50000 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetNear = new Vec2(3000, 0);
-    for (let i = 0; i < 100; i++) sim.step(0.1, frame(shipPos, targetNear));
+    for (let i = 0; i < 100; i++) sim.step(0.1, frame(shipPos, targetNear), { shipA: true, shipB: true });
     expect(sim.states("shipA")[0].mode).toBe("engaging");
     const targetFar = new Vec2(60000, 0);
-    sim.step(0.1, frame(shipPos, targetFar));
+    sim.step(0.1, frame(shipPos, targetFar), { shipA: true, shipB: true });
     expect(sim.states("shipA")[0].mode).toBe("returning");
   });
 
@@ -184,12 +208,12 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 1000, optimal: 1000, controlRange: 50000, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetNear = new Vec2(3000, 0);
-    for (let i = 0; i < 100; i++) sim.step(0.1, frame(shipPos, targetNear));
+    for (let i = 0; i < 100; i++) sim.step(0.1, frame(shipPos, targetNear), { shipA: true, shipB: true });
     expect(sim.states("shipA")[0].mode).toBe("engaging");
     const targetFar = new Vec2(60000, 0);
-    sim.step(0.1, frame(shipPos, targetFar));
+    sim.step(0.1, frame(shipPos, targetFar), { shipA: true, shipB: true });
     expect(sim.states("shipA")[0].mode).toBe("returning");
-    for (let i = 0; i < 500; i++) sim.step(0.1, frame(shipPos, targetFar));
+    for (let i = 0; i < 500; i++) sim.step(0.1, frame(shipPos, targetFar), { shipA: true, shipB: true });
     expect(sim.states("shipA")[0].mode).toBe("idle");
     for (const pos of sim.states("shipA")[0].positions) expect(pos).toEqual(shipPos);
   });
@@ -201,8 +225,8 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [drone1, drone2], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
-    sim.step(0.001, frame(shipPos, targetPos));
-    sim.step(1, frame(shipPos, targetPos));
+    sim.step(0.001, frame(shipPos, targetPos), { shipA: true, shipB: true });
+    sim.step(1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const states = sim.states("shipA");
     const pos1 = states[0].positions[0];
     const pos2 = states[1].positions[0];
@@ -214,7 +238,7 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 3000, optimal: 1000, droneCount: 5 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(50000, 0);
-    sim.step(0.001, frame(shipPos, targetPos));
+    sim.step(0.001, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const positions = sim.states("shipA")[0].positions;
     const first = positions[0];
     const anyDifferent = positions.some((p) => p.dist(first) > 1);
@@ -226,10 +250,10 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [sentryDrone()], shipB: [] });
     const deployPos = new Vec2(1000, 2000);
     const targetPos = new Vec2(50000, 0);
-    sim.step(0.1, frame(deployPos, targetPos));
+    sim.step(0.1, frame(deployPos, targetPos), { shipA: true, shipB: true });
     for (const pos of sim.states("shipA")[0].positions) expect(pos).toEqual(deployPos);
     const shipMoved = new Vec2(5000, 5000);
-    sim.step(0.1, frame(shipMoved, targetPos));
+    sim.step(0.1, frame(shipMoved, targetPos), { shipA: true, shipB: true });
     for (const pos of sim.states("shipA")[0].positions) expect(pos).toEqual(deployPos);
     expect(sim.states("shipA")[0].distanceToTarget).toBeCloseTo(deployPos.dist(targetPos), 0);
   });
@@ -239,10 +263,10 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [sentryDrone({ controlRange: 40000 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetFar = new Vec2(50000, 0);
-    sim.step(0.1, frame(shipPos, targetFar));
+    sim.step(0.1, frame(shipPos, targetFar), { shipA: true, shipB: true });
     expect(sim.states("shipA")[0].inControlRange).toBe(false);
     const targetNear = new Vec2(30000, 0);
-    sim.step(0.1, frame(shipPos, targetNear));
+    sim.step(0.1, frame(shipPos, targetNear), { shipA: true, shipB: true });
     expect(sim.states("shipA")[0].inControlRange).toBe(true);
   });
 
@@ -251,8 +275,8 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [], shipB: [lightDrone({ maxVelocity: 3000, optimal: 1000, droneCount: 1 })] });
     const shipAPos = new Vec2(0, 0);
     const shipBPos = new Vec2(50000, 0);
-    sim.step(0.001, frame(shipAPos, shipBPos));
-    sim.step(1, frame(shipAPos, shipBPos));
+    sim.step(0.001, frame(shipAPos, shipBPos), { shipA: true, shipB: true });
+    sim.step(1, frame(shipAPos, shipBPos), { shipA: true, shipB: true });
     const states = sim.states("shipB");
     expect(states[0].mode).toBe("engaging");
     const pos = states[0].positions[0];
@@ -264,13 +288,13 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 1500, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     let targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos));
+    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const settledSlotDist = sim.states("shipA")[0].distanceToSlot;
     expect(settledSlotDist).toBeLessThan(1000);
     const targetSpeed = 2000;
     for (let i = 0; i < 100; i++) {
       targetPos = new Vec2(targetPos.x + targetSpeed * 0.1, 0);
-      sim.step(0.1, frame(shipPos, targetPos));
+      sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     }
     const chasingSlotDist = sim.states("shipA")[0].distanceToSlot;
     expect(chasingSlotDist).toBeGreaterThan(settledSlotDist);
@@ -281,15 +305,15 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 1500, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     let targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos));
+    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const targetSpeed = 2000;
     for (let i = 0; i < 100; i++) {
       targetPos = new Vec2(targetPos.x + targetSpeed * 0.1, 0);
-      sim.step(0.1, frame(shipPos, targetPos));
+      sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     }
     const chasingSlotDist = sim.states("shipA")[0].distanceToSlot;
     expect(chasingSlotDist).toBeGreaterThan(200);
-    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos));
+    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const settledSlotDist = sim.states("shipA")[0].distanceToSlot;
     expect(settledSlotDist).toBeLessThan(chasingSlotDist);
     expect(settledSlotDist).toBeLessThan(1000);
@@ -300,11 +324,11 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 1500, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     let targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos));
+    for (let i = 0; i < 300; i++) sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     const targetSpeed = 100;
     for (let i = 0; i < 200; i++) {
       targetPos = new Vec2(targetPos.x + targetSpeed * 0.1, 0);
-      sim.step(0.1, frame(shipPos, targetPos));
+      sim.step(0.1, frame(shipPos, targetPos), { shipA: true, shipB: true });
     }
     expect(sim.states("shipA")[0].distanceToSlot).toBeLessThan(1000);
   });
@@ -316,11 +340,11 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity, optimal: 1500, orbitRange: 1000, orbitSpeed: 500, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
-    sim.step(0.001, frame(shipPos, targetPos));
+    sim.step(0.001, frame(shipPos, targetPos), { shipA: true, shipB: true });
     let prevPos = new Vec2(sim.states("shipA")[0].positions[0].x, sim.states("shipA")[0].positions[0].y);
     const maxStep = maxVelocity * dt + 1;
     for (let i = 0; i < 50; i++) {
-      sim.step(dt, frame(shipPos, targetPos));
+      sim.step(dt, frame(shipPos, targetPos), { shipA: true, shipB: true });
       const pos = sim.states("shipA")[0].positions[0];
       const moved = pos.dist(prevPos);
       expect(moved).toBeLessThanOrEqual(maxStep);
@@ -335,12 +359,12 @@ describe("DroneSimulatorImpl", () => {
     sim.reset({ shipA: [lightDrone({ maxVelocity: 50000, optimal: 1500, orbitRange: 1000, orbitSpeed, droneCount: 1 })], shipB: [] });
     const shipPos = new Vec2(0, 0);
     const targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 200; i++) sim.step(dt, frame(shipPos, targetPos));
+    for (let i = 0; i < 200; i++) sim.step(dt, frame(shipPos, targetPos), { shipA: true, shipB: true });
     expect(sim.states("shipA")[0].distanceToSlot).toBeLessThan(200);
     let prevPos = new Vec2(sim.states("shipA")[0].positions[0].x, sim.states("shipA")[0].positions[0].y);
     const maxStep = orbitSpeed * dt + 1;
     for (let i = 0; i < 50; i++) {
-      sim.step(dt, frame(shipPos, targetPos));
+      sim.step(dt, frame(shipPos, targetPos), { shipA: true, shipB: true });
       const pos = sim.states("shipA")[0].positions[0];
       const moved = pos.dist(prevPos);
       expect(moved).toBeLessThanOrEqual(maxStep);
@@ -352,7 +376,7 @@ describe("DroneSimulatorImpl", () => {
     const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ optimal: 1000 })], shipB: [] });
     const targetPos = new Vec2(5000, 0);
-    for (let i = 0; i < 100; i++) sim.step(0.1, frame(new Vec2(0, 0), targetPos));
+    for (let i = 0; i < 100; i++) sim.step(0.1, frame(new Vec2(0, 0), targetPos), { shipA: true, shipB: true });
     const positionsBefore = sim.states("shipA")[0].positions.map((p) => new Vec2(p.x, p.y));
     const modeBefore = sim.states("shipA")[0].mode;
     sim.update({ shipA: [lightDrone({ optimal: 2000 })], shipB: [] });
@@ -368,7 +392,7 @@ describe("DroneSimulatorImpl", () => {
   test("update rebuilds group when drone count changes", () => {
     const sim = new DroneSimulatorImpl();
     sim.reset({ shipA: [lightDrone({ droneCount: 5 })], shipB: [] });
-    for (let i = 0; i < 100; i++) sim.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)));
+    for (let i = 0; i < 100; i++) sim.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)), { shipA: true, shipB: true });
     sim.update({ shipA: [lightDrone({ droneCount: 3 })], shipB: [] });
     expect(sim.states("shipA")[0].positions).toHaveLength(3);
     expect(sim.states("shipA")[0].mode).toBe("idle");
@@ -377,10 +401,10 @@ describe("DroneSimulatorImpl", () => {
   test("capture and restore round-trips the state into another instance", () => {
     const first = new DroneSimulatorImpl();
     first.reset({ shipA: [lightDrone()], shipB: [] });
-    for (let i = 0; i < 20; i++) first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)));
+    for (let i = 0; i < 20; i++) first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)), { shipA: true, shipB: true });
     const expected = { shipA: first.states("shipA"), shipB: first.states("shipB") };
     const state = first.capture();
-    for (let i = 0; i < 10; i++) first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)));
+    for (let i = 0; i < 10; i++) first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)), { shipA: true, shipB: true });
     const second = new DroneSimulatorImpl();
     second.restore(state);
     expect(second.states("shipA")).toEqual(expected.shipA);
@@ -390,12 +414,12 @@ describe("DroneSimulatorImpl", () => {
   test("restored instance keeps stepping independently of the captured source", () => {
     const first = new DroneSimulatorImpl();
     first.reset({ shipA: [lightDrone()], shipB: [] });
-    first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)));
+    first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)), { shipA: true, shipB: true });
     const state = first.capture();
     const second = new DroneSimulatorImpl();
     second.restore(state);
-    for (let i = 0; i < 10; i++) first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)));
-    second.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)));
+    for (let i = 0; i < 10; i++) first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)), { shipA: true, shipB: true });
+    second.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)), { shipA: true, shipB: true });
     expect(first.states("shipA")[0].positions[0].dist(second.states("shipA")[0].positions[0])).toBeGreaterThan(0);
   });
 });

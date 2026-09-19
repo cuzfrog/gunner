@@ -28,7 +28,7 @@ export interface DroneSimulatorState {
 export interface DroneSimulator extends Restorable<DroneSimulatorState> {
   reset(config: DroneSimConfig): void;
   update(config: DroneSimConfig): void;
-  step(dt: number, frame: EngagementFrame): void;
+  step(dt: number, frame: EngagementFrame, operational: Record<Side, boolean>): void;
   states(side: Side): readonly DroneRuntimeState[];
 }
 
@@ -69,9 +69,9 @@ export class DroneSimulatorImpl implements DroneSimulator {
     };
   }
 
-  step(dt: number, frame: EngagementFrame): void {
-    stepSide(this.groups.shipA, frame.shipA.position, frame.shipB.position, frame.distance, dt);
-    stepSide(this.groups.shipB, frame.shipB.position, frame.shipA.position, frame.distance, dt);
+  step(dt: number, frame: EngagementFrame, operational: Record<Side, boolean>): void {
+    if (operational.shipA) stepSide(this.groups.shipA, frame.shipA.position, frame.shipB.position, frame.distance, dt);
+    if (operational.shipB) stepSide(this.groups.shipB, frame.shipB.position, frame.shipA.position, frame.distance, dt);
   }
 
   states(side: Side): readonly DroneRuntimeState[] {
