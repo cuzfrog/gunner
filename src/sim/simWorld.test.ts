@@ -3,6 +3,7 @@ import { SimWorldFactoryImpl } from "./simWorld";
 import { KinematicsImpl } from "./kinematics";
 import { MissileApplicationImpl } from "./missileApplication";
 import { Mulberry32RngFactory } from "./rng";
+import { StackingPenaltyImpl } from "./stackingPenalty";
 import { toTypeId } from "../gamedata/ids";
 import { ZERO_DAMAGE } from "./types";
 import { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
@@ -34,7 +35,7 @@ const ewarResolver = vi.mocked<Required<EwarResolver>>({
 });
 
 function makeFactory(): SimWorldFactoryImpl {
-  return new SimWorldFactoryImpl({ simConfig, ewarResolver, kinematics: new KinematicsImpl(), missileApplication: new MissileApplicationImpl(), rngFactory: new Mulberry32RngFactory() });
+  return new SimWorldFactoryImpl({ simConfig, ewarResolver, kinematics: new KinematicsImpl(), missileApplication: new MissileApplicationImpl(), rngFactory: new Mulberry32RngFactory(), stackingPenalty: new StackingPenaltyImpl() });
 }
 
 function shipState(id: "shipA" | "shipB"): ShipState {

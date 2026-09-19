@@ -80,6 +80,7 @@ function mockDefenseView(deadShipA = false, deadShipB = false): DefenseView {
     repairers: { shipA: [], shipB: [] },
     repairMode: { shipA: "auto", shipB: "auto" },
     rah: { shipA: undefined, shipB: undefined },
+    hardeners: { shipA: [], shipB: [] },
   };
 }
 

@@ -34,6 +34,7 @@ const emptyDefenseView: DefenseView = {
   repairers: { shipA: [], shipB: [] },
   repairMode: { shipA: "auto", shipB: "auto" },
   rah: { shipA: undefined, shipB: undefined },
+  hardeners: { shipA: [], shipB: [] },
 };
 
 const engineConfig: EngineConfig = {
@@ -45,6 +46,7 @@ const engineConfig: EngineConfig = {
     repairMode: { shipA: "auto", shipB: "auto" },
     repairerActivation: { shipA: [], shipB: [] },
     rahActivation: { shipA: undefined, shipB: undefined },
+    overloaded: { shipA: false, shipB: false },
   },
   overloaded: { shipA: false, shipB: false },
   capacitor: { shipA: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 }, shipB: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 } },

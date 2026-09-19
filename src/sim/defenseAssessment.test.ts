@@ -5,12 +5,17 @@ import { ZERO_DAMAGE } from "./types";
 const assessor = new DefenseAssessorImpl();
 
 function makeSpec(opts: { shieldHp?: number; armorHp?: number; hullHp?: number; shieldResistEm?: number; shieldResistThermal?: number; shieldRechargeTime?: number; repairShield?: number; repairCycle?: number; overloadAmount?: number; overloadCycle?: number }): DefenseSpec {
+  const shieldResists = { em: opts.shieldResistEm ?? 0, thermal: opts.shieldResistThermal ?? 0, kinetic: 0, explosive: 0 };
+  const armorResists = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
+  const hullResists = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
   return {
     layers: {
-      shield: { hp: opts.shieldHp ?? 1000, resists: { em: opts.shieldResistEm ?? 0, thermal: opts.shieldResistThermal ?? 0, kinetic: 0, explosive: 0 } },
-      armor: { hp: opts.armorHp ?? 1000, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
-      hull: { hp: opts.hullHp ?? 1000, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
+      shield: { hp: opts.shieldHp ?? 1000, resists: shieldResists },
+      armor: { hp: opts.armorHp ?? 1000, resists: armorResists },
+      hull: { hp: opts.hullHp ?? 1000, resists: hullResists },
     },
+    baseResists: { shield: shieldResists, armor: armorResists, hull: hullResists },
+    hardeners: [],
     shieldRechargeTime: opts.shieldRechargeTime ?? 100,
     repairers: opts.repairShield !== undefined && opts.repairCycle !== undefined
       ? [{ layer: "shield" as const, amount: opts.repairShield, cycleTime: opts.repairCycle, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: opts.overloadAmount ?? 1, cycleTimeMultiplier: opts.overloadCycle ?? 1 } }]

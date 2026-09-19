@@ -7,14 +7,14 @@ function stationaryHull(id: "shipA" | "shipB"): ShipConfig {
 }
 
 function tankedDefense(hp: number): DefenseSpec {
-  return { layers: { shield: { hp, resists: ZERO_RESISTS }, armor: { hp, resists: ZERO_RESISTS }, hull: { hp, resists: ZERO_RESISTS } }, shieldRechargeTime: 0, repairers: [], signaturePenalty: 0, shieldUniformity: 0.25 };
+  return { layers: { shield: { hp, resists: ZERO_RESISTS }, armor: { hp, resists: ZERO_RESISTS }, hull: { hp, resists: ZERO_RESISTS } }, baseResists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS }, hardeners: [], shieldRechargeTime: 0, repairers: [], signaturePenalty: 0, shieldUniformity: 0.25 };
 }
 
 function engineConfig(sim: SimConfig, shipAWeapons: EngineConfig["weapons"]["shipA"], capacitor?: EngineConfig["capacitor"]): EngineConfig {
   return {
     sim,
     weapons: { shipA: shipAWeapons, shipB: [] },
-    defense: { shipA: tankedDefense(1_000_000), shipB: tankedDefense(1_000_000), damageEnabled: { shipA: true, shipB: true }, repairMode: { shipA: "auto", shipB: "auto" }, repairerActivation: { shipA: [], shipB: [] }, rahActivation: { shipA: undefined, shipB: undefined } },
+    defense: { shipA: tankedDefense(1_000_000), shipB: tankedDefense(1_000_000), damageEnabled: { shipA: true, shipB: true }, repairMode: { shipA: "auto", shipB: "auto" }, repairerActivation: { shipA: [], shipB: [] }, rahActivation: { shipA: undefined, shipB: undefined }, overloaded: { shipA: false, shipB: false } },
     overloaded: { shipA: false, shipB: false },
     capacitor: capacitor ?? { shipA: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 }, shipB: { infinite: false, drains: [], boosters: [], fittedDrainPerSecond: 0, weaponsDrainPerSecond: 0 } },
   };

@@ -58,6 +58,12 @@ function defenseSpecWithPenalty(penalty: number): DefenseSpec {
       armor: { hp: 800, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
       hull: { hp: 600, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
     },
+    baseResists: {
+      shield: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+      armor: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+      hull: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+    },
+    hardeners: [],
     shieldRechargeTime: 100,
     repairers: [],
     signaturePenalty: penalty,
@@ -125,6 +131,12 @@ describe("DefenseControllerImpl EHP and repairer HP/s", () => {
         armor: { hp: 800, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
         hull: { hp: 600, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
       },
+      baseResists: {
+        shield: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+        armor: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+        hull: { em: 0, thermal: 0, kinetic: 0, explosive: 0 },
+      },
+      hardeners: [],
       shieldRechargeTime: 100,
       repairers: [{
         layer: "armor",
@@ -255,10 +267,13 @@ describe("DefenseControllerImpl starved indication", () => {
     armor: { hp: 800, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
     hull: { hp: 600, resists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 } },
   };
+  const baseResists = { shield: baseLayers.shield.resists, armor: baseLayers.armor.resists, hull: baseLayers.hull.resists };
 
   function repairerSpec(): DefenseSpec {
     return {
       layers: baseLayers,
+      baseResists,
+      hardeners: [],
       shieldRechargeTime: 100,
       repairers: [{ layer: "armor", amount: 100, cycleTime: 4, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1.5, cycleTimeMultiplier: 0.75 } }],
       signaturePenalty: 0,
@@ -269,11 +284,13 @@ describe("DefenseControllerImpl starved indication", () => {
   function rahSpec(): DefenseSpec {
     return {
       layers: baseLayers,
+      baseResists,
+      hardeners: [],
       shieldRechargeTime: 100,
       repairers: [],
       signaturePenalty: 0,
       shieldUniformity: 0.25,
-      rah: { cycleTime: 9, shiftAmount: 0.3, baseResists: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, overloadCycleTimeMultiplier: 1, armorResistsWithoutRah: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, capacitorNeed: 42 },
+      rah: { cycleTime: 9, shiftAmount: 0.3, baseResists: { em: 0.5, thermal: 0.5, kinetic: 0.5, explosive: 0.5 }, overloadCycleTimeMultiplier: 1, capacitorNeed: 42 },
     };
   }
 

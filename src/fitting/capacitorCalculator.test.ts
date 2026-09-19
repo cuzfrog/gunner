@@ -274,6 +274,17 @@ describe("capacitorCalculator", () => {
     expect(row?.cycleTime).toBeCloseTo(10, 3);
   });
 
+  test("active hardeners produce usage rows from the resolved defense spec", () => {
+    const result = resolve([moduleEntry("EM Shield Hardener II")]);
+    const row = result.rows.find((candidate) => candidate.moduleName === "EM Shield Hardener II");
+    expect(row).toBeDefined();
+    expect(row?.amount).toBeCloseTo(20, 3);
+    expect(row?.cycleTime).toBeCloseTo(10, 3);
+    expect(row?.count).toBe(1);
+    const withoutHardener = resolve([]);
+    expect(result.usagePerSecond).toBeCloseTo(withoutHardener.usagePerSecond + 2, 3);
+  });
+
   test("ewar loadout drains produce usage rows", () => {
     const result = resolve([moduleEntry("Stasis Webifier II")], emptyConditions, [], { ewar: { ...EMPTY_EWAR_LOADOUT, webs: [webSpec("Stasis Webifier II")] } });
     const row = result.rows.find((candidate) => candidate.moduleName === "Stasis Webifier II");

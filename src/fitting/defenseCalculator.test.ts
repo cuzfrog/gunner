@@ -125,6 +125,41 @@ describe("DefenseCalculatorImpl", () => {
     expect(spec.layers.shield.resists.em).toBeCloseTo(0.55, 5);
   });
 
+  test("active hardeners are listed with cycle cost and un-overloaded bonus", () => {
+    const spec = resolve([moduleEntry("EM Shield Hardener II")]);
+    expect(spec.hardeners).toHaveLength(1);
+    const hardener = spec.hardeners[0]!;
+    expect(hardener.moduleId).toBe(moduleEntry("EM Shield Hardener II").moduleId);
+    expect(hardener.layer).toBe("shield");
+    expect(hardener.resistBonus.em).toBeCloseTo(0.55, 5);
+    expect(hardener.resistBonus.thermal).toBe(0);
+    expect(hardener.overloadBonusMultiplier).toBeCloseTo(1.2, 5);
+    expect(hardener.capacitorNeed).toBe(20);
+    expect(hardener.cycleTime).toBe(10);
+  });
+
+  test("layer resists are the all-on composition of base resists and hardeners", () => {
+    const spec = resolve([moduleEntry("EM Shield Hardener II")]);
+    const base = spec.baseResists.shield.em;
+    expect(spec.layers.shield.resists.em).toBeCloseTo(1 - (1 - base) * (1 - 0.55), 5);
+    expect(spec.layers.shield.resists.em).toBeGreaterThan(base);
+  });
+
+  test("base resists exclude active hardeners but keep passive coatings", () => {
+    const bare = resolve([]);
+    expect(bare.hardeners).toEqual([]);
+    expect(bare.baseResists.shield.em).toBeCloseTo(bare.layers.shield.resists.em, 6);
+    expect(bare.baseResists.armor.em).toBeCloseTo(bare.layers.armor.resists.em, 6);
+    const withCoating = resolve([moduleEntry("EM Coating II")]);
+    expect(withCoating.hardeners).toEqual([]);
+    expect(withCoating.baseResists.armor.em).toBeCloseTo(withCoating.layers.armor.resists.em, 6);
+    expect(withCoating.baseResists.armor.em).toBeGreaterThan(bare.baseResists.armor.em);
+    const withHardener = resolve([moduleEntry("EM Coating II"), moduleEntry("EM Shield Hardener II")]);
+    expect(withHardener.hardeners).toHaveLength(1);
+    expect(withHardener.baseResists.armor.em).toBeCloseTo(withCoating.baseResists.armor.em, 6);
+    expect(withHardener.layers.shield.resists.em).toBeGreaterThan(withHardener.baseResists.shield.em);
+  });
+
   test("two hardeners are stacking-penalized", () => {
     const one = resolve([moduleEntry("EM Shield Hardener II")]);
     const two = resolve([moduleEntry("EM Shield Hardener II"), moduleEntry("EM Shield Amplifier II")]);
@@ -262,7 +297,7 @@ describe("DefenseCalculatorImpl", () => {
     expect(eanmPlusRah.rah?.shiftAmount).toBeCloseTo(0.06, 5);
     expect(eanmPlusRah.rah?.cycleTime).toBeGreaterThan(0);
     expect(eanmPlusRah.rah?.capacitorNeed).toBeCloseTo(42, 5);
-    expect(eanmPlusRah.rah?.armorResistsWithoutRah.em).toBeCloseTo(eanmOnly.layers.armor.resists.em, 5);
+    expect(eanmPlusRah.baseResists.armor.em).toBeCloseTo(eanmOnly.layers.armor.resists.em, 5);
   });
 
   test("RAH cycle time is reduced by Armor Resistance Phasing skill", () => {
