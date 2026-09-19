@@ -41,11 +41,13 @@ import type { MissileCatalog } from "./missileCatalog";
 import type { MissileSkillModel, MissileSkillOutput } from "./missileStats";
 import type { DroneCatalog, ImportedDrone } from "./droneCatalog";
 import type { DroneSkillModel } from "./droneStats";
+import type { FighterSkillModel } from "./fighterStats";
+import type { ImportedFighter, ImportedFighterAttack } from "./fighterCatalog";
 import { sigResolutionClassFromChargeSize, toTrackingRadPerSecond } from "./turretStats";
 import type { FittingState, FittedModule } from "./fittingState";
 import type { ItemNameCatalog } from "../gamedata/itemNames";
 import { moduleSkillMultiplier, applyRigDrawbackReduction } from "./skillMultiplier";
-import { type DamageBreakdown, type DamageFactor, chargeDamageByType, droneDamageByType, missileDamageByType } from "./damageBreakdown";
+import { EMPTY_DAMAGE_BREAKDOWN, type DamageBreakdown, type DamageFactor, chargeDamageByType, droneDamageByType, missileDamageByType } from "./damageBreakdown";
 
 export interface PropulsionResult extends PropulsionStats {
   readonly propulsionId: PropulsionId;
@@ -70,6 +72,7 @@ export interface FittingCalculator {
   resolveSensorBoosts(fitting: FittingState, conditions: StatConditions): SensorBoostLoadout;
   resolveSensorSpec(fitting: FittingState, conditions: StatConditions): SensorSpec;
   resolveDrones(fitting: FittingState, conditions: StatConditions): readonly ImportedDrone[];
+  resolveFighters(fitting: FittingState, conditions: StatConditions): readonly ImportedFighter[];
   resolveCargoCharges(fitting: FittingState): readonly { id: TypeId; quantity: number }[];
 }
 
@@ -82,6 +85,7 @@ interface FittingCalculatorDeps {
   readonly missileSkillModel: MissileSkillModel;
   readonly droneCatalog: DroneCatalog;
   readonly droneSkillModel: DroneSkillModel;
+  readonly fighterSkillModel: FighterSkillModel;
   readonly stackingPenalty: StackingPenalty;
   readonly itemNameCatalog: ItemNameCatalog;
 }
@@ -95,6 +99,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
   private readonly missileSkillModel: MissileSkillModel;
   private readonly droneCatalog: DroneCatalog;
   private readonly droneSkillModel: DroneSkillModel;
+  private readonly fighterSkillModel: FighterSkillModel;
   private readonly stacking: StackingPenalty;
   private readonly itemNameCatalog: ItemNameCatalog;
 
@@ -107,6 +112,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
     this.missileSkillModel = deps.missileSkillModel;
     this.droneCatalog = deps.droneCatalog;
     this.droneSkillModel = deps.droneSkillModel;
+    this.fighterSkillModel = deps.fighterSkillModel;
     this.stacking = deps.stackingPenalty;
     this.itemNameCatalog = deps.itemNameCatalog;
   }
@@ -587,6 +593,78 @@ export class FittingCalculatorImpl implements FittingCalculator {
     return result;
   }
 
+  resolveFighters(fitting: FittingState, conditions: StatConditions): readonly ImportedFighter[] {
+    if (fitting.fighterGroups.length === 0) return [];
+
+    const otlOptimalPercents: number[] = [];
+    const otlFalloffPercents: number[] = [];
+    const aoeVelocityPercents: number[] = [];
+    const aoeCloudSizePercents: number[] = [];
+    for (const mod of fitting.droneBoosterModules) {
+      const otlStats = this.db.omnidirectionalTrackingLinks[mod.moduleId];
+      if (otlStats) {
+        otlOptimalPercents.push(otlStats.optimalBonusPercent);
+        otlFalloffPercents.push(otlStats.falloffBonusPercent);
+        aoeVelocityPercents.push(otlStats.aoeVelocityBonusPercent);
+        aoeCloudSizePercents.push(otlStats.aoeCloudSizeBonusPercent);
+        continue;
+      }
+      const oteStats = this.db.omnidirectionalTrackingEnhancers[mod.moduleId];
+      if (oteStats) {
+        otlOptimalPercents.push(oteStats.optimalBonusPercent);
+        otlFalloffPercents.push(oteStats.falloffBonusPercent);
+        aoeVelocityPercents.push(oteStats.aoeVelocityBonusPercent);
+        aoeCloudSizePercents.push(oteStats.aoeCloudSizeBonusPercent);
+      }
+    }
+
+    const optimalBonus = this.stacking.apply(otlOptimalPercents.map((p) => 1 + p / 100));
+    const falloffBonus = this.stacking.apply(otlFalloffPercents.map((p) => 1 + p / 100));
+    const aoeVelocityMultiplier = this.stacking.apply(aoeVelocityPercents.map((p) => 1 + p / 100));
+    const aoeCloudSizeMultiplier = this.stacking.apply(aoeCloudSizePercents.map((p) => 1 + p / 100));
+
+    const result: ImportedFighter[] = [];
+    for (const group of fitting.fighterGroups) {
+      const stats = this.db.fighters[group.typeId];
+      if (!stats) continue;
+      const skillOutput = this.fighterSkillModel.compute(stats, fitting.hullBonuses, conditions.skillLevel);
+      const attack: ImportedFighterAttack | undefined = stats.attack
+        ? {
+            damageMultiplier: skillOutput.damageMultiplier,
+            emDamage: stats.attack.emDamage,
+            thermalDamage: stats.attack.thermalDamage,
+            kineticDamage: stats.attack.kineticDamage,
+            explosiveDamage: stats.attack.explosiveDamage,
+            cycleTime: stats.attack.cycleTime,
+            explosionRadius: stats.attack.explosionRadius * aoeCloudSizeMultiplier,
+            explosionVelocity: stats.attack.explosionVelocity * aoeVelocityMultiplier,
+            optimal: stats.attack.optimal * skillOutput.optimalMultiplier * optimalBonus,
+            falloff: stats.attack.falloff * falloffBonus,
+            damageReductionFactor: stats.attack.damageReductionFactor,
+            damageReductionSensitivity: stats.attack.damageReductionSensitivity,
+            numShots: stats.attack.numShots,
+            rearmTime: stats.attack.rearmTime,
+          }
+        : undefined;
+      const factors = buildFighterDamageFactors(skillOutput.skillDamageMultiplier, skillOutput.skillDamageIds, skillOutput.hullDamageMultiplier, fitting.profile.name);
+      result.push({
+        typeId: group.typeId,
+        name: stats.name,
+        kind: stats.kind,
+        count: group.count,
+        squadronMaxSize: stats.squadronMaxSize,
+        maxVelocity: skillOutput.maxVelocity,
+        orbitRange: stats.orbitRange,
+        signatureRadius: stats.signatureRadius,
+        refuelingTime: stats.refuelingTime,
+        volume: stats.volume,
+        ...(attack ? { attack } : {}),
+        damageBreakdown: attack ? { damageByType: fighterDamageByType(stats.attack), factors } : EMPTY_DAMAGE_BREAKDOWN,
+      });
+    }
+    return result;
+  }
+
   resolveCargoCharges(fitting: FittingState): readonly { id: TypeId; quantity: number }[] {
     const charges: { id: TypeId; quantity: number }[] = [];
     for (const item of fitting.cargo) {
@@ -826,6 +904,22 @@ function buildDroneDamageFactors(baseMultiplier: number, moduleDamageBonus: numb
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
   for (const subsystem of subsystemDamageMultipliers) factors.push({ kind: "subsystem", multiplier: subsystem.multiplier, moduleIds: [subsystem.sourceId] });
   return factors;
+}
+
+function buildFighterDamageFactors(skillDamageMultiplier: number, skillDamageIds: readonly TypeId[], hullDamageMultiplier: number, hullName: string): readonly DamageFactor[] {
+  const factors: DamageFactor[] = [{ kind: "base", multiplier: 1 }];
+  if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillIds: skillDamageIds });
+  if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
+  return factors;
+}
+
+function fighterDamageByType(attack: { readonly emDamage: number; readonly thermalDamage: number; readonly kineticDamage: number; readonly explosiveDamage: number } | undefined): Readonly<Partial<Record<DamageType, number>>> {
+  const result: Partial<Record<DamageType, number>> = {};
+  if (attack?.emDamage) result.em = attack.emDamage;
+  if (attack?.thermalDamage) result.thermal = attack.thermalDamage;
+  if (attack?.kineticDamage) result.kinetic = attack.kineticDamage;
+  if (attack?.explosiveDamage) result.explosive = attack.explosiveDamage;
+  return result;
 }
 
 interface SubsystemDamageMultiplier {

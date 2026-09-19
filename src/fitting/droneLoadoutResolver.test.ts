@@ -95,6 +95,7 @@ function mockCalculator(): FittingCalculator {
     resolveDrones: vi.fn((fitting: FittingState, _conditions: StatConditions): readonly ImportedDrone[] => {
       return fitting.droneGroups.map((g) => makeImportedDrone(String(g.typeId), g.count));
     }),
+    resolveFighters: vi.fn(() => []),
     resolveCargoCharges: vi.fn(() => []),
     resolveEnergyWarfareResistance: vi.fn(() => 0),
   };

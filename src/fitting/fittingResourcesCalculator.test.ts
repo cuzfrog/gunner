@@ -96,6 +96,7 @@ function fittingState(overrides: Partial<FittingState> = {}): FittingState {
     sensorAmplifierModules: [],
     commandBurstModules: [],
     droneGroups: [],
+    fighterGroups: [],
     drones: [],
     cargo: [],
     ...overrides,

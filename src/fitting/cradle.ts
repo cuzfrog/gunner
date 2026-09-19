@@ -1,5 +1,5 @@
 import type { GameDataCradle } from "../gamedata";
-import type { ChargeCatalog, DefenseCalculator, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, DroneSkillModel, FittingCalculator, FittingImport, GunFamilies, LauncherClasses, MissileCatalog, MissileSkillModel, PresetFittings } from "./index";
+import type { ChargeCatalog, DefenseCalculator, DroneCatalog, DroneLoadoutResolver, DroneLoadoutValidator, DroneSkillModel, FighterCatalog, FighterLoadoutValidator, FighterSkillModel, FittingCalculator, FittingImport, GunFamilies, LauncherClasses, MissileCatalog, MissileSkillModel, PresetFittings } from "./index";
 import type { Ships } from "../ships";
 import type { StackingPenalty } from "../sim";
 
@@ -10,6 +10,9 @@ export interface FittingCradle extends GameDataCradle {
   readonly droneLoadoutResolver: DroneLoadoutResolver;
   readonly droneLoadoutValidator: DroneLoadoutValidator;
   readonly droneSkillModel: DroneSkillModel;
+  readonly fighterCatalog: FighterCatalog;
+  readonly fighterLoadoutValidator: FighterLoadoutValidator;
+  readonly fighterSkillModel: FighterSkillModel;
   readonly fittingCalculator: FittingCalculator;
   readonly fittingImport: FittingImport;
   readonly gunFamilies: GunFamilies;

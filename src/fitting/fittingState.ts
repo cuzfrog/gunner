@@ -1,6 +1,7 @@
 import type { TypeId } from "../gamedata/ids";
 import type { FittingDb, HullBonus } from "../gamedata/fittingDb";
 import type { ShipProfile } from "../ships";
+import type { FighterGroup } from "./fighterCatalog";
 
 export interface FittedModule {
   readonly moduleId: TypeId;
@@ -46,6 +47,7 @@ export interface FittingState {
   readonly sensorAmplifierModules: readonly FittedModule[];
   readonly commandBurstModules: readonly FittedModule[];
   readonly droneGroups: readonly DroneGroup[];
+  readonly fighterGroups: readonly FighterGroup[];
   readonly drones: readonly CargoEntry[];
   readonly cargo: readonly CargoEntry[];
 }
@@ -59,7 +61,7 @@ export interface FittingModuleEntry {
 export class FittingStateFactory {
   constructor(private readonly db: FittingDb) {}
 
-  create(profile: ShipProfile, hullBonuses: readonly HullBonus[], modules: readonly FittingModuleEntry[], drones: readonly CargoEntry[], cargo: readonly CargoEntry[]): FittingState {
+  create(profile: ShipProfile, hullBonuses: readonly HullBonus[], modules: readonly FittingModuleEntry[], drones: readonly CargoEntry[], fighters: readonly CargoEntry[], cargo: readonly CargoEntry[]): FittingState {
     const turretCounts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
     const launcherCounts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
     const supportModules: FittedModule[] = [];
@@ -174,6 +176,18 @@ export class FittingStateFactory {
       }
     }
 
+    const fighterCounts = new Map<TypeId, { count: number; order: number }>();
+    let fighterOrder = 0;
+    for (const entry of fighters) {
+      if (!this.db.fighters[entry.id]) continue;
+      const existing = fighterCounts.get(entry.id);
+      if (existing) {
+        existing.count += entry.quantity;
+      } else {
+        fighterCounts.set(entry.id, { count: entry.quantity, order: fighterOrder++ });
+      }
+    }
+
     return {
       profile,
       hullBonuses: mergedHullBonuses,
@@ -190,6 +204,7 @@ export class FittingStateFactory {
       sensorAmplifierModules,
       commandBurstModules,
       droneGroups: [...droneCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([typeId, e]) => ({ typeId, count: e.count })),
+      fighterGroups: [...fighterCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([typeId, e]) => ({ typeId, count: e.count })),
       drones,
       cargo,
     };

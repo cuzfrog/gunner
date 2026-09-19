@@ -71,6 +71,15 @@ function cargo(name: string, quantity: number): CargoEntry {
   return { id: chargeId(name), quantity };
 }
 
+function fighterTypeId(name: string): TypeId {
+  for (const stats of Object.values(FITTING_DB.fighters)) if (stats.name === name) return stats.id;
+  throw new Error(`Fighter not found: ${name}`);
+}
+
+function fighterEntry(name: string, quantity: number): CargoEntry {
+  return { id: fighterTypeId(name), quantity };
+}
+
 describe("FittingStateFactory", () => {
   test("categorizes turret modules into turret groups with count and charge", () => {
     const factory = new FittingStateFactory(FITTING_DB);
@@ -78,7 +87,7 @@ describe("FittingStateFactory", () => {
       entry("Heavy Pulse Laser II", "Conflagration M"),
       entry("Heavy Pulse Laser II", "Conflagration M"),
       entry("Heavy Pulse Laser II", "Conflagration M"),
-    ], [], []);
+    ], [], [], []);
     expect(state.turretGroups.length).toBe(1);
     expect(state.turretGroups[0].moduleId).toBe(moduleId("Heavy Pulse Laser II"));
     expect(state.turretGroups[0].count).toBe(3);
@@ -90,7 +99,7 @@ describe("FittingStateFactory", () => {
     const state = factory.create(profile, hullBonuses, [
       entry("Heavy Missile Launcher II", "Scourge Heavy Missile"),
       entry("Heavy Missile Launcher II"),
-    ], [], []);
+    ], [], [], []);
     expect(state.launcherGroups.length).toBe(1);
     expect(state.launcherGroups[0].count).toBe(2);
   });
@@ -102,7 +111,7 @@ describe("FittingStateFactory", () => {
       entry("Heat Sink II"),
       entry("Heat Sink II"),
       entry("1600mm Steel Plates I"),
-    ], [], []);
+    ], [], [], []);
     expect(state.turretGroups.length).toBe(1);
     expect(state.supportModules.length).toBe(2);
     expect(state.defenseModules.length).toBe(1);
@@ -115,7 +124,7 @@ describe("FittingStateFactory", () => {
     const state = factory.create(profile, hullBonuses, [
       entry("100MN Y-S8 Compact Afterburner"),
       entry("Heat Sink II"),
-    ], [], []);
+    ], [], [], []);
     expect(state.propulsionModule).toBeDefined();
     expect(state.propulsionModule!.moduleId).toBe(moduleId("100MN Y-S8 Compact Afterburner"));
   });
@@ -125,7 +134,7 @@ describe("FittingStateFactory", () => {
     const state = factory.create(profile, hullBonuses, [
       entry("Fleeting Compact Stasis Webifier"),
       entry("Heat Sink II"),
-    ], [], []);
+    ], [], [], []);
     expect(state.ewarModules.length).toBe(1);
     expect(state.ewarModules[0].moduleId).toBe(moduleId("Fleeting Compact Stasis Webifier"));
     expect(state.supportModules.length).toBe(1);
@@ -136,7 +145,7 @@ describe("FittingStateFactory", () => {
     const state = factory.create(profile, hullBonuses, [
       entry("Tracking Computer I", "Tracking Speed Script"),
       entry("Heat Sink II"),
-    ], [], []);
+    ], [], [], []);
     expect(state.boosterModules.length).toBe(1);
     expect(state.boosterModules[0].moduleId).toBe(moduleId("Tracking Computer I"));
     expect(state.boosterModules[0].chargeId).toBe(chargeId("Tracking Speed Script"));
@@ -148,7 +157,7 @@ describe("FittingStateFactory", () => {
     const state = factory.create(profile, hullBonuses, [
       entry("Target Painter II"),
       entry("Heat Sink II"),
-    ], [], []);
+    ], [], [], []);
     expect(state.ewarModules.length).toBe(1);
     expect(state.ewarModules[0].moduleId).toBe(moduleId("Target Painter II"));
     expect(state.supportModules.length).toBe(1);
@@ -160,7 +169,7 @@ describe("FittingStateFactory", () => {
       entry("Heavy Energy Neutralizer II"),
       entry("Medium Energy Nosferatu II"),
       entry("Heat Sink II"),
-    ], [], []);
+    ], [], [], []);
     expect(state.ewarModules.length).toBe(2);
     expect(state.ewarModules[0].moduleId).toBe(moduleId("Heavy Energy Neutralizer II"));
     expect(state.ewarModules[1].moduleId).toBe(moduleId("Medium Energy Nosferatu II"));
@@ -172,7 +181,7 @@ describe("FittingStateFactory", () => {
     const state = factory.create(profile, hullBonuses, [
       entry("Missile Guidance Computer II", "Missile Precision Script"),
       entry("Heat Sink II"),
-    ], [], []);
+    ], [], [], []);
     expect(state.missileBoosterModules.length).toBe(1);
     expect(state.missileBoosterModules[0].moduleId).toBe(moduleId("Missile Guidance Computer II"));
     expect(state.missileBoosterModules[0].chargeId).toBe(chargeId("Missile Precision Script"));
@@ -184,7 +193,7 @@ describe("FittingStateFactory", () => {
     const state = factory.create(profile, hullBonuses, [
       entry("Missile Guidance Enhancer II"),
       entry("Heat Sink II"),
-    ], [], []);
+    ], [], [], []);
     expect(state.missileBoosterModules.length).toBe(1);
     expect(state.missileBoosterModules[0].moduleId).toBe(moduleId("Missile Guidance Enhancer II"));
     expect(state.supportModules.length).toBe(1);
@@ -194,14 +203,31 @@ describe("FittingStateFactory", () => {
     const factory = new FittingStateFactory(FITTING_DB);
     const drones = [cargo("Infiltrator I", 5)];
     const cargoItems = [cargo("Scorch M", 6), cargo("Conflagration M", 6)];
-    const state = factory.create(profile, hullBonuses, [], drones, cargoItems);
+    const state = factory.create(profile, hullBonuses, [], drones, [], cargoItems);
     expect(state.drones).toEqual(drones);
     expect(state.cargo).toEqual(cargoItems);
   });
 
+  test("groups fighter entries into fighter groups ordered by fighter count", () => {
+    const factory = new FittingStateFactory(FITTING_DB);
+    const fighters = [fighterEntry("Templar I", 6), fighterEntry("Templar I", 6), fighterEntry("Cenobite I", 3)];
+    const state = factory.create(profile, hullBonuses, [], [], fighters, []);
+    expect(state.fighterGroups).toEqual([
+      { typeId: fighterTypeId("Templar I"), count: 12 },
+      { typeId: fighterTypeId("Cenobite I"), count: 3 },
+    ]);
+  });
+
+  test("drops unknown fighter entries from fighter groups", () => {
+    const factory = new FittingStateFactory(FITTING_DB);
+    const fighters = [cargo("Navy Cap Booster 800", 5)];
+    const state = factory.create(profile, hullBonuses, [], [], fighters, []);
+    expect(state.fighterGroups).toEqual([]);
+  });
+
   test("carries hull bonuses and profile", () => {
     const factory = new FittingStateFactory(FITTING_DB);
-    const state = factory.create(profile, hullBonuses, [], [], []);
+    const state = factory.create(profile, hullBonuses, [], [], [], []);
     expect(state.profile).toBe(profile);
     expect(state.hullBonuses).toEqual(hullBonuses);
   });
@@ -210,26 +236,26 @@ describe("FittingStateFactory", () => {
     const factory = new FittingStateFactory(FITTING_DB);
     const subsystemBonuses = FITTING_DB.subsystemBonuses["45601"] ?? [];
     expect(subsystemBonuses.length).toBeGreaterThan(0);
-    const state = factory.create(profile, hullBonuses, [{ moduleId: toTypeId("45601"), offline: false }], [], []);
+    const state = factory.create(profile, hullBonuses, [{ moduleId: toTypeId("45601"), offline: false }], [], [], []);
     expect(state.hullBonuses).toEqual([...hullBonuses, ...subsystemBonuses]);
   });
 
   test("routes command bursts into their own bucket and keeps the loaded charge", () => {
     const factory = new FittingStateFactory(FITTING_DB);
-    const state = factory.create(profile, hullBonuses, [entry("Armor Command Burst II", "Armor Energizing Charge")], [], []);
+    const state = factory.create(profile, hullBonuses, [entry("Armor Command Burst II", "Armor Energizing Charge")], [], [], []);
     expect(state.commandBurstModules.length).toBe(1);
     expect(state.commandBurstModules[0].chargeId).toBe(chargeId("Armor Energizing Charge"));
   });
 
   test("offline command bursts do not enter the bucket", () => {
     const factory = new FittingStateFactory(FITTING_DB);
-    const state = factory.create(profile, hullBonuses, [entry("Armor Command Burst II", undefined, true)], [], []);
+    const state = factory.create(profile, hullBonuses, [entry("Armor Command Burst II", undefined, true)], [], [], []);
     expect(state.commandBurstModules.length).toBe(0);
   });
 
   test("skips offline subsystem bonuses", () => {
     const factory = new FittingStateFactory(FITTING_DB);
-    const state = factory.create(profile, hullBonuses, [{ moduleId: toTypeId("45601"), offline: true }], [], []);
+    const state = factory.create(profile, hullBonuses, [{ moduleId: toTypeId("45601"), offline: true }], [], [], []);
     expect(state.hullBonuses).toEqual(hullBonuses);
   });
 
@@ -238,7 +264,7 @@ describe("FittingStateFactory", () => {
     const state = factory.create(profile, hullBonuses, [
       entry("Heavy Pulse Laser II", "Conflagration M"),
       entry("Heavy Pulse Laser II", "Conflagration M", true),
-    ], [], []);
+    ], [], [], []);
     expect(state.turretGroups[0].count).toBe(1);
   });
 
@@ -248,7 +274,7 @@ describe("FittingStateFactory", () => {
       entry("Heavy Pulse Laser II", "Conflagration M"),
       entry("Heavy Pulse Laser II", "Conflagration M"),
       entry("Focused Medium Pulse Laser II", "Scorch M"),
-    ], [], []);
+    ], [], [], []);
     expect(state.turretGroups.length).toBe(2);
     const hpl2 = state.turretGroups.find((g) => g.moduleId === moduleId("Heavy Pulse Laser II"));
     const fmpl2 = state.turretGroups.find((g) => g.moduleId === moduleId("Focused Medium Pulse Laser II"));
