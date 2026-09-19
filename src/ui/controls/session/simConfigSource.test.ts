@@ -10,6 +10,7 @@ import type { SensorBoosterController } from "../sensorBooster";
 import type { DefenseController } from "../defense";
 import type { CapacitorController } from "../capacitor";
 import type { DroneController } from "../drone";
+import type { FighterController } from "../fighter";
 import type { LauncherController } from "../launcher";
 import type { TurretController } from "../turret";
 import type { WeaponSystemSwitch } from "../sidePanel";
@@ -140,6 +141,10 @@ function build() {
     shipA: { currentDroneSpecs: vi.fn(() => []) } as unknown as DroneController,
     shipB: { currentDroneSpecs: vi.fn(() => []) } as unknown as DroneController,
   };
+  const fighterControllers = {
+    shipA: { currentFighterSpecs: vi.fn(() => []) } as unknown as FighterController,
+    shipB: { currentFighterSpecs: vi.fn(() => []) } as unknown as FighterController,
+  };
   const defenseController = {
     spec: vi.fn(() => EMPTY_DEFENSE_SPEC),
     damageEnabled: vi.fn(() => true),
@@ -152,7 +157,7 @@ function build() {
     capBoosterSpecs: vi.fn(() => []),
   } as unknown as CapacitorController;
   const capacitorStatsSource = { stats: vi.fn((_side: "shipA" | "shipB") => undefined as CapacitorStats | undefined), commandBursts: vi.fn((_side: "shipA" | "shipB") => [] as readonly CommandBurstSpec[]) } as unknown as CapacitorStatsSource & { stats: ReturnType<typeof vi.fn> };
-  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, defenseController, capacitorController, capacitorStatsSource, turretSpec, missileSpec };
+  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, fighterControllers, defenseController, capacitorController, capacitorStatsSource, turretSpec, missileSpec };
 }
 
 function makeSource(deps: ReturnType<typeof build>) {
@@ -168,6 +173,7 @@ function makeSource(deps: ReturnType<typeof build>) {
     turretControllers: deps.turretControllers,
     launcherControllers: deps.launcherControllers,
     droneControllers: deps.droneControllers,
+    fighterControllers: deps.fighterControllers,
     defenseController: deps.defenseController,
     capacitorController: deps.capacitorController,
     capacitorStatsSource: deps.capacitorStatsSource,

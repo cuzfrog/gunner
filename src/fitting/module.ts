@@ -3,6 +3,7 @@ import { ChargeCatalogImpl } from "./chargeCatalog";
 import { DefenseCalculatorImpl } from "./defenseCalculator";
 import { DroneCatalogImpl } from "./droneCatalog";
 import { DroneLoadoutResolverImpl } from "./droneLoadoutResolver";
+import { FighterLoadoutResolverImpl } from "./fighterLoadoutResolver";
 import { DroneLoadoutValidatorImpl } from "./droneLoadoutValidator";
 import { DroneSkillModelImpl } from "./droneStats";
 import { FighterCatalogImpl } from "./fighterCatalog";
@@ -23,6 +24,7 @@ export function registerFittingModule<T extends FittingCradle>(cradle: AwilixCon
     defenseCalculator: asClass(DefenseCalculatorImpl).singleton(),
     droneCatalog: asClass(DroneCatalogImpl).singleton(),
     droneLoadoutResolver: asClass(DroneLoadoutResolverImpl).singleton(),
+    fighterLoadoutResolver: asClass(FighterLoadoutResolverImpl).singleton(),
     droneLoadoutValidator: asClass(DroneLoadoutValidatorImpl).singleton(),
     droneSkillModel: asClass(DroneSkillModelImpl).singleton(),
     fighterCatalog: asClass(FighterCatalogImpl).singleton(),

@@ -1,7 +1,7 @@
 import type { AutopilotMode, CapacitorSpec, SigResolutionClass, WeaponKind } from "../sim";
 import type { DefenseSkills, FittedHull, PropulsionId, PropulsionKind, PropulsionStats, SkillLevel, TargetingSkills } from "../ships";
 import type { ShipId, TypeId } from "../gamedata/ids";
-import type { DroneGroup } from "../fitting";
+import type { DroneGroup, FighterGroup } from "../fitting";
 import type { Language } from "./language";
 
 export const USER_SETTINGS_VERSION = 15 as const;
@@ -182,6 +182,8 @@ export interface UserSettings {
   shipBMissileAmmo?: TypeId;
   shipADroneGroups?: readonly DroneGroup[];
   shipBDroneGroups?: readonly DroneGroup[];
+  shipAFighterGroups?: readonly FighterGroup[];
+  shipBFighterGroups?: readonly FighterGroup[];
   simSpeed: number;
   language: Language;
 }

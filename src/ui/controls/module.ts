@@ -14,6 +14,7 @@ import { registerImportModule, type ImportController } from "./import";
 import { registerExportModule } from "./export";
 import { registerLauncherModule } from "./launcher";
 import { registerDroneModule } from "./drone";
+import { registerFighterModule } from "./fighter";
 import { registerPopupModule } from "./popup";
 import { registerPreferencesModule } from "./preferences";
 import { registerProfileModule } from "./profile";
@@ -41,6 +42,7 @@ import { registerInflictedDpsHintModule, wireInflictedDpsHintProvider } from "./
 import { registerShipHintModule, wireShipHintProvider } from "./shipHint";
 import { registerStatHintModule } from "./statHint";
 import { registerDroneHintModule, wireDroneHintProvider } from "./droneHint";
+import { registerFighterHintModule, wireFighterHintProvider } from "./fighterHint";
 import { registerModuleHintModule, wireModuleHintProvider } from "./moduleHint";
 
 export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
@@ -55,6 +57,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerTurretModule(cradle);
   registerLauncherModule(cradle);
   registerDroneModule(cradle);
+  registerFighterModule(cradle);
   registerSidePanelModule(cradle);
   registerModulesPopupModule(cradle);
   registerEwarModule(cradle);
@@ -85,6 +88,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerInflictedDpsHintModule(cradle);
   registerShipHintModule(cradle);
   registerDroneHintModule(cradle);
+  registerFighterHintModule(cradle);
   registerModuleHintModule(cradle);
   wire(cradle);
 }
@@ -97,6 +101,7 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   wireInflictedDpsHintProvider(cradle);
   wireShipHintProvider(cradle);
   wireDroneHintProvider(cradle);
+  wireFighterHintProvider(cradle);
   wireModuleHintProvider(cradle);
   const sides = combatantSidesOf(c.shipASide, c.shipBSide);
   const fittingPopups = { shipA: c.shipAFittingPopup, shipB: c.shipBFittingPopup } as const;

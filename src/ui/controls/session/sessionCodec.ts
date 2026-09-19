@@ -1,4 +1,4 @@
-import type { ChargeCatalog, DroneGroup, FittingImport, ImportedFitting } from "../../../fitting";
+import type { ChargeCatalog, DroneGroup, FighterGroup, FittingImport, ImportedFitting } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
@@ -30,6 +30,7 @@ import type { CapacitorController } from "../capacitor";
 import type { TargetingController } from "../targeting";
 import type { LauncherController } from "../launcher";
 import type { DroneController } from "../drone";
+import type { FighterController } from "../fighter";
 import type { WeaponSystemSwitch } from "../sidePanel";
 import { num } from "../controlsDom";
 import { applyStartupDefaults } from "./startupDefaults";
@@ -62,6 +63,7 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly turretOverridesBySide: Record<Side, TurretOverrides>;
   private readonly launcherControllers: Record<Side, LauncherController>;
   private readonly droneControllers: Record<Side, DroneController>;
+  private readonly fighterControllers: Record<Side, FighterController>;
   private readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   private readonly preferencesController: PreferencesController;
   private readonly profileController: ProfileController;
@@ -90,6 +92,7 @@ export class SessionCodecImpl implements SessionCodec {
     turretOverridesBySide: Record<Side, TurretOverrides>;
     launcherControllers: Record<Side, LauncherController>;
     droneControllers: Record<Side, DroneController>;
+    fighterControllers: Record<Side, FighterController>;
     weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
     preferences: PreferencesController;
     profileController: ProfileController;
@@ -116,6 +119,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.turretOverridesBySide = deps.turretOverridesBySide;
     this.launcherControllers = deps.launcherControllers;
     this.droneControllers = deps.droneControllers;
+    this.fighterControllers = deps.fighterControllers;
     this.weaponSystemSwitches = deps.weaponSystemSwitches;
     this.preferencesController = deps.preferences;
     this.profileController = deps.profileController;
@@ -150,6 +154,8 @@ export class SessionCodecImpl implements SessionCodec {
     const shipBLauncher = this.launcherControllers.shipB.capture();
     const shipADrone = this.droneControllers.shipA.capture();
     const shipBDrone = this.droneControllers.shipB.capture();
+    const shipAFighter = this.fighterControllers.shipA.capture();
+    const shipBFighter = this.fighterControllers.shipB.capture();
     const shipAWeaponKind = this.weaponSystemSwitches.shipA.activeKind();
     const shipBWeaponKind = this.weaponSystemSwitches.shipB.activeKind();
     const { rangeOverlayVisibility: _, ...preferences } = this.preferencesController.capture();
@@ -209,6 +215,8 @@ export class SessionCodecImpl implements SessionCodec {
       shipBMissileAmmo: shipBLauncher.ammo,
       shipADroneGroups: shipADrone.droneGroups,
       shipBDroneGroups: shipBDrone.droneGroups,
+      shipAFighterGroups: shipAFighter.fighterGroups,
+      shipBFighterGroups: shipBFighter.fighterGroups,
       shipAEwarActivation: this.ewarController.capture("shipA"),
       shipBEwarActivation: this.ewarController.capture("shipB"),
       shipABoosterActivation: this.boosterController.capture("shipA"),
@@ -317,6 +325,11 @@ export class SessionCodecImpl implements SessionCodec {
     this.droneControllers[side].restore(fitting, panel.skillConditions(), droneGroups);
   }
 
+  private restoreFighter(side: Side, fitting: string | undefined, fighterGroups: readonly FighterGroup[] | undefined): void {
+    const panel = side === "shipA" ? this.shipASide : this.shipBSide;
+    this.fighterControllers[side].restore(fitting, panel.skillConditions(), fighterGroups);
+  }
+
   resetToDefaults(): void {
     this.settingsStore.clearSelectedProfile();
     this.applyShipState(this.pristineSettings);
@@ -353,6 +366,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.restoreLauncher("shipB", settings.shipB.fitting, settings.shipB.missileAmmo);
     this.restoreDrone("shipA", settings.shipA.fitting, settings.shipA.droneGroups);
     this.restoreDrone("shipB", settings.shipB.fitting, settings.shipB.droneGroups);
+    this.restoreFighter("shipA", settings.shipA.fitting, settings.shipA.fighterGroups);
+    this.restoreFighter("shipB", settings.shipB.fitting, settings.shipB.fighterGroups);
     this.weaponSystemSwitches.shipA.setActiveKind(settings.shipA.weaponKind ?? "turret");
     this.weaponSystemSwitches.shipB.setActiveKind(settings.shipB.weaponKind ?? "turret");
     this.selectPrimaryWeaponSystem("shipA");
@@ -398,6 +413,7 @@ export class SessionCodecImpl implements SessionCodec {
       turret: this.turretControllers[side].turret(),
       launcher: this.launcherControllers[side].launcher(),
       drones: this.droneControllers[side].currentDroneSpecs(),
+      fighters: this.fighterControllers[side].currentFighterSpecs(),
     };
     this.weaponSystemSwitches[side].autoSelectPrimary(systems);
   }

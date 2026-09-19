@@ -12,6 +12,7 @@ export type { FighterCatalog, FighterGroup, FighterOption, ImportedFighter, Impo
 export type { FighterLoadoutValidator, FighterLoadoutValidation, FighterLoadoutViolation } from "./fighterLoadoutValidator";
 export type { FighterSkillModel, FighterSkillOutput } from "./fighterStats";
 export type { DroneLoadoutContext, DroneLoadoutResolver } from "./droneLoadoutResolver";
+export type { FighterLoadoutContext, FighterLoadoutResolver } from "./fighterLoadoutResolver";
 export type { DroneLoadoutValidator, DroneLoadoutValidation, DroneLoadoutViolation } from "./droneLoadoutValidator";
 export type { DroneSkillModel } from "./droneStats";
 export type { PresetFitting, PresetFittings } from "./presetFittings";

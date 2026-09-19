@@ -1,6 +1,6 @@
 import type { DefenseSkills, FittedHull, PropulsionKind, PropulsionStats, SkillLevel, TargetingSkills } from "../ships";
 import { toTypeId } from "../gamedata/ids";
-import type { DroneGroup } from "../fitting";
+import type { DroneGroup, FighterGroup } from "../fitting";
 import type { Language } from "./language";
 import type { SimValueParser } from "../sim";
 import type { FittedHullSummary, HpValueDisplay, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredCapBoosterCharge, StoredCapBoosterMode, StoredEwarActivation, StoredMissileBoosterActivation, StoredRahActivation, StoredRepairMode, StoredRepairerActivation, StoredSensorBoosterActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
@@ -243,6 +243,17 @@ export function isOptionalDroneGroups(value: unknown): value is readonly DroneGr
   if (value === undefined) return true;
   if (!Array.isArray(value)) return false;
   return value.every((entry): entry is DroneGroup => {
+    if (typeof entry !== "object" || entry === null) return false;
+    const typeId = entry.typeId;
+    const count = entry.count;
+    return typeof typeId === "string" && typeof count === "number" && Number.isInteger(count) && count > 0;
+  });
+}
+
+export function isOptionalFighterGroups(value: unknown): value is readonly FighterGroup[] | undefined {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every((entry): entry is FighterGroup => {
     if (typeof entry !== "object" || entry === null) return false;
     const typeId = entry.typeId;
     const count = entry.count;

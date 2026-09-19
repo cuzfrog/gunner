@@ -18,9 +18,11 @@ function buildSwitch(side: Side = "shipA"): { switch: WeaponSystemSwitch; docume
     turretButton: document.getElementById(`${prefix}-weapon-system-turret`)! as HTMLButtonElement,
     missileButton: document.getElementById(`${prefix}-weapon-system-missile`)! as HTMLButtonElement,
     droneButton: document.getElementById(`${prefix}-weapon-system-drone`)! as HTMLButtonElement,
+    fighterButton: document.getElementById(`${prefix}-weapon-system-fighter`)! as HTMLButtonElement,
     turretPanel: document.getElementById(`${prefix}-turret-panel`)!,
     launcherPanel: document.getElementById(`${prefix}-launcher-panel`)!,
     dronePanel: document.getElementById(`${prefix}-drone-panel`)!,
+    fighterPanel: document.getElementById(`${prefix}-fighter-panel`)!,
     events,
   });
   return { switch: sw, document, events };

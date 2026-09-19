@@ -7,6 +7,7 @@ import type { EwarController } from "../ewar";
 import type { DefenseController } from "../defense";
 import type { CapacitorController } from "../capacitor";
 import type { DroneController } from "../drone";
+import type { FighterController } from "../fighter";
 import type { LauncherController } from "../launcher";
 import type { TurretController } from "../turret";
 import type { WeaponSystemSwitch } from "../sidePanel";
@@ -31,6 +32,7 @@ interface SimConfigSourceDeps {
   readonly turretControllers: Record<Side, TurretController>;
   readonly launcherControllers: Record<Side, LauncherController>;
   readonly droneControllers: Record<Side, DroneController>;
+  readonly fighterControllers: Record<Side, FighterController>;
   readonly defenseController: DefenseController;
   readonly capacitorController: CapacitorController;
   readonly capacitorStatsSource: CapacitorStatsSource;
@@ -48,6 +50,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
   private readonly turretControllers: Record<Side, TurretController>;
   private readonly launcherControllers: Record<Side, LauncherController>;
   private readonly droneControllers: Record<Side, DroneController>;
+  private readonly fighterControllers: Record<Side, FighterController>;
   private readonly defenseController: DefenseController;
   private readonly capacitorController: CapacitorController;
   private readonly capacitorStatsSource: CapacitorStatsSource;
@@ -64,6 +67,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
     this.turretControllers = deps.turretControllers;
     this.launcherControllers = deps.launcherControllers;
     this.droneControllers = deps.droneControllers;
+    this.fighterControllers = deps.fighterControllers;
     this.defenseController = deps.defenseController;
     this.capacitorController = deps.capacitorController;
     this.capacitorStatsSource = deps.capacitorStatsSource;
@@ -145,6 +149,8 @@ export class SimConfigSourceImpl implements SimConfigSource {
     const weapons: WeaponSpec[] = [];
     if (activeKind === "drone") {
       for (const spec of this.droneControllers[side].currentDroneSpecs()) weapons.push(spec);
+    } else if (activeKind === "fighter") {
+      for (const spec of this.fighterControllers[side].currentFighterSpecs()) weapons.push(spec);
     } else if (activeKind === "missile") {
       const missile = this.launcherControllers[side].currentMissileSpec();
       if (missile) weapons.push(missile);
@@ -160,6 +166,9 @@ export class SimConfigSourceImpl implements SimConfigSource {
     }
     if (activeKind !== "drone") {
       for (const spec of this.droneControllers[side].currentDroneSpecs()) weapons.push(spec);
+    }
+    if (activeKind !== "fighter") {
+      for (const spec of this.fighterControllers[side].currentFighterSpecs()) weapons.push(spec);
     }
     return weapons;
   }
