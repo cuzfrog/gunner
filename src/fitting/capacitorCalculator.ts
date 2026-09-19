@@ -163,6 +163,11 @@ function buildUsageRows(db: FittingDb, conditions: StatConditions, sources: Capa
     rows.push(buildRow(rah.moduleId, moduleNameFor(db, rah.moduleId), rah.capacitorNeed ?? 0, rah.cycleTime * overloadCycle, 1));
   }
 
+  for (const hardener of sources.defense.hardeners) {
+    if (hardener.capacitorNeed <= 0) continue;
+    rows.push(buildRow(hardener.moduleId, moduleNameFor(db, hardener.moduleId), hardener.capacitorNeed, hardener.cycleTime, 1));
+  }
+
   const propulsionModuleId = sources.propulsionModuleId;
   const propulsion = propulsionModuleId !== undefined ? db.modules[propulsionModuleId]?.propulsion : undefined;
   if (propulsionModuleId !== undefined && propulsion && propulsion.capacitorNeed > 0) {

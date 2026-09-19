@@ -19,6 +19,7 @@ import { PredictiveAutopilot } from "./predictiveAutopilot";
 import type { RngFactory } from "./rng";
 import { SimulationImpl } from "./simulation";
 import type { Simulation } from "./simulation";
+import type { StackingPenalty } from "./stackingPenalty";
 import type { SimConfig } from "./types";
 import { WeaponClockImpl } from "./weaponClock";
 import type { WeaponClock } from "./weaponClock";
@@ -45,13 +46,15 @@ export class SimWorldFactoryImpl implements SimWorldFactory {
   private readonly kinematics: Kinematics;
   private readonly missileApplication: MissileApplication;
   private readonly rngFactory: RngFactory;
+  private readonly stackingPenalty: StackingPenalty;
 
-  constructor(deps: { simConfig: SimConfig; ewarResolver: EwarResolver; kinematics: Kinematics; missileApplication: MissileApplication; rngFactory: RngFactory }) {
+  constructor(deps: { simConfig: SimConfig; ewarResolver: EwarResolver; kinematics: Kinematics; missileApplication: MissileApplication; rngFactory: RngFactory; stackingPenalty: StackingPenalty }) {
     this.simConfig = deps.simConfig;
     this.ewarResolver = deps.ewarResolver;
     this.kinematics = deps.kinematics;
     this.missileApplication = deps.missileApplication;
     this.rngFactory = deps.rngFactory;
+    this.stackingPenalty = deps.stackingPenalty;
   }
 
   createSampled(): SimWorld {
@@ -73,7 +76,7 @@ export class SimWorldFactoryImpl implements SimWorldFactory {
       fighterSimulator: new FighterSimulatorImpl(),
       missileSimulator: new MissileSimulatorImpl({ missileApplication: this.missileApplication }),
       weaponClock: new WeaponClockImpl({ rngFactory: this.rngFactory, hitRoll }),
-      defenseSimulator: new DefenseSimulatorImpl(),
+      defenseSimulator: new DefenseSimulatorImpl({ stackingPenalty: this.stackingPenalty }),
       capacitorSimulator: new CapacitorSimulatorImpl(),
     };
   }

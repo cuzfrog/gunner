@@ -189,6 +189,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
       repairMode: { shipA: this.defenseController.repairMode("shipA"), shipB: this.defenseController.repairMode("shipB") },
       repairerActivation: { shipA: this.defenseController.repairerActivation("shipA"), shipB: this.defenseController.repairerActivation("shipB") },
       rahActivation: { shipA: this.defenseController.rahActivation("shipA"), shipB: this.defenseController.rahActivation("shipB") },
+      overloaded: { shipA: this.overloadedFor("shipA"), shipB: this.overloadedFor("shipB") },
     };
   }
 }

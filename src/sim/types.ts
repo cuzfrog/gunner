@@ -791,18 +791,32 @@ export interface RepairerSpec {
   readonly moduleId?: TypeId;
 }
 
+/** A fitted active resist module (shield/armor hardener): pays capacitorNeed every cycleTime; a starved hardener drops offline and its bonus is lost. */
+export interface ActiveHardenerSpec {
+  readonly moduleId: TypeId;
+  readonly layer: DefenseLayer;
+  /** Per-type resist bonus with compensation skills applied, before overload. */
+  readonly resistBonus: DamageResists;
+  readonly overloadBonusMultiplier: number;
+  readonly capacitorNeed: number; // GJ per cycle
+  readonly cycleTime: number; // seconds
+}
+
 export interface RahSpec {
   readonly cycleTime: number;
   readonly shiftAmount: number;
   readonly baseResists: DamageResists;
   readonly overloadCycleTimeMultiplier: number;
-  readonly armorResistsWithoutRah: DamageResists;
   readonly capacitorNeed?: number;
   readonly moduleId?: TypeId;
 }
 
 export interface DefenseSpec {
   readonly layers: Readonly<Record<DefenseLayer, DefenseLayerSpec>>;
+  /** Layer resists with every fitted active hardener offline: base hull, passive coatings, damage control, hull bonuses, skills. */
+  readonly baseResists: Readonly<Record<DefenseLayer, DamageResists>>;
+  /** Fitted active hardeners. layers[].resists is the all-on composition of baseResists and these. */
+  readonly hardeners: readonly ActiveHardenerSpec[];
   readonly shieldRechargeTime: number;
   readonly repairers: readonly RepairerSpec[];
   readonly signaturePenalty: number;
@@ -878,6 +892,8 @@ export const EMPTY_DEFENSE_SPEC: DefenseSpec = {
     armor: { hp: 0, resists: ZERO_RESISTS },
     hull: { hp: 0, resists: ZERO_RESISTS },
   },
+  baseResists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS },
+  hardeners: [],
   shieldRechargeTime: 0,
   repairers: [],
   signaturePenalty: 0,
