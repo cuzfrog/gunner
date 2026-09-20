@@ -1,9 +1,9 @@
 import { toTypeId } from "../gamedata/ids";
-import { DefenseSimulatorImpl } from "./defenseSimulator";
+import { DefenseSimulatorImpl, _shiftRahResists } from "./defenseSimulator";
 import type { CapacitorGate } from "./capacitorSimulator";
 import type { DefenseSimConfig } from "./defenseSimulator";
 import { StackingPenaltyImpl } from "./stackingPenalty";
-import type { ActiveHardenerSpec, DamageEvent, DamageResists, DamageVector, DefenseLayer, DefenseSpec, LayerDamage, RahSpec, RepairerSpec, Side } from "./types";
+import type { ActiveHardenerSpec, DamageEvent, DamageResists, DamageType, DamageVector, DefenseLayer, DefenseSpec, LayerDamage, RahSpec, RepairerSpec, Side } from "./types";
 import { ZERO_DAMAGE, ZERO_RESISTS } from "./types";
 
 interface DebitRecord {
@@ -100,6 +100,12 @@ function newSim(): DefenseSimulatorImpl {
 
 const EM_DAMAGE: DamageVector = { em: 100, thermal: 0, kinetic: 0, explosive: 0 };
 const MIXED_DAMAGE: DamageVector = { em: 50, thermal: 50, kinetic: 0, explosive: 0 };
+
+const RAH_SPEC: RahSpec = { cycleTime: 10, shiftAmount: 0.06, baseResists: { em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 }, overloadCycleTimeMultiplier: 1 };
+
+function rahState(resists: DamageResists, damage: DamageVector): { resists: { em: number; thermal: number; kinetic: number; explosive: number }; cycleTimer: number; inCycle: boolean; active: boolean; overloaded: boolean; starved: boolean; armorDamageAccumulator: { em: number; thermal: number; kinetic: number; explosive: number } } {
+  return { resists: { ...resists }, cycleTimer: 0, inCycle: true, active: true, overloaded: false, starved: false, armorDamageAccumulator: { ...damage } };
+}
 
 describe("DefenseSimulatorImpl", () => {
   test("reset initializes pools to spec max HP", () => {
@@ -549,10 +555,10 @@ describe("DefenseSimulatorImpl", () => {
     }
     const rah = sim.view().rah.shipA;
     expect(rah).toBeDefined();
-    expect(rah?.resists.em).toBeGreaterThan(0.5);
-    expect(rah?.resists.thermal).toBeLessThan(0.05);
-    expect(rah?.resists.kinetic).toBeLessThan(0.05);
-    expect(rah?.resists.explosive).toBeLessThan(0.05);
+    expect(rah?.resists.em).toBeCloseTo(0.6, 5);
+    expect(rah?.resists.thermal).toBeCloseTo(0, 5);
+    expect(rah?.resists.kinetic).toBeCloseTo(0, 5);
+    expect(rah?.resists.explosive).toBeCloseTo(0, 5);
   });
 
   test("RAH converges toward 30/30/0/0 under EM+thermal damage", () => {
@@ -567,10 +573,10 @@ describe("DefenseSimulatorImpl", () => {
     }
     const rah = sim.view().rah.shipA;
     expect(rah).toBeDefined();
-    expect(rah?.resists.em).toBeGreaterThan(0.25);
-    expect(rah?.resists.thermal).toBeGreaterThan(0.25);
-    expect(rah?.resists.kinetic).toBeLessThan(0.05);
-    expect(rah?.resists.explosive).toBeLessThan(0.05);
+    expect(rah?.resists.em).toBeCloseTo(0.3, 5);
+    expect(rah?.resists.thermal).toBeCloseTo(0.3, 5);
+    expect(rah?.resists.kinetic).toBeCloseTo(0, 5);
+    expect(rah?.resists.explosive).toBeCloseTo(0, 5);
   });
 
   test("RAH resets to 15/15/15/15 on deactivation and reactivation", () => {
@@ -593,6 +599,57 @@ describe("DefenseSimulatorImpl", () => {
     expect(rahAfter?.resists.thermal).toBeCloseTo(0.15, 5);
     expect(rahAfter?.resists.kinetic).toBeCloseTo(0.15, 5);
     expect(rahAfter?.resists.explosive).toBeCloseTo(0.15, 5);
+  });
+
+  test("shiftRahResists is a no-op when no damage was taken during the cycle", () => {
+    const rah = rahState({ em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 }, { em: 0, thermal: 0, kinetic: 0, explosive: 0 });
+    _shiftRahResists(rah, RAH_SPEC);
+    expect(rah.resists).toEqual({ em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 });
+  });
+
+  test("one damaged type takes six percent from each of the other three resistances", () => {
+    const rah = rahState({ em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 }, { em: 100, thermal: 0, kinetic: 0, explosive: 0 });
+    _shiftRahResists(rah, RAH_SPEC);
+    expect(rah.resists.em).toBeCloseTo(0.33, 8);
+    expect(rah.resists.thermal).toBeCloseTo(0.09, 8);
+    expect(rah.resists.kinetic).toBeCloseTo(0.09, 8);
+    expect(rah.resists.explosive).toBeCloseTo(0.09, 8);
+  });
+
+  test("one damaged type drains only what remains from the other three", () => {
+    const rah = rahState({ em: 0.51, thermal: 0.03, kinetic: 0.03, explosive: 0.03 }, { em: 100, thermal: 0, kinetic: 0, explosive: 0 });
+    _shiftRahResists(rah, RAH_SPEC);
+    expect(rah.resists.em).toBeCloseTo(0.6, 8);
+    expect(rah.resists.thermal).toBeCloseTo(0, 8);
+    expect(rah.resists.kinetic).toBeCloseTo(0, 8);
+    expect(rah.resists.explosive).toBeCloseTo(0, 8);
+  });
+
+  test("two damaged types drain the two undamaged resistances into both of them evenly", () => {
+    const rah = rahState({ em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 }, { em: 100, thermal: 50, kinetic: 0, explosive: 0 });
+    _shiftRahResists(rah, RAH_SPEC);
+    expect(rah.resists.em).toBeCloseTo(0.21, 8);
+    expect(rah.resists.thermal).toBeCloseTo(0.21, 8);
+    expect(rah.resists.kinetic).toBeCloseTo(0.09, 8);
+    expect(rah.resists.explosive).toBeCloseTo(0.09, 8);
+  });
+
+  test("two damaged types drain only what remains from the undamaged resistances", () => {
+    const rah = rahState({ em: 0.27, thermal: 0.27, kinetic: 0.03, explosive: 0.03 }, { em: 100, thermal: 50, kinetic: 0, explosive: 0 });
+    _shiftRahResists(rah, RAH_SPEC);
+    expect(rah.resists.em).toBeCloseTo(0.3, 8);
+    expect(rah.resists.thermal).toBeCloseTo(0.3, 8);
+    expect(rah.resists.kinetic).toBeCloseTo(0, 8);
+    expect(rah.resists.explosive).toBeCloseTo(0, 8);
+  });
+
+  test("ties among damaged types take from em, explosive, kinetic, thermal in that order", () => {
+    const rah = rahState({ em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 }, { em: 0, thermal: 100, kinetic: 100, explosive: 100 });
+    _shiftRahResists(rah, RAH_SPEC);
+    expect(rah.resists.em).toBeCloseTo(0.09, 8);
+    expect(rah.resists.explosive).toBeCloseTo(0.09, 8);
+    expect(rah.resists.kinetic).toBeCloseTo(0.21, 8);
+    expect(rah.resists.thermal).toBeCloseTo(0.21, 8);
   });
 
   test("update deactivating rah does not reset pools", () => {
@@ -1205,14 +1262,16 @@ describe("DefenseSimulatorImpl", () => {
 
   test("step: rah accumulates only armor HP actually removed when armor breaks mid-hit", () => {
     const sim = newSim();
-    sim.reset(config(spec({ shieldHp: 0, armorHp: 10, hullHp: 1000, armorResists: { em: 0.5 }, hullResists: { em: 0 }, shieldUniformity: 0, rah: { cycleTime: 1, shiftAmount: 0.06, baseResists: { em: 0, thermal: 0, kinetic: 0, explosive: 0 }, overloadCycleTimeMultiplier: 1 } })));
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 10, hullHp: 1000, armorResists: { em: 0.5 }, hullResists: { em: 0 }, shieldUniformity: 0, rah: { cycleTime: 1, shiftAmount: 0.06, baseResists: { em: 0.15, thermal: 0.15, kinetic: 0.15, explosive: 0.15 }, overloadCycleTimeMultiplier: 1 } })));
     for (let i = 0; i < 5; i++) {
       sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
     }
     const rah = sim.view().rah.shipA;
     expect(rah).toBeDefined();
-    expect(rah?.resists.em).toBeGreaterThan(0);
-    expect(rah?.resists.thermal).toBeLessThan(0.05);
+    expect(rah?.resists.em).toBeCloseTo(0.33, 8);
+    expect(rah?.resists.thermal).toBeCloseTo(0.09, 8);
+    expect(rah?.resists.kinetic).toBeCloseTo(0.09, 8);
+    expect(rah?.resists.explosive).toBeCloseTo(0.09, 8);
   });
 
   test("capture and restore round-trips pools, inflicted totals, and repairer state into another instance", () => {
