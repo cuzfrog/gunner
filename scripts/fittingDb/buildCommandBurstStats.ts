@@ -1,5 +1,5 @@
 import { BURST_CHARGE_GROUPS, COMMAND_BURST_GROUP } from "./combatAttributes";
-import type { ChargeStats, CommandBurstStats } from "../../src/gamedata/fittingDb/types";
+import type { ChargeStats, CommandBurstStats, WarfareBuffChargeStat } from "../../src/gamedata/fittingDb/types";
 import type { TypeId } from "../../src/gamedata/ids";
 
 export interface BuildCommandBurstStatsContext {
@@ -28,11 +28,16 @@ export function buildCommandBurstStats(ctx: BuildCommandBurstStatsContext): Comm
 
 export function buildBurstChargeStats(typeId: TypeId, name: string, groupId: number, values: Map<string, number>): ChargeStats | undefined {
   if (!BURST_CHARGE_GROUPS.has(groupId)) return undefined;
-  const warfareBuffId = values.get("warfareBuff1ID");
+  const warfareBuffs: WarfareBuffChargeStat[] = [];
+  for (const slot of [1, 2, 3, 4]) {
+    const buffId = values.get(`warfareBuff${slot}ID`);
+    if (buffId === undefined || buffId === 0) continue;
+    warfareBuffs.push({ buffId, multiplier: values.get(`warfareBuff${slot}Multiplier`) ?? 0 });
+  }
   return {
     id: typeId,
     name,
-    ...(warfareBuffId !== undefined ? { warfareBuffId, warfareBuffMultiplier: values.get("warfareBuff1Multiplier") } : {}),
+    ...(warfareBuffs.length > 0 ? { warfareBuffs } : {}),
     chargeGroup: groupId,
     chargeSize: 0,
   };

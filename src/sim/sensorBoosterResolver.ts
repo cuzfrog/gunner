@@ -2,7 +2,8 @@ import type { StackingPenalty } from "./stackingPenalty";
 import type { SensorBoostProjection, SensorSpec } from "./types";
 
 export interface SensorBoosterResolver {
-  boostedSensorSpec(spec: SensorSpec, projection: SensorBoostProjection | undefined): SensorSpec;
+  /** Applies runtime sensor boosts and any extra same-group multipliers (command bursts) with stacking penalties. */
+  boostedSensorSpec(spec: SensorSpec, projection: SensorBoostProjection | undefined, extraScanResolutionMultipliers?: readonly number[], extraRangeMultipliers?: readonly number[]): SensorSpec;
 }
 
 export class SensorBoosterResolverImpl implements SensorBoosterResolver {
@@ -12,8 +13,12 @@ export class SensorBoosterResolverImpl implements SensorBoosterResolver {
     this.stacking = stackingPenalty;
   }
 
-  boostedSensorSpec(spec: SensorSpec, projection: SensorBoostProjection | undefined): SensorSpec {
-    if (!projection) return spec;
+  boostedSensorSpec(spec: SensorSpec, projection: SensorBoostProjection | undefined, extraScanResolutionMultipliers: readonly number[] = [], extraRangeMultipliers: readonly number[] = []): SensorSpec {
+    if (!projection) {
+      const scanResolution = Math.round(spec.scanResolution * this.stacking.apply(extraScanResolutionMultipliers));
+      const maxTargetingRange = Math.round(spec.maxTargetingRange * this.stacking.apply(extraRangeMultipliers));
+      return { scanResolution, maxTargetingRange, maxLockedTargets: spec.maxLockedTargets, strengths: spec.strengths };
+    }
     const scanResMultipliers: number[] = [];
     const rangeMultipliers: number[] = [];
     let maxLockedTargets = spec.maxLockedTargets;
@@ -45,8 +50,8 @@ export class SensorBoosterResolverImpl implements SensorBoosterResolver {
       }
     }
 
-    const scanResolution = Math.round(spec.scanResolution * this.stacking.apply(scanResMultipliers));
-    const maxTargetingRange = Math.round(spec.maxTargetingRange * this.stacking.apply(rangeMultipliers));
+    const scanResolution = Math.round(spec.scanResolution * this.stacking.apply([...scanResMultipliers, ...extraScanResolutionMultipliers]));
+    const maxTargetingRange = Math.round(spec.maxTargetingRange * this.stacking.apply([...rangeMultipliers, ...extraRangeMultipliers]));
     return { scanResolution, maxTargetingRange, maxLockedTargets, strengths: spec.strengths };
   }
 }

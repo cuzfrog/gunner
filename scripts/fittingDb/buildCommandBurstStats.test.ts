@@ -38,16 +38,25 @@ describe("buildCommandBurstStats", () => {
 });
 
 describe("buildBurstChargeStats", () => {
-  test("builds armor energizing charge with warfare buff fields", () => {
+  test("builds armor energizing charge with its warfare buff list", () => {
     const result = buildBurstChargeStats(toTypeId("42832"), "Armor Energizing Charge", 1774, values({ warfareBuff1ID: 13, warfareBuff1Multiplier: -8 }));
     expect(result).toEqual({
       id: toTypeId("42832"),
       name: "Armor Energizing Charge",
-      warfareBuffId: 13,
-      warfareBuffMultiplier: -8,
+      warfareBuffs: [{ buffId: 13, multiplier: -8 }],
       chargeGroup: 1774,
       chargeSize: 0,
     });
+  });
+
+  test("collects every nonzero warfare buff slot in order", () => {
+    const result = buildBurstChargeStats(toTypeId("42838"), "Evasive Maneuvers Charge", 1772, values({ warfareBuff1ID: 20, warfareBuff1Multiplier: -6, warfareBuff2ID: 60, warfareBuff2Multiplier: -6 }));
+    expect(result?.warfareBuffs).toEqual([{ buffId: 20, multiplier: -6 }, { buffId: 60, multiplier: -6 }]);
+  });
+
+  test("omits the buff list when the charge carries none", () => {
+    const result = buildBurstChargeStats(toTypeId("42830"), "Mining Laser Optimization Charge", 1771, values({}));
+    expect(result).toEqual({ id: toTypeId("42830"), name: "Mining Laser Optimization Charge", chargeGroup: 1771, chargeSize: 0 });
   });
 
   test("returns undefined outside burst charge groups", () => {

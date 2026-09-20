@@ -1,11 +1,13 @@
-import type { CapacitorSimConfig, CapacitorView } from "./capacitorSimulator";
-import type { AppliedEwarEffect, CapacitorEngagement, DamageEvent, DroneRuntimeState, DroneSpec, EwarProjection, FighterRuntimeState, FighterSpec, InflictedDps, IncomingDrain, LayerDamage, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec, CapacitorSideConfig } from "./types";
+import type { CapacitorSimConfig, CapacitorSimulator, CapacitorView } from "./capacitorSimulator";
+import type { AppliedEwarEffect, BurstModifiers, CapacitorEngagement, DamageEvent, DroneRuntimeState, DroneSpec, EwarProjection, FighterRuntimeState, FighterSpec, InflictedDps, IncomingDrain, LayerDamage, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec, CapacitorSideConfig } from "./types";
+import { IDENTITY_BURST_MODIFIERS } from "./types";
 import type { TypeId } from "../gamedata/ids";
 import type { DefenseSimConfig, DefenseSimulator, DefenseView } from "./defenseSimulator";
 import type { DroneSimConfig } from "./droneSimulator";
 import type { FighterSimConfig } from "./fighterSimulator";
 import type { EngagementFrameComposer, EngagementInput, EngagementView } from "./engagementFrameComposer";
 import type { EwarResolver } from "./ewarResolver";
+import { burstModifiers } from "./burstModifiers";
 import type { LockStepInput } from "./lockClock";
 import type { SensorBoosterResolver } from "./sensorBoosterResolver";
 import type { SimWorld } from "./simWorld";
@@ -232,16 +234,18 @@ export class EngagementEngineImpl implements EngagementEngine {
       shipA: this.capacitorEngagement(preSnapshot, "shipA", preDistance, locksBeforeStep, operational),
       shipB: this.capacitorEngagement(preSnapshot, "shipB", preDistance, locksBeforeStep, operational),
     });
+    const bursts = this.activeBursts(config, operational, world.capacitorSimulator);
     world.simulation.step(dt, {
       propulsionStarved: {
         shipA: !operational.shipA || world.capacitorSimulator.propulsionStarved("shipA"),
         shipB: !operational.shipB || world.capacitorSimulator.propulsionStarved("shipB"),
       },
       ewarActive: operational,
+      bursts,
     });
     const snapshot = mutedDestroyedSnapshot(world.simulation.snapshot(), operational);
     const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
-    const painted = this.paintedSigRadii(snapshot, distance);
+    const painted = this.paintedSigRadii(snapshot, distance, bursts);
     world.jamClock.step({
       dt,
       projections: { shipA: snapshot.shipA.ewar, shipB: snapshot.shipB.ewar },
@@ -250,7 +254,7 @@ export class EngagementEngineImpl implements EngagementEngine {
       operational,
     });
     const jammed = world.jamClock.jammed();
-    const locks = world.lockClock.step(dt, this.lockStepInput(snapshot, distance, painted, operational, jammed));
+    const locks = world.lockClock.step(dt, this.lockStepInput(snapshot, distance, painted, operational, jammed, bursts));
     const input = this.engagementInput(world, snapshot, locks, config, painted, jammed);
     const composed = this.engagementFrameComposer.compose(snapshot, input);
     world.droneSimulator.step(dt, composed.frame, operational);
@@ -258,14 +262,14 @@ export class EngagementEngineImpl implements EngagementEngine {
     const missileEvents = world.missileSimulator.step(dt, composed.frame, this.missileLaunchSpecs(composed, locks, painted));
     const weaponEvents = world.weaponClock.step(dt, composed, world.capacitorSimulator);
     const events: DamageEvent[] = [...missileEvents, ...weaponEvents];
-    world.defenseSimulator.step(dt, events, world.capacitorSimulator);
+    world.defenseSimulator.step(dt, events, world.capacitorSimulator, bursts);
     return { composed, snapshot };
   }
 
   private initializeLocks(): void {
     const snapshot = this.live.simulation.snapshot();
     const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
-    this.live.lockClock.step(0, this.lockStepInput(snapshot, distance, this.paintedSigRadii(snapshot, distance), operationalSides(this.live.defenseSimulator), this.live.jamClock.jammed()));
+    this.live.lockClock.step(0, this.lockStepInput(snapshot, distance, this.paintedSigRadii(snapshot, distance), operationalSides(this.live.defenseSimulator), this.live.jamClock.jammed(), { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS }));
   }
 
   /** Engagement facts for the capacitor: own hard-range modules that apply nothing, own lock state, opponent suppression. Uses the pre-step snapshot, one frame of latency like the incoming-drain inputs. */
@@ -279,11 +283,17 @@ export class EngagementEngineImpl implements EngagementEngine {
     };
   }
 
-  private lockStepInput(snapshot: SimSnapshot, distance: number, painted: Record<Side, number>, operational: Record<Side, boolean>, jammed: Record<Side, boolean>): LockStepInput {
+  /** A burst is live when its side still acts and its module's capacitor drain is cycling (drainRunning), so burst uptime matches the game's capacitor-gated activation. */
+  private activeBursts(config: EngineConfig, operational: Record<Side, boolean>, capacitor: CapacitorSimulator): Record<Side, BurstModifiers> {
+    const sideBursts = (side: Side): BurstModifiers => burstModifiers(config.sim[side].commandBursts ?? [], (moduleId) => operational[side] && capacitor.drainRunning(side, moduleId));
+    return { shipA: sideBursts("shipA"), shipB: sideBursts("shipB") };
+  }
+
+  private lockStepInput(snapshot: SimSnapshot, distance: number, painted: Record<Side, number>, operational: Record<Side, boolean>, jammed: Record<Side, boolean>, bursts: Record<Side, BurstModifiers>): LockStepInput {
     return {
       distance,
-      sensorA: this.effectiveSensorSpec(snapshot.shipA, snapshot.shipB, distance),
-      sensorB: this.effectiveSensorSpec(snapshot.shipB, snapshot.shipA, distance),
+      sensorA: this.effectiveSensorSpec(snapshot.shipA, snapshot.shipB, distance, bursts.shipA),
+      sensorB: this.effectiveSensorSpec(snapshot.shipB, snapshot.shipA, distance, bursts.shipB),
       sigA: painted.shipA,
       sigB: painted.shipB,
       operational,
@@ -292,10 +302,10 @@ export class EngagementEngineImpl implements EngagementEngine {
   }
 
   /** Painted signature of each side's ship, applied by its opponent's target painters; the single per-frame derivation consumed by locks, weapon assessment, and missile launches. */
-  private paintedSigRadii(snapshot: SimSnapshot, distance: number): Record<Side, number> {
+  private paintedSigRadii(snapshot: SimSnapshot, distance: number, bursts: Record<Side, BurstModifiers> = { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS }): Record<Side, number> {
     return {
-      shipA: this.paintedSig(snapshot.shipB, snapshot.shipA, distance),
-      shipB: this.paintedSig(snapshot.shipA, snapshot.shipB, distance),
+      shipA: this.paintedSig(snapshot.shipB, snapshot.shipA, distance, bursts.shipA),
+      shipB: this.paintedSig(snapshot.shipA, snapshot.shipB, distance, bursts.shipB),
     };
   }
 
@@ -317,15 +327,18 @@ export class EngagementEngineImpl implements EngagementEngine {
     return config.weapons[side].map((_, index) => world.weaponClock.spoolCycles(side, index));
   }
 
-  private effectiveSensorSpec(ship: ShipState, opponent: ShipState, distance: number): SensorSpec | undefined {
+  private effectiveSensorSpec(ship: ShipState, opponent: ShipState, distance: number, bursts?: BurstModifiers): SensorSpec | undefined {
     if (!ship.sensorSpec) return undefined;
-    const boosted = this.sensorBoosterResolver.boostedSensorSpec(ship.sensorSpec, ship.sensorBoosts);
+    const scanMultipliers = bursts && bursts.scanStrength !== 1 ? [bursts.scanStrength] : [];
+    const rangeMultipliers = bursts && bursts.targetingRange !== 1 ? [bursts.targetingRange] : [];
+    const boosted = this.sensorBoosterResolver.boostedSensorSpec(ship.sensorSpec, ship.sensorBoosts, scanMultipliers, rangeMultipliers);
     return this.ewarResolver.dampenedSensorSpec(boosted, opponent.ewar, distance);
   }
 
-  private paintedSig(ship: ShipState, opponent: ShipState, distance: number): number {
+  private paintedSig(ship: ShipState, opponent: ShipState, distance: number, opponentBursts?: BurstModifiers): number {
     const baseSig = opponent.sig ?? 1;
-    return baseSig * this.ewarResolver.sigMultiplier(ship.ewar, distance);
+    const extraMultipliers = opponentBursts && opponentBursts.signatureRadius !== 1 ? [opponentBursts.signatureRadius] : [];
+    return baseSig * this.ewarResolver.sigMultiplier(ship.ewar, distance, extraMultipliers);
   }
 
   private missileFactsFor(world: SimWorld, side: Side, config: EngineConfig, paintedTargetSig: number): readonly MissileAttackFacts[] {

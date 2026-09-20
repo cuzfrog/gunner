@@ -103,6 +103,8 @@ export interface CapacitorSimulator extends CapacitorGate, Restorable<CapacitorS
   step(dt: number, engagement: Record<Side, CapacitorEngagement>): void;
   view(): Record<Side, CapacitorView>;
   propulsionStarved(side: Side): boolean;
+  /** Whether the scheduled drain of that module is cycling: true from a paid debit until a debit is denied. Unknown modules return false. */
+  drainRunning(side: Side, moduleId: TypeId): boolean;
   injectBooster(side: Side, boosterIndex: number): void;
   /** Merges the engine's projected cap-warfare debits for one side (timer-preserving by module id). */
   incomingDrains(side: Side, drains: readonly IncomingDrain[]): void;
@@ -213,6 +215,10 @@ export class CapacitorSimulatorImpl implements CapacitorSimulator {
 
   propulsionStarved(side: Side): boolean {
     return this.sides[side].propulsion?.starved ?? false;
+  }
+
+  drainRunning(side: Side, moduleId: TypeId): boolean {
+    return this.sides[side].drains.some((drain) => drain.moduleId === moduleId && drain.running);
   }
 
   injectBooster(side: Side, boosterIndex: number): void {

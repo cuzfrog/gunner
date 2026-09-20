@@ -219,6 +219,11 @@ export interface SkillBonus {
   readonly appliesTo: "module" | "charge";
 }
 
+export interface WarfareBuffChargeStat {
+  readonly buffId: number; // raw SDE warfareBuffNID, the buff the charge applies
+  readonly multiplier: number; // raw SDE warfareBuffNMultiplier percent, e.g. -8 for -8% resonance
+}
+
 export interface ChargeStats {
   readonly trackingMultiplier?: number;
   readonly rangeMultiplier?: number;
@@ -230,8 +235,7 @@ export interface ChargeStats {
   readonly capacitorBonus?: number; // GJ injected per cycle, cap booster charges
   readonly volume?: number; // m3, cap booster charges
   readonly capacitorNeedMultiplier?: number; // turret capacitor need scaling from the charge (attr 317), e.g. 1.25 Conflagration
-  readonly warfareBuffId?: number; // raw SDE warfareBuff1ID, command burst charges
-  readonly warfareBuffMultiplier?: number; // raw SDE warfareBuff1Multiplier percent, command burst charges
+  readonly warfareBuffs?: readonly WarfareBuffChargeStat[]; // command burst charges
   readonly chargeGroup: number;
   readonly chargeSize: number;
   readonly id: TypeId;

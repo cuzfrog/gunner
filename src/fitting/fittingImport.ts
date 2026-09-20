@@ -10,7 +10,7 @@ import type {
   SkillLevel,
   StatConditions,
 } from "../ships";
-import { type BoostLoadout, type CommandBurstSpec, type EwarLoadout, type MissileBoosterLoadout, type SensorBoostLoadout, type SensorSpec, type StackingPenalty } from "../sim";
+import { type BoostLoadout, type BurstEffectKind, type BurstEffectSpec, type CommandBurstSpec, type EwarLoadout, type MissileBoosterLoadout, type SensorBoostLoadout, type SensorSpec, type StackingPenalty } from "../sim";
 import { parseEft, type BankKind, type EftDocument, type EftLine, type QuantityItem } from "./eft";
 
 import type { ItemNameCatalog, ItemNameResolver } from "../gamedata/itemNames";
@@ -595,14 +595,42 @@ function pushByBay(item: ResolvedQuantity, drones: ResolvedQuantity[], fighters:
   else cargo.push(item);
 }
 
+/** Raw SDE warfare buff ids mapped to the sim effect kinds the engagement sim models; unmapped ids (EWAR support, ewar resistance, mining) have no sim surface. */
+const WARFARE_BUFF_KINDS: Readonly<Record<number, BurstEffectKind>> = {
+  10: "shieldResonance",
+  11: "shieldRepair",
+  12: "shieldHp",
+  13: "armorResonance",
+  14: "armorRepair",
+  15: "armorHp",
+  16: "scanResolution",
+  26: "targetingRange",
+  18: "scanStrength",
+  20: "signatureRadius",
+  60: "inertia",
+  22: "propulsionSpeed",
+};
+
 function resolveCommandBurstSpecs(fitting: FittingState, db: FittingDb): readonly CommandBurstSpec[] {
   const specs: CommandBurstSpec[] = [];
   for (const mod of fitting.commandBurstModules) {
     const stats = db.commandBursts[mod.moduleId];
     if (!stats || stats.capacitorNeed <= 0) continue;
-    specs.push({ moduleName: stats.name, moduleId: mod.moduleId, capacitorNeed: stats.capacitorNeed, cycleTime: stats.cycleTime });
+    specs.push({ moduleName: stats.name, moduleId: mod.moduleId, capacitorNeed: stats.capacitorNeed, cycleTime: stats.cycleTime, effects: burstEffects(db, mod.chargeId) });
   }
   return specs;
+}
+
+function burstEffects(db: FittingDb, chargeId: TypeId | undefined): readonly BurstEffectSpec[] {
+  if (chargeId === undefined) return [];
+  const buffs = db.charges[chargeId]?.warfareBuffs;
+  if (!buffs) return [];
+  const effects: BurstEffectSpec[] = [];
+  for (const buff of buffs) {
+    const kind = WARFARE_BUFF_KINDS[buff.buffId];
+    if (kind !== undefined) effects.push({ kind, multiplier: 1 + buff.multiplier / 100 });
+  }
+  return effects;
 }
 
 const PREVIEW_CONDITIONS: StatConditions = { skillLevel: 5 as SkillLevel, overloaded: false, weaponOverloaded: false };

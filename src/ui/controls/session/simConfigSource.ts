@@ -141,6 +141,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
       missileBoosts: this.missileBoosterController.projection(side),
       sensorSpec: state.sensorSpec,
       sensorBoosts: this.sensorBoosterController.projection(side),
+      commandBursts: this.capacitorStatsSource.commandBursts(side),
     };
   }
 

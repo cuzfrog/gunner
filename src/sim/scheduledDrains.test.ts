@@ -10,7 +10,7 @@ const NEUTRALIZER: EwarProjection["loadout"]["neutralizers"][number] = { moduleN
 const COMPUTER: TurretBoostProjection["loadout"]["computers"][number] = { moduleName: "Tracking Computer II", moduleId: toTypeId("4"), trackingBonusPercent: 40, optimalBonusPercent: 40, falloffBonusPercent: 40, defaultScript: undefined, capacitorNeed: 12, cycleTime: 10 };
 const SENSOR_BOOSTER: SensorBoostProjection["loadout"]["boosters"][number] = { moduleName: "Sensor Booster II", moduleId: toTypeId("5"), scanResolutionBonusPercent: 10, maxTargetRangeBonusPercent: 10, overloadStrengthBonusPercent: 0, defaultScript: undefined, capacitorNeed: 11, cycleTime: 8 };
 const MISSILE_COMPUTER: MissileBoosterProjection["loadout"]["computers"][number] = { moduleName: "Missile Guidance Computer II", moduleId: toTypeId("6"), explosionRadiusBonusPercent: 20, explosionVelocityBonusPercent: 20, missileVelocityBonusPercent: 20, flightTimeBonusPercent: 20, overloadStrengthBonusPercent: 0, defaultScript: undefined, capacitorNeed: 9, cycleTime: 12 };
-const COMMAND_BURST: CommandBurstSpec = { moduleName: "Armor Command Burst II", moduleId: toTypeId("7"), capacitorNeed: 25, cycleTime: 60 };
+const COMMAND_BURST: CommandBurstSpec = { moduleName: "Armor Command Burst II", moduleId: toTypeId("7"), capacitorNeed: 25, cycleTime: 60, effects: [] };
 
 function ewarProjection(loadout: Partial<EwarProjection["loadout"]>, activation?: EwarProjection["activation"]): EwarProjection {
   return {

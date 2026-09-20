@@ -460,7 +460,10 @@ const db: FittingDb = {
   needs: {},
   subsystemBonuses: {},
   subsystems: {},
-  commandBursts: {},
+  commandBursts: {
+    "Skirmish Command Burst I": row("Skirmish Command Burst I", "Skirmish Command Burst I", { maxRange: 15000, cycleTime: 10, capacitorNeed: 33, reloadTime: 10, chargeGroup: 1772, requiredSkillIds: [] }),
+    "Armor Command Burst I": row("Armor Command Burst I", "Armor Command Burst I", { maxRange: 15000, cycleTime: 10, capacitorNeed: 33, reloadTime: 10, chargeGroup: 1774, requiredSkillIds: [] }),
+  },
   modules: {
     "1600mm Steel Plates II": row("1600mm Steel Plates II", "1600mm Steel Plates II", { massAddition: 3_750_000, defense: { kind: "armorPlate", armorHpAdd: 4800 } }),
     "Reinforced Bulkheads II": row("Reinforced Bulkheads II", "Reinforced Bulkheads II", { agilityMultiplier: 1.05, defense: { kind: "hullBulkhead", hullHpPercent: 25 } }),
@@ -510,6 +513,8 @@ const db: FittingDb = {
   charges: {
     "Conflagration M": row("Conflagration M", "Conflagration M", { trackingMultiplier: 0.7, rangeMultiplier: 0.5, chargeGroup: 375, chargeSize: 2 }),
     "EMP S": row("EMP S", "EMP S", { rangeMultiplier: 0.5, chargeGroup: 83, chargeSize: 1 }),
+    "Evasive Maneuvers Charge": row("Evasive Maneuvers Charge", "Evasive Maneuvers Charge", { warfareBuffs: [{ buffId: 20, multiplier: -6 }, { buffId: 60, multiplier: -6 }], chargeGroup: 1772, chargeSize: 0 }),
+    "Armor Energizing Charge": row("Armor Energizing Charge", "Armor Energizing Charge", { warfareBuffs: [{ buffId: 13, multiplier: -8 }], chargeGroup: 1774, chargeSize: 0 }),
   },
   launchers: {},
   missiles: {},
@@ -671,6 +676,31 @@ describe("FittingImportImpl", () => {
     expect(result).toBeDefined();
     expect(result!.profile).toBe(profile);
     expect(result!.fittingName).toBe("Brawler");
+  });
+
+  test("command burst spec carries the charge effects mapped to sim kinds", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting("[Harbinger, Burst]\nSkirmish Command Burst I, Evasive Maneuvers Charge", conditions);
+    expect(result!.commandBursts).toHaveLength(1);
+    expect(result!.commandBursts[0].effects).toEqual([
+      { kind: "signatureRadius", multiplier: 0.94 },
+      { kind: "inertia", multiplier: 0.94 },
+    ]);
+    expect(result!.commandBursts[0].capacitorNeed).toBe(33);
+    expect(result!.commandBursts[0].cycleTime).toBe(10);
+  });
+
+  test("armor burst charge maps the resistance buff kind", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting("[Harbinger, Bursty]\nArmor Command Burst I, Armor Energizing Charge", conditions);
+    expect(result!.commandBursts[0].effects).toEqual([{ kind: "armorResonance", multiplier: 0.92 }]);
+  });
+
+  test("burst without a modeled charge yields no effects", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting("[Harbinger, Naked Burst]\nArmor Command Burst I", conditions);
+    expect(result!.commandBursts).toHaveLength(1);
+    expect(result!.commandBursts[0].effects).toEqual([]);
   });
 
   test("sums flat mass from plates without bulkhead item mass fallback", () => {

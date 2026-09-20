@@ -112,7 +112,7 @@ describe("capacitorStatsSource", () => {
   });
 
   test("command bursts flow from the import into drain sources and the accessor", () => {
-    const burst: CommandBurstSpec = { moduleName: "Shield Command Burst II", moduleId: toTypeId("43555"), capacitorNeed: 25, cycleTime: 60 };
+    const burst: CommandBurstSpec = { moduleName: "Shield Command Burst II", moduleId: toTypeId("43555"), capacitorNeed: 25, cycleTime: 60, effects: [] };
     const { source, listeners, fittingImport, imported } = build({ commandBursts: [burst] } as never);
     listeners[0]?.fittingImported("shipA", imported);
     source.stats("shipA");
