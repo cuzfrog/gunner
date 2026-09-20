@@ -31,6 +31,7 @@ export interface MissileSideSnapshot {
   readonly entities: readonly MissileBodySnapshot[];
   readonly cooldowns: ReadonlyMap<number, number>;
   readonly weaponSpecs: ReadonlyMap<number, MissileSpec>;
+  readonly magazines: ReadonlyMap<number, { shotsLeft: number; numShots: number; reloadTime: number }>;
   readonly lastTargetVelocity: Vec2;
   readonly lastTargetMaxSpeed: number;
 }
@@ -73,10 +74,17 @@ interface MissileBody extends PursuitBody {
 
 type PursuitOutcome = "impact" | "lost" | "flying";
 
+interface MagazineCounter {
+  shotsLeft: number;
+  numShots: number;
+  reloadTime: number;
+}
+
 interface SideState {
   entities: MissileBody[];
   cooldowns: Map<number, number>;
   weaponSpecs: Map<number, MissileSpec>;
+  magazines: Map<number, MagazineCounter>;
   lastTargetVelocity: Vec2;
   lastTargetMaxSpeed: number;
 }
@@ -174,8 +182,10 @@ export class MissileSimulatorImpl implements MissileSimulator {
     for (const launch of launches) {
       state.weaponSpecs.set(launch.weaponIndex, launch.boosted);
       if ((state.cooldowns.get(launch.weaponIndex) ?? 0) > 0) continue;
+      prepareMagazine(state, launch);
       state.entities.push(createMissile(shipPos, launch));
-      state.cooldowns.set(launch.weaponIndex, launch.boosted.cycleTime);
+      const reload = spendMagazineShot(state, launch.weaponIndex);
+      state.cooldowns.set(launch.weaponIndex, launch.boosted.cycleTime + (reload ?? 0));
     }
   }
 
@@ -225,12 +235,36 @@ export class MissileSimulatorImpl implements MissileSimulator {
 }
 
 function emptySide(): SideState {
-  return { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
+  return { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), magazines: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
+}
+
+/** Ensures a counter exists for the weapon; a changed spec (ammo swap) restarts the counter full. */
+function prepareMagazine(state: SideState, launch: MissileLaunchSpec): void {
+  const magazine = launch.boosted.magazine;
+  if (magazine === undefined) {
+    state.magazines.delete(launch.weaponIndex);
+    return;
+  }
+  const existing = state.magazines.get(launch.weaponIndex);
+  if (existing === undefined || existing.numShots !== magazine.numShots || existing.reloadTime !== magazine.reloadTime) {
+    state.magazines.set(launch.weaponIndex, { shotsLeft: magazine.numShots, numShots: magazine.numShots, reloadTime: magazine.reloadTime });
+  }
+}
+
+/** Spends one magazine shot; returns the reload time stretching this cooldown when the magazine empties. */
+function spendMagazineShot(state: SideState, weaponIndex: number): number | undefined {
+  const counter = state.magazines.get(weaponIndex);
+  if (counter === undefined) return undefined;
+  counter.shotsLeft -= 1;
+  if (counter.shotsLeft > 0) return undefined;
+  counter.shotsLeft = counter.numShots;
+  return counter.reloadTime;
 }
 
 function snapshotSide(state: SideState): MissileSideSnapshot {
   return {
     entities: state.entities.map(snapshotBody), cooldowns: new Map(state.cooldowns), weaponSpecs: new Map(state.weaponSpecs),
+    magazines: new Map([...state.magazines].map(([index, counter]) => [index, { ...counter }])),
     lastTargetVelocity: state.lastTargetVelocity, lastTargetMaxSpeed: state.lastTargetMaxSpeed,
   };
 }
@@ -238,6 +272,7 @@ function snapshotSide(state: SideState): MissileSideSnapshot {
 function materializeSide(snapshot: MissileSideSnapshot): SideState {
   return {
     entities: snapshot.entities.map(materializeBody), cooldowns: new Map(snapshot.cooldowns), weaponSpecs: new Map(snapshot.weaponSpecs),
+    magazines: new Map([...snapshot.magazines].map(([index, counter]) => [index, { ...counter }])),
     lastTargetVelocity: snapshot.lastTargetVelocity, lastTargetMaxSpeed: snapshot.lastTargetMaxSpeed,
   };
 }

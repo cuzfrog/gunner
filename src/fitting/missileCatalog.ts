@@ -2,7 +2,7 @@ import type { TypeId } from "../gamedata/ids";
 import type { FittingDb, HullBonus, LauncherStats, MissileStats } from "../gamedata/fittingDb";
 import type { SkillLevel } from "../ships";
 import type { ImportedLauncher } from "./chargeCatalog";
-import type { MissileSkillModel } from "./missileStats";
+import { missileMagazineShots, type MissileSkillModel } from "./missileStats";
 import { type DamageFactor, missileDamageByType } from "./damageBreakdown";
 
 export interface MissileOption {
@@ -53,6 +53,7 @@ export class MissileCatalogImpl implements MissileCatalog {
     if (!launcherStats || !launcherStats.chargeGroups.includes(missile.chargeGroup)) return launcher;
     const output = this.skillModel.compute(launcherStats, missile, hullBonuses, skillLevel);
     const factors = rebuildMissileFactors(output.skillDamageMultiplier, output.skillDamageIds, output.hullDamageMultiplier, launcher.name);
+    const magazineShots = missileMagazineShots(launcherStats, missile, launcher.count);
     return {
       moduleId: launcher.moduleId,
       name: launcher.name,
@@ -66,6 +67,8 @@ export class MissileCatalogImpl implements MissileCatalog {
       damageReductionFactor: output.damageReductionFactor,
       maxVelocity: output.maxVelocity,
       flightTime: output.flightTime,
+      ...(magazineShots !== undefined ? { magazineShots } : {}),
+      ...(launcherStats.reloadTime !== undefined ? { reloadTime: launcherStats.reloadTime } : {}),
       damageBreakdown: { damageByType: missileDamageByType(missile), factors },
     };
   }

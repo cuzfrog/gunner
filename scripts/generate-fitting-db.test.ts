@@ -55,8 +55,8 @@ function callBuildModuleStats(vals: Map<string, number>, effects: readonly SdeDo
   return _buildModuleStats(vals, effectIds, groupId, typeDogma, dogmaEffectsMap(effects));
 }
 
-function sdeType(metaLevel = 0, metaGroupID = 1, volume?: number): { typeID: number; "typeName_en-us": string; groupID: number; published: number; metaLevel: number; metaGroupID: number; volume?: number } {
-  return { typeID: 0, "typeName_en-us": "", groupID: 0, published: 1, metaLevel, metaGroupID, volume };
+function sdeType(metaLevel = 0, metaGroupID = 1, volume?: number, capacity?: number): { typeID: number; "typeName_en-us": string; groupID: number; published: number; metaLevel: number; metaGroupID: number; volume?: number; capacity?: number } {
+  return { typeID: 0, "typeName_en-us": "", groupID: 0, published: 1, metaLevel, metaGroupID, ...(volume !== undefined ? { volume } : {}), ...(capacity !== undefined ? { capacity } : {}) };
 }
 
 const WEB_SKILLS = ["3435"].map((id) => toTypeId(id));
@@ -471,6 +471,20 @@ describe("buildLauncherStats", () => {
     expect(stats?.chargeGroups).toEqual([89]);
   });
 
+  test("carries magazine capacity, charge rate, and reload time from the SDE", () => {
+    expect(buildLauncherStats(values({ speed: 7800, chargeGroup1: 384, chargeRate: 1, reloadTime: 35000 }), 511, sdeType(0, 1, undefined, 0.285), skillIds)).toEqual({
+      rateOfFire: 7.8,
+      launcherGroup: 511,
+      chargeGroups: [384],
+      requiredSkillIds: skillIds,
+      metaLevel: 0,
+      metaGroupID: 1,
+      capacity: 0.285,
+      chargeRate: 1,
+      reloadTime: 35,
+    });
+  });
+
   test("preserves metaLevel and metaGroupID from SDE type", () => {
     expect(buildLauncherStats(values({ speed: 12800, chargeGroup1: 384 }), 509, sdeType(5, 2), skillIds)).toEqual({
       rateOfFire: 12.8,
@@ -490,11 +504,11 @@ describe("buildMissileStats", () => {
     expect(buildMissileStats(values({
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3000, explosionDelay: 5000, launcherGroup: 509,
-    }), 384, skillIds)).toBeUndefined();
+    }), 384, sdeType(), skillIds)).toBeUndefined();
   });
 
   test("returns undefined when application attributes are missing", () => {
-    expect(buildMissileStats(values({ kineticDamage: 100 }), 384, skillIds)).toBeUndefined();
+    expect(buildMissileStats(values({ kineticDamage: 100 }), 384, sdeType(), skillIds)).toBeUndefined();
   });
 
   test("builds a kinetic light missile from SDE attributes", () => {
@@ -502,7 +516,7 @@ describe("buildMissileStats", () => {
       emDamage: 0, thermalDamage: 0, kineticDamage: 113, explosiveDamage: 0,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384, skillIds)).toEqual({
+    }), 384, sdeType(), skillIds)).toEqual({
       damage: 113,
       damageType: "kinetic",
       explosionRadius: 50,
@@ -521,7 +535,7 @@ describe("buildMissileStats", () => {
       emDamage: 113, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 0,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384, skillIds);
+    }), 384, sdeType(), skillIds);
     expect(stats?.damageType).toBe("em");
     expect(stats?.damage).toBe(113);
   });
@@ -531,7 +545,7 @@ describe("buildMissileStats", () => {
       emDamage: 0, thermalDamage: 113, kineticDamage: 0, explosiveDamage: 0,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384, skillIds);
+    }), 384, sdeType(), skillIds);
     expect(stats?.damageType).toBe("thermal");
   });
 
@@ -540,7 +554,7 @@ describe("buildMissileStats", () => {
       emDamage: 0, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 113,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384, skillIds);
+    }), 384, sdeType(), skillIds);
     expect(stats?.damageType).toBe("explosive");
   });
 
@@ -549,8 +563,17 @@ describe("buildMissileStats", () => {
       emDamage: 0, thermalDamage: 0, kineticDamage: 100, explosiveDamage: 0,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 10000, launcherGroup: 509,
-    }), 384, skillIds);
+    }), 384, sdeType(), skillIds);
     expect(stats?.flightTime).toBe(10);
+  });
+
+  test("carries the charge volume from the SDE type", () => {
+    const stats = buildMissileStats(values({
+      emDamage: 0, thermalDamage: 0, kineticDamage: 113, explosiveDamage: 0,
+      aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
+      maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
+    }), 384, sdeType(0, 1, 0.015), skillIds);
+    expect(stats?.volume).toBe(0.015);
   });
 
   test("sums multi-type damage into total damage", () => {
@@ -558,7 +581,7 @@ describe("buildMissileStats", () => {
       emDamage: 30, thermalDamage: 30, kineticDamage: 30, explosiveDamage: 30,
       aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
-    }), 384, skillIds);
+    }), 384, sdeType(), skillIds);
     expect(stats?.damage).toBe(120);
   });
 });

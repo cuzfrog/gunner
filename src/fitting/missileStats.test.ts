@@ -1,4 +1,4 @@
-import { MissileSkillModelImpl } from "./missileStats";
+import { MissileSkillModelImpl, missileMagazineShots } from "./missileStats";
 import type { HullBonus, LauncherStats, MissileStats, SkillBonus } from "../gamedata/fittingDb";
 import { type StackingPenalty, damageVectorSum } from "../sim";
 import type { SkillLevel } from "../ships";
@@ -232,5 +232,27 @@ describe("MissileSkillModelImpl", () => {
     const missileWithoutLight = missile({ requiredSkillIds: [MLO_ID] });
     const result = model().compute(launcherWithoutMlo, missileWithoutLight, [], 5);
     expect(damageVectorSum(result.damagePerMissile)).toBeCloseTo(83 * (1 + 0.02 * 5), 6);
+  });
+});
+
+describe("missileMagazineShots", () => {
+  test("floors capacity divided by charge volume times the launcher count", () => {
+    const rlm = launcher(7.8, 511);
+    const rlmWithCapacity = { ...rlm, capacity: 0.285, chargeRate: 1, reloadTime: 35 };
+    const lightMissile = missile({ volume: 0.015 });
+    expect(missileMagazineShots(rlmWithCapacity, lightMissile, 1)).toBe(19);
+    expect(missileMagazineShots(rlmWithCapacity, lightMissile, 3)).toBe(57);
+  });
+
+  test("divides by the charge rate after flooring charges", () => {
+    const lml = { ...launcher(16, 509), capacity: 0.6, chargeRate: 1, reloadTime: 30 };
+    expect(missileMagazineShots(lml, missile({ volume: 0.015 }), 1)).toBe(40);
+  });
+
+  test("returns undefined when the launcher has no capacity or the missile has no volume", () => {
+    const lml = { ...launcher(16, 509), chargeRate: 1 };
+    expect(missileMagazineShots(lml, missile({ volume: 0.015 }), 1)).toBeUndefined();
+    const lmlWithCapacity = { ...lml, capacity: 0.6 };
+    expect(missileMagazineShots(lmlWithCapacity, missile(), 1)).toBeUndefined();
   });
 });

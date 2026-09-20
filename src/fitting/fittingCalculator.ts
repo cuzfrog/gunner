@@ -40,7 +40,7 @@ import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOAD
 import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher } from "./chargeCatalog";
 import type { GunFamily, GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
-import type { MissileSkillModel, MissileSkillOutput } from "./missileStats";
+import { missileMagazineShots, type MissileSkillModel, type MissileSkillOutput } from "./missileStats";
 import type { DroneCatalog, ImportedDrone } from "./droneCatalog";
 import type { DroneSkillModel } from "./droneStats";
 import type { FighterSkillModel } from "./fighterStats";
@@ -285,6 +285,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
     const output = this.missileSkillModel.compute(launcherStats, missileStats, fitting.hullBonuses, conditions.skillLevel);
     const launcherOverloadCycle = conditions.weaponOverloaded ? WEAPON_OVERLOAD_ROF_MULTIPLIER : 1;
     const missileFactors = buildMissileDamageFactors(output, missileStats.damageType, fitting.profile.name, bcsDamageBonus, bcsDamageModifiers);
+    const magazineShots = missileMagazineShots(launcherStats, missileStats, bestGroup.count);
     return {
       moduleId: bestGroup.moduleId,
       name: launcherStats.name,
@@ -298,6 +299,8 @@ export class FittingCalculatorImpl implements FittingCalculator {
       damageReductionFactor: output.damageReductionFactor,
       maxVelocity: output.maxVelocity,
       flightTime: output.flightTime,
+      ...(magazineShots !== undefined ? { magazineShots } : {}),
+      ...(launcherStats.reloadTime !== undefined ? { reloadTime: launcherStats.reloadTime } : {}),
       damageBreakdown: { damageByType: missileDamageByType(missileStats), factors: missileFactors },
     };
   }

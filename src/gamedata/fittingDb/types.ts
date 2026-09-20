@@ -245,6 +245,9 @@ export interface LauncherStats {
   readonly requiredSkillIds: readonly TypeId[];
   readonly metaLevel: number;
   readonly metaGroupID: number;
+  readonly capacity?: number; // m3 magazine capacity of the launcher
+  readonly chargeRate?: number; // charges consumed per cycle
+  readonly reloadTime?: number; // seconds
   readonly id: TypeId;
   readonly name: string;
 }
@@ -257,6 +260,7 @@ export interface MissileStats {
   readonly damageReductionFactor: number;
   readonly maxVelocity: number;
   readonly flightTime: number;
+  readonly volume?: number; // m3 per charge, drives the launcher magazine size
   readonly launcherGroup: number;
   readonly chargeGroup: number;
   readonly requiredSkillIds: readonly TypeId[];
