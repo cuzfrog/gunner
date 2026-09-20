@@ -47,6 +47,6 @@ export class SensorBoosterResolverImpl implements SensorBoosterResolver {
 
     const scanResolution = Math.round(spec.scanResolution * this.stacking.apply(scanResMultipliers));
     const maxTargetingRange = Math.round(spec.maxTargetingRange * this.stacking.apply(rangeMultipliers));
-    return { scanResolution, maxTargetingRange, maxLockedTargets };
+    return { scanResolution, maxTargetingRange, maxLockedTargets, strengths: spec.strengths };
   }
 }

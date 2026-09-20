@@ -90,6 +90,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     this.live.missileSimulator.reset(missileSimConfigFrom(config), { shipA: spawn.shipA.position, shipB: spawn.shipB.position });
     this.live.weaponClock.reset();
     this.live.lockClock.reset();
+    this.live.jamClock.reset();
     this.live.defenseSimulator.reset(config.defense);
     this.live.capacitorSimulator.reset(capacitorSimConfigFrom(config));
     this.initializeLocks();
@@ -164,7 +165,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     if (!config) throw new Error("composeView called before config set");
     const snapshot = this.live.simulation.snapshot();
     const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
-    const input = this.engagementInput(this.live, snapshot, this.live.lockClock.states(), config, this.paintedSigRadii(snapshot, distance));
+    const input = this.engagementInput(this.live, snapshot, this.live.lockClock.states(), config, this.paintedSigRadii(snapshot, distance), this.live.jamClock.jammed());
     const composed = this.engagementFrameComposer.compose(snapshot, input);
     return this.buildView(composed, snapshot);
   }
@@ -202,6 +203,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     const world = this.projection;
     world.simulation.restore(this.live.simulation.capture());
     world.lockClock.restore(this.live.lockClock.capture());
+    world.jamClock.restore(this.live.jamClock.capture());
     world.droneSimulator.restore(this.live.droneSimulator.capture());
     world.fighterSimulator.restore(this.live.fighterSimulator.capture());
     world.missileSimulator.restore(this.live.missileSimulator.capture());
@@ -240,8 +242,16 @@ export class EngagementEngineImpl implements EngagementEngine {
     const snapshot = mutedDestroyedSnapshot(world.simulation.snapshot(), operational);
     const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
     const painted = this.paintedSigRadii(snapshot, distance);
-    const locks = world.lockClock.step(dt, this.lockStepInput(snapshot, distance, painted, operational));
-    const input = this.engagementInput(world, snapshot, locks, config, painted);
+    world.jamClock.step({
+      dt,
+      projections: { shipA: snapshot.shipA.ewar, shipB: snapshot.shipB.ewar },
+      distance,
+      sensorStrengths: { shipA: snapshot.shipA.sensorSpec?.strengths, shipB: snapshot.shipB.sensorSpec?.strengths },
+      operational,
+    });
+    const jammed = world.jamClock.jammed();
+    const locks = world.lockClock.step(dt, this.lockStepInput(snapshot, distance, painted, operational, jammed));
+    const input = this.engagementInput(world, snapshot, locks, config, painted, jammed);
     const composed = this.engagementFrameComposer.compose(snapshot, input);
     world.droneSimulator.step(dt, composed.frame, operational);
     world.fighterSimulator.step(dt, composed.frame, operational);
@@ -255,7 +265,7 @@ export class EngagementEngineImpl implements EngagementEngine {
   private initializeLocks(): void {
     const snapshot = this.live.simulation.snapshot();
     const distance = snapshot.shipB.position.sub(snapshot.shipA.position).len();
-    this.live.lockClock.step(0, this.lockStepInput(snapshot, distance, this.paintedSigRadii(snapshot, distance), operationalSides(this.live.defenseSimulator)));
+    this.live.lockClock.step(0, this.lockStepInput(snapshot, distance, this.paintedSigRadii(snapshot, distance), operationalSides(this.live.defenseSimulator), this.live.jamClock.jammed()));
   }
 
   /** Engagement facts for the capacitor: own hard-range modules that apply nothing, own lock state, opponent suppression. Uses the pre-step snapshot, one frame of latency like the incoming-drain inputs. */
@@ -269,7 +279,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     };
   }
 
-  private lockStepInput(snapshot: SimSnapshot, distance: number, painted: Record<Side, number>, operational: Record<Side, boolean>): LockStepInput {
+  private lockStepInput(snapshot: SimSnapshot, distance: number, painted: Record<Side, number>, operational: Record<Side, boolean>, jammed: Record<Side, boolean>): LockStepInput {
     return {
       distance,
       sensorA: this.effectiveSensorSpec(snapshot.shipA, snapshot.shipB, distance),
@@ -277,6 +287,7 @@ export class EngagementEngineImpl implements EngagementEngine {
       sigA: painted.shipA,
       sigB: painted.shipB,
       operational,
+      jammed,
     };
   }
 
@@ -288,7 +299,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     };
   }
 
-  private engagementInput(world: SimWorld, snapshot: SimSnapshot, locks: Record<Side, LockState>, config: EngineConfig, painted: Record<Side, number>): EngagementInput {
+  private engagementInput(world: SimWorld, snapshot: SimSnapshot, locks: Record<Side, LockState>, config: EngineConfig, painted: Record<Side, number>, jammed: Record<Side, boolean>): EngagementInput {
     return {
       weapons: config.weapons,
       paintedSigRadii: painted,
@@ -298,6 +309,7 @@ export class EngagementEngineImpl implements EngagementEngine {
       defenses: { shipA: config.defense.shipA, shipB: config.defense.shipB },
       overloaded: config.overloaded,
       locks,
+      jammed,
     };
   }
 

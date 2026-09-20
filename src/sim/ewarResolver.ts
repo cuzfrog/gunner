@@ -1,6 +1,6 @@
 import type { TypeId } from "../gamedata/ids";
 import type { StackingPenalty } from "./stackingPenalty";
-import { type AppliedEwarEffect, type DampenerBreakdown, type DisruptionBreakdown, type EwarEffectPotentials, type EwarProjection, type EwarReach, type SensorDampenerSpec, type SensorSpec, type SpeedBreakdown, type SpeedEffectAttribution, type StatEffectAttribution, type TrackingDisruptorSpec, type TurretSpec } from "./types";
+import { SENSOR_TYPES, type AppliedEwarEffect, type DampenerBreakdown, type DisruptionBreakdown, type EwarEffectPotentials, type EwarProjection, type EwarReach, type JammerSpec, type SensorDampenerSpec, type SensorSpec, type SensorStrengths, type SensorType, type SpeedBreakdown, type SpeedEffectAttribution, type StatEffectAttribution, type TrackingDisruptorSpec, type TurretSpec } from "./types";
 
 export interface EwarResolver {
   speedMultiplier(projection: EwarProjection | undefined, distance: number): number;
@@ -18,6 +18,8 @@ export interface EwarResolver {
   dampenerBreakdown(projection: EwarProjection | undefined, distance: number): DampenerBreakdown;
   dampenedSensorSpec(spec: SensorSpec, projection: EwarProjection | undefined, distance: number): SensorSpec;
   dampenedSensorSpecIgnoringRange(spec: SensorSpec, projection: EwarProjection | undefined): SensorSpec;
+  jammerChances(projection: EwarProjection | undefined, distance: number, targetStrengths: SensorStrengths | undefined): readonly number[];
+  jammerChance(projection: EwarProjection | undefined, distance: number, targetStrengths: SensorStrengths | undefined): number;
   reach(projection: EwarProjection | undefined): EwarReach;
   potentials(projection: EwarProjection | undefined): EwarEffectPotentials;
 }
@@ -101,6 +103,7 @@ export class EwarResolverImpl implements EwarResolver {
     if (dampenerEffect) effects.push(dampenerEffect);
     const painterEffect = this.painterAppliedEffect(projection, distance);
     if (painterEffect) effects.push(painterEffect);
+    effects.push(...this.jammerAppliedEffects(projection, distance));
     effects.push(...this.capWarfareAppliedEffects(projection, distance));
     return effects;
   }
@@ -167,8 +170,30 @@ export class EwarResolverImpl implements EwarResolver {
     return this.applyDampenerModifiers(spec, modifiers);
   }
 
+  jammerChances(projection: EwarProjection | undefined, distance: number, targetStrengths: SensorStrengths | undefined): readonly number[] {
+    if (!projection || !targetStrengths) return [];
+    const sensorType = strongestSensorType(targetStrengths);
+    const sensorStrength = targetStrengths[sensorType];
+    if (sensorStrength <= 0) return projection.loadout.jammers.map(() => 0);
+    const activation = projection.activation;
+    return projection.loadout.jammers.map((spec, i) => {
+      const jammerActivation = activation?.jammers[i];
+      if (jammerActivation && !jammerActivation.active) return 0;
+      const overloadBonus = jammerActivation?.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
+      const effectiveness = jammerEffectiveness(distance, spec);
+      if (effectiveness <= 0) return 0;
+      return Math.min(1, (spec.strengths[sensorType] * overloadBonus * effectiveness) / sensorStrength);
+    });
+  }
+
+  jammerChance(projection: EwarProjection | undefined, distance: number, targetStrengths: SensorStrengths | undefined): number {
+    let retain = 1;
+    for (const chance of this.jammerChances(projection, distance, targetStrengths)) retain *= 1 - chance;
+    return 1 - retain;
+  }
+
   reach(projection: EwarProjection | undefined): EwarReach {
-    if (!projection) return { web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0 };
+    if (!projection) return { web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, jammer: 0, neutralizer: 0, nosferatu: 0 };
     return {
       web: this.webReach(projection),
       grappler: this.grapplerReach(projection),
@@ -176,6 +201,7 @@ export class EwarResolverImpl implements EwarResolver {
       disruptor: this.disruptorReach(projection),
       painter: this.painterReach(projection),
       dampener: this.dampenerReach(projection),
+      jammer: this.jammerReach(projection),
       neutralizer: this.capWarfareReach(projection.loadout.neutralizers, projection.activation?.neutralizers),
       nosferatu: this.capWarfareReach(projection.loadout.nosferatu, projection.activation?.nosferatu),
     };
@@ -294,6 +320,18 @@ export class EwarResolverImpl implements EwarResolver {
       return { family: "painter", moduleId: spec.moduleId, signatureMultiplier };
     }
     return undefined;
+  }
+
+  private jammerAppliedEffects(projection: EwarProjection, distance: number): readonly AppliedEwarEffect[] {
+    const effects: AppliedEwarEffect[] = [];
+    for (let i = 0; i < projection.loadout.jammers.length; i++) {
+      const spec = projection.loadout.jammers[i];
+      const activation = projection.activation?.jammers[i];
+      if (activation && !activation.active) continue;
+      if (jammerEffectiveness(distance, spec) <= 0) continue;
+      effects.push({ family: "jammer", moduleId: spec.moduleId, cycleTime: spec.cycleTime });
+    }
+    return effects;
   }
 
   private capWarfareAppliedEffects(projection: EwarProjection, distance: number): readonly AppliedEwarEffect[] {
@@ -489,7 +527,7 @@ export class EwarResolverImpl implements EwarResolver {
   private applyDampenerModifiers(spec: SensorSpec, modifiers: { scanResMultipliers: readonly number[]; rangeMultipliers: readonly number[] }): SensorSpec {
     const scanResolution = Math.round(spec.scanResolution * this.stacking.apply(modifiers.scanResMultipliers));
     const maxTargetingRange = Math.round(spec.maxTargetingRange * this.stacking.apply(modifiers.rangeMultipliers));
-    return { scanResolution, maxTargetingRange, maxLockedTargets: spec.maxLockedTargets };
+    return { scanResolution, maxTargetingRange, maxLockedTargets: spec.maxLockedTargets, strengths: spec.strengths };
   }
 
   private webReach(projection: EwarProjection): number {
@@ -560,4 +598,32 @@ export class EwarResolverImpl implements EwarResolver {
     }
     return reach;
   }
+
+  private jammerReach(projection: EwarProjection): number {
+    let reach = 0;
+    for (let i = 0; i < projection.loadout.jammers.length; i++) {
+      const activation = projection.activation?.jammers[i];
+      if (activation && !activation.active) continue;
+      const spec = projection.loadout.jammers[i];
+      reach = Math.max(reach, spec.optimal + spec.falloff);
+    }
+    return reach;
+  }
+}
+
+function strongestSensorType(strengths: SensorStrengths): SensorType {
+  let best: SensorType = "gravimetric";
+  for (const type of SENSOR_TYPES) {
+    if (strengths[type] > strengths[best]) best = type;
+  }
+  return best;
+}
+
+/** ECM strength falls off like other ewar but cuts off hard at optimal + 3 falloff. */
+function jammerEffectiveness(distance: number, spec: JammerSpec): number {
+  if (distance <= spec.optimal) return 1;
+  if (spec.falloff <= 0) return 0;
+  const ratio = (distance - spec.optimal) / spec.falloff;
+  if (ratio > 3) return 0;
+  return 0.5 ** (ratio * ratio);
 }

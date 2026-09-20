@@ -20,7 +20,7 @@ function importedFitting(): ImportedFitting {
     turrets: [],
     drones: [],
     cargoCharges: [],
-    ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [] },
+    ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [] },
     energyWarfareResistancePercent: 0,
     boosts: { computers: [], scripts: [] },
     missileBoosts: { launchers: [], scripts: [] },
@@ -35,7 +35,7 @@ function importedFitting(): ImportedFitting {
 
 function ewarLoadout(webs: number): EwarLoadout {
   const web = { moduleName: "Stasis Webifier II", moduleId: EWAR_MODULE, maxRange: 10000, speedFactor: -0.6, overloadRangeBonusPercent: 0, capacitorNeed: 6, cycleTime: 5 };
-  return { webs: Array.from({ length: webs }, () => web), grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [] };
+  return { webs: Array.from({ length: webs }, () => web), grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [] };
 }
 
 function emptyBoost(): BoostLoadout {

@@ -9,7 +9,7 @@ import type { ViewStream } from "../../viewStream";
 import type { RangeOverlayController, RangeOverlayEls } from "./rangeOverlayControllerContract";
 import { html } from "../markup";
 
-const ALL_KINDS: readonly RangeOverlayKind[] = ["web", "grappler", "scrambler", "disruptor", "neutralizer", "nosferatu"];
+const ALL_KINDS: readonly RangeOverlayKind[] = ["web", "grappler", "scrambler", "disruptor", "neutralizer", "nosferatu", "jammer"];
 const SIDES: readonly Side[] = ["shipA", "shipB"];
 const TITLE_REFRESH_INTERVAL_MS = 250;
 
@@ -90,6 +90,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
       case "disruptor": return this.ewarEffectDescriber.disruptorDescription(projection, distance);
       case "neutralizer": return this.ewarEffectDescriber.neutralizerDescription(projection, distance);
       case "nosferatu": return this.ewarEffectDescriber.nosferatuDescription(projection, distance);
+      case "jammer": return this.ewarEffectDescriber.jammerDescription(projection, distance);
     }
   }
 
@@ -184,7 +185,22 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
         return reach.neutralizer > 0 ? this.capWarfareFalloffOverlay(side, "neutralizer", projection.loadout.neutralizers, projection.activation?.neutralizers) : undefined;
       case "nosferatu":
         return reach.nosferatu > 0 ? this.capWarfareFalloffOverlay(side, "nosferatu", projection.loadout.nosferatu, projection.activation?.nosferatu) : undefined;
+      case "jammer":
+        return reach.jammer > 0 ? this.jammerFalloffOverlay(side, projection) : undefined;
     }
+  }
+
+  private jammerFalloffOverlay(side: Side, projection: EwarProjection): RangeOverlay | undefined {
+    let bestOptimal = 0;
+    let bestFalloff = 0;
+    for (let i = 0; i < projection.loadout.jammers.length; i++) {
+      const spec = projection.loadout.jammers[i];
+      const activation = projection.activation?.jammers[i];
+      if (activation && !activation.active) continue;
+      if (spec.optimal + spec.falloff > bestOptimal + bestFalloff) { bestOptimal = spec.optimal; bestFalloff = spec.falloff; }
+    }
+    if (bestOptimal <= 0) return undefined;
+    return { side, kind: "jammer", radius: bestOptimal, falloffRadius: bestFalloff };
   }
 
   private capWarfareFalloffOverlay(
@@ -267,6 +283,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
       nosferatu: [...(shipA?.loadout.nosferatu ?? []), ...(shipB?.loadout.nosferatu ?? [])],
       scripts: [...(shipA?.loadout.scripts ?? []), ...(shipB?.loadout.scripts ?? [])],
       dampenerScripts: [],
+      jammers: [...(shipA?.loadout.jammers ?? []), ...(shipB?.loadout.jammers ?? [])],
     };
     const activation: EwarActivation | undefined = (shipA?.activation || shipB?.activation) ? {
       webs: [...(shipA?.activation?.webs ?? []), ...(shipB?.activation?.webs ?? [])],
@@ -277,6 +294,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
       dampeners: [...(shipA?.activation?.dampeners ?? []), ...(shipB?.activation?.dampeners ?? [])],
       neutralizers: [...(shipA?.activation?.neutralizers ?? []), ...(shipB?.activation?.neutralizers ?? [])],
       nosferatu: [...(shipA?.activation?.nosferatu ?? []), ...(shipB?.activation?.nosferatu ?? [])],
+      jammers: [...(shipA?.activation?.jammers ?? []), ...(shipB?.activation?.jammers ?? [])],
     } : undefined;
     return { loadout, activation };
   }
@@ -291,6 +309,7 @@ function hasKind(projection: EwarProjection | undefined, kind: RangeOverlayKind)
     case "disruptor": return projection.loadout.disruptors.length > 0;
     case "neutralizer": return projection.loadout.neutralizers.length > 0;
     case "nosferatu": return projection.loadout.nosferatu.length > 0;
+    case "jammer": return projection.loadout.jammers.length > 0;
   }
 }
 

@@ -10,6 +10,8 @@ export interface LockStepInput {
   readonly sigB: number;
   /** False while a side's ship is destroyed: it holds no lock and cannot acquire one. */
   readonly operational: Record<Side, boolean>;
+  /** True while a side's ship is ECM-jammed: locks are broken and no new lock can start. */
+  readonly jammed: Record<Side, boolean>;
 }
 
 export interface LockClockState {
@@ -39,8 +41,8 @@ export class LockClockImpl implements LockClock {
   }
 
   step(dt: number, input: LockStepInput): Record<Side, LockState> {
-    this.shipA = this.stepSide(this.shipA, input.sensorA, input.sigB, input.distance, dt, input.operational.shipA);
-    this.shipB = this.stepSide(this.shipB, input.sensorB, input.sigA, input.distance, dt, input.operational.shipB);
+    this.shipA = this.stepSide(this.shipA, input.sensorA, input.sigB, input.distance, dt, input.operational.shipA, input.jammed.shipA);
+    this.shipB = this.stepSide(this.shipB, input.sensorB, input.sigA, input.distance, dt, input.operational.shipB, input.jammed.shipB);
     return this.states();
   }
 
@@ -57,8 +59,8 @@ export class LockClockImpl implements LockClock {
     this.shipB = state.shipB;
   }
 
-  private stepSide(prev: LockState, sensor: SensorSpec | undefined, targetSig: number, distance: number, dt: number, operational: boolean): LockState {
-    if (!operational) return IDLE_LOCK;
+  private stepSide(prev: LockState, sensor: SensorSpec | undefined, targetSig: number, distance: number, dt: number, operational: boolean, jammed: boolean): LockState {
+    if (!operational || jammed) return IDLE_LOCK;
     if (!sensor) return LOCKED_NO_SENSOR;
     const inRange = distance <= sensor.maxTargetingRange;
     const time = lockTime(sensor.scanResolution, targetSig);

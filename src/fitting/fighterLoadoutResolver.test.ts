@@ -20,6 +20,7 @@ function makeProfile(): ShipProfile {
     scanResolution: 200,
     maxTargetingRange: 30000,
     maxLockedTargets: 4,
+    sensorStrengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 },
     highSlots: 4,
     medSlots: 4,
     lowSlots: 4,

@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { ShipId, TypeId } from "../src/gamedata/ids";
-import type { DamageResists, DamageType } from "../src/sim";
+import type { DamageResists, DamageType, SensorStrengths } from "../src/sim";
 import {
   TURRET_WEAPON_GROUP_BY_ID,
   type CommandBurstStats,
@@ -255,6 +255,7 @@ const STASIS_GRAPPLER_GROUP = 1672;
 const TRACKING_COMPUTER_GROUP = 213;
 const WEAPON_DISRUPTOR_GROUP = 291;
 const TARGET_PAINTER_GROUP = 379;
+const ECM_JAMMER_GROUP = 201;
 const MISSILE_GUIDANCE_COMPUTER_GROUP = 1396;
 const MISSILE_GUIDANCE_ENHANCER_GROUP = 1395;
 const MISSILE_SCRIPT_GROUP = 1400;
@@ -699,6 +700,7 @@ interface FittingModuleStats {
   readonly trackingDisruptor?: TrackingDisruptorStats;
   readonly warpScrambler?: WarpScramblerStats;
   readonly targetPainter?: TargetPainterStats;
+  readonly jammer?: JammerStats;
   readonly sensorDampener?: SensorDampenerStats;
   readonly sensorBooster?: SensorBoosterStats;
   readonly signalAmplifier?: SignalAmplifierStats;
@@ -831,6 +833,16 @@ export interface TargetPainterStats {
   readonly maxRange: number;
   readonly falloff: number;
   readonly signatureRadiusBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
+  readonly requiredSkillIds: readonly TypeId[];
+}
+
+export interface JammerStats {
+  readonly strengths: SensorStrengths;
+  readonly optimal: number;
+  readonly falloff: number;
   readonly overloadStrengthBonusPercent: number;
   readonly capacitorNeed: number;
   readonly cycleTime: number;
@@ -1149,6 +1161,26 @@ export function buildTargetPainterStats(values: Map<string, number>, requiredSki
     falloff: values.get("falloffEffectiveness") ?? 0,
     signatureRadiusBonusPercent: signatureRadiusBonus,
     overloadStrengthBonusPercent: values.get("overloadPainterStrengthBonus") ?? 0,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    cycleTime: (values.get("duration") ?? 0) / 1000,
+    requiredSkillIds,
+  };
+}
+
+export function buildJammerStats(values: Map<string, number>, requiredSkillIds: readonly TypeId[]): JammerStats | undefined {
+  const gravimetricStrength = values.get("scanGravimetricStrengthBonus");
+  const maxRange = values.get("maxRange");
+  if (gravimetricStrength === undefined || maxRange === undefined) return undefined;
+  return {
+    strengths: {
+      gravimetric: gravimetricStrength,
+      ladar: values.get("scanLadarStrengthBonus") ?? 0,
+      magnetometric: values.get("scanMagnetometricStrengthBonus") ?? 0,
+      radar: values.get("scanRadarStrengthBonus") ?? 0,
+    },
+    optimal: maxRange,
+    falloff: values.get("falloffEffectiveness") ?? 0,
+    overloadStrengthBonusPercent: values.get("overloadECMStrengthBonus") ?? 0,
     capacitorNeed: values.get("capacitorNeed") ?? 0,
     cycleTime: (values.get("duration") ?? 0) / 1000,
     requiredSkillIds,
@@ -1856,6 +1888,7 @@ async function main() {
   const warpScramblers: Record<string, Row<WarpScramblerStats>> = {};
   const disruptionScripts: Record<string, Row<DisruptionScriptStats>> = {};
   const targetPainters: Record<string, Row<TargetPainterStats>> = {};
+  const jammers: Record<string, Row<JammerStats>> = {};
   const missileGuidanceComputers: Record<string, Row<MissileGuidanceComputerStats>> = {};
   const missileGuidanceEnhancers: Record<string, Row<MissileGuidanceEnhancerStats>> = {};
   const missileScripts: Record<string, Row<MissileScriptStats>> = {};
@@ -2127,6 +2160,16 @@ async function main() {
       continue;
     }
 
+    if (type.groupID === ECM_JAMMER_GROUP) {
+      const stats = buildJammerStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
+      if (stats) {
+        jammers[id] = { ...stats, id, name: enName };
+        fittingModules[id] = { jammer: stats, id, name: enName, requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID), groupID: type.groupID };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
     if (type.groupID === MISSILE_GUIDANCE_COMPUTER_GROUP) {
       const stats = buildMissileGuidanceComputerStats(values, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
@@ -2269,7 +2312,7 @@ async function main() {
     `/* eslint-disable */\n\n` +
     `import type { ShipId, TypeId } from "../../ids";\n` +
     `import type {\n` +
-    `  ChargeStats, CommandBurstStats, DisruptionScriptStats, DroneStats, FighterStats, FittingModuleStats, HullBonus, LauncherStats,\n` +
+    `  ChargeStats, CommandBurstStats, DisruptionScriptStats, DroneStats, FighterStats, FittingModuleStats, HullBonus, JammerStats, LauncherStats,\n` +
     `  MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, MissileStats, ModuleFittingNeeds,\n` +
     `  OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, RigDrawbackReduction,\n` +
     `  SensorBoosterScriptStats, SensorBoosterStats, SensorDampenerScriptStats, SensorDampenerStats,\n` +
@@ -2292,6 +2335,8 @@ export const WARP_SCRAMBLERS: Readonly<Record<string, WarpScramblerStats>> = ${s
 export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>> = ${stringifyWithTypeIds(disruptionScripts)};
 
 export const TARGET_PAINTERS: Readonly<Record<string, TargetPainterStats>> = ${stringifyWithTypeIds(targetPainters)};
+
+export const JAMMERS: Readonly<Record<string, JammerStats>> = ${stringifyWithTypeIds(jammers)};
 
 export const MISSILE_GUIDANCE_COMPUTERS: Readonly<Record<string, MissileGuidanceComputerStats>> = ${stringifyWithTypeIds(missileGuidanceComputers)};
 
@@ -2366,6 +2411,7 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     warpScramblers,
     disruptionScripts,
     targetPainters,
+    jammers,
     missileGuidanceComputers,
     missileGuidanceEnhancers,
     missileScripts,
@@ -2416,6 +2462,7 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     `${Object.keys(warpScramblers).length} warp scramblers`,
     `${Object.keys(disruptionScripts).length} disruption scripts`,
     `${Object.keys(targetPainters).length} target painters`,
+    `${Object.keys(jammers).length} ECM jammers`,
     `${Object.keys(missileGuidanceComputers).length} missile guidance computers`,
     `${Object.keys(missileGuidanceEnhancers).length} missile guidance enhancers`,
     `${Object.keys(missileScripts).length} missile scripts`,
@@ -2521,6 +2568,7 @@ function collectDbTableNames(
   warpScramblers: Record<string, WarpScramblerStats>,
   disruptionScripts: Record<string, DisruptionScriptStats>,
   targetPainters: Record<string, TargetPainterStats>,
+  jammers: Record<string, JammerStats>,
   missileGuidanceComputers: Record<string, MissileGuidanceComputerStats>,
   missileGuidanceEnhancers: Record<string, MissileGuidanceEnhancerStats>,
   missileScripts: Record<string, MissileScriptStats>,
@@ -2550,6 +2598,7 @@ function collectDbTableNames(
     ...Object.keys(warpScramblers),
     ...Object.keys(disruptionScripts),
     ...Object.keys(targetPainters),
+    ...Object.keys(jammers),
     ...Object.keys(missileGuidanceComputers),
     ...Object.keys(missileGuidanceEnhancers),
     ...Object.keys(missileScripts),
@@ -2715,7 +2764,7 @@ async function writeI18nFiles(
   await writeFile(collisionJaFile, collisionJaContent);
 }
 
-export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses, buildSubsystemBonuses as _buildSubsystemBonuses, buildPropulsionStats as _buildPropulsionStats, buildSkillBonuses as _buildSkillBonuses, buildDroneSkillIds as _buildDroneSkillIds, assertCombatDroneSkillChain as _assertCombatDroneSkillChain, assertFighterSkillChain as _assertFighterSkillChain };
+export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildDefenseStats as _buildDefenseStats, buildTargetPainterStats as _buildTargetPainterStats, buildJammerStats as _buildJammerStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats, resolveHullBonusAttribute as _resolveHullBonusAttribute, buildHullBonuses as _buildHullBonuses, buildSubsystemBonuses as _buildSubsystemBonuses, buildPropulsionStats as _buildPropulsionStats, buildSkillBonuses as _buildSkillBonuses, buildDroneSkillIds as _buildDroneSkillIds, assertCombatDroneSkillChain as _assertCombatDroneSkillChain, assertFighterSkillChain as _assertFighterSkillChain };
 
 if (import.meta.main) {
   main().catch((error) => {

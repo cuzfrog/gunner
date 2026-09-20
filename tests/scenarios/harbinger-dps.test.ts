@@ -80,7 +80,8 @@ const noEwarResolver: EwarResolver = {
   dampenedSensorSpec: (spec) => spec,
   dampenedSensorSpecIgnoringRange: (spec) => spec,
   dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
-  reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, }),
+  reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, jammer: 0, }),
+jammerChances: () => [], jammerChance: () => 0,
   potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
 };
 
@@ -136,7 +137,7 @@ describe("Harbinger DPS cross-check (all skills 5, no overload)", () => {
     const result = importer.importFitting(HARBINGER_FIT, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const turret = turretSpecFromImported(result!.turret!);
     const composer = makeComposer();
-    const view = composer.compose(snapshot(), { weapons: { shipA: [turret], shipB: [] }, paintedSigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, spoolCycles: { shipA: [], shipB: [] }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    const view = composer.compose(snapshot(), { weapons: { shipA: [turret], shipB: [] }, paintedSigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, spoolCycles: { shipA: [], shipB: [] }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, jammed: { shipA: false, shipB: false } });
     expect(view.attacks.shipA).toBeDefined();
     const expectedNominalDps = (damageVectorSum(turret.damagePerShot) * turret.turretCount) / turret.cycleTime;
     expect(view.attacks.shipA!.damage.nominalDps).toBeCloseTo(expectedNominalDps, 6);
@@ -149,7 +150,7 @@ describe("mixed turret + launcher DPS summation through sim", () => {
     const missile: MissileSpec = { kind: "missile", moduleId: toTypeId("3"), damagePerMissile: { em: 0, thermal: 0, kinetic: 150, explosive: 0 }, cycleTime: 10, launcherCount: 2, explosionRadius: 50, explosionVelocity: 100, damageReductionFactor: 4.5, maxVelocity: 5000, flightTime: 10, flightRange: 50_000 };
     const composer = makeComposer();
     const missileFacts: MissileAttackFacts = { inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 1, signatureTerm: 1, velocityTerm: 1 }, interceptable: true };
-    const view = composer.compose(snapshot(), { weapons: { shipA: [turret, missile], shipB: [] }, paintedSigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [missileFacts], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, spoolCycles: { shipA: [], shipB: [] }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    const view = composer.compose(snapshot(), { weapons: { shipA: [turret, missile], shipB: [] }, paintedSigRadii: { shipA: 300, shipB: 300 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [missileFacts], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, spoolCycles: { shipA: [], shipB: [] }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, jammed: { shipA: false, shipB: false } });
     expect(view.attacks.shipA).toBeDefined();
     const expectedTurretDps = (100 * 4) / 5;
     const expectedMissileDps = (150 * 2) / 10;

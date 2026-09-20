@@ -20,6 +20,7 @@ function makeProfile(): ShipProfile {
     scanResolution: 200,
     maxTargetingRange: 30000,
     maxLockedTargets: 4,
+    sensorStrengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 },
     highSlots: 4,
     medSlots: 4,
     lowSlots: 4,
@@ -87,10 +88,10 @@ function mockCalculator(): FittingCalculator {
     resolveLauncher: vi.fn(() => undefined),
     resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } })),
     resolvePropulsion: vi.fn(() => undefined),
-    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], painters: [], scramblers: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], })),
+    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], painters: [], scramblers: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], })),
     resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
     resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })),
-    resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], })),
+    resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], })),
     resolveSensorSpec: vi.fn(() => ({ scanResolution: 0, maxTargetingRange: 0, maxLockedTargets: 0 })),
     resolveDrones: vi.fn((fitting: FittingState, _conditions: StatConditions): readonly ImportedDrone[] => {
       return fitting.droneGroups.map((g) => makeImportedDrone(String(g.typeId), g.count));

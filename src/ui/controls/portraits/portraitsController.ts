@@ -171,6 +171,8 @@ function ewarEffectHint(effect: ActiveOffensiveModule & { category: "ewar" }, i1
       return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.neutralizer")} ${effect.amountPerCycle} GJ / ${effect.cycleTime}s` };
     case "nosferatu":
       return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.nosferatu")} ${effect.amountPerCycle} GJ / ${effect.cycleTime}s` };
+    case "jammer":
+      return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.jammer")} · ${effect.cycleTime}s` };
   }
 }
 

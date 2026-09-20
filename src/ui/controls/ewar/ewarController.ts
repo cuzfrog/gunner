@@ -1,5 +1,5 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
-import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type EnergyNeutralizerSpec, type NosferatuSpec, type SensorDampenerScriptSpec, type SensorDampenerSpec, type StasisGrapplerSpec, type TargetPainterSpec, type WarpScramblerSpec } from "../../../sim";
+import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type EnergyNeutralizerSpec, type JammerSpec, type NosferatuSpec, type SensorDampenerScriptSpec, type SensorDampenerSpec, type StasisGrapplerSpec, type TargetPainterSpec, type WarpScramblerSpec } from "../../../sim";
 import type { StoredDisruptionScript, StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
@@ -23,6 +23,7 @@ interface MutableEwarActivation {
   dampeners: { active: boolean; overloaded: boolean; script: SensorDampenerScriptSpec | undefined }[];
   neutralizers: { active: boolean }[];
   nosferatu: { active: boolean }[];
+  jammers: { active: boolean; overloaded: boolean }[];
 }
 
 interface EwarState {
@@ -130,6 +131,7 @@ export class EwarControllerImpl implements EwarController {
       })),
       ...(state.activation.neutralizers.length > 0 ? { neutralizers: state.activation.neutralizers.map((n) => ({ active: n.active })) } : {}),
       ...(state.activation.nosferatu.length > 0 ? { nosferatu: state.activation.nosferatu.map((n) => ({ active: n.active })) } : {}),
+      ...(state.activation.jammers.length > 0 ? { jammers: state.activation.jammers.map((j) => ({ active: j.active, overloaded: j.overloaded })) } : {}),
     };
   }
 
@@ -205,12 +207,15 @@ export class EwarControllerImpl implements EwarController {
     if (state.loadout.nosferatu.length > 0) {
       this.renderSection(section, "label.ewar.nosferatu", (container) => this.renderNosferatu(side, state, container));
     }
+    if (state.loadout.jammers.length > 0) {
+      this.renderSection(section, "label.ewar.jammer", (container) => this.renderJammers(side, state, container));
+    }
     this.updateRowStates(side);
   }
 
   private renderSection(
     parent: HTMLElement,
-    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler" | "label.ewar.painter" | "label.ewar.dampener" | "label.ewar.neutralizer" | "label.ewar.nosferatu",
+    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler" | "label.ewar.painter" | "label.ewar.dampener" | "label.ewar.neutralizer" | "label.ewar.nosferatu" | "label.ewar.jammer",
     renderRows: (container: HTMLElement) => void,
   ): void {
     const rowContainer = html`<div></div>` as unknown as HTMLDivElement;
@@ -259,6 +264,10 @@ export class EwarControllerImpl implements EwarController {
     const nosferatuActive = state.activation.nosferatu.filter((n) => n.active).length;
     const nosferatuTitle = nosferatuTotal > 0 ? this.ewarEffectDescriber.nosferatuHint(projection) : "";
     if (nosferatuTotal > 0) this.appendSummaryItem(summary, state.loadout.nosferatu[0].moduleId, nosferatuActive, nosferatuTotal, nosferatuTitle);
+    const jammerTotal = state.loadout.jammers.length;
+    const jammerActive = state.activation.jammers.filter((j) => j.active).length;
+    const jammerTitle = jammerTotal > 0 ? this.ewarEffectDescriber.jammerHint(projection) : "";
+    if (jammerTotal > 0) this.appendSummaryItem(summary, state.loadout.jammers[0].moduleId, jammerActive, jammerTotal, jammerTitle);
   }
 
   private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, hint: string): void {
@@ -270,7 +279,7 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private isEmpty(loadout: EwarLoadout): boolean {
-    return loadout.webs.length === 0 && loadout.grapplers.length === 0 && loadout.disruptors.length === 0 && loadout.scramblers.length === 0 && loadout.painters.length === 0 && loadout.dampeners.length === 0 && loadout.neutralizers.length === 0 && loadout.nosferatu.length === 0;
+    return loadout.webs.length === 0 && loadout.grapplers.length === 0 && loadout.disruptors.length === 0 && loadout.scramblers.length === 0 && loadout.painters.length === 0 && loadout.dampeners.length === 0 && loadout.neutralizers.length === 0 && loadout.nosferatu.length === 0 && loadout.jammers.length === 0;
   }
 
   private clampActivation(loadout: EwarLoadout, saved?: StoredEwarActivation): MutableEwarActivation {
@@ -335,6 +344,7 @@ export class EwarControllerImpl implements EwarController {
       }),
       neutralizers: loadout.neutralizers.map((_, i) => ({ active: saved?.neutralizers?.[i]?.active ?? true })),
       nosferatu: loadout.nosferatu.map((_, i) => ({ active: saved?.nosferatu?.[i]?.active ?? true })),
+      jammers: loadout.jammers.map((_, i) => ({ active: saved?.jammers?.[i]?.active ?? true, overloaded: saved?.jammers?.[i]?.overloaded ?? false })),
     };
   }
 
@@ -429,6 +439,16 @@ export class EwarControllerImpl implements EwarController {
       const button = this.createModuleButton(state.activation.nosferatu[i].active, nosferatu);
       button.addEventListener("click", () => this.toggleNosferatu(side, i, button));
       section.appendChild(this.createRow(side, "nosferatu", i, nosferatu.moduleId, () => state.activation.nosferatu[i].active, [button]));
+    }
+  }
+
+  private renderJammers(side: Side, state: EwarState, section: HTMLElement): void {
+    for (let i = 0; i < state.loadout.jammers.length; i++) {
+      const jammer: JammerSpec = state.loadout.jammers[i];
+      const button = this.createModuleButton(state.activation.jammers[i].active, jammer);
+      const overloadButton = this.createOverloadButton(state.activation.jammers[i].active, state.activation.jammers[i].overloaded, i, jammer, () => this.toggleJammerOverload(side, i, overloadButton));
+      button.addEventListener("click", () => this.toggleJammer(side, i, button));
+      section.appendChild(this.createRow(side, "jammers", i, jammer.moduleId, () => state.activation.jammers[i].active, [button, overloadButton]));
     }
   }
 
@@ -717,6 +737,28 @@ export class EwarControllerImpl implements EwarController {
     state.activation.nosferatu[index].active = active;
     button.setAttribute("aria-pressed", String(active));
     this.refreshRow(side, "nosferatu", index);
+    this.updateSummary(side);
+    this.events.emitConfigInvalidated();
+  }
+
+  private toggleJammer(side: Side, index: number, button: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const active = !state.activation.jammers[index].active;
+    state.activation.jammers[index].active = active;
+    button.setAttribute("aria-pressed", String(active));
+    this.refreshRow(side, "jammers", index);
+    this.updateSummary(side);
+    this.events.emitConfigInvalidated();
+  }
+
+  private toggleJammerOverload(side: Side, index: number, button: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const overloaded = !state.activation.jammers[index].overloaded;
+    state.activation.jammers[index].overloaded = overloaded;
+    button.setAttribute("aria-pressed", String(overloaded));
+
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }

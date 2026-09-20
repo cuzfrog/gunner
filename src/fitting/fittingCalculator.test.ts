@@ -1,5 +1,5 @@
-import { _computeDroneControlRange, _resolveSensorStats } from "./fittingCalculator";
-import type { HullBonus, FittingModuleStats, RigDrawback, RigDrawbackReduction } from "../gamedata/fittingDb";
+import { _computeDroneControlRange, _resolveEwarState, _resolveSensorStats } from "./fittingCalculator";
+import type { EwarDb, FittingDb, HullBonus, FittingModuleStats, RigDrawback, RigDrawbackReduction } from "../gamedata/fittingDb";
 import type { FittedModule } from "./fittingState";
 import { toTypeId, type TypeId, type ShipId, type FactionId, type HullTypeId } from "../gamedata/ids";
 import type { ShipProfile } from "../ships";
@@ -57,6 +57,7 @@ function sensorProfile(overrides: { maxTargetingRange?: number } = {}): ShipProf
     scanResolution: 250,
     maxTargetingRange: overrides.maxTargetingRange ?? 50000,
     maxLockedTargets: 7,
+    sensorStrengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 },
     highSlots: 0,
     medSlots: 0,
     lowSlots: 0,
@@ -91,7 +92,7 @@ function flatBonus(attribute: HullBonus["attribute"], magnitude: number): HullBo
 describe("_resolveSensorStats", () => {
   test("base sensor stats come from the profile at skill level 0", () => {
     const spec = _resolveSensorStats(sensorProfile(), [], undefined);
-    expect(spec).toEqual({ scanResolution: 250, maxTargetingRange: 50000, maxLockedTargets: 7 });
+    expect(spec).toEqual({ scanResolution: 250, maxTargetingRange: 50000, maxLockedTargets: 7, strengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 } });
   });
 
   test("subsystem flat targeting range adds to the base before skill multipliers", () => {
@@ -100,5 +101,24 @@ describe("_resolveSensorStats", () => {
     expect(withFlat.maxTargetingRange).toBe(70000);
     const withSkill = _resolveSensorStats(profile, [flatBonus("maxTargetingRangeFlat", 20000)], { longRangeTargeting: 4, signatureAnalysis: 0, targetManagement: 0, advancedTargetManagement: 0, sensorLinking: 0, signalSuppression: 0, frequencyModulation: 0 });
     expect(withSkill.maxTargetingRange).toBe(84000);
+  });
+});
+
+const EMPTY_EWAR_DB: EwarDb = { stasisWebs: {}, stasisGrapplers: {}, trackingDisruptors: {}, warpScramblers: {}, targetPainters: {}, sensorDampeners: {}, sensorDampenerScripts: {}, disruptionScripts: {}, jammers: {}, modules: {}, skillBonuses: [] };
+const NAME_CATALOG = { nameForId: (id: TypeId) => `Item ${id}` };
+
+const GRAV_ECM_ID = toTypeId("2571");
+const GRAV_ECM_STATS = { strengths: { gravimetric: 4, ladar: 1.3, magnetometric: 1.3, radar: 1.3 }, optimal: 34560, falloff: 32400, overloadStrengthBonusPercent: 20, capacitorNeed: 58, cycleTime: 20, requiredSkillIds: [toTypeId("3427")] };
+
+describe("_resolveEwarState", () => {
+  test("resolves an ECM jammer into a JammerSpec", () => {
+    const db: EwarDb = { ...EMPTY_EWAR_DB, jammers: { [GRAV_ECM_ID]: { ...GRAV_ECM_STATS, id: GRAV_ECM_ID, name: "Gravimetric ECM II" } } };
+    const loadout = _resolveEwarState(db, NAME_CATALOG, [fittedModule("2571")], 0);
+    expect(loadout.jammers).toEqual([{ moduleName: "Gravimetric ECM II", moduleId: GRAV_ECM_ID, strengths: GRAV_ECM_STATS.strengths, optimal: 34560, falloff: 32400, overloadStrengthBonusPercent: 20, capacitorNeed: 58, cycleTime: 20 }]);
+  });
+
+  test("ignores modules that are not ewar", () => {
+    const loadout = _resolveEwarState(EMPTY_EWAR_DB, NAME_CATALOG, [fittedModule("99999")], 0);
+    expect(loadout).toEqual({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], scripts: [], dampenerScripts: [], jammers: [] });
   });
 });

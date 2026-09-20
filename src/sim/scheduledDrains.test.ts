@@ -14,8 +14,8 @@ const COMMAND_BURST: CommandBurstSpec = { moduleName: "Armor Command Burst II", 
 
 function ewarProjection(loadout: Partial<EwarProjection["loadout"]>, activation?: EwarProjection["activation"]): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], ...loadout },
-    activation: activation ?? { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [] },
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], ...loadout },
+    activation: activation ?? { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [] },
   };
 }
 
@@ -47,7 +47,7 @@ describe("scheduledDrainsFromProjections", () => {
   });
 
   test("active ewar entries follow per-instance activation flags", () => {
-    const ewar = ewarProjection({ webs: [WEB] }, { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [] });
+    const ewar = ewarProjection({ webs: [WEB] }, { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [] });
     const drains = scheduledDrainsFromProjections(ewar, { loadout: { computers: [], scripts: [] }, activation: undefined }, { loadout: { computers: [], enhancers: [], scripts: [] }, activation: undefined }, { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: [] }, []);
     expect(drains).toEqual([{ moduleId: toTypeId("1"), amount: 10, interval: 5, active: false }] satisfies ScheduledDrain[]);
   });

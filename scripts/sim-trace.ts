@@ -323,7 +323,7 @@ function parseShipASteering(raw: string): "predictive" | "reactive" {
 }
 
 function buildEwarProjection(loadout: EwarProjection["loadout"], overloaded: boolean): EwarProjection {
-  const { webs, grapplers, disruptors, scramblers = [], painters = [], dampeners = [], neutralizers = [], nosferatu = [] } = loadout;
+  const { webs, grapplers, disruptors, scramblers = [], painters = [], dampeners = [], neutralizers = [], nosferatu = [], jammers = [] } = loadout;
   return {
     loadout,
     activation: {
@@ -335,6 +335,7 @@ function buildEwarProjection(loadout: EwarProjection["loadout"], overloaded: boo
       dampeners: dampeners.map(() => ({ active: true, overloaded, script: undefined })),
       neutralizers: neutralizers.map(() => ({ active: true })),
       nosferatu: nosferatu.map(() => ({ active: true })),
+      jammers: jammers.map(() => ({ active: true, overloaded })),
     },
   };
 }

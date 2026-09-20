@@ -105,6 +105,7 @@ const profile: ShipProfile = {
   sigRadius: 270,
   scanResolution: 200,
   maxTargetingRange: 30000,  maxLockedTargets: 4,
+  sensorStrengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 },
   highSlots: 3,
   medSlots: 4,
   lowSlots: 3,
@@ -142,6 +143,7 @@ const frigateProfile: ShipProfile = {
   sigRadius: 35,
   scanResolution: 200,
   maxTargetingRange: 30000,  maxLockedTargets: 4,
+  sensorStrengths: { gravimetric: 0, ladar: 8, magnetometric: 0, radar: 0 },
   highSlots: 3,
   medSlots: 4,
   lowSlots: 3,
@@ -179,6 +181,7 @@ const bonusProfile: ShipProfile = {
   sigRadius: 130,
   scanResolution: 200,
   maxTargetingRange: 30000,  maxLockedTargets: 4,
+  sensorStrengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 },
   highSlots: 3,
   medSlots: 4,
   lowSlots: 3,
@@ -216,6 +219,7 @@ const roleBonusProfile: ShipProfile = {
   sigRadius: 135,
   scanResolution: 200,
   maxTargetingRange: 30000,  maxLockedTargets: 4,
+  sensorStrengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 },
   highSlots: 3,
   medSlots: 4,
   lowSlots: 3,
@@ -253,6 +257,7 @@ const abaddonProfile: ShipProfile = {
   sigRadius: 470,
   scanResolution: 200,
   maxTargetingRange: 30000,  maxLockedTargets: 4,
+  sensorStrengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 },
   highSlots: 3,
   medSlots: 4,
   lowSlots: 3,
@@ -290,6 +295,7 @@ const harbingerProfile: ShipProfile = {
   sigRadius: 270,
   scanResolution: 200,
   maxTargetingRange: 30000,  maxLockedTargets: 4,
+  sensorStrengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 },
   highSlots: 3,
   medSlots: 4,
   lowSlots: 3,
@@ -360,6 +366,7 @@ const kestrelProfile: ShipProfile = {
   sigRadius: 38,
   scanResolution: 200,
   maxTargetingRange: 30000,  maxLockedTargets: 4,
+  sensorStrengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 },
   highSlots: 3,
   medSlots: 4,
   lowSlots: 3,
@@ -397,6 +404,7 @@ const stilettoProfile: ShipProfile = {
   sigRadius: 31,
   scanResolution: 200,
   maxTargetingRange: 30000,  maxLockedTargets: 4,
+  sensorStrengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 },
   highSlots: 3,
   medSlots: 4,
   lowSlots: 3,
@@ -448,6 +456,7 @@ const ships = vi.mocked<Ships>({
 } as unknown as Ships);
 
 const db: FittingDb = {
+  jammers: {},
   needs: {},
   subsystemBonuses: {},
   subsystems: {},
@@ -592,6 +601,7 @@ const skillBonusDb: FittingDb = {
 };
 
 const fullFittingDb: FittingDb = {
+  jammers: {},
   needs: {},
   subsystemBonuses: SUBSYSTEM_BONUSES,
   subsystems: SUBSYSTEMS,
@@ -2096,7 +2106,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, needs: {}, commandBursts: {}, subsystems: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES, fighters: {} };
+  return { modules: {}, jammers: {}, needs: {}, commandBursts: {}, subsystems: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES, fighters: {} };
 }
 
 describe("FittingImportImpl.summarize", () => {
@@ -2595,6 +2605,7 @@ describe("FittingImportImpl.fighters", () => {
     scanResolution: 70,
     maxTargetingRange: 315000,
     maxLockedTargets: 14,
+    sensorStrengths: { gravimetric: 16, ladar: 0, magnetometric: 0, radar: 0 },
     highSlots: 5,
     medSlots: 4,
     lowSlots: 7,

@@ -18,6 +18,7 @@ function profile(overrides: Partial<ShipProfile> = {}): ShipProfile {
     scanResolution: 200,
     maxTargetingRange: 30000,
     maxLockedTargets: 4,
+    sensorStrengths: { gravimetric: 16, ladar: 0, magnetometric: 0, radar: 0 },
     highSlots: 5,
     medSlots: 4,
     lowSlots: 5,
@@ -68,7 +69,7 @@ function burstStats(id: string, stats: Partial<CommandBurstStats>): CommandBurst
 
 function emptyDb(): FittingDb {
   return {
-    modules: {}, needs: {}, turrets: {}, charges: {}, commandBursts: {}, subsystems: {}, launchers: {}, missiles: {}, scripts: {},
+    modules: {}, jammers: {}, needs: {}, turrets: {}, charges: {}, commandBursts: {}, subsystems: {}, launchers: {}, missiles: {}, scripts: {},
     stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {},
     targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {},
     omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {},

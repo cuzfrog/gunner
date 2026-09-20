@@ -423,6 +423,7 @@ function isModuleRole(id: TypeId, db: FittingDb): boolean {
     db.trackingDisruptors[id] !== undefined ||
     db.warpScramblers[id] !== undefined ||
     db.targetPainters[id] !== undefined ||
+    db.jammers[id] !== undefined ||
     db.missileGuidanceComputers[id] !== undefined ||
     db.missileGuidanceEnhancers[id] !== undefined ||
     db.omnidirectionalTrackingLinks[id] !== undefined ||

@@ -13,6 +13,7 @@ const WEB2 = { moduleId: toTypeId("527"), moduleName: "Stasis Webifier II", maxR
 const SCRAMBLER = { moduleId: toTypeId("448"), moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20, propulsionBlock: true };
 const GRAPPLER = { moduleId: toTypeId("41040"), moduleName: "Heavy Stasis Grappler I", optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
 const DISRUPTOR = { moduleId: toTypeId("2109"), moduleName: "Tracking Disruptor I", optimal: 10000, falloff: 30000, disruption: -0.2, defaultScript: undefined, overloadStrengthBonusPercent: 20 };
+const JAMMER = { moduleId: toTypeId("2571"), moduleName: "Gravimetric ECM II", strengths: { gravimetric: 4, ladar: 1.3, magnetometric: 1.3, radar: 1.3 }, optimal: 34560, falloff: 32400, overloadStrengthBonusPercent: 20, capacitorNeed: 58, cycleTime: 20 };
 
 function buildController(now: () => number = () => 0): {
   controller: RangeOverlayController;
@@ -61,6 +62,8 @@ function buildController(now: () => number = () => 0): {
     scramblerHint: vi.fn(() => "scrambler-hint"),
     painterHint: vi.fn(() => "painter-hint"),
     dampenerHint: vi.fn(() => "dampener-hint"),
+    jammerDescription: vi.fn(() => "jammer-desc"),
+    jammerHint: vi.fn(() => "jammer-hint"),
   });
   const events = new UiEventsImpl();
   const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
@@ -93,29 +96,36 @@ function emitView(listeners: Set<(view: EngagementView) => void>, distance: numb
 
 function projectionWithWeb(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [WEB], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
-    activation: { webs: [{ active, overloaded }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+    loadout: { webs: [WEB], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+    activation: { webs: [{ active, overloaded }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
   };
 }
 
 function projectionWithGrappler(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
-    activation: { webs: [], grapplers: [{ active, overloaded }], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+    loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+    activation: { webs: [], grapplers: [{ active, overloaded }], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
   };
 }
 
 function projectionWithScrambler(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
-    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active, overloaded  }], painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active, overloaded  }], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
   };
 }
 
 function projectionWithDisruptor(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [DISRUPTOR], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
-    activation: { webs: [], grapplers: [], disruptors: [{ active, overloaded, script: undefined }], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+    loadout: { webs: [], grapplers: [], disruptors: [DISRUPTOR], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+    activation: { webs: [], grapplers: [], disruptors: [{ active, overloaded, script: undefined }], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
+  };
+}
+
+function projectionWithJammer(active = true): EwarProjection {
+  return {
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [JAMMER] },
+    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [{ active, overloaded: false }] },
   };
 }
 
@@ -151,6 +161,24 @@ describe("RangeOverlayController", () => {
     expect(overlays).toHaveLength(2);
     expect(overlays[0]).toEqual({ side: "shipA", kind: "web", radius: 10000 });
     expect(overlays[1]).toEqual({ side: "shipB", kind: "disruptor", radius: 10000, falloffRadius: 30000 });
+  });
+
+  test("jammer kind appears in descriptors and produces an optimal+falloff overlay", () => {
+    const { controller, ewarController } = buildController();
+    setProjections(ewarController, projectionWithJammer(), undefined);
+    controller.restoreVisibility({ web: "both", grappler: "both", scrambler: "both", disruptor: "both", neutralizer: "both", nosferatu: "both", jammer: "both" });
+    expect(controller.descriptors()).toEqual(["jammer"]);
+    const overlays = controller.overlays();
+    expect(overlays).toEqual([{ side: "shipA", kind: "jammer", radius: 34560, falloffRadius: 32400 }]);
+  });
+
+  test("inactive jammers do not produce overlays and describe delegates to the describer", () => {
+    const { controller, ewarController, ewarEffectDescriber } = buildController();
+    setProjections(ewarController, projectionWithJammer(false), undefined);
+    controller.restoreVisibility({ web: "both", grappler: "both", scrambler: "both", disruptor: "both", neutralizer: "both", nosferatu: "both", jammer: "both" });
+    expect(controller.overlays()).toEqual([]);
+    expect(controller.describe("jammer")).toBe("jammer-desc");
+    expect(ewarEffectDescriber.jammerDescription).toHaveBeenCalledWith(expect.anything(), 5000);
   });
 
   test("toggle cycles visibility through both, shipA, shipB, none", () => {

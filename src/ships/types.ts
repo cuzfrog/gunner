@@ -1,5 +1,5 @@
 import type { FactionId, HullTypeId, ShipId, TypeId } from "../gamedata/ids";
-import type { DamageResists } from "../sim";
+import type { DamageResists, SensorStrengths } from "../sim";
 
 export type HullTier = "small" | "medium" | "large" | "capital";
 
@@ -32,6 +32,7 @@ export interface ShipProfile {
   readonly scanResolution: number; // mm
   readonly maxTargetingRange: number; // m
   readonly maxLockedTargets: number;
+  readonly sensorStrengths: SensorStrengths;
   readonly highSlots: number;
   readonly medSlots: number;
   readonly lowSlots: number;

@@ -211,7 +211,7 @@ export class FittingStateFactory {
   }
 
   private isEwarModule(moduleId: TypeId): boolean {
-    return this.db.stasisWebs[moduleId] !== undefined || this.db.stasisGrapplers[moduleId] !== undefined || this.db.trackingDisruptors[moduleId] !== undefined || this.db.warpScramblers[moduleId] !== undefined || this.db.targetPainters[moduleId] !== undefined || this.db.sensorDampeners[moduleId] !== undefined || this.db.modules[moduleId]?.neutralizer !== undefined || this.db.modules[moduleId]?.nosferatu !== undefined;
+    return this.db.stasisWebs[moduleId] !== undefined || this.db.stasisGrapplers[moduleId] !== undefined || this.db.trackingDisruptors[moduleId] !== undefined || this.db.warpScramblers[moduleId] !== undefined || this.db.targetPainters[moduleId] !== undefined || this.db.jammers[moduleId] !== undefined || this.db.sensorDampeners[moduleId] !== undefined || this.db.modules[moduleId]?.neutralizer !== undefined || this.db.modules[moduleId]?.nosferatu !== undefined;
   }
 }
 

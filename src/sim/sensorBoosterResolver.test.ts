@@ -24,6 +24,13 @@ function projection(loadout: Partial<SensorBoostLoadout>, activation?: readonly 
 }
 
 describe("SensorBoosterResolverImpl", () => {
+  test("preserves sensor strengths when boosting", () => {
+    const spec: SensorSpec = { ...baseSpec, strengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 } };
+    const loadout = { boosters: [makeBoosterSpec()], amplifiers: [], boosterScripts: [] };
+    const result = resolver.boostedSensorSpec(spec, projection(loadout, [{ active: true, overloaded: false, script: undefined }]));
+    expect(result.strengths).toEqual({ gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 });
+  });
+
   test("returns spec unchanged when projection is undefined", () => {
     expect(resolver.boostedSensorSpec(baseSpec, undefined)).toEqual(baseSpec);
   });

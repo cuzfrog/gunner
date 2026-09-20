@@ -61,8 +61,8 @@ function baseShipBState(): SidePanelState {
 
 function ewarProjection(): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
-    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
   };
 }
 
@@ -294,7 +294,7 @@ describe("SimConfigSourceImpl", () => {
     const painter: import("../../../sim").TargetPainterSpec = { moduleName: "Painter", moduleId: toTypeId("12709"), maxRange: 30000, falloff: 7500, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 0, capacitorNeed: 8, cycleTime: 5 };
     const computer: import("../../../sim").TrackingBoosterSpec = { moduleName: "Computer", moduleId: toTypeId("1978"), trackingBonusPercent: 15, optimalBonusPercent: 7.5, falloffBonusPercent: 15, defaultScript: undefined, capacitorNeed: 10, cycleTime: 10 };
     const sensor: import("../../../sim").SensorBoosterSpec = { moduleName: "Booster", moduleId: toTypeId("1952"), scanResolutionBonusPercent: 30, maxTargetRangeBonusPercent: 30, overloadStrengthBonusPercent: 15, defaultScript: undefined, capacitorNeed: 12, cycleTime: 10 };
-    const ewar: EwarProjection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [painter], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [{ active: false, overloaded: false }], dampeners: [], neutralizers: [], nosferatu: [] } };
+    const ewar: EwarProjection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [painter], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], }, activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [{ active: false, overloaded: false }], dampeners: [], neutralizers: [], nosferatu: [], jammers: [] } };
     const boost: TurretBoostProjection = { loadout: { computers: [computer], scripts: [] }, activation: { computers: [{ active: true, overloaded: false, script: undefined }] } };
     deps.ewarController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? ewar : undefined));
     deps.boosterController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? boost : undefined));
@@ -315,7 +315,7 @@ describe("SimConfigSourceImpl", () => {
   test("getEngineConfig builds drains when activation is absent (defaults to active)", () => {
     const deps = build();
     const web: import("../../../sim").StasisWebSpec = { moduleName: "Web", moduleId: toTypeId("526"), maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 0, capacitorNeed: 6, cycleTime: 5 };
-    const ewar: EwarProjection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [] } };
+    const ewar: EwarProjection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [] } };
     deps.ewarController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? ewar : undefined));
     const engineConfig = makeSource(deps).getEngineConfig();
     expect(engineConfig.capacitor.shipA.drains).toEqual([{ moduleId: web.moduleId, amount: 6, interval: 5, active: true }]);
@@ -333,7 +333,7 @@ describe("SimConfigSourceImpl", () => {
   test("getEngineConfig builds a scheduled drain for each active neutralizer", () => {
     const deps = build();
     const neutralizer: import("../../../sim").EnergyNeutralizerSpec = { moduleName: "Neut", moduleId: toTypeId("12271"), amount: 600, cycleTime: 24, capacitorNeed: 500, maxRange: 20000, falloff: 10000 };
-    const ewar: EwarProjection = { loadout: { ...EMPTY_EWAR_LOADOUT, neutralizers: [neutralizer] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [{ active: true }], nosferatu: [] } };
+    const ewar: EwarProjection = { loadout: { ...EMPTY_EWAR_LOADOUT, neutralizers: [neutralizer] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [{ active: true }], nosferatu: [], jammers: [] } };
     deps.ewarController.projection = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? ewar : undefined));
     const engineConfig = makeSource(deps).getEngineConfig();
     expect(engineConfig.capacitor.shipA.drains).toEqual([{ moduleId: neutralizer.moduleId, amount: 500, interval: 24, active: true }]);

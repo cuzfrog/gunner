@@ -20,6 +20,7 @@ const ATTRIBUTE_NAMES = new Map<number, string>([
   [511, "droneCapacity"], [512, "droneBandwidth"], [513, "maxActiveDrones"],
   [530, "fighterCapacity"], [531, "fighterTubes"], [532, "fighterLightSlots"], [533, "fighterHeavySlots"], [534, "fighterSupportSlots"],
   [520, "hp"], [521, "armorHP"], [522, "shieldCapacity"], [523, "capacitorCapacity"], [524, "rechargeRate"], [525, "shieldRechargeRate"],
+  [540, "scanGravimetricStrength"], [541, "scanLadarStrength"], [542, "scanMagnetometricStrength"], [543, "scanRadarStrength"],
 ]);
 
 const DEFENSE_ATTRIBUTE_NAMES = new Map<number, string>([
@@ -201,6 +202,28 @@ describe("_parseProfile", () => {
     expect(frigate.fighterLightSlots).toBe(0);
     expect(frigate.fighterHeavySlots).toBe(0);
     expect(frigate.fighterSupportSlots).toBe(0);
+  });
+
+  test("extracts sensor strengths from the SDE and defaults them to zero", () => {
+    const withSensors: Record<string, SdeTypeDogma> = {
+      "587": dogmaFor({ ...MINIMAL_DOGMA, scanGravimetricStrength: 0, scanLadarStrength: 8, scanMagnetometricStrength: 0, scanRadarStrength: 0 }),
+    };
+    const raw = { name: "Rifter", faction: "Minmatar Republic", hullType: "Standard Frigates" };
+    const profile = _parseProfile(raw, 0, SHIP_NAME_TO_TYPE, withSensors, ATTRIBUTE_NAMES);
+    expect(profile.sensorStrengths).toEqual({ gravimetric: 0, ladar: 8, magnetometric: 0, radar: 0 });
+    const minimal = _parseProfile(raw, 0, SHIP_NAME_TO_TYPE, typedogmas, ATTRIBUTE_NAMES);
+    expect(minimal.sensorStrengths).toEqual({ gravimetric: 0, ladar: 0, magnetometric: 0, radar: 0 });
+  });
+
+  test("extracts sensor strengths from the SDE and defaults them to zero", () => {
+    const withSensors: Record<string, SdeTypeDogma> = {
+      "587": dogmaFor({ ...MINIMAL_DOGMA, scanGravimetricStrength: 0, scanLadarStrength: 8, scanMagnetometricStrength: 0, scanRadarStrength: 0 }),
+    };
+    const raw = { name: "Rifter", faction: "Minmatar Republic", hullType: "Standard Frigates" };
+    const profile = _parseProfile(raw, 0, SHIP_NAME_TO_TYPE, withSensors, ATTRIBUTE_NAMES);
+    expect(profile.sensorStrengths).toEqual({ gravimetric: 0, ladar: 8, magnetometric: 0, radar: 0 });
+    const minimal = _parseProfile(raw, 0, SHIP_NAME_TO_TYPE, typedogmas, ATTRIBUTE_NAMES);
+    expect(minimal.sensorStrengths).toEqual({ gravimetric: 0, ladar: 0, magnetometric: 0, radar: 0 });
   });
 
   test("throws for a ship name that has no SDE match", () => {
