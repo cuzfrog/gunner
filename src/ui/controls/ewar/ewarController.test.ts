@@ -1,6 +1,6 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import { EMPTY_EWAR_LOADOUT } from "../../../sim";
-import type { DisruptionScriptSpec, EwarLoadout, EnergyNeutralizerSpec, SensorDampenerScriptSpec, SensorDampenerSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
+import type { DisruptionScriptSpec, EwarLoadout, EnergyNeutralizerSpec, JammerSpec, SensorDampenerScriptSpec, SensorDampenerSpec, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";

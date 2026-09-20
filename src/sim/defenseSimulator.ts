@@ -143,8 +143,6 @@ export interface DefenseSimulator extends Restorable<DefenseSimulatorState> {
   inflictedTotals(): Record<Side, LayerDamage>;
 }
 
-const RAH_TOTAL_BUDGET = 0.6;
-
 type MutableDamageVector = Record<DamageType, number>;
 type MutableDamageResists = Record<DamageType, number>;
 type MutableLayerDamage = { shield: number; armor: number; hull: number };
@@ -784,32 +782,35 @@ function rahCycleTime(rahSpec: RahSpec, rah: RahState): number {
   return rah.overloaded ? rahSpec.cycleTime * rahSpec.overloadCycleTimeMultiplier : rahSpec.cycleTime;
 }
 
+const RAH_TIE_BREAK_ORDER: readonly DamageType[] = ["em", "explosive", "kinetic", "thermal"];
+
 function shiftRahResists(rah: RahState, rahSpec: RahSpec): void {
-  const totalDamage = rah.armorDamageAccumulator.em + rah.armorDamageAccumulator.thermal + rah.armorDamageAccumulator.kinetic + rah.armorDamageAccumulator.explosive;
+  const damage = rah.armorDamageAccumulator;
+  const totalDamage = damage.em + damage.thermal + damage.kinetic + damage.explosive;
   if (totalDamage <= 0) return;
   const shift = rahSpec.shiftAmount;
-  const current: Record<DamageType, number> = { em: rah.resists.em, thermal: rah.resists.thermal, kinetic: rah.resists.kinetic, explosive: rah.resists.explosive };
-  const damageTypes: DamageType[] = [];
-  for (const type of DAMAGE_TYPES) {
-    if (rah.armorDamageAccumulator[type] > 0) damageTypes.push(type);
-  }
-  if (damageTypes.length === 0) return;
-  const shiftPerType = shift / damageTypes.length;
-  const nonDamageCount = DAMAGE_TYPES.length - damageTypes.length;
-  for (const type of DAMAGE_TYPES) {
-    if (rah.armorDamageAccumulator[type] > 0) {
-      current[type] = Math.min(current[type] + shiftPerType, RAH_TOTAL_BUDGET);
-    } else if (nonDamageCount > 0) {
-      const decrease = shiftPerType / nonDamageCount;
-      current[type] = Math.max(current[type] - decrease, 0);
+  const current: MutableDamageResists = { em: rah.resists.em, thermal: rah.resists.thermal, kinetic: rah.resists.kinetic, explosive: rah.resists.explosive };
+  const damaged = DAMAGE_TYPES.filter((type) => damage[type] > 0);
+  if (damaged.length === 1) {
+    let shifted = 0;
+    for (const type of DAMAGE_TYPES) {
+      if (type === damaged[0]) continue;
+      const drain = Math.min(shift, current[type]);
+      current[type] -= drain;
+      shifted += drain;
     }
+    current[damaged[0]] += shifted;
+  } else {
+    const ranked = [...RAH_TIE_BREAK_ORDER].sort((a, b) => damage[a] - damage[b]);
+    const drainLowest = Math.min(shift, current[ranked[0]]);
+    const drainSecondLowest = Math.min(shift, current[ranked[1]]);
+    current[ranked[0]] -= drainLowest;
+    current[ranked[1]] -= drainSecondLowest;
+    const gain = (drainLowest + drainSecondLowest) / 2;
+    current[ranked[2]] += gain;
+    current[ranked[3]] += gain;
   }
-  const sum = current.em + current.thermal + current.kinetic + current.explosive;
-  if (sum > RAH_TOTAL_BUDGET) {
-    const scale = RAH_TOTAL_BUDGET / sum;
-    for (const type of DAMAGE_TYPES) current[type] *= scale;
-  }
-  rah.resists = { em: current.em, thermal: current.thermal, kinetic: current.kinetic, explosive: current.explosive };
+  rah.resists = current;
 }
 
 function hardenerViews(pools: SidePools): readonly HardenerViewState[] {
@@ -953,3 +954,5 @@ function materializeRahState(snapshot: RahStateSnapshot): RahState {
     active: snapshot.active, overloaded: snapshot.overloaded, starved: false, armorDamageAccumulator: { ...snapshot.armorDamageAccumulator },
   };
 }
+
+export { shiftRahResists as _shiftRahResists };
