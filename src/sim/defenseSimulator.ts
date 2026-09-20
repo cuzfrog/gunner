@@ -1,4 +1,4 @@
-import { type ActiveHardenerSpec, type DamageEvent, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type LayerDamage, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, ZERO_RESISTS } from "./types";
+import { type ActiveHardenerSpec, type BurstModifiers, type DamageEvent, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type LayerDamage, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, IDENTITY_BURST_MODIFIERS, ZERO_RESISTS } from "./types";
 import type { CapacitorGate } from "./capacitorSimulator";
 import type { Restorable } from "./restorable";
 import type { StackingPenalty } from "./stackingPenalty";
@@ -109,6 +109,8 @@ export interface SidePoolsSnapshot {
   readonly shieldMax: number;
   readonly armorMax: number;
   readonly hullMax: number;
+  readonly shieldMaxBase: number;
+  readonly armorMaxBase: number;
   readonly shieldRechargeTime: number;
   readonly shieldUniformity: number;
   readonly baseResists: Readonly<Record<DefenseLayer, DamageResists>>;
@@ -116,6 +118,7 @@ export interface SidePoolsSnapshot {
   readonly hardenerStates: readonly HardenerStateSnapshot[];
   readonly overloaded: boolean;
   readonly resists: Readonly<Record<DefenseLayer, Readonly<Record<DamageType, number>>>>;
+  readonly bursts: BurstModifiers;
   readonly dead: boolean;
   readonly deadAt: number | undefined;
   readonly damageEnabled: boolean;
@@ -137,7 +140,7 @@ export interface DefenseSimulatorState {
 export interface DefenseSimulator extends Restorable<DefenseSimulatorState> {
   reset(config: DefenseSimConfig): void;
   update(config: DefenseSimConfig): void;
-  step(dt: number, events: readonly DamageEvent[], capacitor?: CapacitorGate): void;
+  step(dt: number, events: readonly DamageEvent[], capacitor?: CapacitorGate, bursts?: Record<Side, BurstModifiers>): void;
   flushPendingDamage(capacitor?: CapacitorGate): void;
   view(): DefenseView;
   inflictedTotals(): Record<Side, LayerDamage>;
@@ -183,6 +186,8 @@ interface SidePools {
   shieldMax: number;
   armorMax: number;
   hullMax: number;
+  shieldMaxBase: number;
+  armorMaxBase: number;
   shieldRechargeTime: number;
   shieldUniformity: number;
   baseResists: Readonly<Record<DefenseLayer, DamageResists>>;
@@ -190,6 +195,7 @@ interface SidePools {
   hardenerStates: HardenerState[];
   overloaded: boolean;
   resists: Readonly<Record<DefenseLayer, Readonly<Record<DamageType, number>>>>;
+  bursts: BurstModifiers;
   dead: boolean;
   deadAt: number | undefined;
   damageEnabled: boolean;
@@ -232,11 +238,13 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
     };
   }
 
-  step(dt: number, events: readonly DamageEvent[], capacitor?: CapacitorGate): void {
+  step(dt: number, events: readonly DamageEvent[], capacitor?: CapacitorGate, bursts?: Record<Side, BurstModifiers>): void {
     this.time += dt;
     for (const event of events) {
       this.eventBuffer.push(event);
     }
+    this.sides.shipA.bursts = bursts?.shipA ?? IDENTITY_BURST_MODIFIERS;
+    this.sides.shipB.bursts = bursts?.shipB ?? IDENTITY_BURST_MODIFIERS;
     const released = this.collectReleasedEvents();
     this.stepSide("shipA", dt, released.shipA, capacitor);
     this.stepSide("shipB", dt, released.shipB, capacitor);
@@ -318,10 +326,10 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
 
   private stepSide(side: Side, dt: number, events: readonly DamageEvent[], capacitor?: CapacitorGate): void {
     stepSidePools(this.sides[side], dt, events, this.time, side, capacitor, this.stacking);
-  }
-}
+  }}
 
 function stepSidePools(pools: SidePools, dt: number, events: readonly DamageEvent[], time: number, side: Side, capacitor: CapacitorGate | undefined, stacking: StackingPenalty): void {
+  applyEffectiveMaxes(pools);
   if (pools.dead) return;
   if (!pools.damageEnabled) {
     pools.shield = pools.shieldMax;
@@ -346,11 +354,13 @@ function emptyPools(): SidePools {
   return {
     shield: 0, armor: 0, hull: 0,
     shieldMax: 0, armorMax: 0, hullMax: 0,
+    shieldMaxBase: 0, armorMaxBase: 0,
     shieldRechargeTime: 0,
     shieldUniformity: 0,
     baseResists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS },
     hardeners: [], hardenerStates: [], overloaded: false,
     resists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS },
+    bursts: IDENTITY_BURST_MODIFIERS,
     dead: false, deadAt: undefined, damageEnabled: true,
     repairers: [], repairerStates: [],
     repairMode: "auto",
@@ -369,6 +379,8 @@ function poolsFromSpec(spec: DefenseSpec, damageEnabled: boolean, repairMode: Re
     shieldMax: spec.layers.shield.hp,
     armorMax: spec.layers.armor.hp,
     hullMax: spec.layers.hull.hp,
+    shieldMaxBase: spec.layers.shield.hp,
+    armorMaxBase: spec.layers.armor.hp,
     shieldRechargeTime: spec.shieldRechargeTime,
     shieldUniformity: spec.shieldUniformity,
     baseResists: spec.baseResists,
@@ -376,6 +388,7 @@ function poolsFromSpec(spec: DefenseSpec, damageEnabled: boolean, repairMode: Re
     hardenerStates: spec.hardeners.map((hardener) => ({ timer: hardener.cycleTime, online: true, needsPayment: true, starved: false })),
     overloaded,
     resists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS },
+    bursts: IDENTITY_BURST_MODIFIERS,
     dead: false, deadAt: undefined, damageEnabled,
     repairers: spec.repairers,
     repairerStates: createRepairerStates(spec.repairers, repairerActivation),
@@ -401,6 +414,8 @@ function mergePools(prev: SidePools, spec: DefenseSpec, damageEnabled: boolean, 
     shieldMax,
     armorMax,
     hullMax,
+    shieldMaxBase: shieldMax,
+    armorMaxBase: armorMax,
     shieldRechargeTime: spec.shieldRechargeTime,
     shieldUniformity: spec.shieldUniformity,
     baseResists: spec.baseResists,
@@ -408,6 +423,7 @@ function mergePools(prev: SidePools, spec: DefenseSpec, damageEnabled: boolean, 
     hardenerStates: mergeHardenerStates(prev.hardeners, prev.hardenerStates, spec.hardeners),
     overloaded,
     resists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS },
+    bursts: prev.bursts,
     dead: prev.dead,
     deadAt: prev.deadAt,
     damageEnabled,
@@ -505,6 +521,15 @@ function clampPool(current: number, max: number): number {
   return current;
 }
 
+function applyEffectiveMaxes(pools: SidePools): void {
+  const shieldMax = pools.shieldMaxBase * pools.bursts.shieldHp;
+  const armorMax = pools.armorMaxBase * pools.bursts.armorHp;
+  if (pools.shield > shieldMax) pools.shield = shieldMax;
+  if (pools.armor > armorMax) pools.armor = armorMax;
+  pools.shieldMax = shieldMax;
+  pools.armorMax = armorMax;
+}
+
 function updateAppliedResists(pools: SidePools, stacking: StackingPenalty): void {
   const shield = layerAppliedResists(pools, "shield", stacking);
   const armor = layerAppliedResists(pools, "armor", stacking);
@@ -518,9 +543,10 @@ function updateAppliedResists(pools: SidePools, stacking: StackingPenalty): void
 
 function layerAppliedResists(pools: SidePools, layer: DefenseLayer, stacking: StackingPenalty): DamageResists {
   const result: Record<DamageType, number> = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
+  const burstResonance = layer === "shield" ? pools.bursts.shieldResonance : layer === "armor" ? pools.bursts.armorResonance : 1;
   for (const type of DAMAGE_TYPES) {
     const hardenerResonances = pools.hardeners.flatMap((hardener, i) => (pools.hardenerStates[i]?.online ? [hardenerResonance(hardener, type, pools.overloaded)] : []));
-    const stacked = stacking.apply(hardenerResonances);
+    const stacked = stacking.apply([...hardenerResonances, burstResonance]);
     result[type] = clampResist(1 - (1 - pools.baseResists[layer][type]) * stacked);
   }
   return result;
@@ -689,14 +715,20 @@ function shouldStartCycle(pools: SidePools, spec: RepairerSpec, state: RepairerS
   return layerPoolAmount(pools, spec.layer) < layerPoolMax(pools, spec.layer);
 }
 
+/** Command bursts shorten repair duration for the layer's repair systems (hull repairers are never boosted). */
+function burstRepairMultiplier(bursts: BurstModifiers, layer: DefenseLayer): number {
+  return layer === "shield" ? bursts.shieldRepair : layer === "armor" ? bursts.armorRepair : 1;
+}
+
 function startCycle(pools: SidePools, side: Side, spec: RepairerSpec, state: RepairerState, capacitor: CapacitorGate | undefined): void {
-  if (capacitor && spec.capacitorNeed > 0 && !capacitor.attemptDebit(side, spec.capacitorNeed, spec.moduleId)) {
+  const repairMultiplier = burstRepairMultiplier(pools.bursts, spec.layer);
+  if (capacitor && spec.capacitorNeed > 0 && !capacitor.attemptDebit(side, spec.capacitorNeed * repairMultiplier, spec.moduleId)) {
     // Starved: the module stays off until the capacitor recovers; retried next frame.
     state.starved = true;
     return;
   }
   state.inCycle = true;
-  state.cycleTimer = effectiveCycleTime(spec, state);
+  state.cycleTimer = effectiveCycleTime(spec, state) * repairMultiplier;
   const amount = effectiveAmount(spec, state);
   const isCharged = spec.ancillary !== undefined && state.ancillaryCharges > 0;
   const healAmount = isCharged ? amount * spec.ancillary.chargeMultiplier : amount;
@@ -829,7 +861,7 @@ function hardenerViews(pools: SidePools): readonly HardenerViewState[] {
 function repairerViews(pools: SidePools): readonly RepairerViewState[] {
   return pools.repairers.map((spec, i) => {
     const state = pools.repairerStates[i];
-    const cycleTime = effectiveCycleTime(spec, state);
+    const cycleTime = effectiveCycleTime(spec, state) * burstRepairMultiplier(pools.bursts, spec.layer);
     const amount = effectiveAmount(spec, state);
     const isCharged = spec.ancillary !== undefined && state.ancillaryCharges > 0;
     const effectiveHp = isCharged ? amount * spec.ancillary.chargeMultiplier : amount;
@@ -881,6 +913,7 @@ function snapshotPools(pools: SidePools): SidePoolsSnapshot {
   return {
     shield: pools.shield, armor: pools.armor, hull: pools.hull,
     shieldMax: pools.shieldMax, armorMax: pools.armorMax, hullMax: pools.hullMax,
+    shieldMaxBase: pools.shieldMaxBase, armorMaxBase: pools.armorMaxBase,
     shieldRechargeTime: pools.shieldRechargeTime,
     shieldUniformity: pools.shieldUniformity,
     baseResists: pools.baseResists,
@@ -888,6 +921,7 @@ function snapshotPools(pools: SidePools): SidePoolsSnapshot {
     hardenerStates: pools.hardenerStates.map(snapshotHardenerState),
     overloaded: pools.overloaded,
     resists: pools.resists,
+    bursts: pools.bursts,
     dead: pools.dead, deadAt: pools.deadAt, damageEnabled: pools.damageEnabled,
     repairers: pools.repairers,
     repairerStates: pools.repairerStates.map(snapshotRepairerState),
@@ -902,6 +936,7 @@ function materializePools(snapshot: SidePoolsSnapshot): SidePools {
   return {
     shield: snapshot.shield, armor: snapshot.armor, hull: snapshot.hull,
     shieldMax: snapshot.shieldMax, armorMax: snapshot.armorMax, hullMax: snapshot.hullMax,
+    shieldMaxBase: snapshot.shieldMaxBase, armorMaxBase: snapshot.armorMaxBase,
     shieldRechargeTime: snapshot.shieldRechargeTime,
     shieldUniformity: snapshot.shieldUniformity,
     baseResists: snapshot.baseResists,
@@ -909,6 +944,7 @@ function materializePools(snapshot: SidePoolsSnapshot): SidePools {
     hardenerStates: snapshot.hardenerStates.map(materializeHardenerState),
     overloaded: snapshot.overloaded,
     resists: snapshot.resists,
+    bursts: snapshot.bursts,
     dead: snapshot.dead, deadAt: snapshot.deadAt, damageEnabled: snapshot.damageEnabled,
     repairers: snapshot.repairers,
     repairerStates: snapshot.repairerStates.map(materializeRepairerState),

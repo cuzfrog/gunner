@@ -9,7 +9,7 @@ import { Mulberry32RngFactory } from "./rng";
 import { StackingPenaltyImpl } from "./stackingPenalty";
 import { SensorBoosterResolverImpl } from "./sensorBoosterResolver";
 import { toTypeId } from "../gamedata/ids";
-import { EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, ZERO_DAMAGE, type AppliedEwarEffect, type EnergyNeutralizerSpec, type EngagementFrame, type EwarProjection, type HitChanceBreakdown, type LayerDamage, type LockState, type NosferatuSpec, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "./types";
+import { EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, IDENTITY_BURST_MODIFIERS, ZERO_DAMAGE, type AppliedEwarEffect, type BurstModifiers, type CommandBurstSpec, type Side, type EnergyNeutralizerSpec, type EngagementFrame, type EwarProjection, type HitChanceBreakdown, type LayerDamage, type LockState, type NosferatuSpec, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "./types";
 import { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
 import type { AttackAssessment } from "./fireControl";
 import type { DefenseSimulator, DefenseSimulatorState, DefenseView, SidePoolsSnapshot } from "./defenseSimulator";
@@ -112,10 +112,12 @@ function weaponClockState(): WeaponClockState {
 function emptyPoolsSnapshot(): SidePoolsSnapshot {
   return {
     shield: 0, armor: 0, hull: 0, shieldMax: 0, armorMax: 0, hullMax: 0,
+    shieldMaxBase: 0, armorMaxBase: 0,
     shieldRechargeTime: 0, shieldUniformity: 0.25,
     baseResists: { shield: ZERO_DAMAGE, armor: ZERO_DAMAGE, hull: ZERO_DAMAGE },
     hardeners: [], hardenerStates: [], overloaded: false,
     resists: { shield: ZERO_DAMAGE, armor: ZERO_DAMAGE, hull: ZERO_DAMAGE },
+    bursts: IDENTITY_BURST_MODIFIERS,
     dead: false, deadAt: undefined, damageEnabled: true,
     repairers: [], repairerStates: [], repairMode: "auto", rahSpec: undefined, rahState: undefined,
     inflicted: { ...ZERO_LAYER },
@@ -141,7 +143,7 @@ function mockWorld() {
     missileSimulator: vi.mocked<MissileSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(() => []), states: vi.fnUntracked(() => []), facts: vi.fnUntracked(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })), capture: vi.fnUntracked(missileSimulatorState), restore: vi.fnUntracked() }),
     weaponClock: vi.mocked<WeaponClock>({ reset: vi.fnUntracked(), step: vi.fnUntracked(() => []), capture: vi.fnUntracked(weaponClockState), restore: vi.fnUntracked(), spoolCycles: vi.fnUntracked(() => 0) }),
     defenseSimulator: vi.mocked<DefenseSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), flushPendingDamage: vi.fnUntracked(), view: vi.fnUntracked(() => emptyDefenseView), inflictedTotals: vi.fnUntracked(zeroTotals), capture: vi.fnUntracked(defenseSimulatorState), restore: vi.fnUntracked() }),
-    capacitorSimulator: vi.mocked<CapacitorSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), view: vi.fnUntracked(() => emptyCapacitorView), attemptDebit: vi.fnUntracked(() => true), incomingDrains: vi.fnUntracked(), propulsionStarved: vi.fnUntracked(() => false), injectBooster: vi.fnUntracked(), capture: vi.fnUntracked(capacitorSimulatorState), restore: vi.fnUntracked() }),
+    capacitorSimulator: vi.mocked<CapacitorSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), view: vi.fnUntracked(() => emptyCapacitorView), attemptDebit: vi.fnUntracked(() => true), incomingDrains: vi.fnUntracked(), propulsionStarved: vi.fnUntracked(() => false), injectBooster: vi.fnUntracked(), drainRunning: vi.fnUntracked(() => false), capture: vi.fnUntracked(capacitorSimulatorState), restore: vi.fnUntracked() }),
   };
 }
 
@@ -261,7 +263,7 @@ describe("EngagementEngineImpl", () => {
       shipA: { operational: true, propulsionSuppressed: true, weaponsEngaged: true, disengagedModuleIds: [] },
       shipB: { operational: true, propulsionSuppressed: true, weaponsEngaged: true, disengagedModuleIds: [] },
     });
-    expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: false, shipB: false }, ewarActive: { shipA: true, shipB: true } });
+    expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: false, shipB: false }, ewarActive: { shipA: true, shipB: true }, bursts: { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS } });
   });
 
   test("capacitor.step receives disengaged ids for own ewar modules without an applied effect and weapons engagement from the lock", () => {
@@ -304,7 +306,7 @@ describe("EngagementEngineImpl", () => {
     deps.live.capacitorSimulator.propulsionStarved = vi.fnUntracked((side: "shipA" | "shipB") => side === "shipA");
     deps.engine.reset(engineConfig());
     deps.engine.step(0.1);
-    expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: true, shipB: false }, ewarActive: { shipA: true, shipB: true } });
+    expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: true, shipB: false }, ewarActive: { shipA: true, shipB: true }, bursts: { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS } });
   });
 
   test("weaponClock.step and defenseSimulator.step receive the capacitor gate", () => {
@@ -312,7 +314,7 @@ describe("EngagementEngineImpl", () => {
     deps.engine.reset(engineConfig());
     deps.engine.step(0.1);
     expect(deps.live.weaponClock.step).toHaveBeenCalledWith(0.1, expect.anything(), deps.live.capacitorSimulator);
-    expect(deps.live.defenseSimulator.step).toHaveBeenCalledWith(0.1, expect.anything(), deps.live.capacitorSimulator);
+    expect(deps.live.defenseSimulator.step).toHaveBeenCalledWith(0.1, expect.anything(), deps.live.capacitorSimulator, { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS });
   });
 
   test("reset and update wire the capacitor simulator config", () => {
@@ -659,7 +661,7 @@ describe("EngagementEngineImpl", () => {
       stepWithDestroyedShipB(deps);
       const lockInput = deps.live.lockClock.step.mock.calls[0][1];
       expect(lockInput.operational).toEqual({ shipA: true, shipB: false });
-      expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: false, shipB: true }, ewarActive: { shipA: true, shipB: false } });
+      expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: false, shipB: true }, ewarActive: { shipA: true, shipB: false }, bursts: { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS } });
       expect(deps.live.droneSimulator.step).toHaveBeenCalledWith(0.1, expect.anything(), { shipA: true, shipB: false });
       expect(deps.live.fighterSimulator.step).toHaveBeenCalledWith(0.1, expect.anything(), { shipA: true, shipB: false });
     });
@@ -728,5 +730,63 @@ describe("ECM jamming integration", () => {
     for (let i = 0; i < 39; i++) engine.step(0.5);
     expect(engine.view().jammed.shipB).toBe(true);
     expect(engine.view().jammed.shipA).toBe(false);
+  });
+});
+
+describe("engagement engine command bursts", () => {
+  const BURST_ID = toTypeId("23440");
+  const burstSpec: CommandBurstSpec = { moduleName: "Shield Command Burst I", moduleId: BURST_ID, capacitorNeed: 0, cycleTime: 10, effects: [{ kind: "shieldResonance", multiplier: 0.92 }] };
+
+  function burstConfig(specs: readonly CommandBurstSpec[]): import("./engagementEngine").EngineConfig {
+    const config = engineConfig();
+    return { ...config, sim: { ...config.sim, shipA: { ...config.sim.shipA, commandBursts: specs } } };
+  }
+
+  test("active command bursts flow into the simulation and defense steps", () => {
+    const deps = makeEngine();
+    deps.live.capacitorSimulator.drainRunning.mockImplementation((side, moduleId) => side === "shipA" && moduleId === BURST_ID);
+    deps.engine.reset(burstConfig([burstSpec]));
+    deps.engine.step(1);
+    const expected: Record<Side, BurstModifiers> = { shipA: { ...IDENTITY_BURST_MODIFIERS, shieldResonance: 0.92 }, shipB: IDENTITY_BURST_MODIFIERS };
+    expect(deps.live.simulation.step).toHaveBeenLastCalledWith(1, expect.objectContaining({ bursts: expected }));
+    expect(deps.live.defenseSimulator.step).toHaveBeenLastCalledWith(1, expect.anything(), deps.live.capacitorSimulator, expected);
+  });
+
+  test("bursts stay identity when no drain is running", () => {
+    const deps = makeEngine();
+    deps.engine.reset(burstConfig([burstSpec]));
+    deps.engine.step(1);
+    const expected: Record<Side, BurstModifiers> = { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS };
+    expect(deps.live.defenseSimulator.step).toHaveBeenLastCalledWith(1, expect.anything(), deps.live.capacitorSimulator, expected);
+  });
+
+  test("a destroyed side projects no bursts even while draining", () => {
+    const deps = makeEngine();
+    const base = burstConfig([burstSpec]);
+    const config: import("./engagementEngine").EngineConfig = { ...base, sim: { ...base.sim, shipB: { ...base.sim.shipB, commandBursts: [burstSpec] } } };
+    deps.live.capacitorSimulator.drainRunning.mockImplementation(() => true);
+    deps.live.defenseSimulator.view.mockImplementation(() => ({ ...emptyDefenseView, dead: { shipA: true, shipB: false } }));
+    deps.engine.reset(config);
+    deps.engine.step(1);
+    expect(deps.live.defenseSimulator.step).toHaveBeenLastCalledWith(1, expect.anything(), deps.live.capacitorSimulator, { shipA: IDENTITY_BURST_MODIFIERS, shipB: { ...IDENTITY_BURST_MODIFIERS, shieldResonance: 0.92 } });
+  });
+
+  test("sensor bursts thread extra multipliers into the sensor booster resolver", () => {
+    const deps = makeEngine();
+    const sensorSpec: SensorSpec = { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4 };
+    deps.live.capacitorSimulator.drainRunning.mockImplementation((side, moduleId) => side === "shipA" && moduleId === BURST_ID);
+    deps.live.simulation.snapshot.mockImplementation(() => ({ ...snapshot, shipA: { ...ship, sensorSpec } }));
+    deps.engine.reset(burstConfig([{ moduleName: "Information Command Burst I", moduleId: BURST_ID, capacitorNeed: 0, cycleTime: 10, effects: [{ kind: "scanStrength", multiplier: 1.18 }, { kind: "targetingRange", multiplier: 1.09 }] }]));
+    deps.engine.step(1);
+    expect(deps.sensorBoosterResolver.boostedSensorSpec).toHaveBeenCalledWith(sensorSpec, undefined, [1.18], [1.09]);
+  });
+
+  test("signature radius bursts thread extra multipliers into the painted signature", () => {
+    const deps = makeEngine();
+    deps.live.capacitorSimulator.drainRunning.mockImplementation((side, moduleId) => side === "shipA" && moduleId === BURST_ID);
+    deps.live.simulation.snapshot.mockImplementation(() => ({ ...snapshot, shipA: { ...ship, sig: 120 } }));
+    deps.engine.reset(burstConfig([{ moduleName: "Skirmish Command Burst I", moduleId: BURST_ID, capacitorNeed: 0, cycleTime: 10, effects: [{ kind: "signatureRadius", multiplier: 0.94 }] }]));
+    deps.engine.step(1);
+    expect(deps.ewarResolver.sigMultiplier).toHaveBeenCalledWith(undefined, 5000, [0.94]);
   });
 });

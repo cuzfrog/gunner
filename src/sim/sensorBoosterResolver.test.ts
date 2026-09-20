@@ -24,6 +24,19 @@ function projection(loadout: Partial<SensorBoostLoadout>, activation?: readonly 
 }
 
 describe("SensorBoosterResolverImpl", () => {
+  test("applies burst extra multipliers inside the same stacking group", () => {
+    const loadout = { boosters: [makeBoosterSpec()], amplifiers: [], boosterScripts: [] };
+    const result = resolver.boostedSensorSpec(baseSpec, projection(loadout, [{ active: true, overloaded: false, script: undefined }]), [1.09], [1.18]);
+    expect(result.scanResolution).toBe(Math.round(200 * stacking.apply([1.3, 1.09])));
+    expect(result.maxTargetingRange).toBe(Math.round(30000 * stacking.apply([1.3, 1.18])));
+  });
+
+  test("applies burst multipliers alone when no boosters are projected", () => {
+    const result = resolver.boostedSensorSpec(baseSpec, undefined, [1.09], [1.18]);
+    expect(result.scanResolution).toBe(Math.round(200 * 1.09));
+    expect(result.maxTargetingRange).toBe(Math.round(30000 * 1.18));
+  });
+
   test("preserves sensor strengths when boosting", () => {
     const spec: SensorSpec = { ...baseSpec, strengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 } };
     const loadout = { boosters: [makeBoosterSpec()], amplifiers: [], boosterScripts: [] };

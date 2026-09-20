@@ -452,7 +452,26 @@ export interface CommandBurstSpec {
   readonly moduleId: TypeId;
   readonly capacitorNeed: number;
   readonly cycleTime: number;
+  /** Timed percentage effects from the loaded burst charge; empty when the charge carries no modeled buff. */
+  readonly effects: readonly BurstEffectSpec[];
 }
+
+/** Kinds of self-buff a command burst charge can apply; each kind maps to one EVE stacking-penalty group. */
+export type BurstEffectKind = "shieldResonance" | "armorResonance" | "shieldHp" | "armorHp" | "shieldRepair" | "armorRepair" | "scanResolution" | "targetingRange" | "scanStrength" | "signatureRadius" | "inertia" | "propulsionSpeed";
+
+/** A burst effect as a direct multiplier on the affected stat (e.g. 0.92 = -8% resonance). */
+export interface BurstEffectSpec {
+  readonly kind: BurstEffectKind;
+  readonly multiplier: number;
+}
+
+/** Per-side aggregate of every live command burst effect: multiplier 1 = no effect. */
+export type BurstModifiers = Readonly<Record<BurstEffectKind, number>>;
+
+export const IDENTITY_BURST_MODIFIERS: BurstModifiers = {
+  shieldResonance: 1, armorResonance: 1, shieldHp: 1, armorHp: 1, shieldRepair: 1, armorRepair: 1,
+  scanResolution: 1, targetingRange: 1, scanStrength: 1, signatureRadius: 1, inertia: 1, propulsionSpeed: 1,
+};
 
 export type SensorType = "gravimetric" | "ladar" | "magnetometric" | "radar";
 
@@ -806,6 +825,7 @@ export interface CombatantConfig extends ShipConfig {
   readonly missileBoosts?: MissileBoosterProjection;
   readonly sensorBoosts?: SensorBoostProjection;
   readonly sensorSpec?: SensorSpec;
+  readonly commandBursts?: readonly CommandBurstSpec[];
   // Capacitor pool spec. Absent = the combatant never starves (legacy fixtures).
   readonly capacitor?: CapacitorSpec;
 }

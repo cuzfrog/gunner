@@ -89,6 +89,32 @@ describe("CapacitorSimulatorImpl", () => {
     expect(sim.view().shipA.cap).toBeCloseTo(expected, 6);
   });
 
+  test("drainRunning reports whether the last debit of a scheduled drain succeeded", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({ drains: [drain("7", 100, 10)] }));
+    sim.step(1, ENGAGED);
+    expect(sim.drainRunning("shipA", toTypeId("7"))).toBe(true);
+    expect(sim.drainRunning("shipA", toTypeId("999"))).toBe(false);
+  });
+
+  test("drainRunning turns false while the drain is starved and true again after recovery", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({ drains: [drain("7", 80, 10)] }, {}, { capacity: 100, rechargeTime: 100 }));
+    sim.step(1, ENGAGED);
+    expect(sim.drainRunning("shipA", toTypeId("7"))).toBe(true);
+    sim.step(10, ENGAGED);
+    expect(sim.drainRunning("shipA", toTypeId("7"))).toBe(false);
+    for (let elapsed = 0; elapsed < 25 && !sim.drainRunning("shipA", toTypeId("7")); elapsed++) sim.step(1, ENGAGED);
+    expect(sim.drainRunning("shipA", toTypeId("7"))).toBe(true);
+  });
+
+  test("drainRunning stays true for free sides without a pool", () => {
+    const sim = new CapacitorSimulatorImpl();
+    sim.reset(makeConfig({ drains: [drain("7", 100, 10)] }, {}, undefined));
+    sim.step(1, ENGAGED);
+    expect(sim.drainRunning("shipA", toTypeId("7"))).toBe(true);
+  });
+
   test("inactive drains do not debit", () => {
     const sim = new CapacitorSimulatorImpl();
     sim.reset(makeConfig({ drains: [drain("1", 100, 10, false)] }));

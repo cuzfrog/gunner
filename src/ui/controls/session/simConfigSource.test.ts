@@ -212,6 +212,16 @@ describe("SimConfigSourceImpl", () => {
     expect(deps.distanceSource.getInitialDistance).toHaveBeenCalled();
   });
 
+  test("getConfig passes command burst specs into the combatant config", () => {
+    const deps = build();
+    const bursts: readonly CommandBurstSpec[] = [{ moduleName: "Shield Command Burst I", moduleId: "23440" as never, capacitorNeed: 240, cycleTime: 10, effects: [{ kind: "shieldResonance", multiplier: 0.92 }] }];
+    deps.capacitorStatsSource.commandBursts = vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? bursts : []));
+    const source = makeSource(deps);
+    const config = source.getConfig();
+    expect(config.shipA.commandBursts).toBe(bursts);
+    expect(config.shipB.commandBursts).toEqual([]);
+  });
+
   test("getConfig falls back to current speed when baseMaxSpeed is missing", () => {
     const deps = build();
     deps.shipASide.capture = vi.fn(() => ({ ...baseShipAState(), baseMaxSpeed: undefined }));

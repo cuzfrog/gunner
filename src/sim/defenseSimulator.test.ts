@@ -3,7 +3,8 @@ import { DefenseSimulatorImpl, _shiftRahResists } from "./defenseSimulator";
 import type { CapacitorGate } from "./capacitorSimulator";
 import type { DefenseSimConfig } from "./defenseSimulator";
 import { StackingPenaltyImpl } from "./stackingPenalty";
-import type { ActiveHardenerSpec, DamageEvent, DamageResists, DamageType, DamageVector, DefenseLayer, DefenseSpec, LayerDamage, RahSpec, RepairerSpec, Side } from "./types";
+import type { ActiveHardenerSpec, BurstEffectKind, BurstModifiers, DamageEvent, DamageResists, DamageType, DamageVector, DefenseLayer, DefenseSpec, LayerDamage, RahSpec, RepairerSpec, Side } from "./types";
+import { IDENTITY_BURST_MODIFIERS } from "./types";
 import { ZERO_DAMAGE, ZERO_RESISTS } from "./types";
 
 interface DebitRecord {
@@ -98,6 +99,7 @@ function newSim(): DefenseSimulatorImpl {
   return new DefenseSimulatorImpl({ stackingPenalty: new StackingPenaltyImpl() });
 }
 
+const ZERO_EVENTS: readonly DamageEvent[] = events(ZERO_DAMAGE, ZERO_DAMAGE);
 const EM_DAMAGE: DamageVector = { em: 100, thermal: 0, kinetic: 0, explosive: 0 };
 const MIXED_DAMAGE: DamageVector = { em: 50, thermal: 50, kinetic: 0, explosive: 0 };
 
@@ -105,6 +107,10 @@ const RAH_SPEC: RahSpec = { cycleTime: 10, shiftAmount: 0.06, baseResists: { em:
 
 function rahState(resists: DamageResists, damage: DamageVector): { resists: { em: number; thermal: number; kinetic: number; explosive: number }; cycleTimer: number; inCycle: boolean; active: boolean; overloaded: boolean; starved: boolean; armorDamageAccumulator: { em: number; thermal: number; kinetic: number; explosive: number } } {
   return { resists: { ...resists }, cycleTimer: 0, inCycle: true, active: true, overloaded: false, starved: false, armorDamageAccumulator: { ...damage } };
+}
+
+function burstSides(overrides: Partial<Record<BurstEffectKind, number>> = {}): Record<Side, BurstModifiers> {
+  return { shipA: { ...IDENTITY_BURST_MODIFIERS, ...overrides }, shipB: IDENTITY_BURST_MODIFIERS };
 }
 
 describe("DefenseSimulatorImpl", () => {
@@ -1404,5 +1410,58 @@ describe("DefenseSimulatorImpl", () => {
     for (let i = 0; i < 5; i++) second.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE), gatedDebits(debits));
     expect(debits).toEqual([{ side: "shipA", amount: 20 }, { side: "shipA", amount: 20 }, { side: "shipA", amount: 20 }]);
     expect(second.view().hardeners.shipA[0]?.online).toBe(true);
+  });
+});
+
+describe("command burst modifiers", () => {
+  test("armor resonance burst raises the applied armor resist", () => {
+    const sim = newSim();
+    sim.reset(config(spec({ shieldHp: 0, hullHp: 0, armorHp: 10000 })));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE), undefined, burstSides({ armorResonance: 0.92 }));
+    expect(sim.view().pools.shipA.armor).toBeCloseTo(9908, 6);
+  });
+
+  test("burst resonance stacks with hardeners under the stacking penalty", () => {
+    const sim = newSim();
+    sim.reset(config(spec({ shieldHp: 0, hullHp: 0, armorHp: 10000, hardeners: [hardener({ layer: "armor", em: 0.5 })] })));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE), undefined, burstSides({ armorResonance: 0.92 }));
+    const stacked = new StackingPenaltyImpl().apply([0.5, 0.92]);
+    expect(sim.view().pools.shipA.armor).toBeCloseTo(10000 - 100 * stacked, 6);
+  });
+
+  test("shield hp burst inflates the effective pool max and clamps the pool on expiry", () => {
+    const sim = newSim();
+    sim.reset(config(spec({ shieldHp: 1000, armorHp: 0, hullHp: 0, shieldRechargeTime: 100 })));
+    sim.step(60, ZERO_EVENTS, undefined, burstSides({ shieldHp: 1.08 }));
+    expect(sim.view().poolMaxes.shipA.shield).toBeCloseTo(1080, 6);
+    expect(sim.view().pools.shipA.shield).toBeGreaterThan(1000);
+    sim.step(1, ZERO_EVENTS);
+    expect(sim.view().poolMaxes.shipA.shield).toBeCloseTo(1000, 6);
+    expect(sim.view().pools.shipA.shield).toBeCloseTo(1000, 6);
+  });
+
+  test("armor repair burst shortens the cycle and reduces the debit", () => {
+    const sim = newSim();
+    const repairSpec = spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, armorResists: { em: 0 }, repairers: [{ layer: "armor", amount: 100, cycleTime: 4, capacitorNeed: 320, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }] });
+    sim.reset(config(repairSpec));
+    const { gate, debits } = recordingGate(true);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE), gate, burstSides({ armorRepair: 0.92 }));
+    expect(debits).toEqual([{ side: "shipA", amount: 320 * 0.92 }]);
+    sim.step(8.2, ZERO_EVENTS, gate, burstSides({ armorRepair: 0.92 }));
+    expect(sim.view().pools.shipA.armor).toBeCloseTo(1000, 6);
+  });
+
+  test("shield repair burst shortens only shield repairer cycles", () => {
+    const sim = newSim();
+    const repairSpec = spec({ shieldHp: 1000, armorHp: 1000, hullHp: 1000, repairers: [
+      { layer: "shield", amount: 100, cycleTime: 4, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } },
+      { layer: "armor", amount: 100, cycleTime: 4, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } },
+    ] });
+    const burstedConfig = { ...config(repairSpec), repairMode: { shipA: "manual" as const, shipB: "auto" as const } };
+    sim.reset(burstedConfig);
+    sim.step(3.5, ZERO_EVENTS, undefined, burstSides({ shieldRepair: 0.92 }));
+    const views = sim.view().repairers.shipA;
+    expect(views[0].cycleProgress).toBeCloseTo(3.5 / (4 * 0.92), 6);
+    expect(views[1].cycleProgress).toBeCloseTo(3.5 / 4, 6);
   });
 });

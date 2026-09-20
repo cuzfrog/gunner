@@ -3,7 +3,7 @@ import type { Autopilot } from "./autopilot";
 import { integrateShip } from "./dynamics";
 import type { EwarResolver } from "./ewarResolver";
 import type { Restorable } from "./restorable";
-import type { CombatantConfig, EwarProjection, ShipState, Side, SimConfig, SimSnapshot } from "./types";
+import { type BurstModifiers, type CombatantConfig, type EwarProjection, type ShipState, type Side, type SimConfig, type SimSnapshot, IDENTITY_BURST_MODIFIERS } from "./types";
 
 export interface SimulationState {
   readonly time: number;
@@ -12,7 +12,7 @@ export interface SimulationState {
 }
 
 export interface Simulation extends Restorable<SimulationState> {
-  step(dt: number, context?: { readonly propulsionStarved: Record<Side, boolean>; readonly ewarActive: Record<Side, boolean> }): void;
+  step(dt: number, context?: { readonly propulsionStarved: Record<Side, boolean>; readonly ewarActive: Record<Side, boolean>; readonly bursts?: Record<Side, BurstModifiers> }): void;
   snapshot(): SimSnapshot;
   reset(config: SimConfig): void;
   update(config: SimConfig): void;
@@ -44,10 +44,13 @@ export class SimulationImpl implements Simulation {
     this.shipB = asState(simConfig.shipB, new Vec2(0, simConfig.initialDistance));
   }
 
-  step(dt: number, context?: { readonly propulsionStarved: Record<Side, boolean>; readonly ewarActive: Record<Side, boolean> }): void {
+  private burstModifiers: Record<Side, BurstModifiers> = { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS };
+
+  step(dt: number, context?: { readonly propulsionStarved: Record<Side, boolean>; readonly ewarActive: Record<Side, boolean>; readonly bursts?: Record<Side, BurstModifiers> }): void {
     if (context) {
       this.propulsionStarved = context.propulsionStarved;
       this.ewarActive = context.ewarActive;
+      this.burstModifiers = context.bursts ?? { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS };
     }
     const frame = this.computeFrame();
     this.shipA = { ...this.shipA, ...integrateShip(frame.shipA, frame.commands.shipA, dt) };
@@ -90,8 +93,8 @@ export class SimulationImpl implements Simulation {
 
   private computeFrame(): { shipA: ShipState; shipB: ShipState; commands: { shipA: Vec2; shipB: Vec2 } } {
     const distance = this.shipB.position.sub(this.shipA.position).len();
-    const shipA = effectiveState(this.ewarResolver, this.shipA, this.ewarActive.shipB ? this.shipB.ewar : undefined, distance, this.propulsionStarved.shipA);
-    const shipB = effectiveState(this.ewarResolver, this.shipB, this.ewarActive.shipA ? this.shipA.ewar : undefined, distance, this.propulsionStarved.shipB);
+    const shipA = effectiveState(this.ewarResolver, this.shipA, this.ewarActive.shipB ? this.shipB.ewar : undefined, distance, this.propulsionStarved.shipA, this.burstModifiers.shipA);
+    const shipB = effectiveState(this.ewarResolver, this.shipB, this.ewarActive.shipA ? this.shipA.ewar : undefined, distance, this.propulsionStarved.shipB, this.burstModifiers.shipB);
     const commands = {
       shipA: this.shipASteering.computeVelocity(shipA, shipB, this.time),
       shipB: this.shipBSteering.computeVelocity(shipB, shipA, this.time),
@@ -100,13 +103,22 @@ export class SimulationImpl implements Simulation {
   }
 }
 
-function effectiveState(resolver: EwarResolver, ship: ShipState, opponentEwar: EwarProjection | undefined, distance: number, propulsionStarved: boolean): ShipState {
+function effectiveState(resolver: EwarResolver, ship: ShipState, opponentEwar: EwarProjection | undefined, distance: number, propulsionStarved: boolean, bursts: BurstModifiers): ShipState {
   const multiplier = resolver.speedMultiplier(opponentEwar, distance);
   const suppressed = resolver.propulsionSuppressed(opponentEwar, distance) || propulsionStarved;
-  const baseSpeed = suppressed ? suppressedSpeed(ship) : ship.maxSpeed;
+  const baseSpeed = suppressed ? suppressedSpeed(ship) : propulsionBoostedSpeed(ship, bursts.propulsionSpeed);
   const sig = effectiveSig(ship, suppressed);
-  if (multiplier === 1 && baseSpeed === ship.maxSpeed && sig === ship.sig) return ship;
-  return { ...ship, maxSpeed: baseSpeed * multiplier, sig };
+  const inertia = ship.inertiaModifier * bursts.inertia;
+  if (multiplier === 1 && baseSpeed === ship.maxSpeed && sig === ship.sig && inertia === ship.inertiaModifier) return ship;
+  return { ...ship, maxSpeed: baseSpeed * multiplier, sig, inertiaModifier: inertia };
+}
+
+/** A propulsion speed burst (Rapid Deployment) scales only the afterburner/MWD contribution above base speed. */
+function propulsionBoostedSpeed(ship: ShipState, multiplier: number): number {
+  if (multiplier === 1) return ship.maxSpeed;
+  const base = ship.baseMaxSpeed;
+  if (base === undefined || base >= ship.maxSpeed) return ship.maxSpeed;
+  return base + (ship.maxSpeed - base) * multiplier;
 }
 
 function effectiveSig(ship: ShipState, suppressed: boolean): number | undefined {

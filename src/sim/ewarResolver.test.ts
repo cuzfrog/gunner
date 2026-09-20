@@ -881,6 +881,25 @@ describe("EwarResolverImpl", () => {
       expect(resolver.sigMultiplier(projection, 5000)).toBeCloseTo(expected, 10);
     });
 
+    test("extra multipliers (command bursts) join the painter stacking group", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
+      const result = resolver.sigMultiplier(projection, 5000, [0.94]);
+      // Bonus and penalty chains are separate (pyfa modifiedAttributeDict): the burst is the only negative, so it is unpenalized.
+      expect(result).toBeCloseTo(1.30 * 0.94, 6);
+    });
+
+    test("a second burst multiplier takes the penalty in its chain", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
+      const result = resolver.sigMultiplier(projection, 5000, [0.94, 0.96]);
+      const secondPenalty = Math.exp(-(1 * 1) / 7.1289);
+      const expected = 1.30 * 0.94 * (1 - 0.04 * secondPenalty);
+      expect(result).toBeCloseTo(expected, 6);
+    });
+
+    test("extra multipliers apply alone without a projection", () => {
+      expect(resolver.sigMultiplier(undefined, 5000, [0.94])).toBeCloseTo(0.94, 10);
+    });
+
     test("multiple painters apply stacking penalties", () => {
       const projection = painterProjection([PAINTER_II, PAINTER_II], [{ active: true, overloaded: false }, { active: true, overloaded: false }]);
       const result = resolver.sigMultiplier(projection, 5000);

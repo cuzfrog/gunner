@@ -5,7 +5,8 @@ import { SENSOR_TYPES, type AppliedEwarEffect, type DampenerBreakdown, type Disr
 export interface EwarResolver {
   speedMultiplier(projection: EwarProjection | undefined, distance: number): number;
   speedMultiplierIgnoringRange(projection: EwarProjection | undefined): number;
-  sigMultiplier(projection: EwarProjection | undefined, distance: number): number;
+  /** Painter stacking group including any extra same-group multipliers (command burst signature reduction). */
+  sigMultiplier(projection: EwarProjection | undefined, distance: number, extraMultipliers?: readonly number[]): number;
   sigMultiplierIgnoringRange(projection: EwarProjection | undefined): number;
   disruptedTurret(turret: TurretSpec, projection: EwarProjection | undefined, distance: number): TurretSpec;
   disruptedTurretIgnoringRange(turret: TurretSpec, projection: EwarProjection | undefined): TurretSpec;
@@ -42,8 +43,8 @@ export class EwarResolverImpl implements EwarResolver {
     return this.stacking.apply(this.speedMultipliers(projection, 0, true));
   }
 
-  sigMultiplier(projection: EwarProjection | undefined, distance: number): number {
-    return this.stacking.apply(this.sigMultipliers(projection, distance, false));
+  sigMultiplier(projection: EwarProjection | undefined, distance: number, extraMultipliers: readonly number[] = []): number {
+    return this.stacking.apply([...this.sigMultipliers(projection, distance, false), ...extraMultipliers]);
   }
 
   sigMultiplierIgnoringRange(projection: EwarProjection | undefined): number {

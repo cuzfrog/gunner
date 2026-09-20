@@ -744,8 +744,14 @@ interface ChargeStats {
   readonly capacitorBonus?: number;
   readonly volume?: number;
   readonly capacitorNeedMultiplier?: number;
+  readonly warfareBuffs?: readonly WarfareBuffChargeStat[];
   readonly chargeGroup: number;
   readonly chargeSize: number;
+}
+
+interface WarfareBuffChargeStat {
+  readonly buffId: number;
+  readonly multiplier: number;
 }
 
 interface LauncherStats {

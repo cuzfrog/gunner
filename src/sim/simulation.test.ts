@@ -6,7 +6,8 @@ import { EwarResolverImpl } from "./ewarResolver";
 import { SimulationImpl } from "./simulation";
 import { StackingPenaltyImpl } from "./stackingPenalty";
 import { toTypeId } from "../gamedata/ids";
-import type { CombatantConfig, EwarProjection, ShipConfig, SimConfig } from "./types";
+import type { BurstModifiers, CombatantConfig, EwarProjection, ShipConfig, SimConfig, Side } from "./types";
+import { IDENTITY_BURST_MODIFIERS } from "./types";
 
 const shipASteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 const shipBSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
@@ -61,6 +62,11 @@ function simConfig(shipAMode: ShipConfig["mode"], mass = INSTANT_MASS, inertiaMo
 
 function makeSim(config: SimConfig): SimulationImpl {
   return new SimulationImpl({ shipASteering, shipBSteering, ewarResolver, simConfig: config });
+}
+
+function burstContext(overrides: Partial<BurstModifiers>, side: Side = "shipB"): { propulsionStarved: Record<Side, boolean>; ewarActive: Record<Side, boolean>; bursts: Record<Side, BurstModifiers> } {
+  const identity: Record<Side, BurstModifiers> = { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS };
+  return { propulsionStarved: { shipA: false, shipB: false }, ewarActive: { shipA: true, shipB: true }, bursts: { ...identity, [side]: { ...IDENTITY_BURST_MODIFIERS, ...overrides } } };
 }
 
 describe("SimulationImpl", () => {
@@ -720,5 +726,34 @@ describe("SimulationImpl", () => {
     second.step(1);
     expect(second.snapshot().time).toBe(2);
     expect(first.snapshot().time).toBe(6);
+  });
+});
+
+describe("simulation burst modifiers", () => {
+  test("propulsion speed burst scales the propulsion contribution only", () => {
+    const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
+    const config = {
+      shipA: shipConfig("shipA", "midships"),
+      shipB: { ...shipConfig("shipB", "midships"), baseMaxSpeed: 200, maxSpeed: 1000 },
+      initialDistance: 5000,
+    };
+    const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver, simConfig: config });
+    sim.step(1, burstContext({ propulsionSpeed: 1.12 }));
+    expect(sim.snapshot().shipB.maxSpeed).toBeCloseTo(200 + 800 * 1.12, 6);
+    expect(sim.snapshot().shipA.maxSpeed).toBe(100);
+  });
+
+  test("propulsion speed burst does nothing without a propulsion contribution", () => {
+    const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
+    const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver, simConfig: simConfig("midships") });
+    sim.step(1, burstContext({ propulsionSpeed: 1.12 }));
+    expect(sim.snapshot().shipB.maxSpeed).toBe(100);
+  });
+
+  test("inertia burst reduces the effective inertia modifier", () => {
+    const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
+    const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver, simConfig: simConfig("midships") });
+    sim.step(1, burstContext({ inertia: 0.94 }));
+    expect(sim.snapshot().shipB.inertiaModifier).toBeCloseTo(INSTANT_INERTIA * 0.94, 12);
   });
 });
