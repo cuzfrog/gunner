@@ -9,6 +9,7 @@ import { FighterSimulatorImpl } from "./fighterSimulator";
 import type { FighterSimulator } from "./fighterSimulator";
 import type { EwarResolver } from "./ewarResolver";
 import { expectedHitRoll, sampledHitRoll, type HitRollStrategy } from "./hitRoll";
+import { JamClockImpl, expectedJamRoll, sampledJamRoll, type JamClock, type JamRollStrategy } from "./jamClock";
 import type { Kinematics } from "./kinematics";
 import { LockClockImpl } from "./lockClock";
 import type { LockClock } from "./lockClock";
@@ -27,6 +28,7 @@ import type { WeaponClock } from "./weaponClock";
 export interface SimWorld {
   readonly simulation: Simulation;
   readonly lockClock: LockClock;
+  readonly jamClock: JamClock;
   readonly droneSimulator: DroneSimulator;
   readonly fighterSimulator: FighterSimulator;
   readonly missileSimulator: MissileSimulator;
@@ -58,20 +60,21 @@ export class SimWorldFactoryImpl implements SimWorldFactory {
   }
 
   createSampled(): SimWorld {
-    return this.create(sampledHitRoll);
+    return this.create(sampledHitRoll, sampledJamRoll);
   }
 
   createExpected(): SimWorld {
-    return this.create(expectedHitRoll);
+    return this.create(expectedHitRoll, expectedJamRoll);
   }
 
-  private create(hitRoll: HitRollStrategy): SimWorld {
+  private create(hitRoll: HitRollStrategy, jamRoll: JamRollStrategy): SimWorld {
     const reactiveSteering = new ReactiveAutopilot();
     const shipASteering = new PredictiveAutopilot({ reactiveSteering, kinematics: this.kinematics });
     const shipBSteering = new PredictiveAutopilot({ reactiveSteering, kinematics: this.kinematics });
     return {
       simulation: new SimulationImpl({ shipASteering, shipBSteering, ewarResolver: this.ewarResolver, simConfig: this.simConfig }),
       lockClock: new LockClockImpl(),
+      jamClock: new JamClockImpl({ resolver: this.ewarResolver, roll: jamRoll, rngFactory: this.rngFactory }),
       droneSimulator: new DroneSimulatorImpl(),
       fighterSimulator: new FighterSimulatorImpl(),
       missileSimulator: new MissileSimulatorImpl({ missileApplication: this.missileApplication }),

@@ -24,6 +24,9 @@ import {
   type TrackingDisruptorSpec,
   type TurretSpec,
   type WarpScramblerSpec,
+  type JammerSpec,
+  type JammerActivation,
+  type SensorStrengths,
   ZERO_DAMAGE,
 } from "./types";
 import { scheduledDrainsFromProjections } from "./scheduledDrains";
@@ -37,6 +40,9 @@ const SCRAM_II_ID = toTypeId("448");
 const DISRUPTOR_II_ID = toTypeId("3244");
 const GRAPPLER_I_ID = toTypeId("41040");
 const TD_I_ID = toTypeId("2108");
+const GRAV_JAM_ID = toTypeId("2571");
+const LADAR_JAM_ID = toTypeId("2573");
+const MULTISPEC_JAM_ID = toTypeId("2567");
 const TD_II_ID = toTypeId("2109");
 const OPTIMAL_SCRIPT_ID = toTypeId("29005");
 const TRACKING_SCRIPT_ID = toTypeId("29007");
@@ -76,44 +82,44 @@ const TD: TrackingDisruptorSpec = {
 };
 
 function webProjection(specs: readonly StasisWebSpec[], overloaded = false): EwarProjection {
-  const loadout = { webs: specs, grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], };
-  const activation = { webs: specs.map(() => ({ active: true, overloaded })), grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], };
+  const loadout = { webs: specs, grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], };
+  const activation = { webs: specs.map(() => ({ active: true, overloaded })), grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], };
   return { loadout, activation };
 }
 
 function grapplerProjection(specs: readonly StasisGrapplerSpec[], overloaded = false): EwarProjection {
-  const loadout = { webs: [], grapplers: specs, disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], };
-  const activation = { webs: [], grapplers: specs.map(() => ({ active: true, overloaded })), disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], };
+  const loadout = { webs: [], grapplers: specs, disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], };
+  const activation = { webs: [], grapplers: specs.map(() => ({ active: true, overloaded })), disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], };
   return { loadout, activation };
 }
 
 function disruptorProjection(specs: readonly TrackingDisruptorSpec[], overloaded = false, script?: DisruptionScriptSpec): EwarProjection {
-  const loadout = { webs: [], grapplers: [], disruptors: specs, scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], };
-  const activation = { webs: [], grapplers: [], disruptors: specs.map(() => ({ active: true, overloaded, script })), scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], };
+  const loadout = { webs: [], grapplers: [], disruptors: specs, scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], };
+  const activation = { webs: [], grapplers: [], disruptors: specs.map(() => ({ active: true, overloaded, script })), scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], };
   return { loadout, activation };
 }
 
 function scramblerProjection(specs: readonly WarpScramblerSpec[], overloaded = false, active = true): EwarProjection {
-  const loadout = { webs: [], grapplers: [], disruptors: [], scramblers: specs, painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], };
-  const activation = { webs: [], grapplers: [], disruptors: [], scramblers: specs.map(() => ({ active, overloaded })), painters: [], dampeners: [], neutralizers: [], nosferatu: [], };
+  const loadout = { webs: [], grapplers: [], disruptors: [], scramblers: specs, painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], };
+  const activation = { webs: [], grapplers: [], disruptors: [], scramblers: specs.map(() => ({ active, overloaded })), painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], };
   return { loadout, activation };
 }
 
 function painterProjection(specs: readonly TargetPainterSpec[], activations?: readonly PainterActivation[]): EwarProjection {
-  const loadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: specs, dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], };
-  const activation = activations ? { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: activations, dampeners: [], neutralizers: [], nosferatu: [], } : undefined;
+  const loadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: specs, dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], };
+  const activation = activations ? { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: activations, dampeners: [], neutralizers: [], nosferatu: [], jammers: [], } : undefined;
   return { loadout, activation };
 }
 
 function neutralizerProjection(specs: readonly EnergyNeutralizerSpec[], active = true): EwarProjection {
-  const loadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: specs, nosferatu: [], };
-  const activation = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: specs.map(() => ({ active })), nosferatu: [] };
+  const loadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: specs, nosferatu: [], jammers: [], };
+  const activation = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: specs.map(() => ({ active })), nosferatu: [], jammers: [] };
   return { loadout, activation };
 }
 
 function nosferatuProjection(specs: readonly NosferatuSpec[], active = true): EwarProjection {
-  const loadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: specs, };
-  const activation = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: specs.map(() => ({ active })) };
+  const loadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: specs, jammers: [], };
+  const activation = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: specs.map(() => ({ active })), jammers: [] };
   return { loadout, activation };
 }
 
@@ -143,8 +149,8 @@ describe("EwarResolverImpl", () => {
     test("overloading one web extends only that web's range", () => {
       const baseWeb: StasisWebSpec = { moduleName: "Stasis Webifier I", moduleId: WEB_I_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
       const heatedWeb: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const loadout = { webs: [baseWeb, heatedWeb], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], };
-      const activation = { webs: [{ active: true, overloaded: false }, { active: true, overloaded: true }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], };
+      const loadout = { webs: [baseWeb, heatedWeb], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], };
+      const activation = { webs: [{ active: true, overloaded: false }, { active: true, overloaded: true }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], };
       const projection: EwarProjection = { loadout, activation };
       expect(resolver.speedMultiplier(projection, 11000)).toBeCloseTo(0.4, 10);
       expect(resolver.speedMultiplier(projection, 13001)).toBe(1);
@@ -177,13 +183,13 @@ describe("EwarResolverImpl", () => {
 
     test("a web missing from a partial activation array is treated as active", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [] } };
+      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [] } };
       expect(resolver.speedMultiplier(projection, 5000)).toBeCloseTo(0.4, 10);
     });
 
     test("explicit active false still disables a web", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [] } };
+      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], }, activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [] } };
       expect(resolver.speedMultiplier(projection, 5000)).toBe(1);
     });
 
@@ -207,8 +213,8 @@ describe("EwarResolverImpl", () => {
 
     test("grappler and web stack-penalize", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const loadout = { webs: [web], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], };
-      const activation = { webs: [{ active: true, overloaded: false }], grapplers: [{ active: true, overloaded: false }], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], };
+      const loadout = { webs: [web], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], };
+      const activation = { webs: [{ active: true, overloaded: false }], grapplers: [{ active: true, overloaded: false }], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], };
       const projection: EwarProjection = { loadout, activation };
       expect(resolver.speedMultiplier(projection, 500)).toBeLessThan(0.2);
     });
@@ -220,7 +226,7 @@ describe("EwarResolverImpl", () => {
     });
 
     test("inactive grappler is skipped", () => {
-      const projection = { loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [] } };
+      const projection = { loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], }, activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [] } };
       expect(resolver.speedMultiplier(projection, 500)).toBe(1);
     });
   });
@@ -257,7 +263,7 @@ describe("EwarResolverImpl", () => {
 
     test("disruptor without activation defaults to its spec script", () => {
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [], disruptors: [{ ...TD, defaultScript: OPTIMAL_SCRIPT }], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
+        loadout: { webs: [], grapplers: [], disruptors: [{ ...TD, defaultScript: OPTIMAL_SCRIPT }], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
       };
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const rangeFactor = 1 - 2 * 0.1719;
@@ -308,8 +314,8 @@ describe("EwarResolverImpl", () => {
     test("overloading one disruptor applies the strength bonus only to that module", () => {
       const base: TrackingDisruptorSpec = { ...TD, disruption: 0.15 };
       const heated: TrackingDisruptorSpec = TD;
-      const loadout = { webs: [], grapplers: [], disruptors: [base, heated], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], };
-      const activation = { webs: [], grapplers: [], disruptors: [{ active: true, overloaded: false, script: undefined }, { active: true, overloaded: true, script: undefined }], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], };
+      const loadout = { webs: [], grapplers: [], disruptors: [base, heated], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], };
+      const activation = { webs: [], grapplers: [], disruptors: [{ active: true, overloaded: false, script: undefined }, { active: true, overloaded: true, script: undefined }], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], };
       const projection: EwarProjection = { loadout, activation };
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const baseFactor = 1 - 0.15;
@@ -366,7 +372,7 @@ describe("EwarResolverImpl", () => {
 
     test("skips inactive modules", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 };
-      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [] } };
+      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], }, activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [] } };
       expect(resolver.speedMultiplierIgnoringRange(projection)).toBe(1);
     });
 
@@ -390,8 +396,8 @@ describe("EwarResolverImpl", () => {
 
     test("skips inactive disruptors", () => {
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
-        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
       };
       expect(resolver.disruptedTurretIgnoringRange(defaultTurret, projection)).toEqual(defaultTurret);
     });
@@ -451,7 +457,7 @@ describe("EwarResolverImpl", () => {
 
     test("a scrambler missing from a partial activation array is treated as active", () => {
       const scrambler: WarpScramblerSpec = { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
-      const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [scrambler], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [] } };
+      const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [scrambler], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [] } };
       expect(resolver.propulsionSuppressed(projection, 5000)).toBe(true);
     });
   });
@@ -471,8 +477,8 @@ describe("EwarResolverImpl", () => {
     test("inactive web is skipped", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
       const projection: EwarProjection = {
-        loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
-        activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+        loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+        activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
       };
       expect(resolver.appliedEffects(projection, 5000)).toEqual([]);
     });
@@ -514,8 +520,8 @@ describe("EwarResolverImpl", () => {
     test("inactive grappler is skipped", () => {
       const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: GRAPPLER_I_ID, optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
-        activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+        loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+        activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
       };
       expect(resolver.appliedEffects(projection, 500)).toEqual([]);
     });
@@ -549,8 +555,8 @@ describe("EwarResolverImpl", () => {
 
     test("inactive disruptor is skipped", () => {
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
-        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
       };
       expect(resolver.appliedEffects(projection, 10000)).toEqual([]);
     });
@@ -568,14 +574,14 @@ describe("EwarResolverImpl", () => {
       const grappler: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: GRAPPLER_I_ID, optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
       const scrambler: WarpScramblerSpec = { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 50000, overloadRangeBonusPercent: 20 };
       const disruptor: TrackingDisruptorSpec = { moduleName: "Tracking Disruptor II", moduleId: TD_II_ID, optimal: 48000, falloff: 24000, disruption: 0.1719, defaultScript: undefined, overloadStrengthBonusPercent: 20 };
-      const loadout = { webs: [web], grapplers: [grappler], disruptors: [disruptor], scramblers: [scrambler], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], };
+      const loadout = { webs: [web], grapplers: [grappler], disruptors: [disruptor], scramblers: [scrambler], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], };
       const activation = {
         webs: [{ active: true, overloaded: false }],
         grapplers: [{ active: true, overloaded: false }],
         disruptors: [{ active: true, overloaded: false, script: undefined }],
         scramblers: [{ active: true, overloaded: false }],
         painters: [],
-        dampeners: [], neutralizers: [], nosferatu: [],
+        dampeners: [], neutralizers: [], nosferatu: [], jammers: [],
       };
       const projection: EwarProjection = { loadout, activation };
       expect(resolver.appliedEffects(projection, 1000)).toEqual([
@@ -645,8 +651,8 @@ describe("EwarResolverImpl", () => {
     test("inactive web is skipped", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
       const projection: EwarProjection = {
-        loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
-        activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+        loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+        activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
       };
       expect(resolver.speedBreakdown(projection, 5000)).toEqual({ effects: [], propulsionSuppressed: false });
     });
@@ -711,8 +717,8 @@ describe("EwarResolverImpl", () => {
 
     test("inactive grappler is skipped", () => {
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
-        activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+        loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+        activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
       };
       expect(resolver.speedBreakdown(projection, 500)).toEqual({ effects: [], propulsionSuppressed: false });
     });
@@ -726,14 +732,14 @@ describe("EwarResolverImpl", () => {
 
     test("speed effects are emitted in web, grappler order", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 50000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const loadout = { webs: [web], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], };
+      const loadout = { webs: [web], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], };
       const activation = {
         webs: [{ active: true, overloaded: false }],
         grapplers: [{ active: true, overloaded: false }],
         disruptors: [],
         scramblers: [],
       painters: [],
-      dampeners: [], neutralizers: [], nosferatu: [],
+      dampeners: [], neutralizers: [], nosferatu: [], jammers: [],
       };
       const projection: EwarProjection = { loadout, activation };
       const effects = resolver.speedBreakdown(projection, 500).effects;
@@ -756,14 +762,14 @@ describe("EwarResolverImpl", () => {
         maxRange: 9000,
         overloadRangeBonusPercent: 20,
       };
-      const loadout = { webs: [web], grapplers: [], disruptors: [], scramblers: [scrambler], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], };
+      const loadout = { webs: [web], grapplers: [], disruptors: [], scramblers: [scrambler], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], };
       const activation = {
         webs: [{ active: true, overloaded: false }],
         grapplers: [],
         disruptors: [],
         scramblers: [{ active: true, overloaded: false }],
         painters: [],
-        dampeners: [], neutralizers: [], nosferatu: [],
+        dampeners: [], neutralizers: [], nosferatu: [], jammers: [],
       };
       const projection: EwarProjection = { loadout, activation };
       const breakdown = resolver.speedBreakdown(projection, 5000);
@@ -822,8 +828,8 @@ describe("EwarResolverImpl", () => {
 
     test("inactive disruptor is skipped", () => {
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], },
-        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], },
+        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: []  , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
       };
       expect(resolver.disruptionBreakdown(projection, 10000)).toEqual({ tracking: [], optimal: [], falloff: [] });
     });
@@ -920,10 +926,17 @@ describe("EwarResolverImpl", () => {
       activations: readonly DampenerActivation[],
     ): EwarProjection {
       return {
-        loadout: { ...EMPTY_EWAR_LOADOUT, dampeners, dampenerScripts: [], neutralizers: [], nosferatu: [], },
-        activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: activations, neutralizers: [], nosferatu: [] },
+        loadout: { ...EMPTY_EWAR_LOADOUT, dampeners, dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], },
+        activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: activations, neutralizers: [], nosferatu: [], jammers: [] },
       };
     }
+
+    test("dampeners preserve sensor strengths", () => {
+      const spec: SensorSpec = { ...baseSensorSpec, strengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 } };
+      const projection = dampenerProjection([DAMP_II], [{ active: true, overloaded: false, script: undefined }]);
+      const result = resolver.dampenedSensorSpec(spec, projection, 10000);
+      expect(result.strengths).toEqual({ gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 });
+    });
 
     test("dampener at optimal applies full scan res and range reduction", () => {
       const projection = dampenerProjection([DAMP_II], [{ active: true, overloaded: false, script: undefined }]);
@@ -1038,12 +1051,12 @@ describe("EwarResolverImpl", () => {
 
   describe("reach", () => {
     test("undefined projection returns all zeros", () => {
-      expect(resolver.reach(undefined)).toEqual({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, });
+      expect(resolver.reach(undefined)).toEqual({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, jammer: 0, neutralizer: 0, nosferatu: 0, });
     });
 
     test("empty loadout returns all zeros", () => {
       const projection: EwarProjection = { loadout: EMPTY_EWAR_LOADOUT };
-      expect(resolver.reach(projection)).toEqual({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, });
+      expect(resolver.reach(projection)).toEqual({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, jammer: 0, neutralizer: 0, nosferatu: 0, });
     });
 
     test("web reach is the furthest maxRange of active webs", () => {
@@ -1061,7 +1074,7 @@ describe("EwarResolverImpl", () => {
 
     test("inactive web does not contribute to reach", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [] } };
+      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], }, activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [] } };
       expect(resolver.reach(projection).web).toBe(0);
     });
 
@@ -1091,7 +1104,7 @@ describe("EwarResolverImpl", () => {
 
     test("dampener reach is optimal plus falloff", () => {
       const damp: SensorDampenerSpec = { moduleName: "Sensor Dampener II", moduleId: TD_II_ID, optimal: 48000, falloff: 24000, scanResolutionBonusPercent: -15.3, maxTargetRangeBonusPercent: -15.3, defaultScript: undefined, overloadStrengthBonusPercent: 20 };
-      const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [damp], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [{ active: true, overloaded: false, script: undefined }], neutralizers: [], nosferatu: [] } };
+      const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [damp], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [{ active: true, overloaded: false, script: undefined }], neutralizers: [], nosferatu: [], jammers: [] } };
       expect(resolver.reach(projection).dampener).toBe(72000);
     });
 
@@ -1155,11 +1168,115 @@ describe("EwarResolverImpl", () => {
 
     test("scanResolutionMultiplier matches dampenedSensorSpecIgnoringRange on unit sensor", () => {
       const damp: SensorDampenerSpec = { moduleName: "Sensor Dampener II", moduleId: TD_II_ID, optimal: 48000, falloff: 24000, scanResolutionBonusPercent: -15.3, maxTargetRangeBonusPercent: -15.3, defaultScript: undefined, overloadStrengthBonusPercent: 20 };
-      const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [damp], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [{ active: true, overloaded: false, script: undefined }], neutralizers: [], nosferatu: [] } };
+      const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [damp], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [{ active: true, overloaded: false, script: undefined }], neutralizers: [], nosferatu: [], jammers: [] } };
       const unitSensor: SensorSpec = { scanResolution: 1, maxTargetingRange: 1, maxLockedTargets: 1 };
       const dampened = resolver.dampenedSensorSpecIgnoringRange(unitSensor, projection);
       expect(resolver.potentials(projection).scanResolutionMultiplier).toBe(dampened.scanResolution);
       expect(resolver.potentials(projection).targetingRangeMultiplier).toBe(dampened.maxTargetingRange);
     });
+  });
+});
+
+describe("EwarResolverImpl jammerChance", () => {
+  const GRAV_SENSOR: SensorStrengths = { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 };
+  const GRAV_JAM: JammerSpec = { moduleName: "Gravimetric ECM II", moduleId: GRAV_JAM_ID, strengths: { gravimetric: 4, ladar: 1.3, magnetometric: 1.3, radar: 1.3 }, optimal: 34560, falloff: 32400, overloadStrengthBonusPercent: 20, capacitorNeed: 58, cycleTime: 20 };
+  const LADAR_JAM: JammerSpec = { moduleName: "Ladar ECM II", moduleId: LADAR_JAM_ID, strengths: { gravimetric: 1.3, ladar: 4, magnetometric: 1.3, radar: 1.3 }, optimal: 34560, falloff: 32400, overloadStrengthBonusPercent: 20, capacitorNeed: 58, cycleTime: 20 };
+  const MULTISPEC: JammerSpec = { moduleName: "Multispectral ECM II", moduleId: MULTISPEC_JAM_ID, strengths: { gravimetric: 2.6, ladar: 2.6, magnetometric: 2.6, radar: 2.6 }, optimal: 23040, falloff: 21600, overloadStrengthBonusPercent: 20, capacitorNeed: 87, cycleTime: 20 };
+
+  function jammerProjection(specs: readonly JammerSpec[], activations?: readonly JammerActivation[]): EwarProjection {
+    return {
+      loadout: { ...EMPTY_EWAR_LOADOUT, jammers: specs },
+      activation: activations ? { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: activations } : undefined,
+    };
+  }
+
+  test("single jammer at optimal uses target's strongest sensor type", () => {
+    const projection = jammerProjection([GRAV_JAM]);
+    expect(resolver.jammerChance(projection, 10000, GRAV_SENSOR)).toBeCloseTo(4 / 11, 10);
+  });
+
+  test("multispectral jammer divides its racial-mismatch strength by the target sensor", () => {
+    const projection = jammerProjection([MULTISPEC]);
+    expect(resolver.jammerChance(projection, 10000, GRAV_SENSOR)).toBeCloseTo(2.6 / 11, 10);
+  });
+
+  test("off-racial jammer contributes only its strength on the target's sensor type", () => {
+    const projection = jammerProjection([LADAR_JAM]);
+    expect(resolver.jammerChance(projection, 10000, GRAV_SENSOR)).toBeCloseTo(1.3 / 11, 10);
+  });
+
+  test("falloff halves strength at optimal + falloff", () => {
+    const projection = jammerProjection([GRAV_JAM]);
+    expect(resolver.jammerChance(projection, 34560 + 32400, GRAV_SENSOR)).toBeCloseTo((4 * 0.5) / 11, 10);
+  });
+
+  test("no jam beyond optimal + 3 falloff", () => {
+    const projection = jammerProjection([GRAV_JAM]);
+    expect(resolver.jammerChance(projection, 34560 + 3 * 32400, GRAV_SENSOR)).toBeCloseTo(4 * 0.5 ** 9 / 11, 12);
+    expect(resolver.jammerChance(projection, 34560 + 3 * 32400 + 1, GRAV_SENSOR)).toBe(0);
+  });
+
+  test("overload multiplies strength by the overload percent", () => {
+    const projection = jammerProjection([GRAV_JAM], [{ active: true, overloaded: true }]);
+    expect(resolver.jammerChance(projection, 10000, GRAV_SENSOR)).toBeCloseTo((4 * 1.2) / 11, 10);
+  });
+
+  test("inactive jammer contributes nothing", () => {
+    const projection = jammerProjection([GRAV_JAM], [{ active: false, overloaded: false }]);
+    expect(resolver.jammerChance(projection, 10000, GRAV_SENSOR)).toBe(0);
+  });
+
+  test("two independent jammers combine as 1 - (1 - c1)(1 - c2)", () => {
+    const projection = jammerProjection([GRAV_JAM, GRAV_JAM]);
+    const c = 4 / 11;
+    expect(resolver.jammerChance(projection, 10000, GRAV_SENSOR)).toBeCloseTo(1 - (1 - c) * (1 - c), 10);
+  });
+
+  test("undefined or zero target sensor strengths cannot be jammed", () => {
+    expect(resolver.jammerChance(jammerProjection([GRAV_JAM]), 10000, undefined)).toBe(0);
+    expect(resolver.jammerChance(jammerProjection([GRAV_JAM]), 10000, { gravimetric: 0, ladar: 0, magnetometric: 0, radar: 0 })).toBe(0);
+  });
+
+  test("sensor type tie resolves to gravimetric", () => {
+    const tied: SensorStrengths = { gravimetric: 5, ladar: 5, magnetometric: 5, radar: 5 };
+    expect(resolver.jammerChance(jammerProjection([GRAV_JAM]), 10000, tied)).toBeCloseTo(4 / 5, 10);
+  });
+
+  test("chance is capped at 1", () => {
+    const huge: JammerSpec = { ...GRAV_JAM, strengths: { gravimetric: 400, ladar: 400, magnetometric: 400, radar: 400 } };
+    expect(resolver.jammerChance(jammerProjection([huge]), 10000, GRAV_SENSOR)).toBe(1);
+  });
+
+  test("jammerChances lists one entry per jammer", () => {
+    const projection = jammerProjection([GRAV_JAM, LADAR_JAM]);
+    const chances = resolver.jammerChances(projection, 10000, GRAV_SENSOR);
+    expect(chances.length).toBe(2);
+    expect(chances[0]).toBeCloseTo(4 / 11, 10);
+    expect(chances[1]).toBeCloseTo(1.3 / 11, 10);
+  });
+
+  test("undefined projection has zero chance and empty per-jammer list", () => {
+    expect(resolver.jammerChance(undefined, 10000, GRAV_SENSOR)).toBe(0);
+    expect(resolver.jammerChances(undefined, 10000, GRAV_SENSOR)).toEqual([]);
+  });
+
+  test("appliedEffects lists engaged jammers with chance and cycle time", () => {
+    const projection = jammerProjection([GRAV_JAM]);
+    const effects = resolver.appliedEffects(projection, 10000).filter((e) => e.family === "jammer");
+    expect(effects.length).toBe(1);
+    const effect = effects[0];
+    if (effect.family !== "jammer") throw new Error("expected jammer effect");
+    expect(effect.moduleId).toBe(GRAV_JAM_ID);
+    expect(effect.cycleTime).toBe(20);
+  });
+
+  test("appliedEffects drops jammers beyond the hard cutoff even when chance is zero", () => {
+    const projection = jammerProjection([GRAV_JAM]);
+    expect(resolver.appliedEffects(projection, 34560 + 3 * 32400 + 1).filter((e) => e.family === "jammer").length).toBe(0);
+  });
+
+  test("reach includes the jammer cutoff", () => {
+    expect(resolver.reach(jammerProjection([GRAV_JAM])).jammer).toBe(34560 + 32400);
+    expect(resolver.reach(undefined).jammer).toBe(0);
   });
 });

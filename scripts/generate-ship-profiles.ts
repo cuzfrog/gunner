@@ -1,6 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { ShipProfile } from "../src/ships";
+import type { SensorStrengths } from "../src/sim";
 import type { FactionId, HullTypeId, ShipId } from "../src/gamedata/ids";
 
 type ShipBonusGroup = ShipProfile["bonuses"][number];
@@ -320,6 +321,12 @@ function parseProfile(
   const capacitor = extractCapacitorData(String(id), typedogmas, attributeNames);
   const slots = extractSlotData(String(id), typedogmas, attributeNames);
   const bonuses = parseBonuses(optionalString(record, "shipBonuses"));
+  const sensorStrengths: SensorStrengths = {
+    gravimetric: values.get("scanGravimetricStrength") ?? 0,
+    ladar: values.get("scanLadarStrength") ?? 0,
+    magnetometric: values.get("scanMagnetometricStrength") ?? 0,
+    radar: values.get("scanRadarStrength") ?? 0,
+  };
 
   return {
     id,
@@ -333,6 +340,7 @@ function parseProfile(
     scanResolution: values.get("scanResolution") ?? 0,
     maxTargetingRange: values.get("maxTargetRange") ?? 0,
     maxLockedTargets: values.get("maxLockedTargets") ?? 0,
+    sensorStrengths,
     highSlots: slots.highSlots,
     medSlots: slots.medSlots,
     lowSlots: slots.lowSlots,
@@ -381,6 +389,7 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push(`    scanResolution: ${p.scanResolution},`);
     lines.push(`    maxTargetingRange: ${p.maxTargetingRange},`);
     lines.push(`    maxLockedTargets: ${p.maxLockedTargets},`);
+    lines.push(`    sensorStrengths: { gravimetric: ${p.sensorStrengths.gravimetric}, ladar: ${p.sensorStrengths.ladar}, magnetometric: ${p.sensorStrengths.magnetometric}, radar: ${p.sensorStrengths.radar} },`);
     lines.push(`    highSlots: ${p.highSlots},`);
     lines.push(`    medSlots: ${p.medSlots},`);
     lines.push(`    lowSlots: ${p.lowSlots},`);

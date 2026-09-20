@@ -18,6 +18,8 @@ export interface EwarEffectDescriber {
   dampenerHint(projection: EwarProjection): string;
   neutralizerHint(projection: EwarProjection): string;
   nosferatuHint(projection: EwarProjection): string;
+  jammerDescription(projection: EwarProjection, distance: number): string;
+  jammerHint(projection: EwarProjection): string;
 }
 
 export class EwarEffectDescriberImpl implements EwarEffectDescriber {
@@ -153,6 +155,19 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
     const potentials = this.resolver.potentials(projection);
     const reach = this.resolver.reach(projection);
     return `${this.dampenerFromPotentials(potentials)} · ${this.formatRange(reach.dampener)}`;
+  }
+
+  jammerDescription(projection: EwarProjection, distance: number): string {
+    if (this.resolver.reach(projection).jammer <= 0 || distance < 0) return this.i18n.t("ewar.hover.outOfRange");
+    return this.jammerText();
+  }
+
+  jammerHint(projection: EwarProjection): string {
+    return `${this.jammerText()} · ${this.formatRange(this.resolver.reach(projection).jammer)}`;
+  }
+
+  private jammerText(): string {
+    return this.i18n.t("ewar.hover.jammer");
   }
 
   private sigDescription(multiplier: number): string {

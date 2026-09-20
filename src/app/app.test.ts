@@ -63,7 +63,7 @@ function baseView(): EngineView {
     frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [turretAttack], shipB: [turretAttack] },
     effectiveWeapons: { shipA: turret, shipB: turret },
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
-    locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+    locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, jammed: { shipA: false, shipB: false },
     readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } },
     incomingOffensiveModules: { shipA: [], shipB: [] },
   };

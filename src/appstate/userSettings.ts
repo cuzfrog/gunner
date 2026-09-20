@@ -26,6 +26,7 @@ export interface StoredEwarActivation {
   readonly dampeners?: readonly { readonly active: boolean; readonly overloaded: boolean; readonly script: StoredDisruptionScript }[];
   readonly neutralizers?: readonly { readonly active: boolean }[];
   readonly nosferatu?: readonly { readonly active: boolean }[];
+  readonly jammers?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
 }
 
 export interface StoredMissileBoosterActivation {

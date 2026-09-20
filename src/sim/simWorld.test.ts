@@ -30,7 +30,9 @@ const ewarResolver = vi.mocked<Required<EwarResolver>>({
   disruptionMultipliers: vi.fn(() => ({ tracking: 1, optimal: 1, falloff: 1 })),
   dampenedSensorSpec: vi.fn((s) => s), dampenedSensorSpecIgnoringRange: vi.fn((s) => s),
   dampenerBreakdown: vi.fn(() => ({ scanResolution: [], maxTargetRange: [] })),
-  reach: vi.fn(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, })),
+  reach: vi.fn(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, jammer: 0 })),
+  jammerChances: vi.fn(() => []),
+  jammerChance: vi.fn(() => 0),
   potentials: vi.fn(() => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 })),
 });
 
@@ -56,7 +58,7 @@ function makeView(): EngagementView {
     frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [attack], shipB: [] },
     effectiveWeapons: { shipA: turret, shipB: turret },
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
-    locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+    locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, jammed: { shipA: false, shipB: false },
     readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } },
     incomingOffensiveModules: { shipA: [], shipB: [] },
   };

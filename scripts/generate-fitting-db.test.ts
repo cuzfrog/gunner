@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { toTypeId, type TypeId } from "../src/gamedata/ids";
-import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildFighterStats, buildLauncherStats, buildMissileStats, buildOmnidirectionalTrackingEnhancerStats, buildOmnidirectionalTrackingLinkStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _assertCombatDroneSkillChain, _assertFighterSkillChain, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses, _buildSubsystemBonuses, _buildSkillBonuses, _buildDroneSkillIds } from "./generate-fitting-db";
+import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildFighterStats, buildLauncherStats, buildMissileStats, buildOmnidirectionalTrackingEnhancerStats, buildOmnidirectionalTrackingLinkStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _assertCombatDroneSkillChain, _assertFighterSkillChain, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildJammerStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses, _buildSubsystemBonuses, _buildSkillBonuses, _buildDroneSkillIds } from "./generate-fitting-db";
 import type { SdeGroup } from "./fittingDb/dogmaTypes";
 import type { UnmappedAttribute } from "./generate-fitting-db";
 import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./fittingDb/dogmaTypes";
@@ -624,6 +624,46 @@ describe("buildDroneStats", () => {
       thermalDamage: 20, droneBandwidthUsed: 5,
     }), sdeType(), droneSkills(3436, 24241));
     expect(stats?.volume).toBe(5);
+  });
+});
+
+describe("_buildJammerStats", () => {
+  test("returns undefined when scanGravimetricStrengthBonus is missing", () => {
+    expect(_buildJammerStats(values({ maxRange: 34560 }), WEB_SKILLS)).toBeUndefined();
+  });
+
+  test("builds an ECM jammer from SDE attributes", () => {
+    expect(_buildJammerStats(values({
+      scanGravimetricStrengthBonus: 4,
+      scanLadarStrengthBonus: 1.3,
+      scanMagnetometricStrengthBonus: 1.3,
+      scanRadarStrengthBonus: 1.3,
+      maxRange: 34560,
+      falloffEffectiveness: 32400,
+      overloadECMStrengthBonus: 20,
+      capacitorNeed: 58,
+      duration: 20000,
+    }), WEB_SKILLS)).toEqual({
+      strengths: { gravimetric: 4, ladar: 1.3, magnetometric: 1.3, radar: 1.3 },
+      optimal: 34560,
+      falloff: 32400,
+      overloadStrengthBonusPercent: 20,
+      capacitorNeed: 58,
+      cycleTime: 20,
+      requiredSkillIds: WEB_SKILLS,
+    });
+  });
+
+  test("defaults missing strengths, falloff, and overload bonus to zero", () => {
+    expect(_buildJammerStats(values({ scanGravimetricStrengthBonus: 2.6, maxRange: 23040, capacitorNeed: 87, duration: 20000 }), WEB_SKILLS)).toEqual({
+      strengths: { gravimetric: 2.6, ladar: 0, magnetometric: 0, radar: 0 },
+      optimal: 23040,
+      falloff: 0,
+      overloadStrengthBonusPercent: 0,
+      capacitorNeed: 87,
+      cycleTime: 20,
+      requiredSkillIds: WEB_SKILLS,
+    });
   });
 });
 

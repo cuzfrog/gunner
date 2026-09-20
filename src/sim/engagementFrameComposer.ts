@@ -13,6 +13,8 @@ export interface EngagementInput {
   readonly defenses: Record<Side, DefenseSpec>;
   readonly overloaded: Record<Side, boolean>;
   readonly locks: Record<Side, LockState>;
+  /** True while a side's ship is ECM-jammed (locks broken, weapons gated). */
+  readonly jammed: Record<Side, boolean>;
 }
 
 export interface WeaponAttack {
@@ -27,6 +29,7 @@ export interface EngagementView {
   readonly effectiveWeapons: Record<Side, WeaponSpec | undefined>;
   readonly defenses: Record<Side, DefenseAssessment>;
   readonly locks: Record<Side, LockState>;
+  readonly jammed: Record<Side, boolean>;
   readonly readouts: Record<Side, SideReadoutValues>;
   readonly incomingOffensiveModules: Record<Side, readonly ActiveOffensiveModule[]>;
 }
@@ -74,7 +77,7 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
       const defenses = this.assessDefenses(input, attacks);
       const readouts = this.computeReadouts(snapshot, frame, attacks, effectiveWeapons);
       const incomingOffensiveModules = this.composeIncomingOffensiveModules(frame, weaponAttacks);
-      return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, locks, readouts, incomingOffensiveModules };
+      return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, locks, jammed: input.jammed, readouts, incomingOffensiveModules };
     }
     const shipAResult = this.assessSide(frame, "shipA", shipAWeapons, input.paintedSigRadii.shipB, input.droneStates.shipA, input.missileFacts.shipA, input.spoolCycles.shipA, locks.shipA.status === "locked");
     const shipBResult = this.assessSide(frame, "shipB", shipBWeapons, input.paintedSigRadii.shipA, input.droneStates.shipB, input.missileFacts.shipB, input.spoolCycles.shipB, locks.shipB.status === "locked");
@@ -87,7 +90,7 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
     const defenses = this.assessDefenses(input, attacks);
     const readouts = this.computeReadouts(snapshot, frame, attacks, effectiveWeapons);
     const incomingOffensiveModules = this.composeIncomingOffensiveModules(frame, weaponAttacks);
-    return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, locks, readouts, incomingOffensiveModules };
+    return { frame, attacks, weaponAttacks, effectiveWeapons, defenses, locks, jammed: input.jammed, readouts, incomingOffensiveModules };
   }
 
   private composeIncomingOffensiveModules(frame: EngagementFrame, weaponAttacks: Record<Side, readonly WeaponAttack[]>): Record<Side, readonly ActiveOffensiveModule[]> {

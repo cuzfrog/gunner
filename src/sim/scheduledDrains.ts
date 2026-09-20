@@ -10,6 +10,7 @@ export function scheduledDrainsFromProjections(ewar: EwarProjection, boosts: Tur
     { specs: ewar.loadout.scramblers, activeAt: (i: number) => activation?.scramblers[i]?.active },
     { specs: ewar.loadout.painters, activeAt: (i: number) => activation?.painters[i]?.active },
     { specs: ewar.loadout.dampeners, activeAt: (i: number) => activation?.dampeners[i]?.active },
+    { specs: ewar.loadout.jammers, activeAt: (i: number) => activation?.jammers[i]?.active },
   ] as const;
   for (const family of ewarFamilies) {
     family.specs.forEach((spec, i) => {

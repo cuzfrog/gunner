@@ -45,6 +45,7 @@ function carrier(overrides: Partial<ShipProfile> = {}): ShipProfile {
     scanResolution: 70,
     maxTargetingRange: 315000,
     maxLockedTargets: 14,
+    sensorStrengths: { gravimetric: 11, ladar: 0, magnetometric: 0, radar: 0 },
     highSlots: 5,
     medSlots: 4,
     lowSlots: 7,

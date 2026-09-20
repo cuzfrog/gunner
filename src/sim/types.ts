@@ -448,10 +448,30 @@ export interface CommandBurstSpec {
   readonly cycleTime: number;
 }
 
+export type SensorType = "gravimetric" | "ladar" | "magnetometric" | "radar";
+
+/** Ship sensor strengths in points; the racial type is the maximum. Gravimetric wins ties (multispectral profiles never occur on real hulls). */
+export const SENSOR_TYPES: readonly SensorType[] = ["gravimetric", "ladar", "magnetometric", "radar"] as const;
+
+export type SensorStrengths = Record<SensorType, number>;
+
 export interface SensorSpec {
   readonly scanResolution: number;
   readonly maxTargetingRange: number;
   readonly maxLockedTargets: number;
+  // Absent = legacy fixture without sensor data: ECM cannot jam it.
+  readonly strengths?: SensorStrengths;
+}
+
+export interface JammerSpec {
+  readonly moduleName: string;
+  readonly moduleId: TypeId;
+  readonly strengths: SensorStrengths;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number;
+  readonly cycleTime: number;
 }
 
 export type LockStatus = "idle" | "locking" | "locked";
@@ -553,9 +573,10 @@ export interface EwarLoadout {
   readonly nosferatu: readonly NosferatuSpec[];
   readonly scripts: readonly DisruptionScriptSpec[];
   readonly dampenerScripts: readonly SensorDampenerScriptSpec[];
+  readonly jammers: readonly JammerSpec[];
 }
 
-export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], scripts: [], dampenerScripts: [] };
+export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], scripts: [], dampenerScripts: [], jammers: [] };
 
 export interface WebActivation {
   readonly active: boolean;
@@ -597,6 +618,11 @@ export interface NosferatuActivation {
   readonly active: boolean;
 }
 
+export interface JammerActivation {
+  readonly active: boolean;
+  readonly overloaded: boolean;
+}
+
 export interface EwarActivation {
   readonly webs: readonly WebActivation[];
   readonly grapplers: readonly GrapplerActivation[];
@@ -606,6 +632,7 @@ export interface EwarActivation {
   readonly dampeners: readonly DampenerActivation[];
   readonly neutralizers: readonly NeutralizerActivation[];
   readonly nosferatu: readonly NosferatuActivation[];
+  readonly jammers: readonly JammerActivation[];
 }
 
 export interface EwarProjection {
@@ -620,6 +647,7 @@ export interface EwarReach {
   readonly disruptor: number;
   readonly painter: number;
   readonly dampener: number;
+  readonly jammer: number;
   readonly neutralizer: number;
   readonly nosferatu: number;
 }
@@ -635,7 +663,7 @@ export interface EwarEffectPotentials {
   readonly targetingRangeMultiplier: number;
 }
 
-export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener" | "painter" | "neutralizer" | "nosferatu";
+export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener" | "painter" | "neutralizer" | "nosferatu" | "jammer";
 
 export type AppliedEwarEffect =
   | { readonly family: "web"; readonly moduleId: TypeId; readonly speedMultiplier: number }
@@ -645,7 +673,8 @@ export type AppliedEwarEffect =
   | { readonly family: "dampener"; readonly moduleId: TypeId; readonly scanResolutionMultiplier: number; readonly maxTargetRangeMultiplier: number }
   | { readonly family: "painter"; readonly moduleId: TypeId; readonly signatureMultiplier: number }
   | { readonly family: "neutralizer"; readonly moduleId: TypeId; readonly amountPerCycle: number; readonly cycleTime: number }
-  | { readonly family: "nosferatu"; readonly moduleId: TypeId; readonly amountPerCycle: number; readonly cycleTime: number };
+  | { readonly family: "nosferatu"; readonly moduleId: TypeId; readonly amountPerCycle: number; readonly cycleTime: number }
+  | { readonly family: "jammer"; readonly moduleId: TypeId; readonly cycleTime: number };
 
 export type ActiveOffensiveModule =
   | { readonly category: "weapon"; readonly weaponKind: WeaponKind; readonly moduleId: TypeId }

@@ -1,6 +1,6 @@
 import type { ShipId, TypeId } from "../ids";
 import type { HullTier } from "../../ships";
-import type { DamageResists, DamageType } from "../../sim";
+import type { DamageResists, DamageType, SensorStrengths } from "../../sim";
 
 export interface FittingPropulsionStats {
   readonly kind: "afterburner" | "microwarpdrive";
@@ -128,6 +128,7 @@ export interface FittingModuleStats {
   readonly trackingDisruptor?: Omit<TrackingDisruptorStats, "id" | "name">;
   readonly warpScrambler?: Omit<WarpScramblerStats, "id" | "name">;
   readonly targetPainter?: Omit<TargetPainterStats, "id" | "name">;
+  readonly jammer?: Omit<JammerStats, "id" | "name">;
   readonly sensorDampener?: Omit<SensorDampenerStats, "id" | "name">;
   readonly sensorBooster?: Omit<SensorBoosterStats, "id" | "name">;
   readonly signalAmplifier?: Omit<SignalAmplifierStats, "id" | "name">;
@@ -340,6 +341,18 @@ export interface TargetPainterStats {
   readonly maxRange: number;
   readonly falloff: number;
   readonly signatureRadiusBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+  readonly capacitorNeed: number; // GJ per cycle
+  readonly cycleTime: number; // seconds
+  readonly requiredSkillIds: readonly TypeId[];
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export interface JammerStats {
+  readonly strengths: SensorStrengths;
+  readonly optimal: number; // m
+  readonly falloff: number; // m
   readonly overloadStrengthBonusPercent: number;
   readonly capacitorNeed: number; // GJ per cycle
   readonly cycleTime: number; // seconds
@@ -569,6 +582,7 @@ export interface FittingDbData {
   readonly warpScramblers: Readonly<Record<string, WarpScramblerStats>>;
   readonly disruptionScripts: Readonly<Record<string, DisruptionScriptStats>>;
   readonly targetPainters: Readonly<Record<string, TargetPainterStats>>;
+  readonly jammers: Readonly<Record<string, JammerStats>>;
   readonly missileGuidanceComputers: Readonly<Record<string, MissileGuidanceComputerStats>>;
   readonly missileGuidanceEnhancers: Readonly<Record<string, MissileGuidanceEnhancerStats>>;
   readonly missileScripts: Readonly<Record<string, MissileScriptStats>>;
@@ -589,3 +603,5 @@ export interface FittingDbData {
 }
 
 export type FittingDb = FittingDbData;
+
+export type EwarDb = Pick<FittingDbData, "stasisWebs" | "stasisGrapplers" | "trackingDisruptors" | "warpScramblers" | "targetPainters" | "sensorDampeners" | "sensorDampenerScripts" | "disruptionScripts" | "jammers" | "modules" | "skillBonuses">;

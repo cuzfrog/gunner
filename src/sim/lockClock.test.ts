@@ -6,9 +6,30 @@ import { IDLE_LOCK } from "./types";
 const sensor: SensorSpec = { scanResolution: 200, maxTargetingRange: 50000, maxLockedTargets: 4 };
 const targetSig = 40;
 
-function stepInput(distance: number, sensorA: SensorSpec | undefined = sensor, sensorB: SensorSpec | undefined = sensor, sigA = targetSig, sigB = targetSig, operational: Record<Side, boolean> = { shipA: true, shipB: true }): LockStepInput {
-  return { distance, sensorA, sensorB, sigA, sigB, operational };
+function stepInput(distance: number, sensorA: SensorSpec | undefined = sensor, sensorB: SensorSpec | undefined = sensor, sigA = targetSig, sigB = targetSig, operational: Record<Side, boolean> = { shipA: true, shipB: true }, jammed: Record<Side, boolean> = { shipA: false, shipB: false }): LockStepInput {
+  return { distance, sensorA, sensorB, sigA, sigB, operational, jammed };
 }
+
+describe("LockClockImpl jamming", () => {
+  test("a jammed side loses its lock immediately", () => {
+    const clock = new LockClockImpl();
+    clock.step(0.1, stepInput(10000));
+    clock.step(11, stepInput(10000));
+    expect(clock.states().shipA.status).toBe("locked");
+    const jammedStates = clock.step(0.1, stepInput(10000, sensor, sensor, targetSig, targetSig, { shipA: true, shipB: true }, { shipA: true, shipB: false }));
+    expect(jammedStates.shipA).toEqual(IDLE_LOCK);
+  });
+
+  test("a jammed side cannot start locking, and resumes from scratch after the jam ends", () => {
+    const clock = new LockClockImpl();
+    clock.step(1, stepInput(10000, sensor, sensor, targetSig, targetSig, { shipA: true, shipB: true }, { shipA: true, shipB: false }));
+    const whileJammed = clock.step(1, stepInput(10000, sensor, sensor, targetSig, targetSig, { shipA: true, shipB: true }, { shipA: true, shipB: false }));
+    expect(whileJammed.shipA).toEqual(IDLE_LOCK);
+    const afterJam = clock.step(0.1, stepInput(10000));
+    expect(afterJam.shipA.status).toBe("locking");
+    expect(afterJam.shipA.progress).toBe(0);
+  });
+});
 
 describe("LockClockImpl", () => {
   test("starts idle and enters locking when in range", () => {
@@ -93,7 +114,7 @@ describe("LockClockImpl", () => {
 
   test("undefined sensor spec results in locked state (backward compatible)", () => {
     const clock = new LockClockImpl();
-    const states = clock.step(0.1, { distance: 10000, sensorA: undefined, sensorB: undefined, sigA: targetSig, sigB: targetSig, operational: { shipA: true, shipB: true } });
+    const states = clock.step(0.1, { distance: 10000, sensorA: undefined, sensorB: undefined, sigA: targetSig, sigB: targetSig, operational: { shipA: true, shipB: true }, jammed: { shipA: false, shipB: false } });
     expect(states.shipA.status).toBe("locked");
     expect(states.shipB.status).toBe("locked");
   });

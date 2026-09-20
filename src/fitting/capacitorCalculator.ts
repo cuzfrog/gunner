@@ -232,7 +232,7 @@ export function buildInjectorDrains(fitting: FittingState, db: FittingDb): reado
 
 /** Display names for drain row modules; family catalogs cover ids absent from db.modules (e.g. tracking computers). */
 function moduleNameFor(db: FittingDb, moduleId: TypeId): string {
-  const family = db.stasisWebs[moduleId] ?? db.stasisGrapplers[moduleId] ?? db.trackingDisruptors[moduleId] ?? db.warpScramblers[moduleId] ?? db.targetPainters[moduleId] ?? db.sensorDampeners[moduleId] ?? db.trackingComputers[moduleId] ?? db.missileGuidanceComputers[moduleId] ?? db.sensorBoosters[moduleId] ?? db.commandBursts[moduleId];
+  const family = db.stasisWebs[moduleId] ?? db.stasisGrapplers[moduleId] ?? db.trackingDisruptors[moduleId] ?? db.warpScramblers[moduleId] ?? db.targetPainters[moduleId] ?? db.jammers[moduleId] ?? db.sensorDampeners[moduleId] ?? db.trackingComputers[moduleId] ?? db.missileGuidanceComputers[moduleId] ?? db.sensorBoosters[moduleId] ?? db.commandBursts[moduleId];
   return db.modules[moduleId]?.name ?? family?.name ?? "";
 }
 

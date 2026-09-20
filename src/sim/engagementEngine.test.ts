@@ -1,5 +1,13 @@
 import { EngagementEngineImpl, _projectionHorizonSeconds } from "./engagementEngine";
+import { EwarResolverImpl } from "./ewarResolver";
+import type { JammerSpec, SensorSpec } from "./types";
 import { Vec2 } from "./vec2";
+import { SimWorldFactoryImpl } from "./simWorld";
+import { KinematicsImpl } from "./kinematics";
+import { MissileApplicationImpl } from "./missileApplication";
+import { Mulberry32RngFactory } from "./rng";
+import { StackingPenaltyImpl } from "./stackingPenalty";
+import { SensorBoosterResolverImpl } from "./sensorBoosterResolver";
 import { toTypeId } from "../gamedata/ids";
 import { EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, ZERO_DAMAGE, type AppliedEwarEffect, type EnergyNeutralizerSpec, type EngagementFrame, type EwarProjection, type HitChanceBreakdown, type LayerDamage, type LockState, type NosferatuSpec, type ShipState, type SimConfig, type SimSnapshot, type TurretSpec } from "./types";
 import { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
@@ -11,6 +19,7 @@ import type { FighterSimulator, FighterSimulatorState } from "./fighterSimulator
 import type { EngagementFrameComposer, EngagementView } from "./engagementFrameComposer";
 import type { EwarResolver } from "./ewarResolver";
 import type { LockClock, LockClockState } from "./lockClock";
+import type { JamClock, JamClockState } from "./jamClock";
 import type { MissileSimulator, MissileSimulatorState } from "./missileSimulator";
 import type { SensorBoosterResolver } from "./sensorBoosterResolver";
 import type { Simulation, SimulationState } from "./simulation";
@@ -48,7 +57,7 @@ function baseView(): EngagementView {
     frame, attacks: { shipA: assessment, shipB: assessment }, weaponAttacks: { shipA: [], shipB: [] },
     effectiveWeapons: { shipA: turret, shipB: turret },
     defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT },
-    locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE },
+    locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, jammed: { shipA: false, shipB: false },
     readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } },
     incomingOffensiveModules: { shipA: [], shipB: [] },
   };
@@ -76,6 +85,10 @@ function simulationState(): SimulationState {
 
 function lockClockState(): LockClockState {
   return { shipA: LOCKED_STATE, shipB: LOCKED_STATE };
+}
+
+function jamClockState(): JamClockState {
+  return { time: 0, seed: 0, jamUntil: { shipA: Number.NEGATIVE_INFINITY, shipB: Number.NEGATIVE_INFINITY }, timers: { shipA: [], shipB: [] } };
 }
 
 function droneSimulatorState(): DroneSimulatorState {
@@ -122,6 +135,7 @@ function mockWorld() {
   return {
     simulation: vi.mocked<Simulation>({ step: vi.fnUntracked(), snapshot: vi.fnUntracked(() => snapshot), reset: vi.fnUntracked(), update: vi.fnUntracked(), capture: vi.fnUntracked(simulationState), restore: vi.fnUntracked() }),
     lockClock: vi.mocked<LockClock>({ reset: vi.fnUntracked(), step: vi.fnUntracked(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), states: vi.fnUntracked(() => ({ shipA: LOCKED_STATE, shipB: LOCKED_STATE })), capture: vi.fnUntracked(lockClockState), restore: vi.fnUntracked() }),
+    jamClock: vi.mocked<JamClock>({ reset: vi.fnUntracked(), step: vi.fnUntracked(), jammed: vi.fnUntracked(() => ({ shipA: false, shipB: false })), capture: vi.fnUntracked(jamClockState), restore: vi.fnUntracked() }),
     droneSimulator: vi.mocked<DroneSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), states: vi.fnUntracked(() => []), capture: vi.fnUntracked(droneSimulatorState), restore: vi.fnUntracked() }),
     fighterSimulator: vi.mocked<FighterSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), states: vi.fnUntracked(() => []), capture: vi.fnUntracked(fighterSimulatorState), restore: vi.fnUntracked() }),
     missileSimulator: vi.mocked<MissileSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(() => []), states: vi.fnUntracked(() => []), facts: vi.fnUntracked(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })), capture: vi.fnUntracked(missileSimulatorState), restore: vi.fnUntracked() }),
@@ -161,7 +175,9 @@ function makeEngine() {
     disruptionMultipliers: vi.fnUntracked(() => ({ tracking: 1, optimal: 1, falloff: 1 })),
     dampenedSensorSpec: vi.fnUntracked((s) => s), dampenedSensorSpecIgnoringRange: vi.fnUntracked((s) => s),
     dampenerBreakdown: vi.fnUntracked(() => ({ scanResolution: [], maxTargetRange: [] })),
-    reach: vi.fnUntracked(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, })),
+    reach: vi.fnUntracked(() => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, jammer: 0 })),
+    jammerChances: vi.fnUntracked(() => []),
+    jammerChance: vi.fnUntracked(() => 0),
     potentials: vi.fnUntracked(() => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 })),
   });
   const sensorBoosterResolver = vi.mocked<SensorBoosterResolver>({ boostedSensorSpec: vi.fnUntracked((s) => s) });
@@ -256,7 +272,7 @@ describe("EngagementEngineImpl", () => {
       loadout: {
         webs: [{ moduleName: "Web", moduleId: webId, maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 0, capacitorNeed: 6, cycleTime: 5 }], grapplers: [], disruptors: [], scramblers: [],
         painters: [{ moduleName: "Painter", moduleId: painterId, maxRange: 30000, falloff: 7500, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 0, capacitorNeed: 8, cycleTime: 5 }],
-        dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [],
+        dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [],
       },
       activation: undefined,
     };
@@ -563,7 +579,7 @@ describe("EngagementEngineImpl", () => {
     const NOS: NosferatuSpec = { moduleName: "Medium Energy Nosferatu II", moduleId: NOS_ID, amount: 36, cycleTime: 5, maxRange: 10000, falloff: 5000 };
 
     function ewarProjection(): EwarProjection {
-      return { loadout: { ...EMPTY_EWAR_LOADOUT, neutralizers: [NEUT, NEUT], nosferatu: [NOS] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [{ active: true }, { active: true }], nosferatu: [{ active: true }] } };
+      return { loadout: { ...EMPTY_EWAR_LOADOUT, neutralizers: [NEUT, NEUT], nosferatu: [NOS] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [{ active: true }, { active: true }], nosferatu: [{ active: true }], jammers: [] } };
     }
 
     function capWarfareEffects(): readonly AppliedEwarEffect[] {
@@ -610,7 +626,7 @@ describe("EngagementEngineImpl", () => {
     const NEUT: EnergyNeutralizerSpec = { moduleName: "Heavy Energy Neutralizer II", moduleId: NEUT_ID, amount: 600, cycleTime: 24, capacitorNeed: 500, maxRange: 20000, falloff: 10000 };
 
     function ewarProjection(): EwarProjection {
-      return { loadout: { ...EMPTY_EWAR_LOADOUT, neutralizers: [NEUT] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [{ active: true }], nosferatu: [] } };
+      return { loadout: { ...EMPTY_EWAR_LOADOUT, neutralizers: [NEUT] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [{ active: true }], nosferatu: [], jammers: [] } };
     }
 
     function stepWithDestroyedShipB(deps: ReturnType<typeof makeEngine>): void {
@@ -659,5 +675,58 @@ describe("_projectionHorizonSeconds", () => {
   test("covers at least two cycles of the slowest weapon on either side", () => {
     expect(_projectionHorizonSeconds([{ ...turret, cycleTime: 8 }], [])).toBe(16);
     expect(_projectionHorizonSeconds([{ ...turret, cycleTime: 1 }], [{ ...turret, cycleTime: 9 }])).toBe(18);
+  });
+});
+
+describe("ECM jamming integration", () => {
+  const JAMMER: JammerSpec = { moduleName: "Gravimetric ECM II", moduleId: toTypeId("2571"), strengths: { gravimetric: 4, ladar: 1.3, magnetometric: 1.3, radar: 1.3 }, optimal: 34560, falloff: 32400, overloadStrengthBonusPercent: 20, capacitorNeed: 58, cycleTime: 20 };
+  const TARGET_SENSORS: SensorSpec = { scanResolution: 200, maxTargetingRange: 30000, maxLockedTargets: 4, strengths: { gravimetric: 4, ladar: 0, magnetometric: 0, radar: 0 } };
+
+  function jamSimConfig(): SimConfig {
+    return {
+      shipA: { id: "shipA", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1, ewar: { loadout: { ...EMPTY_EWAR_LOADOUT, jammers: [JAMMER] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [{ active: true, overloaded: false }] } } },
+      shipB: { id: "shipB", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1, sensorSpec: TARGET_SENSORS },
+      initialDistance: 5000,
+    };
+  }
+
+  function jamEngine() {
+    const stacking = new StackingPenaltyImpl();
+    const resolver = new EwarResolverImpl({ stackingPenalty: stacking });
+    const factory = new SimWorldFactoryImpl({ simConfig: jamSimConfig(), ewarResolver: resolver, kinematics: new KinematicsImpl(), missileApplication: new MissileApplicationImpl(), rngFactory: new Mulberry32RngFactory(), stackingPenalty: stacking });
+    const composer = vi.mocked<EngagementFrameComposer>({ compose: vi.fnUntracked((_snapshot, input) => ({ ...baseView(), jammed: input.jammed, locks: input.locks })) });
+    const engine = new EngagementEngineImpl({ live: factory.createExpected(), projection: factory.createExpected(), engagementFrameComposer: composer, ewarResolver: resolver, sensorBoosterResolver: new SensorBoosterResolverImpl({ stackingPenalty: stacking }) });
+    return engine;
+  }
+
+  function jamConfig(): import("./engagementEngine").EngineConfig {
+    return {
+      sim: jamSimConfig(),
+      weapons: { shipA: [], shipB: [] },
+      defense: {
+        shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC,
+        damageEnabled: { shipA: true, shipB: true },
+        repairMode: { shipA: "auto", shipB: "auto" },
+        repairerActivation: { shipA: [], shipB: [] },
+        rahActivation: { shipA: undefined, shipB: undefined },
+        overloaded: { shipA: false, shipB: false },
+      },
+      overloaded: { shipA: false, shipB: false },
+      capacitor: { shipA: EMPTY_CAPACITOR_SIDE, shipB: EMPTY_CAPACITOR_SIDE },
+    };
+  }
+
+  test("an active jammer breaks the target's locks at cycle completion and keeps them jammed while cycles land", () => {
+    const engine = jamEngine();
+    engine.reset(jamConfig());
+    for (let i = 0; i < 39; i++) engine.step(0.5);
+    expect(engine.view().jammed.shipB).toBe(false);
+    expect(engine.view().locks.shipB.status).not.toBe("idle");
+    engine.step(0.5);
+    expect(engine.view().jammed.shipB).toBe(true);
+    expect(engine.view().locks.shipB.status).toBe("idle");
+    for (let i = 0; i < 39; i++) engine.step(0.5);
+    expect(engine.view().jammed.shipB).toBe(true);
+    expect(engine.view().jammed.shipA).toBe(false);
   });
 });

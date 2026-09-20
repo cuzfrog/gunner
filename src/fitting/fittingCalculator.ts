@@ -30,10 +30,12 @@ import {
   type TurretWeaponGroup,
   type WarpScramblerStats,
   type DisruptionScriptStats,
+  type JammerStats,
+  type EwarDb,
 } from "../gamedata/fittingDb";
 import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../ships";
 import type { DamageType } from "../sim";
-import type { BoostLoadout, DisruptionScriptSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec, EnergyNeutralizerSpec, NosferatuSpec } from "../sim";
+import type { BoostLoadout, DisruptionScriptSpec, JammerSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec, EnergyNeutralizerSpec, NosferatuSpec } from "../sim";
 import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, damageVectorFromPartial, damageVectorScale } from "../sim";
 import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher } from "./chargeCatalog";
 import type { GunFamily, GunFamilies } from "./gunFamilies";
@@ -380,69 +382,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
   }
 
   resolveEwar(fitting: FittingState, conditions: StatConditions): EwarLoadout {
-    const scripts = disruptionScriptSpecsFrom(this.db.disruptionScripts);
-    const scriptByName = new Map(scripts.map((s) => [s.name, s]));
-    const dampenerScripts = sensorDampenerScriptSpecsFrom(this.db.sensorDampenerScripts);
-    const dampenerScriptByName = new Map(dampenerScripts.map((s) => [s.name, s]));
-    const webs: StasisWebSpec[] = [];
-    const grapplers: StasisGrapplerSpec[] = [];
-    const disruptors: TrackingDisruptorSpec[] = [];
-    const scramblers: WarpScramblerSpec[] = [];
-    const painters: TargetPainterSpec[] = [];
-    const dampeners: SensorDampenerSpec[] = [];
-    const neutralizers: EnergyNeutralizerSpec[] = [];
-    const nosferatu: NosferatuSpec[] = [];
-    const skillLevel = conditions.skillLevel;
-
-    for (const mod of fitting.ewarModules) {
-      const webStats = this.db.stasisWebs[mod.moduleId];
-      if (webStats) {
-        webs.push({ moduleName: webStats.name, moduleId: webStats.id, maxRange: webStats.maxRange, speedFactor: Math.round(-webStats.speedFactorPercent * 10000) / 1000000, overloadRangeBonusPercent: webStats.overloadRangeBonusPercent, capacitorNeed: webStats.capacitorNeed * moduleSkillMultiplier(this.db.skillBonuses, webStats.requiredSkillIds, "capUse", skillLevel), cycleTime: webStats.cycleTime });
-        continue;
-      }
-      const grapplerStats = this.db.stasisGrapplers[mod.moduleId];
-      if (grapplerStats) {
-        grapplers.push({ moduleName: grapplerStats.name, moduleId: grapplerStats.id, optimal: grapplerStats.optimal, falloff: grapplerStats.falloff, speedFactor: Math.round(-grapplerStats.speedFactorPercent * 10000) / 1000000, overloadOptimalBonusPercent: grapplerStats.overloadOptimalBonusPercent, capacitorNeed: grapplerStats.capacitorNeed * moduleSkillMultiplier(this.db.skillBonuses, grapplerStats.requiredSkillIds, "capUse", skillLevel), cycleTime: grapplerStats.cycleTime });
-        continue;
-      }
-      const disruptorStats = this.db.trackingDisruptors[mod.moduleId];
-      if (disruptorStats) {
-        const scriptName = mod.chargeId ? this.itemNameCatalog.nameForId(mod.chargeId, "en") : undefined;
-        const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
-        disruptors.push({ moduleName: disruptorStats.name, moduleId: disruptorStats.id, optimal: disruptorStats.optimal, falloff: disruptorStats.falloff, disruption: Math.round(-disruptorStats.disruptionPercent * 10000) / 1000000, defaultScript, overloadStrengthBonusPercent: disruptorStats.overloadStrengthBonusPercent, capacitorNeed: disruptorStats.capacitorNeed * moduleSkillMultiplier(this.db.skillBonuses, disruptorStats.requiredSkillIds, "capUse", skillLevel), cycleTime: disruptorStats.cycleTime });
-        continue;
-      }
-      const scramblerStats = this.db.warpScramblers[mod.moduleId];
-      if (scramblerStats) {
-        scramblers.push({ moduleName: scramblerStats.name, moduleId: scramblerStats.id, maxRange: scramblerStats.maxRange, overloadRangeBonusPercent: scramblerStats.overloadRangeBonusPercent, capacitorNeed: scramblerStats.capacitorNeed * moduleSkillMultiplier(this.db.skillBonuses, scramblerStats.requiredSkillIds, "capUse", skillLevel), cycleTime: scramblerStats.cycleTime, propulsionBlock: scramblerStats.propulsionBlock });
-        continue;
-      }
-      const painterStats = this.db.targetPainters[mod.moduleId];
-      if (painterStats) {
-        painters.push(painterSpecFrom(painterStats, painterStats.capacitorNeed * moduleSkillMultiplier(this.db.skillBonuses, painterStats.requiredSkillIds, "capUse", skillLevel)));
-        continue;
-      }
-      const dampenerStats = this.db.sensorDampeners[mod.moduleId];
-      if (dampenerStats) {
-        const scriptName = mod.chargeId ? this.itemNameCatalog.nameForId(mod.chargeId, "en") : undefined;
-        const defaultScript = scriptName ? dampenerScriptByName.get(scriptName) : undefined;
-        dampeners.push(sensorDampenerSpecFrom(dampenerStats, defaultScript, dampenerStats.capacitorNeed * moduleSkillMultiplier(this.db.skillBonuses, dampenerStats.requiredSkillIds, "capUse", skillLevel)));
-        continue;
-      }
-      const moduleStats = this.db.modules[mod.moduleId];
-      if (moduleStats?.neutralizer) {
-        const neutralizerStats = moduleStats.neutralizer;
-        neutralizers.push({ moduleName: moduleStats.name, moduleId: mod.moduleId, amount: neutralizerStats.amount, cycleTime: neutralizerStats.cycleTime, capacitorNeed: neutralizerStats.capacitorNeed * moduleSkillMultiplier(this.db.skillBonuses, neutralizerStats.requiredSkillIds, "capUse", skillLevel), maxRange: neutralizerStats.maxRange, falloff: neutralizerStats.falloff });
-        continue;
-      }
-      if (moduleStats?.nosferatu) {
-        nosferatu.push({ moduleName: moduleStats.name, moduleId: mod.moduleId, amount: moduleStats.nosferatu.amount, cycleTime: moduleStats.nosferatu.cycleTime, maxRange: moduleStats.nosferatu.maxRange, falloff: moduleStats.nosferatu.falloff });
-      }
-    }
-
-    const empty = webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && painters.length === 0 && dampeners.length === 0 && neutralizers.length === 0 && nosferatu.length === 0;
-    if (empty) return { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], scripts: [], dampenerScripts };
-    return { webs, grapplers, disruptors, scramblers, painters, dampeners, neutralizers, nosferatu, scripts, dampenerScripts };
+    return resolveEwarState(this.db, this.itemNameCatalog, fitting.ewarModules, conditions.skillLevel);
   }
 
   resolveEnergyWarfareResistance(fitting: FittingState): number {
@@ -816,7 +756,7 @@ function resolveSensorStats(profile: ShipProfile, hullBonuses: readonly HullBonu
   const maxTargetingRange = Math.round((profile.maxTargetingRange + flatSum(hullBonuses, "maxTargetingRangeFlat")) * longRangeMultiplier);
   const maxLockedTargets = profile.maxLockedTargets + targetManagementLevel + advancedTargetManagementLevel;
 
-  return { scanResolution, maxTargetingRange, maxLockedTargets };
+  return { scanResolution, maxTargetingRange, maxLockedTargets, strengths: profile.sensorStrengths };
 }
 
 const PROPULSION_BONUS_ATTRIBUTES: Record<PropulsionBonusAttribute, true> = { maxVelocity: true, agility: true, mwdSigBloom: true };
@@ -952,4 +892,77 @@ function energyWarfareResistanceMultipliers(supportModules: readonly FittedModul
   return multipliers;
 }
 
+function resolveEwarState(db: EwarDb, itemNameCatalog: ItemNameCatalog, ewarModules: readonly FittedModule[], skillLevel: SkillLevel): EwarLoadout {
+    const scripts = disruptionScriptSpecsFrom(db.disruptionScripts);
+    const scriptByName = new Map(scripts.map((s) => [s.name, s]));
+    const dampenerScripts = sensorDampenerScriptSpecsFrom(db.sensorDampenerScripts);
+    const dampenerScriptByName = new Map(dampenerScripts.map((s) => [s.name, s]));
+    const webs: StasisWebSpec[] = [];
+    const grapplers: StasisGrapplerSpec[] = [];
+    const disruptors: TrackingDisruptorSpec[] = [];
+    const scramblers: WarpScramblerSpec[] = [];
+    const painters: TargetPainterSpec[] = [];
+    const dampeners: SensorDampenerSpec[] = [];
+    const neutralizers: EnergyNeutralizerSpec[] = [];
+    const nosferatu: NosferatuSpec[] = [];
+    const jammers: JammerSpec[] = [];
+
+    for (const mod of ewarModules) {
+      const webStats = db.stasisWebs[mod.moduleId];
+      if (webStats) {
+        webs.push({ moduleName: webStats.name, moduleId: webStats.id, maxRange: webStats.maxRange, speedFactor: Math.round(-webStats.speedFactorPercent * 10000) / 1000000, overloadRangeBonusPercent: webStats.overloadRangeBonusPercent, capacitorNeed: webStats.capacitorNeed * moduleSkillMultiplier(db.skillBonuses, webStats.requiredSkillIds, "capUse", skillLevel), cycleTime: webStats.cycleTime });
+        continue;
+      }
+      const grapplerStats = db.stasisGrapplers[mod.moduleId];
+      if (grapplerStats) {
+        grapplers.push({ moduleName: grapplerStats.name, moduleId: grapplerStats.id, optimal: grapplerStats.optimal, falloff: grapplerStats.falloff, speedFactor: Math.round(-grapplerStats.speedFactorPercent * 10000) / 1000000, overloadOptimalBonusPercent: grapplerStats.overloadOptimalBonusPercent, capacitorNeed: grapplerStats.capacitorNeed * moduleSkillMultiplier(db.skillBonuses, grapplerStats.requiredSkillIds, "capUse", skillLevel), cycleTime: grapplerStats.cycleTime });
+        continue;
+      }
+      const disruptorStats = db.trackingDisruptors[mod.moduleId];
+      if (disruptorStats) {
+        const scriptName = mod.chargeId ? itemNameCatalog.nameForId(mod.chargeId, "en") : undefined;
+        const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
+        disruptors.push({ moduleName: disruptorStats.name, moduleId: disruptorStats.id, optimal: disruptorStats.optimal, falloff: disruptorStats.falloff, disruption: Math.round(-disruptorStats.disruptionPercent * 10000) / 1000000, defaultScript, overloadStrengthBonusPercent: disruptorStats.overloadStrengthBonusPercent, capacitorNeed: disruptorStats.capacitorNeed * moduleSkillMultiplier(db.skillBonuses, disruptorStats.requiredSkillIds, "capUse", skillLevel), cycleTime: disruptorStats.cycleTime });
+        continue;
+      }
+      const scramblerStats = db.warpScramblers[mod.moduleId];
+      if (scramblerStats) {
+        scramblers.push({ moduleName: scramblerStats.name, moduleId: scramblerStats.id, maxRange: scramblerStats.maxRange, overloadRangeBonusPercent: scramblerStats.overloadRangeBonusPercent, capacitorNeed: scramblerStats.capacitorNeed * moduleSkillMultiplier(db.skillBonuses, scramblerStats.requiredSkillIds, "capUse", skillLevel), cycleTime: scramblerStats.cycleTime, propulsionBlock: scramblerStats.propulsionBlock });
+        continue;
+      }
+      const painterStats = db.targetPainters[mod.moduleId];
+      if (painterStats) {
+        painters.push(painterSpecFrom(painterStats, painterStats.capacitorNeed * moduleSkillMultiplier(db.skillBonuses, painterStats.requiredSkillIds, "capUse", skillLevel)));
+        continue;
+      }
+      const dampenerStats = db.sensorDampeners[mod.moduleId];
+      if (dampenerStats) {
+        const scriptName = mod.chargeId ? itemNameCatalog.nameForId(mod.chargeId, "en") : undefined;
+        const defaultScript = scriptName ? dampenerScriptByName.get(scriptName) : undefined;
+        dampeners.push(sensorDampenerSpecFrom(dampenerStats, defaultScript, dampenerStats.capacitorNeed * moduleSkillMultiplier(db.skillBonuses, dampenerStats.requiredSkillIds, "capUse", skillLevel)));
+        continue;
+      }
+      const jammerStats = db.jammers[mod.moduleId];
+      if (jammerStats) {
+        jammers.push({ moduleName: jammerStats.name, moduleId: jammerStats.id, strengths: jammerStats.strengths, optimal: jammerStats.optimal, falloff: jammerStats.falloff, overloadStrengthBonusPercent: jammerStats.overloadStrengthBonusPercent, capacitorNeed: jammerStats.capacitorNeed * moduleSkillMultiplier(db.skillBonuses, jammerStats.requiredSkillIds, "capUse", skillLevel), cycleTime: jammerStats.cycleTime });
+        continue;
+      }
+      const moduleStats = db.modules[mod.moduleId];
+      if (moduleStats?.neutralizer) {
+        const neutralizerStats = moduleStats.neutralizer;
+        neutralizers.push({ moduleName: moduleStats.name, moduleId: mod.moduleId, amount: neutralizerStats.amount, cycleTime: neutralizerStats.cycleTime, capacitorNeed: neutralizerStats.capacitorNeed * moduleSkillMultiplier(db.skillBonuses, neutralizerStats.requiredSkillIds, "capUse", skillLevel), maxRange: neutralizerStats.maxRange, falloff: neutralizerStats.falloff });
+        continue;
+      }
+      if (moduleStats?.nosferatu) {
+        nosferatu.push({ moduleName: moduleStats.name, moduleId: mod.moduleId, amount: moduleStats.nosferatu.amount, cycleTime: moduleStats.nosferatu.cycleTime, maxRange: moduleStats.nosferatu.maxRange, falloff: moduleStats.nosferatu.falloff });
+      }
+    }
+
+    const empty = webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && painters.length === 0 && dampeners.length === 0 && neutralizers.length === 0 && nosferatu.length === 0 && jammers.length === 0;
+    if (empty) return { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], scripts: [], dampenerScripts: [], jammers: [] };
+    return { webs, grapplers, disruptors, scramblers, painters, dampeners, neutralizers, nosferatu, scripts, dampenerScripts, jammers };
+}
+
 export { resolveSensorStats as _resolveSensorStats };
+
+export { resolveEwarState as _resolveEwarState };

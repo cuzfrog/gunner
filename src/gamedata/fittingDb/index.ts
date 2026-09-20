@@ -62,6 +62,8 @@ export type {
   StasisWebStats,
   SubsystemStats,
   SubsystemSlotKind,
+  EwarDb,
+  JammerStats,
   TargetPainterStats,
   TrackingComputerStats,
   TrackingDisruptorStats,

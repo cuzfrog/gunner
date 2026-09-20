@@ -44,7 +44,7 @@ const disruptorEwar: EwarProjection = {
     painters: [],
     dampeners: [],
     scripts: [],
-    dampenerScripts: [], neutralizers: [], nosferatu: [],
+    dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [],
   },
   activation: {
     webs: [],
@@ -53,7 +53,7 @@ const disruptorEwar: EwarProjection = {
     scramblers: [],
   painters: [],
   dampeners: [],
-  neutralizers: [], nosferatu: [],
+  neutralizers: [], nosferatu: [], jammers: [],
   },
 };
 
@@ -90,7 +90,8 @@ function fakeEwarResolver(): EwarResolver {
     dampenedSensorSpec: (spec) => spec,
     dampenedSensorSpecIgnoringRange: (spec) => spec,
     dampenerBreakdown: () => ({ scanResolution: [], maxTargetRange: [] }),
-    reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, }),
+    reach: () => ({ web: 0, grappler: 0, scrambler: 0, disruptor: 0, painter: 0, dampener: 0, neutralizer: 0, nosferatu: 0, jammer: 0, }),
+jammerChances: () => [], jammerChance: () => 0,
     potentials: () => ({ speedMultiplier: 1, sigMultiplier: 1, propulsionSuppressed: false, trackingMultiplier: 1, optimalMultiplier: 1, falloffMultiplier: 1, scanResolutionMultiplier: 1, targetingRangeMultiplier: 1 }),
   };
 }
@@ -116,7 +117,7 @@ describe("symmetric mutual engagement", () => {
       shipB,
       commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
     };
-    const view = composer.compose(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, paintedSigRadii: { shipA: 40, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, spoolCycles: { shipA: [], shipB: [] }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    const view = composer.compose(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, paintedSigRadii: { shipA: 40, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, spoolCycles: { shipA: [], shipB: [] }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, jammed: { shipA: false, shipB: false } });
     expect(view.attacks.shipA?.turret?.hit.chance).toBe(view.attacks.shipB?.turret?.hit.chance);
     expect(view.frame.shipA.maxSpeed).toBe(view.frame.shipB.maxSpeed);
   });
@@ -131,7 +132,7 @@ describe("symmetric mutual engagement", () => {
       shipB,
       commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
     };
-    const view = composer.compose(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, paintedSigRadii: { shipA: 40, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, spoolCycles: { shipA: [], shipB: [] }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE } });
+    const view = composer.compose(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, paintedSigRadii: { shipA: 40, shipB: 40 }, droneStates: { shipA: [], shipB: [] }, missileFacts: { shipA: [], shipB: [] }, defenses: { shipA: EMPTY_DEFENSE_SPEC, shipB: EMPTY_DEFENSE_SPEC }, overloaded: { shipA: false, shipB: false }, spoolCycles: { shipA: [], shipB: [] }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, jammed: { shipA: false, shipB: false } });
     expect(view.attacks.shipA?.turret?.hit.chance!).toBeLessThan(view.attacks.shipB?.turret?.hit.chance!);
     expect((view.attacks.shipA?.effectiveWeapon as TurretSpec).tracking).toBe(turret.tracking * 0.5);
     expect((view.attacks.shipB?.effectiveWeapon as TurretSpec).tracking).toBe(turret.tracking);

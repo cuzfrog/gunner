@@ -4,7 +4,7 @@ import type { I18n } from "./i18n";
 import { PALETTE, withAlpha } from "./palette";
 import { formatDistance, formatWithCommas } from "./format";
 
-export type RangeOverlayKind = "web" | "grappler" | "scrambler" | "disruptor" | "neutralizer" | "nosferatu";
+export type RangeOverlayKind = "web" | "grappler" | "scrambler" | "disruptor" | "neutralizer" | "nosferatu" | "jammer";
 
 export interface RangeOverlay {
   readonly side: "shipA" | "shipB";
@@ -83,6 +83,7 @@ const COLORS = {
   overlayDisruptor: PALETTE.overlayDisruptor,
   overlayNeutralizer: PALETTE.overlayNeutralizer,
   overlayNosferatu: PALETTE.overlayNosferatu,
+  overlayJammer: PALETTE.overlayJammer,
   lockIdle: withAlpha(PALETTE.textPrimary, 0.4),
   lockProgress: PALETTE.textPrimary,
   targetingRange: withAlpha(PALETTE.accentTeal, 0.3),
@@ -95,6 +96,7 @@ const OVERLAY_COLORS: { readonly [K in RangeOverlayKind]: string } = {
   disruptor: COLORS.overlayDisruptor,
   neutralizer: COLORS.overlayNeutralizer,
   nosferatu: COLORS.overlayNosferatu,
+  jammer: COLORS.overlayJammer,
 };
 
 const GRID_MAX_ALPHA = 0.4;

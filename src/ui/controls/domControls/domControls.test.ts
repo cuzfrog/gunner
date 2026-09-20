@@ -63,7 +63,7 @@ function makeView(distance: number): EngagementView {
     relPosition: new Vec2(0, distance), distance, relVelocity: new Vec2(0, 0),
     radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
   };
-  return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } }, incomingOffensiveModules: { shipA: [], shipB: [] } };
+  return { frame, attacks: { shipA: undefined, shipB: undefined }, weaponAttacks: { shipA: [], shipB: [] }, effectiveWeapons: { shipA: undefined, shipB: undefined }, defenses: { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT }, locks: { shipA: LOCKED_STATE, shipB: LOCKED_STATE }, jammed: { shipA: false, shipB: false }, readouts: { shipA: { kind: "none", speed: 0 }, shipB: { kind: "none", speed: 0 } }, incomingOffensiveModules: { shipA: [], shipB: [] } };
 }
 
 function mockDefenseView(deadShipA = false, deadShipB = false): DefenseView {
@@ -327,13 +327,13 @@ describe("DomControls", () => {
       painters: [],
       dampeners: [],
       scripts: [],
-      dampenerScripts: [], neutralizers: [], nosferatu: [],
+      dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [],
     };
     cradle.cradle.ewarController.setLoadout("shipA", shipAEwar);
     const config = controls.getConfig();
     expect(config.shipA.ewar?.loadout.webs).toHaveLength(1);
     expect(config.shipA.ewar).not.toHaveProperty("overloaded");
-    expect(config.shipA.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] , painters: [], dampeners: [], neutralizers: [], nosferatu: [], });
+    expect(config.shipA.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] , painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], });
     expect(config.shipB.ewar).toBeUndefined();
   });
 
@@ -350,7 +350,7 @@ describe("DomControls", () => {
       painters: [],
       dampeners: [],
       scripts: [],
-      dampenerScripts: [], neutralizers: [], nosferatu: [],
+      dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [],
     };
     cradle.cradle.ewarController.setLoadout("shipB", shipBEwar);
     const config = controls.getConfig();
@@ -392,7 +392,7 @@ describe("DomControls", () => {
     shipBSide.profile = RIFTER;
     shipBSide.sections.propulsion.setPropulsionActive("mwd-5mn");
     shipBSide.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
-    cradle.cradle.ewarController.setLoadout("shipB", { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], });
+    cradle.cradle.ewarController.setLoadout("shipB", { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], });
 
     const config = controls.getConfig();
     expect(config.shipB.maxSpeed).toBe(1800);
