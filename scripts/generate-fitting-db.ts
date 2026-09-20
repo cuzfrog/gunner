@@ -755,6 +755,9 @@ interface LauncherStats {
   readonly requiredSkillIds: readonly TypeId[];
   readonly metaLevel: number;
   readonly metaGroupID: number;
+  readonly capacity?: number;
+  readonly chargeRate?: number;
+  readonly reloadTime?: number;
 }
 
 interface MissileStats {
@@ -765,6 +768,7 @@ interface MissileStats {
   readonly damageReductionFactor: number;
   readonly maxVelocity: number;
   readonly flightTime: number;
+  readonly volume?: number;
   readonly launcherGroup: number;
   readonly chargeGroup: number;
   readonly requiredSkillIds: readonly TypeId[];
@@ -1628,10 +1632,12 @@ export function buildLauncherStats(values: Map<string, number>, groupID: number,
   if (speed === undefined || speed <= 0) return undefined;
   const chargeGroups = readChargeGroups(values);
   if (chargeGroups.length === 0) return undefined;
-  return { rateOfFire: speed / 1000, launcherGroup: groupID, chargeGroups, requiredSkillIds, metaLevel: type.metaLevel ?? 0, metaGroupID: type.metaGroupID ?? 1 };
+  const chargeRate = values.get("chargeRate");
+  const reloadTime = values.get("reloadTime");
+  return { rateOfFire: speed / 1000, launcherGroup: groupID, chargeGroups, requiredSkillIds, metaLevel: type.metaLevel ?? 0, metaGroupID: type.metaGroupID ?? 1, ...(type.capacity !== undefined ? { capacity: type.capacity } : {}), ...(chargeRate !== undefined ? { chargeRate } : {}), ...(reloadTime !== undefined ? { reloadTime: reloadTime / 1000 } : {}) };
 }
 
-export function buildMissileStats(values: Map<string, number>, groupID: number, requiredSkillIds: readonly TypeId[]): MissileStats | undefined {
+export function buildMissileStats(values: Map<string, number>, groupID: number, type: SdeType, requiredSkillIds: readonly TypeId[]): MissileStats | undefined {
   const emDamage = values.get("emDamage") ?? 0;
   const thermalDamage = values.get("thermalDamage") ?? 0;
   const kineticDamage = values.get("kineticDamage") ?? 0;
@@ -1655,6 +1661,7 @@ export function buildMissileStats(values: Map<string, number>, groupID: number, 
     damageReductionFactor,
     maxVelocity,
     flightTime: flightTime / 1000,
+    ...(type.volume !== undefined ? { volume: type.volume } : {}),
     launcherGroup,
     chargeGroup: groupID,
     requiredSkillIds,
@@ -2044,7 +2051,7 @@ async function main() {
     }
 
     if (MISSILE_CHARGE_GROUPS.has(type.groupID)) {
-      const stats = buildMissileStats(values, type.groupID, buildRequiredSkillIds(requiredSkills, type.typeID));
+      const stats = buildMissileStats(values, type.groupID, type, buildRequiredSkillIds(requiredSkills, type.typeID));
       if (stats) {
         missiles[id] = { ...stats, id, name: enName };
         addItemName(itemNames, id, type);

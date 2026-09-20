@@ -26,6 +26,14 @@ export interface MissileSkillModel {
   compute(launcher: LauncherStats, missile: MissileStats, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): MissileSkillOutput;
 }
 
+/** Magazine size in missiles per full reload cycle: floor(capacity / volume) charges per launcher, floor-divided by the charge rate, scaled by the launcher count; undefined when the SDE lacks the data. */
+export function missileMagazineShots(launcher: LauncherStats, missile: MissileStats, launcherCount: number): number | undefined {
+  if (launcher.capacity === undefined || missile.volume === undefined || missile.volume <= 0) return undefined;
+  const perLauncher = Math.floor(Math.floor(launcher.capacity / missile.volume) / (launcher.chargeRate ?? 1));
+  if (perLauncher <= 0) return undefined;
+  return perLauncher * launcherCount;
+}
+
 interface MissileSkillModelDeps {
   readonly stackingPenalty: StackingPenalty;
   readonly skillBonuses: readonly SkillBonus[];

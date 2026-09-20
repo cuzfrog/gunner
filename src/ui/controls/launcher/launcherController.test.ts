@@ -141,6 +141,21 @@ describe("LauncherController", () => {
     expect(spec!.flightRange).toBe(3750 * 5);
   });
 
+  test("currentMissileSpec maps launcher magazine fields into the spec", () => {
+    const { controller } = buildLauncher();
+    const launcher = importedLauncherFixture({ magazineShots: 19, reloadTime: 35 });
+    controller.applyImported(importedWithLauncher(launcher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
+    const spec = controller.currentMissileSpec();
+    expect(spec!.magazine).toEqual({ numShots: 19, reloadTime: 35 });
+  });
+
+  test("currentMissileSpec omits the magazine when the launcher has no magazine data", () => {
+    const { controller } = buildLauncher();
+    const launcher = importedLauncherFixture();
+    controller.applyImported(importedWithLauncher(launcher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
+    expect(controller.currentMissileSpec()!.magazine).toBeUndefined();
+  });
+
   test("ammo popup toggle opens and closes", () => {
     const { controller } = buildLauncher();
     controller.openAmmoPopup();

@@ -40,6 +40,8 @@ export interface ImportedLauncher {
   readonly damageReductionFactor: number;
   readonly maxVelocity: number;
   readonly flightTime: number;
+  readonly magazineShots?: number; // missiles per full reload cycle, undefined when the SDE lacks capacity/volume data
+  readonly reloadTime?: number; // seconds
   readonly damageBreakdown: DamageBreakdown;
 }
 

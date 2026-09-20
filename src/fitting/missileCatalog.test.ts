@@ -100,6 +100,16 @@ describe("MissileCatalogImpl", () => {
     expect(result.damageReductionFactor).toBe(2.6);
   });
 
+  test("withCharge re-derives the magazine from the new missile volume and carries the launcher reload time", () => {
+    const rlm: LauncherStats = { ...LIGHT_MISSILE_LAUNCHER, capacity: 0.285, chargeRate: 1, reloadTime: 35 };
+    const bulky: MissileStats = { ...SCOURGE_FURY_LIGHT, volume: 0.02 };
+    const db: Pick<FittingDb, "missiles" | "launchers"> = { missiles: { ...missiles, [String(bulky.id)]: bulky }, launchers: { ...launchers, [String(rlm.id)]: rlm } };
+    const base = importedLauncher({ magazineShots: 19, reloadTime: 35 });
+    const result = new MissileCatalogImpl({ fittingDb: db, missileSkillModel: skillModel }).withCharge(base, bulky.id, [], 0);
+    expect(result.magazineShots).toBe(14);
+    expect(result.reloadTime).toBe(35);
+  });
+
   test("withCharge preserves launcher count and module id", () => {
     const base = importedLauncher({ count: 3 });
     const result = catalog().withCharge(base, INFERNO_LIGHT.id, [], 0);

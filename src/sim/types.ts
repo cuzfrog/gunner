@@ -133,6 +133,11 @@ export interface TurretSpec extends TrackingApplicationSpec {
   readonly capacitorNeed?: number;
 }
 
+export interface MissileMagazine {
+  readonly numShots: number;
+  readonly reloadTime: number; // seconds
+}
+
 export interface MissileSpec {
   readonly kind: "missile";
   readonly moduleId: TypeId;
@@ -145,6 +150,7 @@ export interface MissileSpec {
   readonly maxVelocity: number;
   readonly flightTime: number; // seconds
   readonly flightRange: number; // maxVelocity * flightTime, computed by the producer
+  readonly magazine?: MissileMagazine; // absent = infinite ammunition (fighters carry their own magazine state)
 }
 
 export interface DroneSpec extends TrackingApplicationSpec {

@@ -385,6 +385,7 @@ function importedLauncherToMissileSpec(launcher: ImportedLauncher): MissileSpec 
     maxVelocity: launcher.maxVelocity,
     flightTime: launcher.flightTime,
     flightRange: launcher.maxVelocity * launcher.flightTime,
+    ...(launcher.magazineShots !== undefined && launcher.reloadTime !== undefined ? { magazine: { numShots: launcher.magazineShots, reloadTime: launcher.reloadTime } } : {}),
   };
 }
 

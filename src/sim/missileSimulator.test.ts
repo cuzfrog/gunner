@@ -119,6 +119,57 @@ describe("MissileSimulatorImpl", () => {
     expect(sim.states("shipA")).toHaveLength(2);
   });
 
+  test("a magazined launcher fires numShots, stretches the last cooldown by the reload, then refills", () => {
+    const spec: MissileSpec = { ...lightMissile, cycleTime: 4, flightTime: 30, flightRange: 3750 * 30, magazine: { numShots: 2, reloadTime: 5 } };
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [spec], shipB: [] }, { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) });
+    const farTarget = new Vec2(500000, 0);
+    const launches = { shipA: [launchSpec(0, spec, 40)], shipB: [] };
+    sim.step(0.1, frame(new Vec2(0, 0), farTarget), launches);
+    expect(sim.states("shipA")).toHaveLength(1);
+    sim.step(4.0, frame(new Vec2(0, 0), farTarget), launches);
+    expect(sim.states("shipA")).toHaveLength(2);
+    sim.step(4.0, frame(new Vec2(0, 0), farTarget), launches);
+    expect(sim.states("shipA")).toHaveLength(2);
+    sim.step(5.0, frame(new Vec2(0, 0), farTarget), launches);
+    expect(sim.states("shipA")).toHaveLength(3);
+    sim.step(4.0, frame(new Vec2(0, 0), farTarget), launches);
+    expect(sim.states("shipA")).toHaveLength(4);
+  });
+
+  test("the magazine counter resets when the loaded spec changes shots", () => {
+    const first: MissileSpec = { ...lightMissile, cycleTime: 4, flightTime: 30, flightRange: 3750 * 30, magazine: { numShots: 2, reloadTime: 5 } };
+    const swapped: MissileSpec = { ...first, magazine: { numShots: 4, reloadTime: 5 } };
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    sim.reset({ shipA: [first], shipB: [] }, { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) });
+    const farTarget = new Vec2(500000, 0);
+    sim.step(0.1, frame(new Vec2(0, 0), farTarget), { shipA: [launchSpec(0, first, 40)], shipB: [] });
+    sim.step(4.0, frame(new Vec2(0, 0), farTarget), { shipA: [launchSpec(0, swapped, 40)], shipB: [] });
+    expect(sim.states("shipA")).toHaveLength(2);
+    sim.step(4.0, frame(new Vec2(0, 0), farTarget), { shipA: [launchSpec(0, swapped, 40)], shipB: [] });
+    sim.step(4.0, frame(new Vec2(0, 0), farTarget), { shipA: [launchSpec(0, swapped, 40)], shipB: [] });
+    expect(sim.states("shipA")).toHaveLength(4);
+    sim.step(4.0, frame(new Vec2(0, 0), farTarget), { shipA: [launchSpec(0, swapped, 40)], shipB: [] });
+    expect(sim.states("shipA")).toHaveLength(5);
+  });
+
+  test("capture and restore preserves magazine counters", () => {
+    const spec: MissileSpec = { ...lightMissile, cycleTime: 4, flightTime: 30, flightRange: 3750 * 30, magazine: { numShots: 2, reloadTime: 5 } };
+    const first = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    first.reset({ shipA: [spec], shipB: [] }, { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) });
+    const farTarget = new Vec2(500000, 0);
+    const launches = { shipA: [launchSpec(0, spec, 40)], shipB: [] };
+    first.step(0.1, frame(new Vec2(0, 0), farTarget), launches);
+    first.step(4.0, frame(new Vec2(0, 0), farTarget), launches);
+    const second = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    second.reset({ shipA: [], shipB: [] }, { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) });
+    second.restore(first.capture());
+    second.step(0.1, frame(new Vec2(0, 0), farTarget), launches);
+    expect(second.states("shipA")).toHaveLength(2);
+    second.step(9.1, frame(new Vec2(0, 0), farTarget), launches);
+    expect(second.states("shipA")).toHaveLength(3);
+  });
+
   test("missile accelerates from zero toward max velocity", () => {
     const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
     sim.reset({ shipA: [lightMissile], shipB: [] }, { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) });

@@ -100,7 +100,7 @@ function fighterSimulatorState(): FighterSimulatorState {
 }
 
 function missileSimulatorState(): MissileSimulatorState {
-  const side = { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
+  const side = { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), magazines: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
   return { sides: { shipA: side, shipB: { ...side } }, time: 0, lastFrameShipA: new Vec2(0, 0), lastFrameShipB: new Vec2(0, 0) };
 }
 
