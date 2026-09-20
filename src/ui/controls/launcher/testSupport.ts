@@ -173,6 +173,7 @@ export function buildLauncher(
   const launcherSelection = createLauncherSelection(selectionSession, launcherClasses);
   const fittingCalculator = vi.mocked<FittingCalculator>({
     resolveTurrets: vi.fn(() => []),
+    resolveVortons: vi.fn(() => []),
     resolveLauncher: vi.fn((state) => {
       const group = state.launcherGroups[0];
       if (!group) return undefined;

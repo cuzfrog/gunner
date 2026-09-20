@@ -6,6 +6,7 @@ import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import type { WeaponDamageAssessor } from "./weaponDamageAssessor";
 import type { DroneApplication } from "./droneApplication";
 import type { FighterApplication } from "./fighterApplication";
+import type { VortonApplication } from "./vortonApplication";
 import type {
   DamageAssessment,
   DroneDamageBreakdown,
@@ -21,6 +22,8 @@ import type {
   Side,
   TurretDamageBreakdown,
   TurretSpec,
+  VortonDamageBreakdown,
+  VortonSpec,
   WeaponSpec,
 } from "./types";
 import { Vec2 } from "./vec2";
@@ -48,6 +51,7 @@ export interface AttackAssessment {
   readonly missile?: MissileDamageBreakdown;
   readonly drone?: DroneDamageBreakdown;
   readonly fighter?: FighterDamageBreakdown;
+  readonly vorton?: VortonDamageBreakdown;
   readonly unitTarget?: UnitTargetKind;
 }
 
@@ -63,8 +67,9 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   private readonly weaponDamageAssessor: WeaponDamageAssessor;
   private readonly droneApplication: DroneApplication;
   private readonly fighterApplication: FighterApplication;
+  private readonly vortonApplication: VortonApplication;
 
-  constructor({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, droneApplication, fighterApplication }: {
+  constructor({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, droneApplication, fighterApplication, vortonApplication }: {
     hitChance: HitChance;
     ewarResolver: EwarResolver;
     turretBoosterResolver: TurretBoosterResolver;
@@ -72,6 +77,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     weaponDamageAssessor: WeaponDamageAssessor;
     droneApplication: DroneApplication;
     fighterApplication: FighterApplication;
+    vortonApplication: VortonApplication;
   }) {
     this.hitChance = hitChance;
     this.ewarResolver = ewarResolver;
@@ -80,6 +86,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     this.weaponDamageAssessor = weaponDamageAssessor;
     this.droneApplication = droneApplication;
     this.fighterApplication = fighterApplication;
+    this.vortonApplication = vortonApplication;
   }
 
   evaluate(frame: EngagementFrame, attacks: { readonly shipA?: AttackState; readonly shipB?: AttackState }): Record<Side, AttackAssessment | undefined> {
@@ -97,6 +104,8 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
       assessment = this.assessDrone(frame, attack.weapon, attack.paintedTargetSig, attack.droneState);
     } else if (attack.weapon.kind === "fighter") {
       assessment = this.assessFighter(frame, opponent, attack.weapon, attack.paintedTargetSig, attack.fighterAliveCount);
+    } else if (attack.weapon.kind === "vorton") {
+      assessment = this.assessVorton(frame, opponent, attack.weapon, attack.paintedTargetSig);
     } else {
       if (!attack.missileFacts) throw new Error("MissileAttackFacts are required to assess a missile weapon");
       assessment = this.assessMissile(ship, attack.weapon, attack.missileFacts);
@@ -143,6 +152,11 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   private assessFighter(frame: EngagementFrame, opponent: ShipState, fighter: FighterSpec, paintedTargetSig: number, aliveCount?: number): AttackAssessment {
     const breakdown = this.fighterApplication.compute(fighter, opponent.velocity.len(), frame.distance, paintedTargetSig, aliveCount);
     return { boostedWeapon: fighter, effectiveWeapon: fighter, damage: breakdown, fighter: breakdown };
+  }
+
+  private assessVorton(frame: EngagementFrame, opponent: ShipState, vorton: VortonSpec, paintedTargetSig: number): AttackAssessment {
+    const breakdown = this.vortonApplication.compute(vorton, frame.distance, opponent.velocity.len(), paintedTargetSig);
+    return { boostedWeapon: vorton, effectiveWeapon: vorton, damage: breakdown, vorton: breakdown };
   }
 }
 

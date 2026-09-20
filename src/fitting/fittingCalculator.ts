@@ -1,7 +1,9 @@
 import type { TypeId } from "../gamedata/ids";
 import {
   turretWeaponGroupForGroupId,
+  type ChargeStats,
   type FittingDb,
+  type VortonStats,
   type FittingModuleStats,
   type HullBonus,
   type ShipStatFlatAttribute,
@@ -37,7 +39,8 @@ import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStat
 import type { DamageType } from "../sim";
 import type { BoostLoadout, DisruptionScriptSpec, JammerSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec, EnergyNeutralizerSpec, NosferatuSpec } from "../sim";
 import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, damageVectorFromPartial, damageVectorScale } from "../sim";
-import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher } from "./chargeCatalog";
+import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher, ImportedVorton } from "./chargeCatalog";
+import type { VortonGroup } from "./fittingState";
 import { thermodynamicsHeatFactor } from "./thermodynamics";
 import type { GunFamily, GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
@@ -66,6 +69,7 @@ export interface HullSideAggregation {
 export interface FittingCalculator {
   resolveTurrets(fitting: FittingState, conditions: StatConditions): readonly ImportedTurret[];
   resolveLauncher(fitting: FittingState, conditions: StatConditions): ImportedLauncher | undefined;
+  resolveVortons(fitting: FittingState, conditions: StatConditions): readonly ImportedVorton[];
   resolveHull(fitting: FittingState, conditions: StatConditions): HullSideAggregation;
   resolvePropulsion(fitting: FittingState): PropulsionResult | undefined;
   resolveEwar(fitting: FittingState, conditions: StatConditions): EwarLoadout;
@@ -306,6 +310,15 @@ export class FittingCalculatorImpl implements FittingCalculator {
       ...(launcherStats.heatDamage !== undefined ? { heatDamagePerCycle: launcherStats.heatDamage * thermodynamicsHeatFactor(conditions.skillLevel) } : {}),
       damageBreakdown: { damageByType: missileDamageByType(missileStats), factors: missileFactors },
     };
+  }
+
+  resolveVortons(fitting: FittingState, conditions: StatConditions): readonly ImportedVorton[] {
+    return fitting.vortonGroups.flatMap((group) => {
+      const stats = this.db.vortons[group.moduleId];
+      if (!stats) return [];
+      const charge = resolveVortonCharge(this.db.charges, stats, group.chargeId);
+      return [buildImportedVorton(stats, group, charge, conditions)];
+    });
   }
 
   resolveHull(fitting: FittingState, conditions: StatConditions): HullSideAggregation {
@@ -979,3 +992,34 @@ function resolveEwarState(db: EwarDb, itemNameCatalog: ItemNameCatalog, ewarModu
 export { resolveSensorStats as _resolveSensorStats };
 
 export { resolveEwarState as _resolveEwarState };
+
+function resolveVortonCharge(charges: Readonly<Record<string, ChargeStats>>, stats: VortonStats, loadedChargeId: TypeId | undefined): ChargeStats | undefined {
+  if (loadedChargeId !== undefined) {
+    const loaded = charges[loadedChargeId];
+    if (loaded && stats.chargeGroups.includes(loaded.chargeGroup) && loaded.chargeSize === stats.chargeSize) return loaded;
+  }
+  const compatible = Object.values(charges).filter((charge) => stats.chargeGroups.includes(charge.chargeGroup) && charge.chargeSize === stats.chargeSize);
+  if (compatible.length === 0) return undefined;
+  return compatible.reduce((lowest, charge) => (charge.id < lowest.id ? charge : lowest));
+}
+
+function buildImportedVorton(stats: VortonStats, group: VortonGroup, charge: ChargeStats | undefined, conditions: StatConditions): ImportedVorton {
+  const damageByType = charge ? chargeDamageByType(charge) : {};
+  const damageMultiplier = stats.damageMultiplier;
+  const overloadCycle = conditions.weaponOverloaded ? WEAPON_OVERLOAD_ROF_MULTIPLIER : 1;
+  return {
+    moduleId: group.moduleId,
+    count: group.count,
+    ...(charge !== undefined ? { chargeId: charge.id } : {}),
+    damagePerShot: damageVectorScale(damageVectorFromPartial(damageByType), damageMultiplier),
+    cycleTime: stats.cycleTime * overloadCycle,
+    maxRange: stats.maxRange * (charge?.rangeMultiplier ?? 1),
+    explosionRadius: stats.explosionRadius,
+    explosionVelocity: stats.explosionVelocity,
+    damageReductionFactor: stats.damageReductionFactor,
+    ...(stats.capacitorNeed !== undefined ? { capacitorNeed: stats.capacitorNeed } : {}),
+    ...(stats.heatDamage !== undefined ? { heatDamagePerCycle: stats.heatDamage * thermodynamicsHeatFactor(conditions.skillLevel) } : {}),
+    requiredSkillIds: stats.requiredSkillIds,
+    damageBreakdown: { damageByType, factors: [{ kind: "base", multiplier: damageMultiplier }] },
+  };
+}

@@ -3,7 +3,7 @@ import { type HitRollStrategy, sampledHitRoll } from "./hitRoll";
 import type { CapacitorGate } from "./capacitorSimulator";
 import type { Restorable } from "./restorable";
 import type { EngagementView, WeaponAttack } from "./engagementFrameComposer";
-import type { DamageEvent, Side, TurretSpec, WeaponKind, WeaponSpec } from "./types";
+import type { DamageEvent, Side, VortonSpec, WeaponKind, WeaponSpec } from "./types";
 import { MODULE_HEAT_HITPOINTS } from "./types";
 import { damageVectorScale, damageVectorSum } from "./types";
 
@@ -35,6 +35,13 @@ interface WeaponMagazineState {
   readonly numShots: number;
   readonly refuelSeconds: number;
   readonly shotsLeft: number;
+}
+
+/** Normalized heat fields of a heat-capable weapon group (turret or vorton). */
+interface WeaponHeatState {
+  readonly identity: string;
+  readonly damagePerCycle: number;
+  readonly count: number;
 }
 
 interface WeaponCooldown {
@@ -114,14 +121,15 @@ export class WeaponClockImpl implements WeaponClock {
       const attack = attacks[i];
       const kind = attack.weapon.kind;
       if (kind === "missile") continue;
-      if (kind === "turret" && burnedOut(clock.heat, attack.weapon)) continue;
+      const heatState = heatStateOf(attack.weapon);
+      if (heatState && burnedOut(clock.heat, heatState)) continue;
       const identity = weaponIdentity(attack.weapon);
       const existing = clock.cooldowns.get(i);
       if (existing && existing.identity !== identity) {
         // The weapon at this slot changed (ammo swap, reorder, refit): restart only its cycle and spool.
         clock.cooldowns.delete(i);
       }
-      const breakdown = attack.assessment.turret ?? attack.assessment.drone ?? attack.assessment.fighter;
+      const breakdown = attack.assessment.turret ?? attack.assessment.drone ?? attack.assessment.fighter ?? attack.assessment.vorton;
       if (!breakdown) continue;
       if (attack.assessment.drone && !attack.assessment.drone.inRange) continue;
       const cycleTime = attack.weapon.cycleTime;
@@ -134,7 +142,7 @@ export class WeaponClockImpl implements WeaponClock {
         clock.cooldowns.delete(i);
         continue;
       }
-      const capNeed = turretCapacitorNeed(attack.weapon);
+      const capNeed = weaponCapacitorNeed(attack.weapon);
       const isNew = !clock.cooldowns.has(i);
       if (capacitor && capNeed > 0 && isNew && !capacitor.attemptDebit(source, capNeed, attack.weapon.moduleId)) {
         // Activation denied: no cooldown entry, the debit is retried next frame.
@@ -151,18 +159,24 @@ export class WeaponClockImpl implements WeaponClock {
         }
         if (kind === "fighter") {
           // Fighters apply through missile math: no hit-quality roll, deterministic volley.
-          const event = this.fighterEvent(source, target, i, attack);
+          const event = this.deterministicEvent(source, target, i, "fighter", attack);
           if (event) events.push(event);
           advanceFighterCycle(cooldown, attack.weapon);
         } else {
           cooldown.timer += cycleTime;
           if (cooldown.timer < 0) cooldown.timer = cycleTime;
-          const rolled = attack.assessment.turret ?? attack.assessment.drone;
-          if (!rolled) continue;
-          const event = this.rollEvent(source, target, i, kind, attack, rolled.hit.chance, rolled.expectedMultiplier, clock.rng);
-          if (event) events.push(event);
-          if (spoolSpec !== undefined) cooldown.spoolCycles += 1;
-          if (kind === "turret" && overloaded) applyHeat(clock.heat, attack.weapon);
+          if (kind === "vorton") {
+            // Vortons apply through missile math like fighters: deterministic volley, no hit roll, no spool.
+            const event = this.deterministicEvent(source, target, i, "vorton", attack);
+            if (event) events.push(event);
+          } else {
+            const rolled = attack.assessment.turret ?? attack.assessment.drone;
+            if (!rolled) continue;
+            const event = this.rollEvent(source, target, i, kind, attack, rolled.hit.chance, rolled.expectedMultiplier, clock.rng);
+            if (event) events.push(event);
+            if (spoolSpec !== undefined) cooldown.spoolCycles += 1;
+          }
+          if (heatState && overloaded) applyHeat(clock.heat, heatState);
         }
       }
       clock.cooldowns.set(i, cooldown);
@@ -170,10 +184,10 @@ export class WeaponClockImpl implements WeaponClock {
     return events;
   }
 
-  private fighterEvent(source: Side, target: Side, weaponIndex: number, attack: WeaponAttack): DamageEvent | undefined {
+  private deterministicEvent(source: Side, target: Side, weaponIndex: number, kind: WeaponKind, attack: WeaponAttack): DamageEvent | undefined {
     const appliedVolley = attack.assessment.damage.appliedVolleyByType;
     if (damageVectorSum(appliedVolley) <= 0) return undefined;
-    return { target, source, weaponIndex, kind: "fighter", rawByType: appliedVolley, ...(attack.assessment.unitTarget ? { unitTarget: attack.assessment.unitTarget } : {}) };
+    return { target, source, weaponIndex, kind, rawByType: appliedVolley, ...(attack.assessment.unitTarget ? { unitTarget: attack.assessment.unitTarget } : {}) };
   }
 
   private rollEvent(source: Side, target: Side, weaponIndex: number, kind: WeaponKind, attack: WeaponAttack, hitChance: number, expectedMultiplier: number, rng: Rng): DamageEvent | undefined {
@@ -194,20 +208,25 @@ function emptySide(createRng: () => Rng): SideClock {
   return { cooldowns: new Map(), heat: new Map(), rng: createRng() };
 }
 
-/** Group heat identity: module id + count, so a refit (new module) restores a fresh heat pool. */
-function heatIdentity(weapon: TurretSpec): string {
-  return `${weapon.moduleId}:${weapon.turretCount}`;
+/** Turret and vorton groups carry the heat fields; the identity embeds the count so a refit restores a fresh pool. */
+function heatStateOf(weapon: WeaponSpec): WeaponHeatState | undefined {
+  if (weapon.kind === "turret") return weapon.heatDamagePerCycle === undefined ? undefined : { identity: `${weapon.moduleId}:${weapon.turretCount}`, damagePerCycle: weapon.heatDamagePerCycle, count: weapon.turretCount };
+  if (weapon.kind === "vorton") return vortonHeatState(weapon);
+  return undefined;
 }
 
-/** A turret group is burned out once its heat pool reaches zero; the pool starts at MODULE_HEAT_HITPOINTS per module. */
-function burnedOut(heat: Map<string, number>, weapon: TurretSpec): boolean {
-  return (heat.get(heatIdentity(weapon)) ?? MODULE_HEAT_HITPOINTS * weapon.turretCount) <= 0;
+function vortonHeatState(weapon: VortonSpec): WeaponHeatState | undefined {
+  return weapon.heatDamagePerCycle === undefined ? undefined : { identity: `${weapon.moduleId}:${weapon.count}`, damagePerCycle: weapon.heatDamagePerCycle, count: weapon.count };
 }
 
-function applyHeat(heat: Map<string, number>, weapon: TurretSpec): void {
-  const id = heatIdentity(weapon);
-  const current = heat.get(id) ?? MODULE_HEAT_HITPOINTS * weapon.turretCount;
-  heat.set(id, current - weapon.heatDamagePerCycle! * weapon.turretCount);
+/** A weapon group is burned out once its heat pool reaches zero; the pool starts at MODULE_HEAT_HITPOINTS per module. */
+function burnedOut(heat: Map<string, number>, state: WeaponHeatState): boolean {
+  return (heat.get(state.identity) ?? MODULE_HEAT_HITPOINTS * state.count) <= 0;
+}
+
+function applyHeat(heat: Map<string, number>, state: WeaponHeatState): void {
+  const current = heat.get(state.identity) ?? MODULE_HEAT_HITPOINTS * state.count;
+  heat.set(state.identity, current - state.damagePerCycle * state.count);
 }
 
 function fighterMagazineState(weapon: WeaponSpec): WeaponMagazineState | undefined {
@@ -254,7 +273,8 @@ function weaponIdentity(weapon: WeaponSpec): string {
   return weapon.kind + ":" + weapon.moduleId + ":" + weapon.cycleTime + (spool ? ":" + spool : "");
 }
 
-function turretCapacitorNeed(weapon: WeaponSpec): number {
-  if (weapon.kind !== "turret" || weapon.capacitorNeed === undefined) return 0;
-  return weapon.capacitorNeed * weapon.turretCount;
+function weaponCapacitorNeed(weapon: WeaponSpec): number {
+  if (weapon.kind === "turret") return weapon.capacitorNeed !== undefined ? weapon.capacitorNeed * weapon.turretCount : 0;
+  if (weapon.kind === "vorton") return weapon.capacitorNeed !== undefined ? weapon.capacitorNeed * weapon.count : 0;
+  return 0;
 }

@@ -33,10 +33,12 @@ import type {
   TurretScriptStats,
   TurretStats,
   TurretWeaponGroup,
+  VortonStats,
   WarpScramblerStats,
 } from "./types";
 import {
   CHARGES,
+  VORTONS,
   COMBAT_DRONES,
   COMMAND_BURSTS,
   DISRUPTION_SCRIPTS,
@@ -112,6 +114,7 @@ export const FITTING_DB: FittingDbData = {
   modules: FITTING_MODULES,
   needs: NEEDS,
   turrets: TURRETS,
+  vortons: VORTONS,
   charges: CHARGES,
   launchers: LAUNCHERS,
   missiles: MISSILES,

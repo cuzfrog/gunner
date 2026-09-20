@@ -266,7 +266,8 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     launcherClasses: asValue(mockLauncherClasses()),
     fittingCalculator: asValue(vi.mocked<FittingCalculator>({
       resolveTurrets: vi.fn(() => []),
-      resolveLauncher: vi.fn(() => undefined),
+      resolveVortons: vi.fn(() => []),
+    resolveLauncher: vi.fn(() => undefined),
       resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } })),
       resolvePropulsion: vi.fn(() => undefined),
       resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], })),

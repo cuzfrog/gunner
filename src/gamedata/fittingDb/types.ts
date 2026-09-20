@@ -258,6 +258,25 @@ export interface LauncherStats {
   readonly name: string;
 }
 
+export interface VortonStats {
+  readonly chargeSize: number;
+  readonly chargeGroups: readonly number[];
+  readonly damageMultiplier: number;
+  readonly cycleTime: number; // attr speed (51), seconds
+  readonly capacitorNeed?: number; // GJ per cycle per module
+  readonly maxRange: number; // attr 54, hard range cutoff (no falloff)
+  readonly explosionRadius: number; // attr aoeCloudSize
+  readonly explosionVelocity: number; // attr aoeVelocity
+  readonly damageReductionFactor: number; // attr aoeDamageReductionFactor
+  readonly heatDamage?: number; // attr heatDamage (1211), per-module HP loss per overloaded cycle
+  readonly requiredSkillIds: readonly TypeId[];
+  readonly groupID: number;
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
 export interface MissileStats {
   readonly damage: number;
   readonly damageType: "em" | "thermal" | "kinetic" | "explosive";
@@ -586,6 +605,7 @@ export interface FittingDbData {
   readonly modules: Readonly<Record<string, FittingModuleStats>>;
   readonly needs: Readonly<Record<string, ModuleFittingNeeds>>;
   readonly turrets: Readonly<Record<string, TurretStats>>;
+  readonly vortons: Readonly<Record<string, VortonStats>>;
   readonly charges: Readonly<Record<string, ChargeStats>>;
   readonly commandBursts: Readonly<Record<string, CommandBurstStats>>;
   readonly subsystems: Readonly<Record<string, SubsystemStats>>;

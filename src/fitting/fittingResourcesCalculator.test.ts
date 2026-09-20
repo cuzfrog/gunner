@@ -69,7 +69,7 @@ function burstStats(id: string, stats: Partial<CommandBurstStats>): CommandBurst
 
 function emptyDb(): FittingDb {
   return {
-    modules: {}, jammers: {}, needs: {}, turrets: {}, charges: {}, commandBursts: {}, subsystems: {}, launchers: {}, missiles: {}, scripts: {},
+    modules: {}, jammers: {}, needs: {}, turrets: {}, vortons: {}, charges: {}, commandBursts: {}, subsystems: {}, launchers: {}, missiles: {}, scripts: {},
     stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {},
     targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {},
     omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {},
@@ -89,6 +89,7 @@ function fittingState(overrides: Partial<FittingState> = {}): FittingState {
     defenseModules: [],
     turretGroups: [],
     launcherGroups: [],
+    vortonGroups: [],
     ewarModules: [],
     boosterModules: [],
     missileBoosterModules: [],

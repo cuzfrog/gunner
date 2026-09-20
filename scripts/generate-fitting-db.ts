@@ -14,6 +14,7 @@ import {
   type RigDrawbackReduction,
   type SubsystemStats,
   type TurretWeaponGroup,
+  type VortonStats,
 } from "../src/gamedata/fittingDb/types";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 import type { ShipNameLanguage } from "../src/ships";
@@ -281,7 +282,10 @@ const CHARGE_GROUPS = new Set([
   83, 85, 86,
   372, 373, 374, 375, 376, 377,
   1987, 1989,
+  4062, // condenser packs (vorton projector charges)
 ]);
+
+const VORTON_PROJECTOR_GROUP = 4060;
 
 const LAUNCHER_GROUPS = new Set([
   506, 507, 508, 509, 510, 511, 524, 771, 1245, 1673, 1674,
@@ -1642,6 +1646,36 @@ export function assertTurretChargeCoverage(
   if (unmatched.length > 0) throw new Error(`Turrets with no compatible charges: ${unmatched.join(", ")}`);
 }
 
+export function buildVortonStats(values: Map<string, number>, type: SdeType, requiredSkillIds: readonly TypeId[]): Omit<VortonStats, "id" | "name"> | undefined {
+  const maxRange = values.get("maxRange");
+  const speed = values.get("speed");
+  const damageMultiplier = values.get("damageMultiplier");
+  const explosionVelocity = values.get("aoeVelocity");
+  const explosionRadius = values.get("aoeCloudSize");
+  const damageReductionFactor = values.get("aoeDamageReductionFactor");
+  if (maxRange === undefined || speed === undefined || damageMultiplier === undefined || explosionVelocity === undefined || explosionRadius === undefined || damageReductionFactor === undefined) return undefined;
+  const chargeGroups = readChargeGroups(values);
+  if (chargeGroups.length === 0) throw new Error(`Vorton "${type["typeName_en-us"]}" has no chargeGroups`);
+  const heatDamage = values.get("heatDamage");
+  const capacitorNeed = values.get("capacitorNeed");
+  return {
+    chargeSize: values.get("chargeSize") ?? 1,
+    chargeGroups,
+    damageMultiplier,
+    cycleTime: speed / 1000,
+    ...(capacitorNeed !== undefined ? { capacitorNeed } : {}),
+    maxRange,
+    explosionRadius,
+    explosionVelocity,
+    damageReductionFactor,
+    ...(heatDamage !== undefined ? { heatDamage } : {}),
+    requiredSkillIds,
+    groupID: type.groupID,
+    metaLevel: type.metaLevel ?? 0,
+    metaGroupID: type.metaGroupID ?? 1,
+  };
+}
+
 export function buildLauncherStats(values: Map<string, number>, groupID: number, type: SdeType, requiredSkillIds: readonly TypeId[]): LauncherStats | undefined {
   const speed = values.get("speed");
   if (speed === undefined || speed <= 0) return undefined;
@@ -1939,6 +1973,7 @@ async function main() {
 
   const fittingModules: Record<string, Row<FittingModuleStats>> = {};
   const turrets: Record<string, Row<TurretStats>> = {};
+  const vortons: Record<string, VortonStats> = {};
   const charges: Record<string, Row<ChargeStats>> = {};
   const launchers: Record<string, Row<LauncherStats>> = {};
   const missiles: Record<string, Row<MissileStats>> = {};
@@ -2008,6 +2043,15 @@ async function main() {
       const stats = buildTurretStats(values, type, types, requiredSkills);
       if (stats) {
         turrets[id] = { ...stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
+    if (type.groupID === VORTON_PROJECTOR_GROUP) {
+      const stats = buildVortonStats(values, type, buildRequiredSkillIds(requiredSkills, type.typeID));
+      if (stats) {
+        vortons[id] = { ...stats, id, name: enName };
         addItemName(itemNames, id, type);
       }
       continue;
@@ -2327,8 +2371,9 @@ async function main() {
   }
 
   assertTurretChargeCoverage(turrets, charges);
+  assertTurretChargeCoverage(vortons, charges);
 
-  const needs = buildNeeds(typedogmas, { ...fittingModules, ...turrets, ...launchers, ...subsystems, ...commandBursts });
+  const needs = buildNeeds(typedogmas, { ...fittingModules, ...turrets, ...vortons, ...launchers, ...subsystems, ...commandBursts });
 
   const sortedDrones = Object.fromEntries(
     Object.entries(drones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
@@ -2353,7 +2398,7 @@ async function main() {
     `  OmnidirectionalTrackingEnhancerStats, OmnidirectionalTrackingLinkStats, RigDrawbackReduction,\n` +
     `  SensorBoosterScriptStats, SensorBoosterStats, SensorDampenerScriptStats, SensorDampenerStats,\n` +
     `  SignalAmplifierStats, SkillBonus, StasisGrapplerStats, StasisWebStats, SubsystemStats, TargetPainterStats,\n` +
-    `  TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, WarpScramblerStats,\n` +
+    `  TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, TurretStats, VortonStats, WarpScramblerStats,\n` +
     `} from "../types";\n\n`;
 
   const scriptDefinitions = `export const SCRIPTS: Readonly<Record<string, TurretScriptStats>> = ${stringifyWithTypeIds(scripts)};
@@ -2408,6 +2453,8 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
     ``,
     `export const TURRETS: Readonly<Record<string, TurretStats>> = ${stringifyWithTypeIds(turrets)};`,
     ``,
+    `export const VORTONS: Readonly<Record<string, VortonStats>> = ${stringifyWithTypeIds(vortons)};`,
+    ``,
     `export const CHARGES: Readonly<Record<string, ChargeStats>> = ${stringifyWithTypeIds(charges)};`,
     ``,
     `export const LAUNCHERS: Readonly<Record<string, LauncherStats>> = ${stringifyWithTypeIds(launchers)};`,
@@ -2436,6 +2483,7 @@ export const SENSOR_DAMPENER_SCRIPTS: Readonly<Record<string, SensorDampenerScri
   const dbTableNames = collectDbTableNames(
     fittingModules,
     turrets,
+    vortons,
     charges,
     launchers,
     missiles,
@@ -2593,6 +2641,7 @@ function addSkillNames(itemNames: Record<string, LocalizedName>, types: Readonly
 function collectDbTableNames(
   fittingModules: Record<string, FittingModuleStats>,
   turrets: Record<string, TurretStats>,
+  vortons: Record<string, VortonStats>,
   charges: Record<string, ChargeStats>,
   launchers: Record<string, LauncherStats>,
   missiles: Record<string, MissileStats>,
@@ -2623,6 +2672,7 @@ function collectDbTableNames(
   return new Set([
     ...Object.keys(fittingModules),
     ...Object.keys(turrets),
+    ...Object.keys(vortons),
     ...Object.keys(charges),
     ...Object.keys(launchers),
     ...Object.keys(missiles),

@@ -1,4 +1,4 @@
-import type { FittingImport, ImportedFitting } from "../../../fitting";
+import type { FittingImport, ImportedFitting, ImportedVorton } from "../../../fitting";
 import type { DefenseSkills, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../../../ships";
 import type { AutopilotMode, CapacitorSpec, SensorSpec, SimValueParser } from "../../../sim";
 import type { I18n } from "../../i18n";
@@ -62,6 +62,8 @@ export interface SidePanel {
   capture(): SidePanelState;
   restore(state: SidePanelState): void;
   skillConditions(): StatConditions;
+  /** Vorton projector groups resolved from the fitting text; empty while no fitting is loaded. */
+  importedVortons(): readonly ImportedVorton[];
 }
 
 export interface SidePanelState {

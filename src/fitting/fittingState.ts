@@ -21,6 +21,12 @@ export interface LauncherGroup {
   readonly count: number;
 }
 
+export interface VortonGroup {
+  readonly moduleId: TypeId;
+  readonly chargeId?: TypeId;
+  readonly count: number;
+}
+
 export interface DroneGroup {
   readonly typeId: TypeId;
   readonly count: number;
@@ -38,6 +44,7 @@ export interface FittingState {
   readonly defenseModules: readonly FittedModule[];
   readonly turretGroups: readonly TurretGroup[];
   readonly launcherGroups: readonly LauncherGroup[];
+  readonly vortonGroups: readonly VortonGroup[];
   readonly propulsionModule?: FittedModule;
   readonly ewarModules: readonly FittedModule[];
   readonly boosterModules: readonly FittedModule[];
@@ -64,6 +71,7 @@ export class FittingStateFactory {
   create(profile: ShipProfile, hullBonuses: readonly HullBonus[], modules: readonly FittingModuleEntry[], drones: readonly CargoEntry[], fighters: readonly CargoEntry[], cargo: readonly CargoEntry[]): FittingState {
     const turretCounts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
     const launcherCounts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
+    const vortonCounts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
     const supportModules: FittedModule[] = [];
     const defenseModules: FittedModule[] = [];
     const ewarModules: FittedModule[] = [];
@@ -104,6 +112,17 @@ export class FittingStateFactory {
           if (existing.chargeId === undefined && mod.chargeId !== undefined) existing.chargeId = mod.chargeId;
         } else {
           launcherCounts.set(mod.moduleId, { count: 1, chargeId: mod.chargeId, order: order++ });
+        }
+        continue;
+      }
+
+      if (this.db.vortons[mod.moduleId]) {
+        const existing = vortonCounts.get(mod.moduleId);
+        if (existing) {
+          existing.count++;
+          if (existing.chargeId === undefined && mod.chargeId !== undefined) existing.chargeId = mod.chargeId;
+        } else {
+          vortonCounts.set(mod.moduleId, { count: 1, chargeId: mod.chargeId, order: order++ });
         }
         continue;
       }
@@ -195,6 +214,7 @@ export class FittingStateFactory {
       defenseModules,
       turretGroups: [...turretCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([moduleId, e]) => ({ moduleId, chargeId: e.chargeId, count: e.count })),
       launcherGroups: [...launcherCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([moduleId, e]) => ({ moduleId, chargeId: e.chargeId, count: e.count })),
+      vortonGroups: [...vortonCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([moduleId, e]) => ({ moduleId, chargeId: e.chargeId, count: e.count })),
       propulsionModule,
       ewarModules,
       boosterModules,

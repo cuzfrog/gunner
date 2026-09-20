@@ -399,6 +399,7 @@ function combatScenarioSummary(config: EngineConfig): string {
       if (weapon.kind === "turret") return `turret dps=${(damageVectorSum(weapon.damagePerShot) * weapon.turretCount / weapon.cycleTime).toFixed(1)}`;
       if (weapon.kind === "missile") return `missile dps=${(damageVectorSum(weapon.damagePerMissile) * weapon.launcherCount / weapon.cycleTime).toFixed(1)}`;
       if (weapon.kind === "fighter") return `fighter dps=${(damageVectorSum(weapon.damagePerVolley) * weapon.fighterCount / weapon.cycleTime).toFixed(1)}`;
+      if (weapon.kind === "vorton") return `vorton dps=${(damageVectorSum(weapon.damagePerShot) * weapon.count / weapon.cycleTime).toFixed(1)}`;
       return `drone dps=${(damageVectorSum(weapon.damagePerShot) * weapon.droneCount / weapon.cycleTime).toFixed(1)}`;
     });
     const layers = DEFENSE_LAYERS.map((layer) => {

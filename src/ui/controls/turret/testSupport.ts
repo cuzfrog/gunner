@@ -170,6 +170,7 @@ export function buildTurret(
         damagePerShot: charge ? damageVectorScale({ em: 0, thermal: 0, kinetic: 20, explosive: 0 }, TURRET.damageMultiplier) : TURRET.damagePerShot,
       };
     })),
+    resolveVortons: vi.fn(() => []),
     resolveLauncher: vi.fn(() => undefined),
     resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } })),
     resolvePropulsion: vi.fn(() => undefined),

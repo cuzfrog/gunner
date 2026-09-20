@@ -2,6 +2,9 @@ import { createContainer, InjectionMode } from "awilix";
 import { registerGameDataModule } from "../../../gamedata";
 import { registerShipsModule, type DefenseSkills, type PropulsionStats, type ShipsCradle, defaultDefenseSkills, defaultTargetingSkills } from "../../../ships";
 import { FITTED, IMPORTED_RIFTER, mockFittingImport } from "../../testing";
+import { ZERO_DAMAGE } from "../../../sim";
+import type { StatConditions } from "../../../ships";
+import type { ImportedVorton } from "../../../fitting";
 import { PROPULSION_NONE, type FittedHullSummary } from "../../../appstate";
 import { toTypeId, type ShipId, type TypeId } from "../../../gamedata/ids";
 import { FakeElement, RIFTER, buildSidePanel, getFake, mockShips } from "../testSupport";
@@ -80,6 +83,20 @@ describe("SidePanel", () => {
     panel.restore({ ...state, fittedHull: { fittingName: "Stale", fitted: FITTED, capacitor: { capacity: 4375, rechargeTime: 656.25 }, energyWarfareResistancePercent: 0 } });
     expect(panel.fittedHull?.fittingName).toBe("Brawler");
     expect(panel.fittedHull?.capacitor?.capacity).toBe(200);
+  });
+
+  test("restore re-resolves the imported vortons with the restored skill conditions", () => {
+    const fittingImport = mockFittingImport();
+    const vortonsAtFive: readonly ImportedVorton[] = [{ moduleId: toTypeId("54747"), count: 1, heatDamagePerCycle: 1, damagePerShot: ZERO_DAMAGE, cycleTime: 9, maxRange: 31680, explosionRadius: 143, explosionVelocity: 105, damageReductionFactor: 0.5, requiredSkillIds: [], damageBreakdown: { damageByType: {}, factors: [] } }];
+    const vortonsAtFour: readonly ImportedVorton[] = [{ ...vortonsAtFive[0], heatDamagePerCycle: 0.8 }];
+    fittingImport.importFitting = vi.fn((_text: string, conditions: StatConditions) => ({ ...IMPORTED_RIFTER, vortons: conditions.skillLevel === 4 ? vortonsAtFour : vortonsAtFive }));
+    const { panel } = buildSidePanel("shipA", shipsWithHull(), fittingImport);
+    panel.profile = RIFTER;
+    panel.fittingText = "[Rifter, Vortons]";
+    expect(panel.importedVortons()).toEqual(vortonsAtFive);
+    const state = panel.capture();
+    panel.restore({ ...state, skillLevel: 4 });
+    expect(panel.importedVortons()).toEqual(vortonsAtFour);
   });
 
   test("restore keeps the saved summary when the fitting text fails to import", () => {
