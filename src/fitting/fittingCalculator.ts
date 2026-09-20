@@ -530,6 +530,10 @@ export class FittingCalculatorImpl implements FittingCalculator {
         bandwidth: stats.bandwidth,
         volume: stats.volume,
         controlRange,
+        ...(stats.shieldHp !== undefined ? { shieldHp: stats.shieldHp } : {}),
+        ...(stats.armorHp !== undefined ? { armorHp: stats.armorHp } : {}),
+        ...(stats.hullHp !== undefined ? { hullHp: stats.hullHp } : {}),
+        ...(stats.signatureRadius !== undefined ? { signatureRadius: stats.signatureRadius } : {}),
         damageBreakdown: { damageByType: droneDamageByType(stats), factors },
       });
     }
@@ -599,6 +603,9 @@ export class FittingCalculatorImpl implements FittingCalculator {
         maxVelocity: skillOutput.maxVelocity,
         orbitRange: stats.orbitRange,
         signatureRadius: stats.signatureRadius,
+        ...(stats.shieldHp !== undefined ? { shieldHp: stats.shieldHp } : {}),
+        ...(stats.armorHp !== undefined ? { armorHp: stats.armorHp } : {}),
+        ...(stats.hullHp !== undefined ? { hullHp: stats.hullHp } : {}),
         refuelingTime: stats.refuelingTime,
         volume: stats.volume,
         ...(attack ? { attack } : {}),

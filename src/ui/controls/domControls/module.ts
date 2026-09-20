@@ -3,11 +3,16 @@ import type { createControlsEls } from "../elements";
 import type { ControlsCradle } from "../cradle";
 import { DomControls } from "./domControls";
 import { ReadoutPresenterImpl } from "./readoutPresenter";
+import { UnitAliveReadoutImpl } from "../unitAlive/unitAliveReadout";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export function registerDomControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
+    unitAliveReadout: asFunction((proxy: ControlsCradle) => new UnitAliveReadoutImpl({
+      shipA: { droneAlive: proxy.els.shipA.droneAlive, fighterAlive: proxy.els.shipA.fighterAlive },
+      shipB: { droneAlive: proxy.els.shipB.droneAlive, fighterAlive: proxy.els.shipB.fighterAlive },
+    })).singleton(),
     readoutPresenter: asFunction((proxy: ControlsCradle) => new ReadoutPresenterImpl({
       viewStream: proxy.viewStream,
       engagementReadout: proxy.engagementReadout,
@@ -15,6 +20,7 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
       defenseReadout: proxy.defenseController,
       capacitorReadout: proxy.capacitorController,
       starvedReadout: proxy.ewarController,
+      unitAliveReadout: proxy.unitAliveReadout,
       i18n: proxy.i18n,
       now: proxy.now,
     })).singleton(),

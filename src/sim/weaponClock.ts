@@ -167,7 +167,7 @@ export class WeaponClockImpl implements WeaponClock {
   private fighterEvent(source: Side, target: Side, weaponIndex: number, attack: WeaponAttack): DamageEvent | undefined {
     const appliedVolley = attack.assessment.damage.appliedVolleyByType;
     if (damageVectorSum(appliedVolley) <= 0) return undefined;
-    return { target, source, weaponIndex, kind: "fighter", rawByType: appliedVolley };
+    return { target, source, weaponIndex, kind: "fighter", rawByType: appliedVolley, ...(attack.assessment.unitTarget ? { unitTarget: attack.assessment.unitTarget } : {}) };
   }
 
   private rollEvent(source: Side, target: Side, weaponIndex: number, kind: WeaponKind, attack: WeaponAttack, hitChance: number, expectedMultiplier: number, rng: Rng): DamageEvent | undefined {
@@ -180,7 +180,7 @@ export class WeaponClockImpl implements WeaponClock {
     const scale = expectedMultiplier > 0 ? hitMultiplier / expectedMultiplier : 0;
     const rawByType = damageVectorScale(appliedVolley, scale);
     if (damageVectorSum(rawByType) <= 0) return undefined;
-    return { target, source, weaponIndex, kind, rawByType };
+    return { target, source, weaponIndex, kind, rawByType, ...(attack.assessment.unitTarget ? { unitTarget: attack.assessment.unitTarget } : {}) };
   }
 }
 

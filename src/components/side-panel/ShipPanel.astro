@@ -100,5 +100,9 @@ const modeSecond = side === "shipA"
     <input type="hidden" id={`${idPrefix}-aggressivity`} value={aggressivity}>
     <input type="range" id={`${idPrefix}-aggressivity-slider`} class="form-slider" min="0" max="1" step="0.001" value={aggressivitySlider} style="--fill: 50%" data-i18n-aria-label="label.maneuverAggressivity" aria-label="Maneuver aggressivity">
   </div>
+  <div class="form-field-group side-panel-drones-field">
+    <label class="field-label truncate" for={`${idPrefix}-attack-drones`} data-i18n="label.attackDrones">Attack drones</label>
+    <input type="checkbox" id={`${idPrefix}-attack-drones`} class="side-panel-drones-checkbox" data-i18n-aria-label="label.attackDrones" aria-label="Attack drones">
+  </div>
   <SkillsField idPrefix={idPrefix} />
 </section>

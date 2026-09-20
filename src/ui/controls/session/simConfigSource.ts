@@ -136,6 +136,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
       energyWarfareResistancePercent: state.energyWarfareResistancePercent,
       propulsionCapacityMultiplier: state.propulsionCapacityMultiplier,
       orbitDirection: "cw",
+      attackDrones: state.attackDrones ?? false,
       ewar: this.ewarController.projection(side),
       boosts: this.boosterController.projection(side),
       missileBoosts: this.missileBoosterController.projection(side),

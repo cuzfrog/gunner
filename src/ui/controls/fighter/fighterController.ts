@@ -331,6 +331,7 @@ function importedFighterToFighterSpec(fighter: ImportedFighter): FighterSpec {
     optimal: attack.optimal,
     falloff: attack.falloff,
     magazine: attack.numShots > 0 ? { numShots: attack.numShots, rearmTime: attack.rearmTime, refuelingTime: fighter.refuelingTime } : undefined,
+    ...(fighter.shieldHp !== undefined || fighter.armorHp !== undefined || fighter.hullHp !== undefined ? { hp: { shield: fighter.shieldHp ?? 0, armor: fighter.armorHp ?? 0, hull: fighter.hullHp ?? 0 } } : {}),
   };
 }
 

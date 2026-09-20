@@ -108,3 +108,22 @@
   margin: 0;
 }
 }
+
+.side-panel-drones-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.side-panel-drones-field > .field-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.side-panel-drones-checkbox {
+  margin: 0;
+  flex: none;
+  width: 13px;
+  height: 13px;
+  accent-color: var(--accent-teal);
+}

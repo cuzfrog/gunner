@@ -23,7 +23,8 @@ import type {
   TurretSpec,
   WeaponSpec,
 } from "./types";
-import { ZERO_DAMAGE, spoolMultiplier } from "./types";
+import { Vec2 } from "./vec2";
+import { ZERO_DAMAGE, spoolMultiplier, type UnitTargetKind, type UnitTargetParams } from "./types";
 
 export interface AttackState {
   readonly weapon: WeaponSpec;
@@ -33,6 +34,10 @@ export interface AttackState {
   readonly missileFacts?: MissileAttackFacts;
   readonly spoolCycles?: number;
   readonly locked?: boolean;
+  /** Set when the weapon engages an opponent drone/fighter instead of the ship (attack-drones targeting). */
+  readonly unitTarget?: UnitTargetParams;
+  /** Alive fighters in the squadron for this weapon index; scales the volley. */
+  readonly fighterAliveCount?: number;
 }
 
 export interface AttackAssessment {
@@ -43,6 +48,7 @@ export interface AttackAssessment {
   readonly missile?: MissileDamageBreakdown;
   readonly drone?: DroneDamageBreakdown;
   readonly fighter?: FighterDamageBreakdown;
+  readonly unitTarget?: UnitTargetKind;
 }
 
 export interface EngagementEvaluator {
@@ -86,11 +92,11 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   private assess(frame: EngagementFrame, ship: ShipState, opponent: ShipState, attack: AttackState): AttackAssessment {
     let assessment: AttackAssessment;
     if (attack.weapon.kind === "turret") {
-      assessment = this.assessTurret(frame, ship, opponent, attack.weapon, attack.paintedTargetSig, attack.spoolCycles);
+      assessment = this.assessTurret(frame, ship, opponent, attack.weapon, attack.paintedTargetSig, attack.spoolCycles, attack.unitTarget);
     } else if (attack.weapon.kind === "drone") {
       assessment = this.assessDrone(frame, attack.weapon, attack.paintedTargetSig, attack.droneState);
     } else if (attack.weapon.kind === "fighter") {
-      assessment = this.assessFighter(frame, opponent, attack.weapon, attack.paintedTargetSig);
+      assessment = this.assessFighter(frame, opponent, attack.weapon, attack.paintedTargetSig, attack.fighterAliveCount);
     } else {
       if (!attack.missileFacts) throw new Error("MissileAttackFacts are required to assess a missile weapon");
       assessment = this.assessMissile(ship, attack.weapon, attack.missileFacts);
@@ -99,10 +105,12 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     return assessment;
   }
 
-  private assessTurret(frame: EngagementFrame, ship: ShipState, opponent: ShipState, turret: TurretSpec, paintedTargetSig: number, spoolCycles: number | undefined): AttackAssessment {
+  private assessTurret(frame: EngagementFrame, ship: ShipState, opponent: ShipState, turret: TurretSpec, paintedTargetSig: number, spoolCycles: number | undefined, unitTarget?: UnitTargetParams): AttackAssessment {
     const boosted = this.boosters.boostedTurret(turret, ship.boosts);
     const effectiveTurret = this.ewarResolver.disruptedTurret(boosted, opponent.ewar, frame.distance);
-    const hit = this.hitChance.compute(frame, effectiveTurret, paintedTargetSig);
+    // Engaging a non-ship unit swaps the target params: the unit's own signature (never painted) and
+    // its speed as transversal, at the unchanged ship-to-ship distance (drones orbit close to their ship).
+    const hit = unitTarget ? this.hitChance.compute(unitTargetFrame(frame, unitTarget), effectiveTurret, unitTarget.signatureRadius) : this.hitChance.compute(frame, effectiveTurret, paintedTargetSig);
     const expectedMultiplier = computeExpectedMultiplier(hit.chance);
     const inOptimal = frame.distance <= effectiveTurret.optimal;
     const spoolFactor = spoolMultiplier(effectiveTurret.spool, spoolCycles ?? 0);
@@ -110,7 +118,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     // spool-inclusive nominal DPS but zeroes application so no damage is applied. Non-spooling turrets
     // keep firing beyond optimal (falloff application still applies).
     const damage = this.weaponDamageAssessor.assess(effectiveTurret, expectedMultiplier, inOptimal || effectiveTurret.spool === undefined, spoolFactor);
-    return { boostedWeapon: boosted, effectiveWeapon: effectiveTurret, damage, turret: { hit, expectedMultiplier: damage.application, spoolFactor, inOptimal } };
+    return { boostedWeapon: boosted, effectiveWeapon: effectiveTurret, damage, turret: { hit, expectedMultiplier: damage.application, spoolFactor, inOptimal }, ...(unitTarget ? { unitTarget: unitTarget.kind } : {}) };
   }
 
   private assessMissile(ship: ShipState, missile: MissileSpec, facts: MissileAttackFacts): AttackAssessment {
@@ -132,10 +140,15 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     return { boostedWeapon: drone, effectiveWeapon: drone, damage: breakdown, drone: breakdown };
   }
 
-  private assessFighter(frame: EngagementFrame, opponent: ShipState, fighter: FighterSpec, paintedTargetSig: number): AttackAssessment {
-    const breakdown = this.fighterApplication.compute(fighter, opponent.velocity.len(), frame.distance, paintedTargetSig);
+  private assessFighter(frame: EngagementFrame, opponent: ShipState, fighter: FighterSpec, paintedTargetSig: number, aliveCount?: number): AttackAssessment {
+    const breakdown = this.fighterApplication.compute(fighter, opponent.velocity.len(), frame.distance, paintedTargetSig, aliveCount);
     return { boostedWeapon: fighter, effectiveWeapon: fighter, damage: breakdown, fighter: breakdown };
   }
+}
+
+/** Ship-weapon frame for a non-ship target: the unit's speed becomes the transversal, radial closes to zero. */
+function unitTargetFrame(frame: EngagementFrame, unitTarget: UnitTargetParams): EngagementFrame {
+  return { ...frame, transversalSpeed: unitTarget.velocity, transversalVelocity: new Vec2(0, unitTarget.velocity), radialVelocity: 0 };
 }
 
 function zeroAppliedDps(assessment: AttackAssessment): AttackAssessment {

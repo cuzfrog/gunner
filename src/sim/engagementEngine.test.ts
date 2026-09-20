@@ -247,11 +247,49 @@ describe("EngagementEngineImpl", () => {
     deps.live.lockClock.step.mockImplementation(() => { order.push("lock"); return { shipA: LOCKED_STATE, shipB: LOCKED_STATE }; });
     deps.engagementFrameComposer.compose.mockImplementation(() => { order.push("compose"); return baseView(); });
     deps.live.droneSimulator.step.mockImplementation(() => { order.push("drone"); });
+    deps.live.fighterSimulator.step.mockImplementation(() => { order.push("fighter"); });
     deps.live.missileSimulator.step.mockImplementation(() => { order.push("missile"); return []; });
     deps.live.weaponClock.step.mockImplementation(() => { order.push("weapon"); return []; });
     deps.live.defenseSimulator.step.mockImplementation(() => { order.push("defense"); });
     deps.engine.step(0.1);
-    expect(order).toEqual(["capacitor", "simulation", "lock", "compose", "drone", "missile", "weapon", "defense"]);
+    expect(order).toEqual(["capacitor", "simulation", "lock", "compose", "missile", "weapon", "drone", "fighter", "defense"]);
+  });
+
+  test("drone and fighter steps receive the same-frame damage events after the weapon clock", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    const events: unknown[] = [];
+    deps.live.missileSimulator.step.mockReturnValue([{ target: "shipB", source: "shipA", weaponIndex: 0, kind: "missile", rawByType: ZERO_DAMAGE }]);
+    deps.live.weaponClock.step.mockReturnValue([{ target: "shipB", source: "shipA", weaponIndex: 0, kind: "turret", rawByType: ZERO_DAMAGE }]);
+    deps.live.droneSimulator.step.mockImplementation((_dt, _frame, _op, received) => { events.push(...(received ?? [])); });
+    deps.live.fighterSimulator.step.mockImplementation((_dt, _frame, _op, received) => { events.push(...(received ?? [])); });
+    deps.engine.step(0.1);
+    expect(events).toHaveLength(4);
+  });
+
+  test("attackDrones flows from the combatant config into the composer input", () => {
+    const deps = makeEngine();
+    const base = engineConfig();
+    const config = { ...base, sim: { ...base.sim, shipA: { ...base.sim.shipA, attackDrones: true }, shipB: { ...base.sim.shipB, attackDrones: true } } };
+    deps.engine.reset(config);
+    deps.engine.step(0.1);
+    expect(deps.engagementFrameComposer.compose.mock.calls[0][1].attackDrones).toEqual({ shipA: true, shipB: true });
+  });
+
+  test("attackDrones defaults to false when the combatant config omits it", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    deps.engine.step(0.1);
+    expect(deps.engagementFrameComposer.compose.mock.calls[0][1].attackDrones).toEqual({ shipA: false, shipB: false });
+  });
+
+  test("fighter alive counts flow from the fighter simulator states into the composer input", () => {
+    const deps = makeEngine();
+    const aliveState = { mode: "engaging" as const, positions: [], distanceToTarget: 1000, aliveCount: 3, hpFractions: [1, 1, 1] };
+    deps.live.fighterSimulator.states.mockReturnValue([aliveState]);
+    deps.engine.reset(engineConfig());
+    deps.engine.step(0.1);
+    expect(deps.engagementFrameComposer.compose.mock.calls[0][1].fighterAliveCounts).toEqual({ shipA: [3], shipB: [3] });
   });
 
   test("capacitor.step precedes simulation.step and receives ewar suppression with the pre-step distance", () => {
@@ -662,8 +700,8 @@ describe("EngagementEngineImpl", () => {
       const lockInput = deps.live.lockClock.step.mock.calls[0][1];
       expect(lockInput.operational).toEqual({ shipA: true, shipB: false });
       expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: false, shipB: true }, ewarActive: { shipA: true, shipB: false }, bursts: { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS } });
-      expect(deps.live.droneSimulator.step).toHaveBeenCalledWith(0.1, expect.anything(), { shipA: true, shipB: false });
-      expect(deps.live.fighterSimulator.step).toHaveBeenCalledWith(0.1, expect.anything(), { shipA: true, shipB: false });
+      expect(deps.live.droneSimulator.step).toHaveBeenCalledWith(0.1, expect.anything(), { shipA: true, shipB: false }, []);
+      expect(deps.live.fighterSimulator.step).toHaveBeenCalledWith(0.1, expect.anything(), { shipA: true, shipB: false }, []);
     });
   });
 });

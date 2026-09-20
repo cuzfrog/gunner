@@ -81,8 +81,9 @@ function buildDeps() {
     setPlaying: vi.fnUntracked(),
   };
   const starvedReadout = { updateStarvedModules: vi.fnUntracked() };
+  const unitAliveReadout = { update: vi.fnUntracked() };
   let fakeNow = 0;
-  const deps = { viewStream, engagementReadout, effectiveReadout, defenseReadout, capacitorReadout, starvedReadout, i18n: mockI18n(), now: () => fakeNow };
+  const deps = { viewStream, engagementReadout, effectiveReadout, defenseReadout, capacitorReadout, starvedReadout, unitAliveReadout, i18n: mockI18n(), now: () => fakeNow };
   return { ...deps, setNow: (n: number) => { fakeNow = n; } };
 }
 
@@ -115,6 +116,14 @@ describe("ReadoutPresenterImpl", () => {
     const view = makeEngineView({ shipA: 100, shipB: 200 }, [toTypeId("3025")]);
     d.viewStream.emit(view);
     expect(d.starvedReadout.updateStarvedModules).toHaveBeenCalledWith({ shipA: [toTypeId("3025")], shipB: [] });
+  });
+
+  test("unitAliveReadout receives every applied view", () => {
+    const d = buildDeps();
+    const presenter: ReadoutPresenter = new ReadoutPresenterImpl(d);
+    const view = makeEngineView({ shipA: 100, shipB: 200 });
+    d.viewStream.emit(view);
+    expect(d.unitAliveReadout.update).toHaveBeenCalledWith(view);
   });
 
   test("throttles readouts while playing and resumes after interval", () => {

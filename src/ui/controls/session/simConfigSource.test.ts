@@ -289,6 +289,17 @@ describe("SimConfigSourceImpl", () => {
     expect(engineConfig.capacitor.shipB.weaponsDrainPerSecond).toBe(0);
   });
 
+  test("getEngineConfig carries the attack-drones tactic from the side panel state", () => {
+    const deps = build();
+    const base = deps.shipASide.capture();
+    const baseB = deps.shipBSide.capture();
+    deps.shipASide.capture = vi.fn(() => ({ ...base, attackDrones: true }));
+    deps.shipBSide.capture = vi.fn(() => ({ ...baseB }));
+    const engineConfig = makeSource(deps).getEngineConfig();
+    expect(engineConfig.sim.shipA.attackDrones).toBe(true);
+    expect(engineConfig.sim.shipB.attackDrones).toBe(false);
+  });
+
   test("getEngineConfig omits the propulsion drain when the module is toggled off", () => {
     const deps = build();
     const base = deps.shipASide.capture();

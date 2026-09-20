@@ -614,6 +614,29 @@ describe("buildDroneStats", () => {
     });
   });
 
+  test("emits hp pools and signature radius when the SDE carries them", () => {
+    const stats = buildDroneStats(values({
+      damageMultiplier: 1.92, trackingSpeed: 2.178, optimalSigRadius: 25, maxRange: 2100, speed: 4000,
+      thermalDamage: 20, maxVelocity: 3360, entityCruiseSpeed: 660, droneBandwidthUsed: 5,
+      hp: 178, shieldCapacity: 50, armorHP: 90, signatureRadius: 25,
+    }), sdeType(5, 2, 5), droneSkills(3436, 24241));
+    expect(stats?.shieldHp).toBe(50);
+    expect(stats?.armorHp).toBe(90);
+    expect(stats?.hullHp).toBe(178);
+    expect(stats?.signatureRadius).toBe(25);
+  });
+
+  test("omits hp pools and signature radius when absent from the SDE", () => {
+    const stats = buildDroneStats(values({
+      damageMultiplier: 1.92, trackingSpeed: 2.178, optimalSigRadius: 25, maxRange: 2100, speed: 4000,
+      thermalDamage: 20, maxVelocity: 3360, entityCruiseSpeed: 660, droneBandwidthUsed: 5,
+    }), sdeType(), droneSkills(3436, 24241));
+    expect(stats?.shieldHp).toBeUndefined();
+    expect(stats?.armorHp).toBeUndefined();
+    expect(stats?.hullHp).toBeUndefined();
+    expect(stats?.signatureRadius).toBeUndefined();
+  });
+
   test("builds a sentry drone (Garde II) with zero orbit speed", () => {
     const stats = buildDroneStats(values({
       damageMultiplier: 1.65, trackingSpeed: 0.0336, optimalSigRadius: 400, maxRange: 18000, speed: 4000,
@@ -1617,6 +1640,22 @@ describe("buildFighterStats", () => {
   function fighterEffects(...effectIds: number[]): Set<number> {
     return new Set(effectIds);
   }
+
+  test("emits hp pools when the SDE carries them", () => {
+    const valuesMap = values({ maxVelocity: 833, signatureRadius: 110, fighterSquadronRole: 2, fighterSquadronMaxSize: 6, fighterSquadronOrbitRange: 6500, fighterRefuelingTime: 5000, hp: 100, shieldCapacity: 3285, armorHP: 0, ...ATTACK_M_ATTRS });
+    const stats = buildFighterStats(valuesMap, sdeType(0, 1, 1000), 1652, fighterEffects(6465, 6431, 6440, 6554), FIGHTER_SKILLS);
+    expect(stats?.shieldHp).toBe(3285);
+    expect(stats?.armorHp).toBe(0);
+    expect(stats?.hullHp).toBe(100);
+  });
+
+  test("omits hp pools when absent from the SDE", () => {
+    const valuesMap = values({ maxVelocity: 833, signatureRadius: 110, fighterSquadronRole: 2, fighterSquadronMaxSize: 6, fighterSquadronOrbitRange: 6500, fighterRefuelingTime: 5000, ...ATTACK_M_ATTRS });
+    const stats = buildFighterStats(valuesMap, sdeType(0, 1, 1000), 1652, fighterEffects(6465, 6431, 6440, 6554), FIGHTER_SKILLS);
+    expect(stats?.shieldHp).toBeUndefined();
+    expect(stats?.armorHp).toBeUndefined();
+    expect(stats?.hullHp).toBeUndefined();
+  });
 
   test("builds a light fighter (Templar I) with the Attack M ability and role magazine", () => {
     const valuesMap = values({ maxVelocity: 833, signatureRadius: 110, fighterSquadronRole: 2, fighterSquadronMaxSize: 6, fighterSquadronOrbitRange: 6500, fighterRefuelingTime: 5000, ...ATTACK_M_ATTRS });

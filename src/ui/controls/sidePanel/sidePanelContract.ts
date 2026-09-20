@@ -72,6 +72,8 @@ export interface SidePanelState {
   readonly mode: AutopilotMode;
   readonly range: number;
   readonly aggressivity: number;
+  /** Tactic: this side's turrets engage the opponent's drone/fighter wing instead of its ship. */
+  readonly attackDrones?: boolean;
   readonly skillLevel: SkillLevel | undefined;
   readonly defenseSkills?: DefenseSkills;
   readonly targetingSkills?: TargetingSkills;

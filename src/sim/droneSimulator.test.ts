@@ -1,7 +1,7 @@
 import { Vec2 } from "./vec2";
 import { DroneSimulatorImpl } from "./droneSimulator";
 import { toTypeId } from "../gamedata/ids";
-import type { DroneSpec, EngagementFrame, ShipState } from "./types";
+import type { DamageEvent, DroneSpec, EngagementFrame, ShipState, Side, UnitTargetKind } from "./types";
 
 function lightDrone(overrides: Partial<DroneSpec> = {}): DroneSpec {
   return { kind: "drone" as const, moduleId: toTypeId("1"), tracking: 2.178, sigResolution: 25, optimal: 1500, falloff: 500, damagePerShot: { em: 0, thermal: 0, kinetic: 38.4, explosive: 0 }, cycleTime: 4, droneCount: 5, maxVelocity: 3000, orbitSpeed: 4000, orbitRange: 1000, isSentry: false, controlRange: 60000, ...overrides };
@@ -421,5 +421,64 @@ describe("DroneSimulatorImpl", () => {
     for (let i = 0; i < 10; i++) first.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)), { shipA: true, shipB: true });
     second.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)), { shipA: true, shipB: true });
     expect(first.states("shipA")[0].positions[0].dist(second.states("shipA")[0].positions[0])).toBeGreaterThan(0);
+  });
+});
+
+describe("drone unit durability", () => {
+  const SHIP_POS = new Vec2(0, 0);
+  const TARGET_POS = new Vec2(50000, 0);
+
+  function hobgoblin(overrides: Partial<DroneSpec> = {}): DroneSpec {
+    return lightDrone({ hp: { shield: 50, armor: 90, hull: 200 }, signatureRadius: 25, ...overrides });
+  }
+
+  function unitDamage(amount: number, target: Side = "shipA", unitTarget: UnitTargetKind = "drone"): DamageEvent {
+    return { target, source: "shipB", weaponIndex: 0, kind: "turret", rawByType: { em: amount, thermal: 0, kinetic: 0, explosive: 0 }, unitTarget };
+  }
+
+  test("states report alive counts and full hp fractions for fresh drones", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [hobgoblin()], shipB: [] });
+    const state = sim.states("shipA")[0];
+    expect(state.aliveCount).toBe(5);
+    expect(state.hpFractions).toEqual([1, 1, 1, 1, 1]);
+  });
+
+  test("damage depletes the focused drone through shield, armor and hull", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [hobgoblin()], shipB: [] });
+    sim.step(0.1, frame(SHIP_POS, TARGET_POS), { shipA: true, shipB: true }, [unitDamage(40)]);
+    expect(sim.states("shipA")[0].hpFractions[0]).toBeCloseTo((10 + 90 + 200) / 340, 6);
+    sim.step(0.1, frame(SHIP_POS, TARGET_POS), { shipA: true, shipB: true }, [unitDamage(100)]);
+    expect(sim.states("shipA")[0].hpFractions[0]).toBeCloseTo(200 / 340, 6);
+    expect(sim.states("shipA")[0].aliveCount).toBe(5);
+    sim.step(0.1, frame(SHIP_POS, TARGET_POS), { shipA: true, shipB: true }, [unitDamage(200)]);
+    expect(sim.states("shipA")[0].aliveCount).toBe(4);
+    expect(sim.states("shipA")[0].positions).toHaveLength(4);
+    expect(sim.states("shipA")[0].hpFractions).toEqual([1, 1, 1, 1, 1].slice(0, 4));
+  });
+
+  test("damage focuses the first alive drone across steps", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [hobgoblin()], shipB: [] });
+    sim.step(0.1, frame(SHIP_POS, TARGET_POS), { shipA: true, shipB: true }, [unitDamage(340)]);
+    expect(sim.states("shipA")[0].aliveCount).toBe(4);
+    sim.step(0.1, frame(SHIP_POS, TARGET_POS), { shipA: true, shipB: true }, [unitDamage(20)]);
+    expect(sim.states("shipA")[0].hpFractions[0]).toBeCloseTo((50 + 90 + 180) / 340, 6);
+  });
+
+  test("a wing without hp data cannot be damaged", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [lightDrone()], shipB: [] });
+    sim.step(0.1, frame(SHIP_POS, TARGET_POS), { shipA: true, shipB: true }, [unitDamage(10000)]);
+    expect(sim.states("shipA")[0].aliveCount).toBe(5);
+    expect(sim.states("shipA")[0].hpFractions).toEqual([1, 1, 1, 1, 1]);
+  });
+
+  test("events targeting the other side are ignored", () => {
+    const sim = new DroneSimulatorImpl();
+    sim.reset({ shipA: [hobgoblin()], shipB: [] });
+    sim.step(0.1, frame(SHIP_POS, TARGET_POS), { shipA: true, shipB: true }, [unitDamage(10000, "shipB")]);
+    expect(sim.states("shipA")[0].aliveCount).toBe(5);
   });
 });

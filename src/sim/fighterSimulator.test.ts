@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { toTypeId } from "../gamedata/ids";
 import { FighterSimulatorImpl } from "./fighterSimulator";
 import { Vec2 } from "./vec2";
-import { ZERO_DAMAGE, type EngagementFrame, type FighterSpec, type ShipState } from "./types";
+import { ZERO_DAMAGE, type DamageEvent, type EngagementFrame, type FighterSpec, type ShipState, type Side } from "./types";
 
 function templar(overrides: Partial<FighterSpec> = {}): FighterSpec {
   return {
@@ -166,5 +166,43 @@ describe("FighterSimulatorImpl", () => {
     expect(second.states("shipA")).toEqual(expected.shipA);
     for (let i = 0; i < 5; i++) second.step(0.1, frame(new Vec2(0, 0), new Vec2(5000, 0)), { shipA: true, shipB: true });
     expect(second.states("shipA")[0].positions[0].dist(first.states("shipA")[0].positions[0])).toBeGreaterThan(0);
+  });
+});
+
+describe("fighter unit durability", () => {
+  const SHIP_POS = new Vec2(0, 0);
+  const TARGET_POS = new Vec2(50000, 0);
+
+  function hpfighter(overrides: Partial<FighterSpec> = {}): FighterSpec {
+    return templar({ hp: { shield: 3285, armor: 0, hull: 100 }, signatureRadius: 110, ...overrides });
+  }
+
+  function unitDamage(amount: number, target: Side = "shipA"): DamageEvent {
+    return { target, source: "shipB", weaponIndex: 0, kind: "turret", rawByType: { em: amount, thermal: 0, kinetic: 0, explosive: 0 }, unitTarget: "fighter" };
+  }
+
+  test("states report alive counts and full hp fractions for fresh squadrons", () => {
+    const sim = new FighterSimulatorImpl();
+    sim.reset({ shipA: [hpfighter()], shipB: [] });
+    const state = sim.states("shipA")[0];
+    expect(state.aliveCount).toBe(6);
+    expect(state.hpFractions).toEqual([1, 1, 1, 1, 1, 1]);
+  });
+
+  test("damage depletes the focused fighter and the wing shrinks", () => {
+    const sim = new FighterSimulatorImpl();
+    sim.reset({ shipA: [hpfighter()], shipB: [] });
+    sim.step(0.1, frame(SHIP_POS, TARGET_POS), { shipA: true, shipB: true }, [unitDamage(2000)]);
+    expect(sim.states("shipA")[0].hpFractions[0]).toBeCloseTo((1285 + 100) / 3385, 6);
+    sim.step(0.1, frame(SHIP_POS, TARGET_POS), { shipA: true, shipB: true }, [unitDamage(1385)]);
+    expect(sim.states("shipA")[0].aliveCount).toBe(5);
+    expect(sim.states("shipA")[0].positions).toHaveLength(5);
+  });
+
+  test("events targeting drones or the other side are ignored", () => {
+    const sim = new FighterSimulatorImpl();
+    sim.reset({ shipA: [hpfighter()], shipB: [] });
+    sim.step(0.1, frame(SHIP_POS, TARGET_POS), { shipA: true, shipB: true }, [unitDamage(10000, "shipB")]);
+    expect(sim.states("shipA")[0].aliveCount).toBe(6);
   });
 });

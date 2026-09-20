@@ -69,7 +69,7 @@ describe("DroneController", () => {
   test("currentDroneSpecs maps all fields correctly", () => {
     const { controller } = buildDrone({
       droneLoadoutResolver: resolverReturningDrones([
-        importedDroneFixture({ emDamage: 10, thermalDamage: 20, kineticDamage: 5, explosiveDamage: 15, damageMultiplier: 2 }),
+        importedDroneFixture({ emDamage: 10, thermalDamage: 20, kineticDamage: 5, explosiveDamage: 15, damageMultiplier: 2, shieldHp: 50, armorHp: 90, hullHp: 200, signatureRadius: 25 }),
       ]),
     });
     controller.applyImported(importedWithDrones([importedDroneFixture()]), NEUTRAL_CONDITIONS);
@@ -87,6 +87,18 @@ describe("DroneController", () => {
     expect(spec.maxVelocity).toBe(1200);
     expect(spec.orbitSpeed).toBe(600);
     expect(spec.isSentry).toBe(false);
+    expect(spec.hp).toEqual({ shield: 50, armor: 90, hull: 200 });
+    expect(spec.signatureRadius).toBe(25);
+  });
+
+  test("drones without durability stats map specs without hp", () => {
+    const { controller } = buildDrone({
+      droneLoadoutResolver: resolverReturningDrones([importedDroneFixture()]),
+    });
+    controller.applyImported(importedWithDrones([importedDroneFixture()]), NEUTRAL_CONDITIONS);
+    const spec = controller.currentDroneSpecs()[0]!;
+    expect(spec.hp).toBeUndefined();
+    expect(spec.signatureRadius).toBeUndefined();
   });
 
   test("sentry drones show dashes for orbit speed and max velocity", () => {

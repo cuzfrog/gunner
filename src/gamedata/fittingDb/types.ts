@@ -497,6 +497,9 @@ export interface FighterStats {
   readonly orbitRange: number; // m
   readonly maxVelocity: number; // m/s
   readonly signatureRadius: number; // m
+  readonly shieldHp?: number;
+  readonly armorHp?: number;
+  readonly hullHp?: number;
   readonly refuelingTime: number; // seconds per refuel cycle
   readonly volume: number; // m3 per fighter
   readonly attack?: FighterAttackStats;
@@ -524,6 +527,10 @@ export interface DroneStats {
   readonly cycleTime: number;
   readonly bandwidth: number;
   readonly volume: number;
+  readonly shieldHp?: number;
+  readonly armorHp?: number;
+  readonly hullHp?: number;
+  readonly signatureRadius?: number;
   readonly metaLevel: number;
   readonly metaGroupID: number;
   readonly requiredSkillIds: readonly TypeId[];

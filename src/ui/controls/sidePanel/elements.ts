@@ -13,6 +13,7 @@ export interface SidePanelElements {
   readonly alignTime: HTMLElement;
   readonly mode: HTMLSelectElement;
   readonly range: HTMLInputElement;
+  readonly attackDrones: HTMLInputElement;
   readonly aggressivity: HTMLInputElement;
   readonly aggressivitySlider: HTMLInputElement;
   readonly aggressivityValue: HTMLElement;
@@ -51,6 +52,7 @@ export function collectSideEls(els: ControlsElements, side: Side): SidePanelElem
     alignTime: combatant.alignTime,
     mode: combatant.mode,
     range: combatant.range,
+    attackDrones: combatant.attackDrones,
     aggressivity: combatant.aggressivity,
     aggressivitySlider: combatant.aggressivitySlider,
     aggressivityValue: combatant.aggressivityValue,
