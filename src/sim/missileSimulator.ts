@@ -13,7 +13,7 @@ import type {
   MissileSpec,
   Side,
 } from "./types";
-import { ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
+import { MODULE_HEAT_HITPOINTS, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 export interface MissileBodySnapshot {
   readonly position: Vec2;
@@ -32,8 +32,15 @@ export interface MissileSideSnapshot {
   readonly cooldowns: ReadonlyMap<number, number>;
   readonly weaponSpecs: ReadonlyMap<number, MissileSpec>;
   readonly magazines: ReadonlyMap<number, { shotsLeft: number; numShots: number; reloadTime: number }>;
+  readonly heat: ReadonlyMap<number, LauncherHeatState>;
   readonly lastTargetVelocity: Vec2;
   readonly lastTargetMaxSpeed: number;
+}
+
+/** Remaining module-group heat HP per launcher-group slot; moduleId resets the pool on refit. */
+interface LauncherHeatState {
+  readonly moduleId: string;
+  readonly hp: number;
 }
 
 export interface MissileSimulatorState {
@@ -46,7 +53,7 @@ export interface MissileSimulatorState {
 export interface MissileSimulator extends Restorable<MissileSimulatorState> {
   reset(config: MissileSimConfig, shipPositions: Record<Side, Vec2>): void;
   update(config: MissileSimConfig): void;
-  step(dt: number, frame: EngagementFrame, launches: Record<Side, readonly MissileLaunchSpec[]>): readonly DamageEvent[];
+  step(dt: number, frame: EngagementFrame, launches: Record<Side, readonly MissileLaunchSpec[]>, overloaded?: Record<Side, boolean>): readonly DamageEvent[];
   states(side: Side): readonly MissileRuntimeState[];
   /** baseSpec is the configured (unboosted) spec, used until the first launch records the boosted spec; paintedTargetSig is the current-frame painted target signature. */
   facts(side: Side, weaponIndex: number, baseSpec: MissileSpec, paintedTargetSig: number): MissileAttackFacts;
@@ -85,6 +92,7 @@ interface SideState {
   cooldowns: Map<number, number>;
   weaponSpecs: Map<number, MissileSpec>;
   magazines: Map<number, MagazineCounter>;
+  heat: Map<number, LauncherHeatState>;
   lastTargetVelocity: Vec2;
   lastTargetMaxSpeed: number;
 }
@@ -114,12 +122,12 @@ export class MissileSimulatorImpl implements MissileSimulator {
     // Weapon specs are pushed per-step via launches; no state needs to change on config update.
   }
 
-  step(dt: number, frame: EngagementFrame, launches: Record<Side, readonly MissileLaunchSpec[]>): readonly DamageEvent[] {
+  step(dt: number, frame: EngagementFrame, launches: Record<Side, readonly MissileLaunchSpec[]>, overloaded?: Record<Side, boolean>): readonly DamageEvent[] {
     this.time += dt;
     this.lastFrameShipA = frame.shipA.position;
     this.lastFrameShipB = frame.shipB.position;
-    const shipAEvents = this.stepSide("shipA", dt, frame.shipA.position, frame.shipB.position, frame.shipB.velocity, frame.shipB.maxSpeed, launches.shipA);
-    const shipBEvents = this.stepSide("shipB", dt, frame.shipB.position, frame.shipA.position, frame.shipA.velocity, frame.shipA.maxSpeed, launches.shipB);
+    const shipAEvents = this.stepSide("shipA", dt, frame.shipA.position, frame.shipB.position, frame.shipB.velocity, frame.shipB.maxSpeed, launches.shipA, overloaded?.shipA ?? false);
+    const shipBEvents = this.stepSide("shipB", dt, frame.shipB.position, frame.shipA.position, frame.shipA.velocity, frame.shipA.maxSpeed, launches.shipB, overloaded?.shipB ?? false);
     return [...shipAEvents, ...shipBEvents];
   }
 
@@ -158,11 +166,11 @@ export class MissileSimulatorImpl implements MissileSimulator {
     this.lastFrameShipB = state.lastFrameShipB;
   }
 
-  private stepSide(side: Side, dt: number, shipPos: Vec2, targetPos: Vec2, targetVel: Vec2, targetMaxSpeed: number, launches: readonly MissileLaunchSpec[]): readonly DamageEvent[] {
+  private stepSide(side: Side, dt: number, shipPos: Vec2, targetPos: Vec2, targetVel: Vec2, targetMaxSpeed: number, launches: readonly MissileLaunchSpec[], overloaded: boolean): readonly DamageEvent[] {
     const state = this.sides[side];
     this.updateTargetKinematics(state, targetVel, targetMaxSpeed);
     this.tickCooldowns(state, dt);
-    this.handleLaunches(state, shipPos, launches);
+    this.handleLaunches(state, shipPos, launches, overloaded);
     return this.advanceEntities(side, state, dt, targetPos, targetVel);
   }
 
@@ -178,14 +186,17 @@ export class MissileSimulatorImpl implements MissileSimulator {
     }
   }
 
-  private handleLaunches(state: SideState, shipPos: Vec2, launches: readonly MissileLaunchSpec[]): void {
+  private handleLaunches(state: SideState, shipPos: Vec2, launches: readonly MissileLaunchSpec[], overloaded: boolean): void {
     for (const launch of launches) {
       state.weaponSpecs.set(launch.weaponIndex, launch.boosted);
       if ((state.cooldowns.get(launch.weaponIndex) ?? 0) > 0) continue;
+      const heat = launcherHeat(state.heat, launch.weaponIndex, launch.boosted);
+      if (heat !== undefined && heat.hp <= 0) continue;
       prepareMagazine(state, launch);
       state.entities.push(createMissile(shipPos, launch));
       const reload = spendMagazineShot(state, launch.weaponIndex);
       state.cooldowns.set(launch.weaponIndex, launch.boosted.cycleTime + (reload ?? 0));
+      if (heat !== undefined && overloaded) applyLauncherHeat(state.heat, launch.weaponIndex, launch.boosted);
     }
   }
 
@@ -235,7 +246,25 @@ export class MissileSimulatorImpl implements MissileSimulator {
 }
 
 function emptySide(): SideState {
-  return { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), magazines: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
+  return { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), magazines: new Map(), heat: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
+}
+
+/** Returns the launcher group's heat pool, or undefined when the module cannot take heat damage; a refit (different moduleId) resets the pool. */
+function launcherHeat(heat: Map<number, LauncherHeatState>, weaponIndex: number, spec: MissileSpec): LauncherHeatState | undefined {
+  if (spec.heatDamagePerCycle === undefined) return undefined;
+  const existing = heat.get(weaponIndex);
+  if (existing === undefined || existing.moduleId !== spec.moduleId) {
+    const fresh = { moduleId: spec.moduleId, hp: MODULE_HEAT_HITPOINTS * spec.launcherCount };
+    heat.set(weaponIndex, fresh);
+    return fresh;
+  }
+  return existing;
+}
+
+function applyLauncherHeat(heat: Map<number, LauncherHeatState>, weaponIndex: number, spec: MissileSpec): void {
+  const pool = heat.get(weaponIndex);
+  if (!pool) return;
+  heat.set(weaponIndex, { moduleId: pool.moduleId, hp: pool.hp - spec.heatDamagePerCycle! * spec.launcherCount });
 }
 
 /** Ensures a counter exists for the weapon; a changed spec (ammo swap) restarts the counter full. */
@@ -265,6 +294,7 @@ function snapshotSide(state: SideState): MissileSideSnapshot {
   return {
     entities: state.entities.map(snapshotBody), cooldowns: new Map(state.cooldowns), weaponSpecs: new Map(state.weaponSpecs),
     magazines: new Map([...state.magazines].map(([index, counter]) => [index, { ...counter }])),
+    heat: new Map([...state.heat].map(([index, pool]) => [index, { ...pool }])),
     lastTargetVelocity: state.lastTargetVelocity, lastTargetMaxSpeed: state.lastTargetMaxSpeed,
   };
 }
@@ -273,6 +303,7 @@ function materializeSide(snapshot: MissileSideSnapshot): SideState {
   return {
     entities: snapshot.entities.map(materializeBody), cooldowns: new Map(snapshot.cooldowns), weaponSpecs: new Map(snapshot.weaponSpecs),
     magazines: new Map([...snapshot.magazines].map(([index, counter]) => [index, { ...counter }])),
+    heat: new Map([...snapshot.heat].map(([index, pool]) => [index, { ...pool }])),
     lastTargetVelocity: snapshot.lastTargetVelocity, lastTargetMaxSpeed: snapshot.lastTargetMaxSpeed,
   };
 }

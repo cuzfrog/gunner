@@ -2,7 +2,7 @@ import { Vec2 } from "./vec2";
 import { MissileSimulatorImpl } from "./missileSimulator";
 import { MissileApplicationImpl } from "./missileApplication";
 import { toTypeId } from "../gamedata/ids";
-import type { EngagementFrame, MissileLaunchSpec, MissileSpec, ShipState } from "./types";
+import type { EngagementFrame, MissileLaunchSpec, MissileSpec, ShipState, Side } from "./types";
 import { damageVectorScale } from "./types";
 
 const lightMissile: MissileSpec = {
@@ -57,6 +57,55 @@ function frame(shipAPos: Vec2, shipBPos: Vec2, shipAVel: Vec2 = new Vec2(0, 0), 
 function launchSpec(weaponIndex: number, boosted: MissileSpec, paintedTargetSig: number): MissileLaunchSpec {
   return { weaponIndex, boosted, paintedTargetSig, baseVolleyByType: damageVectorScale(boosted.damagePerMissile, boosted.launcherCount) };
 }
+
+describe("MissileSimulatorImpl launcher heat", () => {
+  const OVERLOADED: Record<Side, boolean> = { shipA: true, shipB: false };
+  const NOT_OVERLOADED: Record<Side, boolean> = { shipA: false, shipB: false };
+
+  function heatedLauncher(heat: number): MissileSpec {
+    return { ...lightMissile, moduleId: toTypeId("2410"), cycleTime: 1, heatDamagePerCycle: heat };
+  }
+
+  function countLaunches(sim: MissileSimulatorImpl, launcher: MissileSpec, overloaded: Record<Side, boolean>, steps: number): number {
+    let events = 0;
+    for (let i = 0; i < steps; i++) {
+      events += sim.step(1, frame(new Vec2(0, 0), new Vec2(1000, 0)), { shipA: [launchSpec(0, launcher, 40)], shipB: [] }, overloaded).length;
+    }
+    return events;
+  }
+
+  test("an overloaded launcher group stops launching once its heat pool is spent", () => {
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    const launcher = heatedLauncher(10);
+    sim.reset({ shipA: [launcher], shipB: [] }, { shipA: new Vec2(0, 0), shipB: new Vec2(1000, 0) });
+    // Pool 40 / 10 heat per cycle = 4 launches, then burnout.
+    expect(countLaunches(sim, launcher, OVERLOADED, 10)).toBe(4);
+  });
+
+  test("launchers without the overload flag never accumulate heat", () => {
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    const launcher = heatedLauncher(10);
+    sim.reset({ shipA: [launcher], shipB: [] }, { shipA: new Vec2(0, 0), shipB: new Vec2(1000, 0) });
+    expect(countLaunches(sim, launcher, NOT_OVERLOADED, 10)).toBe(10);
+  });
+
+  test("launcher group heat scales with launcherCount", () => {
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    const launcher = { ...heatedLauncher(10), launcherCount: 4 };
+    sim.reset({ shipA: [launcher], shipB: [] }, { shipA: new Vec2(0, 0), shipB: new Vec2(1000, 0) });
+    // Pool 40 * 4 = 160, 40 heat per cycle: 4 launches.
+    expect(countLaunches(sim, launcher, OVERLOADED, 10)).toBe(4);
+  });
+
+  test("a refit with a different module restores the heat pool", () => {
+    const sim = new MissileSimulatorImpl({ missileApplication: new MissileApplicationImpl() });
+    const launcher = heatedLauncher(10);
+    sim.reset({ shipA: [launcher], shipB: [] }, { shipA: new Vec2(0, 0), shipB: new Vec2(1000, 0) });
+    expect(countLaunches(sim, launcher, OVERLOADED, 5)).toBe(4);
+    const refitted = { ...launcher, moduleId: toTypeId("2874") };
+    expect(countLaunches(sim, refitted, OVERLOADED, 1)).toBe(1);
+  });
+});
 
 describe("MissileSimulatorImpl", () => {
   test("reset clears all entities and state", () => {

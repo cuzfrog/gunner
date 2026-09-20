@@ -722,6 +722,7 @@ interface TurretStats {
   readonly chargeGroups: readonly number[];
   readonly damageMultiplier: number;
   readonly cycleTime: number;
+  readonly heatDamage?: number;
   readonly spoolPerCycle?: number;
   readonly spoolMax?: number;
   readonly turretSkill?: string;
@@ -758,6 +759,7 @@ interface LauncherStats {
   readonly rateOfFire: number;
   readonly launcherGroup: number;
   readonly chargeGroups: readonly number[];
+  readonly heatDamage?: number;
   readonly requiredSkillIds: readonly TypeId[];
   readonly metaLevel: number;
   readonly metaGroupID: number;
@@ -1647,7 +1649,40 @@ export function buildLauncherStats(values: Map<string, number>, groupID: number,
   if (chargeGroups.length === 0) return undefined;
   const chargeRate = values.get("chargeRate");
   const reloadTime = values.get("reloadTime");
-  return { rateOfFire: speed / 1000, launcherGroup: groupID, chargeGroups, requiredSkillIds, metaLevel: type.metaLevel ?? 0, metaGroupID: type.metaGroupID ?? 1, ...(type.capacity !== undefined ? { capacity: type.capacity } : {}), ...(chargeRate !== undefined ? { chargeRate } : {}), ...(reloadTime !== undefined ? { reloadTime: reloadTime / 1000 } : {}) };
+  const heatDamage = values.get("heatDamage");
+  return { rateOfFire: speed / 1000, launcherGroup: groupID, chargeGroups, requiredSkillIds, metaLevel: type.metaLevel ?? 0, metaGroupID: type.metaGroupID ?? 1, ...(heatDamage !== undefined ? { heatDamage } : {}), ...(type.capacity !== undefined ? { capacity: type.capacity } : {}), ...(chargeRate !== undefined ? { chargeRate } : {}), ...(reloadTime !== undefined ? { reloadTime: reloadTime / 1000 } : {}) };
+}
+
+export function buildTurretStats(values: Map<string, number>, type: SdeType, types: Record<string, SdeType>, requiredSkills: Record<string, Record<string, number>>): TurretStats | undefined {
+  const tracking = values.get("trackingSpeed");
+  const optimal = values.get("maxRange");
+  const speed = values.get("speed");
+  const damageMultiplier = values.get("damageMultiplier");
+  if (tracking === undefined || optimal === undefined || speed === undefined || damageMultiplier === undefined) return undefined;
+  const chargeGroups = readChargeGroups(values);
+  if (chargeGroups.length === 0) throw new Error(`Turret "${type["typeName_en-us"]}" has no chargeGroups`);
+  const spoolPerCycle = values.get("damageMultiplierBonusPerCycle");
+  const spoolMax = values.get("damageMultiplierBonusMax");
+  const hasSpool = spoolPerCycle !== undefined && spoolMax !== undefined && spoolMax > 0;
+  const heatDamage = values.get("heatDamage");
+  return {
+    tracking,
+    optimal,
+    falloff: values.get("falloff") ?? 0,
+    chargeSize: values.get("chargeSize") ?? 1,
+    chargeGroups,
+    damageMultiplier,
+    cycleTime: speed / 1000,
+    capacitorNeed: values.get("capacitorNeed") ?? 0,
+    ...(heatDamage !== undefined ? { heatDamage } : {}),
+    ...(hasSpool ? { spoolPerCycle, spoolMax } : {}),
+    turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
+    specializationSkill: specializationSkillFromRequired(types, requiredSkills, type.typeID),
+    requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID),
+    groupID: type.groupID,
+    metaLevel: type.metaLevel ?? 0,
+    metaGroupID: type.metaGroupID ?? 1,
+  };
 }
 
 export function buildMissileStats(values: Map<string, number>, groupID: number, type: SdeType, requiredSkillIds: readonly TypeId[]): MissileStats | undefined {
@@ -1970,35 +2005,9 @@ async function main() {
     }
 
     if (TURRET_GROUPS.has(type.groupID)) {
-      const tracking = values.get("trackingSpeed");
-      const optimal = values.get("maxRange");
-      const speed = values.get("speed");
-      const damageMultiplier = values.get("damageMultiplier");
-      if (tracking !== undefined && optimal !== undefined && speed !== undefined && damageMultiplier !== undefined) {
-        const chargeGroups = readChargeGroups(values);
-        if (chargeGroups.length === 0) throw new Error(`Turret "${enName}" has no chargeGroups`);
-        const spoolPerCycle = values.get("damageMultiplierBonusPerCycle");
-        const spoolMax = values.get("damageMultiplierBonusMax");
-        const hasSpool = spoolPerCycle !== undefined && spoolMax !== undefined && spoolMax > 0;
-        turrets[id] = {
-          id,
-          name: enName,
-          tracking,
-          optimal,
-          falloff: values.get("falloff") ?? 0,
-          chargeSize: values.get("chargeSize") ?? 1,
-          chargeGroups,
-          damageMultiplier,
-          cycleTime: speed / 1000,
-          capacitorNeed: values.get("capacitorNeed") ?? 0,
-          ...(hasSpool ? { spoolPerCycle, spoolMax } : {}),
-          turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
-          specializationSkill: specializationSkillFromRequired(types, requiredSkills, type.typeID),
-          requiredSkillIds: buildRequiredSkillIds(requiredSkills, type.typeID),
-          groupID: type.groupID,
-          metaLevel: type.metaLevel ?? 0,
-          metaGroupID: type.metaGroupID ?? 1,
-        };
+      const stats = buildTurretStats(values, type, types, requiredSkills);
+      if (stats) {
+        turrets[id] = { ...stats, id, name: enName };
         addItemName(itemNames, id, type);
       }
       continue;

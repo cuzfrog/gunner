@@ -4,6 +4,7 @@ import type { CapacitorGate } from "./capacitorSimulator";
 import type { DefenseSimConfig } from "./defenseSimulator";
 import { StackingPenaltyImpl } from "./stackingPenalty";
 import type { ActiveHardenerSpec, BurstEffectKind, BurstModifiers, DamageEvent, DamageResists, DamageType, DamageVector, DefenseLayer, DefenseSpec, LayerDamage, RahSpec, RepairerSpec, Side } from "./types";
+import type { RepairerActivationEntry } from "./defenseSimulator";
 import { IDENTITY_BURST_MODIFIERS } from "./types";
 import { ZERO_DAMAGE, ZERO_RESISTS } from "./types";
 
@@ -83,13 +84,13 @@ function gatedDebits(record: DebitRecord[], options?: GateOptions): CapacitorGat
   } };
 }
 
-function config(shipA: DefenseSpec, shipB?: DefenseSpec, damageEnabled?: { shipA: boolean; shipB: boolean }, opts: { overloaded?: Record<Side, boolean>; rahActivation?: Record<Side, { active: boolean; overloaded: boolean } | undefined> } = {}): DefenseSimConfig {
+function config(shipA: DefenseSpec, shipB?: DefenseSpec, damageEnabled?: { shipA: boolean; shipB: boolean }, opts: { overloaded?: Record<Side, boolean>; rahActivation?: Record<Side, { active: boolean; overloaded: boolean } | undefined>; repairerActivation?: Record<Side, readonly RepairerActivationEntry[]> } = {}): DefenseSimConfig {
   return {
     shipA,
     shipB: shipB ?? spec(),
     damageEnabled: damageEnabled ?? { shipA: true, shipB: true },
     repairMode: { shipA: "auto", shipB: "auto" },
-    repairerActivation: { shipA: [], shipB: [] },
+    repairerActivation: opts.repairerActivation ?? { shipA: [], shipB: [] },
     rahActivation: opts.rahActivation ?? { shipA: undefined, shipB: undefined },
     overloaded: opts.overloaded ?? { shipA: false, shipB: false },
   };
@@ -1410,6 +1411,79 @@ describe("DefenseSimulatorImpl", () => {
     for (let i = 0; i < 5; i++) second.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE), gatedDebits(debits));
     expect(debits).toEqual([{ side: "shipA", amount: 20 }, { side: "shipA", amount: 20 }, { side: "shipA", amount: 20 }]);
     expect(second.view().hardeners.shipA[0]?.online).toBe(true);
+  });
+});
+
+describe("defense heat and burnout", () => {
+  function repairer(opts: { heatDamage?: number; amount?: number; cycleTime?: number; moduleId?: string }): RepairerSpec {
+    return { layer: "armor", amount: opts.amount ?? 50, cycleTime: opts.cycleTime ?? 1, capacitorNeed: 0, heatDamage: opts.heatDamage ?? 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 }, moduleId: toTypeId(opts.moduleId ?? "3530") };
+  }
+
+  const HEAVY_EM: DamageVector = { em: 500, thermal: 0, kinetic: 0, explosive: 0 };
+
+  function shieldHardener(heatDamage: number): ActiveHardenerSpec {
+    return { moduleId: toTypeId("2281"), layer: "shield", resistBonus: { em: 0.5, thermal: 0, kinetic: 0, explosive: 0 }, overloadBonusMultiplier: 1.2, capacitorNeed: 0, cycleTime: 1, heatDamage };
+  }
+
+  test("an overloaded repairer burns out after its heat pool is spent", () => {
+    const sim = newSim();
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 1000, repairers: [repairer({ heatDamage: 15 })] })));
+    sim.step(1, events(HEAVY_EM, ZERO_DAMAGE));
+    for (let i = 0; i < 5; i++) sim.step(1, ZERO_EVENTS);
+    // Pool 40 / 15 heat per cycle = 3 completed cycles, then burnout; 500 damage - 150 repaired.
+    expect(sim.view().pools.shipA.armor).toBe(650);
+    expect(sim.view().repairers.shipA[0].burned).toBe(true);
+    expect(sim.view().repairers.shipA[0].hpPerSecond).toBe(0);
+  });
+
+  test("a repairer without the overload flag never accumulates heat", () => {
+    const sim = newSim();
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 1000, repairers: [repairer({ heatDamage: 15 })] }), undefined, undefined, { repairerActivation: { shipA: [{ active: true, overloaded: false }], shipB: [] } }));
+    sim.step(1, events(HEAVY_EM, ZERO_DAMAGE));
+    for (let i = 0; i < 5; i++) sim.step(1, ZERO_EVENTS);
+    expect(sim.view().pools.shipA.armor).toBe(800);
+    expect(sim.view().repairers.shipA[0].burned).toBeUndefined();
+  });
+
+  test("an overloaded hardener burns out and loses its resist bonus", () => {
+    const sim = newSim();
+    sim.reset(config(spec({ shieldHp: 1000, hardeners: [shieldHardener(10)] }), undefined, undefined, { overloaded: { shipA: true, shipB: false } }));
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    // Overloaded bonus 0.5 * 1.2 = 0.6 resist while online.
+    expect(sim.view().pools.shipA.shield).toBe(960);
+    for (let i = 0; i < 5; i++) sim.step(1, ZERO_EVENTS);
+    expect(sim.view().hardeners.shipA[0].burned).toBe(true);
+    expect(sim.view().hardeners.shipA[0].online).toBe(false);
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(sim.view().pools.shipA.shield).toBe(860);
+  });
+
+  test("burnout state survives capture and restore", () => {
+    const sim = newSim();
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 1000, repairers: [repairer({ heatDamage: 15 })] })));
+    sim.step(1, events(HEAVY_EM, ZERO_DAMAGE));
+    sim.step(1, ZERO_EVENTS);
+    const state = sim.capture();
+    const restored = newSim();
+    restored.restore(state);
+    restored.step(1, ZERO_EVENTS);
+    expect(restored.view().pools.shipA.armor).toBe(650);
+    expect(restored.view().repairers.shipA[0].burned).toBe(true);
+  });
+
+  test("repairer refit restores the heat pool", () => {
+    const sim = newSim();
+    const damaged = spec({ shieldHp: 0, armorHp: 1000, repairers: [repairer({ heatDamage: 15 })] });
+    sim.reset(config(damaged));
+    sim.step(1, events(HEAVY_EM, ZERO_DAMAGE));
+    sim.step(1, ZERO_EVENTS);
+    sim.update(config(spec({ shieldHp: 0, armorHp: 1000, repairers: [repairer({ heatDamage: 15, moduleId: "3531" })] })));
+    sim.step(1, ZERO_EVENTS);
+    // A fresh pool does not burn on the first post-refit cycle; the carried-over pool (10 hp left) would.
+    expect(sim.view().repairers.shipA[0].burned).toBeUndefined();
+    for (let i = 0; i < 2; i++) sim.step(1, ZERO_EVENTS);
+    expect(sim.view().pools.shipA.armor).toBe(750);
+    expect(sim.view().repairers.shipA[0].burned).toBe(true);
   });
 });
 

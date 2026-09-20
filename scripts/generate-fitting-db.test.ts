@@ -2,10 +2,10 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { toTypeId, type TypeId } from "../src/gamedata/ids";
-import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildFighterStats, buildLauncherStats, buildMissileStats, buildOmnidirectionalTrackingEnhancerStats, buildOmnidirectionalTrackingLinkStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _assertCombatDroneSkillChain, _assertFighterSkillChain, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildJammerStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses, _buildSubsystemBonuses, _buildSkillBonuses, _buildDroneSkillIds } from "./generate-fitting-db";
+import { assertTurretChargeCoverage, buildDisruptionScriptStats, buildDroneStats, buildFighterStats, buildLauncherStats, buildMissileStats, buildTurretStats, buildOmnidirectionalTrackingEnhancerStats, buildOmnidirectionalTrackingLinkStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, readChargeGroups, _assertCombatDroneSkillChain, _assertFighterSkillChain, _buildModuleStats, _buildPropulsionStats, _buildTargetPainterStats, _buildJammerStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles, _buildDefenseStats, _resolveHullBonusAttribute, _buildHullBonuses, _buildSubsystemBonuses, _buildSkillBonuses, _buildDroneSkillIds } from "./generate-fitting-db";
 import type { SdeGroup } from "./fittingDb/dogmaTypes";
 import type { UnmappedAttribute } from "./generate-fitting-db";
-import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeTypeDogma } from "./fittingDb/dogmaTypes";
+import type { SdeDogmaEffect, SdeDogmaEffectModifier, SdeType, SdeTypeDogma } from "./fittingDb/dogmaTypes";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
@@ -494,6 +494,65 @@ describe("buildLauncherStats", () => {
       metaLevel: 5,
       metaGroupID: 2,
     });
+  });
+
+  test("emits heatDamage when the SDE attribute is present", () => {
+    expect(buildLauncherStats(values({ speed: 12800, chargeGroup1: 384, heatDamage: 1.8 }), 509, sdeType(), skillIds)).toEqual({
+      rateOfFire: 12.8,
+      launcherGroup: 509,
+      chargeGroups: [384],
+      requiredSkillIds: skillIds,
+      metaLevel: 0,
+      metaGroupID: 1,
+      heatDamage: 1.8,
+    });
+  });
+
+  test("omits heatDamage when the SDE attribute is absent", () => {
+    const stats = buildLauncherStats(values({ speed: 12800, chargeGroup1: 384 }), 509, sdeType(), skillIds);
+    expect(stats?.heatDamage).toBeUndefined();
+  });
+});
+
+describe("buildTurretStats", () => {
+  const types: Record<string, SdeType> = {};
+  const requiredSkills: Record<string, Record<string, number>> = {};
+
+  test("returns undefined when trackingSpeed, maxRange, speed, or damageMultiplier is missing", () => {
+    expect(buildTurretStats(values({ maxRange: 10000, speed: 6000, damageMultiplier: 1 }), sdeType(), types, requiredSkills)).toBeUndefined();
+    expect(buildTurretStats(values({ trackingSpeed: 0.02, speed: 6000, damageMultiplier: 1 }), sdeType(), types, requiredSkills)).toBeUndefined();
+    expect(buildTurretStats(values({ trackingSpeed: 0.02, maxRange: 10000, damageMultiplier: 1 }), sdeType(), types, requiredSkills)).toBeUndefined();
+    expect(buildTurretStats(values({ trackingSpeed: 0.02, maxRange: 10000, speed: 6000 }), sdeType(), types, requiredSkills)).toBeUndefined();
+  });
+
+  test("converts cycle time from milliseconds to seconds and carries the tracking stats", () => {
+    expect(buildTurretStats(values({ trackingSpeed: 0.02, maxRange: 10000, falloff: 5000, speed: 6000, damageMultiplier: 1.25, chargeGroup1: 384, chargeSize: 1, capacitorNeed: 12 }), sdeType(5, 2), types, requiredSkills)).toEqual({
+      tracking: 0.02,
+      optimal: 10000,
+      falloff: 5000,
+      chargeSize: 1,
+      chargeGroups: [384],
+      damageMultiplier: 1.25,
+      cycleTime: 6,
+      capacitorNeed: 12,
+      requiredSkillIds: [],
+      groupID: 0,
+      metaLevel: 5,
+      metaGroupID: 2,
+    });
+  });
+
+  test("emits spool and heatDamage attributes when present", () => {
+    expect(buildTurretStats(values({ trackingSpeed: 0.02, maxRange: 10000, speed: 6000, damageMultiplier: 1.25, chargeGroup1: 384, chargeSize: 1, damageMultiplierBonusPerCycle: 0.07, damageMultiplierBonusMax: 2.125, heatDamage: 1 }), sdeType(), types, requiredSkills)).toMatchObject({
+      spoolPerCycle: 0.07,
+      spoolMax: 2.125,
+      heatDamage: 1,
+    });
+  });
+
+  test("omits heatDamage when the SDE attribute is absent", () => {
+    const stats = buildTurretStats(values({ trackingSpeed: 0.02, maxRange: 10000, speed: 6000, damageMultiplier: 1.25, chargeGroup1: 384 }), sdeType(), types, requiredSkills);
+    expect(stats?.heatDamage).toBeUndefined();
   });
 });
 

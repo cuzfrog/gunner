@@ -1,4 +1,4 @@
-import { type ActiveHardenerSpec, type BurstModifiers, type DamageEvent, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type LayerDamage, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, IDENTITY_BURST_MODIFIERS, ZERO_RESISTS } from "./types";
+import { type ActiveHardenerSpec, type BurstModifiers, type DamageEvent, type DamageResists, type DamageType, type DamageVector, type DefenseLayer, type DefenseSpec, type LayerDamage, type RahSpec, type RepairerSpec, type Side, DAMAGE_TYPES, IDENTITY_BURST_MODIFIERS, MODULE_HEAT_HITPOINTS, ZERO_RESISTS } from "./types";
 import type { CapacitorGate } from "./capacitorSimulator";
 import type { Restorable } from "./restorable";
 import type { StackingPenalty } from "./stackingPenalty";
@@ -21,6 +21,8 @@ export interface RepairerViewState {
   readonly overloaded: boolean;
   readonly hpPerSecond: number;
   readonly starved: boolean;
+  /** Present once the module burned out from heat damage and stopped repairing. */
+  readonly burned?: boolean;
 }
 
 export interface RahViewState {
@@ -38,6 +40,8 @@ export interface HardenerViewState {
   readonly online: boolean;
   readonly starved: boolean;
   readonly cycleProgress: number;
+  /** Present once the module burned out from heat damage and dropped offline. */
+  readonly burned?: boolean;
 }
 
 export interface DefenseView {
@@ -84,6 +88,8 @@ export interface RepairerStateSnapshot {
   readonly active: boolean;
   readonly overloaded: boolean;
   readonly hpThisCycle: number;
+  readonly heatHp: number;
+  readonly burned: boolean;
 }
 
 export interface RahStateSnapshot {
@@ -100,6 +106,8 @@ export interface HardenerStateSnapshot {
   readonly online: boolean;
   readonly needsPayment: boolean;
   readonly starved: boolean;
+  readonly heatHp: number;
+  readonly burned: boolean;
 }
 
 export interface SidePoolsSnapshot {
@@ -160,6 +168,8 @@ interface RepairerState {
   overloaded: boolean;
   hpThisCycle: number;
   starved: boolean;
+  heatHp: number;
+  burned: boolean;
 }
 
 interface RahState {
@@ -177,6 +187,8 @@ interface HardenerState {
   online: boolean;
   needsPayment: boolean;
   starved: boolean;
+  heatHp: number;
+  burned: boolean;
 }
 
 interface SidePools {
@@ -385,7 +397,7 @@ function poolsFromSpec(spec: DefenseSpec, damageEnabled: boolean, repairMode: Re
     shieldUniformity: spec.shieldUniformity,
     baseResists: spec.baseResists,
     hardeners: spec.hardeners,
-    hardenerStates: spec.hardeners.map((hardener) => ({ timer: hardener.cycleTime, online: true, needsPayment: true, starved: false })),
+    hardenerStates: spec.hardeners.map((hardener) => ({ timer: hardener.cycleTime, online: true, needsPayment: true, starved: false, heatHp: MODULE_HEAT_HITPOINTS, burned: false })),
     overloaded,
     resists: { shield: ZERO_RESISTS, armor: ZERO_RESISTS, hull: ZERO_RESISTS },
     bursts: IDENTITY_BURST_MODIFIERS,
@@ -428,7 +440,7 @@ function mergePools(prev: SidePools, spec: DefenseSpec, damageEnabled: boolean, 
     deadAt: prev.deadAt,
     damageEnabled,
     repairers: spec.repairers,
-    repairerStates: mergeRepairerStates(prev.repairerStates, spec.repairers, repairerActivation),
+    repairerStates: mergeRepairerStates(prev.repairers, prev.repairerStates, spec.repairers, repairerActivation),
     repairMode,
     rahSpec,
     rahState,
@@ -442,7 +454,7 @@ function mergeHardenerStates(prevHardeners: readonly ActiveHardenerSpec[], prev:
   return specs.map((spec, i) => {
     const existing = prev[i];
     if (existing && prevHardeners[i]?.moduleId === spec.moduleId) return existing;
-    return { timer: spec.cycleTime, online: true, needsPayment: true, starved: false };
+    return { timer: spec.cycleTime, online: true, needsPayment: true, starved: false, heatHp: MODULE_HEAT_HITPOINTS, burned: false };
   });
 }
 
@@ -464,6 +476,8 @@ function createRepairerStates(specs: readonly RepairerSpec[], activation: readon
       overloaded: saved?.overloaded ?? true,
       hpThisCycle: 0,
       starved: false,
+      heatHp: MODULE_HEAT_HITPOINTS,
+      burned: false,
     };
   });
 }
@@ -496,11 +510,11 @@ function mergeRahState(prev: RahState | undefined, rahSpec: RahSpec, activation:
   };
 }
 
-function mergeRepairerStates(prev: RepairerState[], specs: readonly RepairerSpec[], activation: readonly RepairerActivationEntry[]): RepairerState[] {
+function mergeRepairerStates(prevSpecs: readonly RepairerSpec[], prev: RepairerState[], specs: readonly RepairerSpec[], activation: readonly RepairerActivationEntry[]): RepairerState[] {
   return specs.map((spec, i) => {
     const existing = prev[i];
     const saved = activation[i];
-    if (existing) return { ...existing, active: saved?.active ?? existing.active, overloaded: saved?.overloaded ?? existing.overloaded };
+    if (existing && prevSpecs[i]?.moduleId === spec.moduleId) return { ...existing, active: saved?.active ?? existing.active, overloaded: saved?.overloaded ?? existing.overloaded };
     return {
       cycleTimer: 0,
       inCycle: false,
@@ -511,6 +525,8 @@ function mergeRepairerStates(prev: RepairerState[], specs: readonly RepairerSpec
       overloaded: saved?.overloaded ?? true,
       hpThisCycle: 0,
       starved: false,
+      heatHp: MODULE_HEAT_HITPOINTS,
+      burned: false,
     };
   });
 }
@@ -564,16 +580,27 @@ function stepHardeners(pools: SidePools, dt: number, side: Side, capacitor: Capa
 }
 
 function stepHardener(dt: number, side: Side, spec: ActiveHardenerSpec, state: HardenerState, capacitor: CapacitorGate | undefined): void {
+  if (state.burned) {
+    state.online = false;
+    return;
+  }
   if (state.online) {
     if (state.needsPayment && !payHardener(side, spec, state, capacitor)) return;
     state.timer -= dt;
     if (state.timer <= 0) {
       state.timer += spec.cycleTime;
       state.needsPayment = true;
+      if (spec.heatDamage !== undefined && spec.heatDamage > 0) applyModuleHeat(spec.heatDamage, state);
     }
   } else if (payHardener(side, spec, state, capacitor)) {
     state.timer = spec.cycleTime;
   }
+}
+
+/** Applies heat damage to a module state pool; burnout is permanent for the rest of the engagement. */
+function applyModuleHeat(heatDamage: number, state: { heatHp: number; burned: boolean }): void {
+  state.heatHp -= heatDamage;
+  if (state.heatHp <= 0) state.burned = true;
 }
 
 function payHardener(side: Side, spec: ActiveHardenerSpec, state: HardenerState, capacitor: CapacitorGate | undefined): boolean {
@@ -689,6 +716,7 @@ function stepRepairers(pools: SidePools, dt: number, side: Side, capacitor: Capa
 
 function stepRepairer(pools: SidePools, side: Side, spec: RepairerSpec, state: RepairerState, dt: number, capacitor: CapacitorGate | undefined): void {
   state.starved = false;
+  if (state.burned) return;
   if (state.reloading) {
     state.reloadTimer -= dt;
     if (state.reloadTimer <= 0) {
@@ -748,6 +776,7 @@ function completeCycle(pools: SidePools, spec: RepairerSpec, state: RepairerStat
     applyHeal(pools, spec.layer, state.hpThisCycle);
   }
   state.hpThisCycle = 0;
+  if (state.overloaded && spec.heatDamage > 0) applyModuleHeat(spec.heatDamage, state);
   if (spec.ancillary !== undefined && state.ancillaryCharges <= 0 && !state.reloading) {
     state.reloading = true;
     state.reloadTimer = spec.ancillary.reloadTime;
@@ -854,6 +883,7 @@ function hardenerViews(pools: SidePools): readonly HardenerViewState[] {
       online: state.online,
       starved: state.starved,
       cycleProgress: state.online ? 1 - Math.max(state.timer, 0) / spec.cycleTime : 0,
+      burned: state.burned || undefined,
     };
   });
 }
@@ -865,7 +895,7 @@ function repairerViews(pools: SidePools): readonly RepairerViewState[] {
     const amount = effectiveAmount(spec, state);
     const isCharged = spec.ancillary !== undefined && state.ancillaryCharges > 0;
     const effectiveHp = isCharged ? amount * spec.ancillary.chargeMultiplier : amount;
-    const hpPerSecond = state.active && !state.reloading ? effectiveHp / cycleTime : 0;
+    const hpPerSecond = state.active && !state.reloading && !state.burned ? effectiveHp / cycleTime : 0;
     return {
       layer: spec.layer,
       cycling: state.inCycle,
@@ -876,6 +906,7 @@ function repairerViews(pools: SidePools): readonly RepairerViewState[] {
       overloaded: state.overloaded,
       hpPerSecond,
       starved: state.starved,
+      burned: state.burned || undefined,
     };
   });
 }
@@ -956,17 +987,18 @@ function materializePools(snapshot: SidePoolsSnapshot): SidePools {
 }
 
 function snapshotHardenerState(state: HardenerState): HardenerStateSnapshot {
-  return { timer: state.timer, online: state.online, needsPayment: state.needsPayment, starved: state.starved };
+  return { timer: state.timer, online: state.online, needsPayment: state.needsPayment, starved: state.starved, heatHp: state.heatHp, burned: state.burned };
 }
 
 function materializeHardenerState(snapshot: HardenerStateSnapshot): HardenerState {
-  return { timer: snapshot.timer, online: snapshot.online, needsPayment: snapshot.needsPayment, starved: snapshot.starved };
+  return { timer: snapshot.timer, online: snapshot.online, needsPayment: snapshot.needsPayment, starved: snapshot.starved, heatHp: snapshot.heatHp, burned: snapshot.burned };
 }
 
 function snapshotRepairerState(state: RepairerState): RepairerStateSnapshot {
   return {
     cycleTimer: state.cycleTimer, inCycle: state.inCycle, ancillaryCharges: state.ancillaryCharges, reloading: state.reloading,
     reloadTimer: state.reloadTimer, active: state.active, overloaded: state.overloaded, hpThisCycle: state.hpThisCycle,
+    heatHp: state.heatHp, burned: state.burned,
   };
 }
 
@@ -974,6 +1006,7 @@ function materializeRepairerState(snapshot: RepairerStateSnapshot): RepairerStat
   return {
     cycleTimer: snapshot.cycleTimer, inCycle: snapshot.inCycle, ancillaryCharges: snapshot.ancillaryCharges, reloading: snapshot.reloading,
     reloadTimer: snapshot.reloadTimer, active: snapshot.active, overloaded: snapshot.overloaded, hpThisCycle: snapshot.hpThisCycle, starved: false,
+    heatHp: snapshot.heatHp, burned: snapshot.burned,
   };
 }
 

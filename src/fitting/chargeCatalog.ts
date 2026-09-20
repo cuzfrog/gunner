@@ -24,6 +24,7 @@ export interface ImportedTurret {
   readonly capacitorNeed: number; // GJ per module instance per cycle, debited by the runtime capacitor gate
   readonly turretCount: number;
   readonly spool?: TurretSpoolSpec; // resolved spool (per-cycle + hull-adjusted max), absent for non-spooling turrets
+  readonly heatDamagePerCycle?: number; // per-module HP loss per overloaded cycle, thermo-scaled; absent when the SDE has no heat attribute
   readonly damageBreakdown: DamageBreakdown;
 }
 
@@ -42,6 +43,7 @@ export interface ImportedLauncher {
   readonly flightTime: number;
   readonly magazineShots?: number; // missiles per full reload cycle, undefined when the SDE lacks capacity/volume data
   readonly reloadTime?: number; // seconds
+  readonly heatDamagePerCycle?: number; // per-launcher HP loss per overloaded cycle, thermo-scaled; absent when the SDE has no heat attribute
   readonly damageBreakdown: DamageBreakdown;
 }
 

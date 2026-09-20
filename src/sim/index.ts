@@ -150,7 +150,7 @@ export type {
   WeaponKind,
   WeaponSpec,
 } from "./types";
-export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, DAMAGE_TYPES, DEFENSE_LAYERS, EMPTY_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, IDLE_LOCK, SIG_RESOLUTIONS, ZERO_DAMAGE, ZERO_RESISTS, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum } from "./types";
+export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, DAMAGE_TYPES, DEFENSE_LAYERS, MODULE_HEAT_HITPOINTS, EMPTY_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, IDLE_LOCK, SIG_RESOLUTIONS, ZERO_DAMAGE, ZERO_RESISTS, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum } from "./types";
 export type { SimValueParser } from "./simValueParser";
 export type { SimWorld, SimWorldFactory } from "./simWorld";
 export { Vec2 } from "./vec2";

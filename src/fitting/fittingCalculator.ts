@@ -38,6 +38,7 @@ import type { DamageType } from "../sim";
 import type { BoostLoadout, DisruptionScriptSpec, JammerSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec, EnergyNeutralizerSpec, NosferatuSpec } from "../sim";
 import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, damageVectorFromPartial, damageVectorScale } from "../sim";
 import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher } from "./chargeCatalog";
+import { thermodynamicsHeatFactor } from "./thermodynamics";
 import type { GunFamily, GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
 import { missileMagazineShots, type MissileSkillModel, type MissileSkillOutput } from "./missileStats";
@@ -242,6 +243,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
         capacitorNeed: turret.capacitorNeed * (charge.capacitorNeedMultiplier ?? 1) * skillCapUseMultiplier * hullCapMultiplier,
         turretCount: group.count,
         spool,
+        ...(turret.heatDamage !== undefined ? { heatDamagePerCycle: turret.heatDamage * thermodynamicsHeatFactor(conditions.skillLevel) } : {}),
         damageBreakdown: { damageByType: chargeDamageByType(charge), factors },
       });
     }
@@ -301,6 +303,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       flightTime: output.flightTime,
       ...(magazineShots !== undefined ? { magazineShots } : {}),
       ...(launcherStats.reloadTime !== undefined ? { reloadTime: launcherStats.reloadTime } : {}),
+      ...(launcherStats.heatDamage !== undefined ? { heatDamagePerCycle: launcherStats.heatDamage * thermodynamicsHeatFactor(conditions.skillLevel) } : {}),
       damageBreakdown: { damageByType: missileDamageByType(missileStats), factors: missileFactors },
     };
   }
