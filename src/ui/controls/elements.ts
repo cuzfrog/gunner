@@ -102,6 +102,7 @@ interface CombatantEls {
   readonly alignTime: HTMLElement;
   readonly mode: HTMLSelectElement;
   readonly range: HTMLInputElement;
+  readonly attackDrones: HTMLInputElement;
   readonly aggressivity: HTMLInputElement;
   readonly aggressivitySlider: HTMLInputElement;
   readonly aggressivityValue: HTMLElement;
@@ -150,6 +151,7 @@ interface CombatantEls {
   readonly droneOrbitSpeed: HTMLElement;
   readonly droneMaxVelocity: HTMLElement;
   readonly droneCount: HTMLElement;
+  readonly droneAlive: HTMLElement;
   readonly droneLoadoutSection: HTMLElement;
   readonly droneLoadoutList: HTMLElement;
   readonly droneSummaryBar: HTMLElement;
@@ -173,6 +175,7 @@ interface CombatantEls {
   readonly fighterCycleTime: HTMLElement;
   readonly fighterMaxVelocity: HTMLElement;
   readonly fighterCount: HTMLElement;
+  readonly fighterAlive: HTMLElement;
   readonly fighterLoadoutSection: HTMLElement;
   readonly fighterLoadoutList: HTMLElement;
   readonly fighterSummaryBar: HTMLElement;
@@ -394,6 +397,7 @@ function createCombatantEls(side: Side): CombatantEls {
     alignTime: el(combatantElementId("alignTime", side)),
     mode: elOf(combatantElementId("mode", side), isHtmlSelectElement),
     range: elOf(combatantElementId("range", side), isHtmlInputElement),
+    attackDrones: elOf(combatantElementId("attackDrones", side), isHtmlInputElement),
     aggressivity: elOf(combatantElementId("aggressivity", side), isHtmlInputElement),
     aggressivitySlider: elOf(combatantElementId("aggressivitySlider", side), isHtmlInputElement),
     aggressivityValue: el(combatantElementId("aggressivityValue", side)),
@@ -442,6 +446,7 @@ function createCombatantEls(side: Side): CombatantEls {
     droneOrbitSpeed: el(combatantElementId("droneOrbitSpeed", side)),
     droneMaxVelocity: el(combatantElementId("droneMaxVelocity", side)),
     droneCount: el(combatantElementId("droneCount", side)),
+    droneAlive: el(combatantElementId("droneAlive", side)),
     droneLoadoutSection: el(combatantElementId("droneLoadoutSection", side)),
     droneLoadoutList: el(combatantElementId("droneLoadoutList", side)),
     droneSummaryBar: el(combatantElementId("droneSummaryBar", side)),
@@ -465,6 +470,7 @@ function createCombatantEls(side: Side): CombatantEls {
     fighterCycleTime: el(combatantElementId("fighterCycleTime", side)),
     fighterMaxVelocity: el(combatantElementId("fighterMaxVelocity", side)),
     fighterCount: el(combatantElementId("fighterCount", side)),
+    fighterAlive: el(combatantElementId("fighterAlive", side)),
     fighterLoadoutSection: el(combatantElementId("fighterLoadoutSection", side)),
     fighterLoadoutList: el(combatantElementId("fighterLoadoutList", side)),
     fighterSummaryBar: el(combatantElementId("fighterSummaryBar", side)),

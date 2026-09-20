@@ -36,7 +36,7 @@ describe("FighterControllerImpl", () => {
 
   test("attack fighters map to sim FighterSpecs and support fighters are excluded", () => {
     const { controller, fighterLoadoutResolver } = buildFighter();
-    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture(), supportFighterFixture()]);
+    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture({ shieldHp: 3285, armorHp: 0, hullHp: 100 }), supportFighterFixture()]);
     controller.applyImported(templarFitting(), NEUTRAL_CONDITIONS);
     const specs = controller.currentFighterSpecs();
     expect(specs).toHaveLength(1);
@@ -50,6 +50,14 @@ describe("FighterControllerImpl", () => {
     expect(spec.magazine).toEqual({ numShots: 12, rearmTime: 4, refuelingTime: 5 });
     expect(spec.maxVelocity).toBe(1301.5625);
     expect(spec.orbitRange).toBe(6500);
+    expect(spec.hp).toEqual({ shield: 3285, armor: 0, hull: 100 });
+  });
+
+  test("fighters without durability stats map specs without hp", () => {
+    const { controller, fighterLoadoutResolver } = buildFighter();
+    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture()]);
+    controller.applyImported(templarFitting(), NEUTRAL_CONDITIONS);
+    expect(controller.currentFighterSpecs()[0]!.hp).toBeUndefined();
   });
 
   test("support-only loadout reports zero weapon specs and shows the not-simulated marker", () => {

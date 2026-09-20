@@ -3,12 +3,16 @@ import type { CapacitorGate } from "./capacitorSimulator";
 import type { HitRollStrategy } from "./hitRoll";
 import { expectedHitRoll, sampledHitRoll } from "./hitRoll";
 import { Mulberry32RngFactory } from "./rng";
-import type { Rng } from "./rng";
+import type { Rng, RngFactory } from "./rng";
+
+function deterministicRngFactory(): RngFactory {
+  return { create: () => ({ next: () => 0.1 }) };
+}
 import { EMPTY_DEFENSE_ASSESSMENT, Vec2 } from "./index";
 import { toTypeId } from "../gamedata/ids";
 import type { AttackAssessment } from "./fireControl";
 import type { EngagementView, WeaponAttack } from "./engagementFrameComposer";
-import type { EngagementFrame, HitChanceBreakdown, ShipState, Side, TurretSpec, WeaponSpec } from "./types";
+import type { EngagementFrame, FighterSpec, HitChanceBreakdown, ShipState, Side, TurretSpec, WeaponSpec } from "./types";
 import { ZERO_DAMAGE } from "./types";
 
 const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
@@ -76,6 +80,34 @@ function spoolingAttack(volley: { em: number; thermal: number; kinetic: number; 
     },
   };
 }
+
+describe("weapon clock unit targeting", () => {
+  test("turret events carry the assessed unit target kind", () => {
+    const clock = new WeaponClockImpl({ rngFactory: deterministicRngFactory() });
+    const attack = { weapon: turret, assessment: { ...makeAssessment(1, { em: 50, thermal: 0, kinetic: 0, explosive: 0 }), unitTarget: "drone" as const } };
+    const events = clock.step(5, makeView([attack]), undefined);
+    expect(events).toHaveLength(1);
+    expect(events[0].unitTarget).toBe("drone");
+    expect(events[0].target).toBe("shipB");
+  });
+
+  test("fighter events carry the assessed unit target kind", () => {
+    const clock = new WeaponClockImpl({ rngFactory: deterministicRngFactory() });
+    const fighter: FighterSpec = { kind: "fighter", moduleId: toTypeId("9"), damagePerVolley: { em: 100, thermal: 0, kinetic: 0, explosive: 0 }, cycleTime: 5, fighterCount: 6, maxVelocity: 1300, orbitRange: 6500, explosionRadius: 185, explosionVelocity: 105, damageReductionFactor: 0.64, optimal: 8000, falloff: 5000, magazine: { numShots: 12, rearmTime: 4, refuelingTime: 5 } };
+    const assessment = { ...makeAssessment(1, { em: 50, thermal: 0, kinetic: 0, explosive: 0 }), unitTarget: "fighter" as const };
+    const attack: WeaponAttack = { weapon: fighter, assessment };
+    const events = clock.step(5, makeView([attack]), undefined);
+    expect(events).toHaveLength(1);
+    expect(events[0].unitTarget).toBe("fighter");
+  });
+
+  test("events without a unit target stay ship-targeted", () => {
+    const clock = new WeaponClockImpl({ rngFactory: deterministicRngFactory() });
+    const events = clock.step(5, makeView([turretAttack(1, { em: 50, thermal: 0, kinetic: 0, explosive: 0 })]), undefined);
+    expect(events).toHaveLength(1);
+    expect(events[0].unitTarget).toBeUndefined();
+  });
+});
 
 describe("WeaponClockImpl", () => {
   test("no event before cycle completion", () => {

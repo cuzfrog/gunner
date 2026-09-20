@@ -257,11 +257,13 @@ export class EngagementEngineImpl implements EngagementEngine {
     const locks = world.lockClock.step(dt, this.lockStepInput(snapshot, distance, painted, operational, jammed, bursts));
     const input = this.engagementInput(world, snapshot, locks, config, painted, jammed);
     const composed = this.engagementFrameComposer.compose(snapshot, input);
-    world.droneSimulator.step(dt, composed.frame, operational);
-    world.fighterSimulator.step(dt, composed.frame, operational);
     const missileEvents = world.missileSimulator.step(dt, composed.frame, this.missileLaunchSpecs(composed, locks, painted));
     const weaponEvents = world.weaponClock.step(dt, composed, world.capacitorSimulator);
+    // Unit-targeted damage applies the same frame it is dealt: the drone and fighter wings consume
+    // the fresh missile + weapon events, then the defense simulator applies the ship damage.
     const events: DamageEvent[] = [...missileEvents, ...weaponEvents];
+    world.droneSimulator.step(dt, composed.frame, operational, events);
+    world.fighterSimulator.step(dt, composed.frame, operational, events);
     world.defenseSimulator.step(dt, events, world.capacitorSimulator, bursts);
     return { composed, snapshot };
   }
@@ -320,6 +322,8 @@ export class EngagementEngineImpl implements EngagementEngine {
       overloaded: config.overloaded,
       locks,
       jammed,
+      attackDrones: { shipA: config.sim.shipA.attackDrones ?? false, shipB: config.sim.shipB.attackDrones ?? false },
+      fighterAliveCounts: { shipA: fighterAliveCountsFor(world, "shipA"), shipB: fighterAliveCountsFor(world, "shipB") },
     };
   }
 
@@ -391,6 +395,10 @@ function mutedDestroyedSnapshot(snapshot: SimSnapshot, operational: Record<Side,
 
 function withoutEwar(ship: ShipState): ShipState {
   return { ...ship, ewar: undefined };
+}
+
+function fighterAliveCountsFor(world: SimWorld, side: Side): readonly number[] {
+  return world.fighterSimulator.states(side).map((state) => state.aliveCount);
 }
 
 function droneSimConfigFrom(config: EngineConfig): DroneSimConfig {

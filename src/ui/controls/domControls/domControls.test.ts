@@ -88,7 +88,7 @@ function makeEngineView(view: EngagementView, effective: EffectiveReadouts, defe
   const shipAState = { ...view.frame.shipA, sig: sigs?.shipA ?? 1 };
   const shipBState = { ...view.frame.shipB, sig: sigs?.shipB ?? 1 };
   const snapshot = { time: view.frame.time, shipA: shipAState, shipB: shipBState, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
-  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView, capacitorRuntime: emptyCapacitorView(), inflicted: ZERO_INFLICTED, snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
+  return { ...view, readouts: { shipA: effective.shipA, shipB: effective.shipB }, defenseRuntime: defenseView, capacitorRuntime: emptyCapacitorView(), inflicted: ZERO_INFLICTED, snapshot, drones: { shipA: [], shipB: [] }, droneSpecs: { shipA: [], shipB: [] }, fighters: { shipA: [], shipB: [] }, fighterSpecs: { shipA: [], shipB: [] }, missiles: { shipA: [], shipB: [] } } as unknown as EngineView;
 }
 
 function emptyCapacitorView(): Record<Side, CapacitorView> {

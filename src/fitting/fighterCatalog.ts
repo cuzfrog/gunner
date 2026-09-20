@@ -38,6 +38,10 @@ export interface ImportedFighter {
   readonly maxVelocity: number;
   readonly orbitRange: number;
   readonly signatureRadius: number;
+  /** The fighter's own durability pools; undefined when the SDE entry lacks the attribute. */
+  readonly shieldHp?: number;
+  readonly armorHp?: number;
+  readonly hullHp?: number;
   readonly refuelingTime: number;
   readonly volume: number;
   // Undefined for support fighters: they deal no damage and are not simulated.

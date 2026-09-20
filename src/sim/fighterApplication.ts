@@ -3,7 +3,7 @@ import type { WeaponDamageAssessor } from "./weaponDamageAssessor";
 import type { DamageAssessment, FighterDamageBreakdown, FighterSpec, MissileSpec } from "./types";
 
 export interface FighterApplication {
-  compute(fighter: FighterSpec, targetSpeed: number, distance: number, paintedTargetSig: number): FighterDamageBreakdown & DamageAssessment;
+  compute(fighter: FighterSpec, targetSpeed: number, distance: number, paintedTargetSig: number, aliveCount?: number): FighterDamageBreakdown & DamageAssessment;
 }
 
 interface FighterApplicationDeps {
@@ -20,11 +20,12 @@ export class FighterApplicationImpl implements FighterApplication {
     this.weaponDamageAssessor = deps.weaponDamageAssessor;
   }
 
-  compute(fighter: FighterSpec, targetSpeed: number, distance: number, paintedTargetSig: number): FighterDamageBreakdown & DamageAssessment {
+  compute(fighter: FighterSpec, targetSpeed: number, distance: number, paintedTargetSig: number, aliveCount?: number): FighterDamageBreakdown & DamageAssessment {
     const rangeFactor = fighterRangeFactor(fighter, targetSpeed, distance);
     const explosion = this.missileApplication.compute(missileView(fighter), targetSpeed, paintedTargetSig);
     const application = rangeFactor * explosion.application;
-    const damage = this.weaponDamageAssessor.assess(fighter, application, true);
+    const aliveMultiplier = aliveCount !== undefined && fighter.fighterCount > 0 ? aliveCount / fighter.fighterCount : 1;
+    const damage = this.weaponDamageAssessor.assess(fighter, application, true, aliveMultiplier);
     return { ...damage, rangeFactor, signatureTerm: explosion.signatureTerm, velocityTerm: explosion.velocityTerm, inRange: rangeFactor > 0 };
   }
 }

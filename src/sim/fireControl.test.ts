@@ -9,7 +9,7 @@ import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
 import { toTypeId } from "../gamedata/ids";
-import { type DamageAssessment, type DroneDamageBreakdown, type FighterDamageBreakdown, type DroneRuntimeState, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileAttackFacts, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
+import { type DamageAssessment, type UnitTargetParams, type DroneDamageBreakdown, type FighterDamageBreakdown, type DroneRuntimeState, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileAttackFacts, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const boostedTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("2"), tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
@@ -155,6 +155,27 @@ function makeEvaluator(): {
   return { hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, droneApplication, evaluator };
 }
 
+describe("evaluator unit targeting", () => {
+  test("a turret with unitTarget assesses against the unit signature and velocity", () => {
+    const deps = makeEvaluator();
+    const unitTarget: UnitTargetParams = { kind: "drone", signatureRadius: 25, velocity: 3000 };
+    deps.evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 120, unitTarget } });
+    expect(deps.hitChance.compute).toHaveBeenCalledWith(expect.objectContaining({ transversalSpeed: 3000 }), effectiveTurret, 25);
+  });
+
+  test("the unit target kind lands on the assessment", () => {
+    const deps = makeEvaluator();
+    const result = deps.evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 120, unitTarget: { kind: "fighter", signatureRadius: 110, velocity: 1300 } } });
+    expect(result.shipA?.unitTarget).toBe("fighter");
+  });
+
+  test("a turret without unitTarget assesses the painted ship signature", () => {
+    const deps = makeEvaluator();
+    deps.evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 120 } });
+    expect(deps.hitChance.compute).toHaveBeenCalledWith(expect.objectContaining({ transversalSpeed: 0 }), effectiveTurret, 120);
+  });
+});
+
 describe("EngagementEvaluatorImpl", () => {
   test("evaluates shipA turret attack using shipB ewar", () => {
     const { hitChance, ewarResolver, evaluator } = makeEvaluator();
@@ -222,7 +243,7 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("passes the painted target sig to drone application without re-applying painters", () => {
     const { ewarResolver, droneApplication, evaluator } = makeEvaluator();
-    const droneState: DroneRuntimeState = { mode: "engaging", positions: [], distanceToTarget: 1500, distanceToSlot: 0, inControlRange: true };
+    const droneState: DroneRuntimeState = { mode: "engaging", positions: [], distanceToTarget: 1500, distanceToSlot: 0, inControlRange: true, aliveCount: 0, hpFractions: [] };
     const result = evaluator.evaluate(frame, { shipA: { weapon: drone, paintedTargetSig: 130, droneState } });
     expect(droneApplication.compute).toHaveBeenCalledWith(frame, drone, 130, droneState);
     expect(ewarResolver.sigMultiplier).not.toHaveBeenCalled();

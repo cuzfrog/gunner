@@ -322,7 +322,7 @@ describe("AppImpl", () => {
       damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: ZERO_DAMAGE },
     };
     const droneAttack: WeaponAttack = { weapon: drone, assessment: droneAssessment };
-    const droneState: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(100, 200)], distanceToTarget: 1000, distanceToSlot: 100, inControlRange: true };
+    const droneState: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(100, 200)], distanceToTarget: 1000, distanceToSlot: 100, inControlRange: true, aliveCount: 2, hpFractions: [1, 1] };
     const droneView: EngineView = {
       ...baseView(),
       weaponAttacks: { shipA: [droneAttack], shipB: [droneAttack] },

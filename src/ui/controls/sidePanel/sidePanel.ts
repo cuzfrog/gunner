@@ -225,7 +225,7 @@ export class SidePanelImpl implements SidePanel {
     this.els.speed.value = formatNumber(state.speed);
     this.els.mass.value = String(state.mass);
     this.els.inertia.value = formatNumber(state.inertia, 6);
-    this.sections.nav.restore({ mode: state.mode, range: state.range, aggressivity: state.aggressivity });
+    this.sections.nav.restore({ mode: state.mode, range: state.range, aggressivity: state.aggressivity, attackDrones: state.attackDrones });
     this.sections.hull.loadHull(state.hull, state.propulsion);
     this.sections.skill.setSkillLevel(state.skillLevel ?? 5);
     if (state.defenseSkills) this.sections.skill.setDefenseSkills(state.defenseSkills);

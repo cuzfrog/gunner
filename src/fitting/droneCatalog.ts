@@ -24,6 +24,11 @@ export interface ImportedDrone {
   readonly bandwidth: number;
   readonly volume: number;
   readonly controlRange: number;
+  /** The drone's own durability pools; undefined when the SDE entry lacks the attribute. */
+  readonly shieldHp?: number;
+  readonly armorHp?: number;
+  readonly hullHp?: number;
+  readonly signatureRadius?: number;
   readonly damageBreakdown: DamageBreakdown;
 }
 

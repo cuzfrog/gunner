@@ -25,7 +25,9 @@ export class DroneApplicationImpl implements DroneApplication {
     const effective = droneEffectiveFrame(frame, drone, state);
     const hit = this.hitChance.compute(effective.frame, drone, opponentSigRadius);
     const expectedMultiplier = computeExpectedMultiplier(hit.chance);
-    const damage = this.weaponDamageAssessor.assess(drone, expectedMultiplier, effective.inRange);
+    const aliveCount = state?.aliveCount ?? drone.droneCount;
+    const aliveMultiplier = drone.droneCount > 0 ? aliveCount / drone.droneCount : 1;
+    const damage = this.weaponDamageAssessor.assess(drone, expectedMultiplier, effective.inRange, aliveMultiplier);
     return {
       hit, expectedMultiplier, inRange: effective.inRange, inWeaponRange: effective.inWeaponRange,
       mode: effective.mode, distanceToTarget: effective.distanceToTarget, inControlRange: effective.inControlRange,

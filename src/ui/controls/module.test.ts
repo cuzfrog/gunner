@@ -104,6 +104,7 @@ const controlsCradleKeys = {
   fighterHintProvider: "fighterHintProvider",
   viewStream: "viewStream",
   readoutPresenter: "readoutPresenter",
+  unitAliveReadout: "unitAliveReadout",
   appliedDpsHintRenderer: "appliedDpsHintRenderer",
   appliedDpsHintProvider: "appliedDpsHintProvider",
   inflictedDpsHintRenderer: "inflictedDpsHintRenderer",

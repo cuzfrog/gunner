@@ -74,6 +74,22 @@ describe("DroneApplicationImpl", () => {
     expect(result.hit.chance).toBeLessThan(0.5);
   });
 
+  test("scales the volley by the alive drone count from the runtime state", () => {
+    const drone = lightDrone();
+    const state: DroneRuntimeState = { mode: "engaging", positions: [], distanceToTarget: 1000, distanceToSlot: 0, inControlRange: true, aliveCount: 3, hpFractions: [1, 1, 1] };
+    const result = application.compute(frame(5000, 0), drone, 40, state);
+    const expectedBase = damageVectorScale({ em: 0, thermal: 0, kinetic: 38.4, explosive: 0 }, 3);
+    expect(result.baseVolleyByType).toEqual(expectedBase);
+    expect(damageVectorSum(result.baseVolleyByType)).toBeCloseTo(38.4 * 3, 6);
+  });
+
+  test("full alive count keeps the unscaled volley", () => {
+    const drone = lightDrone();
+    const state: DroneRuntimeState = { mode: "engaging", positions: [], distanceToTarget: 1000, distanceToSlot: 0, inControlRange: true, aliveCount: 5, hpFractions: [1, 1, 1, 1, 1] };
+    const result = application.compute(frame(5000, 0), drone, 40, state);
+    expect(damageVectorSum(result.baseVolleyByType)).toBeCloseTo(38.4 * 5, 6);
+  });
+
   test("zero damage drone produces zero DPS", () => {
     const drone = lightDrone({ damagePerShot: ZERO_DAMAGE });
     const result = application.compute(frame(5000, 0), drone, 40);
@@ -130,7 +146,7 @@ describe("DroneApplicationImpl", () => {
 
     test("sentry with state uses state inControlRange", () => {
       const drone = sentryDrone({ controlRange: 10000 });
-      const state: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 0)], distanceToTarget: 15000, distanceToSlot: 0, inControlRange: true };
+      const state: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 0)], distanceToTarget: 15000, distanceToSlot: 0, inControlRange: true, aliveCount: 2, hpFractions: [1, 1] };
       const result = application.compute(frame(15000, 0), drone, 400, state);
       expect(result.inControlRange).toBe(true);
       expect(result.inRange).toBe(true);
@@ -138,7 +154,7 @@ describe("DroneApplicationImpl", () => {
 
     test("sentry with state out of control range has zero DPS", () => {
       const drone = sentryDrone({ controlRange: 60000 });
-      const state: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 0)], distanceToTarget: 70000, distanceToSlot: 0, inControlRange: false };
+      const state: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 0)], distanceToTarget: 70000, distanceToSlot: 0, inControlRange: false, aliveCount: 2, hpFractions: [1, 1] };
       const result = application.compute(frame(70000, 0), drone, 400, state);
       expect(result.inControlRange).toBe(false);
       expect(result.inRange).toBe(false);
@@ -149,7 +165,7 @@ describe("DroneApplicationImpl", () => {
   describe("stateful mobile drones", () => {
     test("idle drone has zero applied DPS", () => {
       const drone = lightDrone();
-      const state: DroneRuntimeState = { mode: "idle", positions: [new Vec2(0, 0)], distanceToTarget: 50000, distanceToSlot: 0, inControlRange: true };
+      const state: DroneRuntimeState = { mode: "idle", positions: [new Vec2(0, 0)], distanceToTarget: 50000, distanceToSlot: 0, inControlRange: true, aliveCount: 2, hpFractions: [1, 1] };
       const result = application.compute(frame(5000, 0), drone, 40, state);
       expect(result.mode).toBe("idle");
       expect(result.inRange).toBe(false);
@@ -158,7 +174,7 @@ describe("DroneApplicationImpl", () => {
 
     test("returning drone has zero applied DPS", () => {
       const drone = lightDrone();
-      const state: DroneRuntimeState = { mode: "returning", positions: [new Vec2(1000, 0)], distanceToTarget: 49000, distanceToSlot: 0, inControlRange: false };
+      const state: DroneRuntimeState = { mode: "returning", positions: [new Vec2(1000, 0)], distanceToTarget: 49000, distanceToSlot: 0, inControlRange: false, aliveCount: 2, hpFractions: [1, 1] };
       const result = application.compute(frame(5000, 0), drone, 40, state);
       expect(result.mode).toBe("returning");
       expect(result.inRange).toBe(false);
@@ -167,7 +183,7 @@ describe("DroneApplicationImpl", () => {
 
     test("engaging drone at orbit slot in control range applies damage", () => {
       const drone = lightDrone();
-      const state: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1500)], distanceToTarget: 1500, distanceToSlot: 0, inControlRange: true };
+      const state: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1500)], distanceToTarget: 1500, distanceToSlot: 0, inControlRange: true, aliveCount: 2, hpFractions: [1, 1] };
       const result = application.compute(frame(5000, 0), drone, 40, state);
       expect(result.mode).toBe("engaging");
       expect(result.inRange).toBe(true);
@@ -176,7 +192,7 @@ describe("DroneApplicationImpl", () => {
 
     test("engaging drone out of control range reports mode but no range", () => {
       const drone = lightDrone();
-      const state: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1500)], distanceToTarget: 1500, distanceToSlot: 0, inControlRange: false };
+      const state: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1500)], distanceToTarget: 1500, distanceToSlot: 0, inControlRange: false, aliveCount: 2, hpFractions: [1, 1] };
       const result = application.compute(frame(5000, 0), drone, 40, state);
       expect(result.mode).toBe("engaging");
       expect(result.inControlRange).toBe(false);
@@ -185,19 +201,19 @@ describe("DroneApplicationImpl", () => {
 
     test("engaging drone within weapon range but far from slot applies damage with reduced angular velocity", () => {
       const drone = lightDrone({ orbitRange: 1000, orbitSpeed: 4000 });
-      const state: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1500)], distanceToTarget: 1500, distanceToSlot: 1000, inControlRange: true };
+      const state: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1500)], distanceToTarget: 1500, distanceToSlot: 1000, inControlRange: true, aliveCount: 2, hpFractions: [1, 1] };
       const result = application.compute(frame(5000, 0), drone, 40, state);
       expect(result.mode).toBe("engaging");
       expect(result.inRange).toBe(true);
       expect(result.appliedDps).toBeGreaterThan(0);
-      const slotState: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1500)], distanceToTarget: 1500, distanceToSlot: 0, inControlRange: true };
+      const slotState: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1500)], distanceToTarget: 1500, distanceToSlot: 0, inControlRange: true, aliveCount: 2, hpFractions: [1, 1] };
       const slotResult = application.compute(frame(5000, 0), drone, 40, slotState);
       expect(result.hit.chance).toBeGreaterThan(slotResult.hit.chance);
     });
 
     test("engaging drone out of weapon range has zero applied DPS", () => {
       const drone = lightDrone({ optimal: 100, falloff: 50 });
-      const state: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1500)], distanceToTarget: 1500, distanceToSlot: 0, inControlRange: true };
+      const state: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1500)], distanceToTarget: 1500, distanceToSlot: 0, inControlRange: true, aliveCount: 2, hpFractions: [1, 1] };
       const result = application.compute(frame(5000, 0), drone, 40, state);
       expect(result.inWeaponRange).toBe(false);
       expect(result.inRange).toBe(false);
@@ -206,9 +222,9 @@ describe("DroneApplicationImpl", () => {
 
     test("chasing drone pulled into falloff by fast target has reduced DPS vs settled orbit", () => {
       const drone = lightDrone({ tracking: 100, optimal: 1000, falloff: 200, orbitRange: 1000, orbitSpeed: 100 });
-      const settled: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1000)], distanceToTarget: 1000, distanceToSlot: 0, inControlRange: true };
+      const settled: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1000)], distanceToTarget: 1000, distanceToSlot: 0, inControlRange: true, aliveCount: 2, hpFractions: [1, 1] };
       const settledResult = application.compute(frame(5000, 0), drone, 40, settled);
-      const chasing: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1500)], distanceToTarget: 1500, distanceToSlot: 1000, inControlRange: true };
+      const chasing: DroneRuntimeState = { mode: "engaging", positions: [new Vec2(0, 1500)], distanceToTarget: 1500, distanceToSlot: 1000, inControlRange: true, aliveCount: 2, hpFractions: [1, 1] };
       const chasingResult = application.compute(frame(5000, 0), drone, 40, chasing);
       expect(chasingResult.inRange).toBe(true);
       expect(chasingResult.appliedDps).toBeGreaterThan(0);

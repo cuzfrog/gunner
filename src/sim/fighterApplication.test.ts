@@ -3,7 +3,7 @@ import { toTypeId } from "../gamedata/ids";
 import { MissileApplicationImpl } from "./missileApplication";
 import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
 import { FighterApplicationImpl } from "./fighterApplication";
-import { ZERO_DAMAGE, type FighterSpec } from "./types";
+import { ZERO_DAMAGE, damageVectorSum, type FighterSpec } from "./types";
 
 const TEMPLAR_DRF_AGGREGATED = 0.64444259751338; // ln(3)/ln(5.5)
 
@@ -36,6 +36,16 @@ describe("FighterApplicationImpl", () => {
     expect(result.rangeFactor).toBe(1);
     expect(result.application).toBe(1);
     expect(result.inRange).toBe(true);
+  });
+
+  test("scales the volley by the alive fighter count", () => {
+    const result = application().compute(templar(), 100, 40000, 400, 4);
+    expect(damageVectorSum(result.baseVolleyByType)).toBeCloseTo(182.8125 * 4, 6);
+  });
+
+  test("full alive count keeps the unscaled volley", () => {
+    const result = application().compute(templar(), 100, 40000, 400);
+    expect(damageVectorSum(result.baseVolleyByType)).toBeCloseTo(182.8125 * 6, 6);
   });
 
   test("stationary target gets pure signature application: S/E clamped at 1", () => {

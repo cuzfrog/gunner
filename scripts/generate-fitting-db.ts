@@ -966,6 +966,9 @@ interface FighterStats {
   readonly orbitRange: number;
   readonly maxVelocity: number;
   readonly signatureRadius: number;
+  readonly shieldHp?: number;
+  readonly armorHp?: number;
+  readonly hullHp?: number;
   readonly refuelingTime: number;
   readonly volume: number;
   readonly attack?: FighterAttackStats;
@@ -991,6 +994,10 @@ interface DroneStats {
   readonly cycleTime: number;
   readonly bandwidth: number;
   readonly volume: number;
+  readonly shieldHp?: number;
+  readonly armorHp?: number;
+  readonly hullHp?: number;
+  readonly signatureRadius?: number;
   readonly metaLevel: number;
   readonly metaGroupID: number;
   readonly requiredSkillIds: readonly TypeId[];
@@ -1718,6 +1725,10 @@ export function buildDroneStats(values: Map<string, number>, type: SdeType, requ
     cycleTime: speed / 1000,
     bandwidth,
     volume,
+    ...(values.get("shieldCapacity") !== undefined ? { shieldHp: values.get("shieldCapacity") } : {}),
+    ...(values.get("armorHP") !== undefined ? { armorHp: values.get("armorHP") } : {}),
+    ...(values.get("hp") !== undefined ? { hullHp: values.get("hp") } : {}),
+    ...(values.get("signatureRadius") !== undefined ? { signatureRadius: values.get("signatureRadius") } : {}),
     metaLevel: type.metaLevel ?? 0,
     metaGroupID: type.metaGroupID ?? 1,
     requiredSkillIds,
@@ -1817,6 +1828,9 @@ export function buildFighterStats(values: Map<string, number>, type: SdeType, gr
     orbitRange: orbitRange ?? 0,
     maxVelocity: maxVelocity ?? 0,
     signatureRadius: signatureRadius ?? 0,
+    ...(values.get("shieldCapacity") !== undefined ? { shieldHp: values.get("shieldCapacity") } : {}),
+    ...(values.get("armorHP") !== undefined ? { armorHp: values.get("armorHP") } : {}),
+    ...(values.get("hp") !== undefined ? { hullHp: values.get("hp") } : {}),
     refuelingTime: (refuelingTime ?? 0) / 1000,
     volume: type.volume ?? 0,
     ...(attack ? { attack } : {}),

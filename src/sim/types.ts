@@ -164,16 +164,38 @@ export interface DroneSpec extends TrackingApplicationSpec {
   readonly orbitRange: number; // m, distance drones orbit the target (entityFlyRange)
   readonly isSentry: boolean;
   readonly controlRange: number; // m, ship-to-target max command distance
+  /** Per-drone raw hp pools; undefined when the SDE carries no hp data (the wing cannot be damaged). */
+  readonly hp?: UnitPoolsSpec;
+  readonly signatureRadius?: number; // m
+}
+
+/** Raw shield/armor/hull pools of one simulated unit (drone or fighter); damage cascades shield -> armor -> hull without resists. */
+export interface UnitPoolsSpec {
+  readonly shield: number;
+  readonly armor: number;
+  readonly hull: number;
+}
+
+/** Kind of non-ship unit a weapon is engaging. */
+export type UnitTargetKind = "drone" | "fighter";
+
+/** Target parameters used to assess a ship weapon engaging an opponent's drone or fighter instead of the ship. */
+export interface UnitTargetParams {
+  readonly kind: UnitTargetKind;
+  readonly signatureRadius: number;
+  readonly velocity: number;
 }
 
 export type DroneMode = "idle" | "engaging" | "returning";
 
 export interface DroneRuntimeState {
   readonly mode: DroneMode;
-  readonly positions: readonly Vec2[]; // individual drone positions
+  readonly positions: readonly Vec2[]; // individual drone positions, alive drones only
   readonly distanceToTarget: number; // m, group-average drone-to-target
   readonly distanceToSlot: number; // m, group-average distance to desired orbit position
   readonly inControlRange: boolean; // ship-to-target <= controlRange
+  readonly aliveCount: number; // drones still flying in the group
+  readonly hpFractions: readonly number[]; // remaining pooled hp fraction per alive drone
 }
 
 export interface FighterMagazine {
@@ -196,11 +218,16 @@ export interface FighterSpec {
   readonly optimal: number; // m, attack range optimal
   readonly falloff: number; // m, attack range falloff
   readonly magazine: FighterMagazine | undefined; // undefined = unlimited (superiority/attack role)
+  /** Per-fighter raw hp pools; undefined when the SDE carries no hp data (the squadron cannot be damaged). */
+  readonly hp?: UnitPoolsSpec;
+  readonly signatureRadius?: number; // m
 }
 
 export interface FighterRuntimeState {
-  readonly positions: readonly Vec2[]; // individual fighter positions
+  readonly positions: readonly Vec2[]; // individual fighter positions, alive fighters only
   readonly distanceToTarget: number; // m, group-average fighter-to-target
+  readonly aliveCount: number; // fighters still flying in the squadron
+  readonly hpFractions: readonly number[]; // remaining pooled hp fraction per alive fighter
 }
 
 export type WeaponSpec = TurretSpec | MissileSpec | DroneSpec | FighterSpec;
@@ -222,6 +249,8 @@ export interface DamageEvent {
   readonly weaponIndex: number;
   readonly kind: WeaponKind;
   readonly rawByType: DamageVector; // post-hit-quality, pre-resist
+  /** Set when the shot engaged a non-ship unit (the opponent's drone or fighter wing) instead of the ship. */
+  readonly unitTarget?: UnitTargetKind;
 }
 
 export interface TurretDamageBreakdown {
@@ -826,6 +855,8 @@ export interface CombatantConfig extends ShipConfig {
   readonly sensorBoosts?: SensorBoostProjection;
   readonly sensorSpec?: SensorSpec;
   readonly commandBursts?: readonly CommandBurstSpec[];
+  /** Weapon-allocation preference: this side's turrets engage the opponent's drone/fighter wing instead of the ship. */
+  readonly attackDrones?: boolean;
   // Capacitor pool spec. Absent = the combatant never starves (legacy fixtures).
   readonly capacitor?: CapacitorSpec;
 }

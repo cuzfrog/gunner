@@ -335,6 +335,8 @@ function importedDroneToDroneSpec(drone: ImportedDrone): DroneSpec {
     orbitRange: drone.orbitRange,
     isSentry: drone.sizeClass === "sentry",
     controlRange: drone.controlRange,
+    ...(drone.shieldHp !== undefined || drone.armorHp !== undefined || drone.hullHp !== undefined ? { hp: { shield: drone.shieldHp ?? 0, armor: drone.armorHp ?? 0, hull: drone.hullHp ?? 0 } } : {}),
+    ...(drone.signatureRadius !== undefined ? { signatureRadius: drone.signatureRadius } : {}),
   };
 }
 
