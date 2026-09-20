@@ -12,6 +12,7 @@ export type {
   CapacitorModuleKind,
   CapacitorModuleStats,
   ChargeStats,
+  VortonStats,
   CommandBurstStats,
   EnergyNeutralizerStats,
   NosferatuStats,

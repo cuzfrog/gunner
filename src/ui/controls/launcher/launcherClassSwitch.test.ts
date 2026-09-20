@@ -15,6 +15,7 @@ function importedWithLauncher(launcher: ReturnType<typeof importedLauncherFixtur
       ...IMPORTED_RIFTER.fittingState!,
       turretGroups: [],
       launcherGroups: [{ moduleId: launcher.moduleId, chargeId: launcher.chargeId, count: launcher.count }],
+      vortonGroups: [],
     },
   };
 }

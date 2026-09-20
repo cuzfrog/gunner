@@ -1,5 +1,6 @@
-import { EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, scheduledDrainsFromProjections, type CombatantConfig, type EngineConfig, type SimConfig, type WeaponSpec } from "../../../sim";
+import { EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, EMPTY_DEFENSE_SPEC, scheduledDrainsFromProjections, type CombatantConfig, type EngineConfig, type SimConfig, type VortonSpec, type WeaponSpec } from "../../../sim";
 import type { StatConditions } from "../../../ships";
+import type { ImportedVorton } from "../../../fitting";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
 import type { SensorBoosterController } from "../sensorBooster";
@@ -177,6 +178,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
     if (activeKind !== "fighter") {
       for (const spec of this.fighterControllers[side].currentFighterSpecs()) weapons.push(spec);
     }
+    for (const vorton of this.sideFor(side).importedVortons()) weapons.push(toVortonSpec(vorton));
     return weapons;
   }
 
@@ -204,5 +206,10 @@ export class SimConfigSourceImpl implements SimConfigSource {
 interface SidePanelConfigSource {
   capture(): SidePanelState;
   skillConditions(): StatConditions;
+  importedVortons(): readonly ImportedVorton[];
 }
 
+/** The imported vorton is already fully resolved; the spec mirrors it in the sim's weapon shape. */
+function toVortonSpec(vorton: ImportedVorton): VortonSpec {
+  return { kind: "vorton", moduleId: vorton.moduleId, damagePerShot: vorton.damagePerShot, cycleTime: vorton.cycleTime, count: vorton.count, maxRange: vorton.maxRange, explosionRadius: vorton.explosionRadius, explosionVelocity: vorton.explosionVelocity, damageReductionFactor: vorton.damageReductionFactor, ...(vorton.capacitorNeed !== undefined ? { capacitorNeed: vorton.capacitorNeed } : {}), ...(vorton.heatDamagePerCycle !== undefined ? { heatDamagePerCycle: vorton.heatDamagePerCycle } : {}) };
+}

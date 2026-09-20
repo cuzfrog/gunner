@@ -3,13 +3,14 @@ import { computeExpectedMultiplier } from "./expectedHitMultiplier";
 import { EngagementEvaluatorImpl } from "./fireControl";
 import type { DroneApplication } from "./droneApplication";
 import type { FighterApplication } from "./fighterApplication";
+import type { VortonApplication } from "./vortonApplication";
 import type { EwarResolver } from "./ewarResolver";
 import type { HitChance } from "./hitChance";
 import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import { WeaponDamageAssessorImpl } from "./weaponDamageAssessor";
 import { toTypeId } from "../gamedata/ids";
-import { type DamageAssessment, type UnitTargetParams, type DroneDamageBreakdown, type FighterDamageBreakdown, type DroneRuntimeState, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileAttackFacts, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
+import { type DamageAssessment, type UnitTargetParams, type DroneDamageBreakdown, type FighterDamageBreakdown, type DroneRuntimeState, type DroneSpec, type EngagementFrame, type HitChanceBreakdown, type MissileAttackFacts, type MissileDamageBreakdown, type MissileSpec, type ShipState, type TurretSpec, type VortonDamageBreakdown, type VortonSpec, ZERO_DAMAGE, damageVectorScale, damageVectorSum } from "./types";
 
 const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
 const boostedTurret: TurretSpec = { kind: "turret", moduleId: toTypeId("2"), tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
@@ -104,6 +105,21 @@ const droneBreakdownResult: DroneDamageBreakdown & DamageAssessment = {
   appliedVolleyByType: ZERO_DAMAGE,
 };
 
+const vorton: VortonSpec = { kind: "vorton", moduleId: toTypeId("9"), damagePerShot: { em: 550, thermal: 0, kinetic: 166.1, explosive: 0 }, cycleTime: 9, count: 1, maxRange: 31680, explosionRadius: 143, explosionVelocity: 105, damageReductionFactor: 0.5 };
+
+const vortonBreakdownResult: VortonDamageBreakdown & DamageAssessment = {
+  application: 0.9,
+  signatureTerm: 1,
+  velocityTerm: 0.9,
+  inRange: true,
+  nominalDps: 0,
+  appliedDps: 0,
+  volley: 0,
+  baseVolleyByType: ZERO_DAMAGE,
+  appliedByType: ZERO_DAMAGE,
+  appliedVolleyByType: ZERO_DAMAGE,
+};
+
 const fighterBreakdownResult: FighterDamageBreakdown & DamageAssessment = {
   rangeFactor: 1,
   signatureTerm: 1,
@@ -124,6 +140,7 @@ function makeEvaluator(): {
   turretBoosterResolver: TurretBoosterResolver;
   missileBoosterResolver: MissileBoosterResolver;
   droneApplication: DroneApplication;
+  vortonApplication: VortonApplication;
   evaluator: EngagementEvaluatorImpl;
 } {
   const hitChance = vi.mocked<HitChance>({ compute: vi.fn(() => hit), findBestDistance: vi.fn() });
@@ -151,8 +168,9 @@ function makeEvaluator(): {
   const weaponDamageAssessor = new WeaponDamageAssessorImpl();
   const droneApplication = vi.mocked<DroneApplication>({ compute: vi.fn(() => droneBreakdownResult) });
   const fighterApplication = vi.mocked<FighterApplication>({ compute: vi.fn(() => fighterBreakdownResult) });
-  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, droneApplication, fighterApplication });
-  return { hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, droneApplication, evaluator };
+  const vortonApplication = vi.mocked<VortonApplication>({ compute: vi.fn(() => vortonBreakdownResult) });
+  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, weaponDamageAssessor, droneApplication, fighterApplication, vortonApplication });
+  return { hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, droneApplication, vortonApplication, evaluator };
 }
 
 describe("evaluator unit targeting", () => {
@@ -173,6 +191,24 @@ describe("evaluator unit targeting", () => {
     const deps = makeEvaluator();
     deps.evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 120 } });
     expect(deps.hitChance.compute).toHaveBeenCalledWith(expect.objectContaining({ transversalSpeed: 0 }), effectiveTurret, 120);
+  });
+});
+
+describe("EngagementEvaluatorImpl vortons", () => {
+  test("a vorton weapon assesses through the vorton application at the ship distance and painted signature", () => {
+    const deps = makeEvaluator();
+    const result = deps.evaluator.evaluate(frame, { shipA: { weapon: vorton, paintedTargetSig: 143 } });
+    expect(deps.vortonApplication.compute).toHaveBeenCalledWith(vorton, 6000, 0, 143);
+    expect(result.shipA?.effectiveWeapon).toEqual(vorton);
+    expect(result.shipA?.vorton).toEqual(vortonBreakdownResult);
+  });
+
+  test("a vorton assessment feeds the target speed of the opposing ship", () => {
+    const deps = makeEvaluator();
+    const movingOpponent = { ...shipB, velocity: new Vec2(300, 400) };
+    const movingFrame = { ...frame, shipB: movingOpponent };
+    deps.evaluator.evaluate(movingFrame, { shipA: { weapon: vorton, paintedTargetSig: 143 } });
+    expect(deps.vortonApplication.compute).toHaveBeenCalledWith(vorton, 6000, 500, 143);
   });
 });
 

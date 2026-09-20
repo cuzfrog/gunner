@@ -159,6 +159,23 @@ export interface MissileSpec {
   readonly heatDamagePerCycle?: number;
 }
 
+/** Vorton projector: area weapon applying through the missile explosion formula with a hard range cutoff (no falloff). */
+export interface VortonSpec {
+  readonly kind: "vorton";
+  readonly moduleId: TypeId;
+  readonly damagePerShot: DamageVector;
+  readonly cycleTime: number; // seconds
+  readonly count: number; // projector instances in the group
+  readonly maxRange: number; // m, hard cutoff
+  readonly explosionRadius: number;
+  readonly explosionVelocity: number;
+  readonly damageReductionFactor: number;
+  // GJ per module instance per cycle; the group debits capacitorNeed * count at each activation.
+  readonly capacitorNeed?: number;
+  // Per-module HP loss per completed overloaded cycle; absent = module cannot take heat damage.
+  readonly heatDamagePerCycle?: number;
+}
+
 export interface DroneSpec extends TrackingApplicationSpec {
   readonly kind: "drone";
   readonly moduleId: TypeId;
@@ -236,8 +253,8 @@ export interface FighterRuntimeState {
   readonly hpFractions: readonly number[]; // remaining pooled hp fraction per alive fighter
 }
 
-export type WeaponSpec = TurretSpec | MissileSpec | DroneSpec | FighterSpec;
-export type WeaponKind = "turret" | "missile" | "drone" | "fighter";
+export type WeaponSpec = TurretSpec | MissileSpec | DroneSpec | FighterSpec | VortonSpec;
+export type WeaponKind = "turret" | "missile" | "drone" | "fighter" | "vorton";
 
 export interface DamageAssessment {
   readonly nominalDps: number;
@@ -323,6 +340,13 @@ export interface FighterDamageBreakdown {
   readonly signatureTerm: number; // S/E
   readonly velocityTerm: number;
   readonly inRange: boolean; // target within optimal + 3*falloff (slow-fighter mode)
+}
+
+export interface VortonDamageBreakdown {
+  readonly application: number; // missile explosion factor, 0..1
+  readonly signatureTerm: number; // S/E
+  readonly velocityTerm: number; // (S/E * Ve/Vt)^drf
+  readonly inRange: boolean; // target within the hard maxRange cutoff
 }
 
 export interface EngagementFrame {

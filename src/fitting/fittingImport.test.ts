@@ -510,8 +510,13 @@ const db: FittingDb = {
     "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, chargeGroups: [86, 375], damageMultiplier: 3, cycleTime: 5, capacitorNeed: 36, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", requiredSkillIds: [toTypeId("3300"), toTypeId("3306"), toTypeId("12214")], groupID: 53, metaLevel: 5, metaGroupID: 2 }),
     "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, chargeGroups: [83, 372], damageMultiplier: 3, cycleTime: 5, capacitorNeed: 0, turretSkill: "Small Projectile Turret", requiredSkillIds: [toTypeId("3300"), toTypeId("3302"), toTypeId("11079")], groupID: 55, metaLevel: 5, metaGroupID: 2 }),
   },
+  vortons: {
+    "Scoped Vorton Projector": row("Scoped Vorton Projector", "Scoped Vorton Projector", { chargeSize: 2, chargeGroups: [4062], damageMultiplier: 1.1, cycleTime: 9, capacitorNeed: 32, maxRange: 42240, explosionRadius: 143, explosionVelocity: 105, damageReductionFactor: 0.5, heatDamage: 1, requiredSkillIds: [toTypeId("55033"), toTypeId("55035")], groupID: 4060, metaLevel: 1, metaGroupID: 1 }),
+  },
   charges: {
     "Conflagration M": row("Conflagration M", "Conflagration M", { trackingMultiplier: 0.7, rangeMultiplier: 0.5, chargeGroup: 375, chargeSize: 2 }),
+    "GalvaSurge Condenser Pack": row("GalvaSurge Condenser Pack", "GalvaSurge Condenser Pack", { emDamage: 500, kineticDamage: 151, rangeMultiplier: 0.75, chargeGroup: 4062, chargeSize: 2 }),
+    "MesmerFlux Condenser Pack": row("MesmerFlux Condenser Pack", "MesmerFlux Condenser Pack", { emDamage: 250, kineticDamage: 77, rangeMultiplier: 1.5, chargeGroup: 4062, chargeSize: 2 }),
     "EMP S": row("EMP S", "EMP S", { rangeMultiplier: 0.5, chargeGroup: 83, chargeSize: 1 }),
     "Evasive Maneuvers Charge": row("Evasive Maneuvers Charge", "Evasive Maneuvers Charge", { warfareBuffs: [{ buffId: 20, multiplier: -6 }, { buffId: 60, multiplier: -6 }], chargeGroup: 1772, chargeSize: 0 }),
     "Armor Energizing Charge": row("Armor Energizing Charge", "Armor Energizing Charge", { warfareBuffs: [{ buffId: 13, multiplier: -8 }], chargeGroup: 1774, chargeSize: 0 }),
@@ -610,6 +615,7 @@ const fullFittingDb: FittingDb = {
   needs: {},
   subsystemBonuses: SUBSYSTEM_BONUSES,
   subsystems: SUBSYSTEMS,
+  vortons: {},
   modules: FITTING_MODULES,
   turrets: TURRETS,
   charges: CHARGES,
@@ -694,6 +700,53 @@ describe("FittingImportImpl", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting("[Harbinger, Bursty]\nArmor Command Burst I, Armor Energizing Charge", conditions);
     expect(result!.commandBursts[0].effects).toEqual([{ kind: "armorResonance", multiplier: 0.92 }]);
+  });
+
+  test("vorton projector resolves explicit charge with damage multiplier and range multiplier", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting("[Harbinger, Vortons]\nScoped Vorton Projector, MesmerFlux Condenser Pack", conditions);
+    expect(result!.vortons).toHaveLength(1);
+    expect(result!.vortons[0].moduleId).toBe("Scoped Vorton Projector" as TypeId);
+    expect(result!.vortons[0].chargeId).toBe("MesmerFlux Condenser Pack" as TypeId);
+    expect(result!.vortons[0].count).toBe(1);
+    expect(result!.vortons[0].damagePerShot).toEqual({ em: 275, thermal: 0, kinetic: 84.7, explosive: 0 });
+    expect(result!.vortons[0].cycleTime).toBe(9);
+    expect(result!.vortons[0].maxRange).toBe(63360);
+    expect(result!.vortons[0].explosionRadius).toBe(143);
+    expect(result!.vortons[0].explosionVelocity).toBe(105);
+    expect(result!.vortons[0].damageReductionFactor).toBe(0.5);
+    expect(result!.vortons[0].capacitorNeed).toBe(32);
+    expect(result!.vortons[0].heatDamagePerCycle).toBe(1);
+    expect(result!.vortons[0].requiredSkillIds).toEqual([toTypeId("55033"), toTypeId("55035")]);
+  });
+
+  test("vorton projector without charge falls back to the lowest compatible charge id", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting("[Harbinger, Vortons]\nScoped Vorton Projector", conditions);
+    expect(result!.vortons[0].chargeId).toBe("GalvaSurge Condenser Pack" as TypeId);
+    expect(result!.vortons[0].damagePerShot.em).toBeCloseTo(550);
+    expect(result!.vortons[0].damagePerShot.kinetic).toBeCloseTo(166.1);
+    expect(result!.vortons[0].maxRange).toBe(31680);
+  });
+
+  test("repeated vorton modules group into one entry with count", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting("[Harbinger, Vortons]\nScoped Vorton Projector\nScoped Vorton Projector", conditions);
+    expect(result!.vortons).toHaveLength(1);
+    expect(result!.vortons[0].count).toBe(2);
+  });
+
+  test("overloaded vorton shortens cycle time without changing damage", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting("[Harbinger, Vortons]\nScoped Vorton Projector, MesmerFlux Condenser Pack", { skillLevel: 0, overloaded: false, weaponOverloaded: true });
+    expect(result!.vortons[0].cycleTime).toBeCloseTo(7.65);
+    expect(result!.vortons[0].damagePerShot).toEqual({ em: 275, thermal: 0, kinetic: 84.7, explosive: 0 });
+  });
+
+  test("thermodynamics skill level scales vorton heat damage", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, droneCatalog, droneSkillModel, fighterSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting("[Harbinger, Vortons]\nScoped Vorton Projector", { skillLevel: 4, overloaded: false, weaponOverloaded: false });
+    expect(result!.vortons[0].heatDamagePerCycle).toBeCloseTo(0.8);
   });
 
   test("burst without a modeled charge yields no effects", () => {
@@ -2136,7 +2189,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, jammers: {}, needs: {}, commandBursts: {}, subsystems: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES, fighters: {} };
+  return { modules: {}, jammers: {}, needs: {}, commandBursts: {}, subsystems: {}, turrets: {}, vortons: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, omnidirectionalTrackingLinks: {}, omnidirectionalTrackingEnhancers: {}, sensorDampeners: {}, sensorBoosters: {}, signalAmplifiers: {}, sensorBoosterScripts: {}, sensorDampenerScripts: {}, hullBonuses: {}, subsystemBonuses: {}, skillBonuses: [], rigDrawbackReductions: [], drones: DRONES, combatDrones: COMBAT_DRONES, fighters: {} };
 }
 
 describe("FittingImportImpl.summarize", () => {

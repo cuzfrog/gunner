@@ -1,6 +1,6 @@
-import { EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, type CommandBurstSpec, type EwarProjection, type MissileBoosterProjection, type MissileSpec, type SensorBoostProjection, type TurretBoostProjection, type TurretSpec, type WeaponSpec } from "../../../sim";
+import { EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, type CommandBurstSpec, type EwarProjection, type MissileBoosterProjection, type MissileSpec, type SensorBoostProjection, type TurretBoostProjection, type TurretSpec, type VortonSpec, type WeaponSpec } from "../../../sim";
 import { toTypeId } from "../../../gamedata/ids";
-import type { CapacitorStats } from "../../../fitting";
+import type { CapacitorStats, ImportedVorton } from "../../../fitting";
 import type { FittedHullSummary } from "../../../appstate";
 import type { SidePanelState } from "../sidePanel";
 import type { EwarController } from "../ewar";
@@ -120,8 +120,9 @@ function build() {
     render: vi.fn(),
     updateSummaries: vi.fn(),
   });
-  const shipASide = { capture: vi.fn(() => shipAState), skillConditions: vi.fn(() => ({ overloaded: true, skillLevel: 5 as const, weaponOverloaded: false, defenseSkills: undefined, targetingSkills: undefined })) };
-  const shipBSide = { capture: vi.fn(() => shipBState), skillConditions: vi.fn(() => ({ overloaded: true, skillLevel: 5 as const, weaponOverloaded: false, defenseSkills: undefined, targetingSkills: undefined })) };
+  const importedVorton: ImportedVorton = { moduleId: toTypeId("54747"), count: 2, chargeId: toTypeId("54773"), damagePerShot: { em: 550, thermal: 0, kinetic: 166.1, explosive: 0 }, cycleTime: 9, maxRange: 31680, explosionRadius: 143, explosionVelocity: 105, damageReductionFactor: 0.5, capacitorNeed: 32, heatDamagePerCycle: 1, requiredSkillIds: [toTypeId("55033")], damageBreakdown: { damageByType: { em: 500, kinetic: 151 }, factors: [{ kind: "base", multiplier: 1.1 }] } };
+  const shipASide = { capture: vi.fn(() => shipAState), skillConditions: vi.fn(() => ({ overloaded: true, skillLevel: 5 as const, weaponOverloaded: false, defenseSkills: undefined, targetingSkills: undefined })), importedVortons: vi.fn(() => [] as readonly ImportedVorton[]) };
+  const shipBSide = { capture: vi.fn(() => shipBState), skillConditions: vi.fn(() => ({ overloaded: true, skillLevel: 5 as const, weaponOverloaded: false, defenseSkills: undefined, targetingSkills: undefined })), importedVortons: vi.fn(() => [] as readonly ImportedVorton[]) };
   const distanceSource = { getInitialDistance: vi.fn(() => 6000) };
   const turretSpec: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.3, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
   const missileSpec: MissileSpec = { kind: "missile", moduleId: toTypeId("2"), damagePerMissile: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 10, launcherCount: 1, explosionRadius: 40, explosionVelocity: 170, damageReductionFactor: 0.5, maxVelocity: 5000, flightTime: 5, flightRange: 25000 };
@@ -157,7 +158,7 @@ function build() {
     capBoosterSpecs: vi.fn(() => []),
   } as unknown as CapacitorController;
   const capacitorStatsSource = { stats: vi.fn((_side: "shipA" | "shipB") => undefined as CapacitorStats | undefined), commandBursts: vi.fn((_side: "shipA" | "shipB") => [] as readonly CommandBurstSpec[]) } as unknown as CapacitorStatsSource & { stats: ReturnType<typeof vi.fn> };
-  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, fighterControllers, defenseController, capacitorController, capacitorStatsSource, turretSpec, missileSpec };
+  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, fighterControllers, defenseController, capacitorController, capacitorStatsSource, turretSpec, missileSpec, importedVorton };
 }
 
 function makeSource(deps: ReturnType<typeof build>) {
@@ -268,6 +269,16 @@ describe("SimConfigSourceImpl", () => {
     expect(engineConfig.defense.repairMode).toEqual({ shipA: "auto", shipB: "auto" });
     expect(engineConfig.defense.overloaded).toEqual({ shipA: true, shipB: true });
     expect(engineConfig.overloaded).toEqual({ shipA: true, shipB: true });
+  });
+
+  test("getEngineConfig joins the side panel's imported vortons into the weapon list", () => {
+    const deps = build();
+    vi.mocked(deps.shipASide.importedVortons).mockReturnValue([deps.importedVorton]);
+    const source = makeSource(deps);
+    const engineConfig = source.getEngineConfig();
+    const expectedVortonSpec: VortonSpec = { kind: "vorton", moduleId: deps.importedVorton.moduleId, damagePerShot: deps.importedVorton.damagePerShot, cycleTime: deps.importedVorton.cycleTime, count: deps.importedVorton.count, maxRange: deps.importedVorton.maxRange, explosionRadius: deps.importedVorton.explosionRadius, explosionVelocity: deps.importedVorton.explosionVelocity, damageReductionFactor: deps.importedVorton.damageReductionFactor, capacitorNeed: deps.importedVorton.capacitorNeed, heatDamagePerCycle: deps.importedVorton.heatDamagePerCycle };
+    expect(engineConfig.weapons.shipA).toEqual([deps.turretSpec, deps.missileSpec, expectedVortonSpec]);
+    expect(engineConfig.weapons.shipB).toEqual([deps.turretSpec, deps.missileSpec]);
   });
 
   test("getEngineConfig carries capacitor spec, capacity multiplier, and composes the propulsion drain from the stats source", () => {

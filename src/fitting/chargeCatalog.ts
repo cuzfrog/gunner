@@ -47,6 +47,22 @@ export interface ImportedLauncher {
   readonly damageBreakdown: DamageBreakdown;
 }
 
+export interface ImportedVorton {
+  readonly moduleId: TypeId;
+  readonly count: number;
+  readonly chargeId?: TypeId; // absent only when the db has no compatible condenser pack
+  readonly damagePerShot: DamageVector;
+  readonly cycleTime: number;
+  readonly maxRange: number; // hard cutoff (no falloff), already scaled by the charge range multiplier
+  readonly explosionRadius: number;
+  readonly explosionVelocity: number;
+  readonly damageReductionFactor: number;
+  readonly capacitorNeed?: number;
+  readonly heatDamagePerCycle?: number; // per-module HP loss per overloaded cycle, thermo-scaled
+  readonly requiredSkillIds: readonly TypeId[];
+  readonly damageBreakdown: DamageBreakdown;
+}
+
 export interface CargoCharge {
   readonly id: TypeId;
   readonly quantity: number;

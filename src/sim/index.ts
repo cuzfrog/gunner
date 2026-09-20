@@ -19,6 +19,7 @@ export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireC
 export type { DroneApplication } from "./droneApplication";
 export type { DroneSimulator, DroneSimConfig } from "./droneSimulator";
 export type { FighterApplication } from "./fighterApplication";
+export type { VortonApplication } from "./vortonApplication";
 export type { FighterSimulator, FighterSimConfig } from "./fighterSimulator";
 export type { MissileApplication } from "./missileApplication";
 export type { MissileSimulator } from "./missileSimulator";
@@ -76,6 +77,8 @@ export type {
   EwarProjection,
   EwarReach,
   FighterDamageBreakdown,
+  VortonDamageBreakdown,
+  VortonSpec,
   FighterMagazine,
   FighterReadoutValues,
   FighterRuntimeState,

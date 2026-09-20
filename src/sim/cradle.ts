@@ -17,6 +17,7 @@ import type {
   SimWorldFactory,
   StackingPenalty,
   TurretBoosterResolver,
+  VortonApplication,
   WeaponDamageAssessor,
 } from "./index";
 
@@ -31,6 +32,7 @@ export interface SimCradle {
   readonly hitChance: HitChance;
   readonly droneApplication: DroneApplication;
   readonly fighterApplication: FighterApplication;
+  readonly vortonApplication: VortonApplication;
   readonly missileApplication: MissileApplication;
   readonly weaponDamageAssessor: WeaponDamageAssessor;
   readonly engagementEvaluator: EngagementEvaluator;

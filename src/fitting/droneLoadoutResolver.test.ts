@@ -85,6 +85,7 @@ function makeImportedDrone(typeId: string, count: number): ImportedDrone {
 function mockCalculator(): FittingCalculator {
   return {
     resolveTurrets: vi.fn(() => []),
+    resolveVortons: vi.fn(() => []),
     resolveLauncher: vi.fn(() => undefined),
     resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0, mwdSigBloomMultiplier: 1 } })),
     resolvePropulsion: vi.fn(() => undefined),

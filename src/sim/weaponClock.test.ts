@@ -12,7 +12,7 @@ import { EMPTY_DEFENSE_ASSESSMENT, Vec2 } from "./index";
 import { toTypeId } from "../gamedata/ids";
 import type { AttackAssessment } from "./fireControl";
 import type { EngagementView, WeaponAttack } from "./engagementFrameComposer";
-import type { EngagementFrame, FighterSpec, HitChanceBreakdown, ShipState, Side, TurretSpec, WeaponSpec } from "./types";
+import type { EngagementFrame, FighterSpec, HitChanceBreakdown, ShipState, Side, TurretSpec, VortonSpec, WeaponSpec } from "./types";
 import { ZERO_DAMAGE } from "./types";
 
 const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: { em: 0, thermal: 0, kinetic: 100, explosive: 0 }, cycleTime: 5, turretCount: 1 };
@@ -177,6 +177,85 @@ describe("WeaponClockImpl turret heat", () => {
     const restored = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
     restored.restore(state);
     expect(restored.step(1, view, undefined, { shipA: true, shipB: false }).length).toBe(0);
+  });
+});
+
+describe("WeaponClockImpl vortons", () => {
+  const vorton: VortonSpec = { kind: "vorton", moduleId: toTypeId("9"), damagePerShot: { em: 0, thermal: 0, kinetic: 716, explosive: 0 }, cycleTime: 5, count: 2, maxRange: 31680, explosionRadius: 143, explosionVelocity: 105, damageReductionFactor: 0.5, capacitorNeed: 7, heatDamagePerCycle: 1 };
+
+  function vortonAttack(weapon: VortonSpec, volley: { em: number; thermal: number; kinetic: number; explosive: number }, inRange = true): WeaponAttack {
+    return {
+      weapon,
+      assessment: {
+        boostedWeapon: weapon,
+        effectiveWeapon: weapon,
+        damage: { nominalDps: 20, appliedDps: inRange ? 20 : 0, application: inRange ? 1 : 0, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: inRange ? volley : ZERO_DAMAGE },
+        vorton: { application: inRange ? 1 : 0, signatureTerm: 1, velocityTerm: 1, inRange },
+      },
+    };
+  }
+
+  function countingRngFactory(): { factory: RngFactory; calls: () => number } {
+    let nextCalls = 0;
+    return { factory: { create: () => ({ next: () => { nextCalls++; return 0.1; } }) }, calls: () => nextCalls };
+  }
+
+  test("a completed vorton cycle emits a deterministic event with the applied volley", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });
+    const view = makeView([vortonAttack(vorton, { em: 0, thermal: 0, kinetic: 1432, explosive: 0 })]);
+    const events = clock.step(5, view, undefined);
+    expect(events).toHaveLength(1);
+    expect(events[0].kind).toBe("vorton");
+    expect(events[0].rawByType).toEqual({ em: 0, thermal: 0, kinetic: 1432, explosive: 0 });
+    expect(events[0].target).toBe("shipB");
+    expect(events[0].source).toBe("shipA");
+  });
+
+  test("vortons never consume the rng", () => {
+    const { factory, calls } = countingRngFactory();
+    const clock = new WeaponClockImpl({ rngFactory: factory, hitRoll: sampledHitRoll });
+    const view = makeView([vortonAttack(vorton, { em: 0, thermal: 0, kinetic: 1432, explosive: 0 })]);
+    for (let i = 0; i < 15; i++) clock.step(1, view, undefined);
+    expect(calls()).toBe(0);
+  });
+
+  test("the capacitor debit scales with the group count at activation and at each cycle completion", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const { gate, debits } = recordingGate(true);
+    const view = makeView([vortonAttack(vorton, { em: 0, thermal: 0, kinetic: 1432, explosive: 0 })]);
+    clock.step(5, view, gate);
+    expect(debits).toEqual([{ side: "shipA", amount: 14 }, { side: "shipA", amount: 14 }]);
+    clock.step(5, view, gate);
+    expect(debits).toEqual([{ side: "shipA", amount: 14 }, { side: "shipA", amount: 14 }, { side: "shipA", amount: 14 }]);
+  });
+
+  test("an overloaded vorton burns out after MODULE_HEAT_HITPOINTS / heatDamage cycles", () => {
+    const heated: VortonSpec = { ...vorton, moduleId: toTypeId("3082"), cycleTime: 1, count: 1 };
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const view = makeView([vortonAttack(heated, { em: 0, thermal: 0, kinetic: 716, explosive: 0 })]);
+    let events = 0;
+    for (let i = 0; i < 45; i++) events += clock.step(1, view, undefined, { shipA: true, shipB: false }).length;
+    expect(events).toBe(40);
+  });
+
+  test("vortons without heat data never burn out", () => {
+    const heated: VortonSpec = { ...vorton, moduleId: toTypeId("3082"), cycleTime: 1, count: 1, heatDamagePerCycle: undefined };
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const view = makeView([vortonAttack(heated, { em: 0, thermal: 0, kinetic: 716, explosive: 0 })]);
+    let events = 0;
+    for (let i = 0; i < 45; i++) events += clock.step(1, view, undefined, { shipA: true, shipB: false }).length;
+    expect(events).toBe(45);
+  });
+
+  test("an out-of-range vorton keeps cycling and paying capacitor but produces no events", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const { gate, debits } = recordingGate(true);
+    const view = makeView([vortonAttack(vorton, { em: 0, thermal: 0, kinetic: 1432, explosive: 0 }, false)]);
+    let events = 0;
+    for (let i = 0; i < 12; i++) events += clock.step(5, view, gate).length;
+    expect(events).toBe(0);
+    expect(debits.length).toBe(13);
+    expect(debits.every((debit) => debit.amount === 14)).toBe(true);
   });
 });
 

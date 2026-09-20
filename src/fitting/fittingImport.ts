@@ -15,7 +15,7 @@ import { parseEft, type BankKind, type EftDocument, type EftLine, type QuantityI
 
 import type { ItemNameCatalog, ItemNameResolver } from "../gamedata/itemNames";
 import type { ModuleSlotCatalog } from "../gamedata/moduleSlots";
-import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedLauncher } from "./chargeCatalog";
+import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedLauncher, ImportedVorton } from "./chargeCatalog";
 import type { ImportedDrone } from "./droneCatalog";
 import type { GunFamilies } from "./gunFamilies";
 import type { MissileCatalog } from "./missileCatalog";
@@ -33,7 +33,7 @@ import type { FittingDb, FittingModuleStats, FittingResources, HullBonus } from 
 import type { DefenseSpec } from "../sim";
 
 export type { FittingDb } from "../gamedata/fittingDb";
-export type { ImportedTurret, ImportedLauncher, CargoCharge } from "./chargeCatalog";
+export type { ImportedTurret, ImportedLauncher, ImportedVorton, CargoCharge } from "./chargeCatalog";
 
 export interface FittingRow {
   readonly name: string;
@@ -76,6 +76,7 @@ export interface ImportedFitting {
   readonly turret?: ImportedTurret;
   readonly turrets?: readonly ImportedTurret[];
   readonly launcher?: ImportedLauncher;
+  readonly vortons: readonly ImportedVorton[];
   readonly drones: readonly ImportedDrone[];
   readonly fighters: readonly ImportedFighter[];
   readonly cargoCharges: readonly CargoCharge[];
@@ -211,6 +212,7 @@ export class FittingImportImpl implements FittingImport {
     const turrets = this.calculator.resolveTurrets(fittingState, conditions);
     const turret = turrets.length > 0 ? turrets[0] : undefined;
     const launcher = this.calculator.resolveLauncher(fittingState, conditions);
+    const vortons = this.calculator.resolveVortons(fittingState, conditions);
     const drones = this.calculator.resolveDrones(fittingState, conditions);
     const fighters = this.calculator.resolveFighters(fittingState, conditions);
     const cargoCharges = this.calculator.resolveCargoCharges(fittingState);
@@ -235,6 +237,7 @@ export class FittingImportImpl implements FittingImport {
       turret,
       turrets: turrets.length > 0 ? turrets : undefined,
       launcher,
+      vortons,
       drones,
       fighters,
       cargoCharges,
@@ -415,6 +418,7 @@ function isModuleRole(id: TypeId, db: FittingDb): boolean {
     db.modules[id] !== undefined ||
     db.turrets[id] !== undefined ||
     db.launchers[id] !== undefined ||
+    db.vortons[id] !== undefined ||
     db.subsystemBonuses[id] !== undefined ||
     db.subsystems[id] !== undefined ||
     db.stasisWebs[id] !== undefined ||

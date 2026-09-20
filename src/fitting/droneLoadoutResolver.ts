@@ -42,6 +42,7 @@ function syntheticFittingState(context: DroneLoadoutContext, groups: readonly Dr
     defenseModules: [],
     turretGroups: [],
     launcherGroups: [],
+    vortonGroups: [],
     propulsionModule: undefined,
     ewarModules: [],
     boosterModules: [],

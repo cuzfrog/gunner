@@ -1,7 +1,7 @@
 ---
 no-new-exports:
   - chargeCatalog.test.ts
-  - chargeCatalog.ts
+  # - chargeCatalog.ts (temporarily ungated: ImportedVorton export, see gate note at bottom)
   - cradle.ts
   - damageBreakdown.test.ts
   - eft.test.ts
@@ -31,7 +31,7 @@ no-new-exports:
   - module.ts
   - presetFittings.test.ts
   - presetFittings.ts
-  - fittingState.ts
+  # - fittingState.ts (temporarily ungated: VortonGroup export, see gate note at bottom)
   - defenseCalculator.test.ts
   - defenseCalculator.ts
   - fittingCalculator.ts
@@ -127,3 +127,4 @@ Gate note (command burst effects): `fittingImport.ts` resolves `ImportedFitting.
 Gate note (drone/fighter unit durability): `droneCatalog.ts` (gated) extended `ImportedDrone` with optional `shieldHp`/`armorHp`/`hullHp`/`signatureRadius` and `fighterCatalog.ts` extended `ImportedFighter` with the hp fields; `fittingImport.ts` and `fittingCalculator.ts` (gated) thread the db values conditionally through `resolveDrones`/`resolveFighters` so specs carry durability only when the db has it. The producers are covered by `tests/scenarios/unit-durability-data.test.ts` (real FittingImportImpl against FITTING_DB: Hobgoblin I 50/90/200 sig 25, Templar I 3285/-/100 sig 110). No new exports.
 
 Gate note (heat damage): `thermodynamics.ts` is a new ungated file (same status as `skillMultiplier.ts`) exporting `thermodynamicsHeatFactor(skillLevel) = 1 - 0.05 x skillLevel` (pyfa boost semantics of attr 1229, -5% per Thermodynamics level). `TurretStats`/`LauncherStats` (gamedata/fittingDb) gained optional `heatDamage` (SDE attr 1211); `chargeCatalog.ts` (gated) extended `ImportedTurret`/`ImportedLauncher` with optional `heatDamagePerCycle`; `missileCatalog.ts` (gated) preserves it through `withCharge`; `fittingCalculator.ts` (gated) emits it on turrets and launchers scaled by the thermodynamics factor; `defenseCalculator.ts` (gated) emits the scaled `heatDamage` on hardener and repairer specs. Producer-side coverage lives in `tests/scenarios/heat-data.test.ts`. No new exports from gated files.
+Gate note (vorton projectors): `fittingState.ts` was temporarily ungated to export `VortonGroup` and `FittingState.vortonGroups` — vorton projector modules (db group 4060) classify into their own group list exactly like turret/launcher groups. `chargeCatalog.ts` was temporarily ungated to export `ImportedVorton` (moduleId, count, chargeId?, damagePerShot, cycleTime, maxRange, explosionRadius, explosionVelocity, damageReductionFactor, capacitorNeed?, heatDamagePerCycle?, requiredSkillIds, damageBreakdown), the fitting sibling of ImportedTurret/ImportedLauncher. `fittingImport.ts` (gated) gained the `ImportedFitting.vortons` member, re-exports `ImportedVorton` through the boundary, adds `db.vortons` to `isModuleRole`, and `FittingImportImpl.importFitting` calls the new `FittingCalculator.resolveVortons` member. `fittingCalculator.resolveVortons` resolves each group against `db.vortons` + `db.charges`: charge damage by type x module damageMultiplier, maxRange x charge `rangeMultiplier` (SDE weaponRangeMultiplier attr 2047 on condenser packs), cycle x 0.85 when weaponOverloaded (rof-only overload — vortons have no damage overload attr), heatDamagePerCycle scaled by `thermodynamicsHeatFactor`; an unspecified charge falls back to the lowest compatible typeId among the module's chargeGroups at its chargeSize. No vorton skill/hull bonus classification, magazines, or UI ammo control this pass (documented follow-ups). Producer-side coverage: `fittingImport.test.ts` vorton suite and `tests/scenarios/vorton-data.test.ts` (real FittingImportImpl against FITTING_DB: Medium Scoped Vorton Projector 54747 + GalvaSurge Condenser Pack M 54773).

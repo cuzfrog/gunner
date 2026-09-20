@@ -1,6 +1,6 @@
 import type { ShipProfile, Ships, StatConditions } from "../../../ships";
 import type { ShipId } from "../../../gamedata/ids";
-import type { FittingImport } from "../../../fitting";
+import type { FittingImport, ImportedVorton } from "../../../fitting";
 import type { AutopilotMode, SensorSpec } from "../../../sim";
 import {
   PROPULSION_NONE,
@@ -71,6 +71,7 @@ export class SidePanelImpl implements SidePanel {
   private profileValue?: ShipProfile;
   private fittedHullValue?: FittedHullSummary;
   private fittingTextValue?: string;
+  private importedVortonsValue: readonly ImportedVorton[] = [];
   private lastCommittedHullValue?: ShipId;
   private importerValue?: SideImporter;
   private exporterValue?: ExportController;
@@ -128,6 +129,7 @@ export class SidePanelImpl implements SidePanel {
   get fittingText(): string | undefined { return this.fittingTextValue; }
   set fittingText(value: string | undefined) {
     this.fittingTextValue = value;
+    this.refreshImportedVortons();
     this.syncExportButton();
   }
   get lastCommittedHull(): ShipId | undefined { return this.lastCommittedHullValue; }
@@ -239,6 +241,7 @@ export class SidePanelImpl implements SidePanel {
     if (state.sig !== undefined) this.els.shipSig.value = String(state.sig);
     this.sections.stats.updateShipStats({ updateInertia: true, updateMass: false, updateSig: true });
     this.sections.stats.updateAlignTime();
+    this.refreshImportedVortons();
   }
 
   /** The saved summary can predate newer derived fields (e.g. capacitor), so the fitting text is the source of truth. */
@@ -318,6 +321,12 @@ export class SidePanelImpl implements SidePanel {
   }
 
   skillConditions(): StatConditions { return this.sections.skill.skillConditions(); }
+
+  private refreshImportedVortons(): void {
+    this.importedVortonsValue = this.fittingTextValue ? this.fittingImport.importFitting(this.fittingTextValue, this.skillConditions())?.vortons ?? [] : [];
+  }
+
+  importedVortons(): readonly ImportedVorton[] { return this.importedVortonsValue; }
 }
 
 /** The persisted propulsion selection, not the fitting text, decides whether a module is active on restore. */

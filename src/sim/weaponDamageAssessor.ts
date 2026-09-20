@@ -22,5 +22,6 @@ function computeBaseVolley(spec: WeaponSpec): DamageVector {
   if (spec.kind === "turret") return damageVectorScale(spec.damagePerShot, spec.turretCount);
   if (spec.kind === "missile") return damageVectorScale(spec.damagePerMissile, spec.launcherCount);
   if (spec.kind === "fighter") return damageVectorScale(spec.damagePerVolley, spec.fighterCount);
+  if (spec.kind === "vorton") return damageVectorScale(spec.damagePerShot, spec.count);
   return damageVectorScale(spec.damagePerShot, spec.droneCount);
 }
