@@ -1,5 +1,9 @@
 import { join } from "path";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { asClass, createContainer, InjectionMode } from "awilix";
 import type { PropulsionModule, ShipNameLanguage, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
+import { registerShipsModule } from "../ships";
+import { registerGameDataModule } from "../gamedata";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import { StackingPenaltyImpl, type DisruptionScriptSpec } from "../sim";
 import { damageVectorSum } from "../sim";
@@ -50,6 +54,8 @@ import {
 import { MODULE_SLOTS_BY_NAME, MODULE_SLOT_CATALOG } from "../gamedata/moduleSlots";
 import { moduleLines, parseEft, type EftDocument } from "./eft";
 import { _detectionOrder } from "./fittingImport";
+import type { FittingCradle } from "./cradle";
+import { registerFittingModule } from "./module";
 
 const OPTIMAL_RANGE_STAT = Object.values(DISRUPTION_SCRIPTS).find((s) => s.name === "Optimal Range Disruption Script")!;
 const TRACKING_SPEED_STAT = Object.values(DISRUPTION_SCRIPTS).find((s) => s.name === "Tracking Speed Disruption Script")!;
@@ -2694,4 +2700,58 @@ Templar I x6`;
     expect(canonical).toBeDefined();
     expect(canonical).toContain("Templar I x6\nCenobite I x6");
   });
+});
+
+function walkFittingFiles(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    const path = join(dir, entry);
+    if (statSync(path).isDirectory()) out.push(...walkFittingFiles(path));
+    else if (path.endsWith(".txt")) out.push(path);
+  }
+  return out;
+}
+
+const presetContainer = createContainer<FittingCradle>({ injectionMode: InjectionMode.PROXY });
+registerGameDataModule(presetContainer);
+registerShipsModule(presetContainer);
+presetContainer.register({ stackingPenalty: asClass(StackingPenaltyImpl).singleton() });
+registerFittingModule(presetContainer);
+const presetImporter = presetContainer.resolve("fittingImport");
+
+describe("FittingImportImpl slot placement over bundled presets", () => {
+  test("local armor repairers, nosferatu and drone link augmentors resolve into their dogma banks", () => {
+    const violations: string[] = [];
+    let armorRepairerRows = 0;
+    let nosferatuRows = 0;
+    let droneLinkRows = 0;
+    for (const file of walkFittingFiles("data/ship-fittings")) {
+      const summary = presetImporter.summarize(readFileSync(file, "utf8"));
+      if (!summary) {
+        violations.push(`${file}: summarize returned undefined`);
+        continue;
+      }
+      for (const section of summary.sections) {
+        if (section.kind !== "low" && section.kind !== "mid" && section.kind !== "high") continue;
+        for (const row of section.rows) {
+          if (/Armor Repairer/.test(row.name) && !/Remote/.test(row.name)) {
+            armorRepairerRows++;
+            if (section.kind !== "low") violations.push(`${file}: ${row.name} in ${section.kind}`);
+          }
+          if (/Nosferatu/.test(row.name)) {
+            nosferatuRows++;
+            if (section.kind !== "high") violations.push(`${file}: ${row.name} in ${section.kind}`);
+          }
+          if (/Drone Link Augmentor/.test(row.name)) {
+            droneLinkRows++;
+            if (section.kind !== "high") violations.push(`${file}: ${row.name} in ${section.kind}`);
+          }
+        }
+      }
+    }
+    expect(armorRepairerRows).toBeGreaterThan(100);
+    expect(nosferatuRows).toBeGreaterThan(100);
+    expect(droneLinkRows).toBeGreaterThan(10);
+    expect(violations).toEqual([]);
+  }, 15000);
 });
