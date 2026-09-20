@@ -3,7 +3,8 @@ import { type HitRollStrategy, sampledHitRoll } from "./hitRoll";
 import type { CapacitorGate } from "./capacitorSimulator";
 import type { Restorable } from "./restorable";
 import type { EngagementView, WeaponAttack } from "./engagementFrameComposer";
-import type { DamageEvent, Side, WeaponKind, WeaponSpec } from "./types";
+import type { DamageEvent, Side, TurretSpec, WeaponKind, WeaponSpec } from "./types";
+import { MODULE_HEAT_HITPOINTS } from "./types";
 import { damageVectorScale, damageVectorSum } from "./types";
 
 export interface WeaponCooldownSnapshot {
@@ -16,6 +17,7 @@ export interface WeaponCooldownSnapshot {
 
 export interface SideClockSnapshot {
   readonly cooldowns: ReadonlyMap<number, WeaponCooldownSnapshot>;
+  readonly heat: ReadonlyMap<string, number>; // heatIdentity -> remaining module-group HP (MODULE_HEAT_HITPOINTS * count)
 }
 
 export interface WeaponClockState {
@@ -25,7 +27,7 @@ export interface WeaponClockState {
 
 export interface WeaponClock extends Restorable<WeaponClockState> {
   reset(): void;
-  step(dt: number, view: EngagementView, capacitor?: CapacitorGate): readonly DamageEvent[];
+  step(dt: number, view: EngagementView, capacitor?: CapacitorGate, overloaded?: Record<Side, boolean>): readonly DamageEvent[];
   spoolCycles(side: Side, weaponIndex: number): number;
 }
 
@@ -45,6 +47,7 @@ interface WeaponCooldown {
 
 interface SideClock {
   cooldowns: Map<number, WeaponCooldown>;
+  heat: Map<string, number>;
   rng: Rng;
 }
 
@@ -69,6 +72,7 @@ export class WeaponClockImpl implements WeaponClock {
     };
   }
 
+
   spoolCycles(side: Side, weaponIndex: number): number {
     return this.sides[side].cooldowns.get(weaponIndex)?.spoolCycles ?? 0;
   }
@@ -85,17 +89,17 @@ export class WeaponClockImpl implements WeaponClock {
     };
   }
 
-  step(dt: number, view: EngagementView, capacitor?: CapacitorGate): readonly DamageEvent[] {
+  step(dt: number, view: EngagementView, capacitor?: CapacitorGate, overloaded: Record<Side, boolean> = { shipA: false, shipB: false }): readonly DamageEvent[] {
     const events: DamageEvent[] = [];
     if (view.locks.shipA.status === "locked") {
-      const shipAEvents = this.stepSide("shipA", dt, view.weaponAttacks.shipA, "shipB", capacitor);
+      const shipAEvents = this.stepSide("shipA", dt, view.weaponAttacks.shipA, "shipB", capacitor, overloaded.shipA);
       for (const event of shipAEvents) events.push(event);
     } else {
       // Disengaged: weapons stop cycling entirely, matching the capacitor gate that only drains weapon capacitors while engaged.
       this.sides["shipA"].cooldowns.clear();
     }
     if (view.locks.shipB.status === "locked") {
-      const shipBEvents = this.stepSide("shipB", dt, view.weaponAttacks.shipB, "shipA", capacitor);
+      const shipBEvents = this.stepSide("shipB", dt, view.weaponAttacks.shipB, "shipA", capacitor, overloaded.shipB);
       for (const event of shipBEvents) events.push(event);
     } else {
       this.sides["shipB"].cooldowns.clear();
@@ -103,13 +107,14 @@ export class WeaponClockImpl implements WeaponClock {
     return events;
   }
 
-  private stepSide(source: Side, dt: number, attacks: readonly WeaponAttack[], target: Side, capacitor?: CapacitorGate): readonly DamageEvent[] {
+  private stepSide(source: Side, dt: number, attacks: readonly WeaponAttack[], target: Side, capacitor: CapacitorGate | undefined, overloaded: boolean): readonly DamageEvent[] {
     const events: DamageEvent[] = [];
     const clock = this.sides[source];
     for (let i = 0; i < attacks.length; i++) {
       const attack = attacks[i];
       const kind = attack.weapon.kind;
       if (kind === "missile") continue;
+      if (kind === "turret" && burnedOut(clock.heat, attack.weapon)) continue;
       const identity = weaponIdentity(attack.weapon);
       const existing = clock.cooldowns.get(i);
       if (existing && existing.identity !== identity) {
@@ -157,6 +162,7 @@ export class WeaponClockImpl implements WeaponClock {
           const event = this.rollEvent(source, target, i, kind, attack, rolled.hit.chance, rolled.expectedMultiplier, clock.rng);
           if (event) events.push(event);
           if (spoolSpec !== undefined) cooldown.spoolCycles += 1;
+          if (kind === "turret" && overloaded) applyHeat(clock.heat, attack.weapon);
         }
       }
       clock.cooldowns.set(i, cooldown);
@@ -185,7 +191,23 @@ export class WeaponClockImpl implements WeaponClock {
 }
 
 function emptySide(createRng: () => Rng): SideClock {
-  return { cooldowns: new Map(), rng: createRng() };
+  return { cooldowns: new Map(), heat: new Map(), rng: createRng() };
+}
+
+/** Group heat identity: module id + count, so a refit (new module) restores a fresh heat pool. */
+function heatIdentity(weapon: TurretSpec): string {
+  return `${weapon.moduleId}:${weapon.turretCount}`;
+}
+
+/** A turret group is burned out once its heat pool reaches zero; the pool starts at MODULE_HEAT_HITPOINTS per module. */
+function burnedOut(heat: Map<string, number>, weapon: TurretSpec): boolean {
+  return (heat.get(heatIdentity(weapon)) ?? MODULE_HEAT_HITPOINTS * weapon.turretCount) <= 0;
+}
+
+function applyHeat(heat: Map<string, number>, weapon: TurretSpec): void {
+  const id = heatIdentity(weapon);
+  const current = heat.get(id) ?? MODULE_HEAT_HITPOINTS * weapon.turretCount;
+  heat.set(id, current - weapon.heatDamagePerCycle! * weapon.turretCount);
 }
 
 function fighterMagazineState(weapon: WeaponSpec): WeaponMagazineState | undefined {
@@ -217,14 +239,14 @@ function snapshotClock(clock: SideClock): SideClockSnapshot {
   const cooldowns = [...clock.cooldowns].map(
     ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime, spoolCycles: cooldown.spoolCycles, identity: cooldown.identity, ...(cooldown.magazine ? { magazine: { ...cooldown.magazine } } : {}) }] as const,
   );
-  return { cooldowns: new Map(cooldowns) };
+  return { cooldowns: new Map(cooldowns), heat: new Map(clock.heat) };
 }
 
 function materializeClock(snapshot: SideClockSnapshot, createRng: () => Rng): SideClock {
   const cooldowns = [...snapshot.cooldowns].map(
     ([index, cooldown]) => [index, { timer: cooldown.timer, cycleTime: cooldown.cycleTime, spoolCycles: cooldown.spoolCycles, identity: cooldown.identity, ...(cooldown.magazine ? { magazine: { ...cooldown.magazine } } : {}) }] as const,
   );
-  return { cooldowns: new Map(cooldowns), rng: createRng() };
+  return { cooldowns: new Map(cooldowns), heat: new Map(snapshot.heat), rng: createRng() };
 }
 
 function weaponIdentity(weapon: WeaponSpec): string {

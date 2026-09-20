@@ -18,6 +18,8 @@ export interface EngineConfig {
   readonly defense: DefenseSimConfig;
   readonly overloaded: Record<Side, boolean>;
   readonly capacitor: Record<Side, CapacitorSideConfig>;
+  /** Side-level weapon overload toggle; an overloaded weapon group accumulates heat damage per completed cycle and burns out at zero module HP. */
+  readonly weaponOverloaded?: Record<Side, boolean>;
 }
 
 export interface EngineView extends EngagementView {
@@ -257,8 +259,9 @@ export class EngagementEngineImpl implements EngagementEngine {
     const locks = world.lockClock.step(dt, this.lockStepInput(snapshot, distance, painted, operational, jammed, bursts));
     const input = this.engagementInput(world, snapshot, locks, config, painted, jammed);
     const composed = this.engagementFrameComposer.compose(snapshot, input);
-    const missileEvents = world.missileSimulator.step(dt, composed.frame, this.missileLaunchSpecs(composed, locks, painted));
-    const weaponEvents = world.weaponClock.step(dt, composed, world.capacitorSimulator);
+    const weaponOverloaded = config.weaponOverloaded ?? { shipA: false, shipB: false };
+    const missileEvents = world.missileSimulator.step(dt, composed.frame, this.missileLaunchSpecs(composed, locks, painted), weaponOverloaded);
+    const weaponEvents = world.weaponClock.step(dt, composed, world.capacitorSimulator, weaponOverloaded);
     // Unit-targeted damage applies the same frame it is dealt: the drone and fighter wings consume
     // the fresh missile + weapon events, then the defense simulator applies the ship damage.
     const events: DamageEvent[] = [...missileEvents, ...weaponEvents];

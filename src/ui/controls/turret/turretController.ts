@@ -265,6 +265,7 @@ export class TurretControllerImpl implements TurretController {
       capacitorNeed: this.selectedTurret.capacitorNeed,
       turretCount: this.selectedTurret.turretCount,
       spool: this.selectedTurret.spool,
+      ...(this.selectedTurret.heatDamagePerCycle !== undefined ? { heatDamagePerCycle: this.selectedTurret.heatDamagePerCycle } : {}),
     };
   }
   currentTurretSpecs(trackingOverride?: number): readonly TurretSpec[] {
@@ -288,6 +289,7 @@ export class TurretControllerImpl implements TurretController {
       capacitorNeed: turret.capacitorNeed,
       turretCount: turret.turretCount,
       spool: turret.spool,
+      ...(turret.heatDamagePerCycle !== undefined ? { heatDamagePerCycle: turret.heatDamagePerCycle } : {}),
     }));
   }
 

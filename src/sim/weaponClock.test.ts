@@ -109,6 +109,77 @@ describe("weapon clock unit targeting", () => {
   });
 });
 
+describe("WeaponClockImpl turret heat", () => {
+  const NO_OVERLOAD: Record<Side, boolean> = { shipA: false, shipB: false };
+
+  function heatedTurret(heat: number, count = 1): TurretSpec {
+    return { ...turret, moduleId: toTypeId("3082"), cycleTime: 1, heatDamagePerCycle: heat, turretCount: count };
+  }
+
+  function heatedAttack(weapon: TurretSpec): WeaponAttack {
+    return {
+      weapon,
+      assessment: {
+        boostedWeapon: weapon,
+        effectiveWeapon: weapon,
+        damage: { nominalDps: 20, appliedDps: 20, application: 1, volley: 100, baseVolleyByType: ZERO_DAMAGE, appliedByType: ZERO_DAMAGE, appliedVolleyByType: { em: 0, thermal: 0, kinetic: 100, explosive: 0 } },
+        turret: { hit, expectedMultiplier: 1, spoolFactor: 1, inOptimal: true },
+      },
+    };
+  }
+
+  test("an overloaded turret burns out after MODULE_HEAT_HITPOINTS / heatDamage cycles", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const view = makeView([heatedAttack(heatedTurret(1))]);
+    let events = 0;
+    for (let i = 0; i < 45; i++) events += clock.step(1, view, undefined, { shipA: true, shipB: false }).length;
+    expect(events).toBe(40);
+  });
+
+  test("turrets without the overload flag never accumulate heat", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const view = makeView([heatedAttack(heatedTurret(1))]);
+    let events = 0;
+    for (let i = 0; i < 45; i++) events += clock.step(1, view, undefined, NO_OVERLOAD).length;
+    expect(events).toBe(45);
+  });
+
+  test("group heat scales with turret count so the group pool depletes in the same number of cycles", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const view = makeView([heatedAttack(heatedTurret(1, 2))]);
+    let events = 0;
+    for (let i = 0; i < 45; i++) events += clock.step(1, view, undefined, { shipA: true, shipB: false }).length;
+    expect(events).toBe(40);
+  });
+
+  test("weapons without heat data never burn out", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const view = makeView([heatedAttack({ ...turret, cycleTime: 1 })]);
+    let events = 0;
+    for (let i = 0; i < 45; i++) events += clock.step(1, view, undefined, { shipA: true, shipB: false }).length;
+    expect(events).toBe(45);
+  });
+
+  test("refitting the module restores its heat pool", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const view = makeView([heatedAttack(heatedTurret(4))]);
+    for (let i = 0; i < 10; i++) clock.step(1, view, undefined, { shipA: true, shipB: false });
+    expect(clock.step(1, view, undefined, { shipA: true, shipB: false }).length).toBe(0);
+    const refitted = makeView([heatedAttack({ ...heatedTurret(4), moduleId: toTypeId("3083") })]);
+    expect(clock.step(1, refitted, undefined, { shipA: true, shipB: false }).length).toBe(1);
+  });
+
+  test("heat pools survive capture and restore", () => {
+    const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    const view = makeView([heatedAttack(heatedTurret(4))]);
+    for (let i = 0; i < 10; i++) clock.step(1, view, undefined, { shipA: true, shipB: false });
+    const state = clock.capture();
+    const restored = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: expectedHitRoll });
+    restored.restore(state);
+    expect(restored.step(1, view, undefined, { shipA: true, shipB: false }).length).toBe(0);
+  });
+});
+
 describe("WeaponClockImpl", () => {
   test("no event before cycle completion", () => {
     const clock = new WeaponClockImpl({ rngFactory: new Mulberry32RngFactory(), hitRoll: sampledHitRoll });

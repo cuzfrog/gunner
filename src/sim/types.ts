@@ -25,6 +25,8 @@ export interface InflictedDps {
 export const ZERO_DAMAGE: DamageVector = { em: 0, thermal: 0, kinetic: 0, explosive: 0 };
 export const DAMAGE_TYPES: readonly DamageType[] = ["em", "thermal", "kinetic", "explosive"];
 export const DEFENSE_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
+/** Every fitted module (SDE attr 9) carries the same 40 structure HP that overheating burns through. */
+export const MODULE_HEAT_HITPOINTS = 40;
 
 export function damageVectorSum(vec: DamageVector): number {
   return vec.em + vec.thermal + vec.kinetic + vec.explosive;
@@ -131,6 +133,8 @@ export interface TurretSpec extends TrackingApplicationSpec {
   readonly spool?: TurretSpoolSpec; // absent for non-spooling turrets
   // GJ per module instance per cycle; the group debits capacitorNeed * turretCount at each activation.
   readonly capacitorNeed?: number;
+  // Per-module HP loss per completed overloaded cycle; absent = module cannot take heat damage.
+  readonly heatDamagePerCycle?: number;
 }
 
 export interface MissileMagazine {
@@ -151,6 +155,8 @@ export interface MissileSpec {
   readonly flightTime: number; // seconds
   readonly flightRange: number; // maxVelocity * flightTime, computed by the producer
   readonly magazine?: MissileMagazine; // absent = infinite ammunition (fighters carry their own magazine state)
+  // Per-launcher HP loss per completed overloaded launch cycle; absent = launcher cannot take heat damage.
+  readonly heatDamagePerCycle?: number;
 }
 
 export interface DroneSpec extends TrackingApplicationSpec {
@@ -886,6 +892,8 @@ export interface ActiveHardenerSpec {
   readonly overloadBonusMultiplier: number;
   readonly capacitorNeed: number; // GJ per cycle
   readonly cycleTime: number; // seconds
+  // Per-module HP loss per completed overloaded cycle; absent = hardener cannot take heat damage.
+  readonly heatDamage?: number;
 }
 
 export interface RahSpec {

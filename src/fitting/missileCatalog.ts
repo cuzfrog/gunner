@@ -69,6 +69,7 @@ export class MissileCatalogImpl implements MissileCatalog {
       flightTime: output.flightTime,
       ...(magazineShots !== undefined ? { magazineShots } : {}),
       ...(launcherStats.reloadTime !== undefined ? { reloadTime: launcherStats.reloadTime } : {}),
+      ...(launcher.heatDamagePerCycle !== undefined ? { heatDamagePerCycle: launcher.heatDamagePerCycle } : {}),
       damageBreakdown: { damageByType: missileDamageByType(missile), factors },
     };
   }

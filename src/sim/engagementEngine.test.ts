@@ -100,12 +100,12 @@ function fighterSimulatorState(): FighterSimulatorState {
 }
 
 function missileSimulatorState(): MissileSimulatorState {
-  const side = { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), magazines: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
+  const side = { entities: [], cooldowns: new Map(), weaponSpecs: new Map(), magazines: new Map(), heat: new Map(), lastTargetVelocity: new Vec2(0, 0), lastTargetMaxSpeed: 0 };
   return { sides: { shipA: side, shipB: { ...side } }, time: 0, lastFrameShipA: new Vec2(0, 0), lastFrameShipB: new Vec2(0, 0) };
 }
 
 function weaponClockState(): WeaponClockState {
-  const side = { cooldowns: new Map() };
+  const side = { cooldowns: new Map(), heat: new Map() };
   return { seed: 0, sides: { shipA: side, shipB: { ...side } } };
 }
 
@@ -351,7 +351,7 @@ describe("EngagementEngineImpl", () => {
     const deps = makeEngine();
     deps.engine.reset(engineConfig());
     deps.engine.step(0.1);
-    expect(deps.live.weaponClock.step).toHaveBeenCalledWith(0.1, expect.anything(), deps.live.capacitorSimulator);
+    expect(deps.live.weaponClock.step).toHaveBeenCalledWith(0.1, expect.anything(), deps.live.capacitorSimulator, { shipA: false, shipB: false });
     expect(deps.live.defenseSimulator.step).toHaveBeenCalledWith(0.1, expect.anything(), deps.live.capacitorSimulator, { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS });
   });
 
@@ -508,6 +508,25 @@ describe("EngagementEngineImpl", () => {
     deps.live.defenseSimulator.view.mockReturnValue(deadView);
     const view = deps.engine.step(0.1);
     expect(view.defenseRuntime.dead.shipA).toBe(true);
+  });
+
+  test("step passes the configured weapon overload flags to the missile simulator and weapon clock", () => {
+    const deps = makeEngine();
+    const config = { ...engineConfig(), weaponOverloaded: { shipA: true, shipB: false } as Record<Side, boolean> };
+    deps.engine.reset(config);
+    deps.engine.step(0.1);
+    const expected: Record<Side, boolean> = { shipA: true, shipB: false };
+    expect(deps.live.missileSimulator.step.mock.calls[0][3]).toEqual(expected);
+    expect(deps.live.weaponClock.step.mock.calls[0][3]).toEqual(expected);
+  });
+
+  test("step defaults weapon overload flags to false when the config omits them", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    deps.engine.step(0.1);
+    const expected: Record<Side, boolean> = { shipA: false, shipB: false };
+    expect(deps.live.missileSimulator.step.mock.calls[0][3]).toEqual(expected);
+    expect(deps.live.weaponClock.step.mock.calls[0][3]).toEqual(expected);
   });
 
   test("step does not launch missiles when lock is not locked", () => {

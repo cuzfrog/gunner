@@ -31,3 +31,5 @@ Gate note (live turret drains, propulsion, and fitted net): `capacitorStatsSourc
 Gate note (command bursts): `simConfigSource.ts` `buildCombatantConfig` passes `capacitorStatsSource.commandBursts(side)` (the imported fitting's resolved burst specs, shared with the capacitor drain source) into `CombatantConfig.commandBursts`. Body-only change, no new exports.
 
 Gate note (attack drones tactic): `simConfigSource.ts` (gated) `buildCombatantConfig` passes the side panel's `attackDrones` capture into `CombatantConfig.attackDrones` (default false). Body-only change, no new exports.
+
+Gate note (weapon overload plumbing): `simConfigSource.ts` changed bodies only — `getEngineConfig` emits `weaponOverloaded` from the existing `skillConditions().weaponOverloaded` toggle via a private `weaponOverloadedFor`, so the engine's weapon heat gating consumes the same UI toggle the fitting calculators already use. No new exports.

@@ -88,8 +88,13 @@ export class SimConfigSourceImpl implements SimConfigSource {
       weapons: { shipA: this.weaponsFor("shipA"), shipB: this.weaponsFor("shipB") },
       defense: this.defenseSimConfig(),
       overloaded: { shipA: this.overloadedFor("shipA"), shipB: this.overloadedFor("shipB") },
+      weaponOverloaded: { shipA: this.weaponOverloadedFor("shipA"), shipB: this.weaponOverloadedFor("shipB") },
       capacitor: { shipA: this.capacitorSide("shipA"), shipB: this.capacitorSide("shipB") },
     };
+  }
+
+  private weaponOverloadedFor(side: Side): boolean {
+    return this.sideFor(side).skillConditions().weaponOverloaded;
   }
 
   private capacitorSide(side: Side): EngineConfig["capacitor"][Side] {

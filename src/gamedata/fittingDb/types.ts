@@ -171,6 +171,7 @@ export interface TurretStats {
   readonly damageMultiplier: number;
   readonly cycleTime: number;
   readonly capacitorNeed: number; // GJ per cycle per turret
+  readonly heatDamage?: number; // attr heatDamage (1211), per-module HP loss per overloaded cycle
   readonly spoolPerCycle?: number; // damageMultiplierBonusPerCycle, fraction (e.g. 0.07)
   readonly spoolMax?: number; // damageMultiplierBonusMax, fraction (e.g. 2.125)
   readonly turretSkill?: string;
@@ -246,6 +247,7 @@ export interface LauncherStats {
   readonly rateOfFire: number;
   readonly launcherGroup: number;
   readonly chargeGroups: readonly number[];
+  readonly heatDamage?: number; // attr heatDamage (1211), per-module HP loss per overloaded cycle
   readonly requiredSkillIds: readonly TypeId[];
   readonly metaLevel: number;
   readonly metaGroupID: number;

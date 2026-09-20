@@ -202,6 +202,20 @@ describe("TurretController", () => {
     expect(controller.currentTurretSpec()).toBeUndefined();
   });
 
+  test("currentTurretSpec carries the per-module heat damage into the spec", () => {
+    const turret = { ...TURRET, heatDamagePerCycle: 0.8 };
+    const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, turret })) } });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
+    expect(controller.currentTurretSpec()!.heatDamagePerCycle).toBe(0.8);
+    expect(controller.currentTurretSpecs()[0].heatDamagePerCycle).toBe(0.8);
+  });
+
+  test("currentTurretSpec omits heat damage when the imported turret has none", () => {
+    const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
+    expect(controller.currentTurretSpec()!.heatDamagePerCycle).toBeUndefined();
+  });
+
   test("currentTurretSpec carries the capacitor need for the capacitor gate", () => {
     const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });

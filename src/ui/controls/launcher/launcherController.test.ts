@@ -149,6 +149,19 @@ describe("LauncherController", () => {
     expect(spec!.magazine).toEqual({ numShots: 19, reloadTime: 35 });
   });
 
+  test("currentMissileSpec carries the per-launcher heat damage into the spec", () => {
+    const { controller } = buildLauncher();
+    const launcher = importedLauncherFixture({ heatDamagePerCycle: 1.35 });
+    controller.applyImported(importedWithLauncher(launcher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
+    expect(controller.currentMissileSpec()!.heatDamagePerCycle).toBe(1.35);
+  });
+
+  test("currentMissileSpec omits heat damage when the launcher has none", () => {
+    const { controller } = buildLauncher();
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
+    expect(controller.currentMissileSpec()!.heatDamagePerCycle).toBeUndefined();
+  });
+
   test("currentMissileSpec omits the magazine when the launcher has no magazine data", () => {
     const { controller } = buildLauncher();
     const launcher = importedLauncherFixture();
