@@ -1,5 +1,36 @@
+import { readdirSync, readFileSync } from "node:fs";
 import type { TypeId } from "../src/gamedata/ids";
+import { MODULE_SLOTS_BY_ID } from "../src/gamedata/moduleSlots";
 import { generateModuleSlotsContent, type ModuleSlot } from "./generate-module-slots";
+
+const POWER_SLOT_BY_EFFECT: Readonly<Record<number, ModuleSlot>> = { 11: "low", 12: "high", 13: "mid" };
+
+type DogmaEntry = { readonly dogmaEffects?: readonly { readonly effectID?: unknown }[] };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function loadDogmaFittingEffects(): Map<string, ModuleSlot[]> {
+  const effects = new Map<string, ModuleSlot[]>();
+  for (const file of readdirSync("sde").filter((name) => /^typedogma\..*\.json$/.test(name)).sort()) {
+    const parsed: unknown = JSON.parse(readFileSync(`sde/${file}`, "utf8"));
+    if (!isRecord(parsed)) throw new Error(`Expected typedogma root object in ${file}`);
+    for (const [id, entry] of Object.entries(parsed)) {
+      if (!isRecord(entry)) throw new Error(`Expected typedogma entry object for ${id}`);
+      const raw = Array.isArray(entry.dogmaEffects) ? entry.dogmaEffects : [];
+      const slots = raw.map((effect) => (isRecord(effect) ? effect.effectID : undefined)).map((effectId) => (typeof effectId === "number" ? POWER_SLOT_BY_EFFECT[effectId] : undefined)).filter((slot): slot is ModuleSlot => slot !== undefined);
+      effects.set(id, slots);
+    }
+  }
+  return effects;
+}
+
+function majoritySlot(slots: readonly ModuleSlot[]): ModuleSlot {
+  const counts = new Map<ModuleSlot, number>();
+  for (const slot of slots) counts.set(slot, (counts.get(slot) ?? 0) + 1);
+  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+}
 
 function nameToIdFixture(): {
   readonly byName: {
@@ -62,4 +93,23 @@ describe("generateModuleSlotsContent", () => {
       generateModuleSlotsContent(nameToIdFixture(), [{ name: "Unknown Group Module", id: asTypeId("0") }], [], GROUP_SLOTS),
     ).toThrow(/unmatched groups/);
   });
+
+  test("every power-slot mapping agrees with the SDE dogma fitting effect", () => {
+    const dogma = loadDogmaFittingEffects();
+    const violations: string[] = [];
+    let checked = 0;
+    for (const [id, slot] of Object.entries(MODULE_SLOTS_BY_ID)) {
+      if (slot === "rig" || slot === "subsystem") continue;
+      checked++;
+      const fitting = dogma.get(id);
+      if (fitting === undefined || fitting.length === 0) {
+        violations.push(`${id} (${slot}): no dogma fitting effect`);
+        continue;
+      }
+      const majority = majoritySlot(fitting);
+      if (majority !== slot) violations.push(`${id} (${slot}): dogma says ${majority}`);
+    }
+    expect(checked).toBeGreaterThan(2000);
+    expect(violations).toEqual([]);
+  }, 15000);
 });
