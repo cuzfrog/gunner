@@ -1,6 +1,6 @@
 import type { TypeId } from "../gamedata/ids";
 import type { StackingPenalty } from "./stackingPenalty";
-import { SENSOR_TYPES, type AppliedEwarEffect, type DampenerBreakdown, type DisruptionBreakdown, type EwarEffectPotentials, type EwarProjection, type EwarReach, type JammerSpec, type SensorDampenerSpec, type SensorSpec, type SensorStrengths, type SensorType, type SpeedBreakdown, type SpeedEffectAttribution, type StatEffectAttribution, type TrackingDisruptorSpec, type TurretSpec } from "./types";
+import { SENSOR_TYPES, type AppliedEwarEffect, type DampenerBreakdown, type DisruptionBreakdown, type EwarEffectPotentials, type EwarProjection, type EwarReach, type SensorDampenerSpec, type SensorSpec, type SensorStrengths, type SensorType, type SpeedBreakdown, type SpeedEffectAttribution, type StatEffectAttribution, type TrackingDisruptorSpec, type TurretSpec } from "./types";
 
 export interface EwarResolver {
   speedMultiplier(projection: EwarProjection | undefined, distance: number): number;
