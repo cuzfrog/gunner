@@ -1229,10 +1229,18 @@ describe("EwarResolverImpl jammerChance", () => {
     expect(resolver.jammerChance(projection, 34560 + 32400, GRAV_SENSOR)).toBeCloseTo((4 * 0.5) / 11, 10);
   });
 
-  test("no jam beyond optimal + 3 falloff", () => {
+  test("jam strength follows the pure falloff curve beyond optimal", () => {
     const projection = jammerProjection([GRAV_JAM]);
-    expect(resolver.jammerChance(projection, 34560 + 3 * 32400, GRAV_SENSOR)).toBeCloseTo(4 * 0.5 ** 9 / 11, 12);
-    expect(resolver.jammerChance(projection, 34560 + 3 * 32400 + 1, GRAV_SENSOR)).toBe(0);
+    expect(resolver.jammerChance(projection, 34560 + 32400, GRAV_SENSOR)).toBeCloseTo((4 * 0.5) / 11, 12);
+    expect(resolver.jammerChance(projection, 34560 + 2 * 32400, GRAV_SENSOR)).toBeCloseTo((4 * 0.5 ** 4) / 11, 12);
+  });
+
+  test("jammers beyond the applied effectiveness threshold cannot jam", () => {
+    const projection = jammerProjection([GRAV_JAM]);
+    // 0.5^r^2 >= 0.01 holds up to r = sqrt(log2(100)) ~ 2.578 falloffs.
+    const cutoff = 34560 + Math.sqrt(Math.log2(100)) * 32400;
+    expect(resolver.jammerChance(projection, cutoff, GRAV_SENSOR)).toBeCloseTo((4 * 0.01) / 11, 12);
+    expect(resolver.jammerChance(projection, cutoff + 1, GRAV_SENSOR)).toBe(0);
   });
 
   test("overload multiplies strength by the overload percent", () => {
@@ -1289,9 +1297,10 @@ describe("EwarResolverImpl jammerChance", () => {
     expect(effect.cycleTime).toBe(20);
   });
 
-  test("appliedEffects drops jammers beyond the hard cutoff even when chance is zero", () => {
+  test("appliedEffects drops jammers below the applied effectiveness threshold", () => {
     const projection = jammerProjection([GRAV_JAM]);
-    expect(resolver.appliedEffects(projection, 34560 + 3 * 32400 + 1).filter((e) => e.family === "jammer").length).toBe(0);
+    expect(resolver.appliedEffects(projection, 34560 + Math.sqrt(Math.log2(100)) * 32400 + 1).filter((e) => e.family === "jammer").length).toBe(0);
+    expect(resolver.appliedEffects(projection, 34560 + Math.sqrt(Math.log2(100)) * 32400).filter((e) => e.family === "jammer").length).toBe(1);
   });
 
   test("reach includes the jammer cutoff", () => {
