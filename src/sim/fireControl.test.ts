@@ -178,7 +178,7 @@ describe("evaluator unit targeting", () => {
     const deps = makeEvaluator();
     const unitTarget: UnitTargetParams = { kind: "drone", signatureRadius: 25, velocity: 3000 };
     deps.evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 120, unitTarget } });
-    expect(deps.hitChance.compute).toHaveBeenCalledWith(expect.objectContaining({ transversalSpeed: 3000 }), effectiveTurret, 25);
+    expect(deps.hitChance.compute).toHaveBeenCalledWith(expect.objectContaining({ distance: 6000, angularVelocity: 0.5, radialVelocity: 0 }), effectiveTurret, 25);
   });
 
   test("the unit target kind lands on the assessment", () => {
@@ -190,7 +190,7 @@ describe("evaluator unit targeting", () => {
   test("a turret without unitTarget assesses the painted ship signature", () => {
     const deps = makeEvaluator();
     deps.evaluator.evaluate(frame, { shipA: { weapon: turret, paintedTargetSig: 120 } });
-    expect(deps.hitChance.compute).toHaveBeenCalledWith(expect.objectContaining({ transversalSpeed: 0 }), effectiveTurret, 120);
+    expect(deps.hitChance.compute).toHaveBeenCalledWith(expect.objectContaining({ distance: 6000, angularVelocity: 0 }), effectiveTurret, 120);
   });
 });
 

@@ -1,5 +1,5 @@
 import type { TypeId } from "../gamedata/ids";
-import type { Vec2 } from "./vec2";
+import { Vec2 } from "./vec2";
 
 export const SIG_RESOLUTIONS = { S: 40, M: 125, L: 400, XL: 2000 } as const;
 export type SigResolutionClass = keyof typeof SIG_RESOLUTIONS;
@@ -360,6 +360,26 @@ export interface EngagementFrame {
   readonly transversalVelocity: Vec2; // m/s
   readonly transversalSpeed: number; // m/s
   readonly angularVelocity: number; // rad/s
+}
+
+/** Position-independent inputs of an engagement frame; every kinematic field is derived from the relative motion. */
+export interface RelativeMotion {
+  readonly time: number;
+  readonly shipA: ShipState;
+  readonly shipB: ShipState;
+  readonly relPosition: Vec2; // shipB.pos - shipA.pos
+  readonly relVelocity: Vec2; // shipB.vel - shipA.vel
+}
+
+/** The single derivation of an engagement frame: radial/transversal decomposition and angular velocity stay mutually consistent by construction. */
+export function deriveEngagementFrame(motion: RelativeMotion): EngagementFrame {
+  const distance = motion.relPosition.len();
+  const rHat = distance > 0 ? motion.relPosition.scale(1 / distance) : new Vec2(1, 0);
+  const radialVelocity = motion.relVelocity.dot(rHat);
+  const transversalVelocity = motion.relVelocity.sub(rHat.scale(radialVelocity));
+  const transversalSpeed = transversalVelocity.len();
+  const angularVelocity = distance > 0 ? transversalSpeed / distance : 0;
+  return { time: motion.time, shipA: motion.shipA, shipB: motion.shipB, relPosition: motion.relPosition, distance, relVelocity: motion.relVelocity, radialVelocity, transversalVelocity, transversalSpeed, angularVelocity };
 }
 
 export interface HitChanceBreakdown {

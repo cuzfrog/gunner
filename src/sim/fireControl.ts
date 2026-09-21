@@ -27,7 +27,7 @@ import type {
   WeaponSpec,
 } from "./types";
 import { Vec2 } from "./vec2";
-import { ZERO_DAMAGE, spoolMultiplier, type UnitTargetKind, type UnitTargetParams } from "./types";
+import { ZERO_DAMAGE, deriveEngagementFrame, spoolMultiplier, type UnitTargetKind, type UnitTargetParams } from "./types";
 
 export interface AttackState {
   readonly weapon: WeaponSpec;
@@ -160,9 +160,10 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   }
 }
 
-/** Ship-weapon frame for a non-ship target: the unit's speed becomes the transversal, radial closes to zero. */
+/** Ship-weapon frame for a non-ship target: the unit orbits across the unchanged ship-to-ship LOS, so its speed is pure transversal at that distance. */
 function unitTargetFrame(frame: EngagementFrame, unitTarget: UnitTargetParams): EngagementFrame {
-  return { ...frame, transversalSpeed: unitTarget.velocity, transversalVelocity: new Vec2(0, unitTarget.velocity), radialVelocity: 0 };
+  const rHat = frame.distance > 0 ? frame.relPosition.scale(1 / frame.distance) : new Vec2(1, 0);
+  return deriveEngagementFrame({ time: frame.time, shipA: frame.shipA, shipB: frame.shipB, relPosition: frame.relPosition, relVelocity: rHat.perpCCW().scale(unitTarget.velocity) });
 }
 
 function zeroAppliedDps(assessment: AttackAssessment): AttackAssessment {
