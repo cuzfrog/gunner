@@ -42,8 +42,8 @@ const frame: EngagementFrame = {
 const turret: TurretSpec = { kind: "turret", moduleId: toTypeId("1"), tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, turretCount: 1 };
 const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0, trackingPenalty: 1, rangePenalty: 1 };
 const shipConfig: SimConfig = {
-  shipA: { id: "shipA", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1 },
-  shipB: { id: "shipB", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1 },
+  shipA: { id: "shipA", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1, propulsionKind: "microwarpdrive" },
+  shipB: { id: "shipB", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1, propulsionKind: "microwarpdrive" },
   initialDistance: 5000,
 };
 
@@ -302,6 +302,22 @@ describe("EngagementEngineImpl", () => {
       shipB: { operational: true, propulsionSuppressed: true, weaponsEngaged: true, disengagedModuleIds: [] },
     });
     expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, { propulsionStarved: { shipA: false, shipB: false }, ewarActive: { shipA: true, shipB: true }, bursts: { shipA: IDENTITY_BURST_MODIFIERS, shipB: IDENTITY_BURST_MODIFIERS } });
+  });
+
+  test("capacitor.step keeps an afterburner drain running while the opponent scrambles", () => {
+    const deps = makeEngine();
+    deps.ewarResolver.propulsionSuppressed = vi.fnUntracked(() => true);
+    const abConfig: SimConfig = {
+      shipA: { ...shipConfig.shipA, propulsionKind: "afterburner" },
+      shipB: { ...shipConfig.shipB, propulsionKind: "afterburner" },
+      initialDistance: shipConfig.initialDistance,
+    };
+    deps.engine.reset({ ...engineConfig(), sim: abConfig });
+    deps.engine.step(0.1);
+    expect(deps.live.capacitorSimulator.step).toHaveBeenCalledWith(0.1, expect.objectContaining({
+      shipA: expect.objectContaining({ propulsionSuppressed: false }),
+      shipB: expect.objectContaining({ propulsionSuppressed: false }),
+    }));
   });
 
   test("capacitor.step receives disengaged ids for own ewar modules without an applied effect and weapons engagement from the lock", () => {

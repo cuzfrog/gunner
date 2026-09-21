@@ -299,6 +299,20 @@ describe("SimulationImpl", () => {
     expect(sim.snapshot().shipB.maxSpeed).toBe(1000);
   });
 
+  test("capacitor starvation suppresses the afterburner", () => {
+    const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
+    const config = {
+      shipA: shipConfig("shipA", "midships"),
+      shipB: { ...shipConfig("shipB", "midships"), baseMaxSpeed: 200, maxSpeed: 600, propulsionKind: "afterburner" as const },
+      initialDistance: 5000,
+    };
+    const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver, simConfig: config });
+    sim.step(1, { propulsionStarved: { shipA: false, shipB: true }, ewarActive: { shipA: true, shipB: true } });
+    expect(sim.snapshot().shipB.maxSpeed).toBe(200);
+    sim.step(1, { propulsionStarved: { shipA: false, shipB: false }, ewarActive: { shipA: true, shipB: true } });
+    expect(sim.snapshot().shipB.maxSpeed).toBe(600);
+  });
+
   test("snapshot leaves max speed unchanged when the projection is out of range", () => {
     const resolver: EwarResolver = {
       speedMultiplier: (projection, distance) => (distance <= 5000 ? 0.4 : 1),

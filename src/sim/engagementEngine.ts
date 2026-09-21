@@ -280,9 +280,11 @@ export class EngagementEngineImpl implements EngagementEngine {
   /** Engagement facts for the capacitor: own hard-range modules that apply nothing, own lock state, opponent suppression. Uses the pre-step snapshot, one frame of latency like the incoming-drain inputs. */
   private capacitorEngagement(snapshot: SimSnapshot, side: Side, distance: number, locks: Record<Side, LockState>, operational: Record<Side, boolean>): CapacitorEngagement {
     const opponent = side === "shipA" ? "shipB" : "shipA";
+    const propulsionKind = this.config?.sim[side].propulsionKind;
     return {
       operational: operational[side],
-      propulsionSuppressed: this.ewarResolver.propulsionSuppressed(snapshot[opponent].ewar, distance),
+      // A scrambler shuts down a microwarpdrive only; an afterburner keeps running and draining.
+      propulsionSuppressed: propulsionKind === "microwarpdrive" && this.ewarResolver.propulsionSuppressed(snapshot[opponent].ewar, distance),
       weaponsEngaged: locks[side].status === "locked",
       disengagedModuleIds: disengagedModuleIds(snapshot[side].ewar, distance, this.ewarResolver),
     };
