@@ -1,4 +1,5 @@
-import { DAMAGE_TYPES, ZERO_DAMAGE, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum, type DamageVector, deriveEngagementFrame, type ShipState } from "./types";
+import { actingEwarFamilies, DAMAGE_TYPES, EMPTY_EWAR_LOADOUT, ZERO_DAMAGE, damageVectorAdd, damageVectorFromPartial, damageVectorScale, damageVectorSum, type DamageVector, deriveEngagementFrame, type EwarActivation, type EwarLoadout, type JammerSpec, type NosferatuSpec, type ShipState, type StasisWebSpec } from "./types";
+import { toTypeId } from "../gamedata/ids";
 import { Vec2 } from "./vec2";
 
 describe("ZERO_DAMAGE", () => {
@@ -109,5 +110,34 @@ describe("deriveEngagementFrame", () => {
     expect(frame.distance).toBeCloseTo(5000, 9);
     expect(frame.transversalSpeed).toBeCloseTo(frame.angularVelocity * frame.distance, 9);
     expect(frame.relVelocity.dot(new Vec2(frame.relPosition.x / frame.distance, frame.relPosition.y / frame.distance))).toBeCloseTo(frame.radialVelocity, 9);
+  });
+});
+
+describe("actingEwarFamilies", () => {
+  const id = (n: string) => toTypeId(n);
+  const web: StasisWebSpec = { moduleName: "Web", moduleId: id("1"), maxRange: 10000, speedFactor: 0.4, overloadRangeBonusPercent: 0, capacitorNeed: 10, cycleTime: 5 };
+  const nosferatu: NosferatuSpec = { moduleName: "Vampire", moduleId: id("2"), amount: 480, cycleTime: 6, maxRange: 9000, falloff: 6000 };
+  const jammer: JammerSpec = { moduleName: "ECM", moduleId: id("3"), optimal: 18000, falloff: 34000, strengths: { gravimetric: 8, ladar: 8, magnetometric: 8, radar: 8 }, overloadStrengthBonusPercent: 0, capacitorNeed: 26, cycleTime: 20 };
+  const loadout: EwarLoadout = { ...EMPTY_EWAR_LOADOUT, webs: [web], nosferatu: [nosferatu], jammers: [jammer] };
+
+  test("enumerates every acting family in stable order, including jammers and nosferatu", () => {
+    const families = actingEwarFamilies(loadout);
+    expect(families.map((family) => family.specs.map((spec) => spec.moduleId))).toEqual([
+      [id("1")], [], [], [], [], [], [], [id("2")], [id("3")],
+    ]);
+  });
+
+  test("activeAt reads the activation arrays per family and index", () => {
+    const activation: EwarActivation = { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [{ active: true, overloaded: false }] };
+    const families = actingEwarFamilies(loadout, activation);
+    expect(families[0].activeAt(0)).toBe(false);
+    expect(families[8].activeAt(0)).toBe(true);
+    expect(families[7].activeAt(0)).toBeUndefined();
+  });
+
+  test("absent activation means every module cycles by default", () => {
+    const families = actingEwarFamilies(loadout);
+    expect(families[0].activeAt(0)).toBeUndefined();
+    expect(families[8].activeAt(0)).toBeUndefined();
   });
 });

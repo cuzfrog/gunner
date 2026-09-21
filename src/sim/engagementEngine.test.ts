@@ -324,11 +324,13 @@ describe("EngagementEngineImpl", () => {
     const deps = makeEngine();
     const webId = toTypeId("4027");
     const painterId = toTypeId("12709");
+    const jammerId = toTypeId("8529");
     const projection: EwarProjection = {
       loadout: {
         webs: [{ moduleName: "Web", moduleId: webId, maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 0, capacitorNeed: 6, cycleTime: 5 }], grapplers: [], disruptors: [], scramblers: [],
         painters: [{ moduleName: "Painter", moduleId: painterId, maxRange: 30000, falloff: 7500, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 0, capacitorNeed: 8, cycleTime: 5 }],
-        dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [],
+        dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [],
+        jammers: [{ moduleName: "Jammer", moduleId: jammerId, optimal: 18000, falloff: 34000, strengths: { gravimetric: 8, ladar: 8, magnetometric: 8, radar: 8 }, overloadStrengthBonusPercent: 0, capacitorNeed: 26, cycleTime: 20 }],
       },
       activation: undefined,
     };
@@ -338,7 +340,7 @@ describe("EngagementEngineImpl", () => {
     deps.engine.reset(engineConfig());
     deps.engine.step(0.1);
     expect(deps.live.capacitorSimulator.step).toHaveBeenCalledWith(0.1, {
-      shipA: { operational: true, propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [painterId] },
+      shipA: { operational: true, propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [painterId, jammerId] },
       shipB: { operational: true, propulsionSuppressed: false, weaponsEngaged: true, disengagedModuleIds: [] },
     });
   });

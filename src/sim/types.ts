@@ -744,6 +744,38 @@ export interface EwarProjection {
   readonly activation?: EwarActivation;
 }
 
+/** The drain-relevant surface shared by every acting ewar spec; nosferatu specs carry no self cost, so their fields are absent. */
+export interface ActingEwarSpec {
+  readonly moduleId: TypeId;
+  readonly capacitorNeed?: number;
+  readonly cycleTime?: number;
+}
+
+export interface ActingEwarFamily {
+  readonly specs: readonly ActingEwarSpec[];
+  /** Activation state per spec index; undefined entries (or an absent activation) mean the module cycles by default. */
+  activeAt(index: number): boolean | undefined;
+}
+
+/** Every ewar family that acts on the opponent, in stable family order - the single enumeration for drains and disengagement. */
+export function actingEwarFamilies(loadout: EwarLoadout, activation?: EwarActivation): readonly ActingEwarFamily[] {
+  return [
+    familyOf(loadout.webs, activation?.webs),
+    familyOf(loadout.grapplers, activation?.grapplers),
+    familyOf(loadout.disruptors, activation?.disruptors),
+    familyOf(loadout.scramblers, activation?.scramblers),
+    familyOf(loadout.painters, activation?.painters),
+    familyOf(loadout.dampeners, activation?.dampeners),
+    familyOf(loadout.neutralizers, activation?.neutralizers),
+    familyOf(loadout.nosferatu, activation?.nosferatu),
+    familyOf(loadout.jammers, activation?.jammers),
+  ];
+}
+
+function familyOf(specs: readonly ActingEwarSpec[], activations: readonly { readonly active: boolean }[] | undefined): ActingEwarFamily {
+  return { specs, activeAt: (index: number) => activations?.[index]?.active };
+}
+
 export interface EwarReach {
   readonly web: number;
   readonly grappler: number;
