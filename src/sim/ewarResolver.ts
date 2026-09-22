@@ -1,6 +1,6 @@
 import type { TypeId } from "../gamedata/ids";
 import type { StackingPenalty } from "./stackingPenalty";
-import { SENSOR_TYPES, type AppliedEwarEffect, type DampenerBreakdown, type DisruptionBreakdown, type EwarEffectPotentials, type EwarProjection, type EwarReach, type JammerSpec, type SensorDampenerSpec, type SensorSpec, type SensorStrengths, type SensorType, type SpeedBreakdown, type SpeedEffectAttribution, type StatEffectAttribution, type TrackingDisruptorSpec, type TurretSpec } from "./types";
+import { SENSOR_TYPES, type AppliedEwarEffect, type DampenerBreakdown, type DisruptionBreakdown, type EwarEffectPotentials, type EwarProjection, type EwarReach, type SensorDampenerSpec, type SensorSpec, type SensorStrengths, type SensorType, type SpeedBreakdown, type SpeedEffectAttribution, type StatEffectAttribution, type TrackingDisruptorSpec, type TurretSpec } from "./types";
 
 export interface EwarResolver {
   speedMultiplier(projection: EwarProjection | undefined, distance: number): number;
@@ -181,8 +181,8 @@ export class EwarResolverImpl implements EwarResolver {
       const jammerActivation = activation?.jammers[i];
       if (jammerActivation && !jammerActivation.active) return 0;
       const overloadBonus = jammerActivation?.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
-      const effectiveness = jammerEffectiveness(distance, spec);
-      if (effectiveness <= 0) return 0;
+      const effectiveness = this.falloffEffectiveness(distance, spec.optimal, spec.falloff);
+      if (effectiveness < MIN_APPLIED_EFFECTIVENESS) return 0;
       return Math.min(1, (spec.strengths[sensorType] * overloadBonus * effectiveness) / sensorStrength);
     });
   }
@@ -329,7 +329,7 @@ export class EwarResolverImpl implements EwarResolver {
       const spec = projection.loadout.jammers[i];
       const activation = projection.activation?.jammers[i];
       if (activation && !activation.active) continue;
-      if (jammerEffectiveness(distance, spec) <= 0) continue;
+      if (this.falloffEffectiveness(distance, spec.optimal, spec.falloff) < MIN_APPLIED_EFFECTIVENESS) continue;
       effects.push({ family: "jammer", moduleId: spec.moduleId, cycleTime: spec.cycleTime });
     }
     return effects;
@@ -618,13 +618,4 @@ function strongestSensorType(strengths: SensorStrengths): SensorType {
     if (strengths[type] > strengths[best]) best = type;
   }
   return best;
-}
-
-/** ECM strength falls off like other ewar but cuts off hard at optimal + 3 falloff. */
-function jammerEffectiveness(distance: number, spec: JammerSpec): number {
-  if (distance <= spec.optimal) return 1;
-  if (spec.falloff <= 0) return 0;
-  const ratio = (distance - spec.optimal) / spec.falloff;
-  if (ratio > 3) return 0;
-  return 0.5 ** (ratio * ratio);
 }

@@ -1,5 +1,5 @@
 import type { TypeId } from "../gamedata/ids";
-import type { Vec2 } from "./vec2";
+import { Vec2 } from "./vec2";
 
 export const SIG_RESOLUTIONS = { S: 40, M: 125, L: 400, XL: 2000 } as const;
 export type SigResolutionClass = keyof typeof SIG_RESOLUTIONS;
@@ -362,6 +362,26 @@ export interface EngagementFrame {
   readonly angularVelocity: number; // rad/s
 }
 
+/** Position-independent inputs of an engagement frame; every kinematic field is derived from the relative motion. */
+export interface RelativeMotion {
+  readonly time: number;
+  readonly shipA: ShipState;
+  readonly shipB: ShipState;
+  readonly relPosition: Vec2; // shipB.pos - shipA.pos
+  readonly relVelocity: Vec2; // shipB.vel - shipA.vel
+}
+
+/** The single derivation of an engagement frame: radial/transversal decomposition and angular velocity stay mutually consistent by construction. */
+export function deriveEngagementFrame(motion: RelativeMotion): EngagementFrame {
+  const distance = motion.relPosition.len();
+  const rHat = distance > 0 ? motion.relPosition.scale(1 / distance) : new Vec2(1, 0);
+  const radialVelocity = motion.relVelocity.dot(rHat);
+  const transversalVelocity = motion.relVelocity.sub(rHat.scale(radialVelocity));
+  const transversalSpeed = transversalVelocity.len();
+  const angularVelocity = distance > 0 ? transversalSpeed / distance : 0;
+  return { time: motion.time, shipA: motion.shipA, shipB: motion.shipB, relPosition: motion.relPosition, distance, relVelocity: motion.relVelocity, radialVelocity, transversalVelocity, transversalSpeed, angularVelocity };
+}
+
 export interface HitChanceBreakdown {
   readonly chance: number; // 0..1
   readonly trackingTerm: number;
@@ -722,6 +742,38 @@ export interface EwarActivation {
 export interface EwarProjection {
   readonly loadout: EwarLoadout;
   readonly activation?: EwarActivation;
+}
+
+/** The drain-relevant surface shared by every acting ewar spec; nosferatu specs carry no self cost, so their fields are absent. */
+export interface ActingEwarSpec {
+  readonly moduleId: TypeId;
+  readonly capacitorNeed?: number;
+  readonly cycleTime?: number;
+}
+
+export interface ActingEwarFamily {
+  readonly specs: readonly ActingEwarSpec[];
+  /** Activation state per spec index; undefined entries (or an absent activation) mean the module cycles by default. */
+  activeAt(index: number): boolean | undefined;
+}
+
+/** Every ewar family that acts on the opponent, in stable family order - the single enumeration for drains and disengagement. */
+export function actingEwarFamilies(loadout: EwarLoadout, activation?: EwarActivation): readonly ActingEwarFamily[] {
+  return [
+    familyOf(loadout.webs, activation?.webs),
+    familyOf(loadout.grapplers, activation?.grapplers),
+    familyOf(loadout.disruptors, activation?.disruptors),
+    familyOf(loadout.scramblers, activation?.scramblers),
+    familyOf(loadout.painters, activation?.painters),
+    familyOf(loadout.dampeners, activation?.dampeners),
+    familyOf(loadout.neutralizers, activation?.neutralizers),
+    familyOf(loadout.nosferatu, activation?.nosferatu),
+    familyOf(loadout.jammers, activation?.jammers),
+  ];
+}
+
+function familyOf(specs: readonly ActingEwarSpec[], activations: readonly { readonly active: boolean }[] | undefined): ActingEwarFamily {
+  return { specs, activeAt: (index: number) => activations?.[index]?.active };
 }
 
 export interface EwarReach {

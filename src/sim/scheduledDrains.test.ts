@@ -52,6 +52,20 @@ describe("scheduledDrainsFromProjections", () => {
     expect(drains).toEqual([{ moduleId: toTypeId("1"), amount: 10, interval: 5, active: false }] satisfies ScheduledDrain[]);
   });
 
+  test("collects jammer drains like every acting ewar family", () => {
+    const jammer: EwarProjection["loadout"]["jammers"][number] = { moduleName: "Multispectral ECM II", moduleId: toTypeId("8"), optimal: 18000, falloff: 34000, strengths: { gravimetric: 8, ladar: 8, magnetometric: 8, radar: 8 }, overloadStrengthBonusPercent: 0, capacitorNeed: 26, cycleTime: 20 };
+    const ewar = ewarProjection({ jammers: [jammer] });
+    const drains = scheduledDrainsFromProjections(ewar, { loadout: { computers: [], scripts: [] }, activation: undefined }, { loadout: { computers: [], enhancers: [], scripts: [] }, activation: undefined }, { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: [] }, []);
+    expect(drains).toEqual([{ moduleId: toTypeId("8"), amount: 26, interval: 20, active: true }] satisfies ScheduledDrain[]);
+  });
+
+  test("nosferatu produce no self drain: their transfer debits the target", () => {
+    const nosferatu: EwarProjection["loadout"]["nosferatu"][number] = { moduleName: "Heavy Energy Vampire II", moduleId: toTypeId("9"), amount: 480, cycleTime: 6, maxRange: 9000, falloff: 6000 };
+    const ewar = ewarProjection({ nosferatu: [nosferatu] });
+    const drains = scheduledDrainsFromProjections(ewar, { loadout: { computers: [], scripts: [] }, activation: undefined }, { loadout: { computers: [], enhancers: [], scripts: [] }, activation: undefined }, { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: [] }, []);
+    expect(drains).toEqual([] satisfies ScheduledDrain[]);
+  });
+
   test("collects command burst drains", () => {
     const drains = scheduledDrainsFromProjections(ewarProjection({}), { loadout: { computers: [], scripts: [] }, activation: undefined }, { loadout: { computers: [], enhancers: [], scripts: [] }, activation: undefined }, { loadout: EMPTY_SENSOR_BOOST_LOADOUT, activation: [] }, [COMMAND_BURST, { ...COMMAND_BURST, capacitorNeed: 0 }]);
     expect(drains).toEqual([{ moduleId: toTypeId("7"), amount: 25, interval: 60, active: true }] satisfies ScheduledDrain[]);

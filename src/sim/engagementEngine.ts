@@ -1,6 +1,6 @@
 import type { CapacitorSimConfig, CapacitorSimulator, CapacitorView } from "./capacitorSimulator";
 import type { AppliedEwarEffect, BurstModifiers, CapacitorEngagement, DamageEvent, DroneRuntimeState, DroneSpec, EwarProjection, FighterRuntimeState, FighterSpec, InflictedDps, IncomingDrain, LayerDamage, LockState, MissileAttackFacts, MissileLaunchSpec, MissileRuntimeState, MissileSimConfig, MissileSpec, SensorSpec, ShipState, Side, SimConfig, SimSnapshot, WeaponSpec, CapacitorSideConfig } from "./types";
-import { IDENTITY_BURST_MODIFIERS } from "./types";
+import { actingEwarFamilies, IDENTITY_BURST_MODIFIERS } from "./types";
 import type { TypeId } from "../gamedata/ids";
 import type { DefenseSimConfig, DefenseSimulator, DefenseView } from "./defenseSimulator";
 import type { DroneSimConfig } from "./droneSimulator";
@@ -280,9 +280,11 @@ export class EngagementEngineImpl implements EngagementEngine {
   /** Engagement facts for the capacitor: own hard-range modules that apply nothing, own lock state, opponent suppression. Uses the pre-step snapshot, one frame of latency like the incoming-drain inputs. */
   private capacitorEngagement(snapshot: SimSnapshot, side: Side, distance: number, locks: Record<Side, LockState>, operational: Record<Side, boolean>): CapacitorEngagement {
     const opponent = side === "shipA" ? "shipB" : "shipA";
+    const propulsionKind = this.config?.sim[side].propulsionKind;
     return {
       operational: operational[side],
-      propulsionSuppressed: this.ewarResolver.propulsionSuppressed(snapshot[opponent].ewar, distance),
+      // A scrambler shuts down a microwarpdrive only; an afterburner keeps running and draining.
+      propulsionSuppressed: propulsionKind === "microwarpdrive" && this.ewarResolver.propulsionSuppressed(snapshot[opponent].ewar, distance),
       weaponsEngaged: locks[side].status === "locked",
       disengagedModuleIds: disengagedModuleIds(snapshot[side].ewar, distance, this.ewarResolver),
     };
@@ -461,17 +463,13 @@ function incomingDrains(effects: readonly AppliedEwarEffect[], resistancePercent
   return [...byModule.values()];
 }
 
-/** Own hard-range modules that apply nothing at this distance: the ewar families minus the ids with an applied effect. Boosters never apply and are never listed. */
+/** Own hard-range modules that act on the opponent but apply nothing at this distance: the acting ewar families minus the ids with an applied effect. */
 function disengagedModuleIds(projection: EwarProjection | undefined, distance: number, resolver: EwarResolver): readonly TypeId[] {
   if (!projection) return [];
   const applied = new Set(resolver.appliedEffects(projection, distance).map((effect) => effect.moduleId));
-  const loadout = projection.loadout;
-  const families: readonly (readonly { readonly moduleId: TypeId }[])[] = [
-    loadout.webs, loadout.grapplers, loadout.disruptors, loadout.scramblers, loadout.painters, loadout.dampeners, loadout.neutralizers, loadout.nosferatu,
-  ];
   const ids: TypeId[] = [];
-  for (const family of families) {
-    for (const spec of family) {
+  for (const family of actingEwarFamilies(projection.loadout)) {
+    for (const spec of family.specs) {
       if (!applied.has(spec.moduleId)) ids.push(spec.moduleId);
     }
   }

@@ -105,12 +105,19 @@ export class SimulationImpl implements Simulation {
 
 function effectiveState(resolver: EwarResolver, ship: ShipState, opponentEwar: EwarProjection | undefined, distance: number, propulsionStarved: boolean, bursts: BurstModifiers): ShipState {
   const multiplier = resolver.speedMultiplier(opponentEwar, distance);
-  const suppressed = resolver.propulsionSuppressed(opponentEwar, distance) || propulsionStarved;
-  const baseSpeed = suppressed ? suppressedSpeed(ship) : propulsionBoostedSpeed(ship, bursts.propulsionSpeed);
-  const sig = effectiveSig(ship, suppressed);
+  const scrambled = resolver.propulsionSuppressed(opponentEwar, distance);
+  const offline = propulsionOffline(ship, scrambled, propulsionStarved);
+  const baseSpeed = offline ? suppressedSpeed(ship) : propulsionBoostedSpeed(ship, bursts.propulsionSpeed);
+  const sig = effectiveSig(ship, offline);
   const inertia = ship.inertiaModifier * bursts.inertia;
   if (multiplier === 1 && baseSpeed === ship.maxSpeed && sig === ship.sig && inertia === ship.inertiaModifier) return ship;
   return { ...ship, maxSpeed: baseSpeed * multiplier, sig, inertiaModifier: inertia };
+}
+
+/** EVE parity: cap starvation stops any propulsion module, while a scrambler shuts down microwarpdrives only - an afterburner keeps running. */
+function propulsionOffline(ship: ShipState, scrambled: boolean, starved: boolean): boolean {
+  if (starved) return true;
+  return scrambled && ship.propulsionKind === "microwarpdrive";
 }
 
 /** A propulsion speed burst (Rapid Deployment) scales only the afterburner/MWD contribution above base speed. */
@@ -128,9 +135,9 @@ function effectiveSig(ship: ShipState, suppressed: boolean): number | undefined 
   return (base + (ship.sigPenalty ?? 0)) * (1 + (ship.sigBloom ?? 0));
 }
 
+/** A deactivated propulsion module leaves the hull at base speed. */
 function suppressedSpeed(ship: ShipState): number {
-  if (ship.propulsionKind === "microwarpdrive") return ship.baseMaxSpeed ?? ship.maxSpeed;
-  return ship.maxSpeed;
+  return ship.baseMaxSpeed ?? ship.maxSpeed;
 }
 
 function asState(config: CombatantConfig, position: Vec2): ShipState {

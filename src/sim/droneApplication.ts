@@ -1,7 +1,8 @@
 import { computeExpectedMultiplier } from "./expectedHitMultiplier";
 import type { HitChance } from "./hitChance";
 import type { WeaponDamageAssessor } from "./weaponDamageAssessor";
-import type { DamageAssessment, DroneDamageBreakdown, DroneMode, DroneRuntimeState, DroneSpec, EngagementFrame } from "./types";
+import { Vec2 } from "./vec2";
+import { type DamageAssessment, type DroneDamageBreakdown, type DroneMode, type DroneRuntimeState, type DroneSpec, type EngagementFrame, deriveEngagementFrame } from "./types";
 
 export interface DroneApplication {
   compute(frame: EngagementFrame, drone: DroneSpec, opponentSigRadius: number, state?: DroneRuntimeState): DroneDamageBreakdown & DamageAssessment;
@@ -88,5 +89,6 @@ function orbitAngularVelocity(orbitSpeed: number, orbitRange: number, distanceTo
 }
 
 function withAngularVelocityAndDistance(frame: EngagementFrame, angularVelocity: number, distance: number): EngagementFrame {
-  return { ...frame, angularVelocity, distance };
+  const rHat = frame.distance > 0 ? frame.relPosition.scale(1 / frame.distance) : new Vec2(1, 0);
+  return deriveEngagementFrame({ time: frame.time, shipA: frame.shipA, shipB: frame.shipB, relPosition: rHat.scale(distance), relVelocity: rHat.perpCCW().scale(angularVelocity * distance) });
 }
