@@ -17,8 +17,7 @@ import { StaticItemNameCatalog, StaticItemNameResolver } from "../src/gamedata/i
 import { MODULE_SLOT_CATALOG } from "../src/gamedata/moduleSlots";
 import { FITTING_DB } from "../src/gamedata/fittingDb";
 import { PRESET_FITTINGS } from "../src/gamedata/presets/fittingPresets";
-import { StaticImageCatalog } from "../src/ui/icons/imageCatalog";
-import { TYPE_ICON_FILES } from "../src/ui/icons/typeIconFiles";
+import { StaticImageCatalog, TYPE_ICON_FILES } from "../src/ui/icons";
 
 const ships = new ShipsImpl({ shipProfileCatalog: new StaticShipProfileCatalog(), nameI18nCatalog: new StaticNameI18nCatalog() });
 const gunFamilies = new GunFamiliesImpl({ fittingDb: FITTING_DB });

@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { toTypeId } from "../src/gamedata/ids";
-import { TYPE_ICON_FILES } from "../src/ui/icons/typeIconFiles";
+import { TYPE_ICON_FILES } from "../src/ui/icons";
 import { ensureDistBuild } from "./ensure-dist-build";
 
 const DISTRIBUTION_DIRECTORY = "dist";

@@ -1,6 +1,6 @@
 {
   "name": "gunner",
-  "version": "0.53.1",
+  "version": "0.53.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,6 +14,8 @@
     "lint:css": "stylelint \"src/styles/**/*.css\"",
     "trace": "bun run scripts/sim-trace.ts",
     "generate:icons": "bun run scripts/generate-icon-assets.ts",
+    "sync:type-icons": "bun run scripts/sync-type-icons.ts",
+    "verify:icons": "bun run scripts/sync-type-icons.ts --verify",
     "generate:slots": "bun run scripts/generate-module-slots.ts",
     "generate:name-i18n": "bun run scripts/generate-name-i18n.ts",
     "generate:fitting-db": "bun run scripts/generate-fitting-db.ts",

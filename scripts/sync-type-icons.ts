@@ -1,76 +1,71 @@
 #!/usr/bin/env bun
-import { existsSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import * as process from "node:process";
+import { buildTypeIconEntries, IN_SCOPE_CATEGORY_IDS, readSdeGroups, readSdeTypes, syncTypeIcons, verifyTypeIcons, type TypeIconFetchResult, type TypeIconFetcher, type TypeIconProblems, type TypeIconStore } from "./iconAssets";
 
-const SDE_DIR = process.argv[2] ?? join(import.meta.dir, "..", "sde");
-const ICONS_SOURCE_DIRECTORY = "data/ship-modules";
-const TYPE_ICONS_DIR = join(ICONS_SOURCE_DIRECTORY, "type-icons");
-const IN_SCOPE_CATEGORY_IDS = new Set([7, 8, 18, 32, 66, 87, 4, 22]);
-const FETCH_CONCURRENCY = 8;
+const SDE_DIR = join(import.meta.dir, "..", "sde");
+const TYPE_ICONS_DIR = join("data", "ship-modules", "type-icons");
+const EXIT_PROBLEMS = 1;
 
-interface SdeType {
-  readonly typeID: number;
-  readonly groupID: number;
-  readonly iconID?: number;
+function main(): void {
+  void run(process.argv.slice(2)).catch((error: Error) => {
+    console.error(error);
+    process.exit(1);
+  });
 }
 
-interface SdeGroup {
-  readonly groupID: number;
-  readonly categoryID: number;
-}
-
-async function main(): Promise<void> {
-  mkdirSync(TYPE_ICONS_DIR, { recursive: true });
-  const groups = JSON.parse(readFileSync(join(SDE_DIR, "groups.0.json"), "utf8")) as Record<string, SdeGroup>;
-  const inScopeGroupIds = new Set<string>();
-  for (const [gid, group] of Object.entries(groups)) {
-    if (IN_SCOPE_CATEGORY_IDS.has(group.categoryID)) inScopeGroupIds.add(gid);
-  }
-
-  const needed: number[] = [];
-  for (const file of readdirSync(SDE_DIR).filter((f) => f.startsWith("types.") && f.endsWith(".json")).sort()) {
-    const types = JSON.parse(readFileSync(join(SDE_DIR, file), "utf8")) as Record<string, SdeType>;
-    for (const type of Object.values(types)) {
-      if (type.iconID !== undefined) continue;
-      if (!inScopeGroupIds.has(String(type.groupID))) continue;
-      needed.push(type.typeID);
-    }
-  }
-  needed.sort((a, b) => a - b);
-
-  const toFetch = needed.filter((tid) => !existsSync(join(TYPE_ICONS_DIR, `${tid}@1x.png`)));
-  console.log(`${needed.length} in-scope types without an SDE iconID; ${toFetch.length} missing on disk.`);
-  if (toFetch.length === 0) {
-    console.log("Nothing to fetch.");
+async function run(args: readonly string[]): Promise<void> {
+  const flags = args.filter((arg) => arg.startsWith("--"));
+  const store = nodeTypeIconStore(TYPE_ICONS_DIR);
+  const entries = buildTypeIconEntries(readSdeTypes(SDE_DIR), readSdeGroups(SDE_DIR), IN_SCOPE_CATEGORY_IDS);
+  if (flags.includes("--verify")) {
+    const problems = await verifyTypeIcons({ entries, store });
+    reportProblems(problems);
+    if (problems.invalid.length + problems.orphaned.length > 0) process.exit(EXIT_PROBLEMS);
     return;
   }
-
-  let done = 0;
-  let failed = 0;
-  for (let i = 0; i < toFetch.length; i += FETCH_CONCURRENCY) {
-    const batch = toFetch.slice(i, i + FETCH_CONCURRENCY);
-    await Promise.all(batch.map(async (tid) => {
-      const outPath = join(TYPE_ICONS_DIR, `${tid}@1x.png`);
-      const url = `https://images.evetech.net/types/${tid}/icon`;
-      try {
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        await Bun.write(outPath, await resp.blob());
-        done++;
-      } catch (error) {
-        failed++;
-        console.warn(`Failed to fetch icon for typeId ${tid}: ${(error as Error).message}`);
-      }
-    }));
-    if ((i + FETCH_CONCURRENCY) % 80 === 0 || i + FETCH_CONCURRENCY >= toFetch.length) {
-      console.log(`Progress: ${done} fetched, ${failed} failed, ${toFetch.length - done - failed} remaining.`);
-    }
-  }
-  console.log(`Done: ${done} fetched, ${failed} failed.`);
+  const prune = flags.includes("--prune");
+  const report = await syncTypeIcons({ entries, store, fetcher: httpTypeIconFetcher(), prune });
+  console.log(`Fetched ${report.fetched.length} icon(s)${report.fetched.length > 0 ? `: ${report.fetched.join(", ")}` : ""}.`);
+  for (const failure of report.failed) console.warn(`Failed typeId ${failure.typeId}: ${failure.reason}`);
+  if (report.unavailable.length > 0) console.log(`Unavailable at source (no icon published): ${report.unavailable.length} typeId(s).`);
+  if (report.pruned.length > 0) console.log(`Pruned ${report.pruned.length} orphaned file(s): ${report.pruned.join(", ")}`);
+  if (report.failed.length > 0) console.warn(`Done with ${report.failed.length} failure(s); re-run to retry.`);
+  if (report.failed.length > 0) process.exit(EXIT_PROBLEMS);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+function reportProblems(problems: TypeIconProblems): void {
+  for (const problem of problems.invalid) console.warn(`Invalid ${problem.name}: ${problem.reason}`);
+  if (problems.orphaned.length > 0) console.warn(`Orphaned files (run sync with --prune): ${problems.orphaned.join(", ")}`);
+  if (problems.missing.length > 0) console.log(`Missing on disk (run sync to fetch; some may be unavailable at source): ${problems.missing.length} typeId(s).`);
+  const total = problems.invalid.length + problems.orphaned.length;
+  console.log(total === 0 ? "All on-disk type icons verified." : `${total} problem(s) found.`);
+}
+
+function nodeTypeIconStore(dir: string): TypeIconStore {
+  return {
+    fileNames: () => existsSync(dir) ? readdirSync(dir) : [],
+    read: (name) => existsSync(join(dir, name)) ? readFileSync(join(dir, name)) : undefined,
+    write: (name, bytes) => {
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, name), bytes);
+    },
+    delete: (name) => rmSync(join(dir, name)),
+  };
+}
+
+function httpTypeIconFetcher(): TypeIconFetcher {
+  return {
+    fetch: async (typeId): Promise<TypeIconFetchResult> => {
+      const response = await fetch(`https://images.evetech.net/types/${typeId}/icon`);
+      if (response.status === 404) return { status: "unavailable" };
+      if (!response.ok) return { status: "failed", reason: `HTTP ${response.status}` };
+      return { status: "ok", bytes: new Uint8Array(await response.arrayBuffer()) };
+    },
+  };
+}
+
+if (import.meta.main) {
+  main();
+}
