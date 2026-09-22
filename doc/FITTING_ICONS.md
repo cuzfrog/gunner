@@ -47,10 +47,11 @@ An icon going missing means exactly one hop is broken. Diagnose by walking from 
 - Check: the generated `TYPE_ICON_FILES` map; then the generator - the old implementation name-joined and `continue`d on any miss, so a single name drift silently dropped entries.
 - Fix: generation must iterate SDE types directly (coverage from data, not names) and the generator must fail loudly on a missing on-disk file.
 
-### 6. Table entry exists but file missing on disk
+### 6. Table entry exists but file missing or invalid on disk
 
-- Symptom: URL resolves, `<img src>` set, no image (browser 404); or build throws `Missing icon source`.
-- Check: does `data/ship-modules/<table value>` exist? For icon-less types the file must be fetched from `https://images.evetech.net/types/<typeId>/icon` into `data/ship-modules/type-icons/` (re-run `scripts/sync-type-icons.ts`; it is idempotent).
+- Symptom: URL resolves, `<img src>` set, no image (browser 404); or build throws `Missing icon source`; or an item shows a WRONG image (e.g. a faction emblem).
+- Check: does `data/ship-modules/<table value>` exist and is it a valid PNG of at least 32x32? For icon-less types the file must be fetched from `https://images.evetech.net/types/<typeId>/icon` (re-run `bun scripts/sync-type-icons.ts`; it validates bytes and re-fetches invalid or missing files, and is idempotent).
+- History: the image server once served 16x16 placeholder fallbacks (HTTP 200) for some drones, shipping e.g. Acolyte II with the Amarr emblem. `tests/typeIconsData.test.ts` now guards every referenced file's integrity and prunes orphans; `--verify` audits, `--prune` removes files no longer expected by the SDE.
 - Fix: fetch and COMMIT the file; never delete the table entry to make a check pass.
 
 ### 7. iconId vs typeId file-key collision

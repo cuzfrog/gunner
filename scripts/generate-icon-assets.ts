@@ -1,46 +1,16 @@
 #!/usr/bin/env bun
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { extname, join } from "node:path";
 import * as process from "node:process";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 import type { ShipProfile } from "../src/ships";
+import { buildTypeIconEntries, IN_SCOPE_CATEGORY_IDS, readSdeGroups, readSdeTypes } from "./iconAssets";
 
 const SDE_DIR = process.argv[2] ?? join(import.meta.dir, "..", "sde");
 const TYPE_ICON_OUTPUT_PATH = "src/ui/icons/typeIconFiles.ts";
 const SHIP_IMAGE_OUTPUT_PATH = "src/ui/icons/shipImageIds.ts";
 const SHIP_IMAGES_SOURCE = "data/ship-images";
 const ICONS_SOURCE_DIRECTORY = "data/ship-modules";
-
-const IN_SCOPE_CATEGORY_IDS = new Set([7, 8, 18, 32, 66, 87, 4, 22]);
-
-interface SdeType {
-  readonly typeID: number;
-  readonly groupID: number;
-  readonly published: number;
-  readonly iconID?: number;
-}
-
-interface SdeGroup {
-  readonly groupID: number;
-  readonly categoryID: number;
-}
-
-export function buildTypeIconEntries(
-  types: Readonly<Record<string, SdeType>>,
-  groups: Readonly<Record<string, SdeGroup>>,
-  inScopeCategoryIds: ReadonlySet<number>,
-): Record<string, string> {
-  const inScopeGroupIds = new Set<string>();
-  for (const [gid, group] of Object.entries(groups)) {
-    if (inScopeCategoryIds.has(group.categoryID)) inScopeGroupIds.add(gid);
-  }
-  const entries: Record<string, string> = {};
-  for (const [tid, type] of Object.entries(types)) {
-    if (!inScopeGroupIds.has(String(type.groupID))) continue;
-    entries[tid] = type.iconID !== undefined ? `icons/${type.iconID}@1x.png` : `type-icons/${tid}@1x.png`;
-  }
-  return entries;
-}
 
 export function generateTypeIconFilesContent(entries: Readonly<Record<string, string>>): string {
   const lines = Object.keys(entries)
@@ -83,19 +53,6 @@ function readShipImageFileNames(): string[] {
     .map((entry) => entry.name);
 }
 
-function readSdeGroups(): Record<string, SdeGroup> {
-  return JSON.parse(readFileSync(join(SDE_DIR, "groups.0.json"), "utf8"));
-}
-
-function readSdeTypes(): Record<string, SdeType> {
-  const types: Record<string, SdeType> = {};
-  for (const file of readdirSync(SDE_DIR).filter((f) => f.startsWith("types.") && f.endsWith(".json")).sort()) {
-    const shard = JSON.parse(readFileSync(join(SDE_DIR, file), "utf8")) as Record<string, SdeType>;
-    for (const [tid, type] of Object.entries(shard)) types[tid] = type;
-  }
-  return types;
-}
-
 function collectExistingIconFiles(): Set<string> {
   const files = new Set<string>();
   for (const sub of ["icons", "type-icons"]) {
@@ -109,8 +66,8 @@ function collectExistingIconFiles(): Set<string> {
 }
 
 function main(): void {
-  const groups = readSdeGroups();
-  const types = readSdeTypes();
+  const groups = readSdeGroups(SDE_DIR);
+  const types = readSdeTypes(SDE_DIR);
   const allEntries = buildTypeIconEntries(types, groups, IN_SCOPE_CATEGORY_IDS);
   const existingFiles = collectExistingIconFiles();
 
