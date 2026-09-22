@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { buildTypeIconEntries, IN_SCOPE_CATEGORY_IDS, readSdeGroups, readSdeTypes, TYPE_ICON_FILE_PREFIX, validateTypeIconBytes } from "../scripts/iconAssets";
-import { TYPE_ICON_FILES } from "../src/ui/icons/typeIconFiles";
+import { TYPE_ICON_FILES } from "../src/ui/icons";
 
 const TYPE_ICONS_DIR = join("data", "ship-modules", "type-icons");
 const entries = buildTypeIconEntries(readSdeTypes("sde"), readSdeGroups("sde"), IN_SCOPE_CATEGORY_IDS);

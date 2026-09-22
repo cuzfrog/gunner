@@ -3,7 +3,7 @@ import type { ServerResponse } from "node:http";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
-import { TYPE_ICON_FILES } from "../../src/ui/icons/typeIconFiles";
+import { TYPE_ICON_FILES } from "../../src/ui/icons";
 
 const SHIP_IMAGES_SOURCE = "data/ship-images";
 const ICONS_SOURCE_DIRECTORY = "data/ship-modules";
