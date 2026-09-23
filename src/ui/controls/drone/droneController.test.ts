@@ -110,6 +110,16 @@ describe("DroneController", () => {
     expect(getFake(document, "ship-a-drone-max-velocity").textContent).toBe("-");
   });
 
+  test("drone count telemetry shows the launched total, not the carried bay total", () => {
+    const hobgoblin = importedDroneFixture({ count: 5 });
+    const warrior = importedDroneFixture({ typeId: WARRIOR_ID, name: "Warrior I", count: 2 });
+    const { document, controller } = buildDrone({
+      droneLoadoutResolver: resolverReturningDrones([hobgoblin, warrior]),
+    });
+    controller.applyImported(importedWithDrones([hobgoblin, importedDroneFixture({ typeId: WARRIOR_ID, name: "Warrior I", count: 5 })]), NEUTRAL_CONDITIONS);
+    expect(getFake(document, "ship-a-drone-count").textContent).toBe("7");
+  });
+
   test("restore with fitting text and droneGroups selects the specified drones", () => {
     const hobgoblin = importedDroneFixture();
     const warrior = importedDroneFixture({ typeId: WARRIOR_ID, name: "Warrior I" });

@@ -167,7 +167,7 @@ export class DroneControllerImpl implements DroneController {
     setText(this.els.falloff, formatDistance(drone.falloff, t));
     setText(this.els.damage, formatWithCommas(damageVectorSum(droneDamagePerShot(drone)), 1));
     setText(this.els.cycleTime, `${formatNumber(drone.cycleTime, 2)} s`);
-    setText(this.els.count, String(this.totalCount()));
+    setText(this.els.count, String(this.launchedCount()));
     if (drone.sizeClass === "sentry") {
       setText(this.els.orbitSpeed, "-");
       setText(this.els.maxVelocity, "-");
@@ -276,8 +276,8 @@ export class DroneControllerImpl implements DroneController {
     this.events.emitConfigInvalidated();
   }
 
-  private totalCount(): number {
-    return this.droneGroups.reduce((sum, g) => sum + g.count, 0);
+  private launchedCount(): number {
+    return this.resolvedDrones.reduce((sum, drone) => sum + drone.count, 0);
   }
 
   private recompute(): void {
