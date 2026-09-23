@@ -1,6 +1,7 @@
-import type { DroneStats, FittingDb, HullBonus, ShipStatFlatAttribute } from "../gamedata/fittingDb";
+import type { DroneStats, FittingDb, HullBonus } from "../gamedata/fittingDb";
 import type { ShipProfile } from "../ships";
 import type { DroneGroup } from "./fittingState";
+import { droneLoadoutLimits, type DroneLoadoutLimits } from "./droneLoadoutLimits";
 
 export type DroneLoadoutViolation = "tooManyDrones" | "bandwidthExceeded" | "bayCapacityExceeded";
 
@@ -41,21 +42,16 @@ export class DroneLoadoutValidatorImpl implements DroneLoadoutValidator {
         totalVolume += group.count * stats.volume;
       }
     }
-    const bandwidthLimit = profile.droneBandwidth + flatSum(hullBonuses, "droneBandwidthFlat");
-    const capacityLimit = profile.droneCapacity + flatSum(hullBonuses, "droneCapacityFlat");
-    const violations = collectViolations(totalCount, totalBandwidth, totalVolume, profile, bandwidthLimit, capacityLimit);
-    return { valid: violations.length === 0, totalCount, totalBandwidth, totalVolume, bandwidthLimit, capacityLimit, violations };
+    const limits = droneLoadoutLimits(profile, hullBonuses);
+    const violations = collectViolations(totalCount, totalBandwidth, totalVolume, limits);
+    return { valid: violations.length === 0, totalCount, totalBandwidth, totalVolume, bandwidthLimit: limits.bandwidthLimit, capacityLimit: limits.capacityLimit, violations };
   }
 }
 
-function collectViolations(totalCount: number, totalBandwidth: number, totalVolume: number, profile: ShipProfile, bandwidthLimit: number, capacityLimit: number): DroneLoadoutViolation[] {
+function collectViolations(totalCount: number, totalBandwidth: number, totalVolume: number, limits: DroneLoadoutLimits): DroneLoadoutViolation[] {
   const violations: DroneLoadoutViolation[] = [];
-  if (totalCount > profile.maxActiveDrones) violations.push("tooManyDrones");
-  if (totalBandwidth > bandwidthLimit) violations.push("bandwidthExceeded");
-  if (totalVolume > capacityLimit) violations.push("bayCapacityExceeded");
+  if (totalCount > limits.maxActiveDrones) violations.push("tooManyDrones");
+  if (totalBandwidth > limits.bandwidthLimit) violations.push("bandwidthExceeded");
+  if (totalVolume > limits.capacityLimit) violations.push("bayCapacityExceeded");
   return violations;
-}
-
-function flatSum(hullBonuses: readonly HullBonus[], attribute: ShipStatFlatAttribute): number {
-  return hullBonuses.reduce((sum, bonus) => (bonus.attribute === attribute ? sum + bonus.magnitude : sum), 0);
 }
