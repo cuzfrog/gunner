@@ -116,9 +116,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   onSkillOrOverloadChange(updateInertia: boolean): void {
     this.panel.sections.stats.updateShipStats({ updateInertia, updateMass: false, updateSig: false });
     if (this.panel.profile && this.panel.fittingText) {
-      this.panel.restoreTurret();
-      this.panel.restoreLauncher();
-      this.panel.restoreDrone();
+      this.panel.recomputeFittedSpecs();
     }
     this.panel.host.persistConfigChange(this.panel.profile !== undefined);
   }

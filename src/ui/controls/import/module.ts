@@ -8,7 +8,7 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export function registerImportModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    importController: asFunction(({ els, clipboard, fittingImport, savedFittings, popupGroup, shipASide, shipBSide, turretControllers, launcherControllers, droneControllers, weaponSystemSwitches, profileController, profileTextCodec, uiEvents, itemNameLoader }: ControlsCradle) => new ImportControllerImpl({
+    importController: asFunction(({ els, clipboard, fittingImport, savedFittings, popupGroup, shipASide, shipBSide, turretControllers, launcherControllers, droneControllers, fighterControllers, weaponSystemSwitches, profileController, profileTextCodec, uiEvents, itemNameLoader }: ControlsCradle) => new ImportControllerImpl({
       clipboard,
       fittingImport,
       savedFittings,
@@ -19,6 +19,7 @@ export function registerImportModule<T extends ControlsCradle>(cradle: AwilixCon
       turrets: turretControllers,
       launchers: launcherControllers,
       drones: droneControllers,
+      fighters: fighterControllers,
       weaponSystemSwitches,
       profileController,
       profileTextCodec,

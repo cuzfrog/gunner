@@ -166,11 +166,8 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
     recordOverride: vi.fn(),
     clearOverrides: vi.fn(),
     clearTurret: vi.fn(),
-    restoreTurret: vi.fn(),
     clearLauncher: vi.fn(),
-    restoreLauncher: vi.fn(),
     clearDrone: vi.fn(),
-    restoreDrone: vi.fn(),
     clearSelectionSession: vi.fn(),
   } as unknown as SidePanel);
 

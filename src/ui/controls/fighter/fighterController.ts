@@ -115,6 +115,13 @@ export class FighterControllerImpl implements FighterController {
     this.clear();
   }
 
+  updateConditions(conditions: StatConditions): void {
+    this.conditions = conditions;
+    if (!this.loadoutContext) return;
+    this.recompute();
+    this.render();
+  }
+
   clear(): void {
     this.popupGroup.close(this.popupValue);
     this.fighterGroups = [];

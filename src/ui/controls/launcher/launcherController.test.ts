@@ -3,6 +3,7 @@ import { FakeElement, getFake, IMPORTED_RIFTER } from "../testSupport";
 import { damageVectorSum } from "../../../sim";
 import { formatDistance } from "../controlsFormat";
 import type { ImportedFitting } from "../../../fitting";
+import type { StatConditions } from "../../../ships";
 import type { TypeId } from "../../../gamedata/ids";
 
 const SCOURGE_LIGHT_ID = "206" as TypeId;
@@ -128,6 +129,32 @@ describe("LauncherController", () => {
   test("currentMissileSpec returns undefined when no launcher is fitted", () => {
     const { controller } = buildLauncher();
     expect(controller.currentMissileSpec()).toBeUndefined();
+  });
+
+  test("updateConditions re-resolves the launcher under the new conditions and preserves the selected charge", () => {
+    const { document, controller, fittingCalculator, events } = buildLauncher();
+    const nova = importedLauncherFixture({ chargeId: NOVA_LIGHT_ID, chargeName: "Nova Light Missile" });
+    vi.mocked(fittingCalculator.resolveLauncher).mockReturnValue(nova);
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
+    controller.openAmmoPopup();
+    const list = getFake(document, "ship-a-launcher-ammo-list");
+    (list.children[1].firstElementChild as unknown as FakeElement).trigger("click");
+    expect(controller.ammoId()).toBe(NOVA_LIGHT_ID);
+    const resolveSpy = vi.mocked(fittingCalculator.resolveLauncher);
+    resolveSpy.mockClear();
+    const emitSpy = vi.spyOn(events, "emitConfigInvalidated");
+    const conditions: StatConditions = { skillLevel: 4, overloaded: true, weaponOverloaded: false };
+    controller.updateConditions(conditions);
+    expect(resolveSpy.mock.calls[0]?.[1]).toBe(conditions);
+    expect(controller.ammoId()).toBe(NOVA_LIGHT_ID);
+    expect(getFake(document, "ship-a-launcher-ammo-summary").textContent).toBe("Nova Light Missile");
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  test("updateConditions without a fitted launcher does not resolve", () => {
+    const { controller, fittingCalculator } = buildLauncher();
+    controller.updateConditions({ skillLevel: 4, overloaded: false, weaponOverloaded: false });
+    expect(fittingCalculator.resolveLauncher).not.toHaveBeenCalled();
   });
 
   test("currentMissileSpec returns a MissileSpec with flightRange when a launcher is fitted", () => {

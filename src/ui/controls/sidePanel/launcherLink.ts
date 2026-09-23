@@ -5,7 +5,7 @@ import type { Side } from "../side";
 
 export interface PanelLauncherLink {
   clear(): void;
-  restore(fittingText: string | undefined, conditions: StatConditions): void;
+  updateConditions(conditions: StatConditions): void;
   setHullProfile(profile: ShipProfile | undefined): void;
 }
 
@@ -21,8 +21,8 @@ class PanelLauncherLinkImpl implements PanelLauncherLink {
     this.launcher.clear();
   }
 
-  restore(fittingText: string | undefined, conditions: StatConditions): void {
-    this.launcher.restore(fittingText, conditions);
+  updateConditions(conditions: StatConditions): void {
+    this.launcher.updateConditions(conditions);
   }
 
   setHullProfile(profile: ShipProfile | undefined): void {

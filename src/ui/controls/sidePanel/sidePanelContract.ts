@@ -15,6 +15,7 @@ import type { PanelOverrides } from "./overrides";
 import type { PanelTurretLink } from "./turretLink";
 import type { PanelLauncherLink } from "./launcherLink";
 import type { PanelDroneLink } from "./droneLink";
+import type { PanelFighterLink } from "./fighterLink";
 import type { SidePanelElements } from "./elements";
 import type { DimensionedSelection, SelectionSession, PropulsionDimension } from "../../selectionSession";
 
@@ -47,13 +48,13 @@ export interface SidePanel {
   recordOverride<K extends keyof ProfileParamOverrides>(key: K, value: ProfileParamOverrides[K]): void;
   clearOverrides(): void;
   clearTurret(): void;
-  restoreTurret(): void;
   setTurretProfile(profile: ShipProfile | undefined): void;
   clearLauncher(): void;
-  restoreLauncher(): void;
   setLauncherProfile(profile: ShipProfile | undefined): void;
   clearDrone(): void;
-  restoreDrone(): void;
+  clearFighter(): void;
+  /** Re-resolves fitted weapons and drone/fighter bays under the current skill conditions, preserving user selections. */
+  recomputeFittedSpecs(): void;
   clearSelectionSession(): void;
   setSensorData(spec: SensorSpec | undefined): void;
   renderFittingPopupIfOpen(): void;
@@ -133,6 +134,7 @@ export interface SidePanelDeps {
   turretLink: PanelTurretLink;
   launcherLink: PanelLauncherLink;
   droneLink: PanelDroneLink;
+  fighterLink: PanelFighterLink;
   simValueParser: SimValueParser;
   propulsionSelection: DimensionedSelection<PropulsionDimension>;
   selectionSession: SelectionSession;

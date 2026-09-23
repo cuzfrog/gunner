@@ -52,6 +52,7 @@ export interface FighterController {
   validation(): FighterLoadoutValidation | undefined;
   applyImported(imported: ImportedFitting, conditions: StatConditions): void;
   restore(fitting?: string, conditions?: StatConditions, fighterGroups?: readonly FighterGroup[]): void;
+  updateConditions(conditions: StatConditions): void;
   clear(): void;
   capture(): { fighterGroups: readonly FighterGroup[] };
   isPopupOpen(): boolean;

@@ -1,4 +1,5 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
+import type { StatConditions } from "../../../ships";
 import type { ImportedFitting } from "../../../fitting";
 import type { FighterSpec } from "../../../sim";
 import { damageVectorSum } from "../../../sim";
@@ -129,5 +130,28 @@ describe("FighterControllerImpl", () => {
     controller.applyImported(templarFitting(), NEUTRAL_CONDITIONS);
     const countEl = getFake(globalThis.document!, "ship-a-fighter-count");
     expect(countEl.textContent).toBe("6");
+  });
+
+  test("updateConditions re-resolves the squadrons under the new conditions and preserves user additions", () => {
+    const { controller, fighterCatalog, fighterLoadoutResolver, events } = buildFighter();
+    fighterCatalog.fightersByKind.mockImplementation((kind) => kind === "light" ? [{ id: TEMPLAR_ID, name: "Templar I", kind: "light", damage: 97.5, damageByType: { em: 97.5 }, volume: 2500, squadronMaxSize: 6 }] : []);
+    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture()]);
+    controller.applyImported(templarFitting(), NEUTRAL_CONDITIONS);
+    const option = getFake(globalThis.document!, "ship-a-fighter-catalog-light").children[0]?.firstElementChild as unknown as FakeElement;
+    option.trigger("click");
+    const resolveSpy = vi.mocked(fighterLoadoutResolver.resolve);
+    resolveSpy.mockClear();
+    const emitSpy = vi.spyOn(events, "emitConfigInvalidated");
+    const conditions: StatConditions = { skillLevel: 4, overloaded: true, weaponOverloaded: false };
+    controller.updateConditions(conditions);
+    expect(resolveSpy.mock.calls[0]?.[2]).toBe(conditions);
+    expect(resolveSpy.mock.calls[0]?.[0]).toEqual([{ typeId: TEMPLAR_ID, count: 7 }]);
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  test("updateConditions without an imported fitting still stores the conditions and does not resolve", () => {
+    const { controller, fighterLoadoutResolver } = buildFighter();
+    controller.updateConditions({ skillLevel: 4, overloaded: false, weaponOverloaded: false });
+    expect(fighterLoadoutResolver.resolve).not.toHaveBeenCalled();
   });
 });

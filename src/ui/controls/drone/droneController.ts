@@ -117,6 +117,13 @@ export class DroneControllerImpl implements DroneController {
     this.clear();
   }
 
+  updateConditions(conditions: StatConditions): void {
+    this.conditions = conditions;
+    if (!this.loadoutContext) return;
+    this.recompute();
+    this.render();
+  }
+
   clear(): void {
     this.popupGroup.close(this.popupValue);
     this.droneGroups = [];

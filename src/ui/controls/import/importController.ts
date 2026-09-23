@@ -8,6 +8,7 @@ import type { ProfileController } from "../profile";
 import type { Side } from "../side";
 import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
 import type { DroneController } from "../drone/droneControllerContract";
+import type { FighterController } from "../fighter/fighterControllerContract";
 import type { ShipATurret } from "./shipATurret";
 import type { ShipALauncher } from "./shipALauncher";
 import { EftSideImporter } from "./eftSideImporter";
@@ -46,6 +47,7 @@ export class ImportControllerImpl implements ImportController {
     turrets: Record<Side, ShipATurret>;
     launchers: Record<Side, ShipALauncher>;
     drones: Record<Side, Pick<DroneController, "applyImported" | "currentDroneSpecs">>;
+    fighters: Record<Side, Pick<FighterController, "applyImported" | "currentFighterSpecs">>;
     weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
     profileController: ProfileController;
     profileTextCodec: ProfileTextCodec;
@@ -70,6 +72,7 @@ export class ImportControllerImpl implements ImportController {
       turrets: deps.turrets,
       launchers: deps.launchers,
       drones: deps.drones,
+      fighters: deps.fighters,
       weaponSystemSwitches: deps.weaponSystemSwitches,
       fittingImport: deps.fittingImport,
     });

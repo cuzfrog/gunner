@@ -59,9 +59,7 @@ function buildSkillSection() {
     profile: undefined,
     fittedHull: undefined,
     fittingText: undefined,
-    restoreTurret: vi.fn(),
-    restoreLauncher: vi.fn(),
-    restoreDrone: vi.fn(),
+    recomputeFittedSpecs: vi.fn(),
   } as unknown as SidePanel);
 
   const i18n = mockI18n();
@@ -177,8 +175,7 @@ describe("SkillOverloadSection", () => {
     expect(section.isWeaponOverloaded()).toBe(false);
     section.onWeaponOverloadButtonClick();
     expect(section.isWeaponOverloaded()).toBe(true);
-    expect(panel.restoreTurret).toHaveBeenCalled();
-    expect(panel.restoreLauncher).toHaveBeenCalled();
+    expect(panel.recomputeFittedSpecs).toHaveBeenCalled();
     expect(panel.host.persistConfigChange).toHaveBeenCalled();
     section.onWeaponOverloadButtonClick();
     expect(section.isWeaponOverloaded()).toBe(false);

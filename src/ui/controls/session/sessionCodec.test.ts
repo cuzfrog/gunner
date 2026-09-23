@@ -283,6 +283,7 @@ class FakeTurretController implements TurretController {
   ammoId = vi.fn(() => "12608" as TypeId);
   applyImported = vi.fn();
   restore = vi.fn((..._args: unknown[]): void => {});
+  updateConditions = vi.fn();
   clear = vi.fn();
   currentTurretSpec = vi.fn((): TurretSpec | undefined => ({
     kind: "turret",
@@ -334,6 +335,7 @@ function mockLauncherControllers(): Record<Side, LauncherController> {
     currentMissileSpec: vi.fn(() => undefined),
     applyImported: vi.fn(),
     restore: vi.fn(),
+    updateConditions: vi.fn(),
     setHullProfile: vi.fn(),
     clear: vi.fn(),
     capture: vi.fn(() => ({ ammo: undefined })),
@@ -354,6 +356,7 @@ function mockFighterControllers(): Record<Side, FighterController> {
     validation: vi.fn(() => undefined),
     applyImported: vi.fn(),
     restore: vi.fn(),
+    updateConditions: vi.fn(),
     clear: vi.fn(),
     capture: vi.fn(() => ({ fighterGroups: [] })),
     isPopupOpen: vi.fn(() => false),
@@ -373,6 +376,7 @@ function mockDroneControllers(): Record<Side, DroneController> {
     validation: vi.fn(() => undefined),
     applyImported: vi.fn(),
     restore: vi.fn(),
+    updateConditions: vi.fn(),
     clear: vi.fn(),
     capture: vi.fn(() => ({ droneGroups: [] })),
     isPopupOpen: vi.fn(() => false),

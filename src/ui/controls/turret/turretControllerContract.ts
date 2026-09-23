@@ -42,6 +42,7 @@ export interface TurretController {
   ammo(): string;
   ammoId(): TypeId;
   applyImported(imported: ImportedFitting, conditions: StatConditions): void;
+  updateConditions(conditions: StatConditions): void;
   restore(
     fitting?: string,
     conditions?: StatConditions,

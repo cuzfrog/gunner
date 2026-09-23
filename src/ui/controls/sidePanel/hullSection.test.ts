@@ -149,13 +149,11 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
     recordOverride: vi.fn(),
     clearOverrides: vi.fn(),
     clearTurret: vi.fn(),
-    restoreTurret: vi.fn(),
     setTurretProfile: vi.fn(),
     clearLauncher: vi.fn(),
-    restoreLauncher: vi.fn(),
     setLauncherProfile: vi.fn(),
     clearDrone: vi.fn(),
-    restoreDrone: vi.fn(),
+    clearFighter: vi.fn(),
     clearSelectionSession: vi.fn(),
   } as unknown as SidePanel);
 

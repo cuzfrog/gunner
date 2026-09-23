@@ -55,6 +55,7 @@ export interface DroneController {
   validation(): DroneLoadoutValidation | undefined;
   applyImported(imported: ImportedFitting, conditions: StatConditions): void;
   restore(fitting?: string, conditions?: StatConditions, droneGroups?: readonly DroneGroup[]): void;
+  updateConditions(conditions: StatConditions): void;
   clear(): void;
   capture(): { droneGroups: readonly DroneGroup[] };
   isPopupOpen(): boolean;

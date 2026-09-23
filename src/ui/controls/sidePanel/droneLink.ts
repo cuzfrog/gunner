@@ -5,7 +5,7 @@ import type { Side } from "../side";
 
 export interface PanelDroneLink {
   clear(): void;
-  restore(fittingText: string | undefined, conditions: StatConditions): void;
+  updateConditions(conditions: StatConditions): void;
 }
 
 export function createPanelDroneLink(side: Side, droneControllers: Record<Side, DroneController>, popupGroup: PopupGroup): PanelDroneLink {
@@ -20,7 +20,7 @@ class PanelDroneLinkImpl implements PanelDroneLink {
     this.drone.clear();
   }
 
-  restore(fittingText: string | undefined, conditions: StatConditions): void {
-    this.drone.restore(fittingText, conditions);
+  updateConditions(conditions: StatConditions): void {
+    this.drone.updateConditions(conditions);
   }
 }
