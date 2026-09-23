@@ -66,7 +66,7 @@ describe("FighterLoadoutResolverImpl", () => {
     } as unknown as FittingCalculator;
     const booster: FittedModule = { moduleId: toTypeId("39948"), offline: false };
     const resolver = new FighterLoadoutResolverImpl({ fittingCalculator: calculator });
-    const groups: readonly FighterGroup[] = [{ typeId: toTypeId("34359"), count: 6 }];
+    const groups: readonly FighterGroup[] = [{ typeId: toTypeId("34359"), count: 6, activeCount: 6 }];
     const ctx = context({ droneBoosterModules: [booster] });
     const result = resolver.resolve(groups, ctx, CONDITIONS);
     expect(result).toBe(resolved);
@@ -74,6 +74,20 @@ describe("FighterLoadoutResolverImpl", () => {
     expect(seen[0].fighterGroups).toEqual(groups);
     expect(seen[0].droneBoosterModules).toEqual([booster]);
     expect(seen[0].profile).toBe(ctx.profile);
+  });
+
+  test("passes idle hangar fighters through untouched (the calculator resolves the launched set)", () => {
+    let seen: FittingState | undefined;
+    const calculator = {
+      resolveFighters(fitting: FittingState): readonly ImportedFighter[] {
+        seen = fitting;
+        return [];
+      },
+    } as unknown as FittingCalculator;
+    const resolver = new FighterLoadoutResolverImpl({ fittingCalculator: calculator });
+    const groups: readonly FighterGroup[] = [{ typeId: toTypeId("34359"), count: 12, activeCount: 6 }];
+    resolver.resolve(groups, context(), CONDITIONS);
+    expect(seen!.fighterGroups).toEqual(groups);
   });
 
   test("empty groups resolve without touching the calculator", () => {

@@ -277,10 +277,16 @@ function parseDroneGroups(value: string): readonly DroneGroup[] | undefined {
       const typeId = entry.typeId;
       const count = entry.count;
       if (typeof typeId !== "string" || typeof count !== "number" || !Number.isInteger(count) || count <= 0) return undefined;
-      groups.push({ typeId: toTypeId(typeId), count });
+      groups.push({ typeId: toTypeId(typeId), count, activeCount: activeCountOf(entry.activeCount, count) });
     }
     return groups;
   } catch {
     return undefined;
   }
+}
+
+/** Groups written before the bay split carry no activeCount; they launched everything they stored. */
+function activeCountOf(activeCount: unknown, count: number): number {
+  if (typeof activeCount !== "number" || !Number.isInteger(activeCount) || activeCount < 0 || activeCount > count) return count;
+  return activeCount;
 }

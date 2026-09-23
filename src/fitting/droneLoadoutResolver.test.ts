@@ -5,7 +5,7 @@ import type { ImportedDrone } from "./droneCatalog";
 import type { DroneStats, FittingDb, HullBonus } from "../gamedata/fittingDb";
 import type { ShipProfile } from "../ships";
 import type { StatConditions } from "../ships";
-import { toTypeId, type ShipId, type FactionId, type HullTypeId } from "../gamedata/ids";
+import { toTypeId, type ShipId, type FactionId, type HullTypeId, type TypeId } from "../gamedata/ids";
 
 function makeProfile(overrides: { droneBandwidth?: number; droneCapacity?: number; maxActiveDrones?: number }): ShipProfile {
   return {
@@ -130,7 +130,7 @@ function mockCalculator(): FittingCalculator {
     resolveSensorBoosts: vi.fn(() => ({ boosters: [], amplifiers: [], boosterScripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], })),
     resolveSensorSpec: vi.fn(() => ({ scanResolution: 0, maxTargetingRange: 0, maxLockedTargets: 0 })),
     resolveDrones: vi.fn((fitting: FittingState, _conditions: StatConditions): readonly ImportedDrone[] => {
-      return fitting.droneGroups.map((g) => makeImportedDrone(String(g.typeId), g.count));
+      return fitting.droneGroups.map((g) => makeImportedDrone(String(g.typeId), g.activeCount));
     }),
     resolveFighters: vi.fn(() => []),
     resolveCargoCharges: vi.fn(() => []),
@@ -142,13 +142,17 @@ function makeResolver(calculator: FittingCalculator): DroneLoadoutResolverImpl {
   return new DroneLoadoutResolverImpl({ fittingCalculator: calculator, fittingDb: { combatDrones: COMBAT_DRONES } });
 }
 
+function group(typeId: TypeId, count: number, activeCount: number = count): DroneGroup {
+  return { typeId, count, activeCount };
+}
+
 describe("DroneLoadoutResolverImpl", () => {
   test("resolve returns ImportedDrone[] for the given groups", () => {
     const calculator = mockCalculator();
     const resolver = makeResolver(calculator);
 
     const result = resolver.resolve(
-      [{ typeId: LIGHT_ID, count: 2 }, { typeId: MEDIUM_ID, count: 1 }],
+      [group(LIGHT_ID, 2), group(MEDIUM_ID, 1)],
       makeContext({}),
       makeConditions(),
     );
@@ -174,7 +178,7 @@ describe("DroneLoadoutResolverImpl", () => {
     const resolver = makeResolver(calculator);
     const conditions = makeConditions();
 
-    resolver.resolve([{ typeId: LIGHT_ID, count: 1 }], makeContext({}), conditions);
+    resolver.resolve([group(LIGHT_ID, 1)], makeContext({}), conditions);
 
     const call = vi.mocked(calculator.resolveDrones).mock.calls[0];
     expect(call[1]).toBe(conditions);
@@ -185,7 +189,7 @@ describe("DroneLoadoutResolverImpl", () => {
     const resolver = makeResolver(calculator);
     const context = makeContext({});
 
-    const userGroups: readonly DroneGroup[] = [{ typeId: LIGHT_ID, count: 5 }];
+    const userGroups: readonly DroneGroup[] = [group(LIGHT_ID, 5)];
     resolver.resolve(userGroups, context, makeConditions());
 
     const call = vi.mocked(calculator.resolveDrones).mock.calls[0];
@@ -195,11 +199,44 @@ describe("DroneLoadoutResolverImpl", () => {
     expect(call[0].droneBoosterModules).toBe(context.droneBoosterModules);
   });
 
+  test("resolves the launched drones, not the idle bay stock", () => {
+    const calculator = mockCalculator();
+    const resolver = makeResolver(calculator);
+
+    const result = resolver.resolve([group(LIGHT_ID, 10, 4)], makeContext({}), makeConditions());
+
+    expect(result).toHaveLength(1);
+    expect(result[0].count).toBe(4);
+    const call = vi.mocked(calculator.resolveDrones).mock.calls[0];
+    expect(call[0].droneGroups).toEqual([group(LIGHT_ID, 4, 4)]);
+  });
+
+  test("a group with nothing launched is skipped entirely", () => {
+    const calculator = mockCalculator();
+    const resolver = makeResolver(calculator);
+
+    const result = resolver.resolve([group(LIGHT_ID, 5, 0), group(MEDIUM_ID, 1)], makeContext({}), makeConditions());
+
+    expect(result).toEqual([makeImportedDrone("24546", 1)]);
+    const call = vi.mocked(calculator.resolveDrones).mock.calls[0];
+    expect(call[0].droneGroups).toEqual([group(MEDIUM_ID, 1, 1)]);
+  });
+
   test("launch count never exceeds the drone bandwidth limit", () => {
     const calculator = mockCalculator();
     const resolver = makeResolver(calculator);
 
-    const result = resolver.resolve([{ typeId: HEAVY_ID, count: 5 }], makeContext({ profile: makeProfile({ droneBandwidth: 75 }) }), makeConditions());
+    const result = resolver.resolve([group(HEAVY_ID, 5)], makeContext({ profile: makeProfile({ droneBandwidth: 75 }) }), makeConditions());
+
+    expect(result).toHaveLength(1);
+    expect(result[0].count).toBe(3);
+  });
+
+  test("the bandwidth clamp applies to the launched set when the budget shrinks below it", () => {
+    const calculator = mockCalculator();
+    const resolver = makeResolver(calculator);
+
+    const result = resolver.resolve([group(HEAVY_ID, 5, 4)], makeContext({ profile: makeProfile({ droneBandwidth: 75 }) }), makeConditions());
 
     expect(result).toHaveLength(1);
     expect(result[0].count).toBe(3);
@@ -209,7 +246,7 @@ describe("DroneLoadoutResolverImpl", () => {
     const calculator = mockCalculator();
     const resolver = makeResolver(calculator);
 
-    const result = resolver.resolve([{ typeId: LIGHT_ID, count: 10 }], makeContext({ profile: makeProfile({ maxActiveDrones: 5 }) }), makeConditions());
+    const result = resolver.resolve([group(LIGHT_ID, 10)], makeContext({ profile: makeProfile({ maxActiveDrones: 5 }) }), makeConditions());
 
     expect(result).toHaveLength(1);
     expect(result[0].count).toBe(5);
@@ -220,7 +257,7 @@ describe("DroneLoadoutResolverImpl", () => {
     const resolver = makeResolver(calculator);
 
     const result = resolver.resolve(
-      [{ typeId: HEAVY_ID, count: 5 }, { typeId: LIGHT_ID, count: 5 }],
+      [group(HEAVY_ID, 5), group(LIGHT_ID, 5)],
       makeContext({ profile: makeProfile({ droneBandwidth: 35, maxActiveDrones: 7 }) }),
       makeConditions(),
     );
@@ -233,7 +270,7 @@ describe("DroneLoadoutResolverImpl", () => {
     const resolver = makeResolver(calculator);
 
     const result = resolver.resolve(
-      [{ typeId: HEAVY_ID, count: 2 }, { typeId: LIGHT_ID, count: 3 }],
+      [group(HEAVY_ID, 2), group(LIGHT_ID, 3)],
       makeContext({ profile: makeProfile({ droneBandwidth: 20, maxActiveDrones: 5 }) }),
       makeConditions(),
     );
@@ -246,7 +283,7 @@ describe("DroneLoadoutResolverImpl", () => {
     const resolver = makeResolver(calculator);
 
     const result = resolver.resolve(
-      [{ typeId: toTypeId("99999"), count: 3 }, { typeId: LIGHT_ID, count: 2 }],
+      [group(toTypeId("99999"), 3), group(LIGHT_ID, 2)],
       makeContext({}),
       makeConditions(),
     );
@@ -258,7 +295,7 @@ describe("DroneLoadoutResolverImpl", () => {
     const calculator = mockCalculator();
     const resolver = makeResolver(calculator);
 
-    const result = resolver.resolve([{ typeId: LIGHT_ID, count: 2 }], makeContext({ profile: makeProfile({ droneBandwidth: 0, maxActiveDrones: 0 }) }), makeConditions());
+    const result = resolver.resolve([group(LIGHT_ID, 2)], makeContext({ profile: makeProfile({ droneBandwidth: 0, maxActiveDrones: 0 }) }), makeConditions());
 
     expect(result).toEqual([]);
     expect(calculator.resolveDrones).not.toHaveBeenCalled();
@@ -269,7 +306,7 @@ describe("DroneLoadoutResolverImpl", () => {
     const resolver = makeResolver(calculator);
     const hullBonuses: readonly HullBonus[] = [{ attribute: "droneBandwidthFlat", magnitude: 50, scalesWithHullSkill: false, sourceId: toTypeId("45606") }];
 
-    const result = resolver.resolve([{ typeId: HEAVY_ID, count: 5 }], makeContext({ profile: makeProfile({ droneBandwidth: 75 }), hullBonuses }), makeConditions());
+    const result = resolver.resolve([group(HEAVY_ID, 5)], makeContext({ profile: makeProfile({ droneBandwidth: 75 }), hullBonuses }), makeConditions());
 
     expect(result).toHaveLength(1);
     expect(result[0].count).toBe(5);

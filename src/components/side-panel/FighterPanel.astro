@@ -38,7 +38,18 @@ const ROWS = [
     </TriggerButton>
     <PopupBox id={`${idPrefix}-fighter-popup`} extraClass="drone-popup popup-stretch" position="below" align="both" scroll>
       <div class="drone-loadout-section" id={`${idPrefix}-fighter-loadout-section`}>
-        <span class="fitting-group-label" data-i18n="fighter.activeLoadout">Active loadout</span>
+        <div class="drone-loadout-header">
+          <span class="fitting-group-label" data-i18n="fighter.bayTitle">Fighter hangar</span>
+          <button type="button" class="btn drone-quick-btn" id={`${idPrefix}-fighter-launch-all`} data-i18n="fighter.launchAll" data-i18n-aria-label="fighter.launchAll" disabled>Launch all</button>
+          <button type="button" class="btn drone-quick-btn" id={`${idPrefix}-fighter-recall-all`} data-i18n="fighter.recallAll" data-i18n-aria-label="fighter.recallAll" disabled>Recall all</button>
+        </div>
+        <div class="drone-loadout-headers">
+          <span class="drone-header-icon"></span>
+          <span class="drone-header-name"></span>
+          <span class="drone-header-stepper" data-i18n="fighter.hangar">Hangar</span>
+          <span class="drone-header-stepper" data-i18n="fighter.launched">Launched</span>
+          <span class="drone-header-remove"></span>
+        </div>
         <div class="drone-loadout-list" id={`${idPrefix}-fighter-loadout-list`}></div>
         <div class="drone-summary-bar" id={`${idPrefix}-fighter-summary-bar`}>
           <span class="drone-summary-item">
@@ -46,7 +57,7 @@ const ROWS = [
             <span class="drone-summary-value mono" id={`${idPrefix}-fighter-summary-squadrons`}>0/0</span>
           </span>
           <span class="drone-summary-item">
-            <span class="drone-summary-label" data-i18n="fighter.count">Fighters</span>
+            <span class="drone-summary-label" data-i18n="fighter.launched">Launched</span>
             <span class="drone-summary-value mono" id={`${idPrefix}-fighter-summary-count`}>0/0</span>
           </span>
           <span class="drone-summary-item">

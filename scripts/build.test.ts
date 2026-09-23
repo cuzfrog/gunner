@@ -61,7 +61,8 @@ describe("build", () => {
     // Re-baselined at v0.39.0: ship bonus texts (~200 KB) now ship inside the profile data.
     // Re-baselined for the fitting-resources needs table and ship profile powergrid/CPU fields.
     // Re-baselined for drone skill bonuses (specialization skills) and drone required-skill chains.
-    const baseline = 4_337_992;
+    // Re-baselined for the drone/fighter bay vs launched split (bay + launched steppers, launch/recall actions).
+    const baseline = 4_557_402;
     const limit = Math.ceil(baseline * 1.05);
     expect(totalJsSize).toBeLessThanOrEqual(limit);
   });

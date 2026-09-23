@@ -51,6 +51,8 @@ function collectFighterEls(els: ControlsElements, side: Side): FighterEls {
     count: s.fighterCount,
     loadoutSection: s.fighterLoadoutSection,
     loadoutList: s.fighterLoadoutList,
+    launchAll: s.fighterLaunchAll,
+    recallAll: s.fighterRecallAll,
     summaryBar: s.fighterSummaryBar,
     summarySquadrons: s.fighterSummarySquadrons,
     summaryCount: s.fighterSummaryCount,

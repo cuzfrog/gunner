@@ -231,8 +231,8 @@ export function isOptionalUnitInterval(value: unknown): value is number | undefi
   return value === undefined || (isFiniteNumber(value) && value >= 0 && value <= 1);
 }
 
-export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 {
-  return value === 5 || value === 6 || value === 7 || value === 8 || value === 9 || value === 10 || value === 11 || value === 12 || value === 13 || value === 14 || value === 15;
+export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 {
+  return value === 5 || value === 6 || value === 7 || value === 8 || value === 9 || value === 10 || value === 11 || value === 12 || value === 13 || value === 14 || value === 15 || value === 16;
 }
 
 export function isOptionalNonEmptyString(value: unknown): value is string | undefined {
@@ -246,7 +246,8 @@ export function isOptionalDroneGroups(value: unknown): value is readonly DroneGr
     if (typeof entry !== "object" || entry === null) return false;
     const typeId = entry.typeId;
     const count = entry.count;
-    return typeof typeId === "string" && typeof count === "number" && Number.isInteger(count) && count > 0;
+    if (typeof typeId !== "string" || typeof count !== "number" || !Number.isInteger(count) || count <= 0) return false;
+    return isOptionalActiveCount(entry.activeCount);
   });
 }
 
@@ -257,8 +258,13 @@ export function isOptionalFighterGroups(value: unknown): value is readonly Fight
     if (typeof entry !== "object" || entry === null) return false;
     const typeId = entry.typeId;
     const count = entry.count;
-    return typeof typeId === "string" && typeof count === "number" && Number.isInteger(count) && count > 0;
+    if (typeof typeId !== "string" || typeof count !== "number" || !Number.isInteger(count) || count <= 0) return false;
+    return isOptionalActiveCount(entry.activeCount);
   });
+}
+
+function isOptionalActiveCount(value: unknown): boolean {
+  return value === undefined || (typeof value === "number" && Number.isInteger(value) && value >= 0);
 }
 
 export function isOptionalFittingText(value: unknown): value is string | undefined {

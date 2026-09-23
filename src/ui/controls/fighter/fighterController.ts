@@ -1,4 +1,4 @@
-import type { FighterCatalog, FighterGroup, FighterLoadoutContext, FighterLoadoutResolver, FighterLoadoutValidation, FighterLoadoutValidator, FittingImport, ImportedFighter, ImportedFitting } from "../../../fitting";
+import type { FighterCatalog, FighterGroup, FighterLoadoutContext, FighterLoadoutResolver, FighterLoadoutValidation, FighterLoadoutValidator, FighterLoadoutViolation, FittingImport, ImportedFighter, ImportedFitting } from "../../../fitting";
 import type { FighterKind } from "../../../gamedata/fittingDb";
 import type { TypeId } from "../../../gamedata/ids";
 import type { DamageVector, FighterSpec } from "../../../sim";
@@ -18,6 +18,7 @@ import type { FighterController, FighterControllerDeps, FighterEls } from "./fig
 export type { FighterController } from "./fighterControllerContract";
 
 const KINDS: readonly FighterKind[] = ["light", "heavy", "support"];
+const LAUNCH_VIOLATIONS: readonly FighterLoadoutViolation[] = ["tooManySquadrons", "lightSquadronsExceeded", "heavySquadronsExceeded", "supportSquadronsExceeded"];
 
 export class FighterControllerImpl implements FighterController {
   readonly side: Side;
@@ -73,6 +74,8 @@ export class FighterControllerImpl implements FighterController {
     });
     this.popupGroup.register(this.popupValue);
     this.els.trigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
+    this.els.launchAll.addEventListener("click", () => this.launchAll());
+    this.els.recallAll.addEventListener("click", () => this.recallAll());
     this.events.onLanguageChanged(() => this.render());
     this.render();
   }
@@ -94,7 +97,7 @@ export class FighterControllerImpl implements FighterController {
   applyImported(imported: ImportedFitting, conditions: StatConditions): void {
     this.loadoutContext = loadoutContextFromFitting(imported);
     this.conditions = conditions;
-    this.fighterGroups = imported.fighters.map((f) => ({ typeId: f.typeId, count: f.count }));
+    this.fighterGroups = imported.fighters.map((f) => ({ typeId: f.typeId, count: f.count, activeCount: f.count }));
     this.recompute();
     this.render();
   }
@@ -106,7 +109,7 @@ export class FighterControllerImpl implements FighterController {
         this.loadoutContext = loadoutContextFromFitting(imported);
         this.conditions = conditions;
         const known = fighterGroups && fighterGroups.length > 0 ? filterKnownGroups(fighterGroups, this.fighterCatalog) : [];
-        this.fighterGroups = known.length > 0 ? known : imported.fighters.map((f) => ({ typeId: f.typeId, count: f.count }));
+        this.fighterGroups = known.length > 0 ? known : imported.fighters.map((f) => ({ typeId: f.typeId, count: f.count, activeCount: f.count }));
         this.recompute();
         this.render();
         return;
@@ -167,7 +170,7 @@ export class FighterControllerImpl implements FighterController {
     }
     this.fighterChip.render(fighter.name, this.imageCatalog.itemIconUrl(fighter.typeId));
     const t = (key: string): string => this.i18n.t(key);
-    setText(this.els.count, String(this.totalCount()));
+    setText(this.els.count, String(this.launchedCount()));
     if (fighter.attack === undefined) {
       setText(this.els.optimal, "-");
       setText(this.els.falloff, "-");
@@ -188,24 +191,40 @@ export class FighterControllerImpl implements FighterController {
     for (const group of this.fighterGroups) {
       this.els.loadoutList.appendChild(this.createLoadoutRow(group));
     }
+    this.els.launchAll.disabled = this.fighterGroups.length === 0;
+    this.els.recallAll.disabled = this.fighterGroups.length === 0;
   }
 
   private createLoadoutRow(group: FighterGroup): Element {
     const fighter = this.resolvedFighters.find((f) => f.typeId === group.typeId);
     const name = fighter?.name ?? this.fittingImport.itemNameForId(group.typeId, this.i18n.current()) ?? String(group.typeId);
     const iconUrl = this.imageCatalog.itemIconUrl(group.typeId);
-    const decrementBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-minus" aria-label="Decrease count">-</button>` as HTMLElement;
-    const incrementBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-plus" aria-label="Increase count">+</button>` as HTMLElement;
-    const removeBtn = html`<button type="button" class="btn drone-remove-btn" aria-label="Remove fighter">x</button>` as HTMLElement;
-    decrementBtn.addEventListener("click", () => this.decrementCount(group.typeId));
-    incrementBtn.addEventListener("click", () => this.incrementCount(group.typeId));
+    const squadronStep = this.squadronStep(group.typeId);
+    const bayMinusBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-minus" aria-label=${this.i18n.t("fighter.bayMinus")}>-</button>` as HTMLElement;
+    const bayPlusBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-plus" aria-label=${this.i18n.t("fighter.bayPlus")}>+</button>` as HTMLElement;
+    const launchedMinusBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-minus" aria-label=${this.i18n.t("fighter.launchMinus")}>-</button>` as HTMLElement;
+    const launchedPlusBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-plus" aria-label=${this.i18n.t("fighter.launchPlus")}>+</button>` as HTMLElement;
+    const removeBtn = html`<button type="button" class="btn drone-remove-btn" aria-label=${this.i18n.t("fighter.removeFighter")}>x</button>` as HTMLElement;
+    bayMinusBtn.addEventListener("click", () => this.decrementCount(group.typeId));
+    bayPlusBtn.addEventListener("click", () => this.incrementCount(group.typeId));
+    launchedMinusBtn.addEventListener("click", () => this.recallSquadron(group.typeId, squadronStep));
+    launchedPlusBtn.addEventListener("click", () => this.launchSquadron(group.typeId, squadronStep));
     removeBtn.addEventListener("click", () => this.removeFighter(group.typeId));
-    return html`<div class="drone-loadout-row" data-drone-id=${group.typeId}>
+    return html`<div class="drone-loadout-row" data-fighter-id=${group.typeId}>
       <img class="drone-loadout-icon" alt="" src=${iconUrl ?? ""} hidden=${iconUrl === undefined ? "" : false}>
       <span class="drone-loadout-name truncate">${name}</span>
-      <div class="drone-stepper">${decrementBtn}<span class="drone-stepper-count mono">${group.count}</span>${incrementBtn}</div>
+      <div class="drone-stepper drone-bay-stepper">${bayMinusBtn}<span class="drone-stepper-count mono">${group.count}</span>${bayPlusBtn}</div>
+      <div class="drone-stepper drone-launched-stepper">${launchedMinusBtn}<span class="drone-stepper-count mono">${group.activeCount}</span>${launchedPlusBtn}</div>
       ${removeBtn}
     </div>` as Element;
+  }
+
+  private squadronStep(typeId: TypeId): number {
+    for (const kind of KINDS) {
+      const option = this.fighterCatalog.fightersByKind(kind).find((o) => o.id === typeId);
+      if (option) return option.squadronMaxSize;
+    }
+    return 1;
   }
 
   private renderSummary(): void {
@@ -218,8 +237,8 @@ export class FighterControllerImpl implements FighterController {
       this.els.summaryBar.classList.remove("is-invalid");
       return;
     }
-    setText(this.els.summarySquadrons, `${v.totalSquadrons}/${profile.fighterTubes}`);
-    setText(this.els.summaryCount, `${v.totalFighters}`);
+    setText(this.els.summarySquadrons, `${v.activeSquadrons}/${profile.fighterTubes}`);
+    setText(this.els.summaryCount, `${v.activeFighters}/${v.totalFighters}`);
     setText(this.els.summaryHangar, `${formatWithCommas(v.totalVolume, 0)}/${formatWithCommas(v.hangarCapacity, 0)}`);
     this.els.summaryBar.classList.toggle("is-invalid", !v.valid);
   }
@@ -244,21 +263,15 @@ export class FighterControllerImpl implements FighterController {
 
   private addFighter(typeId: TypeId): void {
     const existing = this.fighterGroups.find((g) => g.typeId === typeId);
-    if (existing) {
-      this.fighterGroups = this.fighterGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count + 1 } : g);
-    } else {
-      this.fighterGroups = [...this.fighterGroups, { typeId, count: 1 }];
-    }
-    this.recompute();
-    this.render();
-    this.events.emitConfigInvalidated();
+    const stored = existing
+      ? this.fighterGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count + 1, activeCount: g.activeCount } : g)
+      : [...this.fighterGroups, { typeId, count: 1, activeCount: 0 }];
+    this.storeFighter(typeId, stored);
   }
 
   private incrementCount(typeId: TypeId): void {
-    this.fighterGroups = this.fighterGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count + 1 } : g);
-    this.recompute();
-    this.render();
-    this.events.emitConfigInvalidated();
+    const stored = this.fighterGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count + 1, activeCount: g.activeCount } : g);
+    this.storeFighter(typeId, stored);
   }
 
   private decrementCount(typeId: TypeId): void {
@@ -268,7 +281,7 @@ export class FighterControllerImpl implements FighterController {
       this.removeFighter(typeId);
       return;
     }
-    this.fighterGroups = this.fighterGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count - 1 } : g);
+    this.fighterGroups = this.fighterGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count - 1, activeCount: Math.min(g.activeCount, g.count - 1) } : g);
     this.recompute();
     this.render();
     this.events.emitConfigInvalidated();
@@ -281,8 +294,49 @@ export class FighterControllerImpl implements FighterController {
     this.events.emitConfigInvalidated();
   }
 
-  private totalCount(): number {
-    return this.fighterGroups.reduce((sum, g) => sum + g.count, 0);
+  private launchSquadron(typeId: TypeId, step: number): void {
+    const existing = this.fighterGroups.find((g) => g.typeId === typeId);
+    if (!existing || existing.activeCount >= existing.count) return;
+    this.fighterGroups = this.fighterGroups.map((g) => g.typeId === typeId ? { ...g, activeCount: Math.min(g.activeCount + step, g.count) } : g);
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private recallSquadron(typeId: TypeId, step: number): void {
+    const existing = this.fighterGroups.find((g) => g.typeId === typeId);
+    if (!existing || existing.activeCount <= 0) return;
+    this.fighterGroups = this.fighterGroups.map((g) => g.typeId === typeId ? { ...g, activeCount: Math.max(g.activeCount - step, 0) } : g);
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private launchAll(): void {
+    if (this.fighterGroups.length === 0) return;
+    this.fighterGroups = this.fighterGroups.map((g) => ({ ...g, activeCount: g.count }));
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private recallAll(): void {
+    if (this.fighterGroups.length === 0) return;
+    this.fighterGroups = this.fighterGroups.map((g) => ({ ...g, activeCount: 0 }));
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private storeFighter(typeId: TypeId, stored: FighterGroup[]): void {
+    this.fighterGroups = this.loadoutContext ? tryLaunch(stored, typeId, this.validator, this.loadoutContext) : stored;
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private launchedCount(): number {
+    return this.resolvedFighters.reduce((sum, fighter) => sum + fighter.count, 0);
   }
 
   private recompute(): void {
@@ -317,9 +371,17 @@ function loadoutContextFromFitting(imported: ImportedFitting): FighterLoadoutCon
 function filterKnownGroups(groups: readonly FighterGroup[], catalog: FighterCatalog): FighterGroup[] {
   const result: FighterGroup[] = [];
   for (const group of groups) {
-    if (catalog.has(group.typeId) && group.count > 0) result.push({ typeId: group.typeId, count: group.count });
+    if (catalog.has(group.typeId) && group.count > 0) result.push({ typeId: group.typeId, count: group.count, activeCount: Math.min(group.activeCount, group.count) });
   }
   return result;
+}
+
+function tryLaunch(groups: readonly FighterGroup[], typeId: TypeId, validator: FighterLoadoutValidator, context: FighterLoadoutContext): FighterGroup[] {
+  const candidate = groups.map((g) => g.typeId === typeId && g.activeCount < g.count ? { ...g, activeCount: g.activeCount + 1 } : g);
+  if (candidate.every((g, i) => g.activeCount === groups[i]!.activeCount)) return [...groups];
+  const validation = validator.validate(candidate, context.profile);
+  if (validation.violations.some((violation) => LAUNCH_VIOLATIONS.includes(violation))) return [...groups];
+  return candidate;
 }
 
 function importedFighterToFighterSpec(fighter: ImportedFighter): FighterSpec {

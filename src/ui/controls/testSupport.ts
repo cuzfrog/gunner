@@ -259,10 +259,10 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     missileCatalog: asValue(mockMissileCatalog()),
     droneCatalog: asValue(mockDroneCatalog()),
     droneLoadoutResolver: asValue(vi.mocked<DroneLoadoutResolver>({ resolve: vi.fn(() => []) })),
-    droneLoadoutValidator: asValue(vi.mocked<DroneLoadoutValidator>({ validate: vi.fn(() => ({ valid: true, totalCount: 0, totalBandwidth: 0, totalVolume: 0, bandwidthLimit: 0, capacityLimit: 0, violations: [] })) })),
+    droneLoadoutValidator: asValue(vi.mocked<DroneLoadoutValidator>({ validate: vi.fn(() => ({ valid: true, totalCount: 0, activeCount: 0, activeBandwidth: 0, totalVolume: 0, bandwidthLimit: 0, capacityLimit: 0, violations: [] })) })),
     fighterCatalog: asValue(mockFighterCatalog()),
     fighterLoadoutResolver: asValue(vi.mocked<FighterLoadoutResolver>({ resolve: vi.fn(() => []) })),
-    fighterLoadoutValidator: asValue(vi.mocked<FighterLoadoutValidator>({ validate: vi.fn(() => ({ valid: true, totalFighters: 0, totalSquadrons: 0, totalVolume: 0, hangarCapacity: 0, violations: [] })) })),
+    fighterLoadoutValidator: asValue(vi.mocked<FighterLoadoutValidator>({ validate: vi.fn(() => ({ valid: true, totalFighters: 0, activeFighters: 0, activeSquadrons: 0, totalVolume: 0, hangarCapacity: 0, violations: [] })) })),
     fighterHintProvider: asValue({ render: vi.fn() }),
     launcherClasses: asValue(mockLauncherClasses()),
     fittingCalculator: asValue(vi.mocked<FittingCalculator>({

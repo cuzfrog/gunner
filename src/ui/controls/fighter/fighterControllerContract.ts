@@ -34,6 +34,8 @@ export interface FighterEls {
   readonly count: HTMLElement;
   readonly loadoutSection: HTMLElement;
   readonly loadoutList: HTMLElement;
+  readonly launchAll: HTMLButtonElement;
+  readonly recallAll: HTMLButtonElement;
   readonly summaryBar: HTMLElement;
   readonly summarySquadrons: HTMLElement;
   readonly summaryCount: HTMLElement;

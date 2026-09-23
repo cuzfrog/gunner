@@ -8,10 +8,9 @@ import { FakeElement, getFake } from "../testSupport";
 
 const TEMPLAR_ID = toTypeId("34359");
 
-function templarFitting(): ImportedFitting {
-  const fighter = importedFighterFixture();
+function templarFitting(fighters = [importedFighterFixture()]): ImportedFitting {
   return {
-    fighters: [fighter],
+    fighters,
     drones: [],
     fittingState: {
       profile: { fighterCapacity: 150000, fighterTubes: 4, fighterLightSlots: 3, fighterHeavySlots: 3, fighterSupportSlots: 2 },
@@ -27,7 +26,7 @@ describe("FighterControllerImpl", () => {
     const fighter = importedFighterFixture();
     fighterLoadoutResolver.resolve.mockReturnValue([fighter]);
     controller.applyImported(templarFitting(), NEUTRAL_CONDITIONS);
-    expect(fighterLoadoutResolver.resolve).toHaveBeenCalledWith([{ typeId: TEMPLAR_ID, count: 6 }], expect.anything(), NEUTRAL_CONDITIONS);
+    expect(fighterLoadoutResolver.resolve).toHaveBeenCalledWith([{ typeId: TEMPLAR_ID, count: 6, activeCount: 6 }], expect.anything(), NEUTRAL_CONDITIONS);
     expect(controller.fighters()).toEqual([fighter]);
     const document = globalThis.document;
     expect(getFake(document!, "ship-a-fighter-summary").textContent).toBe("Templar I");
@@ -70,27 +69,154 @@ describe("FighterControllerImpl", () => {
     expect(i18n.t).toHaveBeenCalledWith("fighter.notSimulated");
   });
 
-  test("steppers change the group count and emit config invalidation", () => {
+  test("bay stepper plus adds to the hangar and auto-launches within budget", () => {
     const { controller, events, fighterLoadoutResolver } = buildFighter();
     fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture()]);
     controller.applyImported(templarFitting(), NEUTRAL_CONDITIONS);
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
     const loadoutList = getFake(globalThis.document!, "ship-a-fighter-loadout-list");
     const row = loadoutList.children[0] as unknown as FakeElement;
-    const stepper = row.children.find((c) => c.className.split(" ").includes("drone-stepper")) as unknown as FakeElement;
+    const stepper = row.children.find((c) => c.className.split(" ").includes("drone-bay-stepper")) as unknown as FakeElement;
     const incrementBtn = stepper.children.find((c) => c.className.split(" ").includes("drone-stepper-plus")) as unknown as FakeElement;
     incrementBtn.trigger("click");
-    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 7 }]);
+    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 7, activeCount: 7 }]);
     expect(emitConfigInvalidated).toHaveBeenCalled();
+  });
+
+  test("bay stepper minus removes one from the hangar and clamps the launched count", () => {
+    const { controller, fighterLoadoutResolver } = buildFighter();
+    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture()]);
+    controller.applyImported(templarFitting(), NEUTRAL_CONDITIONS);
+    const loadoutList = getFake(globalThis.document!, "ship-a-fighter-loadout-list");
+    const row = loadoutList.children[0] as unknown as FakeElement;
+    const stepper = row.children.find((c) => c.className.split(" ").includes("drone-bay-stepper")) as unknown as FakeElement;
     const decrementBtn = stepper.children.find((c) => c.className.split(" ").includes("drone-stepper-minus")) as unknown as FakeElement;
     decrementBtn.trigger("click");
-    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 6 }]);
+    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 5, activeCount: 5 }]);
+  });
+
+  test("decrementing a fighter count to zero removes the group", () => {
+    const { controller, fighterLoadoutResolver } = buildFighter();
+    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture({ count: 1 })]);
+    controller.applyImported(templarFitting([importedFighterFixture({ count: 1 })]), NEUTRAL_CONDITIONS);
+    const loadoutList = getFake(globalThis.document!, "ship-a-fighter-loadout-list");
+    const row = loadoutList.children[0] as unknown as FakeElement;
+    const stepper = row.children.find((c) => c.className.split(" ").includes("drone-bay-stepper")) as unknown as FakeElement;
+    const decrementBtn = stepper.children.find((c) => c.className.split(" ").includes("drone-stepper-minus")) as unknown as FakeElement;
+    decrementBtn.trigger("click");
+    expect(controller.capture().fighterGroups).toEqual([]);
+  });
+
+  test("bay increment stores the fighter idle when the squadron budget is exhausted", () => {
+    const valid = { valid: true, totalFighters: 6, activeFighters: 6, activeSquadrons: 1, totalVolume: 15000, hangarCapacity: 150000, violations: [] as const };
+    const overBudget = { valid: false, totalFighters: 7, activeFighters: 7, activeSquadrons: 2, totalVolume: 17500, hangarCapacity: 150000, violations: ["lightSquadronsExceeded"] as const };
+    const { controller, fighterLoadoutResolver, fighterLoadoutValidator } = buildFighter();
+    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture()]);
+    fighterLoadoutValidator.validate.mockReturnValueOnce(valid).mockReturnValueOnce(overBudget).mockReturnValue(valid);
+    controller.applyImported(templarFitting(), NEUTRAL_CONDITIONS);
+    const loadoutList = getFake(globalThis.document!, "ship-a-fighter-loadout-list");
+    const row = loadoutList.children[0] as unknown as FakeElement;
+    const stepper = row.children.find((c) => c.className.split(" ").includes("drone-bay-stepper")) as unknown as FakeElement;
+    const incrementBtn = stepper.children.find((c) => c.className.split(" ").includes("drone-stepper-plus")) as unknown as FakeElement;
+    incrementBtn.trigger("click");
+    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 7, activeCount: 6 }]);
+    expect(fighterLoadoutValidator.validate).toHaveBeenCalledTimes(3);
+  });
+
+  test("launched stepper launches a full squadron", () => {
+    const { controller, fighterCatalog, fighterLoadoutResolver, fittingImport } = buildFighter();
+    fighterCatalog.fightersByKind.mockImplementation((kind) => kind === "light" ? [{ id: TEMPLAR_ID, name: "Templar I", kind: "light", damage: 97.5, damageByType: { em: 97.5 }, volume: 2500, squadronMaxSize: 6 }] : []);
+    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture()]);
+    fittingImport.importFitting.mockReturnValue(templarFitting());
+    controller.restore("some eft text", NEUTRAL_CONDITIONS, [{ typeId: TEMPLAR_ID, count: 12, activeCount: 0 }]);
+    const loadoutList = getFake(globalThis.document!, "ship-a-fighter-loadout-list");
+    const row = loadoutList.children[0] as unknown as FakeElement;
+    const stepper = row.children.find((c) => c.className.split(" ").includes("drone-launched-stepper")) as unknown as FakeElement;
+    const incrementBtn = stepper.children.find((c) => c.className.split(" ").includes("drone-stepper-plus")) as unknown as FakeElement;
+    incrementBtn.trigger("click");
+    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 12, activeCount: 6 }]);
+  });
+
+  test("launched stepper clamps at the hangar count", () => {
+    const { controller, fighterCatalog, fighterLoadoutResolver, fittingImport } = buildFighter();
+    fighterCatalog.fightersByKind.mockImplementation((kind) => kind === "light" ? [{ id: TEMPLAR_ID, name: "Templar I", kind: "light", damage: 97.5, damageByType: { em: 97.5 }, volume: 2500, squadronMaxSize: 6 }] : []);
+    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture()]);
+    fittingImport.importFitting.mockReturnValue(templarFitting());
+    controller.restore("some eft text", NEUTRAL_CONDITIONS, [{ typeId: TEMPLAR_ID, count: 8, activeCount: 6 }]);
+    const loadoutList = getFake(globalThis.document!, "ship-a-fighter-loadout-list");
+    const row = loadoutList.children[0] as unknown as FakeElement;
+    const stepper = row.children.find((c) => c.className.split(" ").includes("drone-launched-stepper")) as unknown as FakeElement;
+    const incrementBtn = stepper.children.find((c) => c.className.split(" ").includes("drone-stepper-plus")) as unknown as FakeElement;
+    incrementBtn.trigger("click");
+    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 8, activeCount: 8 }]);
+  });
+
+  test("launched stepper recalls a full squadron", () => {
+    const { controller, fighterCatalog, fighterLoadoutResolver, fittingImport } = buildFighter();
+    fighterCatalog.fightersByKind.mockImplementation((kind) => kind === "light" ? [{ id: TEMPLAR_ID, name: "Templar I", kind: "light", damage: 97.5, damageByType: { em: 97.5 }, volume: 2500, squadronMaxSize: 6 }] : []);
+    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture()]);
+    fittingImport.importFitting.mockReturnValue(templarFitting());
+    controller.restore("some eft text", NEUTRAL_CONDITIONS, [{ typeId: TEMPLAR_ID, count: 12, activeCount: 12 }]);
+    const loadoutList = getFake(globalThis.document!, "ship-a-fighter-loadout-list");
+    const row = loadoutList.children[0] as unknown as FakeElement;
+    const stepper = row.children.find((c) => c.className.split(" ").includes("drone-launched-stepper")) as unknown as FakeElement;
+    const decrementBtn = stepper.children.find((c) => c.className.split(" ").includes("drone-stepper-minus")) as unknown as FakeElement;
+    decrementBtn.trigger("click");
+    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 12, activeCount: 6 }]);
+  });
+
+  test("launched stepper does not recall below zero", () => {
+    const { controller, fighterCatalog, fighterLoadoutResolver, fittingImport } = buildFighter();
+    fighterCatalog.fightersByKind.mockImplementation((kind) => kind === "light" ? [{ id: TEMPLAR_ID, name: "Templar I", kind: "light", damage: 97.5, damageByType: { em: 97.5 }, volume: 2500, squadronMaxSize: 6 }] : []);
+    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture({ count: 3 })]);
+    fittingImport.importFitting.mockReturnValue(templarFitting([importedFighterFixture({ count: 3 })]));
+    controller.restore("some eft text", NEUTRAL_CONDITIONS, [{ typeId: TEMPLAR_ID, count: 3, activeCount: 3 }]);
+    const loadoutList = getFake(globalThis.document!, "ship-a-fighter-loadout-list");
+    const row = loadoutList.children[0] as unknown as FakeElement;
+    const stepper = row.children.find((c) => c.className.split(" ").includes("drone-launched-stepper")) as unknown as FakeElement;
+    const decrementBtn = stepper.children.find((c) => c.className.split(" ").includes("drone-stepper-minus")) as unknown as FakeElement;
+    decrementBtn.trigger("click");
+    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 3, activeCount: 0 }]);
+  });
+
+  test("launch all launches every stored fighter", () => {
+    const cenobite = supportFighterFixture({ count: 3 });
+    const { controller, fighterLoadoutResolver, fittingImport } = buildFighter();
+    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture(), cenobite]);
+    fittingImport.importFitting.mockReturnValue(templarFitting([importedFighterFixture(), cenobite]));
+    controller.restore("some eft text", NEUTRAL_CONDITIONS, [{ typeId: TEMPLAR_ID, count: 6, activeCount: 2 }, { typeId: cenobite.typeId, count: 3, activeCount: 0 }]);
+    const launchAll = getFake(globalThis.document!, "ship-a-fighter-launch-all") as unknown as FakeElement & { disabled: boolean };
+    expect(launchAll.disabled).toBe(false);
+    launchAll.trigger("click");
+    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 6, activeCount: 6 }, { typeId: cenobite.typeId, count: 3, activeCount: 3 }]);
+  });
+
+  test("recall all recalls every launched fighter and resolves nothing", () => {
+    const { controller, fighterLoadoutResolver } = buildFighter();
+    fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture()]);
+    controller.applyImported(templarFitting(), NEUTRAL_CONDITIONS);
+    vi.mocked(fighterLoadoutResolver.resolve).mockClear();
+    const recallAll = getFake(globalThis.document!, "ship-a-fighter-recall-all") as unknown as FakeElement;
+    recallAll.trigger("click");
+    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 6, activeCount: 0 }]);
+    expect(vi.mocked(fighterLoadoutResolver.resolve).mock.calls.at(-1)?.[0]).toEqual([{ typeId: TEMPLAR_ID, count: 6, activeCount: 0 }]);
+  });
+
+  test("launch and recall buttons are disabled when the hangar is empty and enabled after import", () => {
+    const { controller } = buildFighter();
+    const launchAll = getFake(globalThis.document!, "ship-a-fighter-launch-all");
+    const recallAll = getFake(globalThis.document!, "ship-a-fighter-recall-all");
+    expect(launchAll.disabled).toBe(true);
+    expect(recallAll.disabled).toBe(true);
+    controller.applyImported(templarFitting(), NEUTRAL_CONDITIONS);
+    expect(launchAll.disabled).toBe(false);
+    expect(recallAll.disabled).toBe(false);
   });
 
   test("invalid validation flags the summary bar", () => {
     const { controller, fighterLoadoutResolver, fighterLoadoutValidator } = buildFighter();
     fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture()]);
-    fighterLoadoutValidator.validate.mockReturnValue({ valid: false, totalFighters: 12, totalSquadrons: 5, totalVolume: 30000, hangarCapacity: 150000, violations: ["tooManySquadrons"] });
+    fighterLoadoutValidator.validate.mockReturnValue({ valid: false, totalFighters: 12, activeFighters: 12, activeSquadrons: 5, totalVolume: 30000, hangarCapacity: 150000, violations: ["tooManySquadrons"] });
     controller.applyImported(templarFitting(), NEUTRAL_CONDITIONS);
     expect(controller.validation()!.valid).toBe(false);
     expect(getFake(globalThis.document!, "ship-a-fighter-summary-squadrons").textContent).toBe("5/4");
@@ -103,10 +229,10 @@ describe("FighterControllerImpl", () => {
     fighterLoadoutResolver.resolve.mockReturnValue([importedFighterFixture()]);
     const fitting = "some eft text";
     fittingImport.importFitting.mockReturnValue(templarFitting());
-    controller.restore(fitting, NEUTRAL_CONDITIONS, [{ typeId: TEMPLAR_ID, count: 6 }]);
-    expect(controller.capture()).toEqual({ fighterGroups: [{ typeId: TEMPLAR_ID, count: 6 }] });
-    controller.restore(fitting, NEUTRAL_CONDITIONS, [{ typeId: TEMPLAR_ID, count: 3 }]);
-    expect(controller.capture()).toEqual({ fighterGroups: [{ typeId: TEMPLAR_ID, count: 3 }] });
+    controller.restore(fitting, NEUTRAL_CONDITIONS, [{ typeId: TEMPLAR_ID, count: 6, activeCount: 6 }]);
+    expect(controller.capture()).toEqual({ fighterGroups: [{ typeId: TEMPLAR_ID, count: 6, activeCount: 6 }] });
+    controller.restore(fitting, NEUTRAL_CONDITIONS, [{ typeId: TEMPLAR_ID, count: 3, activeCount: 3 }]);
+    expect(controller.capture()).toEqual({ fighterGroups: [{ typeId: TEMPLAR_ID, count: 3, activeCount: 3 }] });
     controller.clear();
     expect(controller.capture()).toEqual({ fighterGroups: [] });
     expect(controller.fighters()).toEqual([]);
@@ -120,7 +246,7 @@ describe("FighterControllerImpl", () => {
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
     const option = getFake(globalThis.document!, "ship-a-fighter-catalog-light").children[0]?.firstElementChild as unknown as FakeElement;
     option.trigger("click");
-    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 7 }]);
+    expect(controller.capture().fighterGroups).toEqual([{ typeId: TEMPLAR_ID, count: 7, activeCount: 7 }]);
     expect(emitConfigInvalidated).toHaveBeenCalled();
   });
 
@@ -145,7 +271,7 @@ describe("FighterControllerImpl", () => {
     const conditions: StatConditions = { skillLevel: 4, overloaded: true, weaponOverloaded: false };
     controller.updateConditions(conditions);
     expect(resolveSpy.mock.calls[0]?.[2]).toBe(conditions);
-    expect(resolveSpy.mock.calls[0]?.[0]).toEqual([{ typeId: TEMPLAR_ID, count: 7 }]);
+    expect(resolveSpy.mock.calls[0]?.[0]).toEqual([{ typeId: TEMPLAR_ID, count: 7, activeCount: 7 }]);
     expect(emitSpy).not.toHaveBeenCalled();
   });
 

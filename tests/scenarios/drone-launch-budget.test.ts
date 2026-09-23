@@ -54,7 +54,7 @@ Ogre II x5`;
 
 function resolveLaunched(imported: NonNullable<ReturnType<typeof importer.importFitting>>) {
   const context: DroneLoadoutContext = { profile: imported.profile, hullBonuses: imported.fittingState.hullBonuses, droneBoosterModules: imported.fittingState.droneBoosterModules };
-  const groups = imported.drones.map((drone) => ({ typeId: drone.typeId, count: drone.count }));
+  const groups = imported.drones.map((drone) => ({ typeId: drone.typeId, count: drone.count, activeCount: drone.count }));
   return resolver.resolve(groups, context, CONDITIONS);
 }
 
@@ -92,5 +92,13 @@ describe("Drone launch budget (drones sent to attack never exceed the drone band
     expect(launched).toHaveLength(1);
     expect(launched[0].count).toBe(5);
     expect(launchedBandwidth(launched)).toBe(125);
+  });
+
+  test("an explicit launch subset below the bay stock is respected", () => {
+    const imported = importer.importFitting(ISHTAR_10_OGRE, CONDITIONS)!;
+    const context: DroneLoadoutContext = { profile: imported.profile, hullBonuses: imported.fittingState.hullBonuses, droneBoosterModules: imported.fittingState.droneBoosterModules };
+    const launched = resolver.resolve([{ typeId: imported.drones[0].typeId, count: 10, activeCount: 4 }], context, CONDITIONS);
+    expect(launched).toHaveLength(1);
+    expect(launched[0].count).toBe(4);
   });
 });

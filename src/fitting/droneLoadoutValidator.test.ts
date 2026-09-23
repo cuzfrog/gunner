@@ -1,7 +1,8 @@
 import { DroneLoadoutValidatorImpl, type DroneLoadoutViolation, type DroneLoadoutValidation } from "./droneLoadoutValidator";
 import type { DroneStats, FittingDb, HullBonus } from "../gamedata/fittingDb";
 import type { ShipProfile } from "../ships";
-import { toTypeId, type ShipId, type FactionId, type HullTypeId } from "../gamedata/ids";
+import type { DroneGroup } from "./fittingState";
+import { toTypeId, type ShipId, type FactionId, type HullTypeId, type TypeId } from "../gamedata/ids";
 
 function makeDroneStats(overrides: { id: string; bandwidth: number; volume: number }): DroneStats {
   return {
@@ -81,53 +82,82 @@ describe("DroneLoadoutValidatorImpl", () => {
   const db = makeDb({ "24545": lightDrone, "24546": mediumDrone, "24547": heavyDrone });
   const validator = new DroneLoadoutValidatorImpl({ fittingDb: db });
 
+  function group(typeId: TypeId, count: number, activeCount: number = count): DroneGroup {
+    return { typeId, count, activeCount };
+  }
+
   test("validates an empty loadout as valid", () => {
     const result = validator.validate([], makeProfile({}), []);
     expect(result.valid).toBe(true);
     expect(result.totalCount).toBe(0);
-    expect(result.totalBandwidth).toBe(0);
+    expect(result.activeCount).toBe(0);
+    expect(result.activeBandwidth).toBe(0);
     expect(result.totalVolume).toBe(0);
     expect(result.violations).toEqual([]);
   });
 
   test("validates a loadout within all limits", () => {
     const result = validator.validate(
-      [{ typeId: toTypeId("24545"), count: 3 }, { typeId: toTypeId("24546"), count: 2 }],
+      [group(toTypeId("24545"), 3), group(toTypeId("24546"), 2)],
       makeProfile({ droneBandwidth: 35, droneCapacity: 35, maxActiveDrones: 5 }),
       [],
     );
     expect(result.valid).toBe(true);
     expect(result.totalCount).toBe(5);
-    expect(result.totalBandwidth).toBe(35);
+    expect(result.activeCount).toBe(5);
+    expect(result.activeBandwidth).toBe(35);
     expect(result.totalVolume).toBe(35);
     expect(result.violations).toEqual([]);
   });
 
-  test("reports tooManyDrones when count exceeds maxActiveDrones", () => {
+  test("reports tooManyDrones when the launched count exceeds maxActiveDrones", () => {
     const result = validator.validate(
-      [{ typeId: toTypeId("24545"), count: 3 }, { typeId: toTypeId("24546"), count: 3 }],
+      [group(toTypeId("24545"), 3), group(toTypeId("24546"), 3)],
       makeProfile({ maxActiveDrones: 5 }),
       [],
     );
     expect(result.valid).toBe(false);
-    expect(result.totalCount).toBe(6);
+    expect(result.activeCount).toBe(6);
     expect(result.violations).toContain("tooManyDrones" as DroneLoadoutViolation);
   });
 
-  test("reports bandwidthExceeded when total bandwidth exceeds ship limit", () => {
+  test("a bay may store more drones than can be launched", () => {
     const result = validator.validate(
-      [{ typeId: toTypeId("24547"), count: 4 }],
+      [group(toTypeId("24545"), 6, 5)],
+      makeProfile({ maxActiveDrones: 5 }),
+      [],
+    );
+    expect(result.valid).toBe(true);
+    expect(result.totalCount).toBe(6);
+    expect(result.activeCount).toBe(5);
+    expect(result.violations).toEqual([]);
+  });
+
+  test("reports bandwidthExceeded when the launched bandwidth exceeds ship limit", () => {
+    const result = validator.validate(
+      [group(toTypeId("24547"), 4)],
       makeProfile({ droneBandwidth: 75, maxActiveDrones: 5 }),
       [],
     );
     expect(result.valid).toBe(false);
-    expect(result.totalBandwidth).toBe(100);
+    expect(result.activeBandwidth).toBe(100);
     expect(result.violations).toContain("bandwidthExceeded" as DroneLoadoutViolation);
   });
 
-  test("reports bayCapacityExceeded when total volume exceeds ship capacity", () => {
+  test("idle drones stored in the bay do not consume bandwidth", () => {
     const result = validator.validate(
-      [{ typeId: toTypeId("24547"), count: 4 }],
+      [group(toTypeId("24547"), 4, 2)],
+      makeProfile({ droneBandwidth: 75, droneCapacity: 200, maxActiveDrones: 5 }),
+      [],
+    );
+    expect(result.valid).toBe(true);
+    expect(result.activeBandwidth).toBe(50);
+    expect(result.violations).toEqual([]);
+  });
+
+  test("reports bayCapacityExceeded when the stored volume exceeds ship capacity", () => {
+    const result = validator.validate(
+      [group(toTypeId("24547"), 4)],
       makeProfile({ droneBandwidth: 200, droneCapacity: 50, maxActiveDrones: 5 }),
       [],
     );
@@ -136,9 +166,20 @@ describe("DroneLoadoutValidatorImpl", () => {
     expect(result.violations).toContain("bayCapacityExceeded" as DroneLoadoutViolation);
   });
 
+  test("bay capacity counts idle drones too, not only launched ones", () => {
+    const result = validator.validate(
+      [group(toTypeId("24547"), 4, 2)],
+      makeProfile({ droneBandwidth: 200, droneCapacity: 50, maxActiveDrones: 5 }),
+      [],
+    );
+    expect(result.valid).toBe(false);
+    expect(result.totalVolume).toBe(100);
+    expect(result.violations).toEqual(["bayCapacityExceeded"]);
+  });
+
   test("reports multiple violations simultaneously", () => {
     const result = validator.validate(
-      [{ typeId: toTypeId("24547"), count: 6 }],
+      [group(toTypeId("24547"), 6)],
       makeProfile({ droneBandwidth: 50, droneCapacity: 50, maxActiveDrones: 5 }),
       [],
     );
@@ -148,19 +189,19 @@ describe("DroneLoadoutValidatorImpl", () => {
 
   test("skips unknown drone typeIds without error", () => {
     const result = validator.validate(
-      [{ typeId: toTypeId("99999"), count: 1 }],
+      [group(toTypeId("99999"), 1)],
       makeProfile({}),
       [],
     );
     expect(result.valid).toBe(true);
     expect(result.totalCount).toBe(1);
-    expect(result.totalBandwidth).toBe(0);
+    expect(result.activeBandwidth).toBe(0);
     expect(result.totalVolume).toBe(0);
   });
 
   test("treats zero-limit ship as rejecting all drones", () => {
     const result = validator.validate(
-      [{ typeId: toTypeId("24545"), count: 1 }],
+      [group(toTypeId("24545"), 1)],
       makeProfile({ droneBandwidth: 0, droneCapacity: 0, maxActiveDrones: 0 }),
       [],
     );
@@ -176,7 +217,7 @@ describe("DroneLoadoutValidatorImpl", () => {
       { attribute: "droneCapacityFlat", magnitude: 300, scalesWithHullSkill: false, sourceId: toTypeId("45606") },
     ];
     const result = validator.validate(
-      [{ typeId: toTypeId("24547"), count: 5 }],
+      [group(toTypeId("24547"), 5)],
       makeProfile({ droneBandwidth: 0, droneCapacity: 0, maxActiveDrones: 5 }),
       hullBonuses,
     );

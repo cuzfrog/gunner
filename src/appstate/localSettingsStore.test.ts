@@ -30,6 +30,7 @@ import {
   type ProfileSettings,
 } from "./localSettingsStore.testSupport";
 import type { FittedHullSummary } from "./userSettings";
+import { USER_SETTINGS_VERSION } from "./userSettings";
 import type { SessionSettings } from "./combatantSettings";
 
 beforeEach(() => resetMocks());
@@ -657,7 +658,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.version).toBe(15);
+    expect(loaded!.version).toBe(USER_SETTINGS_VERSION);
     expect(loaded!.shipA.fittedHull).toEqual(FITTED_HULL_SUMMARY);
     expect(loaded!.shipA.mass).toBe(DEFAULT_SETTINGS.shipAMass);
   });
@@ -667,7 +668,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.version).toBe(15);
+    expect(loaded!.version).toBe(USER_SETTINGS_VERSION);
     expect(loaded!.shipA.fittedHull).toBeUndefined();
   });
 

@@ -154,6 +154,8 @@ interface CombatantEls {
   readonly droneAlive: HTMLElement;
   readonly droneLoadoutSection: HTMLElement;
   readonly droneLoadoutList: HTMLElement;
+  readonly droneLaunchAll: HTMLButtonElement;
+  readonly droneRecallAll: HTMLButtonElement;
   readonly droneSummaryBar: HTMLElement;
   readonly droneSummaryCount: HTMLElement;
   readonly droneSummaryBandwidth: HTMLElement;
@@ -178,6 +180,8 @@ interface CombatantEls {
   readonly fighterAlive: HTMLElement;
   readonly fighterLoadoutSection: HTMLElement;
   readonly fighterLoadoutList: HTMLElement;
+  readonly fighterLaunchAll: HTMLButtonElement;
+  readonly fighterRecallAll: HTMLButtonElement;
   readonly fighterSummaryBar: HTMLElement;
   readonly fighterSummarySquadrons: HTMLElement;
   readonly fighterSummaryCount: HTMLElement;
@@ -449,6 +453,8 @@ function createCombatantEls(side: Side): CombatantEls {
     droneAlive: el(combatantElementId("droneAlive", side)),
     droneLoadoutSection: el(combatantElementId("droneLoadoutSection", side)),
     droneLoadoutList: el(combatantElementId("droneLoadoutList", side)),
+    droneLaunchAll: elOf(combatantElementId("droneLaunchAll", side), isHtmlButtonElement),
+    droneRecallAll: elOf(combatantElementId("droneRecallAll", side), isHtmlButtonElement),
     droneSummaryBar: el(combatantElementId("droneSummaryBar", side)),
     droneSummaryCount: el(combatantElementId("droneSummaryCount", side)),
     droneSummaryBandwidth: el(combatantElementId("droneSummaryBandwidth", side)),
@@ -473,6 +479,8 @@ function createCombatantEls(side: Side): CombatantEls {
     fighterAlive: el(combatantElementId("fighterAlive", side)),
     fighterLoadoutSection: el(combatantElementId("fighterLoadoutSection", side)),
     fighterLoadoutList: el(combatantElementId("fighterLoadoutList", side)),
+    fighterLaunchAll: elOf(combatantElementId("fighterLaunchAll", side), isHtmlButtonElement),
+    fighterRecallAll: elOf(combatantElementId("fighterRecallAll", side), isHtmlButtonElement),
     fighterSummaryBar: el(combatantElementId("fighterSummaryBar", side)),
     fighterSummarySquadrons: el(combatantElementId("fighterSummarySquadrons", side)),
     fighterSummaryCount: el(combatantElementId("fighterSummaryCount", side)),
