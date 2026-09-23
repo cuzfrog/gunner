@@ -101,6 +101,10 @@ export function normalizeLegacySettings(record: Record<string, unknown>): void {
   normalizeLegacyOverrides(record, "targetOverrides", "shipBOverrides");
   migrateDroneTypeIdToGroups(record, "shipADroneTypeId", "shipADroneGroups");
   migrateDroneTypeIdToGroups(record, "shipBDroneTypeId", "shipBDroneGroups");
+  migrateDroneActiveCounts(record, "shipADroneGroups");
+  migrateDroneActiveCounts(record, "shipBDroneGroups");
+  migrateDroneActiveCounts(record, "shipAFighterGroups");
+  migrateDroneActiveCounts(record, "shipBFighterGroups");
   const entries = Object.entries(record);
   for (const [oldKey, value] of entries) {
     if (oldKey === "version" || oldKey === "language" || oldKey === "trackingUnit" || oldKey === "simSpeed") continue;
@@ -185,7 +189,21 @@ function migrateDroneTypeIdToGroups(record: Record<string, unknown>, oldKey: str
   const typeId = record[oldKey];
   if (typeId === undefined) return;
   if (typeof typeId === "string" && !(newKey in record)) {
-    record[newKey] = [{ typeId, count: 1 }];
+    record[newKey] = [{ typeId, count: 1, activeCount: 1 }];
   }
   delete record[oldKey];
+}
+
+/** Settings written before the drone/fighter bay split carry no activeCount; they launched everything they stored. */
+function migrateDroneActiveCounts(record: Record<string, unknown>, key: string): void {
+  const groups = record[key];
+  if (!Array.isArray(groups)) return;
+  for (const entry of groups) {
+    if (typeof entry !== "object" || entry === null) continue;
+    const group = entry as { count?: unknown; activeCount?: unknown };
+    if (typeof group.count !== "number" || !Number.isInteger(group.count) || group.count <= 0) continue;
+    if (group.activeCount === undefined || typeof group.activeCount !== "number" || !Number.isInteger(group.activeCount) || group.activeCount < 0 || group.activeCount > group.count) {
+      group.activeCount = group.count;
+    }
+  }
 }

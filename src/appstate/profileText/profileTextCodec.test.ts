@@ -59,13 +59,20 @@ describe("profileTextCodec", () => {
   });
 
   test("round-trips a profile with droneGroups", () => {
-    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAWeaponKind: "drone", shipADroneGroups: [{ typeId: toTypeId("24545"), count: 5 }] };
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAWeaponKind: "drone", shipADroneGroups: [{ typeId: toTypeId("24545"), count: 5, activeCount: 3 }] };
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });
 
   test("round-trips a profile with multiple drone groups", () => {
-    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAWeaponKind: "drone", shipADroneGroups: [{ typeId: toTypeId("24545"), count: 3 }, { typeId: toTypeId("80001"), count: 2 }] };
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAWeaponKind: "drone", shipADroneGroups: [{ typeId: toTypeId("24545"), count: 3, activeCount: 3 }, { typeId: toTypeId("80001"), count: 2, activeCount: 1 }] };
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
+  });
+
+  test("droneGroups without activeCount parse as fully launched", () => {
+    const text = `${codec.serialize(MINIMAL_PROFILE)}\nshipA.droneGroups=[{"typeId":"24545","count":5}]`;
+    const parsed = codec.parse(text);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipADroneGroups).toEqual([{ typeId: toTypeId("24545"), count: 5, activeCount: 5 }]);
   });
 
   test("fitting body preserves blank lines and empty slot stubs", () => {
@@ -148,7 +155,7 @@ describe("profileTextCodec", () => {
 
   test("a profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
-version=15
+version=16
 shipA.tracking=0.32
 shipA.sigRes=S
 shipA.optimal=5000

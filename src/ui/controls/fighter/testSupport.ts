@@ -28,6 +28,8 @@ export function collectFighterEls(document: Document, side: Side): FighterEls {
     count: document.getElementById(`${id}-fighter-count`)!,
     loadoutSection: document.getElementById(`${id}-fighter-loadout-section`)!,
     loadoutList: document.getElementById(`${id}-fighter-loadout-list`)!,
+    launchAll: document.getElementById(`${id}-fighter-launch-all`)! as HTMLButtonElement,
+    recallAll: document.getElementById(`${id}-fighter-recall-all`)! as HTMLButtonElement,
     summaryBar: document.getElementById(`${id}-fighter-summary-bar`)!,
     summarySquadrons: document.getElementById(`${id}-fighter-summary-squadrons`)!,
     summaryCount: document.getElementById(`${id}-fighter-summary-count`)!,
@@ -149,6 +151,6 @@ function mockFighterLoadoutResolver(): FighterLoadoutResolver {
 
 function mockFighterLoadoutValidator(): FighterLoadoutValidator {
   return {
-    validate: vi.fn((): FighterLoadoutValidation => ({ valid: true, totalFighters: 0, totalSquadrons: 0, totalVolume: 0, hangarCapacity: 0, violations: [] })),
+    validate: vi.fn((): FighterLoadoutValidation => ({ valid: true, totalFighters: 0, activeFighters: 0, activeSquadrons: 0, totalVolume: 0, hangarCapacity: 0, violations: [] })),
   };
 }

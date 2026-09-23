@@ -29,7 +29,10 @@ export interface VortonGroup {
 
 export interface DroneGroup {
   readonly typeId: TypeId;
+  /** Drones stored in the drone bay. */
   readonly count: number;
+  /** Drones launched into combat; never above count. */
+  readonly activeCount: number;
 }
 
 export interface CargoEntry {
@@ -223,8 +226,8 @@ export class FittingStateFactory {
       sensorBoosterModules,
       sensorAmplifierModules,
       commandBurstModules,
-      droneGroups: [...droneCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([typeId, e]) => ({ typeId, count: e.count })),
-      fighterGroups: [...fighterCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([typeId, e]) => ({ typeId, count: e.count })),
+      droneGroups: [...droneCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([typeId, e]) => ({ typeId, count: e.count, activeCount: e.count })),
+      fighterGroups: [...fighterCounts.entries()].sort((a, b) => sortGroups(a[1], b[1])).map(([typeId, e]) => ({ typeId, count: e.count, activeCount: e.count })),
       drones,
       cargo,
     };

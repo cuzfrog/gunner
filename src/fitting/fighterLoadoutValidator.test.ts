@@ -77,8 +77,8 @@ const templar = toTypeId("23055");
 const ametat = toTypeId("23277");
 const cenobite = toTypeId("23280");
 
-function group(typeId: TypeId, count: number): FighterGroup {
-  return { typeId, count };
+function group(typeId: TypeId, count: number, activeCount: number = count): FighterGroup {
+  return { typeId, count, activeCount };
 }
 
 describe("FighterLoadoutValidatorImpl", () => {
@@ -87,7 +87,8 @@ describe("FighterLoadoutValidatorImpl", () => {
   test("empty loadout is valid", () => {
     const result = validator.validate([], carrier());
     expect(result.valid).toBe(true);
-    expect(result.totalSquadrons).toBe(0);
+    expect(result.activeSquadrons).toBe(0);
+    expect(result.activeFighters).toBe(0);
     expect(result.totalFighters).toBe(0);
     expect(result.totalVolume).toBe(0);
     expect(result.hangarCapacity).toBe(65000);
@@ -96,21 +97,31 @@ describe("FighterLoadoutValidatorImpl", () => {
   test("one full light squadron is valid and counts one squadron of six fighters", () => {
     const result = validator.validate([group(templar, 6)], carrier());
     expect(result.valid).toBe(true);
-    expect(result.totalSquadrons).toBe(1);
+    expect(result.activeSquadrons).toBe(1);
+    expect(result.activeFighters).toBe(6);
     expect(result.totalFighters).toBe(6);
     expect(result.totalVolume).toBe(6000);
   });
 
   test("squadrons per group ceil-divide by squadron max size (8 fighters = 2 squadrons)", () => {
     const result = validator.validate([group(templar, 8)], carrier());
-    expect(result.totalSquadrons).toBe(2);
+    expect(result.activeSquadrons).toBe(2);
     expect(result.totalFighters).toBe(8);
+  });
+
+  test("squadron limits apply to launched fighters only", () => {
+    const result = validator.validate([group(templar, 24, 18)], carrier());
+    expect(result.valid).toBe(true);
+    expect(result.activeSquadrons).toBe(3);
+    expect(result.activeFighters).toBe(18);
+    expect(result.totalFighters).toBe(24);
+    expect(result.violations).toEqual([]);
   });
 
   test("three light and one support squadron fill the four tubes without violations", () => {
     const result = validator.validate([group(templar, 18), group(cenobite, 3)], carrier());
     expect(result.valid).toBe(true);
-    expect(result.totalSquadrons).toBe(4);
+    expect(result.activeSquadrons).toBe(4);
   });
 
   test("five squadrons exceed the four tubes", () => {
@@ -147,6 +158,13 @@ describe("FighterLoadoutValidatorImpl", () => {
     expect(result.violations).toEqual(["hangarCapacityExceeded"]);
   });
 
+  test("hangar capacity counts idle fighters stored in the hangar", () => {
+    const small = carrier({ fighterCapacity: 10000 });
+    const result = validator.validate([group(templar, 12, 6)], small);
+    expect(result.violations).toEqual(["hangarCapacityExceeded"]);
+    expect(result.activeSquadrons).toBe(1);
+  });
+
   test("fighters on a hull without tubes violate the squadron, slot and hangar limits", () => {
     const rifter = carrier({ fighterCapacity: 0, fighterTubes: 0, fighterLightSlots: 0, fighterHeavySlots: 0, fighterSupportSlots: 0 });
     const result = validator.validate([group(templar, 1)], rifter);
@@ -156,7 +174,7 @@ describe("FighterLoadoutValidatorImpl", () => {
   test("unknown fighter ids are ignored without crashing", () => {
     const result = validator.validate([group(toTypeId("99999"), 6)], carrier());
     expect(result.valid).toBe(true);
-    expect(result.totalSquadrons).toBe(0);
+    expect(result.activeSquadrons).toBe(0);
     expect(result.totalFighters).toBe(6);
   });
 });

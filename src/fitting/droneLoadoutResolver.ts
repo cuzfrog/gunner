@@ -63,7 +63,7 @@ function syntheticFittingState(context: DroneLoadoutContext, groups: readonly Dr
   };
 }
 
-/** Projects the bay loadout onto the launch budget: drones sent to attack never exceed the bandwidth or active-drone limits. */
+/** Projects the bay loadout onto the launch budget: drones sent to attack are the launched subset, never exceeding the bandwidth or active-drone limits. */
 function launchClampedGroups(groups: readonly DroneGroup[], limits: DroneLoadoutLimits, combatDrones: Readonly<Record<string, DroneStats>>): DroneGroup[] {
   const launched: DroneGroup[] = [];
   let remainingBandwidth = limits.bandwidthLimit;
@@ -71,9 +71,9 @@ function launchClampedGroups(groups: readonly DroneGroup[], limits: DroneLoadout
   for (const group of groups) {
     const stats = combatDrones[group.typeId];
     if (!stats) continue;
-    const count = Math.min(group.count, stats.bandwidth > 0 ? Math.floor(remainingBandwidth / stats.bandwidth) : group.count, remainingSlots);
+    const count = Math.min(group.activeCount, stats.bandwidth > 0 ? Math.floor(remainingBandwidth / stats.bandwidth) : group.activeCount, remainingSlots);
     if (count <= 0) continue;
-    launched.push({ typeId: group.typeId, count });
+    launched.push({ typeId: group.typeId, count, activeCount: count });
     remainingBandwidth -= count * stats.bandwidth;
     remainingSlots -= count;
   }

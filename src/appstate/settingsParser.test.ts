@@ -62,12 +62,12 @@ describe("SettingsParser", () => {
     const v8 = { ...DEFAULT_SETTINGS, version: 8 };
     const v9 = { ...DEFAULT_SETTINGS, version: 9 };
     const v10 = { ...DEFAULT_SETTINGS, version: 10 };
-    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(15);
-    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(15);
-    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(15);
-    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(15);
-    expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(15);
-    expect(makeParser().parseUserSettings(JSON.stringify(v10))?.version).toBe(15);
+    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(USER_SETTINGS_VERSION);
+    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(USER_SETTINGS_VERSION);
+    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(USER_SETTINGS_VERSION);
+    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(USER_SETTINGS_VERSION);
+    expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(USER_SETTINGS_VERSION);
+    expect(makeParser().parseUserSettings(JSON.stringify(v10))?.version).toBe(USER_SETTINGS_VERSION);
   });
 
   test("parseUserSettings defaults missing shipAAmmo", () => {
@@ -186,7 +186,7 @@ describe("SettingsParser", () => {
   test("parseUserSettings parses missile booster activation with script and overload", () => {
     const v13 = {
       ...DEFAULT_SETTINGS,
-      version: 15,
+      version: 16,
       shipAMissileBoosterActivation: [{ active: true, overloaded: true, script: "Missile Precision Script" }, { active: false, overloaded: false, script: "none" }],
       shipBMissileBoosterActivation: [{ active: true, overloaded: false, script: "Missile Range Script" }],
     };
@@ -206,7 +206,7 @@ describe("SettingsParser", () => {
   test("parseUserSettings defaults missing overloaded field to false in missile booster entries", () => {
     const v13 = {
       ...DEFAULT_SETTINGS,
-      version: 15,
+      version: 16,
       shipAMissileBoosterActivation: [{ active: true, script: "Missile Precision Script" }],
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(v13));
@@ -237,7 +237,7 @@ describe("SettingsParser", () => {
   test("parseUserSettings parses sensor booster activation with script and overload", () => {
     const v15 = {
       ...DEFAULT_SETTINGS,
-      version: 15,
+      version: 16,
       shipASensorBoosterActivation: [{ active: true, overloaded: true, script: "Scan Resolution Script" }, { active: false, overloaded: false, script: "none" }],
       shipBSensorBoosterActivation: [{ active: true, overloaded: false, script: "Targeting Range Script" }],
     };
@@ -257,7 +257,7 @@ describe("SettingsParser", () => {
   test("parseUserSettings defaults missing overloaded field to false in sensor booster entries", () => {
     const v15 = {
       ...DEFAULT_SETTINGS,
-      version: 15,
+      version: 16,
       shipASensorBoosterActivation: [{ active: true, script: "Scan Resolution Script" }],
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(v15));
@@ -829,13 +829,45 @@ describe("SettingsParser", () => {
     const wire: UserSettings = {
       ...DEFAULT_SETTINGS,
       shipAWeaponKind: "drone",
-      shipADroneGroups: [{ typeId: toTypeId("24545"), count: 5 }],
+      shipADroneGroups: [{ typeId: toTypeId("24545"), count: 5, activeCount: 3 }],
     };
     const session = parser.fromWire(wire);
     expect(session.shipA.weaponKind).toBe("drone");
-    expect(session.shipA.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 5 }]);
+    expect(session.shipA.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 5, activeCount: 3 }]);
     expect(session.shipB.droneGroups).toBeUndefined();
     expect(parser.toWire(session)).toEqual(wire);
+  });
+
+  test("droneGroups without activeCount migrate to fully launched", () => {
+    const parser = makeParser();
+    const legacy = JSON.stringify({ ...DEFAULT_SETTINGS, shipADroneGroups: [{ typeId: "24545", count: 3 }] });
+    const parsed = parser.parseUserSettings(legacy);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 3, activeCount: 3 }]);
+  });
+
+  test("fighterGroups without activeCount migrate to fully launched", () => {
+    const parser = makeParser();
+    const legacy = JSON.stringify({ ...DEFAULT_SETTINGS, shipBFighterGroups: [{ typeId: "34359", count: 6 }] });
+    const parsed = parser.parseUserSettings(legacy);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipB.fighterGroups).toEqual([{ typeId: toTypeId("34359"), count: 6, activeCount: 6 }]);
+  });
+
+  test("activeCount above count is clamped to count", () => {
+    const parser = makeParser();
+    const wire = JSON.stringify({ ...DEFAULT_SETTINGS, shipADroneGroups: [{ typeId: "24545", count: 2, activeCount: 9 }] });
+    const parsed = parser.parseUserSettings(wire);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 2, activeCount: 2 }]);
+  });
+
+  test("activeCount within count is preserved", () => {
+    const parser = makeParser();
+    const wire = JSON.stringify({ ...DEFAULT_SETTINGS, shipADroneGroups: [{ typeId: "24545", count: 5, activeCount: 2 }] });
+    const parsed = parser.parseUserSettings(wire);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 5, activeCount: 2 }]);
   });
 
   test("absent weaponKind defaults to undefined in session settings", () => {
@@ -845,12 +877,12 @@ describe("SettingsParser", () => {
     expect(session.shipB.weaponKind).toBeUndefined();
   });
 
-  test("version 12 settings migrate to version 15", () => {
+  test("version 12 settings migrate to the current version", () => {
     const parser = makeParser();
     const v12 = JSON.stringify({ ...DEFAULT_SETTINGS, version: 12 });
     const parsed = parser.parseUserSettings(v12);
     expect(parsed).not.toBeNull();
-    expect(parsed!.version).toBe(15);
+    expect(parsed!.version).toBe(USER_SETTINGS_VERSION);
     expect(parsed!.shipA.weaponKind).toBeUndefined();
   });
 
@@ -859,7 +891,7 @@ describe("SettingsParser", () => {
     const legacy = JSON.stringify({ ...DEFAULT_SETTINGS, shipADroneTypeId: "24545" });
     const parsed = parser.parseUserSettings(legacy);
     expect(parsed).not.toBeNull();
-    expect(parsed!.shipA.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 1 }]);
+    expect(parsed!.shipA.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 1, activeCount: 1 }]);
   });
 
   test("legacy shipBDroneTypeId migrates to shipBDroneGroups with count 1", () => {
@@ -867,15 +899,15 @@ describe("SettingsParser", () => {
     const legacy = JSON.stringify({ ...DEFAULT_SETTINGS, shipBDroneTypeId: "24545" });
     const parsed = parser.parseUserSettings(legacy);
     expect(parsed).not.toBeNull();
-    expect(parsed!.shipB.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 1 }]);
+    expect(parsed!.shipB.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 1, activeCount: 1 }]);
   });
 
   test("droneTypeId is ignored when droneGroups is already set", () => {
     const parser = makeParser();
-    const legacy = JSON.stringify({ ...DEFAULT_SETTINGS, shipADroneTypeId: "99999", shipADroneGroups: [{ typeId: toTypeId("24545"), count: 3 }] });
+    const legacy = JSON.stringify({ ...DEFAULT_SETTINGS, shipADroneTypeId: "99999", shipADroneGroups: [{ typeId: "24545", count: 3 }] });
     const parsed = parser.parseUserSettings(legacy);
     expect(parsed).not.toBeNull();
-    expect(parsed!.shipA.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 3 }]);
+    expect(parsed!.shipA.droneGroups).toEqual([{ typeId: toTypeId("24545"), count: 3, activeCount: 3 }]);
   });
 
   test("invalid droneGroups with non-integer count are rejected", () => {

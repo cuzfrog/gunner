@@ -24,7 +24,10 @@ export interface ImportedFighterAttack {
 
 export interface FighterGroup {
   readonly typeId: TypeId;
+  /** Fighters stored in the fighter hangar. */
   readonly count: number;
+  /** Fighters launched in squadrons; never above count. */
+  readonly activeCount: number;
 }
 
 export interface ImportedFighter {

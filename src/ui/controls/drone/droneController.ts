@@ -75,6 +75,8 @@ export class DroneControllerImpl implements DroneController {
     });
     this.popupGroup.register(this.popupValue);
     this.els.trigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
+    this.els.launchAll.addEventListener("click", () => this.launchAll());
+    this.els.recallAll.addEventListener("click", () => this.recallAll());
     this.events.onLanguageChanged(() => this.render());
     this.render();
   }
@@ -96,7 +98,7 @@ export class DroneControllerImpl implements DroneController {
   applyImported(imported: ImportedFitting, conditions: StatConditions): void {
     this.loadoutContext = loadoutContextFromFitting(imported);
     this.conditions = conditions;
-    this.droneGroups = imported.drones.map((d) => ({ typeId: d.typeId, count: d.count }));
+    this.droneGroups = imported.drones.map((d) => ({ typeId: d.typeId, count: d.count, activeCount: d.count }));
     this.recompute();
     this.render();
   }
@@ -108,7 +110,7 @@ export class DroneControllerImpl implements DroneController {
         this.loadoutContext = loadoutContextFromFitting(imported);
         this.conditions = conditions;
         const known = droneGroups && droneGroups.length > 0 ? filterKnownGroups(droneGroups, this.droneCatalog) : [];
-        this.droneGroups = known.length > 0 ? known : imported.drones.map((d) => ({ typeId: d.typeId, count: d.count }));
+        this.droneGroups = known.length > 0 ? known : imported.drones.map((d) => ({ typeId: d.typeId, count: d.count, activeCount: d.count }));
         this.recompute();
         this.render();
         return;
@@ -184,30 +186,37 @@ export class DroneControllerImpl implements DroneController {
     }
   }
 
+  private createLoadoutRow(group: DroneGroup): Element {
+    const drone = this.resolvedDrones.find((d) => d.typeId === group.typeId);
+    const name = drone?.name ?? this.fittingImport.itemNameForId(group.typeId, this.i18n.current()) ?? String(group.typeId);
+    const iconUrl = this.imageCatalog.itemIconUrl(group.typeId);
+    const bayMinusBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-minus" aria-label=${this.i18n.t("drone.bayMinus")}>-</button>` as HTMLElement;
+    const bayPlusBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-plus" aria-label=${this.i18n.t("drone.bayPlus")}>+</button>` as HTMLElement;
+    const launchedMinusBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-minus" aria-label=${this.i18n.t("drone.launchMinus")}>-</button>` as HTMLElement;
+    const launchedPlusBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-plus" aria-label=${this.i18n.t("drone.launchPlus")}>+</button>` as HTMLElement;
+    const removeBtn = html`<button type="button" class="btn drone-remove-btn" aria-label=${this.i18n.t("drone.removeDrone")}>x</button>` as HTMLElement;
+    bayMinusBtn.addEventListener("click", () => this.decrementCount(group.typeId));
+    bayPlusBtn.addEventListener("click", () => this.incrementCount(group.typeId));
+    launchedMinusBtn.addEventListener("click", () => this.recallDrone(group.typeId));
+    launchedPlusBtn.addEventListener("click", () => this.launchDrone(group.typeId));
+    removeBtn.addEventListener("click", () => this.removeDrone(group.typeId));
+    return html`<div class="drone-loadout-row" data-drone-id=${group.typeId}>
+      <img class="drone-loadout-icon" alt="" src=${iconUrl ?? ""} hidden=${iconUrl === undefined ? "" : false}>
+      <span class="drone-loadout-name truncate">${name}</span>
+      <div class="drone-stepper drone-bay-stepper">${bayMinusBtn}<span class="drone-stepper-count mono">${group.count}</span>${bayPlusBtn}</div>
+      <div class="drone-stepper drone-launched-stepper">${launchedMinusBtn}<span class="drone-stepper-count mono">${group.activeCount}</span>${launchedPlusBtn}</div>
+      ${removeBtn}
+    </div>` as Element;
+  }
+
   private renderLoadout(): void {
     this.els.loadoutList.innerHTML = "";
     for (const group of this.droneGroups) {
       const row = this.createLoadoutRow(group);
       this.els.loadoutList.appendChild(row);
     }
-  }
-
-  private createLoadoutRow(group: DroneGroup): Element {
-    const drone = this.resolvedDrones.find((d) => d.typeId === group.typeId);
-    const name = drone?.name ?? this.fittingImport.itemNameForId(group.typeId, this.i18n.current()) ?? String(group.typeId);
-    const iconUrl = this.imageCatalog.itemIconUrl(group.typeId);
-    const decrementBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-minus" aria-label="Decrease count">-</button>` as HTMLElement;
-    const incrementBtn = html`<button type="button" class="btn drone-stepper-btn drone-stepper-plus" aria-label="Increase count">+</button>` as HTMLElement;
-    const removeBtn = html`<button type="button" class="btn drone-remove-btn" aria-label="Remove drone">x</button>` as HTMLElement;
-    decrementBtn.addEventListener("click", () => this.decrementCount(group.typeId));
-    incrementBtn.addEventListener("click", () => this.incrementCount(group.typeId));
-    removeBtn.addEventListener("click", () => this.removeDrone(group.typeId));
-    return html`<div class="drone-loadout-row" data-drone-id=${group.typeId}>
-      <img class="drone-loadout-icon" alt="" src=${iconUrl ?? ""} hidden=${iconUrl === undefined ? "" : false}>
-      <span class="drone-loadout-name truncate">${name}</span>
-      <div class="drone-stepper">${decrementBtn}<span class="drone-stepper-count mono">${group.count}</span>${incrementBtn}</div>
-      ${removeBtn}
-    </div>` as Element;
+    this.els.launchAll.disabled = this.droneGroups.length === 0;
+    this.els.recallAll.disabled = this.droneGroups.length === 0;
   }
 
   private renderSummary(): void {
@@ -220,8 +229,8 @@ export class DroneControllerImpl implements DroneController {
       this.els.summaryBar.classList.remove("is-invalid");
       return;
     }
-    setText(this.els.summaryCount, `${v.totalCount}/${profile.maxActiveDrones}`);
-    setText(this.els.summaryBandwidth, `${v.totalBandwidth}/${v.bandwidthLimit}`);
+    setText(this.els.summaryCount, `${v.activeCount}/${profile.maxActiveDrones}`);
+    setText(this.els.summaryBandwidth, `${v.activeBandwidth}/${v.bandwidthLimit}`);
     setText(this.els.summaryBay, `${v.totalVolume}/${v.capacityLimit}`);
     this.els.summaryBar.classList.toggle("is-invalid", !v.valid);
   }
@@ -246,21 +255,15 @@ export class DroneControllerImpl implements DroneController {
 
   private addDrone(typeId: TypeId): void {
     const existing = this.droneGroups.find((g) => g.typeId === typeId);
-    if (existing) {
-      this.droneGroups = this.droneGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count + 1 } : g);
-    } else {
-      this.droneGroups = [...this.droneGroups, { typeId, count: 1 }];
-    }
-    this.recompute();
-    this.render();
-    this.events.emitConfigInvalidated();
+    const stored = existing
+      ? this.droneGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count + 1, activeCount: g.activeCount } : g)
+      : [...this.droneGroups, { typeId, count: 1, activeCount: 0 }];
+    this.storeDrone(typeId, stored);
   }
 
   private incrementCount(typeId: TypeId): void {
-    this.droneGroups = this.droneGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count + 1 } : g);
-    this.recompute();
-    this.render();
-    this.events.emitConfigInvalidated();
+    const stored = this.droneGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count + 1, activeCount: g.activeCount } : g);
+    this.storeDrone(typeId, stored);
   }
 
   private decrementCount(typeId: TypeId): void {
@@ -270,7 +273,48 @@ export class DroneControllerImpl implements DroneController {
       this.removeDrone(typeId);
       return;
     }
-    this.droneGroups = this.droneGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count - 1 } : g);
+    this.droneGroups = this.droneGroups.map((g) => g.typeId === typeId ? { typeId, count: g.count - 1, activeCount: Math.min(g.activeCount, g.count - 1) } : g);
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private launchDrone(typeId: TypeId): void {
+    const existing = this.droneGroups.find((g) => g.typeId === typeId);
+    if (!existing || existing.activeCount >= existing.count) return;
+    this.droneGroups = this.droneGroups.map((g) => g.typeId === typeId ? { ...g, activeCount: g.activeCount + 1 } : g);
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private recallDrone(typeId: TypeId): void {
+    const existing = this.droneGroups.find((g) => g.typeId === typeId);
+    if (!existing || existing.activeCount <= 0) return;
+    this.droneGroups = this.droneGroups.map((g) => g.typeId === typeId ? { ...g, activeCount: g.activeCount - 1 } : g);
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private launchAll(): void {
+    if (this.droneGroups.length === 0) return;
+    this.droneGroups = this.droneGroups.map((g) => ({ ...g, activeCount: g.count }));
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private recallAll(): void {
+    if (this.droneGroups.length === 0) return;
+    this.droneGroups = this.droneGroups.map((g) => ({ ...g, activeCount: 0 }));
+    this.recompute();
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private storeDrone(typeId: TypeId, stored: DroneGroup[]): void {
+    this.droneGroups = this.loadoutContext ? tryLaunch(stored, typeId, this.validator, this.loadoutContext) : stored;
     this.recompute();
     this.render();
     this.events.emitConfigInvalidated();
@@ -321,9 +365,17 @@ function loadoutContextFromFitting(imported: ImportedFitting): DroneLoadoutConte
 function filterKnownGroups(groups: readonly DroneGroup[], catalog: DroneCatalog): DroneGroup[] {
   const result: DroneGroup[] = [];
   for (const group of groups) {
-    if (catalog.has(group.typeId) && group.count > 0) result.push({ typeId: group.typeId, count: group.count });
+    if (catalog.has(group.typeId) && group.count > 0) result.push({ typeId: group.typeId, count: group.count, activeCount: Math.min(group.activeCount, group.count) });
   }
   return result;
+}
+
+function tryLaunch(groups: readonly DroneGroup[], typeId: TypeId, validator: DroneLoadoutValidator, context: DroneLoadoutContext): DroneGroup[] {
+  const candidate = groups.map((g) => g.typeId === typeId && g.activeCount < g.count ? { ...g, activeCount: g.activeCount + 1 } : g);
+  if (candidate.every((g, i) => g.activeCount === groups[i]!.activeCount)) return [...groups];
+  const validation = validator.validate(candidate, context.profile, context.hullBonuses);
+  if (validation.violations.includes("tooManyDrones") || validation.violations.includes("bandwidthExceeded")) return [...groups];
+  return candidate;
 }
 
 function importedDroneToDroneSpec(drone: ImportedDrone): DroneSpec {

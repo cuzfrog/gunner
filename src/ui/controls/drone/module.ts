@@ -51,6 +51,8 @@ function collectDroneEls(els: ControlsElements, side: Side): DroneEls {
     count: s.droneCount,
     loadoutSection: s.droneLoadoutSection,
     loadoutList: s.droneLoadoutList,
+    launchAll: s.droneLaunchAll,
+    recallAll: s.droneRecallAll,
     summaryBar: s.droneSummaryBar,
     summaryCount: s.droneSummaryCount,
     summaryBandwidth: s.droneSummaryBandwidth,

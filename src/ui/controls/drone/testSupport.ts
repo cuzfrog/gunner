@@ -34,6 +34,8 @@ export function collectDroneEls(document: Document, side: Side): DroneEls {
     count: document.getElementById(`${id}-drone-count`)!,
     loadoutSection: document.getElementById(`${id}-drone-loadout-section`)!,
     loadoutList: document.getElementById(`${id}-drone-loadout-list`)!,
+    launchAll: document.getElementById(`${id}-drone-launch-all`)! as HTMLButtonElement,
+    recallAll: document.getElementById(`${id}-drone-recall-all`)! as HTMLButtonElement,
     summaryBar: document.getElementById(`${id}-drone-summary-bar`)!,
     summaryCount: document.getElementById(`${id}-drone-summary-count`)!,
     summaryBandwidth: document.getElementById(`${id}-drone-summary-bandwidth`)!,
@@ -90,7 +92,7 @@ function mockDroneLoadoutResolver(): DroneLoadoutResolver {
 
 function mockDroneLoadoutValidator(): DroneLoadoutValidator {
   return {
-    validate: vi.fn((): DroneLoadoutValidation => ({ valid: true, totalCount: 0, totalBandwidth: 0, totalVolume: 0, bandwidthLimit: 0, capacityLimit: 0, violations: [] })),
+    validate: vi.fn((): DroneLoadoutValidation => ({ valid: true, totalCount: 0, activeCount: 0, activeBandwidth: 0, totalVolume: 0, bandwidthLimit: 0, capacityLimit: 0, violations: [] })),
   };
 }
 

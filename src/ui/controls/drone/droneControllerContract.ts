@@ -36,6 +36,8 @@ export interface DroneEls {
   readonly count: HTMLElement;
   readonly loadoutSection: HTMLElement;
   readonly loadoutList: HTMLElement;
+  readonly launchAll: HTMLButtonElement;
+  readonly recallAll: HTMLButtonElement;
   readonly summaryBar: HTMLElement;
   readonly summaryCount: HTMLElement;
   readonly summaryBandwidth: HTMLElement;

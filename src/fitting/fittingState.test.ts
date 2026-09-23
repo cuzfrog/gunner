@@ -214,9 +214,16 @@ describe("FittingStateFactory", () => {
     const fighters = [fighterEntry("Templar I", 6), fighterEntry("Templar I", 6), fighterEntry("Cenobite I", 3)];
     const state = factory.create(profile, hullBonuses, [], [], fighters, []);
     expect(state.fighterGroups).toEqual([
-      { typeId: fighterTypeId("Templar I"), count: 12 },
-      { typeId: fighterTypeId("Cenobite I"), count: 3 },
+      { typeId: fighterTypeId("Templar I"), count: 12, activeCount: 12 },
+      { typeId: fighterTypeId("Cenobite I"), count: 3, activeCount: 3 },
     ]);
+  });
+
+  test("groups drone entries into drone groups with every drone launched", () => {
+    const factory = new FittingStateFactory(FITTING_DB);
+    const drones = [cargo("Infiltrator I", 3), cargo("Infiltrator I", 2)];
+    const state = factory.create(profile, hullBonuses, [], drones, [], []);
+    expect(state.droneGroups).toEqual([{ typeId: chargeId("Infiltrator I"), count: 5, activeCount: 5 }]);
   });
 
   test("drops unknown fighter entries from fighter groups", () => {

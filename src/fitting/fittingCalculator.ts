@@ -516,7 +516,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
     const result: ImportedDrone[] = [];
     for (const group of fitting.droneGroups) {
       const stats = this.db.combatDrones[group.typeId];
-      if (!stats) continue;
+      if (!stats || group.activeCount <= 0) continue;
       const skillOutput = this.droneSkillModel.compute(stats, fitting.hullBonuses, conditions.skillLevel);
       const finalDamageMultiplier = skillOutput.damageMultiplier * ddaDamageBonus;
       const finalTracking = skillOutput.tracking * trackingBonus;
@@ -529,7 +529,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
         typeId: group.typeId,
         name: stats.name,
         sizeClass: stats.sizeClass,
-        count: group.count,
+        count: group.activeCount,
         damageMultiplier: finalDamageMultiplier,
         emDamage: stats.emDamage,
         thermalDamage: stats.thermalDamage,
@@ -589,7 +589,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
     const result: ImportedFighter[] = [];
     for (const group of fitting.fighterGroups) {
       const stats = this.db.fighters[group.typeId];
-      if (!stats) continue;
+      if (!stats || group.activeCount <= 0) continue;
       const skillOutput = this.fighterSkillModel.compute(stats, fitting.hullBonuses, conditions.skillLevel);
       const attack: ImportedFighterAttack | undefined = stats.attack
         ? {
@@ -614,7 +614,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
         typeId: group.typeId,
         name: stats.name,
         kind: stats.kind,
-        count: group.count,
+        count: group.activeCount,
         squadronMaxSize: stats.squadronMaxSize,
         maxVelocity: skillOutput.maxVelocity,
         orbitRange: stats.orbitRange,
