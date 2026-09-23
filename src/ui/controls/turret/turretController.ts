@@ -223,6 +223,14 @@ export class TurretControllerImpl implements TurretController {
     this.render();
   }
 
+  updateConditions(conditions: StatConditions): void {
+    this.skillLevel = conditions.skillLevel;
+    this.conditions = conditions;
+    if (!this.fittingState || !this.selectedTurret) return;
+    this.applyResolvedTurrets(this.resolveTurretsFromState(conditions), false);
+    this.render();
+  }
+
   private applyRawTurretValues(tracking?: number, sigRes?: SigResolutionClass, optimal?: number, falloff?: number): void {
     const sigResValue = sigRes ?? this.currentSigResClass();
     const sigResolution = SIG_RESOLUTIONS[sigResValue];
@@ -475,17 +483,24 @@ export class TurretControllerImpl implements TurretController {
 
   private recompute(): void {
     if (!this.fittingState || !this.conditions) return;
-    const patched = applyFittingOverrides(this.fittingState, this.fittingOverrides.get());
-    const turrets = this.calculator.resolveTurrets(patched, this.conditions);
-    this.importedTurrets = turrets;
-    this.selectedTurret = turrets[0];
-    if (this.selectedTurret) {
-      this.currentAmmoId = this.selectedTurret.chargeId;
-      this.turretOverrides.clearTurret();
-      this.inputSet.set(this.selectedTurret);
-    }
+    this.applyResolvedTurrets(this.resolveTurretsFromState(this.conditions), true);
     this.render();
     this.events.emitConfigInvalidated();
+  }
+
+  private resolveTurretsFromState(conditions: StatConditions): readonly ImportedTurret[] {
+    if (!this.fittingState) return [];
+    const patched = applyFittingOverrides(this.fittingState, this.fittingOverrides.get());
+    return this.calculator.resolveTurrets(patched, conditions);
+  }
+
+  private applyResolvedTurrets(turrets: readonly ImportedTurret[], resetRawInputs: boolean): void {
+    this.importedTurrets = turrets;
+    this.selectedTurret = turrets[0];
+    if (!this.selectedTurret) return;
+    this.currentAmmoId = this.selectedTurret.chargeId;
+    if (resetRawInputs) this.turretOverrides.clearTurret();
+    this.inputSet.set(this.selectedTurret);
   }
 
   private rememberCurrentSelection(): void {

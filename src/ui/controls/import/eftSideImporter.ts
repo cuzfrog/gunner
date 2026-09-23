@@ -3,6 +3,7 @@ import { PROPULSION_NONE } from "../../../appstate";
 import type { Side } from "../side";
 import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
 import type { DroneController } from "../drone/droneControllerContract";
+import type { FighterController } from "../fighter/fighterControllerContract";
 import type { ShipATurret } from "./shipATurret";
 import type { ShipALauncher } from "./shipALauncher";
 
@@ -12,6 +13,7 @@ interface EftSideImporterDeps {
   readonly turrets: Record<Side, ShipATurret>;
   readonly launchers: Record<Side, ShipALauncher>;
   readonly drones: Record<Side, Pick<DroneController, "applyImported" | "currentDroneSpecs">>;
+  readonly fighters: Record<Side, Pick<FighterController, "applyImported" | "currentFighterSpecs">>;
   readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   readonly fittingImport: FittingImport;
 }
@@ -22,6 +24,7 @@ export class EftSideImporter {
   private readonly turrets: Record<Side, ShipATurret>;
   private readonly launchers: Record<Side, ShipALauncher>;
   private readonly drones: Record<Side, Pick<DroneController, "applyImported" | "currentDroneSpecs">>;
+  private readonly fighters: Record<Side, Pick<FighterController, "applyImported" | "currentFighterSpecs">>;
   private readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   private readonly fittingImport: FittingImport;
 
@@ -31,6 +34,7 @@ export class EftSideImporter {
     this.turrets = deps.turrets;
     this.launchers = deps.launchers;
     this.drones = deps.drones;
+    this.fighters = deps.fighters;
     this.weaponSystemSwitches = deps.weaponSystemSwitches;
     this.fittingImport = deps.fittingImport;
   }
@@ -57,7 +61,8 @@ export class EftSideImporter {
     this.turrets[side].applyImported(imported, conditions);
     this.launchers[side].applyImported(imported, conditions);
     this.drones[side].applyImported(imported, conditions);
-    this.weaponSystemSwitches[side].autoSelectPrimary({ turret: imported.turret, launcher: imported.launcher, drones: this.drones[side].currentDroneSpecs() });
+    this.fighters[side].applyImported(imported, conditions);
+    this.weaponSystemSwitches[side].autoSelectPrimary({ turret: imported.turret, launcher: imported.launcher, drones: this.drones[side].currentDroneSpecs(), fighters: this.fighters[side].currentFighterSpecs() });
     if (persist) {
       panel.lastCommittedHull = imported.profile.id;
     }

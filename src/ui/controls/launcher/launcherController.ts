@@ -161,6 +161,16 @@ export class LauncherControllerImpl implements LauncherController {
     this.render();
   }
 
+  updateConditions(conditions: StatConditions): void {
+    this.skillLevel = conditions.skillLevel;
+    this.conditions = conditions;
+    if (!this.fittingState || !this.selectedLauncher) return;
+    const launcher = this.resolveLauncherFromState(conditions);
+    this.selectedLauncher = launcher;
+    this.currentAmmoId = launcher?.chargeId;
+    this.render();
+  }
+
   setHullProfile(profile: ShipProfile | undefined): void {
     this.hullProfile = profile;
     this.renderClassSelector();
@@ -355,12 +365,17 @@ export class LauncherControllerImpl implements LauncherController {
 
   private recompute(): void {
     if (!this.fittingState || !this.conditions) return;
-    const patched = applyFittingOverrides(this.fittingState, this.fittingOverrides.get());
-    const launcher = this.calculator.resolveLauncher(patched, this.conditions);
+    const launcher = this.resolveLauncherFromState(this.conditions);
     this.selectedLauncher = launcher;
     this.currentAmmoId = launcher?.chargeId;
     this.render();
     this.events.emitConfigInvalidated();
+  }
+
+  private resolveLauncherFromState(conditions: StatConditions): ImportedLauncher | undefined {
+    if (!this.fittingState) return undefined;
+    const patched = applyFittingOverrides(this.fittingState, this.fittingOverrides.get());
+    return this.calculator.resolveLauncher(patched, conditions);
   }
 
   private rememberCurrentLauncherSelection(): void {

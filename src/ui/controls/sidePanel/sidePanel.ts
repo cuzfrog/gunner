@@ -29,6 +29,7 @@ import type { PanelOverrides } from "./overrides";
 import type { PanelTurretLink } from "./turretLink";
 import type { PanelLauncherLink } from "./launcherLink";
 import type { PanelDroneLink } from "./droneLink";
+import type { PanelFighterLink } from "./fighterLink";
 import {
   type FittingPopupControl,
   type FittingPreviewControl,
@@ -66,6 +67,7 @@ export class SidePanelImpl implements SidePanel {
   private readonly turretLink: PanelTurretLink;
   private readonly launcherLink: PanelLauncherLink;
   private readonly droneLink: PanelDroneLink;
+  private readonly fighterLink: PanelFighterLink;
   private readonly selectionSession: SelectionSession;
   private hostValue: SidePanelHost = NOOP_HOST;
   private profileValue?: ShipProfile;
@@ -81,7 +83,7 @@ export class SidePanelImpl implements SidePanel {
   private fittingPreview?: FittingPreviewControl;
 
   constructor(deps: SidePanelDeps) {
-    const { side, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events, overrides, turretLink, launcherLink, droneLink, simValueParser, propulsionSelection, selectionSession } = deps;
+    const { side, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events, overrides, turretLink, launcherLink, droneLink, fighterLink, simValueParser, propulsionSelection, selectionSession } = deps;
     this.selectionSession = selectionSession;
     this.side = side;
     this.popupGroup = popupGroup;
@@ -95,6 +97,7 @@ export class SidePanelImpl implements SidePanel {
     this.turretLink = turretLink;
     this.launcherLink = launcherLink;
     this.droneLink = droneLink;
+    this.fighterLink = fighterLink;
     const hull = new HullSection({ panel: this, els, ships, i18n });
     const nav = new NavSection({ panel: this, els, simValueParser });
     const stats = new StatsSection({ panel: this, els, ships, i18n });
@@ -288,20 +291,12 @@ export class SidePanelImpl implements SidePanel {
     this.turretLink.clear();
   }
 
-  restoreTurret(): void {
-    this.turretLink.restore(this.fittingText, this.skillConditions());
-  }
-
   setTurretProfile(profile: ShipProfile | undefined): void {
     this.turretLink.setHullProfile(profile);
   }
 
   clearLauncher(): void {
     this.launcherLink.clear();
-  }
-
-  restoreLauncher(): void {
-    this.launcherLink.restore(this.fittingText, this.skillConditions());
   }
 
   setLauncherProfile(profile: ShipProfile | undefined): void {
@@ -312,8 +307,16 @@ export class SidePanelImpl implements SidePanel {
     this.droneLink.clear();
   }
 
-  restoreDrone(): void {
-    this.droneLink.restore(this.fittingText, this.skillConditions());
+  clearFighter(): void {
+    this.fighterLink.clear();
+  }
+
+  recomputeFittedSpecs(): void {
+    const conditions = this.skillConditions();
+    this.turretLink.updateConditions(conditions);
+    this.launcherLink.updateConditions(conditions);
+    this.droneLink.updateConditions(conditions);
+    this.fighterLink.updateConditions(conditions);
   }
 
   clearSelectionSession(): void {

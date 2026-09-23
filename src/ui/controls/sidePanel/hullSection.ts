@@ -133,6 +133,7 @@ export class HullSection implements IHullSection {
     this.panel.clearTurret();
     this.panel.clearLauncher();
     this.panel.clearDrone();
+    this.panel.clearFighter();
     this.panel.hideFittingPreview();
     this.panel.sections.paste.clearImportHint();
   }

@@ -3,7 +3,7 @@ import { CHARGE_OPTIONS, FakeElement, getFake, IMPORTED_RIFTER, IMPORTED_RIFTER_
 import { TurretControllerImpl } from "./turretController";
 import { damageVectorSum } from "../../../sim";
 import { toTypeId } from "../../../gamedata/ids";
-import type { ShipProfile } from "../../../ships";
+import type { ShipProfile, StatConditions } from "../../../ships";
 import type { FactionId, HullTypeId, ShipId, TypeId } from "../../../gamedata/ids";
 import type { Language } from "../../../ui/i18n";
 
@@ -408,6 +408,35 @@ describe("TurretController", () => {
     getFake(document, "ship-a-sigRes").trigger("input");
     expect(turretOverrides.get().sigRes).toBe("M");
     expect(emitDisplayInvalidated).toHaveBeenCalled();
+  });
+
+  test("updateConditions re-resolves specs under the new conditions and preserves charge and raw inputs", () => {
+    const { document, controller, fittingCalculator, events } = buildTurret({
+      fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
+      chargeCatalog: { chargesForTurret: vi.fn(() => CHARGE_OPTIONS) },
+    });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
+    controller.openAmmoPopup();
+    (getFake(document, "ship-a-ammo-all-list").children[1].firstElementChild as unknown as FakeElement).trigger("click");
+    getFake(document, "ship-a-optimal").value = "12345";
+    getFake(document, "ship-a-optimal").trigger("input");
+    expect(controller.ammo()).toBe("Republic Fleet EMP S");
+    const resolveSpy = vi.mocked(fittingCalculator.resolveTurrets);
+    resolveSpy.mockClear();
+    const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
+    const conditions: StatConditions = { skillLevel: 4, overloaded: false, weaponOverloaded: false };
+    controller.updateConditions(conditions);
+    expect(resolveSpy.mock.calls[0]?.[1]).toBe(conditions);
+    expect(controller.ammo()).toBe("Republic Fleet EMP S");
+    expect(getFake(document, "ship-a-ammo-summary").textContent).toBe("Republic Fleet EMP S");
+    expect(getFake(document, "ship-a-optimal").value).toBe("12345");
+    expect(emitConfigInvalidated).not.toHaveBeenCalled();
+  });
+
+  test("updateConditions without a fitted turret does not resolve", () => {
+    const { controller, fittingCalculator } = buildTurret();
+    controller.updateConditions({ skillLevel: 4, overloaded: false, weaponOverloaded: false });
+    expect(fittingCalculator.resolveTurrets).not.toHaveBeenCalled();
   });
 
   test("clicking a sig-res button with a fitted turret switches module and emits configInvalidated", () => {

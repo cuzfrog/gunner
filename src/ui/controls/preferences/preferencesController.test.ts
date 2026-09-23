@@ -145,6 +145,7 @@ class FakeTurretController implements TurretController {
   ammoId = vi.fnUntracked(() => "12608" as import("../../../gamedata/ids").TypeId);
   applyImported = vi.fnUntracked();
   restore(_arg1?: unknown, _arg2?: unknown, _arg3?: unknown, _arg4?: unknown): void {}
+  updateConditions = vi.fnUntracked();
   clear = vi.fnUntracked();
   currentTurretSpec = vi.fnUntracked((): import("../../../sim").TurretSpec | undefined => ({
     kind: "turret",
@@ -185,6 +186,7 @@ class FakeDroneController implements DroneController {
   validation = vi.fnUntracked(() => undefined);
   applyImported = vi.fnUntracked();
   restore = vi.fnUntracked();
+  updateConditions = vi.fnUntracked();
   clear = vi.fnUntracked();
   capture = vi.fnUntracked(() => ({ droneGroups: [] }));
   isPopupOpen = vi.fnUntracked();

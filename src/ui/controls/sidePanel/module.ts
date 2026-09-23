@@ -8,6 +8,7 @@ import { createPanelOverrides } from "./overrides";
 import { createPanelTurretLink } from "./turretLink";
 import { createPanelLauncherLink } from "./launcherLink";
 import { createPanelDroneLink } from "./droneLink";
+import { createPanelFighterLink } from "./fighterLink";
 import { WeaponSystemSwitchImpl } from "./weaponSystemSwitch";
 import { createPropulsionSelection } from "../../selectionSession";
 
@@ -55,6 +56,7 @@ function sideDeps<T extends ControlsCradle>(proxy: T, side: Side): SidePanelDeps
     turretLink: createPanelTurretLink(side, proxy.turretControllers, proxy.popupGroup),
     launcherLink: createPanelLauncherLink(side, proxy.launcherControllers, proxy.popupGroup),
     droneLink: createPanelDroneLink(side, proxy.droneControllers, proxy.popupGroup),
+    fighterLink: createPanelFighterLink(side, proxy.fighterControllers, proxy.popupGroup),
     simValueParser: proxy.simValueParser,
     propulsionSelection: createPropulsionSelection(selectionSession),
     selectionSession,

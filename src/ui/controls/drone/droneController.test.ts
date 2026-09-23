@@ -388,4 +388,35 @@ describe("DroneController", () => {
     expect(catalogButton.getAttribute("data-hint-content")).toBe("drone");
     expect(catalogButton.getAttribute("data-value")).toBe(WARRIOR_ID);
   });
+
+  test("updateConditions re-resolves the bay loadout under the new conditions and preserves user additions", () => {
+    const warrior = importedDroneFixture({ typeId: WARRIOR_ID, name: "Warrior I", count: 1 });
+    const { document, controller, droneLoadoutResolver, events } = buildDrone({
+      droneLoadoutResolver: resolverReturningDrones([warrior]),
+      droneCatalog: {
+        has: vi.fn(() => true),
+        dronesByClass: vi.fn((sizeClass: DroneSizeClass): readonly { id: TypeId; name: string; sizeClass: DroneSizeClass; damage: number; damageByType: Record<string, number>; bandwidth: number; volume: number }[] => sizeClass === "light" ? [{ id: WARRIOR_ID, name: "Warrior I", sizeClass: "light", damage: 10, damageByType: {}, bandwidth: 5, volume: 5 }] : []),
+        usualForClass: vi.fn(() => undefined),
+        idForName: vi.fn(() => undefined),
+      } satisfies DroneCatalog,
+    });
+    controller.applyImported(importedWithDrones([importedDroneFixture()]), NEUTRAL_CONDITIONS);
+    const catalogButton = getFake(document, "ship-a-drone-catalog-light").children[0]?.firstElementChild as unknown as FakeElement;
+    catalogButton.trigger("click");
+    const resolveSpy = vi.mocked(droneLoadoutResolver.resolve);
+    resolveSpy.mockClear();
+    const emitSpy = vi.spyOn(events, "emitConfigInvalidated");
+    const conditions: StatConditions = { skillLevel: 4, overloaded: true, weaponOverloaded: false };
+    controller.updateConditions(conditions);
+    expect(resolveSpy.mock.calls[0]?.[2]).toBe(conditions);
+    expect(resolveSpy.mock.calls[0]?.[0].map((g) => g.typeId)).toEqual([HOBGOBLIN_ID, WARRIOR_ID]);
+    expect(controller.currentDroneSpecs()).toHaveLength(1);
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  test("updateConditions without an imported fitting still stores the conditions and does not resolve", () => {
+    const { controller, droneLoadoutResolver } = buildDrone();
+    controller.updateConditions({ skillLevel: 4, overloaded: false, weaponOverloaded: false });
+    expect(vi.mocked(droneLoadoutResolver.resolve)).not.toHaveBeenCalled();
+  });
 });

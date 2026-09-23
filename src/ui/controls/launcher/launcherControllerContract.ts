@@ -58,6 +58,7 @@ export interface LauncherController {
   currentMissileSpec(): MissileSpec | undefined;
   applyImported(imported: ImportedFitting, conditions: StatConditions): void;
   restore(fitting?: string, conditions?: StatConditions, ammoId?: TypeId): void;
+  updateConditions(conditions: StatConditions): void;
   setHullProfile(profile: ShipProfile | undefined): void;
   clear(): void;
   capture(): { ammo: TypeId | undefined };

@@ -5,7 +5,7 @@ import type { Side } from "../side";
 
 export interface PanelTurretLink {
   clear(): void;
-  restore(fittingText: string | undefined, conditions: StatConditions): void;
+  updateConditions(conditions: StatConditions): void;
   setHullProfile(profile: ShipProfile | undefined): void;
 }
 
@@ -21,8 +21,8 @@ class PanelTurretLinkImpl implements PanelTurretLink {
     this.turret.clear();
   }
 
-  restore(fittingText: string | undefined, conditions: StatConditions): void {
-    this.turret.restore(fittingText, conditions);
+  updateConditions(conditions: StatConditions): void {
+    this.turret.updateConditions(conditions);
   }
 
   setHullProfile(profile: ShipProfile | undefined): void {
