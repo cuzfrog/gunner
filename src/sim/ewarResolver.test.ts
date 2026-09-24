@@ -510,6 +510,19 @@ describe("EwarResolverImpl", () => {
       expect(resolver.appliedEffects(projection, 10801)).toEqual([]);
     });
 
+    test("pure warp disruptor applies as warpDisruptor, not scrambler", () => {
+      const disruptor: WarpScramblerSpec = { propulsionBlock: false, moduleName: "Warp Disruptor II", moduleId: DISRUPTOR_II_ID, maxRange: 24000, overloadRangeBonusPercent: 20 };
+      const projection = scramblerProjection([disruptor]);
+      expect(resolver.appliedEffects(projection, 24000)).toEqual([{ family: "warpDisruptor", moduleId: DISRUPTOR_II_ID }]);
+      expect(resolver.appliedEffects(projection, 24001)).toEqual([]);
+    });
+
+    test("inactive pure warp disruptor is skipped", () => {
+      const disruptor: WarpScramblerSpec = { propulsionBlock: false, moduleName: "Warp Disruptor II", moduleId: DISRUPTOR_II_ID, maxRange: 24000, overloadRangeBonusPercent: 20 };
+      const projection = scramblerProjection([disruptor], false, false);
+      expect(resolver.appliedEffects(projection, 5000)).toEqual([]);
+    });
+
     test("grappler applies while falloff effectiveness is at least 0.01", () => {
       const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: GRAPPLER_I_ID, optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
       const projection = grapplerProjection([GRAPPLER]);

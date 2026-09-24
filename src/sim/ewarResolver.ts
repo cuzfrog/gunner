@@ -267,7 +267,7 @@ export class EwarResolverImpl implements EwarResolver {
       if (activation && !activation.active) continue;
       const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
       const range = spec.maxRange * overloadBonus;
-      if (range >= distance) return { family: "scrambler", moduleId: spec.moduleId };
+      if (range >= distance) return { family: spec.propulsionBlock ? "scrambler" : "warpDisruptor", moduleId: spec.moduleId };
     }
     return undefined;
   }

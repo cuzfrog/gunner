@@ -12,6 +12,7 @@ export interface EwarEffectDescriber {
   disruptorHint(projection: EwarProjection): string;
   scramblerDescription(projection: EwarProjection, distance: number): string;
   scramblerHint(projection: EwarProjection): string;
+  warpDisruptorHint(projection: EwarProjection): string;
   neutralizerDescription(projection: EwarProjection, distance: number): string;
   nosferatuDescription(projection: EwarProjection, distance: number): string;
   painterHint(projection: EwarProjection): string;
@@ -63,15 +64,24 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   }
 
   scramblerDescription(projection: EwarProjection, distance: number): string {
-    return this.resolver.propulsionSuppressed(projection, distance)
-      ? this.i18n.t("ewar.hover.scrambler")
-      : this.i18n.t("ewar.hover.outOfRange");
+    const statements: string[] = [];
+    if (this.resolver.propulsionSuppressed(this.scramblerBucketProjection(projection, true), distance)) statements.push(this.i18n.t("ewar.hover.scrambler"));
+    if (this.resolver.appliedEffects(projection, distance).some((effect) => effect.family === "warpDisruptor")) statements.push(this.i18n.t("ewar.hover.warpDisruptor"));
+    return statements.length > 0 ? statements.join(" · ") : this.i18n.t("ewar.hover.outOfRange");
   }
 
   scramblerHint(projection: EwarProjection): string {
-    const potentials = this.resolver.potentials(projection);
-    const reach = this.resolver.reach(projection);
+    const blockers = this.scramblerBucketProjection(projection, true);
+    const potentials = this.resolver.potentials(blockers);
+    const reach = this.resolver.reach(blockers);
     return `${potentials.propulsionSuppressed ? this.i18n.t("ewar.hover.scrambler") : this.i18n.t("ewar.hover.outOfRange")} · ${this.formatRange(reach.scrambler)}`;
+  }
+
+  warpDisruptorHint(projection: EwarProjection): string {
+    const disruptors = this.scramblerBucketProjection(projection, false);
+    const reach = this.resolver.reach(disruptors);
+    const statement = reach.scrambler > 0 ? this.i18n.t("ewar.hover.warpDisruptor") : this.i18n.t("ewar.hover.outOfRange");
+    return `${statement} · ${this.formatRange(reach.scrambler)}`;
   }
 
   neutralizerDescription(projection: EwarProjection, distance: number): string {
@@ -183,6 +193,19 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
     const scanResLabel = this.i18n.t("ewar.hover.scanResolution");
     const rangeLabel = this.i18n.t("ewar.hover.targetingRange");
     return `${scanResLabel} -${scanRes}% · ${rangeLabel} -${range}%`;
+  }
+
+  private scramblerBucketProjection(projection: EwarProjection, propulsionBlock: boolean): EwarProjection {
+    const specs = projection.loadout.scramblers;
+    if (specs.every((spec) => spec.propulsionBlock === propulsionBlock)) return projection;
+    const activations = projection.activation?.scramblers;
+    const indices: number[] = [];
+    for (let i = 0; i < specs.length; i++) if (specs[i].propulsionBlock === propulsionBlock) indices.push(i);
+    const filteredActivations = activations === undefined ? undefined : indices.map((i) => activations[i]);
+    return {
+      loadout: { ...projection.loadout, scramblers: indices.map((i) => specs[i]) },
+      activation: projection.activation === undefined || filteredActivations === undefined ? projection.activation : { ...projection.activation, scramblers: filteredActivations },
+    };
   }
 }
 

@@ -34,6 +34,7 @@ const DISRUPTOR2: TrackingDisruptorSpec = {
   disruption: -0.25, defaultScript: OPTIMAL_SCRIPT, overloadStrengthBonusPercent: 20,
 };
 const SCRAMBLER: WarpScramblerSpec = { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 };
+const WARP_DISRUPTOR: WarpScramblerSpec = { propulsionBlock: false, moduleName: "Warp Disruptor II", moduleId: toTypeId("3244"), maxRange: 24000, overloadRangeBonusPercent: 20 };
 const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: toTypeId("41040"), optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
 const PAINTER: TargetPainterSpec = { moduleName: "Target Painter II", moduleId: toTypeId("12275"), maxRange: 36000, falloff: 90000, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 20 };
 const SCAN_RES_SCRIPT: SensorDampenerScriptSpec & { readonly moduleId: TypeId } = {
@@ -127,6 +128,7 @@ function buildEwarController(
     "2108": "Tracking Disruptor I",
     "2109": "Tracking Disruptor II",
     "448": "Warp Scrambler II",
+    "3244": "Warp Disruptor II",
     "41040": "Heavy Stasis Grappler I",
     "12275": "Target Painter II",
     "2119": "Sensor Dampener I",
@@ -154,6 +156,7 @@ function buildEwarController(
     disruptorHint: vi.fn(() => "disruptor-hint"),
     scramblerDescription: vi.fn(() => "scrambler-title"),
     scramblerHint: vi.fn(() => "scrambler-hint"),
+    warpDisruptorHint: vi.fn(() => "warpDisruptor-hint"),
     painterHint: vi.fn(() => "painter-hint"),
     dampenerHint: vi.fn(() => "dampener-hint"),
     jammerDescription: vi.fn(() => "jammer-desc"),
@@ -188,6 +191,10 @@ function dampenerSection(document: Document, side: "shipA" | "shipB"): FakeEleme
 
 function scramblerSection(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
   return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.scrambler");
+}
+
+function warpDisruptorSection(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
+  return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.warpDisruptor");
 }
 
 function neutralizerSection(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
@@ -346,6 +353,32 @@ describe("EwarController", () => {
       activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active: true, overloaded: false }], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [], },
     });
     expect(ewarEffectDescriber.scramblerHint).toHaveBeenCalled();
+  });
+
+  test("mixed scrambler bucket renders separate sections and summaries per kind", () => {
+    const { controller, document } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER, WARP_DISRUPTOR], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], };
+    controller.setLoadout("shipA", loadout);
+
+    const summary = getFake(document, "ship-a-ewar-summary");
+    expect(summary.children.length).toBe(2);
+    expect(summary.children[0].getAttribute("data-hint")).toBe("scrambler-hint");
+    expect(summary.children[0].children[0].src).toBe("icons/448.png");
+    expect(summary.children[0].children[1].textContent).toBe("1/1");
+    expect(summary.children[1].getAttribute("data-hint")).toBe("warpDisruptor-hint");
+    expect(summary.children[1].children[0].src).toBe("icons/3244.png");
+    expect(summary.children[1].children[1].textContent).toBe("1/1");
+
+    const scramblers = scramblerSection(document, "shipA")!;
+    expect(scramblers.children[0].textContent).toBe("label.ewar.scrambler");
+    expect(scramblers.children[1].children[0].children[1].textContent).toBe(SCRAMBLER.moduleName);
+    const disruptors = warpDisruptorSection(document, "shipA")!;
+    expect(disruptors.children[0].textContent).toBe("label.ewar.warpDisruptor");
+    expect(disruptors.children[1].children[0].children[1].textContent).toBe(WARP_DISRUPTOR.moduleName);
+
+    disruptors.children[1].children[0].trigger("click");
+    expect(controller.projection("shipA")!.activation!.scramblers).toEqual([{ active: true, overloaded: false }, { active: false, overloaded: false }]);
+    expect(getFake(document, "ship-a-ewar-summary").children[1].children[1].textContent).toBe("0/1");
   });
 
   test("toggling a web flips state, updates its section summary, and does not close popup", () => {

@@ -118,9 +118,12 @@ describe("ModuleHintProviderImpl", () => {
     });
   });
 
-  test("omits the MWD statement for pure warp disruptors", () => {
+  test("shows the warp-drive statement for pure warp disruptors", () => {
     const model = renderModel({ modules: { "532": makeModule({ warpScrambler: { maxRange: 24000, overloadRangeBonusPercent: 50, capacitorNeed: 1, cycleTime: 10, propulsionBlock: false, requiredSkillIds: [] } }) } }, "532");
-    expect(model?.sections[0].rows).toEqual([{ label: "label.maxRange", value: "24.0 unit.kilometer" }]);
+    expect(model?.sections[0].rows).toEqual([
+      { value: "ewar.hover.warpDisruptor", emphasis: true },
+      { label: "label.maxRange", value: "24.0 unit.kilometer" },
+    ]);
   });
 
   test("builds target painter rows with signature bonus and range", () => {

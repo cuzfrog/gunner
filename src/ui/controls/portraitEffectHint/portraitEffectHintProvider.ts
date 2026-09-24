@@ -188,6 +188,8 @@ function ewarEffectText(effect: AppliedEwarEffect, t: (key: string) => string): 
       return `${t("ewar.hover.web")} ${percentReduction(effect.speedMultiplier)}%`;
     case "scrambler":
       return t("ewar.hover.scrambler");
+    case "warpDisruptor":
+      return t("ewar.hover.warpDisruptor");
     case "disruptor": {
       const parts: string[] = [];
       if (effect.trackingMultiplier < 1) parts.push(`${t("ewar.hover.tracking")} -${percentReduction(effect.trackingMultiplier)}%`);

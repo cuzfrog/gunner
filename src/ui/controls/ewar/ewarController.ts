@@ -192,8 +192,11 @@ export class EwarControllerImpl implements EwarController {
     if (state.loadout.disruptors.length > 0) {
       this.renderSection(section, "label.ewar.disruptor", (container) => this.renderDisruptors(side, state, container));
     }
-    if (state.loadout.scramblers.length > 0) {
-      this.renderSection(section, "label.ewar.scrambler", (container) => this.renderScramblers(side, state, container));
+    if (state.loadout.scramblers.some((spec) => spec.propulsionBlock)) {
+      this.renderSection(section, "label.ewar.scrambler", (container) => this.renderScramblers(side, state, container, true));
+    }
+    if (state.loadout.scramblers.some((spec) => !spec.propulsionBlock)) {
+      this.renderSection(section, "label.ewar.warpDisruptor", (container) => this.renderScramblers(side, state, container, false));
     }
     if (state.loadout.painters.length > 0) {
       this.renderSection(section, "label.ewar.painter", (container) => this.renderPainters(side, state, container));
@@ -215,7 +218,7 @@ export class EwarControllerImpl implements EwarController {
 
   private renderSection(
     parent: HTMLElement,
-    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler" | "label.ewar.painter" | "label.ewar.dampener" | "label.ewar.neutralizer" | "label.ewar.nosferatu" | "label.ewar.jammer",
+    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler" | "label.ewar.warpDisruptor" | "label.ewar.painter" | "label.ewar.dampener" | "label.ewar.neutralizer" | "label.ewar.nosferatu" | "label.ewar.jammer",
     renderRows: (container: HTMLElement) => void,
   ): void {
     const rowContainer = html`<div></div>` as unknown as HTMLDivElement;
@@ -246,9 +249,18 @@ export class EwarControllerImpl implements EwarController {
     const disruptorActive = state.activation.disruptors.filter((d) => d.active).length;
     const disruptorTitle = disruptorTotal > 0 ? this.ewarEffectDescriber.disruptorHint(projection) : "";
     if (disruptorTotal > 0) this.appendSummaryItem(summary, state.loadout.disruptors[0].moduleId, disruptorActive, disruptorTotal, disruptorTitle);
-    const scramblerActive = state.activation.scramblers.filter((s) => s.active).length;
-    const scramblerTitle = state.loadout.scramblers.length > 0 ? this.ewarEffectDescriber.scramblerHint(projection) : "";
-    if (state.loadout.scramblers.length > 0) this.appendSummaryItem(summary, state.loadout.scramblers[0].moduleId, scramblerActive, state.loadout.scramblers.length, scramblerTitle);
+    const scramblerSpecs = state.loadout.scramblers;
+    const blockerCount = scramblerSpecs.filter((s) => s.propulsionBlock).length;
+    const blockerActive = state.activation.scramblers.filter((s, i) => s.active && scramblerSpecs[i].propulsionBlock).length;
+    const scramblerIndex = scramblerSpecs.findIndex((s) => s.propulsionBlock);
+    const warpDisruptorIndex = scramblerSpecs.findIndex((s) => !s.propulsionBlock);
+    const scramblerTitle = scramblerIndex >= 0 ? this.ewarEffectDescriber.scramblerHint(projection) : "";
+    const warpDisruptorTitle = warpDisruptorIndex >= 0 ? this.ewarEffectDescriber.warpDisruptorHint(projection) : "";
+    if (scramblerIndex >= 0) this.appendSummaryItem(summary, scramblerSpecs[scramblerIndex].moduleId, blockerActive, blockerCount, scramblerTitle);
+    if (warpDisruptorIndex >= 0) {
+      const disruptorActive = state.activation.scramblers.filter((s) => s.active).length - blockerActive;
+      this.appendSummaryItem(summary, scramblerSpecs[warpDisruptorIndex].moduleId, disruptorActive, scramblerSpecs.length - blockerCount, warpDisruptorTitle);
+    }
     const painterActive = state.activation.painters.filter((p) => p.active).length;
     const painterTitle = state.loadout.painters.length > 0 ? this.ewarEffectDescriber.painterHint(projection) : "";
     if (state.loadout.painters.length > 0) this.appendSummaryItem(summary, state.loadout.painters[0].moduleId, painterActive, state.loadout.painters.length, painterTitle);
@@ -386,9 +398,10 @@ export class EwarControllerImpl implements EwarController {
     }
   }
 
-  private renderScramblers(side: Side, state: EwarState, section: HTMLElement): void {
+  private renderScramblers(side: Side, state: EwarState, section: HTMLElement, propulsionBlock: boolean): void {
     for (let i = 0; i < state.loadout.scramblers.length; i++) {
       const scrambler: WarpScramblerSpec = state.loadout.scramblers[i];
+      if (scrambler.propulsionBlock !== propulsionBlock) continue;
       const button = this.createModuleButton(state.activation.scramblers[i].active, scrambler);
       const overloadButton = this.createOverloadButton(state.activation.scramblers[i].active, state.activation.scramblers[i].overloaded, i, scrambler, () => this.toggleScramblerOverload(side, i, overloadButton));
       button.addEventListener("click", () => this.toggleScrambler(side, i, button));

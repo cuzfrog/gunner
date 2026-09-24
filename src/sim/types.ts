@@ -799,12 +799,13 @@ export interface EwarEffectPotentials {
   readonly targetingRangeMultiplier: number;
 }
 
-export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor" | "dampener" | "painter" | "neutralizer" | "nosferatu" | "jammer";
+export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "warpDisruptor" | "disruptor" | "dampener" | "painter" | "neutralizer" | "nosferatu" | "jammer";
 
 export type AppliedEwarEffect =
   | { readonly family: "web"; readonly moduleId: TypeId; readonly speedMultiplier: number }
   | { readonly family: "grappler"; readonly moduleId: TypeId; readonly speedMultiplier: number }
   | { readonly family: "scrambler"; readonly moduleId: TypeId }
+  | { readonly family: "warpDisruptor"; readonly moduleId: TypeId }
   | { readonly family: "disruptor"; readonly moduleId: TypeId; readonly trackingMultiplier: number; readonly optimalMultiplier: number; readonly falloffMultiplier: number }
   | { readonly family: "dampener"; readonly moduleId: TypeId; readonly scanResolutionMultiplier: number; readonly maxTargetRangeMultiplier: number }
   | { readonly family: "painter"; readonly moduleId: TypeId; readonly signatureMultiplier: number }
