@@ -20,29 +20,11 @@ function navElsFor(document: Document, side: "shipA" | "shipB"): NavSectionEls {
   return {
     mode: getFake(document, `${prefix}-mode`) as unknown as HTMLSelectElement,
     range: getFake(document, `${prefix}-range`) as unknown as HTMLInputElement,
-    attackDrones: getFake(document, `${prefix}-attack-drones`) as unknown as HTMLInputElement,
     aggressivity: getFake(document, `${prefix}-aggressivity`) as unknown as HTMLInputElement,
     aggressivitySlider: getFake(document, `${prefix}-aggressivity-slider`) as unknown as HTMLInputElement,
     aggressivityValue: getFake(document, `${prefix}-aggressivity-value`) as unknown as HTMLElement,
   };
 }
-
-describe("NavSection attack drones", () => {
-  test("capture reports the checkbox state and restore applies it", () => {
-    const document = fakeDocument();
-    const section = new NavSection({ panel: mockPanel(), els: navElsFor(document, "shipA"), simValueParser });
-    const checkbox = getFake(document, "ship-a-attack-drones") as unknown as HTMLInputElement;
-    getFake(document, "ship-a-mode").value = "orbit";
-    checkbox.checked = true;
-    const captured = section.capture();
-    expect(captured.attackDrones).toBe(true);
-    checkbox.checked = false;
-    section.restore({ mode: "orbit", range: 5000, aggressivity: 1, attackDrones: true });
-    expect(checkbox.checked).toBe(true);
-    section.restore({ mode: "orbit", range: 5000, aggressivity: 1 });
-    expect(checkbox.checked).toBe(false);
-  });
-});
 
 describe("NavSection", () => {
   test("constructor disables the aggressivity slider when the initial mode is not maneuver", () => {

@@ -3,6 +3,7 @@ import { toTypeId } from "../../../gamedata/ids";
 import type { CapacitorStats, ImportedVorton } from "../../../fitting";
 import type { FittedHullSummary } from "../../../appstate";
 import type { SidePanelState } from "../sidePanel";
+import type { Side } from "../side";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import type { MissileBoosterController } from "../missileBooster";
@@ -13,6 +14,7 @@ import type { DroneController } from "../drone";
 import type { FighterController } from "../fighter";
 import type { LauncherController } from "../launcher";
 import type { TurretController } from "../turret";
+import type { TargetingController } from "../targeting";
 import type { WeaponSystemSwitch } from "../sidePanel";
 import type { CapacitorStatsSource } from "./capacitorStatsSource";
 import { SimConfigSourceImpl } from "./simConfigSource";
@@ -158,7 +160,10 @@ function build() {
     capBoosterSpecs: vi.fn(() => []),
   } as unknown as CapacitorController;
   const capacitorStatsSource = { stats: vi.fn((_side: "shipA" | "shipB") => undefined as CapacitorStats | undefined), commandBursts: vi.fn((_side: "shipA" | "shipB") => [] as readonly CommandBurstSpec[]) } as unknown as CapacitorStatsSource & { stats: ReturnType<typeof vi.fn> };
-  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, fighterControllers, defenseController, capacitorController, capacitorStatsSource, turretSpec, missileSpec, importedVorton };
+  const targetingController = {
+    attackDrones: vi.fn((side: "shipA" | "shipB") => false as boolean),
+  } as unknown as TargetingController & { attackDrones: ReturnType<typeof vi.fn> };
+  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, sensorBoosterController, distanceSource, ewar, boost, missileBoost, sensorBoost, weaponSystemSwitches, turretControllers, launcherControllers, droneControllers, fighterControllers, defenseController, capacitorController, capacitorStatsSource, targetingController, turretSpec, missileSpec, importedVorton };
 }
 
 function makeSource(deps: ReturnType<typeof build>) {
@@ -178,6 +183,7 @@ function makeSource(deps: ReturnType<typeof build>) {
     defenseController: deps.defenseController,
     capacitorController: deps.capacitorController,
     capacitorStatsSource: deps.capacitorStatsSource,
+    targetingController: deps.targetingController,
   });
 }
 
@@ -300,12 +306,9 @@ describe("SimConfigSourceImpl", () => {
     expect(engineConfig.capacitor.shipB.weaponsDrainPerSecond).toBe(0);
   });
 
-  test("getEngineConfig carries the attack-drones tactic from the side panel state", () => {
+  test("getEngineConfig carries the attack-drones tactic from the targeting controller", () => {
     const deps = build();
-    const base = deps.shipASide.capture();
-    const baseB = deps.shipBSide.capture();
-    deps.shipASide.capture = vi.fn(() => ({ ...base, attackDrones: true }));
-    deps.shipBSide.capture = vi.fn(() => ({ ...baseB }));
+    deps.targetingController.attackDrones.mockImplementation((side: Side): boolean => side === "shipA");
     const engineConfig = makeSource(deps).getEngineConfig();
     expect(engineConfig.sim.shipA.attackDrones).toBe(true);
     expect(engineConfig.sim.shipB.attackDrones).toBe(false);

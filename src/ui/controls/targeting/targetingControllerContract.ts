@@ -11,5 +11,6 @@ export type TargetingEls = Sided<TargetingFieldEls>;
 
 export interface TargetingController {
   setSensorData(side: Side, spec: SensorSpec | undefined): void;
+  attackDrones(side: Side): boolean;
   render(): void;
 }

@@ -20,6 +20,7 @@ function fakeEls(): TargetingEls {
 function fakeI18n(): I18n {
   const map: Record<string, string> = {
     "label.targeting": "Targeting",
+    "label.attackDrones": "Attack drones",
     "title.targeting.empty": "No targeting data available",
     "targeting.attributes": "Sensor attributes",
     "targeting.scanResolution": "Scan resolution",
@@ -31,16 +32,16 @@ function fakeI18n(): I18n {
   return { t: (key: string) => map[key] ?? key } as unknown as I18n;
 }
 
-function fakeEvents(): UiEvents & { readonly listeners: Record<string, ((...args: unknown[]) => void)[]> } {
+function fakeEvents(): UiEvents & { readonly listeners: Record<string, ((...args: unknown[]) => void)[]>; readonly emitConfigInvalidated: (...args: unknown[]) => void } {
   const listeners: Record<string, ((...args: unknown[]) => void)[]> = {};
   return {
     listeners,
     onFittingImported: (cb: (...args: unknown[]) => void): void => { (listeners.onFittingImported ??= []).push(cb); },
     onLanguageChanged: (cb: (...args: unknown[]) => void): void => { (listeners.onLanguageChanged ??= []).push(cb); },
     onConfigInvalidated: (cb: (...args: unknown[]) => void): void => { (listeners.onConfigInvalidated ??= []).push(cb); },
-    emitConfigInvalidated: (): void => {},
-    emitLanguageChanged: (): void => {},
-  } as unknown as UiEvents & { readonly listeners: Record<string, ((...args: unknown[]) => void)[]> };
+    emitConfigInvalidated: vi.fn(),
+    emitLanguageChanged: vi.fn(),
+  } as unknown as UiEvents & { readonly listeners: Record<string, ((...args: unknown[]) => void)[]>; readonly emitConfigInvalidated: (...args: unknown[]) => void };
 }
 
 function fakePopupGroup(): PopupGroup {
@@ -193,7 +194,74 @@ describe("TargetingController", () => {
     const summaryAfter = (els.shipA.summary as unknown as FakeElement).children.length;
     expect(summaryAfter).toBeGreaterThan(0);
   });
+
+  test("renders the attack-drones toggle in the popup section", () => {
+    const els = fakeEls();
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    controller.setSensorData("shipA", SPEC);
+    const checkbox = findDescendant(els.shipA.section, "targeting-drones-checkbox");
+    expect(checkbox).toBeDefined();
+    expect((checkbox as unknown as HTMLInputElement).checked).toBe(false);
+    expect(sectionText(els.shipA.section)).toContain("Attack drones");
+  });
+
+  test("attackDrones defaults to false per side", () => {
+    const els = fakeEls();
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    controller.setSensorData("shipA", SPEC);
+    expect(controller.attackDrones("shipA")).toBe(false);
+    expect(controller.attackDrones("shipB")).toBe(false);
+  });
+
+  test("toggling attack-drones updates the side state and emits config invalidated", () => {
+    const els = fakeEls();
+    const events = fakeEvents();
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events, sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    controller.setSensorData("shipA", SPEC);
+    const checkbox = findDescendant(els.shipA.section, "targeting-drones-checkbox") as unknown as FakeElement & { checked: boolean };
+    checkbox.checked = true;
+    checkbox.trigger("change");
+    expect(controller.attackDrones("shipA")).toBe(true);
+    expect(events.emitConfigInvalidated).toHaveBeenCalledTimes(1);
+  });
+
+  test("attack-drones sides are independent", () => {
+    const els = fakeEls();
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    controller.setSensorData("shipA", SPEC);
+    controller.setSensorData("shipB", SPEC);
+    const checkbox = findDescendant(els.shipA.section, "targeting-drones-checkbox") as unknown as FakeElement & { checked: boolean };
+    checkbox.checked = true;
+    checkbox.trigger("change");
+    expect(controller.attackDrones("shipA")).toBe(true);
+    expect(controller.attackDrones("shipB")).toBe(false);
+  });
+
+  test("re-render preserves the attack-drones state", () => {
+    const els = fakeEls();
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    controller.setSensorData("shipA", SPEC);
+    const checkbox = findDescendant(els.shipA.section, "targeting-drones-checkbox") as unknown as FakeElement & { checked: boolean };
+    checkbox.checked = true;
+    checkbox.trigger("change");
+    controller.render();
+    const rerendered = findDescendant(els.shipA.section, "targeting-drones-checkbox") as unknown as FakeElement & { checked: boolean };
+    expect(rerendered.checked).toBe(true);
+    expect(controller.attackDrones("shipA")).toBe(true);
+  });
 });
+
+function findDescendant(root: HTMLElement, className: string): FakeElement | undefined {
+  function walk(node: FakeElement): FakeElement | undefined {
+    for (const child of node.children) {
+      if (typeof child.className === "string" && child.className.split(" ").includes(className)) return child;
+      const found = walk(child);
+      if (found) return found;
+    }
+    return undefined;
+  }
+  return walk(root as unknown as FakeElement);
+}
 
 function sectionText(el: HTMLElement): string {
   const parts: string[] = [];

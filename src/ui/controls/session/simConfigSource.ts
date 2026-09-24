@@ -9,6 +9,7 @@ import type { DefenseController } from "../defense";
 import type { CapacitorController } from "../capacitor";
 import type { DroneController } from "../drone";
 import type { FighterController } from "../fighter";
+import type { TargetingController } from "../targeting";
 import type { LauncherController } from "../launcher";
 import type { TurretController } from "../turret";
 import type { WeaponSystemSwitch } from "../sidePanel";
@@ -37,6 +38,7 @@ interface SimConfigSourceDeps {
   readonly defenseController: DefenseController;
   readonly capacitorController: CapacitorController;
   readonly capacitorStatsSource: CapacitorStatsSource;
+  readonly targetingController: TargetingController;
 }
 
 export class SimConfigSourceImpl implements SimConfigSource {
@@ -55,6 +57,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
   private readonly defenseController: DefenseController;
   private readonly capacitorController: CapacitorController;
   private readonly capacitorStatsSource: CapacitorStatsSource;
+  private readonly targetingController: TargetingController;
 
   constructor(deps: SimConfigSourceDeps) {
     this.shipASide = deps.shipASide;
@@ -72,6 +75,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
     this.defenseController = deps.defenseController;
     this.capacitorController = deps.capacitorController;
     this.capacitorStatsSource = deps.capacitorStatsSource;
+    this.targetingController = deps.targetingController;
   }
 
   getConfig(): SimConfig {
@@ -142,7 +146,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
       energyWarfareResistancePercent: state.energyWarfareResistancePercent,
       propulsionCapacityMultiplier: state.propulsionCapacityMultiplier,
       orbitDirection: "cw",
-      attackDrones: state.attackDrones ?? false,
+      attackDrones: this.targetingController.attackDrones(side),
       ewar: this.ewarController.projection(side),
       boosts: this.boosterController.projection(side),
       missileBoosts: this.missileBoosterController.projection(side),

@@ -261,7 +261,6 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
     defaultValue: (side: SideConfig) => (side.key === "shipA" ? "keepAtRange" : "orbit"),
   },
   range: { tag: "INPUT" as const, baseId: "range", defaultValue: "5000" },
-  attackDrones: { tag: "INPUT" as const, baseId: "attack-drones", defaultValue: undefined },
   aggressivity: { tag: "INPUT" as const, baseId: "aggressivity", defaultValue: "1" },
   aggressivitySlider: { tag: "INPUT" as const, baseId: "aggressivity-slider", defaultValue: "0.5" },
   aggressivityValue: { tag: "OUTPUT" as const, baseId: "aggressivity-value", defaultValue: undefined },

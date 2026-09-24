@@ -58,6 +58,7 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       defenseController: proxy.defenseController,
       capacitorController: proxy.capacitorController,
       capacitorStatsSource: proxy.capacitorStatsSource,
+      targetingController: proxy.targetingController,
     })).singleton(),
     capacitorStatsSource: asFunction((proxy) => new CapacitorStatsSourceImpl({
       events: proxy.uiEvents,
