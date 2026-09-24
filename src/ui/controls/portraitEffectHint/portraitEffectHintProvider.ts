@@ -82,7 +82,9 @@ export class PortraitEffectHintProviderImpl implements HintContentProvider {
 
   private weaponModel(anchor: WeaponEffectAnchor, view: EngineView, name: string): StatHintModel | undefined {
     const t = this.t;
-    const attacks = view.weaponAttacks[anchor.side].filter((attack) => attack.weapon.moduleId === anchor.moduleId);
+    // Weapon icons sit under the defender's portrait: read the opponent's attacks and drones.
+    const attackerSide = opponentOf(anchor.side);
+    const attacks = view.weaponAttacks[attackerSide].filter((attack) => attack.weapon.moduleId === anchor.moduleId);
     if (attacks.length === 0) return undefined;
     const appliedDps = attacks.reduce((sum, attack) => sum + attack.assessment.damage.appliedDps, 0);
     const nominalDps = attacks.reduce((sum, attack) => sum + attack.assessment.damage.nominalDps, 0);
@@ -92,7 +94,7 @@ export class PortraitEffectHintProviderImpl implements HintContentProvider {
       { label: t("appliedDpsHint.application"), value: percentLabel(nominalDps > 0 ? appliedDps / nominalDps : 0) },
     ];
     if (anchor.weaponKind === "drone") {
-      const droneCount = droneCountFor(view, anchor.side, anchor.moduleId);
+      const droneCount = droneCountFor(view, attackerSide, anchor.moduleId);
       if (droneCount !== undefined) rows.push({ label: t("portraitEffect.activeDrones"), value: droneCount });
     }
     return { name, subtitle: t(`portrait.weapon.${anchor.weaponKind}`), sections: [{ rows }] };
@@ -158,6 +160,10 @@ function sideFromAnchor(anchor: HTMLElement): "shipA" | "shipB" | undefined {
   const side = anchor.dataset.side;
   if (side === "shipA" || side === "shipB") return side;
   return undefined;
+}
+
+function opponentOf(side: "shipA" | "shipB"): "shipA" | "shipB" {
+  return side === "shipA" ? "shipB" : "shipA";
 }
 
 function droneCountFor(view: EngineView, side: "shipA" | "shipB", moduleId: TypeId): string | undefined {

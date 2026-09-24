@@ -13,7 +13,10 @@ Hover hint content provider for the portrait effect icons (key
 anchor carrying `data-hint-content="portraitEffect"` plus identifying
 attributes (`data-side`, `data-effect-kind`, and kind-specific
 `data-weapon-kind` / `data-ewar-family` / `data-repairer-index` /
-`data-module-id`). This provider parses those attributes and builds a live
+`data-module-id`). `data-side` is the portrait (defender) side: weapon and
+drone data is read from the opponent's `weaponAttacks`/`drones`, while ewar
+and defense data is read on the portrait side itself. This provider parses
+those attributes and builds a live
 `StatHintModel` from the current `EngagementView` on every render, so values
 update every sim frame while the hint is visible:
 

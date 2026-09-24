@@ -59,7 +59,7 @@ describe("PortraitEffectHintProviderImpl", () => {
       weaponAttacks: { shipA: [{ weapon: { kind: "turret", moduleId: MODULE_ID }, assessment: { damage: { nominalDps: 200, appliedDps: 150 } } }], shipB: [] },
     } as unknown as EngineView);
     const { provider, container, models } = buildProvider(view);
-    provider.render(createAnchor({ "data-hint-content": "portraitEffect", "data-side": "shipA", "data-effect-kind": "weapon", "data-weapon-kind": "turret", "data-module-id": "100" }), container);
+    provider.render(createAnchor({ "data-hint-content": "portraitEffect", "data-side": "shipB", "data-effect-kind": "weapon", "data-weapon-kind": "turret", "data-module-id": "100" }), container);
     expect(models).toHaveLength(1);
     expect(models[0].name).toBe("name-100");
     expect(models[0].subtitle).toBe("portrait.weapon.turret");
@@ -68,6 +68,15 @@ describe("PortraitEffectHintProviderImpl", () => {
       { label: "appliedDpsHint.nominal", value: "200.0 DPS" },
       { label: "appliedDpsHint.application", value: "75%" },
     ]);
+  });
+
+  test("weapon icon under a portrait reads the opponent's attacks, not the portrait's own", () => {
+    const view = buildView({
+      weaponAttacks: { shipA: [{ weapon: { kind: "turret", moduleId: MODULE_ID }, assessment: { damage: { nominalDps: 10, appliedDps: 5 } } }], shipB: [{ weapon: { kind: "turret", moduleId: MODULE_ID }, assessment: { damage: { nominalDps: 200, appliedDps: 150 } } }] },
+    } as unknown as EngineView);
+    const { provider, container, models } = buildProvider(view);
+    provider.render(createAnchor({ "data-side": "shipA", "data-effect-kind": "weapon", "data-weapon-kind": "turret", "data-module-id": "100" }), container);
+    expect(models[0].sections[0].rows[0]).toEqual({ label: "appliedDpsHint.applied", value: "150.0 DPS", emphasis: true });
   });
 
   test("drone weapon icon sums its groups and shows the active drone count", () => {
@@ -81,7 +90,7 @@ describe("PortraitEffectHintProviderImpl", () => {
       droneSpecs: { shipA: [{ kind: "drone", moduleId: droneModuleId, droneCount: 5 }, { kind: "drone", moduleId: toTypeId("999"), droneCount: 10 }], shipB: [] },
     } as unknown as EngineView);
     const { provider, container, models } = buildProvider(view);
-    provider.render(createAnchor({ "data-side": "shipA", "data-effect-kind": "weapon", "data-weapon-kind": "drone", "data-module-id": "2454" }), container);
+    provider.render(createAnchor({ "data-side": "shipB", "data-effect-kind": "weapon", "data-weapon-kind": "drone", "data-module-id": "2454" }), container);
     expect(models).toHaveLength(1);
     expect(models[0].subtitle).toBe("portrait.weapon.drone");
     expect(models[0].sections[0].rows).toEqual([
