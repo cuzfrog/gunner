@@ -337,6 +337,58 @@ describe("PortraitsController", () => {
     expect(els.shipBEffects.hidden).toBe(true);
   });
 
+  test("persistent effect keeps its icon element when other effects appear", () => {
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
+    imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("527") || name === toTypeId("448") ? `images/icons/${String(name)}@1x.png` : undefined));
+    profiles.shipA = SHIP_A_PROFILE;
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
+    controller.update();
+    const original = els.shipAEffects.children[0];
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }, { category: "ewar", family: "scrambler", moduleId: toTypeId("448") }], shipB: [] }));
+    controller.update();
+    expect(els.shipAEffects.children.length).toBe(2);
+    expect(els.shipAEffects.children[0]).toBe(original);
+  });
+
+  test("persistent effect keeps its icon element when the lock badge toggles", () => {
+    const { controller, els, profiles, viewStream } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
+    controller.update();
+    const original = els.shipAEffects.children[0];
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }, { shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 3, inRange: true }, shipB: IDLE_LOCK }));
+    controller.update();
+    expect(els.shipAEffects.children[0]).toBe(original);
+  });
+
+  test("removed effect drops its icon element from the row", () => {
+    const { controller, els, profiles, viewStream } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }, { category: "ewar", family: "scrambler", moduleId: toTypeId("448") }], shipB: [] }));
+    controller.update();
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
+    controller.update();
+    expect(els.shipAEffects.children.length).toBe(1);
+    expect((els.shipAEffects.children[0] as unknown as HTMLImageElement).getAttribute("data-ewar-family")).toBe("web");
+  });
+
+  test("reordered effects keep their icon elements and DOM order follows the effect list", () => {
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
+    imageCatalog.itemIconUrl.mockImplementation((name) => `images/icons/${String(name)}@1x.png`);
+    profiles.shipA = SHIP_A_PROFILE;
+    const web = { category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 } as const;
+    const scrambler = { category: "ewar", family: "scrambler", moduleId: toTypeId("448") } as const;
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [web, scrambler], shipB: [] }));
+    controller.update();
+    const webIcon = els.shipAEffects.children[0];
+    const scramblerIcon = els.shipAEffects.children[1];
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [scrambler, web], shipB: [] }));
+    controller.update();
+    expect(els.shipAEffects.children.length).toBe(2);
+    expect(els.shipAEffects.children[0]).toBe(scramblerIcon);
+    expect(els.shipAEffects.children[1]).toBe(webIcon);
+  });
+
   test("shipA scrambler module shows icon under shipB portrait", () => {
     const { controller, els, profiles, viewStream, imageCatalog } = buildController();
     profiles.shipB = SHIP_B_PROFILE;

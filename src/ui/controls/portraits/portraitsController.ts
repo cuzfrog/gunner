@@ -14,6 +14,7 @@ import { setText } from "../controlsDom";
 interface SideState {
   lastKey: string;
   lastId: ShipId | "";
+  lastIcons: Map<string, HTMLImageElement>;
 }
 
 /** Identifies one effect icon so the hint provider can resolve its live view data per frame. */
@@ -35,8 +36,8 @@ export class PortraitsControllerImpl implements PortraitsController {
   private readonly combatantProfiles: CombatantProfiles;
   private readonly events: UiEvents;
   private readonly viewStream: ViewStream;
-  private readonly shipAState: SideState = { lastKey: "", lastId: "" };
-  private readonly shipBState: SideState = { lastKey: "", lastId: "" };
+  private readonly shipAState: SideState = { lastKey: "", lastId: "", lastIcons: new Map() };
+  private readonly shipBState: SideState = { lastKey: "", lastId: "", lastIcons: new Map() };
   private hpValueDisplay: HpValueDisplay = "none";
 
   constructor(deps: {
@@ -88,6 +89,7 @@ export class PortraitsControllerImpl implements PortraitsController {
       wrap.removeAttribute("data-value");
       state.lastKey = "";
       state.lastId = "";
+      state.lastIcons = new Map();
       return;
     }
     const offensiveModules = this.viewStream.currentView()?.incomingOffensiveModules[side] ?? [];
@@ -114,14 +116,11 @@ export class PortraitsControllerImpl implements PortraitsController {
       wrap.setAttribute("data-hint-content", SHIP_HINT_CONTENT_KEY);
       wrap.setAttribute("data-value", profile.id);
     }
-    effects.innerHTML = "";
-    const icons = document.createDocumentFragment();
-    for (const effect of allEffects) {
-      const icon = this.createEffectIcon(effect, side);
-      if (icon === undefined) continue;
-      icons.appendChild(icon);
-    }
-    effects.appendChild(icons);
+    // Keyed reconciliation: icons whose effect persists keep their DOM element, so an effect
+    // icon under the pointer stays a live CSS anchor for the hover hint while the surrounding
+    // effect list changes during the engagement.
+    const icons = reconcileEffectIcons(effects, allEffects, state.lastIcons, (effect) => this.createEffectIcon(effect, side));
+    state.lastIcons = icons;
     if (effects.hidden !== (effects.childElementCount === 0)) effects.hidden = effects.childElementCount === 0;
   }
 
@@ -141,6 +140,23 @@ function sideStateFor(side: Side, shipAState: SideState, shipBState: SideState):
 
 function buildDiffKey(id: ShipId, effects: readonly PortraitEffect[], lockBadge: boolean): string {
   return `${id}|${effects.map(effectKey).join(",")}|${lockBadge}`;
+}
+
+function reconcileEffectIcons(effects: HTMLElement, allEffects: readonly PortraitEffect[], previous: ReadonlyMap<string, HTMLImageElement>, create: (effect: PortraitEffect) => HTMLImageElement | undefined): Map<string, HTMLImageElement> {
+  const icons = new Map<string, HTMLImageElement>();
+  for (const effect of allEffects) {
+    const key = effectKey(effect);
+    const reused = previous.get(key);
+    const icon = reused !== undefined && reused.isConnected ? reused : create(effect);
+    if (icon === undefined) continue;
+    icons.set(key, icon);
+  }
+  for (const icon of icons.values()) effects.appendChild(icon);
+  const kept = new Set<Element>(icons.values());
+  for (const child of Array.from(effects.children)) {
+    if (!kept.has(child)) child.remove();
+  }
+  return icons;
 }
 
 function effectKey(effect: PortraitEffect): string {
