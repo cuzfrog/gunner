@@ -1,7 +1,7 @@
 import { buildDrone, importedDroneFixture, NEUTRAL_CONDITIONS } from "./testSupport";
 import { FakeElement, getFake, IMPORTED_RIFTER } from "../testSupport";
 import { damageVectorSum } from "../../../sim";
-import type { DroneCatalog, DroneGroup, DroneLoadoutContext, DroneLoadoutViolation, ImportedFitting } from "../../../fitting";
+import type { DroneCatalog, DroneGroup, DroneLoadoutContext, DroneLoadoutViolation, ImportedDrone, ImportedFitting } from "../../../fitting";
 import type { DroneSizeClass } from "../../../gamedata/fittingDb";
 import type { TypeId } from "../../../gamedata/ids";
 import type { StatConditions } from "../../../ships";
@@ -16,6 +16,33 @@ function importedWithDrones(drones: readonly ReturnType<typeof importedDroneFixt
 function resolverReturningDrones(drones: readonly ReturnType<typeof importedDroneFixture>[]) {
   return {
     resolve: vi.fn((_groups: readonly DroneGroup[], _fitting: DroneLoadoutContext, _conditions: StatConditions) => drones),
+  };
+}
+
+function nameFor(typeId: TypeId): string {
+  return typeId === WARRIOR_ID ? "Warrior I" : "Hobgoblin I";
+}
+
+function resolverLaunchingActiveGroups() {
+  return {
+    resolve: vi.fn((groups: readonly DroneGroup[]): readonly ImportedDrone[] => groups.filter((g) => g.activeCount > 0).map((g) => importedDroneFixture({ typeId: g.typeId, name: nameFor(g.typeId), count: g.activeCount }))),
+  };
+}
+
+function resolverClampedToMaxActive(maxActive: number) {
+  return {
+    resolve: vi.fn((groups: readonly DroneGroup[]): readonly ImportedDrone[] => {
+      const launched: ImportedDrone[] = [];
+      let slots = maxActive;
+      for (const group of groups) {
+        const count = Math.min(group.activeCount, slots);
+        if (count > 0) {
+          launched.push(importedDroneFixture({ typeId: group.typeId, name: nameFor(group.typeId), count }));
+          slots -= count;
+        }
+      }
+      return launched;
+    }),
   };
 }
 
@@ -38,7 +65,7 @@ describe("DroneController", () => {
     expect(getFake(document, "ship-a-drone-optimal").textContent).not.toBe("-");
     expect(getFake(document, "ship-a-drone-damage").textContent).not.toBe("-");
     expect(getFake(document, "ship-a-drone-count").textContent).toBe("5");
-    expect(droneLoadoutResolver.resolve).toHaveBeenCalledTimes(1);
+    expect(droneLoadoutResolver.resolve).toHaveBeenCalledTimes(2);
   });
 
   test("applyImported without drones leaves no drone", () => {
@@ -132,7 +159,7 @@ describe("DroneController", () => {
     controller.restore("[Rifter, Test]", NEUTRAL_CONDITIONS, [{ typeId: WARRIOR_ID, count: 1, activeCount: 1 }]);
     expect(controller.drone()?.typeId).toBe(WARRIOR_ID);
     expect(fittingImport.importFitting).toHaveBeenCalled();
-    expect(droneLoadoutResolver.resolve).toHaveBeenCalledTimes(1);
+    expect(droneLoadoutResolver.resolve).toHaveBeenCalledTimes(2);
   });
 
   test("restore with missing droneGroups falls back to imported drones", () => {
@@ -361,7 +388,7 @@ describe("DroneController", () => {
   test("launched stepper launches an idle drone", () => {
     const hobgoblin = importedDroneFixture();
     const { document, controller } = buildDrone({
-      droneLoadoutResolver: resolverReturningDrones([hobgoblin]),
+      droneLoadoutResolver: resolverLaunchingActiveGroups(),
       fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, drones: [hobgoblin] })) },
     });
     controller.restore("[Rifter, Test]", NEUTRAL_CONDITIONS, [{ typeId: HOBGOBLIN_ID, count: 5, activeCount: 3 }]);
@@ -371,6 +398,24 @@ describe("DroneController", () => {
     const incrementBtn = stepper.children.find((c) => c.className.split(" ").includes("drone-stepper-plus")) as unknown as FakeElement;
     incrementBtn.trigger("click");
     expect(controller.capture().droneGroups).toEqual([{ typeId: HOBGOBLIN_ID, count: 5, activeCount: 4 }]);
+  });
+
+  test("launched stepper does not launch beyond the launch budget", () => {
+    const hobgoblin = importedDroneFixture({ count: 10 });
+    const { document, controller } = buildDrone({
+      droneLoadoutResolver: resolverLaunchingActiveGroups(),
+      fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, drones: [hobgoblin] })) },
+      droneLoadoutValidator: {
+        validate: vi.fn(() => ({ valid: false, totalCount: 10, activeCount: 6, activeBandwidth: 30, totalVolume: 50, bandwidthLimit: 100, capacityLimit: 100, violations: ["tooManyDrones"] as readonly DroneLoadoutViolation[] })),
+      },
+    });
+    controller.restore("[Rifter, Test]", NEUTRAL_CONDITIONS, [{ typeId: HOBGOBLIN_ID, count: 10, activeCount: 5 }]);
+    const loadoutList = getFake(document, "ship-a-drone-loadout-list");
+    const row = loadoutList.children[0] as unknown as FakeElement;
+    const stepper = row.children.find((c) => c.className.split(" ").includes("drone-launched-stepper")) as unknown as FakeElement;
+    const incrementBtn = stepper.children.find((c) => c.className.split(" ").includes("drone-stepper-plus")) as unknown as FakeElement;
+    incrementBtn.trigger("click");
+    expect(controller.capture().droneGroups).toEqual([{ typeId: HOBGOBLIN_ID, count: 10, activeCount: 5 }]);
   });
 
   test("launched stepper recalls a launched drone", () => {
@@ -420,7 +465,7 @@ describe("DroneController", () => {
     const hobgoblin = importedDroneFixture();
     const warrior = importedDroneFixture({ typeId: WARRIOR_ID, name: "Warrior I", count: 3 });
     const { document, controller, events } = buildDrone({
-      droneLoadoutResolver: resolverReturningDrones([hobgoblin, warrior]),
+      droneLoadoutResolver: resolverLaunchingActiveGroups(),
       fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, drones: [hobgoblin, warrior] })) },
     });
     controller.restore("[Rifter, Test]", NEUTRAL_CONDITIONS, [{ typeId: HOBGOBLIN_ID, count: 5, activeCount: 2 }, { typeId: WARRIOR_ID, count: 3, activeCount: 0 }]);
@@ -429,6 +474,40 @@ describe("DroneController", () => {
     launchAll.trigger("click");
     expect(controller.capture().droneGroups).toEqual([{ typeId: HOBGOBLIN_ID, count: 5, activeCount: 5 }, { typeId: WARRIOR_ID, count: 3, activeCount: 3 }]);
     expect(emitConfigInvalidated).toHaveBeenCalled();
+  });
+
+  test("launch all clamps the launched set to the launch budget", () => {
+    const hobgoblin = importedDroneFixture({ count: 10 });
+    const warrior = importedDroneFixture({ typeId: WARRIOR_ID, name: "Warrior I", count: 3 });
+    const { document, controller, events } = buildDrone({
+      droneLoadoutResolver: resolverClampedToMaxActive(5),
+      fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, drones: [hobgoblin, warrior] })) },
+    });
+    controller.restore("[Rifter, Test]", NEUTRAL_CONDITIONS, [{ typeId: HOBGOBLIN_ID, count: 10, activeCount: 2 }, { typeId: WARRIOR_ID, count: 3, activeCount: 0 }]);
+    const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
+    const launchAll = getFake(document, "ship-a-drone-launch-all") as unknown as FakeElement & { disabled: boolean };
+    launchAll.trigger("click");
+    expect(controller.capture().droneGroups).toEqual([{ typeId: HOBGOBLIN_ID, count: 10, activeCount: 5 }, { typeId: WARRIOR_ID, count: 3, activeCount: 0 }]);
+    expect(emitConfigInvalidated).toHaveBeenCalled();
+  });
+
+  test("importing a fitting clamps the launched set to the launch budget", () => {
+    const hobgoblin = importedDroneFixture({ count: 10 });
+    const { controller } = buildDrone({
+      droneLoadoutResolver: resolverClampedToMaxActive(5),
+    });
+    controller.applyImported(importedWithDrones([hobgoblin]), NEUTRAL_CONDITIONS);
+    expect(controller.capture().droneGroups).toEqual([{ typeId: HOBGOBLIN_ID, count: 10, activeCount: 5 }]);
+  });
+
+  test("restoring a session clamps the launched set to the launch budget", () => {
+    const hobgoblin = importedDroneFixture({ count: 10 });
+    const { controller } = buildDrone({
+      droneLoadoutResolver: resolverClampedToMaxActive(5),
+      fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, drones: [hobgoblin] })) },
+    });
+    controller.restore("[Rifter, Test]", NEUTRAL_CONDITIONS, [{ typeId: HOBGOBLIN_ID, count: 10, activeCount: 10 }]);
+    expect(controller.capture().droneGroups).toEqual([{ typeId: HOBGOBLIN_ID, count: 10, activeCount: 5 }]);
   });
 
   test("recall all recalls every launched drone and resolves nothing", () => {
