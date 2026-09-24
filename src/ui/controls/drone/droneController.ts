@@ -98,7 +98,7 @@ export class DroneControllerImpl implements DroneController {
   applyImported(imported: ImportedFitting, conditions: StatConditions): void {
     this.loadoutContext = loadoutContextFromFitting(imported);
     this.conditions = conditions;
-    this.droneGroups = imported.drones.map((d) => ({ typeId: d.typeId, count: d.count, activeCount: d.count }));
+    this.droneGroups = clampToLaunchBudget(imported.drones.map((d) => ({ typeId: d.typeId, count: d.count, activeCount: d.count })), this.resolver, this.loadoutContext, conditions);
     this.recompute();
     this.render();
   }
@@ -110,7 +110,8 @@ export class DroneControllerImpl implements DroneController {
         this.loadoutContext = loadoutContextFromFitting(imported);
         this.conditions = conditions;
         const known = droneGroups && droneGroups.length > 0 ? filterKnownGroups(droneGroups, this.droneCatalog) : [];
-        this.droneGroups = known.length > 0 ? known : imported.drones.map((d) => ({ typeId: d.typeId, count: d.count, activeCount: d.count }));
+        const groups = known.length > 0 ? known : imported.drones.map((d) => ({ typeId: d.typeId, count: d.count, activeCount: d.count }));
+        this.droneGroups = clampToLaunchBudget(groups, this.resolver, this.loadoutContext, conditions);
         this.recompute();
         this.render();
         return;
@@ -280,9 +281,10 @@ export class DroneControllerImpl implements DroneController {
   }
 
   private launchDrone(typeId: TypeId): void {
-    const existing = this.droneGroups.find((g) => g.typeId === typeId);
-    if (!existing || existing.activeCount >= existing.count) return;
-    this.droneGroups = this.droneGroups.map((g) => g.typeId === typeId ? { ...g, activeCount: g.activeCount + 1 } : g);
+    if (!this.loadoutContext) return;
+    const candidate = tryLaunch(this.droneGroups, typeId, this.validator, this.loadoutContext);
+    if (candidate.every((g, i) => g === this.droneGroups[i])) return;
+    this.droneGroups = candidate;
     this.recompute();
     this.render();
     this.events.emitConfigInvalidated();
@@ -298,8 +300,10 @@ export class DroneControllerImpl implements DroneController {
   }
 
   private launchAll(): void {
-    if (this.droneGroups.length === 0) return;
-    this.droneGroups = this.droneGroups.map((g) => ({ ...g, activeCount: g.count }));
+    if (this.droneGroups.length === 0 || !this.loadoutContext || !this.conditions) return;
+    const clamped = clampToLaunchBudget(this.droneGroups.map((g) => ({ ...g, activeCount: g.count })), this.resolver, this.loadoutContext, this.conditions);
+    if (clamped.every((g, i) => g.activeCount === this.droneGroups[i]!.activeCount)) return;
+    this.droneGroups = clamped;
     this.recompute();
     this.render();
     this.events.emitConfigInvalidated();
@@ -376,6 +380,12 @@ function tryLaunch(groups: readonly DroneGroup[], typeId: TypeId, validator: Dro
   const validation = validator.validate(candidate, context.profile, context.hullBonuses);
   if (validation.violations.includes("tooManyDrones") || validation.violations.includes("bandwidthExceeded")) return [...groups];
   return candidate;
+}
+
+function clampToLaunchBudget(groups: readonly DroneGroup[], resolver: DroneLoadoutResolver, context: DroneLoadoutContext, conditions: StatConditions): DroneGroup[] {
+  const launchedByType = new Map<TypeId, number>();
+  for (const drone of resolver.resolve(groups, context, conditions)) launchedByType.set(drone.typeId, (launchedByType.get(drone.typeId) ?? 0) + drone.count);
+  return groups.map((g) => ({ ...g, activeCount: Math.min(g.count, launchedByType.get(g.typeId) ?? 0) }));
 }
 
 function importedDroneToDroneSpec(drone: ImportedDrone): DroneSpec {
