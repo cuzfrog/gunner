@@ -81,6 +81,7 @@ function stasisGrapplerModel(stats: Omit<StasisGrapplerStats, "id" | "name">, t:
 function warpScramblerModel(stats: Omit<WarpScramblerStats, "id" | "name">, t: (key: string) => string): StatHintModel {
   const rows: StatHintRow[] = [];
   if (stats.propulsionBlock) rows.push({ value: t("ewar.hover.scrambler"), emphasis: true });
+  else rows.push({ value: t("ewar.hover.warpDisruptor"), emphasis: true });
   rows.push({ label: t("label.maxRange"), value: distanceValue(stats.maxRange, t) });
   return withActivation(rows, stats.cycleTime, stats.capacitorNeed, t);
 }

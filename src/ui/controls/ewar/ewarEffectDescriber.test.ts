@@ -39,6 +39,7 @@ const LABELS: Record<string, string> = {
   "ewar.hover.optimal": "Optimal",
   "ewar.hover.falloff": "Falloff",
   "ewar.hover.scrambler": "Disables MWD",
+  "ewar.hover.warpDisruptor": "Disables warp drive",
   "ewar.hover.sigRadius": "Signature radius",
   "ewar.hover.scanResolution": "Scan resolution",
   "ewar.hover.targetingRange": "Targeting range",
@@ -58,6 +59,17 @@ const i18n = vi.mocked<I18n>({
 
 const describer = new EwarEffectDescriberImpl({ ewarResolver: resolver, i18n });
 const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], } };
+const MIXED_BUCKET: EwarProjection = {
+  loadout: {
+    webs: [], grapplers: [], disruptors: [],
+    scramblers: [
+      { propulsionBlock: true, moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 },
+      { propulsionBlock: false, moduleName: "Warp Disruptor II", moduleId: toTypeId("3244"), maxRange: 24000, overloadRangeBonusPercent: 20 },
+    ],
+    painters: [], dampeners: [], scripts: [], dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [],
+  },
+  activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active: true, overloaded: false }, { active: true, overloaded: false }], painters: [], dampeners: [], neutralizers: [], nosferatu: [], jammers: [] },
+};
 const distance = 5000;
 
 beforeEach(() => {
@@ -68,6 +80,7 @@ beforeEach(() => {
   resolver.reach.mockReturnValue(ZERO_REACH);
   resolver.potentials.mockReturnValue(IDENTITY_POTENTIALS);
   resolver.disruptionMultipliers.mockReturnValue({ tracking: 1, optimal: 1, falloff: 1 });
+  resolver.appliedEffects.mockReturnValue([]);
   i18n.t.mockImplementation((key) => LABELS[key] ?? key);
 });
 
@@ -133,6 +146,24 @@ describe("EwarEffectDescriber", () => {
     expect(describer.scramblerDescription(projection, distance)).toBe("No effect at this range");
   });
 
+  test("scramblerDescription combines MWD and warp-drive statements when both kinds apply", () => {
+    resolver.propulsionSuppressed.mockReturnValue(true);
+    resolver.appliedEffects.mockReturnValue([{ family: "warpDisruptor", moduleId: toTypeId("3244") }]);
+    expect(describer.scramblerDescription(MIXED_BUCKET, distance)).toBe("Disables MWD · Disables warp drive");
+  });
+
+  test("scramblerDescription reports only the warp-drive statement when just a pure disruptor applies", () => {
+    resolver.propulsionSuppressed.mockReturnValue(false);
+    resolver.appliedEffects.mockReturnValue([{ family: "warpDisruptor", moduleId: toTypeId("3244") }]);
+    expect(describer.scramblerDescription(MIXED_BUCKET, distance)).toBe("Disables warp drive");
+  });
+
+  test("scramblerDescription reports out-of-range when neither kind applies", () => {
+    resolver.propulsionSuppressed.mockReturnValue(false);
+    resolver.appliedEffects.mockReturnValue([]);
+    expect(describer.scramblerDescription(MIXED_BUCKET, distance)).toBe("No effect at this range");
+  });
+
   test("webHint reports percentage and ignores the current distance", () => {
     resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, speedMultiplier: 0.63 });
     expect(describer.webHint(projection)).toBe("Reduce speed by 37% · range 0 m");
@@ -156,6 +187,23 @@ describe("EwarEffectDescriber", () => {
     resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, propulsionSuppressed: true });
     expect(describer.scramblerHint(projection)).toBe("Disables MWD · range 0 m");
     expect(resolver.potentials).toHaveBeenCalledWith(projection);
+  });
+
+  test("scramblerHint only considers propulsion-blocking modules in a mixed bucket", () => {
+    resolver.potentials.mockReturnValue({ ...IDENTITY_POTENTIALS, propulsionSuppressed: true });
+    resolver.reach.mockReturnValue({ ...ZERO_REACH, scrambler: 9000 });
+    expect(describer.scramblerHint(MIXED_BUCKET)).toBe("Disables MWD · range 9,000 m");
+    const filtered = vi.mocked(resolver.potentials).mock.calls.at(-1)![0];
+    expect(filtered?.loadout.scramblers).toHaveLength(1);
+    expect(filtered?.loadout.scramblers[0].propulsionBlock).toBe(true);
+  });
+
+  test("warpDisruptorHint reports the warp-drive statement with the disruptor reach", () => {
+    resolver.reach.mockReturnValue({ ...ZERO_REACH, scrambler: 24000 });
+    expect(describer.warpDisruptorHint(MIXED_BUCKET)).toBe("Disables warp drive · range 24.0 km");
+    const filtered = vi.mocked(resolver.reach).mock.calls.at(-1)![0];
+    expect(filtered?.loadout.scramblers).toHaveLength(1);
+    expect(filtered?.loadout.scramblers[0].propulsionBlock).toBe(false);
   });
 
   test("scramblerHint reports out of range when no active scrambler is present", () => {

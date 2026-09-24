@@ -60,6 +60,7 @@ function buildController(now: () => number = () => 0): {
     disruptorHint: vi.fn(() => "disruptor-hint"),
     scramblerDescription: vi.fn(() => "scrambler-title"),
     scramblerHint: vi.fn(() => "scrambler-hint"),
+    warpDisruptorHint: vi.fn(() => "warpDisruptor-hint"),
     painterHint: vi.fn(() => "painter-hint"),
     dampenerHint: vi.fn(() => "dampener-hint"),
     jammerDescription: vi.fn(() => "jammer-desc"),
