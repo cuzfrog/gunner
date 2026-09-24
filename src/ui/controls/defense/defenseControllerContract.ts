@@ -12,6 +12,11 @@ export interface DefenseFieldEls extends PopupFieldEls {
 
 export type DefenseEls = Sided<DefenseFieldEls>;
 
+/** Identifies one actively cycling defense effect so consumers can resolve live view data. */
+export type CyclingEffectDescriptor =
+  | { readonly kind: "repairer"; readonly moduleId: TypeId; readonly repairerIndex: number }
+  | { readonly kind: "rah"; readonly moduleId: TypeId };
+
 export interface DefenseController {
   setDefenseSpec(side: Side, spec: DefenseSpec): void;
   spec(side: Side): DefenseSpec | undefined;
@@ -30,7 +35,7 @@ export interface DefenseController {
   rahActivation(side: Side): StoredRahActivation | undefined;
   setRahActivation(side: Side, active: boolean, overloaded: boolean): void;
   restore(side: Side, enabled: boolean, repMode?: StoredRepairMode, repairerActivation?: readonly StoredRepairerActivation[], rahActivation?: StoredRahActivation): void;
-  cyclingEffects(side: Side): readonly { readonly moduleId: TypeId; readonly hint: string }[];
+  cyclingEffects(side: Side): readonly CyclingEffectDescriptor[];
   hpPercentages(side: Side): Readonly<Record<DefenseLayer, number>> | undefined;
   hpValues(side: Side): { readonly current: Readonly<Record<DefenseLayer, number>>; readonly max: Readonly<Record<DefenseLayer, number>> } | undefined;
 }

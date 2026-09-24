@@ -112,6 +112,7 @@ const controlsCradleKeys = {
   shipHintProvider: "shipHintProvider",
   droneHintProvider: "droneHintProvider",
   moduleHintProvider: "moduleHintProvider",
+  portraitEffectHintProvider: "portraitEffectHintProvider",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 
 describe("registerControlsModule", () => {

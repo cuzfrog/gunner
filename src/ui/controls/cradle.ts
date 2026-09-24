@@ -47,6 +47,7 @@ import type { DpsHintProvider } from "./dpsHint";
 import type { DpsHintRenderer } from "./dpsHint";
 import type { AmmoHintProvider } from "./ammoHint";
 import type { AppliedDpsHintProvider, AppliedDpsHintRenderer } from "./appliedDpsHint";
+import type { PortraitEffectHintProvider } from "./portraitEffectHint";
 import type { InflictedDpsHintProvider, InflictedDpsHintRenderer } from "./inflictedDpsHint";
 import type { ShipHintProvider } from "./shipHint";
 import type { DroneHintProvider } from "./droneHint";
@@ -160,6 +161,7 @@ export interface ControlsCradle {
   readonly unitAliveReadout: UnitAliveReadout;
   readonly appliedDpsHintRenderer: AppliedDpsHintRenderer;
   readonly appliedDpsHintProvider: AppliedDpsHintProvider;
+  readonly portraitEffectHintProvider: PortraitEffectHintProvider;
   readonly inflictedDpsHintRenderer: InflictedDpsHintRenderer;
   readonly inflictedDpsHintProvider: InflictedDpsHintProvider;
   readonly shipHintProvider: ShipHintProvider;
