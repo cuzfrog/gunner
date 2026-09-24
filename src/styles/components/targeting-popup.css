@@ -19,4 +19,27 @@
   text-align: right;
   white-space: nowrap;
 }
+
+.targeting-drones-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px;
+  margin-top: 6px;
+  cursor: pointer;
+}
+
+.targeting-drones-label {
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.targeting-drones-checkbox {
+  margin: 0;
+  flex: none;
+  width: 13px;
+  height: 13px;
+  accent-color: var(--accent-teal);
+}
 }

@@ -17,6 +17,7 @@ export class TargetingControllerImpl implements TargetingController {
   private readonly sensorBoosterController: SensorBoosterController;
   private readonly resolver: SensorBoosterResolver;
   private readonly specs = new Map<Side, SensorSpec>();
+  private readonly attackDronesBySide: Map<Side, boolean> = new Map();
   private readonly sectionBlock: SectionBlockImpl;
   private readonly fields: Record<Side, PopupField>;
 
@@ -46,6 +47,10 @@ export class TargetingControllerImpl implements TargetingController {
     this.renderSide(side);
   }
 
+  attackDrones(side: Side): boolean {
+    return this.attackDronesBySide.get(side) ?? false;
+  }
+
   render(): void {
     this.renderSide("shipA");
     this.renderSide("shipB");
@@ -70,7 +75,21 @@ export class TargetingControllerImpl implements TargetingController {
     section.appendChild(heading);
     const boosted = this.resolver.boostedSensorSpec(spec, this.sensorBoosterController.projection(side));
     this.renderSensorAttributes(section, boosted);
+    section.appendChild(this.createAttackDronesRow(side));
     field.close();
+  }
+
+  private createAttackDronesRow(side: Side): Element {
+    const checkbox = html`<input type="checkbox" class="targeting-drones-checkbox">` as HTMLInputElement;
+    checkbox.checked = this.attackDronesBySide.get(side) ?? false;
+    checkbox.addEventListener("change", () => {
+      this.attackDronesBySide.set(side, checkbox.checked);
+      this.events.emitConfigInvalidated();
+    });
+    return html`<label class="targeting-drones-row">
+      <span class="targeting-drones-label">${this.i18n.t("label.attackDrones")}</span>
+      ${checkbox}
+    </label>` as Element;
   }
 
   private renderSensorAttributes(section: HTMLElement, spec: SensorSpec): void {

@@ -102,7 +102,6 @@ interface CombatantEls {
   readonly alignTime: HTMLElement;
   readonly mode: HTMLSelectElement;
   readonly range: HTMLInputElement;
-  readonly attackDrones: HTMLInputElement;
   readonly aggressivity: HTMLInputElement;
   readonly aggressivitySlider: HTMLInputElement;
   readonly aggressivityValue: HTMLElement;
@@ -401,7 +400,6 @@ function createCombatantEls(side: Side): CombatantEls {
     alignTime: el(combatantElementId("alignTime", side)),
     mode: elOf(combatantElementId("mode", side), isHtmlSelectElement),
     range: elOf(combatantElementId("range", side), isHtmlInputElement),
-    attackDrones: elOf(combatantElementId("attackDrones", side), isHtmlInputElement),
     aggressivity: elOf(combatantElementId("aggressivity", side), isHtmlInputElement),
     aggressivitySlider: elOf(combatantElementId("aggressivitySlider", side), isHtmlInputElement),
     aggressivityValue: el(combatantElementId("aggressivityValue", side)),
