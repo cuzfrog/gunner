@@ -1,5 +1,5 @@
 import type { ShipId, TypeId } from "../../../gamedata/ids";
-import type { ActiveOffensiveModule, DefenseLayer, LockState } from "../../../sim";
+import type { ActiveOffensiveModule, DefenseLayer, LockState, WeaponKind } from "../../../sim";
 import type { HpValueDisplay } from "../../../appstate";
 import type { ImageCatalog } from "../../icons";
 import type { I18n } from "../../i18n";
@@ -20,6 +20,7 @@ interface SideState {
 
 interface PortraitEffect {
   readonly moduleId: TypeId;
+  readonly weaponKind: WeaponKind | undefined;
   readonly hint: string;
 }
 
@@ -94,7 +95,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     }
     const offensiveModules = this.viewStream.currentView()?.incomingOffensiveModules[side] ?? [];
     const portraitEffects = offensiveModules.map((m) => offensiveModuleEffect(m, this.i18n));
-    const defenseEffects = this.defenseController.cyclingEffects(side);
+    const defenseEffects = this.defenseController.cyclingEffects(side).map((e) => ({ ...e, weaponKind: undefined as WeaponKind | undefined }));
     const allEffects = [...portraitEffects, ...defenseEffects];
     const defenseRuntime = this.viewStream.currentView()?.defenseRuntime;
     const hpPercentages = defenseRuntime?.poolPercentages[side] ?? FULL_POOL;
@@ -119,7 +120,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     effects.innerHTML = "";
     const icons = document.createDocumentFragment();
     for (const effect of allEffects) {
-      const iconUrl = this.imageCatalog.itemIconUrl(effect.moduleId);
+      const iconUrl = effect.weaponKind === "drone" ? this.imageCatalog.droneIconUrl() : this.imageCatalog.itemIconUrl(effect.moduleId);
       if (iconUrl === undefined) continue;
       const img = html`<img class="portrait-effect-icon" src=${iconUrl} alt="" data-hint=${effect.hint}>` as unknown as HTMLImageElement;
       icons.appendChild(img);
@@ -138,11 +139,11 @@ function buildDiffKey(id: ShipId, effects: readonly PortraitEffect[], lockBadge:
 }
 
 function offensiveModuleEffect(module: ActiveOffensiveModule, i18n: I18n): PortraitEffect {
-  if (module.category === "weapon") return { moduleId: module.moduleId, hint: i18n.t(`portrait.weapon.${module.weaponKind}`) };
-  return ewarEffectHint(module, i18n);
+  if (module.category === "weapon") return { moduleId: module.moduleId, weaponKind: module.weaponKind, hint: i18n.t(`portrait.weapon.${module.weaponKind}`) };
+  return { ...ewarEffectHint(module, i18n), weaponKind: undefined };
 }
 
-function ewarEffectHint(effect: ActiveOffensiveModule & { category: "ewar" }, i18n: I18n): PortraitEffect {
+function ewarEffectHint(effect: ActiveOffensiveModule & { category: "ewar" }, i18n: I18n): Omit<PortraitEffect, "weaponKind"> {
   switch (effect.family) {
     case "web":
       return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.web")} ${percentFromMultiplier(effect.speedMultiplier)}%` };

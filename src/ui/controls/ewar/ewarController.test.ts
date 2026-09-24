@@ -102,6 +102,7 @@ function buildEwarController(
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((_shipId) => ""),
     itemIconUrl: vi.fn((id) => `icons/${String(id)}.png`),
+    droneIconUrl: vi.fn(() => ""),
   });
   const popupGroup = new FakePopupGroup();
   const els = createControlsEls();

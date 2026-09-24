@@ -118,6 +118,7 @@ export function buildLauncher(
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((_shipId) => ""),
     itemIconUrl: vi.fn(() => undefined),
+    droneIconUrl: vi.fn(() => ""),
     ...options.imageCatalog,
   });
   const fittingImport = vi.mocked<FittingImport>({

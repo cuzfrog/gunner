@@ -71,6 +71,7 @@ function buildSensorBoosterController() {
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((_shipId) => ""),
     itemIconUrl: vi.fn((id) => `icons/${String(id)}.png`),
+    droneIconUrl: vi.fn(() => ""),
   });
   const popupGroup = vi.mocked<PopupGroup>({
     register: vi.fn(),

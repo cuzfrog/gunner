@@ -192,6 +192,7 @@ function buildController() {
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((_shipId) => "images/ships/Rifter.webp"),
     itemIconUrl: vi.fn((name) => (name === toTypeId("527") ? "images/icons/1234@1x.png" : undefined)),
+    droneIconUrl: vi.fn(() => "images/icons/icon-drones.png"),
   });
   const events = new UiEventsImpl();
   const createElementSpy = vi.spyOn(document, "createElement");
@@ -528,6 +529,18 @@ describe("PortraitsController", () => {
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
     expect(icon.src).toBe("images/icons/weapon@1x.png");
     expect(icon.getAttribute("data-hint")).toBe("portrait.weapon.turret");
+  });
+
+  test("drone weapon effect uses the general drone icon instead of the drone type icon", () => {
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    imageCatalog.itemIconUrl.mockReturnValue(undefined);
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "weapon", weaponKind: "drone", moduleId: toTypeId("2454") }], shipB: [] }));
+    controller.update();
+    expect(imageCatalog.itemIconUrl).not.toHaveBeenCalled();
+    expect(els.shipAEffects.hidden).toBe(false);
+    expect(els.shipAEffects.children.length).toBe(1);
+    expect((els.shipAEffects.children[0] as unknown as HTMLImageElement).src).toBe("images/icons/icon-drones.png");
   });
 
   test("defense cycling effects appear after offensive modules", () => {

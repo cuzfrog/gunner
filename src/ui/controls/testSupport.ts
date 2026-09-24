@@ -208,6 +208,7 @@ function mockImageCatalog(): ImageCatalog {
   return vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((_shipId) => ""),
     itemIconUrl: vi.fn(() => undefined),
+    droneIconUrl: vi.fn(() => ""),
   });
 }
 
@@ -438,6 +439,7 @@ export function buildSidePanel(
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((_shipId) => ""),
     itemIconUrl: vi.fn(() => undefined),
+    droneIconUrl: vi.fn(() => ""),
   });
   const popupGroup = vi.mocked<PopupGroup>({
     register: vi.fn(),
