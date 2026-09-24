@@ -153,6 +153,7 @@ function createImageCatalog(): ImageCatalog {
       if (id === SCRIPT_ID) return "images/icons/3344@1x.png";
       return undefined;
     }),
+    droneIconUrl: () => "images/icons/icon-drones.png",
   };
 }
 

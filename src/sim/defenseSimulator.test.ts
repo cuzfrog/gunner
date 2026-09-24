@@ -501,6 +501,24 @@ describe("DefenseSimulatorImpl", () => {
     const r = sim.view().repairers.shipA[0];
     expect(r.overloaded).toBe(true);
     expect(r.hpPerSecond).toBeCloseTo((100 * 1.5) / (4 * 0.75), 5);
+    expect(r.hpPerCycle).toBeCloseTo(100 * 1.5, 5);
+  });
+
+  test("ancillary repairer view reports charged hp per cycle", () => {
+    const sim = newSim();
+    const repairSpec = spec({ shieldHp: 0, armorHp: 100000, hullHp: 100000, armorResists: { em: 0 }, repairers: [{
+      layer: "armor", amount: 100, cycleTime: 2, capacitorNeed: 0, heatDamage: 0,
+      overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 },
+      ancillary: { chargeMultiplier: 3, shots: 2, reloadTime: 5 },
+    }] });
+    sim.reset(config(repairSpec));
+    sim.step(1, events({ em: 5000, thermal: 0, kinetic: 0, explosive: 0 }, ZERO_DAMAGE));
+    expect(sim.view().repairers.shipA[0].hpPerCycle).toBeCloseTo(300, 5);
+    sim.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE));
+    sim.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE));
+    sim.step(1, events(ZERO_DAMAGE, ZERO_DAMAGE));
+    expect(sim.view().repairers.shipA[0].reloading).toBe(true);
+    expect(sim.view().repairers.shipA[0].hpPerCycle).toBe(0);
   });
 
   test("auto mode skips new cycles when pool is full", () => {

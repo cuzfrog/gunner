@@ -16,4 +16,6 @@ exported for DI registration. The module owns its DOM collection through a priva
 simulation `EngagementView` (target-indexed: weapons and ewar actively applied against
 this ship) plus own-ship defense cycling effects from `DefenseController`. It does not
 depend on `EwarResolver` or `EwarController` — all runtime activity is resolved by the
-simulation and exposed through the view.
+simulation and exposed through the view. Effect icons
+carry their identity as `data-*` attributes (`data-hint-content="portraitEffect"`) and
+render no hint text themselves — the live hover content is produced by [[portraitEffectHint]].

@@ -85,7 +85,9 @@ export class FakeElement {
       child.children = [];
       return;
     }
+    child.remove();
     child.parent = this;
+    child.isConnected = true;
     this.children.push(child);
   }
   remove(): void {

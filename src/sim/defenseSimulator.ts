@@ -20,6 +20,8 @@ export interface RepairerViewState {
   readonly active: boolean;
   readonly overloaded: boolean;
   readonly hpPerSecond: number;
+  /** Heal amount applied on cycle completion while the repairer is actively cycling (0 otherwise). */
+  readonly hpPerCycle: number;
   readonly starved: boolean;
   /** Present once the module burned out from heat damage and stopped repairing. */
   readonly burned?: boolean;
@@ -896,6 +898,7 @@ function repairerViews(pools: SidePools): readonly RepairerViewState[] {
     const isCharged = spec.ancillary !== undefined && state.ancillaryCharges > 0;
     const effectiveHp = isCharged ? amount * spec.ancillary.chargeMultiplier : amount;
     const hpPerSecond = state.active && !state.reloading && !state.burned ? effectiveHp / cycleTime : 0;
+    const hpPerCycle = state.active && !state.reloading && !state.burned ? effectiveHp : 0;
     return {
       layer: spec.layer,
       cycling: state.inCycle,
@@ -905,6 +908,7 @@ function repairerViews(pools: SidePools): readonly RepairerViewState[] {
       active: state.active,
       overloaded: state.overloaded,
       hpPerSecond,
+      hpPerCycle,
       starved: state.starved,
       burned: state.burned || undefined,
     };

@@ -10,7 +10,7 @@ import { html } from "../markup";
 import type { PopupGroup } from "../popup";
 import { IconActionImpl, PopupField, SectionBlockImpl, spriteIcon } from "../shared";
 import type { Side } from "../side";
-import type { DefenseController, DefenseEls } from "./defenseControllerContract";
+import type { CyclingEffectDescriptor, DefenseController, DefenseEls } from "./defenseControllerContract";
 
 const DEFENSE_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
 
@@ -141,20 +141,20 @@ export class DefenseControllerImpl implements DefenseController {
     this.rahActivationState[side] = rahActivation;
   }
 
-  cyclingEffects(side: Side): readonly { readonly moduleId: TypeId; readonly hint: string }[] {
+  cyclingEffects(side: Side): readonly CyclingEffectDescriptor[] {
     const spec = this.specs.get(side);
     if (!spec || !this.defenseView) return [];
-    const effects: { moduleId: TypeId; hint: string }[] = [];
+    const effects: CyclingEffectDescriptor[] = [];
     const repairerViews = this.defenseView.repairers[side];
     for (let i = 0; i < spec.repairers.length && i < repairerViews.length; i++) {
       const repairerSpec = spec.repairers[i];
       const repairerView = repairerViews[i];
       if (!repairerView.cycling || repairerSpec.moduleId === undefined) continue;
-      effects.push({ moduleId: repairerSpec.moduleId, hint: this.i18n.t(layerLabelKey(repairerSpec.layer)) });
+      effects.push({ kind: "repairer", moduleId: repairerSpec.moduleId, repairerIndex: i });
     }
     const rahView = this.defenseView.rah[side];
     if (rahView?.cycling && spec.rah?.moduleId !== undefined) {
-      effects.push({ moduleId: spec.rah.moduleId, hint: this.i18n.t("defense.rah") });
+      effects.push({ kind: "rah", moduleId: spec.rah.moduleId });
     }
     return effects;
   }

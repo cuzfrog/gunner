@@ -42,6 +42,10 @@ function setViewportWidth(document: Document, width: number): void {
   (document.documentElement as unknown as { clientWidth: number }).clientWidth = width;
 }
 
+function setViewportHeight(document: Document, height: number): void {
+  (document.documentElement as unknown as { clientHeight: number }).clientHeight = height;
+}
+
 function stubAnchorRect(anchor: HTMLElement, rect: { left: number; width: number; bottom: number }): void {
   (anchor as unknown as FakeElement).getBoundingClientRect = () => ({
     left: rect.left,
@@ -819,5 +823,64 @@ describe("HoverHintControllerImpl", () => {
     timer.fire();
 
     expect(hintEl.style.left).toBe("222px");
+  });
+
+  test("keeps the hint below the anchor when it fits the viewport height", () => {
+    const document = globalThis.document;
+    setViewportWidth(document, 1540);
+    setViewportHeight(document, 700);
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    hintEl.offsetWidth = 220;
+    hintEl.offsetHeight = 143;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    stubAnchorRect(anchor, { left: 500, width: 100, bottom: 532 });
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.style.top).toBe("532px");
+    expect(hintEl.style.marginTop).toBe("4px");
+  });
+
+  test("flips the hint above the anchor when there is no room below", () => {
+    const document = globalThis.document;
+    setViewportWidth(document, 1540);
+    setViewportHeight(document, 700);
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    hintEl.offsetWidth = 220;
+    hintEl.offsetHeight = 143;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    stubAnchorRect(anchor, { left: 500, width: 100, bottom: 640 });
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.style.top).toBe("453px");
+    expect(hintEl.style.marginTop).toBe("0px");
+  });
+
+  test("keeps the hint below when neither side has room", () => {
+    const document = globalThis.document;
+    setViewportWidth(document, 1540);
+    setViewportHeight(document, 700);
+    const timer = new ControllableTimer();
+    const hintEl = getFake(document, "hover-hint") as unknown as FakeElement;
+    hintEl.offsetWidth = 220;
+    hintEl.offsetHeight = 600;
+    const anchor = document.createElement("button");
+    anchor.setAttribute("data-hint", "effect text");
+    stubAnchorRect(anchor, { left: 500, width: 100, bottom: 90 });
+    new HoverHintControllerImpl({ hintEl: hintEl as unknown as HTMLElement, timer, viewStream: makeViewStream() });
+
+    dispatch(document, "pointerover", anchor);
+    timer.fire();
+
+    expect(hintEl.style.top).toBe("90px");
   });
 });

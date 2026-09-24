@@ -5,7 +5,10 @@ import { SHIP_IMAGE_FILES } from "./shipImageIds";
 export interface ImageCatalog {
   shipImageUrl(shipId: ShipId): string | undefined;
   itemIconUrl(typeId: TypeId): string | undefined;
+  droneIconUrl(): string;
 }
+
+const DRONE_ICON_FILE = "icons/icon-drones.png";
 
 export class StaticImageCatalog implements ImageCatalog {
   shipImageUrl(shipId: ShipId): string | undefined {
@@ -15,5 +18,9 @@ export class StaticImageCatalog implements ImageCatalog {
   itemIconUrl(typeId: TypeId): string | undefined {
     const file = TYPE_ICON_FILES[typeId];
     return file !== undefined ? `images/${file}` : undefined;
+  }
+
+  droneIconUrl(): string {
+    return `images/${DRONE_ICON_FILE}`;
   }
 }

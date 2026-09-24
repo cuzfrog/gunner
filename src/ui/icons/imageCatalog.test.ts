@@ -27,4 +27,8 @@ describe("StaticImageCatalog", () => {
   test("itemIconUrl resolves a charge id whose icon is keyed by iconId", () => {
     expect(catalog.itemIconUrl(toTypeId("29005"))).toBe("images/icons/3344@1x.png");
   });
+
+  test("droneIconUrl returns the general drone icon path", () => {
+    expect(catalog.droneIconUrl()).toBe("images/icons/icon-drones.png");
+  });
 });

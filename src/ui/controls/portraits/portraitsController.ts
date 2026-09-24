@@ -1,31 +1,33 @@
 import type { ShipId, TypeId } from "../../../gamedata/ids";
-import type { ActiveOffensiveModule, DefenseLayer, LockState } from "../../../sim";
+import type { ActiveOffensiveModule, DefenseLayer, EwarEffectFamily, LockState, WeaponKind } from "../../../sim";
 import type { HpValueDisplay } from "../../../appstate";
 import type { ImageCatalog } from "../../icons";
-import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
-import type { DefenseController } from "../defense";
+import type { CyclingEffectDescriptor, DefenseController } from "../defense";
 import type { ViewStream } from "../../viewStream";
 import type { Side } from "../side";
 import type { CombatantProfiles, PortraitsEls, PortraitsController } from "./portraitsControllerContract";
 import { html } from "../markup";
-import { percentFromMultiplier, signedPercentFromMultiplier } from "../../format";
 import { formatWithCommas } from "../controlsFormat";
 import { setText } from "../controlsDom";
 
 interface SideState {
   lastKey: string;
   lastId: ShipId | "";
+  lastIcons: Map<string, HTMLImageElement>;
 }
 
-interface PortraitEffect {
-  readonly moduleId: TypeId;
-  readonly hint: string;
-}
+/** Identifies one effect icon so the hint provider can resolve its live view data per frame. */
+type PortraitEffect =
+  | { readonly kind: "weapon"; readonly moduleId: TypeId; readonly weaponKind: WeaponKind }
+  | { readonly kind: "ewar"; readonly moduleId: TypeId; readonly family: EwarEffectFamily }
+  | { readonly kind: "repairer"; readonly moduleId: TypeId; readonly repairerIndex: number }
+  | { readonly kind: "rah"; readonly moduleId: TypeId };
 
 const HP_BAR_LAYERS: readonly DefenseLayer[] = ["shield", "armor", "hull"];
 const FULL_POOL: Readonly<Record<DefenseLayer, number>> = { shield: 1, armor: 1, hull: 1 };
 const SHIP_HINT_CONTENT_KEY = "shipProfile";
+const EFFECT_HINT_CONTENT_KEY = "portraitEffect";
 
 export class PortraitsControllerImpl implements PortraitsController {
   private readonly els: PortraitsEls;
@@ -33,10 +35,9 @@ export class PortraitsControllerImpl implements PortraitsController {
   private readonly defenseController: DefenseController;
   private readonly combatantProfiles: CombatantProfiles;
   private readonly events: UiEvents;
-  private readonly i18n: I18n;
   private readonly viewStream: ViewStream;
-  private readonly shipAState: SideState = { lastKey: "", lastId: "" };
-  private readonly shipBState: SideState = { lastKey: "", lastId: "" };
+  private readonly shipAState: SideState = { lastKey: "", lastId: "", lastIcons: new Map() };
+  private readonly shipBState: SideState = { lastKey: "", lastId: "", lastIcons: new Map() };
   private hpValueDisplay: HpValueDisplay = "none";
 
   constructor(deps: {
@@ -45,7 +46,6 @@ export class PortraitsControllerImpl implements PortraitsController {
     defenseController: DefenseController;
     combatantProfiles: CombatantProfiles;
     events: UiEvents;
-    i18n: I18n;
     viewStream: ViewStream;
   }) {
     this.els = deps.els;
@@ -53,7 +53,6 @@ export class PortraitsControllerImpl implements PortraitsController {
     this.defenseController = deps.defenseController;
     this.combatantProfiles = deps.combatantProfiles;
     this.events = deps.events;
-    this.i18n = deps.i18n;
     this.viewStream = deps.viewStream;
     deps.viewStream.onViewUpdated(() => this.update());
     deps.events.onLanguageChanged(() => this.update());
@@ -90,11 +89,12 @@ export class PortraitsControllerImpl implements PortraitsController {
       wrap.removeAttribute("data-value");
       state.lastKey = "";
       state.lastId = "";
+      state.lastIcons = new Map();
       return;
     }
     const offensiveModules = this.viewStream.currentView()?.incomingOffensiveModules[side] ?? [];
-    const portraitEffects = offensiveModules.map((m) => offensiveModuleEffect(m, this.i18n));
-    const defenseEffects = this.defenseController.cyclingEffects(side);
+    const portraitEffects = offensiveModules.map((m) => offensiveModuleEffect(m));
+    const defenseEffects = this.defenseController.cyclingEffects(side).map(defenseEffect);
     const allEffects = [...portraitEffects, ...defenseEffects];
     const defenseRuntime = this.viewStream.currentView()?.defenseRuntime;
     const hpPercentages = defenseRuntime?.poolPercentages[side] ?? FULL_POOL;
@@ -116,16 +116,21 @@ export class PortraitsControllerImpl implements PortraitsController {
       wrap.setAttribute("data-hint-content", SHIP_HINT_CONTENT_KEY);
       wrap.setAttribute("data-value", profile.id);
     }
-    effects.innerHTML = "";
-    const icons = document.createDocumentFragment();
-    for (const effect of allEffects) {
-      const iconUrl = this.imageCatalog.itemIconUrl(effect.moduleId);
-      if (iconUrl === undefined) continue;
-      const img = html`<img class="portrait-effect-icon" src=${iconUrl} alt="" data-hint=${effect.hint}>` as unknown as HTMLImageElement;
-      icons.appendChild(img);
-    }
-    effects.appendChild(icons);
+    // Keyed reconciliation: icons whose effect persists keep their DOM element, so an effect
+    // icon under the pointer stays a live CSS anchor for the hover hint while the surrounding
+    // effect list changes during the engagement.
+    const icons = reconcileEffectIcons(effects, allEffects, state.lastIcons, (effect) => this.createEffectIcon(effect, side));
+    state.lastIcons = icons;
     if (effects.hidden !== (effects.childElementCount === 0)) effects.hidden = effects.childElementCount === 0;
+  }
+
+  private createEffectIcon(effect: PortraitEffect, side: Side): HTMLImageElement | undefined {
+    const iconUrl = effect.kind === "weapon" && effect.weaponKind === "drone" ? this.imageCatalog.droneIconUrl() : this.imageCatalog.itemIconUrl(effect.moduleId);
+    if (iconUrl === undefined) return undefined;
+    if (effect.kind === "weapon") return html`<img class="portrait-effect-icon" src=${iconUrl} alt="" data-hint-content=${EFFECT_HINT_CONTENT_KEY} data-side=${side} data-effect-kind="weapon" data-weapon-kind=${effect.weaponKind} data-module-id=${effect.moduleId}>` as unknown as HTMLImageElement;
+    if (effect.kind === "ewar") return html`<img class="portrait-effect-icon" src=${iconUrl} alt="" data-hint-content=${EFFECT_HINT_CONTENT_KEY} data-side=${side} data-effect-kind="ewar" data-ewar-family=${effect.family} data-module-id=${effect.moduleId}>` as unknown as HTMLImageElement;
+    if (effect.kind === "repairer") return html`<img class="portrait-effect-icon" src=${iconUrl} alt="" data-hint-content=${EFFECT_HINT_CONTENT_KEY} data-side=${side} data-effect-kind="repairer" data-repairer-index=${String(effect.repairerIndex)} data-module-id=${effect.moduleId}>` as unknown as HTMLImageElement;
+    return html`<img class="portrait-effect-icon" src=${iconUrl} alt="" data-hint-content=${EFFECT_HINT_CONTENT_KEY} data-side=${side} data-effect-kind="rah" data-module-id=${effect.moduleId}>` as unknown as HTMLImageElement;
   }
 }
 
@@ -134,46 +139,41 @@ function sideStateFor(side: Side, shipAState: SideState, shipBState: SideState):
 }
 
 function buildDiffKey(id: ShipId, effects: readonly PortraitEffect[], lockBadge: boolean): string {
-  return `${id}|${effects.map((e) => `${e.moduleId}:${e.hint}`).join(",")}|${lockBadge}`;
+  return `${id}|${effects.map(effectKey).join(",")}|${lockBadge}`;
 }
 
-function offensiveModuleEffect(module: ActiveOffensiveModule, i18n: I18n): PortraitEffect {
-  if (module.category === "weapon") return { moduleId: module.moduleId, hint: i18n.t(`portrait.weapon.${module.weaponKind}`) };
-  return ewarEffectHint(module, i18n);
-}
-
-function ewarEffectHint(effect: ActiveOffensiveModule & { category: "ewar" }, i18n: I18n): PortraitEffect {
-  switch (effect.family) {
-    case "web":
-      return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.web")} ${percentFromMultiplier(effect.speedMultiplier)}%` };
-    case "grappler":
-      return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.web")} ${percentFromMultiplier(effect.speedMultiplier)}%` };
-    case "scrambler":
-      return { moduleId: effect.moduleId, hint: i18n.t("ewar.hover.scrambler") };
-    case "disruptor": {
-      const parts: string[] = [];
-      if (effect.trackingMultiplier < 1) parts.push(`${i18n.t("ewar.hover.tracking")} -${percentFromMultiplier(effect.trackingMultiplier)}%`);
-      if (effect.optimalMultiplier < 1) parts.push(`${i18n.t("ewar.hover.optimal")} -${percentFromMultiplier(effect.optimalMultiplier)}%`);
-      if (effect.falloffMultiplier < 1) parts.push(`${i18n.t("ewar.hover.falloff")} -${percentFromMultiplier(effect.falloffMultiplier)}%`);
-      return { moduleId: effect.moduleId, hint: parts.join(" · ") };
-    }
-    case "dampener": {
-      const parts: string[] = [];
-      if (effect.scanResolutionMultiplier < 1) parts.push(`${i18n.t("ewar.hover.scanResolution")} -${percentFromMultiplier(effect.scanResolutionMultiplier)}%`);
-      if (effect.maxTargetRangeMultiplier < 1) parts.push(`${i18n.t("ewar.hover.targetingRange")} -${percentFromMultiplier(effect.maxTargetRangeMultiplier)}%`);
-      return { moduleId: effect.moduleId, hint: parts.join(" · ") };
-    }
-    case "painter": {
-      const percent = signedPercentFromMultiplier(effect.signatureMultiplier);
-      return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.sigRadius")} ${percent > 0 ? "+" : ""}${percent}%` };
-    }
-    case "neutralizer":
-      return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.neutralizer")} ${effect.amountPerCycle} GJ / ${effect.cycleTime}s` };
-    case "nosferatu":
-      return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.nosferatu")} ${effect.amountPerCycle} GJ / ${effect.cycleTime}s` };
-    case "jammer":
-      return { moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.jammer")} · ${effect.cycleTime}s` };
+function reconcileEffectIcons(effects: HTMLElement, allEffects: readonly PortraitEffect[], previous: ReadonlyMap<string, HTMLImageElement>, create: (effect: PortraitEffect) => HTMLImageElement | undefined): Map<string, HTMLImageElement> {
+  const icons = new Map<string, HTMLImageElement>();
+  for (const effect of allEffects) {
+    const key = effectKey(effect);
+    const reused = previous.get(key);
+    const icon = reused !== undefined && reused.isConnected ? reused : create(effect);
+    if (icon === undefined) continue;
+    icons.set(key, icon);
   }
+  for (const icon of icons.values()) effects.appendChild(icon);
+  const kept = new Set<Element>(icons.values());
+  for (const child of Array.from(effects.children)) {
+    if (!kept.has(child)) child.remove();
+  }
+  return icons;
+}
+
+function effectKey(effect: PortraitEffect): string {
+  if (effect.kind === "weapon") return `weapon:${effect.weaponKind}:${effect.moduleId}`;
+  if (effect.kind === "ewar") return `ewar:${effect.family}:${effect.moduleId}`;
+  if (effect.kind === "repairer") return `repairer:${effect.repairerIndex}:${effect.moduleId}`;
+  return `rah:${effect.moduleId}`;
+}
+
+function offensiveModuleEffect(module: ActiveOffensiveModule): PortraitEffect {
+  if (module.category === "weapon") return { kind: "weapon", moduleId: module.moduleId, weaponKind: module.weaponKind };
+  return { kind: "ewar", moduleId: module.moduleId, family: module.family };
+}
+
+function defenseEffect(descriptor: CyclingEffectDescriptor): PortraitEffect {
+  if (descriptor.kind === "repairer") return { kind: "repairer", moduleId: descriptor.moduleId, repairerIndex: descriptor.repairerIndex };
+  return { kind: "rah", moduleId: descriptor.moduleId };
 }
 
 function updateHpBars(container: HTMLElement, percentages: Readonly<Record<DefenseLayer, number>> | undefined): void {

@@ -15,7 +15,6 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
       imageCatalog,
       defenseController,
       uiEvents,
-      i18n,
       shipASide,
       shipBSide,
       viewStream,
@@ -25,7 +24,6 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
       defenseController,
       combatantProfiles: { profile: (side: Side) => (side === "shipA" ? shipASide.profile : shipBSide.profile) },
       events: uiEvents,
-      i18n,
       viewStream,
     })).singleton(),
   });

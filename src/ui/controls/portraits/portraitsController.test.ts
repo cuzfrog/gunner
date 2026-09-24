@@ -7,7 +7,6 @@ import type { ViewStream } from "../../viewStream";
 import type { ImageCatalog } from "../../icons";
 import type { ShipProfile } from "../../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId } from "../../../gamedata/ids";
-import type { I18n, Language } from "../../i18n";
 import { PortraitsControllerImpl } from "./portraitsController";
 import type { PortraitsController, PortraitsEls, CombatantProfiles } from "./portraitsControllerContract";
 
@@ -192,15 +191,10 @@ function buildController() {
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((_shipId) => "images/ships/Rifter.webp"),
     itemIconUrl: vi.fn((name) => (name === toTypeId("527") ? "images/icons/1234@1x.png" : undefined)),
+    droneIconUrl: vi.fn(() => "images/icons/icon-drones.png"),
   });
   const events = new UiEventsImpl();
   const createElementSpy = vi.spyOn(document, "createElement");
-  const i18n = vi.mocked<I18n>({
-    current: vi.fn((): Language => "en"),
-    setLanguage: vi.fn(),
-    t: vi.fn((key: string) => key),
-    translateDocument: vi.fn(),
-  });
   const defenseController = vi.mocked<DefenseController>({
     setDefenseSpec: vi.fn(),
     spec: vi.fn(() => undefined),
@@ -236,10 +230,9 @@ function buildController() {
     defenseController,
     combatantProfiles,
     events,
-    i18n,
     viewStream,
   });
-  return { controller, els, profiles, defenseController, imageCatalog, events, createElementSpy, i18n, viewStream, viewStreamListeners };
+  return { controller, els, profiles, defenseController, imageCatalog, events, createElementSpy, viewStream, viewStreamListeners };
 }
 
 describe("PortraitsController", () => {
@@ -313,7 +306,7 @@ describe("PortraitsController", () => {
     expect(els.shipAEffects.hidden).toBe(true);
   });
 
-  test("one web ewar module shows a visible icon with a localized tooltip", () => {
+  test("one web ewar module shows a visible icon with hint provider attributes", () => {
     const { controller, els, profiles, viewStream } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
@@ -324,7 +317,11 @@ describe("PortraitsController", () => {
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
     expect(icon.tagName).toBe("IMG");
     expect(icon.src).toBe("images/icons/1234@1x.png");
-    expect(icon.getAttribute("data-hint")).toBe("ewar.hover.web 60%");
+    expect(icon.getAttribute("data-hint-content")).toBe("portraitEffect");
+    expect(icon.getAttribute("data-side")).toBe("shipA");
+    expect(icon.getAttribute("data-effect-kind")).toBe("ewar");
+    expect(icon.getAttribute("data-ewar-family")).toBe("web");
+    expect(icon.getAttribute("data-module-id")).toBe("527");
   });
 
   test("shipB web module shows icon under shipA portrait", () => {
@@ -340,6 +337,58 @@ describe("PortraitsController", () => {
     expect(els.shipBEffects.hidden).toBe(true);
   });
 
+  test("persistent effect keeps its icon element when other effects appear", () => {
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
+    imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("527") || name === toTypeId("448") ? `images/icons/${String(name)}@1x.png` : undefined));
+    profiles.shipA = SHIP_A_PROFILE;
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
+    controller.update();
+    const original = els.shipAEffects.children[0];
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }, { category: "ewar", family: "scrambler", moduleId: toTypeId("448") }], shipB: [] }));
+    controller.update();
+    expect(els.shipAEffects.children.length).toBe(2);
+    expect(els.shipAEffects.children[0]).toBe(original);
+  });
+
+  test("persistent effect keeps its icon element when the lock badge toggles", () => {
+    const { controller, els, profiles, viewStream } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
+    controller.update();
+    const original = els.shipAEffects.children[0];
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }, { shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 3, inRange: true }, shipB: IDLE_LOCK }));
+    controller.update();
+    expect(els.shipAEffects.children[0]).toBe(original);
+  });
+
+  test("removed effect drops its icon element from the row", () => {
+    const { controller, els, profiles, viewStream } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }, { category: "ewar", family: "scrambler", moduleId: toTypeId("448") }], shipB: [] }));
+    controller.update();
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
+    controller.update();
+    expect(els.shipAEffects.children.length).toBe(1);
+    expect((els.shipAEffects.children[0] as unknown as HTMLImageElement).getAttribute("data-ewar-family")).toBe("web");
+  });
+
+  test("reordered effects keep their icon elements and DOM order follows the effect list", () => {
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
+    imageCatalog.itemIconUrl.mockImplementation((name) => `images/icons/${String(name)}@1x.png`);
+    profiles.shipA = SHIP_A_PROFILE;
+    const web = { category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 } as const;
+    const scrambler = { category: "ewar", family: "scrambler", moduleId: toTypeId("448") } as const;
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [web, scrambler], shipB: [] }));
+    controller.update();
+    const webIcon = els.shipAEffects.children[0];
+    const scramblerIcon = els.shipAEffects.children[1];
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [scrambler, web], shipB: [] }));
+    controller.update();
+    expect(els.shipAEffects.children.length).toBe(2);
+    expect(els.shipAEffects.children[0]).toBe(scramblerIcon);
+    expect(els.shipAEffects.children[1]).toBe(webIcon);
+  });
+
   test("shipA scrambler module shows icon under shipB portrait", () => {
     const { controller, els, profiles, viewStream, imageCatalog } = buildController();
     profiles.shipB = SHIP_B_PROFILE;
@@ -351,7 +400,9 @@ describe("PortraitsController", () => {
     expect(els.shipBEffects.children.length).toBe(1);
     const icon = els.shipBEffects.children[0] as unknown as HTMLImageElement;
     expect(icon.src).toBe("images/icons/5678@1x.png");
-    expect(icon.getAttribute("data-hint")).toBe("ewar.hover.scrambler");
+    expect(icon.getAttribute("data-hint-content")).toBe("portraitEffect");
+    expect(icon.getAttribute("data-side")).toBe("shipB");
+    expect(icon.getAttribute("data-ewar-family")).toBe("scrambler");
   });
 
   test("no offensive modules leaves effect rows empty while portraits stay visible", () => {
@@ -430,7 +481,7 @@ describe("PortraitsController", () => {
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
     expect(icon.src).toBe("images/icons/1234@1x.png");
-    expect(icon.getAttribute("data-hint")).toBe("ewar.hover.web 60%");
+    expect(icon.getAttribute("data-hint-content")).toBe("portraitEffect");
   });
 
   test("view changes that do not change the module set do not create new img elements", () => {
@@ -483,17 +534,18 @@ describe("PortraitsController", () => {
     expect(els.shipAEffects.children.length).toBe(1);
   });
 
-  test("web effect title shows speed reduction percentage instead of module name", () => {
+  test("web effect icon carries the hint provider anchor attributes", () => {
     const { controller, els, profiles, viewStream } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
     controller.update();
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
-    expect(icon.getAttribute("data-hint")).toBe("ewar.hover.web 60%");
+    expect(icon.getAttribute("data-hint-content")).toBe("portraitEffect");
+    expect(icon.getAttribute("data-ewar-family")).toBe("web");
   });
 
-  test("scrambler effect title shows scrambler hover label", () => {
+  test("scrambler effect icon carries the hint provider anchor attributes", () => {
     const { controller, els, profiles, viewStream, imageCatalog } = buildController();
     profiles.shipB = SHIP_B_PROFILE;
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("448") ? "images/icons/5678@1x.png" : undefined));
@@ -501,10 +553,11 @@ describe("PortraitsController", () => {
     controller.update();
     expect(els.shipBEffects.children.length).toBe(1);
     const icon = els.shipBEffects.children[0] as unknown as HTMLImageElement;
-    expect(icon.getAttribute("data-hint")).toBe("ewar.hover.scrambler");
+    expect(icon.getAttribute("data-hint-content")).toBe("portraitEffect");
+    expect(icon.getAttribute("data-ewar-family")).toBe("scrambler");
   });
 
-  test("disruptor effect title shows tracking and optimal range reductions", () => {
+  test("disruptor effect icon carries the hint provider anchor attributes", () => {
     const { controller, els, profiles, viewStream, imageCatalog } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     const disruptorId = toTypeId("3456");
@@ -513,7 +566,8 @@ describe("PortraitsController", () => {
     controller.update();
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
-    expect(icon.getAttribute("data-hint")).toBe("ewar.hover.tracking -45% · ewar.hover.optimal -17%");
+    expect(icon.getAttribute("data-hint-content")).toBe("portraitEffect");
+    expect(icon.getAttribute("data-ewar-family")).toBe("disruptor");
   });
 
   test("weapon module from the view is rendered as an icon", () => {
@@ -527,7 +581,20 @@ describe("PortraitsController", () => {
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
     expect(icon.src).toBe("images/icons/weapon@1x.png");
-    expect(icon.getAttribute("data-hint")).toBe("portrait.weapon.turret");
+    expect(icon.getAttribute("data-effect-kind")).toBe("weapon");
+    expect(icon.getAttribute("data-weapon-kind")).toBe("turret");
+  });
+
+  test("drone weapon effect uses the general drone icon instead of the drone type icon", () => {
+    const { controller, els, profiles, viewStream, imageCatalog } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    imageCatalog.itemIconUrl.mockReturnValue(undefined);
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "weapon", weaponKind: "drone", moduleId: toTypeId("2454") }], shipB: [] }));
+    controller.update();
+    expect(imageCatalog.itemIconUrl).not.toHaveBeenCalled();
+    expect(els.shipAEffects.hidden).toBe(false);
+    expect(els.shipAEffects.children.length).toBe(1);
+    expect((els.shipAEffects.children[0] as unknown as HTMLImageElement).src).toBe("images/icons/icon-drones.png");
   });
 
   test("defense cycling effects appear after offensive modules", () => {
@@ -537,16 +604,19 @@ describe("PortraitsController", () => {
     const defenseModuleId = toTypeId("200");
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === weaponModuleId ? "images/icons/weapon@1x.png" : name === defenseModuleId ? "images/icons/defense@1x.png" : undefined));
     viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "weapon", weaponKind: "turret", moduleId: weaponModuleId }], shipB: [] }));
-    defenseController.cyclingEffects.mockReturnValue([{ moduleId: defenseModuleId, hint: "defense.cycling" }]);
+    defenseController.cyclingEffects.mockReturnValue([{ kind: "repairer", moduleId: defenseModuleId, repairerIndex: 2 }]);
     controller.update();
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(2);
     const weaponIcon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
     expect(weaponIcon.src).toBe("images/icons/weapon@1x.png");
-    expect(weaponIcon.getAttribute("data-hint")).toBe("portrait.weapon.turret");
+    expect(weaponIcon.getAttribute("data-effect-kind")).toBe("weapon");
+    expect(weaponIcon.getAttribute("data-weapon-kind")).toBe("turret");
     const defenseIcon = els.shipAEffects.children[1] as unknown as HTMLImageElement;
     expect(defenseIcon.src).toBe("images/icons/defense@1x.png");
-    expect(defenseIcon.getAttribute("data-hint")).toBe("defense.cycling");
+    expect(defenseIcon.getAttribute("data-effect-kind")).toBe("repairer");
+    expect(defenseIcon.getAttribute("data-repairer-index")).toBe("2");
+    expect(defenseIcon.getAttribute("data-module-id")).toBe("200");
   });
 
   test("onLanguageChanged subscription triggers update and re-renders effects", () => {

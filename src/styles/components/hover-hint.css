@@ -1,6 +1,8 @@
 @layer components {
 .hover-hint {
-  position: absolute;
+  /* Viewport-fixed so anchor() coordinates and the --hover-hint-above flip resolve against the
+     real viewport: a tooltip must not scroll with the page or overflow past the window edge. */
+  position: fixed;
   position-anchor: --hover-hint-anchor;
   top: anchor(bottom);
 
@@ -79,7 +81,6 @@
 
 @supports not (anchor-name: --hover-hint-anchor) {
   .hover-hint {
-    position: fixed;
     translate: -50% 0;
 
     /* The JS fallback owns the horizontal gap via clamping; the vertical gap stays in CSS. */

@@ -17,6 +17,7 @@ const STRING_ATTR = "data-hint";
 const DEFERRED_HIDE_MS = 50;
 // Keep in sync with the --hint-viewport-gap token (src/styles/tokens.css).
 const HINT_VIEWPORT_GAP_PX = 12;
+const PLACEMENT_GAP_PX = 4;
 
 export class HoverHintControllerImpl implements HoverHintController {
   private readonly hintEl: HTMLElement;
@@ -252,11 +253,23 @@ export class HoverHintControllerImpl implements HoverHintController {
   private placeByRect(anchor: HTMLElement): void {
     const rect = anchor.getBoundingClientRect();
     const viewportWidth = this.document.documentElement.clientWidth;
+    const viewportHeight = this.document.documentElement.clientHeight;
     const center = rect.left + rect.width / 2;
     const halfWidth = this.hintEl.offsetWidth / 2;
     const clampedCenter = Math.max(HINT_VIEWPORT_GAP_PX + halfWidth, Math.min(center, viewportWidth - HINT_VIEWPORT_GAP_PX - halfWidth));
     this.hintEl.style.left = `${clampedCenter}px`;
-    this.hintEl.style.top = `${rect.bottom}px`;
+    // Flip above when the hint does not fit below but the space above is larger; otherwise keep it
+    // below the anchor (the 4px placement gap matches the stylesheet's margin-top).
+    const height = this.hintEl.offsetHeight;
+    const below = viewportHeight - rect.bottom - HINT_VIEWPORT_GAP_PX;
+    const above = rect.top - HINT_VIEWPORT_GAP_PX;
+    if (height > below && above > below) {
+      this.hintEl.style.top = `${rect.top - height - PLACEMENT_GAP_PX}px`;
+      this.hintEl.style.marginTop = "0px";
+    } else {
+      this.hintEl.style.top = `${rect.bottom}px`;
+      this.hintEl.style.marginTop = `${PLACEMENT_GAP_PX}px`;
+    }
   }
 
   private scheduleDeferredHide(): void {

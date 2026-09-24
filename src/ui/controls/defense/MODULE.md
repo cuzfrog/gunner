@@ -12,4 +12,4 @@ no-new-exports:
 
 Defense field popup controller and effective-sig suffix UI.
 
-`DefenseController` is the public abstraction and `registerDefenseModule` is exported for DI registration. The module owns its DOM collection through a private `collectDefenseEls` and subscribes to the shared `UiEvents.onFittingImported` channel to refresh the defense spec when a fitting is imported.
+`DefenseController` is the public abstraction and `registerDefenseModule` is exported for DI registration. The module owns its DOM collection through a private `collectDefenseEls` and subscribes to the shared `UiEvents.onFittingImported` channel to refresh the defense spec when a fitting is imported. `cyclingEffects` exposes `CyclingEffectDescriptor` values (repairer index or RAH module id) so consumers like [[portraitEffectHint]] can resolve live view data without defense internals.
