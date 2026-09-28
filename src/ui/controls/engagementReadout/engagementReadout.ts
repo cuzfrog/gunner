@@ -1,4 +1,4 @@
-import type { AttackAssessment, EngineView, HitChanceBreakdown, InflictedDps, LockState } from "../../../sim";
+import type { AttackAssessment, EngineView, HitChanceBreakdown, InflictedDps } from "../../../sim";
 import type { TypeId } from "../../../gamedata/ids";
 import { setText } from "../controlsDom";
 import { formatDistance, formatWithCommas, hitChanceClass } from "../controlsFormat";
@@ -26,8 +26,6 @@ interface SideDpsEls {
   readonly resTimeToImpactLabel: HTMLElement;
   readonly resSigFactorLabel: HTMLElement;
   readonly resVelocityFactorLabel: HTMLElement;
-  readonly resLock: HTMLElement;
-  readonly resLockLabel: HTMLElement;
   readonly resSide: HTMLElement;
 }
 
@@ -51,13 +49,12 @@ export class EngagementReadoutImpl implements EngagementReadout {
   update(view: EngineView, t: (key: string) => string): void {
     const { frame, attacks, inflicted } = view;
     setText(this.els.resDistance, formatDistance(frame.distance, t));
-    this.updateSide(this.els.shipA, view.locks.shipA, attacks.shipA, inflicted.shipB, starvedModuleIds(view, "shipA"), t);
-    this.updateSide(this.els.shipB, view.locks.shipB, attacks.shipB, inflicted.shipA, starvedModuleIds(view, "shipB"), t);
+    this.updateSide(this.els.shipA, attacks.shipA, inflicted.shipB, starvedModuleIds(view, "shipA"), t);
+    this.updateSide(this.els.shipB, attacks.shipB, inflicted.shipA, starvedModuleIds(view, "shipB"), t);
   }
 
-  private updateSide(els: SideHitEls & SideDpsEls, lock: LockState, attack: AttackAssessment | undefined, opponentInflicted: InflictedDps, starvedModules: readonly TypeId[], t: (key: string) => string): void {
+  private updateSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment | undefined, opponentInflicted: InflictedDps, starvedModules: readonly TypeId[], t: (key: string) => string): void {
     this.clearColorClasses(els);
-    this.updateLock(els, lock, t);
     const turretStarved = attack?.turret !== undefined && starvedModules.includes(attack.boostedWeapon.moduleId);
     els.resAppliedDps.setAttribute("data-hint", turretStarved ? t("capacitor.insufficient") : "");
     if (turretStarved) els.resAppliedDps.classList.add("is-dim");
@@ -82,17 +79,6 @@ export class EngagementReadoutImpl implements EngagementReadout {
     els.resSigFactor.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resVelocityFactor.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resTimeToImpact.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
-  }
-
-  private updateLock(els: SideDpsEls, lock: LockState, t: (key: string) => string): void {
-    setText(els.resLockLabel, t("result.lockTime"));
-    els.resLock.classList.remove("is-dim");
-    if (!Number.isFinite(lock.lockTime) || lock.lockTime <= 0) {
-      setText(els.resLock, "-");
-      els.resLock.classList.add("is-dim");
-      return;
-    }
-    setText(els.resLock, `${formatWithCommas(lock.lockTime, 1)}s`);
   }
 
   private updateHitChanceSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment, opponentInflicted: InflictedDps, hit: HitChanceBreakdown, t: (key: string) => string): void {
