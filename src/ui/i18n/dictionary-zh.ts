@@ -362,6 +362,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "result.nominalDps": { zh: "纸面 DPS" },
   "result.timeToImpact": { zh: "命中时间" },
   "result.signatureFactor": { zh: "信号系数" },
+  "result.lockTime": { zh: "锁定时间" },
   "result.velocityFactor": { zh: "速度系数" },
   "readout.time": { zh: "T +" },
   "readout.range": { zh: "距离：" },

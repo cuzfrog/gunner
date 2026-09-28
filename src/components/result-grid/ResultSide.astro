@@ -51,4 +51,8 @@ const MISSILE_METRICS = [
       <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`}>{m.value}</span>
     </div>
   ))}
+  <div class="result-metric">
+    <span class="result-metric-label" id={`res-lock-label-${s}`} data-i18n="result.lockTime">Lock time</span>
+    <span class="result-metric-value mono" id={`res-lock-${s}`}>-</span>
+  </div>
 </div>

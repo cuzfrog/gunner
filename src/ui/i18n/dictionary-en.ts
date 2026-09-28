@@ -362,6 +362,7 @@ export const EN: LanguageSlice<"en"> = {
   "result.nominalDps": { en: "Nominal DPS" },
   "result.timeToImpact": { en: "Time to impact" },
   "result.signatureFactor": { en: "Sig. factor" },
+  "result.lockTime": { en: "Lock time" },
   "result.velocityFactor": { en: "Velocity factor" },
   "readout.time": { en: "T +" },
   "readout.range": { en: "Range: " },

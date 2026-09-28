@@ -29,10 +29,10 @@ function fakeSideEls(): ReadoutEls["shipA"] {
     resTrackPen: make(), resRangePen: make(), resHit: make(),
     resTrackPenLabel: make(), resRangePenLabel: make(), resHitLabel: make(),
     resNominalDps: make(), resAppliedDps: make(), resAppliedDpsApplication: make(), resInflictedDps: make(), resTimeToImpact: make(),
-    resSigFactor: make(), resVelocityFactor: make(),
+    resSigFactor: make(), resVelocityFactor: make(), resLock: make(),
     resNominalDpsLabel: make(), resAppliedDpsLabel: make(), resInflictedDpsLabel: make(),
     resTimeToImpactLabel: make(),
-    resSigFactorLabel: make(), resVelocityFactorLabel: make(),
+    resSigFactorLabel: make(), resVelocityFactorLabel: make(), resLockLabel: make(),
     resSide: make(),
   };
 }
@@ -93,7 +93,7 @@ function makeInflicted(total: number): InflictedDps {
   return { total, byLayer: { shield: 0, armor: 0, hull: 0 } };
 }
 
-function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipALock?: LockState; shipBInflictedDps?: number; shipAStarved?: readonly TypeId[] }) {
+function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipBHit?: { chance: number; trackingTerm: number; rangeTerm: number; trackingPenalty: number; rangePenalty: number }; shipADamage?: DamageAssessment; shipALock?: LockState; shipBLock?: LockState; shipBInflictedDps?: number; shipAStarved?: readonly TypeId[] }) {
   const ship = fakeShipState();
   const frame = {
     time: 0, shipA: ship, shipB: ship,
@@ -116,9 +116,10 @@ function makeTurretView(overrides: { distance?: number; shipAHit?: { chance: num
     turret: { hit: shipBHit, expectedMultiplier: 0, spoolFactor: 1, inOptimal: true },
   };
   const shipALock = overrides.shipALock ?? IDLE_LOCK;
+  const shipBLock = overrides.shipBLock ?? IDLE_LOCK;
   const defenses = { shipA: EMPTY_DEFENSE_ASSESSMENT, shipB: EMPTY_DEFENSE_ASSESSMENT };
   const inflicted = { shipA: ZERO_INFLICTED, shipB: makeInflicted(overrides.shipBInflictedDps ?? 1.5) };
-  return { frame, attacks: { shipA: shipAAttack, shipB: shipBAttack }, effectiveWeapons: { shipA: DUMMY_TURRET, shipB: DUMMY_TURRET }, defenses, inflicted, locks: { shipA: shipALock, shipB: IDLE_LOCK }, capacitorRuntime: capacitorRuntime(overrides.shipAStarved) } as unknown as EngineView;
+  return { frame, attacks: { shipA: shipAAttack, shipB: shipBAttack }, effectiveWeapons: { shipA: DUMMY_TURRET, shipB: DUMMY_TURRET }, defenses, inflicted, locks: { shipA: shipALock, shipB: shipBLock }, capacitorRuntime: capacitorRuntime(overrides.shipAStarved) } as unknown as EngineView;
 }
 
 function makeMissileView(overrides: { distance?: number; shipADamage?: DamageAssessment; shipAMissile?: { application: number; signatureTerm: number; velocityTerm: number; inRange: boolean; timeToImpact: number }; shipBInflictedDps?: number }) {
@@ -330,6 +331,41 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resSigFactor.classList.contains("is-dim")).toBe(false);
     expect(els.shipA.resVelocityFactor.classList.contains("is-dim")).toBe(false);
     expect(els.shipA.resTimeToImpact.classList.contains("is-dim")).toBe(false);
+  });
+
+  test("displays lock time while locking with the projected full duration", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeTurretView({ distance: 1000, shipALock: { status: "locking", progress: 0.5, remaining: 1.2, lockTime: 2.4, inRange: true } }), T);
+    expect(els.shipA.resLock.textContent).toBe("2.4s");
+    expect(els.shipA.resLock.classList.contains("is-dim")).toBe(false);
+    expect(els.shipA.resLockLabel.textContent).toBe("result.lockTime");
+  });
+
+  test("displays lock time when the lock is held", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeTurretView({ distance: 1000, shipALock: { status: "locked", progress: 1, remaining: 0, lockTime: 2.4, inRange: true } }), T);
+    expect(els.shipA.resLock.textContent).toBe("2.4s");
+    expect(els.shipA.resLock.classList.contains("is-dim")).toBe(false);
+  });
+
+  test("lock time shows an em-dash while no lock is held", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeTurretView({ distance: 1000, shipALock: IDLE_LOCK, shipBLock: { status: "locked", progress: 1, remaining: 0, lockTime: 3.6, inRange: true } }), T);
+    expect(els.shipA.resLock.textContent).toBe("-");
+    expect(els.shipA.resLock.classList.contains("is-dim")).toBe(true);
+    expect(els.shipB.resLock.textContent).toBe("3.6s");
+  });
+
+  test("lock time clears the dim state after the lock is acquired", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeTurretView({ distance: 1000, shipALock: IDLE_LOCK }), T);
+    expect(els.shipA.resLock.classList.contains("is-dim")).toBe(true);
+    readout.update(makeTurretView({ distance: 1000, shipALock: { status: "locked", progress: 1, remaining: 0, lockTime: 2.4, inRange: true } }), T);
+    expect(els.shipA.resLock.classList.contains("is-dim")).toBe(false);
   });
 
   test("drone side shows hit-chance cards with DPS like turret", () => {

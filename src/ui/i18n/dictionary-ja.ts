@@ -362,6 +362,7 @@ export const JA: LanguageSlice<"ja"> = {
   "result.nominalDps": { ja: "理論 DPS" },
   "result.timeToImpact": { ja: "着弾時間" },
   "result.signatureFactor": { ja: "シグネチャ係数" },
+  "result.lockTime": { ja: "ロック時間" },
   "result.velocityFactor": { ja: "速度係数" },
   "readout.time": { ja: "T +" },
   "readout.range": { ja: "距離：" },
