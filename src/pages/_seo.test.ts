@@ -16,6 +16,7 @@ import {
   shipWire,
   simulatorDeepLink,
   slugify,
+  shipImageUrlFor,
   type ShipPageData,
 } from "./_seo";
 
@@ -54,6 +55,21 @@ describe("eftTextFor", () => {
   test("prepends the EFT header to the preset body", () => {
     const text = eftTextFor("Thrasher", { name: "Artillery", body: "280mm Artillery Cannon I" });
     expect(text).toBe("[Thrasher, Artillery]\n280mm Artillery Cannon I");
+  });
+});
+
+describe("shipImageUrlFor", () => {
+  const catalog = shipProfileCatalog();
+
+  test("returns the bundled render URL for a ship with an image", () => {
+    const abaddon = catalog.byName("Abaddon");
+    expect(abaddon).toBeDefined();
+    expect(shipImageUrlFor(abaddon!)).toBe("images/ships/Abaddon.webp");
+  });
+
+  test("returns undefined for a ship without a bundled image", () => {
+    const withoutImage = catalog.all().find((profile) => shipImageUrlFor(profile) === undefined);
+    expect(withoutImage).toBeUndefined();
   });
 });
 

@@ -155,6 +155,46 @@
   white-space: pre;
 }
 
+.content-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 22px;
+}
+
+.content-hero-image {
+  flex: none;
+  width: 128px;
+  height: 128px;
+  border: 1px solid var(--border-dim);
+  background: var(--bg-panel);
+}
+
+.content-hero-text {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.content-hero-text .content-lede {
+  margin: 0;
+}
+
+.content-ship-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.content-ship-thumb {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-dim);
+  background: var(--bg-panel);
+}
+
 .content-links {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));

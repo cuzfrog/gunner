@@ -1,6 +1,7 @@
 import { URL_PARAM, encodeBase64, USER_SETTINGS_VERSION, type UserSettings } from "../appstate";
 import { StaticShipProfileCatalog } from "../gamedata/shipProfiles";
 import { StaticPresetFitTexts } from "../gamedata/presets";
+import { SHIP_IMAGE_FILES } from "../ui/icons";
 import type { ShipProfile } from "../ships";
 import type { PresetFitting } from "../fitting";
 
@@ -104,6 +105,10 @@ export function groupNameFor(hullTypeId: string): string {
 
 export function factionNameFor(factionId: string): string {
   return FACTION_NAMES[factionId] ?? factionId;
+}
+
+export function shipImageUrlFor(profile: ShipProfile): string | undefined {
+  return SHIP_IMAGE_FILES[profile.id];
 }
 
 export function slugify(name: string): string {

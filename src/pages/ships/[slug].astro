@@ -7,6 +7,7 @@ import {
   groupNameFor,
   matchupSlug,
   presetFitTexts,
+  shipImageUrlFor,
   shipProfileCatalog,
   shipStatRows,
   shipWire,
@@ -44,17 +45,23 @@ const description = firstFit === undefined
   : `${shipName} ${className.toLowerCase()} stats and preset fittings. Load a ${shipName} fit into the Gunner EVE Online combat simulator and fight it 1v1 in real time.`;
 const stats = shipStatRows(profile);
 const firstDeepLink = simulatorDeepLink(shipWire(profile, firstFit === undefined ? undefined : eftTextFor(shipName, firstFit)));
+const imageUrl = shipImageUrlFor(profile);
 ---
 
-<ContentLayout title={title} description={description}>
+<ContentLayout title={title} description={description} ogImage={imageUrl === undefined ? undefined : `/${imageUrl}`}>
   <nav class="content-crumbs" aria-label="Breadcrumb">
     <a href="/">Simulator</a> / <a href="/ships/">Ships</a> / {shipName}
   </nav>
-  <h1 class="content-title">{shipName} — {className}</h1>
-  <p class="content-lede">
-    The {shipName} is a {factionName} {className.toLowerCase()}. Open it in the Gunner combat simulator to see how it moves, tracks and applies damage against
-    another hull in a real-time 2D fight.
-  </p>
+  <div class="content-hero">
+    {imageUrl && <img class="content-hero-image" src={`/${imageUrl}`} width="128" height="128" alt={`${shipName} render`} />}
+    <div class="content-hero-text">
+      <h1 class="content-title">{shipName} — {className}</h1>
+      <p class="content-lede">
+        The {shipName} is a {factionName} {className.toLowerCase()}. Open it in the Gunner combat simulator to see how it moves, tracks and applies damage against
+        another hull in a real-time 2D fight.
+      </p>
+    </div>
+  </div>
 
   <section class="content-section">
     <h2 class="content-section-title">Fly the {shipName}</h2>

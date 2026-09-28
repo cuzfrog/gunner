@@ -1,6 +1,6 @@
 ---
 import ContentLayout from "../../layouts/ContentLayout.astro";
-import { buildShipPages, factionNameFor, groupNameFor, presetFitTexts, shipProfileCatalog, type ShipPageData } from "../_seo";
+import { buildShipPages, factionNameFor, groupNameFor, presetFitTexts, shipImageUrlFor, shipProfileCatalog, type ShipPageData } from "../_seo";
 
 const title = "EVE Online Ships — Stats & Preset Fittings — Gunner";
 const description =
@@ -61,9 +61,19 @@ const factionGroups: readonly FactionGroup[] = [...byFaction.entries()]
         <div>
           <h3 class="content-group-title">{group.className}</h3>
           <ul class="content-links">
-            {group.ships.map((ship) => (
-              <li><a href={`/ships/${ship.slug}/`}>{ship.profile.name}</a></li>
-            ))}
+            {group.ships.map((ship) => {
+              const imageUrl = shipImageUrlFor(ship.profile);
+              return (
+                <li>
+                  <a class="content-ship-link" href={`/ships/${ship.slug}/`}>
+                    {imageUrl && (
+                      <img class="content-ship-thumb" src={`/${imageUrl}`} width="32" height="32" alt="" loading="lazy" decoding="async" />
+                    )}
+                    {ship.profile.name}
+                  </a>
+                </li>
+              );
+            })}
           </ul>
         </div>
       ))}
