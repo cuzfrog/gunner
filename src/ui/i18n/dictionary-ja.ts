@@ -66,6 +66,7 @@ export const JA: LanguageSlice<"ja"> = {
   "label.targeting": { ja: "ターゲッティング" },
   "title.targeting.empty": { ja: "ターゲッティングデータなし" },
   "targeting.attributes": { ja: "センサー属性" },
+  "targeting.lockTime": { ja: "ロック時間" },
   "targeting.scanResolution": { ja: "スキャン解像度" },
   "targeting.maxTargetingRange": { ja: "最大ターゲット範囲" },
   "targeting.maxLockedTargets": { ja: "最大ロック数" },

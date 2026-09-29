@@ -1,8 +1,7 @@
-import type { SensorSpec } from "../../../sim";
-import type { SensorBoosterResolver } from "../../../sim";
+import { type SensorBoosterResolver, type SensorSpec, lockTime } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
-import { formatWithCommas } from "../controlsFormat";
+import { formatNumber, formatWithCommas } from "../controlsFormat";
 import { html } from "../markup";
 import type { PopupGroup } from "../popup";
 import { PopupField, SectionBlockImpl } from "../shared";
@@ -16,21 +15,24 @@ export class TargetingControllerImpl implements TargetingController {
   private readonly events: UiEvents;
   private readonly sensorBoosterController: SensorBoosterController;
   private readonly resolver: SensorBoosterResolver;
+  private readonly sigSource: { sigRadius(side: Side): number | undefined };
   private readonly specs = new Map<Side, SensorSpec>();
   private readonly attackDronesBySide: Map<Side, boolean> = new Map();
   private readonly sectionBlock: SectionBlockImpl;
   private readonly fields: Record<Side, PopupField>;
 
-  constructor(deps: { els: TargetingEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents; sensorBoosterController: SensorBoosterController; resolver: SensorBoosterResolver }) {
+  /** sigSource supplies the config-time base signature radius per side: the value the sim consumes as CombatantConfig.sig, before bloom and paint. */
+  constructor(deps: { els: TargetingEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents; sensorBoosterController: SensorBoosterController; resolver: SensorBoosterResolver; sigSource: { sigRadius(side: Side): number | undefined } }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.sensorBoosterController = deps.sensorBoosterController;
     this.resolver = deps.resolver;
+    this.sigSource = deps.sigSource;
     this.sectionBlock = new SectionBlockImpl();
     this.fields = {
-      shipA: new PopupField({ els: deps.els.shipA, popupGroup: deps.popupGroup }),
-      shipB: new PopupField({ els: deps.els.shipB, popupGroup: deps.popupGroup }),
+      shipA: new PopupField({ els: deps.els.shipA, popupGroup: deps.popupGroup, onOpen: () => this.render() }),
+      shipB: new PopupField({ els: deps.els.shipB, popupGroup: deps.popupGroup, onOpen: () => this.render() }),
     };
     this.events.onFittingImported((side, imported) => this.setSensorData(side, imported.sensorSpec));
     this.events.onLanguageChanged(() => this.render());
@@ -44,7 +46,7 @@ export class TargetingControllerImpl implements TargetingController {
     } else {
       this.specs.delete(side);
     }
-    this.renderSide(side);
+    this.render();
   }
 
   attackDrones(side: Side): boolean {
@@ -74,9 +76,8 @@ export class TargetingControllerImpl implements TargetingController {
     const heading = html`<div class="preview-section-label">${targetingLabel}</div>`;
     section.appendChild(heading);
     const boosted = this.resolver.boostedSensorSpec(spec, this.sensorBoosterController.projection(side));
-    this.renderSensorAttributes(section, boosted);
+    this.renderSensorAttributes(section, boosted, this.sigSource.sigRadius(opponentOf(side)));
     section.appendChild(this.createAttackDronesRow(side));
-    field.close();
   }
 
   private createAttackDronesRow(side: Side): Element {
@@ -92,9 +93,12 @@ export class TargetingControllerImpl implements TargetingController {
     </label>` as Element;
   }
 
-  private renderSensorAttributes(section: HTMLElement, spec: SensorSpec): void {
+  private renderSensorAttributes(section: HTMLElement, spec: SensorSpec, targetSigRadius: number | undefined): void {
+    const lockSeconds = targetSigRadius === undefined ? undefined : lockTime(spec.scanResolution, targetSigRadius);
+    const lockTimeValue = lockSeconds !== undefined && Number.isFinite(lockSeconds) ? formatNumber(lockSeconds, 2) + this.i18n.t("unit.second") : "-";
     const rows: (Element | DocumentFragment)[] = [
       html`<div class="targeting-attr-row"><span class="targeting-attr-label">${this.i18n.t("targeting.scanResolution")}</span><span class="targeting-attr-value mono">${formatWithCommas(spec.scanResolution)}${this.i18n.t("unit.mm")}</span></div>`,
+      html`<div class="targeting-attr-row"><span class="targeting-attr-label">${this.i18n.t("targeting.lockTime")}</span><span class="targeting-attr-value mono">${lockTimeValue}</span></div>`,
       html`<div class="targeting-attr-row"><span class="targeting-attr-label">${this.i18n.t("targeting.maxTargetingRange")}</span><span class="targeting-attr-value mono">${formatWithCommas(spec.maxTargetingRange)}${this.i18n.t("unit.meter")}</span></div>`,
       html`<div class="targeting-attr-row"><span class="targeting-attr-label">${this.i18n.t("targeting.maxLockedTargets")}</span><span class="targeting-attr-value mono">${String(spec.maxLockedTargets)}</span></div>`,
     ];
@@ -114,4 +118,8 @@ export class TargetingControllerImpl implements TargetingController {
     const item = html`<span class="trigger-summary-item"><span class="trigger-summary-count mono">${formatWithCommas(boosted.maxTargetingRange)}${this.i18n.t("unit.meter")}</span></span>`;
     summary.appendChild(item);
   }
+}
+
+function opponentOf(side: Side): Side {
+  return side === "shipA" ? "shipB" : "shipA";
 }

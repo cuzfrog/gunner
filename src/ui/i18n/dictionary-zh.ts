@@ -66,6 +66,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "label.targeting": { zh: "锁定" },
   "title.targeting.empty": { zh: "无锁定数据" },
   "targeting.attributes": { zh: "传感器属性" },
+  "targeting.lockTime": { zh: "锁定时间" },
   "targeting.scanResolution": { zh: "扫描分辨率" },
   "targeting.maxTargetingRange": { zh: "最大锁定范围" },
   "targeting.maxLockedTargets": { zh: "最大锁定数" },

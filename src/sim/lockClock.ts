@@ -1,5 +1,6 @@
 import type { LockState, SensorSpec, Side } from "./types";
 import { IDLE_LOCK } from "./types";
+import { lockTime } from "./lockTime";
 import type { Restorable } from "./restorable";
 
 export interface LockStepInput {
@@ -23,12 +24,6 @@ export interface LockClock extends Restorable<LockClockState> {
   reset(): void;
   step(dt: number, input: LockStepInput): Record<Side, LockState>;
   states(): Record<Side, LockState>;
-}
-
-function lockTime(scanResolution: number, targetSigRadius: number): number {
-  if (scanResolution <= 0) return Infinity;
-  if (targetSigRadius <= 0) return Infinity;
-  return 40000 / (scanResolution * Math.asinh(targetSigRadius) ** 2);
 }
 
 export class LockClockImpl implements LockClock {

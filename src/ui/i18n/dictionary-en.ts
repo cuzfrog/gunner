@@ -66,6 +66,7 @@ export const EN: LanguageSlice<"en"> = {
   "label.targeting": { en: "Targeting" },
   "title.targeting.empty": { en: "No targeting data available" },
   "targeting.attributes": { en: "Sensor attributes" },
+  "targeting.lockTime": { en: "Lock time" },
   "targeting.scanResolution": { en: "Scan resolution" },
   "targeting.maxTargetingRange": { en: "Max targeting range" },
   "targeting.maxLockedTargets": { en: "Max locked targets" },

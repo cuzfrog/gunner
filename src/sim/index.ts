@@ -24,6 +24,7 @@ export type { FighterSimulator, FighterSimConfig } from "./fighterSimulator";
 export type { MissileApplication } from "./missileApplication";
 export type { MissileSimulator } from "./missileSimulator";
 export type { Rng, RngFactory } from "./rng";
+export { lockTime } from "./lockTime";
 export type { WeaponDamageAssessor } from "./weaponDamageAssessor";
 export type { WeaponClock } from "./weaponClock";
 export { StackingPenaltyImpl } from "./stackingPenalty";

@@ -2,8 +2,9 @@ import type { SensorBoostProjection, SensorSpec } from "../../../sim";
 import type { SensorBoosterResolver } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
-import type { PopupGroup } from "../popup";
+import type { Popup, PopupGroup } from "../popup";
 import type { SensorBoosterController } from "../sensorBooster";
+import type { Side } from "../side";
 import { FakeElement, fakeDocument } from "../../testing";
 import { TargetingControllerImpl } from "./targetingController";
 import type { TargetingController, TargetingEls } from "./targetingControllerContract";
@@ -24,10 +25,12 @@ function fakeI18n(): I18n {
     "title.targeting.empty": "No targeting data available",
     "targeting.attributes": "Sensor attributes",
     "targeting.scanResolution": "Scan resolution",
+    "targeting.lockTime": "Lock time",
     "targeting.maxTargetingRange": "Max targeting range",
     "targeting.maxLockedTargets": "Max locked targets",
     "unit.mm": "mm",
     "unit.meter": "m",
+    "unit.second": "s",
   };
   return { t: (key: string) => map[key] ?? key } as unknown as I18n;
 }
@@ -50,6 +53,18 @@ function fakePopupGroup(): PopupGroup {
     toggle: (): void => {},
     closeAll: (): void => {},
   } as unknown as PopupGroup;
+}
+
+function fakeOpeningPopupGroup(): PopupGroup {
+  return {
+    register: (): void => {},
+    toggle: (popup: Popup): void => popup.open(),
+    closeAll: (): void => {},
+  } as unknown as PopupGroup;
+}
+
+function fakeSigSource(sigRadius: (side: Side) => number | undefined = () => undefined): { sigRadius(side: Side): number | undefined } {
+  return { sigRadius };
 }
 
 function fakeSensorBoosterController(projection: SensorBoostProjection | undefined = undefined): SensorBoosterController {
@@ -80,14 +95,14 @@ describe("TargetingController", () => {
 
   test("renders disabled trigger when no sensor spec is set", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource() });
     controller.render();
     expect(els.shipA.trigger.disabled).toBe(true);
   });
 
   test("enables trigger and renders sensor attributes when spec is set", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     expect(els.shipA.trigger.disabled).toBe(false);
     expect((els.shipA.section as unknown as FakeElement).children.length).toBeGreaterThan(0);
@@ -95,7 +110,7 @@ describe("TargetingController", () => {
 
   test("does not render booster or amplifier module lists", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     const text = sectionText(els.shipA.section);
     expect(text).not.toContain("Sensor boosters");
@@ -109,7 +124,7 @@ describe("TargetingController", () => {
     const resolver = {
       boostedSensorSpec: vi.fn(() => boosted),
     } as unknown as SensorBoosterResolver;
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver, sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     const text = sectionText(els.shipA.section);
     expect(text).toContain("260");
@@ -125,7 +140,7 @@ describe("TargetingController", () => {
     const resolver = {
       boostedSensorSpec: vi.fn((spec: SensorSpec) => spec),
     } as unknown as SensorBoosterResolver;
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController, resolver });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController, resolver, sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     expect(sensorBoosterController.projection).toHaveBeenCalledWith("shipA");
     expect(resolver.boostedSensorSpec).toHaveBeenCalledWith(SPEC, projection);
@@ -138,7 +153,7 @@ describe("TargetingController", () => {
     const resolver = {
       boostedSensorSpec: vi.fn(() => currentBoosted),
     } as unknown as SensorBoosterResolver;
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events, sensorBoosterController: fakeSensorBoosterController(), resolver });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events, sensorBoosterController: fakeSensorBoosterController(), resolver, sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     expect(sectionText(els.shipA.summary)).toContain("30,000");
     currentBoosted = { scanResolution: 260, maxTargetingRange: 39000, maxLockedTargets: 5 };
@@ -152,7 +167,7 @@ describe("TargetingController", () => {
     const resolver = {
       boostedSensorSpec: vi.fn(() => boosted),
     } as unknown as SensorBoosterResolver;
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver, sigSource: fakeSigSource() });
     controller.setSensorData("shipB", SPEC);
     const text = sectionText(els.shipB.section);
     expect(text).toContain("400");
@@ -167,14 +182,14 @@ describe("TargetingController", () => {
     const resolver = {
       boostedSensorSpec: vi.fn(() => boosted),
     } as unknown as SensorBoosterResolver;
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver, sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     expect(sectionText(els.shipA.summary)).toContain("39,000");
   });
 
   test("clears summary when spec is removed", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     controller.setSensorData("shipA", undefined);
     expect(els.shipA.summary.textContent).toBe("");
@@ -185,7 +200,7 @@ describe("TargetingController", () => {
     const els = fakeEls();
     const events = fakeEvents();
     const resolver = fakeResolver();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events, sensorBoosterController: fakeSensorBoosterController(), resolver });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events, sensorBoosterController: fakeSensorBoosterController(), resolver, sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     expect(events.listeners.onConfigInvalidated?.length).toBe(1);
     const summaryBefore = (els.shipA.summary as unknown as FakeElement).children.length;
@@ -197,7 +212,7 @@ describe("TargetingController", () => {
 
   test("renders the attack-drones toggle in the popup section", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     const checkbox = findDescendant(els.shipA.section, "targeting-drones-checkbox");
     expect(checkbox).toBeDefined();
@@ -207,7 +222,7 @@ describe("TargetingController", () => {
 
   test("attackDrones defaults to false per side", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     expect(controller.attackDrones("shipA")).toBe(false);
     expect(controller.attackDrones("shipB")).toBe(false);
@@ -216,7 +231,7 @@ describe("TargetingController", () => {
   test("toggling attack-drones updates the side state and emits config invalidated", () => {
     const els = fakeEls();
     const events = fakeEvents();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events, sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events, sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     const checkbox = findDescendant(els.shipA.section, "targeting-drones-checkbox") as unknown as FakeElement & { checked: boolean };
     checkbox.checked = true;
@@ -227,7 +242,7 @@ describe("TargetingController", () => {
 
   test("attack-drones sides are independent", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     controller.setSensorData("shipB", SPEC);
     const checkbox = findDescendant(els.shipA.section, "targeting-drones-checkbox") as unknown as FakeElement & { checked: boolean };
@@ -239,7 +254,7 @@ describe("TargetingController", () => {
 
   test("re-render preserves the attack-drones state", () => {
     const els = fakeEls();
-    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver() });
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource() });
     controller.setSensorData("shipA", SPEC);
     const checkbox = findDescendant(els.shipA.section, "targeting-drones-checkbox") as unknown as FakeElement & { checked: boolean };
     checkbox.checked = true;
@@ -248,6 +263,61 @@ describe("TargetingController", () => {
     const rerendered = findDescendant(els.shipA.section, "targeting-drones-checkbox") as unknown as FakeElement & { checked: boolean };
     expect(rerendered.checked).toBe(true);
     expect(controller.attackDrones("shipA")).toBe(true);
+  });
+
+  test("displays lock time against the opponent's signature radius", () => {
+    const els = fakeEls();
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource((side) => (side === "shipB" ? 120 : undefined)) });
+    controller.setSensorData("shipA", SPEC);
+    const text = sectionText(els.shipA.section);
+    expect(text).toContain("Lock time");
+    expect(text).toContain("6.66s");
+  });
+
+  test("renders an em-dash for lock time when the opponent signature is unavailable", () => {
+    const els = fakeEls();
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource() });
+    controller.setSensorData("shipA", SPEC);
+    expect(sectionText(els.shipA.section)).toContain("Lock time -");
+  });
+
+  test("uses the boosted scan resolution for lock time", () => {
+    const els = fakeEls();
+    const boosted: SensorSpec = { scanResolution: 260, maxTargetingRange: 39000, maxLockedTargets: 5 };
+    const resolver = { boostedSensorSpec: vi.fn(() => boosted) } as unknown as SensorBoosterResolver;
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver, sigSource: fakeSigSource((side) => (side === "shipB" ? 120 : undefined)) });
+    controller.setSensorData("shipA", SPEC);
+    expect(sectionText(els.shipA.section)).toContain("5.12s");
+  });
+
+  test("shows shipB lock time against shipA's signature radius", () => {
+    const els = fakeEls();
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource((side) => (side === "shipA" ? 120 : undefined)) });
+    controller.setSensorData("shipB", SPEC);
+    expect(sectionText(els.shipB.section)).toContain("6.66s");
+  });
+
+  test("re-renders both sides when either side's sensor data changes so lock time stays fresh", () => {
+    const els = fakeEls();
+    let targetSig = 120;
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakePopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource((side) => (side === "shipB" ? targetSig : undefined)) });
+    controller.setSensorData("shipA", SPEC);
+    expect(sectionText(els.shipA.section)).toContain("6.66s");
+    targetSig = 60;
+    controller.setSensorData("shipB", SPEC);
+    expect(sectionText(els.shipA.section)).toContain("8.73s");
+  });
+
+  test("re-renders on popup open so lock time reflects the current opponent signature", () => {
+    const els = fakeEls();
+    let targetSig = 120;
+    const controller = new TargetingControllerImpl({ els, popupGroup: fakeOpeningPopupGroup(), i18n: fakeI18n(), events: fakeEvents(), sensorBoosterController: fakeSensorBoosterController(), resolver: fakeResolver(), sigSource: fakeSigSource((side) => (side === "shipB" ? targetSig : undefined)) });
+    controller.setSensorData("shipA", SPEC);
+    expect(sectionText(els.shipA.section)).toContain("6.66s");
+    targetSig = 60;
+    (els.shipA.trigger as unknown as FakeElement).trigger("click");
+    expect(sectionText(els.shipA.section)).toContain("8.73s");
+    expect((els.shipA.popup as unknown as FakeElement).hidden).toBe(false);
   });
 });
 
