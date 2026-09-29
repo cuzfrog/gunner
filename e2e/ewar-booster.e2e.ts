@@ -20,11 +20,11 @@ test.describe.serial("EWAR and boosters", () => {
     await page.locator("#ship-a-ewar-trigger").click();
     await expect(page.locator("#ship-a-ewar-popup")).toBeVisible();
     await expect(page.locator("#ship-a-ewar-section")).toBeVisible();
-    await expect(page.locator("#ship-a-ewar-section .ewar-module-toggle")).not.toHaveCount(0);
+    await expect(page.locator("#ship-a-ewar-section .modules-module-toggle")).not.toHaveCount(0);
   });
 
   test("toggle webifier deactivates and updates summary", async () => {
-    const toggleButton = page.locator("#ship-a-ewar-section .ewar-module-toggle").first();
+    const toggleButton = page.locator("#ship-a-ewar-section .modules-module-toggle").first();
     const initialState = await toggleButton.getAttribute("aria-pressed");
     await toggleButton.click();
     const newState = await toggleButton.getAttribute("aria-pressed");
@@ -49,12 +49,12 @@ test.describe.serial("EWAR and boosters", () => {
     await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_CURSE_EWAR));
     await page.locator("#ship-a-ewar-trigger").click();
     await expect(page.locator("#ship-a-ewar-popup")).toBeVisible();
-    const gearIcon = page.locator("#ship-a-ewar-section .ewar-script-gear").first();
+    const gearIcon = page.locator("#ship-a-ewar-section .script-gear").first();
     if (await gearIcon.count() > 0) {
       await gearIcon.click();
-      const scriptPopup = page.locator("#ship-a-ewar-script-popup");
+      const scriptPopup = page.locator("#ship-a-script-popup");
       await expect(scriptPopup).toBeVisible();
-      const scriptOptions = scriptPopup.locator(".ewar-script-option");
+      const scriptOptions = scriptPopup.locator(".script-option");
       await expect(scriptOptions).not.toHaveCount(0);
       await scriptOptions.first().click();
       await expect(scriptPopup).toBeHidden();

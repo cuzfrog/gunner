@@ -18,7 +18,7 @@ test.describe.serial("module hint", () => {
   test("hovering an ewar module row shows the module stats hint", async () => {
     await importFittingViaPaste(page, "ship-a", loadFittingText(FITTING_CURSE_EWAR));
     await page.locator("#ship-a-ewar-trigger").click();
-    const webButton = page.locator("#ship-a-ewar-section .ewar-row .ewar-module-toggle").first();
+    const webButton = page.locator("#ship-a-ewar-section .modules-row .modules-module-toggle").first();
     await expect(webButton).toBeVisible();
     await webButton.hover();
     const hint = page.locator("#hover-hint");
@@ -32,8 +32,8 @@ test.describe.serial("module hint", () => {
   });
 
   test("hovering the warp scrambler row shows the propulsion statement", async () => {
-    const scramblerRow = page.locator("#ship-a-ewar-section .ewar-row", { hasText: "Warp Scrambler" }).first();
-    await scramblerRow.locator(".ewar-module-toggle").hover();
+    const scramblerRow = page.locator("#ship-a-ewar-section .modules-row", { hasText: "Warp Scrambler" }).first();
+    await scramblerRow.locator(".modules-module-toggle").hover();
     const hint = page.locator("#hover-hint");
     await expect(hint).toBeVisible();
     await expect(hint.locator(".stat-hint-row-emphasis", { hasText: "Disables MWD" })).toBeVisible();
