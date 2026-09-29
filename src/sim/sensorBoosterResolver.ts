@@ -1,4 +1,5 @@
 import type { StackingPenalty } from "./stackingPenalty";
+import { sensorEffectPercents } from "./scriptedEffect";
 import type { SensorBoostProjection, SensorSpec } from "./types";
 
 export interface SensorBoosterResolver {
@@ -38,16 +39,10 @@ export class SensorBoosterResolverImpl implements SensorBoosterResolver {
       const scanResPercent = boosterSpec.scanResolutionBonusPercent * overloadBonus;
       const rangePercent = boosterSpec.maxTargetRangeBonusPercent * overloadBonus;
       const script = activation.script;
+      const scripted = sensorEffectPercents(scanResPercent, rangePercent, script);
 
-      if (script !== undefined) {
-        const scriptedScanRes = scanResPercent * script.scanResolutionMultiplier;
-        const scriptedRange = rangePercent * script.maxTargetRangeMultiplier;
-        if (scriptedScanRes !== 0) scanResMultipliers.push(1 + scriptedScanRes / 100);
-        if (scriptedRange !== 0) rangeMultipliers.push(1 + scriptedRange / 100);
-      } else {
-        if (scanResPercent !== 0) scanResMultipliers.push(1 + scanResPercent / 100);
-        if (rangePercent !== 0) rangeMultipliers.push(1 + rangePercent / 100);
-      }
+      if (scripted.scanResolutionPercent !== 0) scanResMultipliers.push(1 + scripted.scanResolutionPercent / 100);
+      if (scripted.maxTargetRangePercent !== 0) rangeMultipliers.push(1 + scripted.maxTargetRangePercent / 100);
     }
 
     const scanResolution = Math.round(spec.scanResolution * this.stacking.apply([...scanResMultipliers, ...extraScanResolutionMultipliers]));

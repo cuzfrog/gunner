@@ -1,4 +1,5 @@
 import type { StackingPenalty } from "./stackingPenalty";
+import { trackingEffectPercents } from "./scriptedEffect";
 import type { TrackingBoosterSpec, TurretBoostProjection, TurretScriptSpec, TurretSpec } from "./types";
 
 export interface TurretBoosterResolver {
@@ -24,18 +25,10 @@ export class TurretBoosterResolverImpl implements TurretBoosterResolver {
       if (!activation || !activation.active) continue;
 
       const script = activation.script;
-      if (script !== undefined) {
-        const trackingPercent = spec.trackingBonusPercent * script.trackingMultiplier;
-        const optimalPercent = spec.optimalBonusPercent * script.optimalMultiplier;
-        const falloffPercent = spec.falloffBonusPercent * script.falloffMultiplier;
-        if (trackingPercent !== 0) tracking.push(1 + trackingPercent / 100);
-        if (optimalPercent !== 0) optimal.push(1 + optimalPercent / 100);
-        if (falloffPercent !== 0) falloff.push(1 + falloffPercent / 100);
-      } else {
-        if (spec.trackingBonusPercent !== 0) tracking.push(1 + spec.trackingBonusPercent / 100);
-        if (spec.optimalBonusPercent !== 0) optimal.push(1 + spec.optimalBonusPercent / 100);
-        if (spec.falloffBonusPercent !== 0) falloff.push(1 + spec.falloffBonusPercent / 100);
-      }
+      const scripted = trackingEffectPercents(spec.trackingBonusPercent, spec.optimalBonusPercent, spec.falloffBonusPercent, script);
+      if (scripted.trackingPercent !== 0) tracking.push(1 + scripted.trackingPercent / 100);
+      if (scripted.optimalPercent !== 0) optimal.push(1 + scripted.optimalPercent / 100);
+      if (scripted.falloffPercent !== 0) falloff.push(1 + scripted.falloffPercent / 100);
     }
 
     return {

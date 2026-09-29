@@ -1,4 +1,5 @@
 import type { StackingPenalty } from "./stackingPenalty";
+import { missileEffectPercents } from "./scriptedEffect";
 import type { MissileBoosterProjection, MissileSpec } from "./types";
 
 export interface MissileBoosterResolver {
@@ -26,20 +27,12 @@ export class MissileBoosterResolverImpl implements MissileBoosterResolver {
 
       const overloadFactor = activation.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
       const script = activation.script ?? spec.defaultScript;
-      const erMultiplier = script ? script.explosionRadiusMultiplier : 1;
-      const evMultiplier = script ? script.explosionVelocityMultiplier : 1;
-      const mvMultiplier = script ? script.missileVelocityMultiplier : 1;
-      const ftMultiplier = script ? script.flightTimeMultiplier : 1;
+      const scripted = missileEffectPercents(spec.explosionRadiusBonusPercent * overloadFactor, spec.explosionVelocityBonusPercent * overloadFactor, spec.missileVelocityBonusPercent * overloadFactor, spec.flightTimeBonusPercent * overloadFactor, script);
 
-      const erPercent = spec.explosionRadiusBonusPercent * overloadFactor * erMultiplier;
-      const evPercent = spec.explosionVelocityBonusPercent * overloadFactor * evMultiplier;
-      const mvPercent = spec.missileVelocityBonusPercent * overloadFactor * mvMultiplier;
-      const ftPercent = spec.flightTimeBonusPercent * overloadFactor * ftMultiplier;
-
-      if (erPercent !== 0) explosionRadiusMultipliers.push(1 + erPercent / 100);
-      if (evPercent !== 0) explosionVelocityMultipliers.push(1 + evPercent / 100);
-      if (mvPercent !== 0) missileVelocityMultipliers.push(1 + mvPercent / 100);
-      if (ftPercent !== 0) flightTimeMultipliers.push(1 + ftPercent / 100);
+      if (scripted.explosionRadiusPercent !== 0) explosionRadiusMultipliers.push(1 + scripted.explosionRadiusPercent / 100);
+      if (scripted.explosionVelocityPercent !== 0) explosionVelocityMultipliers.push(1 + scripted.explosionVelocityPercent / 100);
+      if (scripted.missileVelocityPercent !== 0) missileVelocityMultipliers.push(1 + scripted.missileVelocityPercent / 100);
+      if (scripted.flightTimePercent !== 0) flightTimeMultipliers.push(1 + scripted.flightTimePercent / 100);
     }
 
     for (const enhancer of projection.loadout.enhancers) {

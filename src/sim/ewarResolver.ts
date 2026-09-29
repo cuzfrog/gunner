@@ -1,5 +1,6 @@
 import type { TypeId } from "../gamedata/ids";
 import type { StackingPenalty } from "./stackingPenalty";
+import { disruptionEffectStrengths, sensorEffectPercents } from "./scriptedEffect";
 import { SENSOR_TYPES, type AppliedEwarEffect, type DampenerBreakdown, type DisruptionBreakdown, type EwarEffectPotentials, type EwarProjection, type EwarReach, type SensorDampenerSpec, type SensorSpec, type SensorStrengths, type SensorType, type SpeedBreakdown, type SpeedEffectAttribution, type StatEffectAttribution, type TrackingDisruptorSpec, type TurretSpec } from "./types";
 
 export interface EwarResolver {
@@ -282,9 +283,10 @@ export class EwarResolverImpl implements EwarResolver {
       const overloadBonus = activation?.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
       const strength = spec.disruption * overloadBonus;
       const script = activation?.script ?? spec.defaultScript;
-      const trackingMultiplier = 1 - strength * (script?.trackingMultiplier ?? 1) * effectiveness;
-      const optimalMultiplier = 1 - strength * (script?.optimalMultiplier ?? 1) * effectiveness;
-      const falloffMultiplier = 1 - strength * (script?.falloffMultiplier ?? 1) * effectiveness;
+      const strengths = disruptionEffectStrengths(strength, script);
+      const trackingMultiplier = 1 - strengths.trackingPercent * effectiveness;
+      const optimalMultiplier = 1 - strengths.optimalPercent * effectiveness;
+      const falloffMultiplier = 1 - strengths.falloffPercent * effectiveness;
       return { family: "disruptor", moduleId: spec.moduleId, trackingMultiplier, optimalMultiplier, falloffMultiplier };
     }
     return undefined;
@@ -301,8 +303,9 @@ export class EwarResolverImpl implements EwarResolver {
       const scanResPercent = spec.scanResolutionBonusPercent * overloadBonus;
       const rangePercent = spec.maxTargetRangeBonusPercent * overloadBonus;
       const script = activation?.script ?? spec.defaultScript;
-      const scanResolutionMultiplier = 1 + (scanResPercent * (script?.scanResolutionMultiplier ?? 1) / 100) * effectiveness;
-      const maxTargetRangeMultiplier = 1 + (rangePercent * (script?.maxTargetRangeMultiplier ?? 1) / 100) * effectiveness;
+      const effects = sensorEffectPercents(scanResPercent, rangePercent, script);
+      const scanResolutionMultiplier = 1 + (effects.scanResolutionPercent / 100) * effectiveness;
+      const maxTargetRangeMultiplier = 1 + (effects.maxTargetRangePercent / 100) * effectiveness;
       return { family: "dampener", moduleId: spec.moduleId, scanResolutionMultiplier, maxTargetRangeMultiplier };
     }
     return undefined;
@@ -435,14 +438,11 @@ export class EwarResolverImpl implements EwarResolver {
       const effectiveness = ignoreRange ? 1 : this.disruptorEffectiveness(distance, spec);
       if (effectiveness <= 0) continue;
       const script = activation?.script ?? spec.defaultScript;
+      const strengths = disruptionEffectStrengths(strength, script);
       const scriptId = script?.moduleId;
-      const trackingEffect = strength * (script?.trackingMultiplier ?? 1);
-      const optimalEffect = strength * (script?.optimalMultiplier ?? 1);
-      const falloffEffect = strength * (script?.falloffMultiplier ?? 1);
-
-      if (trackingEffect > 0) tracking.push({ moduleId: spec.moduleId, scriptId, multiplier: 1 - trackingEffect * effectiveness });
-      if (optimalEffect > 0) optimal.push({ moduleId: spec.moduleId, scriptId, multiplier: 1 - optimalEffect * effectiveness });
-      if (falloffEffect > 0) falloff.push({ moduleId: spec.moduleId, scriptId, multiplier: 1 - falloffEffect * effectiveness });
+      if (strengths.trackingPercent > 0) tracking.push({ moduleId: spec.moduleId, scriptId, multiplier: 1 - strengths.trackingPercent * effectiveness });
+      if (strengths.optimalPercent > 0) optimal.push({ moduleId: spec.moduleId, scriptId, multiplier: 1 - strengths.optimalPercent * effectiveness });
+      if (strengths.falloffPercent > 0) falloff.push({ moduleId: spec.moduleId, scriptId, multiplier: 1 - strengths.falloffPercent * effectiveness });
     }
 
     return { tracking, optimal, falloff };
@@ -486,10 +486,9 @@ export class EwarResolverImpl implements EwarResolver {
       const effectiveness = ignoreRange ? 1 : this.falloffEffectiveness(distance, spec.optimal, spec.falloff);
       if (effectiveness <= 0) continue;
       const script = activation?.script ?? spec.defaultScript;
-      const scriptedScanRes = scanResPercent * (script?.scanResolutionMultiplier ?? 1);
-      const scriptedRange = rangePercent * (script?.maxTargetRangeMultiplier ?? 1);
-      if (scriptedScanRes !== 0) scanResolution.push({ moduleId: spec.moduleId, scriptId: script?.moduleId, multiplier: 1 + (scriptedScanRes / 100) * effectiveness });
-      if (scriptedRange !== 0) maxTargetRange.push({ moduleId: spec.moduleId, scriptId: script?.moduleId, multiplier: 1 + (scriptedRange / 100) * effectiveness });
+      const effects = sensorEffectPercents(scanResPercent, rangePercent, script);
+      if (effects.scanResolutionPercent !== 0) scanResolution.push({ moduleId: spec.moduleId, scriptId: script?.moduleId, multiplier: 1 + (effects.scanResolutionPercent / 100) * effectiveness });
+      if (effects.maxTargetRangePercent !== 0) maxTargetRange.push({ moduleId: spec.moduleId, scriptId: script?.moduleId, multiplier: 1 + (effects.maxTargetRangePercent / 100) * effectiveness });
     }
     return { scanResolution, maxTargetRange };
   }
@@ -515,11 +514,10 @@ export class EwarResolverImpl implements EwarResolver {
       if (effectiveness <= 0) continue;
 
       const script = activation?.script ?? spec.defaultScript;
-      const scriptedScanRes = scanResPercent * (script?.scanResolutionMultiplier ?? 1);
-      const scriptedRange = rangePercent * (script?.maxTargetRangeMultiplier ?? 1);
+      const effects = sensorEffectPercents(scanResPercent, rangePercent, script);
 
-      if (scriptedScanRes !== 0) scanResMultipliers.push(1 + (scriptedScanRes / 100) * effectiveness);
-      if (scriptedRange !== 0) rangeMultipliers.push(1 + (scriptedRange / 100) * effectiveness);
+      if (effects.scanResolutionPercent !== 0) scanResMultipliers.push(1 + (effects.scanResolutionPercent / 100) * effectiveness);
+      if (effects.maxTargetRangePercent !== 0) rangeMultipliers.push(1 + (effects.maxTargetRangePercent / 100) * effectiveness);
     }
 
     return { scanResMultipliers, rangeMultipliers };
