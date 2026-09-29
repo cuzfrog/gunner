@@ -281,6 +281,23 @@ describe("SensorBoosterController", () => {
     expect(captured![0].script).toBe(toTypeId("29011"));
   });
 
+  test("booster buttons carry the selected script id for the hint provider", () => {
+    const { controller, document } = buildSensorBoosterController();
+    controller.setLoadout("shipA", LOADOUT);
+    const row = boosterRows(sensorBoosterSection(document, "shipA"))[0];
+    const button = row.children.find((c) => c.className === "modules-module-toggle")!;
+    expect(button.getAttribute("data-script")).toBeNull();
+    const gear = row.children.find((c) => c.className.split(" ").includes("script-gear"))!;
+    gear.dispatchEvent(new Event("click"));
+    const scriptPopup = getFake(document, "ship-a-ewar-field").children.find((c) => c.id === "ship-a-sensor-booster-script-popup")!;
+    scriptPopup.children.find((c) => c.getAttribute("data-value") === String(toTypeId("29011")))!.dispatchEvent(new Event("click"));
+    expect(button.getAttribute("data-script")).toBe(toTypeId("29011"));
+    gear.dispatchEvent(new Event("click"));
+    const reopened = getFake(document, "ship-a-ewar-field").children.find((c) => c.id === "ship-a-sensor-booster-script-popup")!;
+    reopened.children.find((c) => c.getAttribute("data-value") === "none")!.dispatchEvent(new Event("click"));
+    expect(button.getAttribute("data-script")).toBeNull();
+  });
+
   test("amplifier-only loadout still displays section", () => {
     const { controller, document } = buildSensorBoosterController();
     controller.setLoadout("shipA", { boosters: [], amplifiers: [SA_II], boosterScripts: [] });

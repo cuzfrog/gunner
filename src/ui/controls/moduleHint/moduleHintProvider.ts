@@ -1,4 +1,6 @@
-import type { EnergyNeutralizerStats, FittingDb, FittingModuleStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, NosferatuStats, SensorBoosterStats, SensorDampenerStats, SignalAmplifierStats, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, WarpScramblerStats } from "../../../gamedata/fittingDb";
+import type { DisruptionScriptStats, EnergyNeutralizerStats, FittingDb, FittingModuleStats, MissileGuidanceComputerStats, MissileGuidanceEnhancerStats, MissileScriptStats, NosferatuStats, SensorBoosterScriptStats, SensorBoosterStats, SensorDampenerScriptStats, SensorDampenerStats, SignalAmplifierStats, StasisGrapplerStats, StasisWebStats, TargetPainterStats, TrackingComputerStats, TrackingDisruptorStats, TurretScriptStats, WarpScramblerStats } from "../../../gamedata/fittingDb";
+import { disruptionScriptMultipliers } from "../../../fitting";
+import { disruptionEffectStrengths, missileEffectPercents, sensorEffectPercents, trackingEffectPercents } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { HintContentProvider } from "../hoverHint";
 import { formatDistance, formatNumber } from "../controlsFormat";
@@ -26,35 +28,40 @@ export class ModuleHintProviderImpl implements ModuleHintProvider {
   render(anchor: HTMLElement, container: HTMLElement): void {
     const id = anchor.getAttribute("data-value");
     if (id === null || id === "") return;
-    const model = buildModuleHintModel(id, this.fittingDb, (key) => this.i18n.t(key));
+    const scriptId = anchor.getAttribute("data-script") ?? undefined;
+    const model = buildModuleHintModel(id, scriptId, this.fittingDb, (key) => this.i18n.t(key));
     if (model === undefined) return;
     this.renderer.render(model, container);
   }
 }
 
-function buildModuleHintModel(id: string, db: FittingDb, t: (key: string) => string): StatHintModel | undefined {
+function buildModuleHintModel(id: string, scriptId: string | undefined, db: FittingDb, t: (key: string) => string): StatHintModel | undefined {
   const stats = db.modules[id];
   if (stats !== undefined) {
-    const model = modelFromModuleStats(stats, t);
+    const model = modelFromModuleStats(stats, scriptId, db, t);
     if (model !== undefined) return model;
   }
   const computer = db.trackingComputers[id];
-  if (computer !== undefined) return trackingComputerModel(computer, t);
+  if (computer !== undefined) return trackingComputerModel(computer, scriptLookup(scriptId, db.scripts), t);
   const guidance = db.missileGuidanceComputers[id];
-  if (guidance !== undefined) return guidanceComputerModel(guidance, t);
+  if (guidance !== undefined) return guidanceComputerModel(guidance, scriptLookup(scriptId, db.missileScripts), t);
   const enhancer = db.missileGuidanceEnhancers[id];
   if (enhancer !== undefined) return guidanceEnhancerModel(enhancer, t);
   return undefined;
 }
 
-function modelFromModuleStats(stats: FittingModuleStats, t: (key: string) => string): StatHintModel | undefined {
+function scriptLookup<T>(scriptId: string | undefined, scripts: Readonly<Record<string, T>>): T | undefined {
+  return scriptId === undefined ? undefined : scripts[scriptId];
+}
+
+function modelFromModuleStats(stats: FittingModuleStats, scriptId: string | undefined, db: FittingDb, t: (key: string) => string): StatHintModel | undefined {
   if (stats.stasisWeb !== undefined) return stasisWebModel(stats.stasisWeb, t);
   if (stats.stasisGrappler !== undefined) return stasisGrapplerModel(stats.stasisGrappler, t);
   if (stats.warpScrambler !== undefined) return warpScramblerModel(stats.warpScrambler, t);
   if (stats.targetPainter !== undefined) return targetPainterModel(stats.targetPainter, t);
-  if (stats.trackingDisruptor !== undefined) return trackingDisruptorModel(stats.trackingDisruptor, t);
-  if (stats.sensorDampener !== undefined) return sensorDampenerModel(stats.sensorDampener, t);
-  if (stats.sensorBooster !== undefined) return sensorBoosterModel(stats.sensorBooster, t);
+  if (stats.trackingDisruptor !== undefined) return trackingDisruptorModel(stats.trackingDisruptor, scriptLookup(scriptId, db.disruptionScripts), t);
+  if (stats.sensorDampener !== undefined) return sensorDampenerModel(stats.sensorDampener, scriptLookup(scriptId, db.sensorDampenerScripts), t);
+  if (stats.sensorBooster !== undefined) return sensorBoosterModel(stats.sensorBooster, scriptLookup(scriptId, db.sensorBoosterScripts), t);
   if (stats.signalAmplifier !== undefined) return signalAmplifierModel(stats.signalAmplifier, t);
   if (stats.neutralizer !== undefined) return neutralizerModel(stats.neutralizer, t);
   if (stats.nosferatu !== undefined) return nosferatuModel(stats.nosferatu, t);
@@ -95,29 +102,41 @@ function targetPainterModel(stats: Omit<TargetPainterStats, "id" | "name">, t: (
   return withActivation(rows, stats.cycleTime, stats.capacitorNeed, t);
 }
 
-function trackingDisruptorModel(stats: Omit<TrackingDisruptorStats, "id" | "name">, t: (key: string) => string): StatHintModel {
+function trackingDisruptorModel(stats: Omit<TrackingDisruptorStats, "id" | "name">, script: DisruptionScriptStats | undefined, t: (key: string) => string): StatHintModel {
+  let rows: StatHintRow[];
+  if (script === undefined) {
+    rows = [
+      { label: t("moduleHint.disruptionStrength"), value: percentValue(stats.disruptionPercent) },
+      { label: t("label.optimalRange"), value: distanceValue(stats.optimal, t) },
+      { label: t("label.falloffRange"), value: distanceValue(stats.falloff, t) },
+    ];
+  } else {
+    const strengths = disruptionEffectStrengths(stats.disruptionPercent, disruptionScriptMultipliers(script));
+    rows = [
+      { label: t("moduleHint.trackingDisruption"), value: percentValue(strengths.trackingPercent) },
+      { label: t("moduleHint.optimalDisruption"), value: percentValue(strengths.optimalPercent) },
+      { label: t("moduleHint.falloffDisruption"), value: percentValue(strengths.falloffPercent) },
+    ];
+  }
+  return withActivation(rows, stats.cycleTime, stats.capacitorNeed, t);
+}
+
+function sensorDampenerModel(stats: Omit<SensorDampenerStats, "id" | "name">, script: SensorDampenerScriptStats | undefined, t: (key: string) => string): StatHintModel {
+  const scan = sensorEffectPercents(stats.scanResolutionBonusPercent, stats.maxTargetRangeBonusPercent, script);
   const rows: StatHintRow[] = [
-    { label: t("moduleHint.disruptionStrength"), value: percentValue(stats.disruptionPercent) },
+    { label: t("label.scanResolution"), value: percentValue(scan.scanResolutionPercent) },
+    { label: t("label.targetingRange"), value: percentValue(scan.maxTargetRangePercent) },
     { label: t("label.optimalRange"), value: distanceValue(stats.optimal, t) },
     { label: t("label.falloffRange"), value: distanceValue(stats.falloff, t) },
   ];
   return withActivation(rows, stats.cycleTime, stats.capacitorNeed, t);
 }
 
-function sensorDampenerModel(stats: Omit<SensorDampenerStats, "id" | "name">, t: (key: string) => string): StatHintModel {
+function sensorBoosterModel(stats: Omit<SensorBoosterStats, "id" | "name">, script: SensorBoosterScriptStats | undefined, t: (key: string) => string): StatHintModel {
+  const scan = sensorEffectPercents(stats.scanResolutionBonusPercent, stats.maxTargetRangeBonusPercent, script);
   const rows: StatHintRow[] = [
-    { label: t("label.scanResolution"), value: percentValue(stats.scanResolutionBonusPercent) },
-    { label: t("label.targetingRange"), value: percentValue(stats.maxTargetRangeBonusPercent) },
-    { label: t("label.optimalRange"), value: distanceValue(stats.optimal, t) },
-    { label: t("label.falloffRange"), value: distanceValue(stats.falloff, t) },
-  ];
-  return withActivation(rows, stats.cycleTime, stats.capacitorNeed, t);
-}
-
-function sensorBoosterModel(stats: Omit<SensorBoosterStats, "id" | "name">, t: (key: string) => string): StatHintModel {
-  const rows: StatHintRow[] = [
-    { label: t("label.scanResolution"), value: percentValue(stats.scanResolutionBonusPercent) },
-    { label: t("label.targetingRange"), value: percentValue(stats.maxTargetRangeBonusPercent) },
+    { label: t("label.scanResolution"), value: percentValue(scan.scanResolutionPercent) },
+    { label: t("label.targetingRange"), value: percentValue(scan.maxTargetRangePercent) },
   ];
   return withActivation(rows, stats.cycleTime, stats.capacitorNeed, t);
 }
@@ -149,22 +168,43 @@ function nosferatuModel(stats: NosferatuStats, t: (key: string) => string): Stat
   return withActivation(rows, stats.cycleTime, undefined, t);
 }
 
-function trackingComputerModel(stats: TrackingComputerStats, t: (key: string) => string): StatHintModel {
-  const rows: StatHintRow[] = [
-    percentRow(t("label.trackingSpeed"), stats.trackingBonusPercent),
-    percentRow(t("label.optimalRange"), stats.optimalBonusPercent),
-    percentRow(t("label.falloffRange"), stats.falloffBonusPercent),
-  ].filter((row): row is StatHintRow => row !== undefined);
+function trackingComputerModel(stats: TrackingComputerStats, script: TurretScriptStats | undefined, t: (key: string) => string): StatHintModel {
+  let rows: StatHintRow[];
+  if (script === undefined) {
+    rows = [
+      percentRow(t("label.trackingSpeed"), stats.trackingBonusPercent),
+      percentRow(t("label.optimalRange"), stats.optimalBonusPercent),
+      percentRow(t("label.falloffRange"), stats.falloffBonusPercent),
+    ].filter((row): row is StatHintRow => row !== undefined);
+  } else {
+    const effective = trackingEffectPercents(stats.trackingBonusPercent, stats.optimalBonusPercent, stats.falloffBonusPercent, script);
+    rows = [
+      { label: t("label.trackingSpeed"), value: percentValue(effective.trackingPercent) },
+      { label: t("label.optimalRange"), value: percentValue(effective.optimalPercent) },
+      { label: t("label.falloffRange"), value: percentValue(effective.falloffPercent) },
+    ];
+  }
   return withActivation(rows, stats.cycleTime, stats.capacitorNeed, t);
 }
 
-function guidanceComputerModel(stats: MissileGuidanceComputerStats, t: (key: string) => string): StatHintModel {
-  const rows: StatHintRow[] = [
-    percentRow(t("label.explosionRadius"), stats.explosionRadiusBonusPercent),
-    percentRow(t("label.explosionVelocity"), stats.explosionVelocityBonusPercent),
-    percentRow(t("label.missileVelocity"), stats.missileVelocityBonusPercent),
-    percentRow(t("label.flightTime"), stats.flightTimeBonusPercent),
-  ].filter((row): row is StatHintRow => row !== undefined);
+function guidanceComputerModel(stats: MissileGuidanceComputerStats, script: MissileScriptStats | undefined, t: (key: string) => string): StatHintModel {
+  let rows: StatHintRow[];
+  if (script === undefined) {
+    rows = [
+      percentRow(t("label.explosionRadius"), stats.explosionRadiusBonusPercent),
+      percentRow(t("label.explosionVelocity"), stats.explosionVelocityBonusPercent),
+      percentRow(t("label.missileVelocity"), stats.missileVelocityBonusPercent),
+      percentRow(t("label.flightTime"), stats.flightTimeBonusPercent),
+    ].filter((row): row is StatHintRow => row !== undefined);
+  } else {
+    const effective = missileEffectPercents(stats.explosionRadiusBonusPercent, stats.explosionVelocityBonusPercent, stats.missileVelocityBonusPercent, stats.flightTimeBonusPercent, script);
+    rows = [
+      { label: t("label.explosionRadius"), value: percentValue(effective.explosionRadiusPercent) },
+      { label: t("label.explosionVelocity"), value: percentValue(effective.explosionVelocityPercent) },
+      { label: t("label.missileVelocity"), value: percentValue(effective.missileVelocityPercent) },
+      { label: t("label.flightTime"), value: percentValue(effective.flightTimePercent) },
+    ];
+  }
   return withActivation(rows, stats.cycleTime, stats.capacitorNeed, t);
 }
 

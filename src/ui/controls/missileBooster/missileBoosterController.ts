@@ -34,6 +34,7 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
   private readonly events: UiEvents;
   private readonly describer: MissileBoosterEffectDescriber;
   private readonly states = new Map<Side, MissileBoosterState>();
+  private readonly moduleButtons = new Map<Side, HTMLButtonElement[]>();
   private readonly scriptSections: Record<Side, ScriptSection<number>>;
   private readonly overloadAction: IconActionImpl;
   private readonly sectionBlock: SectionBlockImpl;
@@ -209,11 +210,13 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
   }
 
   private renderComputers(side: Side, state: MissileBoosterState, section: HTMLElement): void {
+    this.moduleButtons.set(side, []);
     for (let i = 0; i < state.loadout.computers.length; i++) {
       const computer = state.loadout.computers[i];
       const activation = state.activation[i];
       const row = html`<div class=${activation.active ? "modules-row" : "modules-row modules-row-inactive"}></div>` as unknown as HTMLDivElement;
-      const button = this.createModuleButton(activation.active, computer);
+      const button = this.createModuleButton(activation.active, computer, activation.script?.moduleId);
+      this.moduleButtons.get(side)![i] = button;
       button.addEventListener("click", () => this.toggleComputer(side, i, button, row));
       row.appendChild(button);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, computer, () => this.toggleComputerOverload(side, i, overloadButton));
@@ -260,11 +263,11 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
     return this.scriptIconUrl(state.loadout.scripts.find((s) => s.moduleId === byId));
   }
 
-  private createModuleButton(active: boolean, computer: MissileBoosterSpec): HTMLButtonElement {
+  private createModuleButton(active: boolean, computer: MissileBoosterSpec, scriptId?: TypeId): HTMLButtonElement {
     const displayName = this.moduleDisplayName(computer);
     const iconUrl = this.imageCatalog.itemIconUrl(computer.moduleId);
     const nameSpan = html`<span class="truncate">${displayName}</span>` as unknown as HTMLSpanElement;
-    return html`<button type="button" class="modules-module-toggle" aria-pressed=${String(active)} aria-label=${displayName} data-hint-content="module" data-value=${String(computer.moduleId)}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
+    return html`<button type="button" class="modules-module-toggle" aria-pressed=${String(active)} aria-label=${displayName} data-hint-content="module" data-value=${String(computer.moduleId)} data-script=${scriptId === undefined ? undefined : String(scriptId)}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
   }
 
   private createEnhancerButton(enhancer: MissileEnhancerSpec): HTMLButtonElement {
@@ -323,8 +326,17 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
       if (script === undefined) return;
       state.activation[index].script = script;
     }
+    this.updateRowScriptAnchor(side, index);
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
+  }
+
+  private updateRowScriptAnchor(side: Side, index: number): void {
+    const button = this.moduleButtons.get(side)?.[index];
+    if (button === undefined) return;
+    const scriptId = this.states.get(side)?.activation[index].script?.moduleId;
+    if (scriptId === undefined) button.removeAttribute("data-script");
+    else button.setAttribute("data-script", String(scriptId));
   }
 
   private toggleComputer(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {

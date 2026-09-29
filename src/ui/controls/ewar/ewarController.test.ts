@@ -692,6 +692,24 @@ describe("EwarController", () => {
     expect(button.children[1].getAttribute("data-hint")).toBeNull();
   });
 
+  test("module buttons carry the selected script id for the hint provider", () => {
+    const { controller, document } = buildEwarController();
+    controller.setLoadout("shipA", { webs: [], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], });
+    const section = disruptorSection(document, "shipA")!;
+    const row = section.children[1];
+    const button = row.children[0];
+    expect(button.getAttribute("data-script")).toBe(String(OPTIMAL_SCRIPT.moduleId));
+    const gear = gearFor(row);
+    gear.trigger("click");
+    const scriptPopup = scriptPopupFor(document, "shipA");
+    scriptOptionFor(scriptPopup, String(TRACKING_SCRIPT.moduleId))!.trigger("click");
+    expect(button.getAttribute("data-script")).toBe(String(TRACKING_SCRIPT.moduleId));
+    gear.trigger("click");
+    const reopened = scriptPopupFor(document, "shipA");
+    scriptOptionFor(reopened, "none")!.trigger("click");
+    expect(button.getAttribute("data-script")).toBeNull();
+  });
+
   test("setLoadout renders translated module names and keeps icon inputs canonical", () => {
     const { controller, document, fittingImport, imageCatalog } = buildEwarController("zh");
     controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], painters: [], dampeners: [], scripts: SCRIPTS, dampenerScripts: [], neutralizers: [], nosferatu: [], jammers: [], });

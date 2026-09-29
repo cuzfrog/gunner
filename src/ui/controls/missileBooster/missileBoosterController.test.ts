@@ -276,4 +276,21 @@ describe("MissileBoosterController", () => {
     const captured = controller.capture("shipA");
     expect(captured![0].script).toBe(toTypeId("35795"));
   });
+
+  test("computer buttons carry the selected script id for the hint provider", () => {
+    const { controller, document } = buildMissileBoosterController();
+    controller.setLoadout("shipA", LOADOUT);
+    const row = computerRows(missileBoosterSection(document, "shipA"))[0];
+    const button = row.children.find((c) => c.className === "modules-module-toggle")!;
+    expect(button.getAttribute("data-script")).toBeNull();
+    const gear = row.children.find((c) => c.className.split(" ").includes("script-gear"))!;
+    gear.dispatchEvent(new Event("click"));
+    const scriptPopup = getFake(document, "ship-a-ewar-field").children.find((c) => c.id === "ship-a-missile-booster-script-popup")!;
+    scriptPopup.children.find((c) => c.getAttribute("data-value") === String(toTypeId("35795")))!.dispatchEvent(new Event("click"));
+    expect(button.getAttribute("data-script")).toBe(toTypeId("35795"));
+    gear.dispatchEvent(new Event("click"));
+    const reopened = getFake(document, "ship-a-ewar-field").children.find((c) => c.id === "ship-a-missile-booster-script-popup")!;
+    reopened.children.find((c) => c.getAttribute("data-value") === "none")!.dispatchEvent(new Event("click"));
+    expect(button.getAttribute("data-script")).toBeNull();
+  });
 });

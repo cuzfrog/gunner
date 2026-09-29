@@ -26,5 +26,6 @@ export type { CapacitorBoosterChargeOption, CapacitorBoosterStats, CapacitorCalc
 export type { CapacitorSpec } from "../sim";
 export type { FittingOverrides, FittingOverridesStore } from "./fittingOverrides";
 export { applyFittingOverrides, FittingOverridesStoreImpl } from "./fittingOverrides";
+export { disruptionScriptMultipliers } from "./fittingCalculator";
 export type { FittingCradle } from "./cradle";
 export { registerFittingModule } from "./module";

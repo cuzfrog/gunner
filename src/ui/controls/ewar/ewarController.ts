@@ -38,6 +38,8 @@ interface EwarRowRef {
   readonly row: HTMLDivElement;
   readonly stateLabel: HTMLSpanElement;
   readonly isActive: () => boolean;
+  readonly moduleButton: HTMLButtonElement | undefined;
+  readonly scriptId: (() => TypeId | undefined) | undefined;
 }
 
 type EwarScriptKey = { kind: "disruptor" | "dampener"; index: number };
@@ -385,7 +387,7 @@ export class EwarControllerImpl implements EwarController {
     for (let i = 0; i < state.loadout.disruptors.length; i++) {
       const disruptor = state.loadout.disruptors[i];
       const activation = state.activation.disruptors[i];
-      const button = this.createModuleButton(activation.active, disruptor);
+      const button = this.createModuleButton(activation.active, disruptor, activation.script?.moduleId);
       const onToggle = () => this.toggleDisruptorOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, disruptor, onToggle);
       const key: EwarScriptKey = { kind: "disruptor", index: i };
@@ -396,7 +398,7 @@ export class EwarControllerImpl implements EwarController {
         dataIndex: i,
       });
       button.addEventListener("click", () => this.toggleDisruptor(side, i, button));
-      section.appendChild(this.createRow(side, "disruptors", i, disruptor.moduleId, () => state.activation.disruptors[i].active, [button, overloadButton, gear]));
+      section.appendChild(this.createRow(side, "disruptors", i, disruptor.moduleId, () => state.activation.disruptors[i].active, [button, overloadButton, gear], button, () => state.activation.disruptors[i].script?.moduleId));
     }
   }
 
@@ -425,7 +427,7 @@ export class EwarControllerImpl implements EwarController {
     for (let i = 0; i < state.loadout.dampeners.length; i++) {
       const dampener: SensorDampenerSpec = state.loadout.dampeners[i];
       const activation = state.activation.dampeners[i];
-      const button = this.createModuleButton(activation.active, dampener);
+      const button = this.createModuleButton(activation.active, dampener, activation.script?.moduleId);
       const onToggle = () => this.toggleDampenerOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, dampener, onToggle);
       const key: EwarScriptKey = { kind: "dampener", index: i };
@@ -436,7 +438,7 @@ export class EwarControllerImpl implements EwarController {
         dataIndex: i,
       });
       button.addEventListener("click", () => this.toggleDampener(side, i, button));
-      section.appendChild(this.createRow(side, "dampeners", i, dampener.moduleId, () => state.activation.dampeners[i].active, [button, overloadButton, gear]));
+      section.appendChild(this.createRow(side, "dampeners", i, dampener.moduleId, () => state.activation.dampeners[i].active, [button, overloadButton, gear], button, () => state.activation.dampeners[i].script?.moduleId));
     }
   }
 
@@ -468,10 +470,10 @@ export class EwarControllerImpl implements EwarController {
     }
   }
 
-  private createRow(side: Side, family: keyof MutableEwarActivation, index: number, moduleId: TypeId, isActive: () => boolean, controls: (Element | DocumentFragment)[]): HTMLDivElement {
+  private createRow(side: Side, family: keyof MutableEwarActivation, index: number, moduleId: TypeId, isActive: () => boolean, controls: (Element | DocumentFragment)[], moduleButton?: HTMLButtonElement, scriptId?: () => TypeId | undefined): HTMLDivElement {
     const stateLabel = html`<span class="modules-row-state" hidden></span>` as unknown as HTMLSpanElement;
     const row = html`<div class="modules-row">${[...controls, stateLabel]}</div>` as unknown as HTMLDivElement;
-    this.rowRefs.get(side)!.push({ family, index, moduleId, row, stateLabel, isActive });
+    this.rowRefs.get(side)!.push({ family, index, moduleId, row, stateLabel, isActive, moduleButton, scriptId });
     return row;
   }
 
@@ -520,13 +522,13 @@ export class EwarControllerImpl implements EwarController {
     return script === undefined ? undefined : this.imageCatalog.itemIconUrl(script.moduleId);
   }
 
-  private createModuleButton(active: boolean, spec: { readonly moduleId: TypeId }): HTMLButtonElement {
+  private createModuleButton(active: boolean, spec: { readonly moduleId: TypeId }, scriptId?: TypeId): HTMLButtonElement {
     const displayName = this.moduleDisplayName(spec);
     const iconUrl = this.imageCatalog.itemIconUrl(spec.moduleId);
     const img = html`<img class="modules-module-icon" alt="" src=${iconUrl}>` as unknown as HTMLImageElement;
     if (iconUrl === undefined) img.hidden = true;
     const nameSpan = html`<span class="modules-module-name truncate">${displayName}</span>` as unknown as HTMLSpanElement;
-    return html`<button type="button" class="modules-module-toggle" aria-pressed=${String(active)} aria-label=${displayName} data-hint-content="module" data-value=${String(spec.moduleId)}>${img}${nameSpan}</button>` as unknown as HTMLButtonElement;
+    return html`<button type="button" class="modules-module-toggle" aria-pressed=${String(active)} aria-label=${displayName} data-hint-content="module" data-value=${String(spec.moduleId)} data-script=${scriptId === undefined ? undefined : String(scriptId)}>${img}${nameSpan}</button>` as unknown as HTMLButtonElement;
   }
 
   private createOverloadButton(
@@ -599,8 +601,17 @@ export class EwarControllerImpl implements EwarController {
         state.activation.dampeners[key.index].script = script;
       }
     }
+    this.updateRowScriptAnchor(side, key.kind === "disruptor" ? "disruptors" : "dampeners", key.index);
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
+  }
+
+  private updateRowScriptAnchor(side: Side, family: keyof MutableEwarActivation, index: number): void {
+    const ref = this.rowRefs.get(side)?.find((candidate) => candidate.family === family && candidate.index === index);
+    if (ref?.moduleButton === undefined || ref.scriptId === undefined) return;
+    const scriptId = ref.scriptId();
+    if (scriptId === undefined) ref.moduleButton.removeAttribute("data-script");
+    else ref.moduleButton.setAttribute("data-script", String(scriptId));
   }
 
   private gearHintForSide(side: Side, key: EwarScriptKey): string {

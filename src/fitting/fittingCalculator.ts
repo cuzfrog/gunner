@@ -37,7 +37,7 @@ import {
 } from "../gamedata/fittingDb";
 import type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions, TargetingSkills } from "../ships";
 import type { DamageType } from "../sim";
-import type { BoostLoadout, DisruptionScriptSpec, JammerSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TurretScriptSpec, WarpScramblerSpec, EnergyNeutralizerSpec, NosferatuSpec } from "../sim";
+import type { BoostLoadout, DisruptionScriptSpec, JammerSpec, EwarLoadout, MissileBoosterLoadout, MissileBoosterSpec, MissileEnhancerSpec, MissileScriptSpec, SensorBoostLoadout, SensorBoosterSpec, SensorBoosterScriptSpec, SensorDampenerScriptSpec, SensorDampenerSpec, SensorSpec, SignalAmplifierSpec, StackingPenalty, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingBoosterSpec, TrackingDisruptorSpec, TrackingScriptMultipliers, TurretScriptSpec, WarpScramblerSpec, EnergyNeutralizerSpec, NosferatuSpec } from "../sim";
 import { SIG_RESOLUTIONS, EMPTY_MISSILE_BOOSTER_LOADOUT, EMPTY_SENSOR_BOOST_LOADOUT, damageVectorFromPartial, damageVectorScale } from "../sim";
 import type { ChargeCatalog, ImportedTurret, ImportedTurretBase, ImportedLauncher, ImportedVorton } from "./chargeCatalog";
 import type { VortonGroup } from "./fittingState";
@@ -658,10 +658,15 @@ function scriptSpecsFrom(scripts: Readonly<Record<string, TurretScriptStats>>): 
   return result;
 }
 
+function disruptionScriptMultipliers(stats: DisruptionScriptStats): TrackingScriptMultipliers {
+  return { trackingMultiplier: 1 + stats.trackingDeltaBonus / 100, optimalMultiplier: 1 + stats.rangeDeltaBonus / 100, falloffMultiplier: 1 + stats.falloffDeltaBonus / 100 };
+}
+
 function disruptionScriptSpecsFrom(scripts: Readonly<Record<string, DisruptionScriptStats>>): DisruptionScriptSpec[] {
   const result: DisruptionScriptSpec[] = [];
   for (const stats of Object.values(scripts)) {
-    result.push({ name: stats.name, moduleId: stats.id, trackingMultiplier: 1 + stats.trackingDeltaBonus / 100, optimalMultiplier: 1 + stats.rangeDeltaBonus / 100, falloffMultiplier: 1 + stats.falloffDeltaBonus / 100 });
+    const multipliers = disruptionScriptMultipliers(stats);
+    result.push({ name: stats.name, moduleId: stats.id, trackingMultiplier: multipliers.trackingMultiplier, optimalMultiplier: multipliers.optimalMultiplier, falloffMultiplier: multipliers.falloffMultiplier });
   }
   return result;
 }
@@ -990,6 +995,8 @@ function resolveEwarState(db: EwarDb, itemNameCatalog: ItemNameCatalog, ewarModu
 }
 
 export { resolveSensorStats as _resolveSensorStats };
+
+export { disruptionScriptMultipliers };
 
 export { resolveEwarState as _resolveEwarState };
 

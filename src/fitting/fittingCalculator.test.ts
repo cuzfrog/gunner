@@ -1,4 +1,4 @@
-import { _computeDroneControlRange, _resolveEwarState, _resolveSensorStats } from "./fittingCalculator";
+import { _computeDroneControlRange, _resolveEwarState, _resolveSensorStats, disruptionScriptMultipliers } from "./fittingCalculator";
 import type { EwarDb, FittingDb, HullBonus, FittingModuleStats, RigDrawback, RigDrawbackReduction } from "../gamedata/fittingDb";
 import type { FittedModule } from "./fittingState";
 import { toTypeId, type TypeId, type ShipId, type FactionId, type HullTypeId } from "../gamedata/ids";
@@ -120,5 +120,12 @@ describe("_resolveEwarState", () => {
   test("ignores modules that are not ewar", () => {
     const loadout = _resolveEwarState(EMPTY_EWAR_DB, NAME_CATALOG, [fittedModule("99999")], 0);
     expect(loadout).toEqual({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], dampeners: [], neutralizers: [], nosferatu: [], scripts: [], dampenerScripts: [], jammers: [] });
+  });
+});
+
+describe("disruptionScriptMultipliers", () => {
+  test("converts db percent deltas into 1+delta/100 multipliers", () => {
+    const stats = { trackingDeltaBonus: 40, rangeDeltaBonus: -60, falloffDeltaBonus: 0, id: toTypeId("29001"), name: "Tracking Speed Disruption Script" };
+    expect(disruptionScriptMultipliers(stats)).toEqual({ trackingMultiplier: 1.4, optimalMultiplier: 0.4, falloffMultiplier: 1 });
   });
 });

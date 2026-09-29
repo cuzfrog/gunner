@@ -8,9 +8,10 @@ interface FakeElement {
   getAttribute(name: string): string | null;
 }
 
-function fakeAnchor(value: string | null): HTMLElement {
+function fakeAnchor(value: string | null, script?: string): HTMLElement {
   const attrs = new Map<string, string>();
   if (value !== null) attrs.set("data-value", value);
+  if (script !== undefined) attrs.set("data-script", script);
   return {
     tagName: "button",
     getAttribute: (name: string) => attrs.get(name) ?? null,
@@ -26,6 +27,11 @@ interface DbFixture {
   readonly trackingComputers?: Readonly<Record<string, object>>;
   readonly missileGuidanceComputers?: Readonly<Record<string, object>>;
   readonly missileGuidanceEnhancers?: Readonly<Record<string, object>>;
+  readonly disruptionScripts?: Readonly<Record<string, object>>;
+  readonly sensorDampenerScripts?: Readonly<Record<string, object>>;
+  readonly sensorBoosterScripts?: Readonly<Record<string, object>>;
+  readonly scripts?: Readonly<Record<string, object>>;
+  readonly missileScripts?: Readonly<Record<string, object>>;
 }
 
 function makeFittingDb(fixture: DbFixture): FittingDb {
@@ -34,6 +40,11 @@ function makeFittingDb(fixture: DbFixture): FittingDb {
     trackingComputers: fixture.trackingComputers ?? {},
     missileGuidanceComputers: fixture.missileGuidanceComputers ?? {},
     missileGuidanceEnhancers: fixture.missileGuidanceEnhancers ?? {},
+    disruptionScripts: fixture.disruptionScripts ?? {},
+    sensorDampenerScripts: fixture.sensorDampenerScripts ?? {},
+    sensorBoosterScripts: fixture.sensorBoosterScripts ?? {},
+    scripts: fixture.scripts ?? {},
+    missileScripts: fixture.missileScripts ?? {},
   } as unknown as FittingDb;
 }
 
@@ -52,9 +63,9 @@ function makeProvider(fixture: DbFixture): { provider: ModuleHintProviderImpl; m
   return { provider, models };
 }
 
-function renderModel(fixture: DbFixture, id: string): StatHintModel | undefined {
+function renderModel(fixture: DbFixture, id: string, script?: string): StatHintModel | undefined {
   const { provider, models } = makeProvider(fixture);
-  provider.render(fakeAnchor(id), {} as HTMLElement);
+  provider.render(fakeAnchor(id, script), {} as HTMLElement);
   return models[0];
 }
 
@@ -150,6 +161,21 @@ describe("ModuleHintProviderImpl", () => {
     });
   });
 
+  test("builds scripted tracking disruptor rows with effective component strengths", () => {
+    const model = renderModel({
+      modules: { "532": makeModule({ trackingDisruptor: { optimal: 24000, falloff: 20000, disruptionPercent: -15.3, overloadStrengthBonusPercent: 50, capacitorNeed: 6, cycleTime: 10, requiredSkillIds: [] } }) },
+      disruptionScripts: { "29001": { trackingDeltaBonus: 40, rangeDeltaBonus: -60, falloffDeltaBonus: 0, id: "29001", name: "Tracking Speed Disruption Script" } },
+    }, "532", "29001");
+    expect(model?.sections[0]).toEqual({
+      heading: "moduleHint.section.effect",
+      rows: [
+        { label: "moduleHint.trackingDisruption", value: "-21.42%" },
+        { label: "moduleHint.optimalDisruption", value: "-6.12%" },
+        { label: "moduleHint.falloffDisruption", value: "-15.3%" },
+      ],
+    });
+  });
+
   test("builds sensor dampener rows with scan and range penalties", () => {
     const model = renderModel({ modules: { "532": makeModule({ sensorDampener: { optimal: 27000, falloff: 18000, scanResolutionBonusPercent: -13.7, maxTargetRangeBonusPercent: -14.5, overloadStrengthBonusPercent: 50, capacitorNeed: 6, cycleTime: 10, requiredSkillIds: [] } }) } }, "532");
     expect(model?.sections[0]).toEqual({
@@ -163,6 +189,22 @@ describe("ModuleHintProviderImpl", () => {
     });
   });
 
+  test("builds scripted sensor dampener rows with effective scan and range penalties", () => {
+    const model = renderModel({
+      modules: { "532": makeModule({ sensorDampener: { optimal: 27000, falloff: 18000, scanResolutionBonusPercent: -13.7, maxTargetRangeBonusPercent: -14.5, overloadStrengthBonusPercent: 50, capacitorNeed: 6, cycleTime: 10, requiredSkillIds: [] } }) },
+      sensorDampenerScripts: { "29007": { scanResolutionMultiplier: 1.8, maxTargetRangeMultiplier: 0.5, id: "29007", name: "Scan Resolution Dampening Script" } },
+    }, "532", "29007");
+    expect(model?.sections[0]).toEqual({
+      heading: "moduleHint.section.effect",
+      rows: [
+        { label: "label.scanResolution", value: "-24.66%" },
+        { label: "label.targetingRange", value: "-7.25%" },
+        { label: "label.optimalRange", value: "27.0 unit.kilometer" },
+        { label: "label.falloffRange", value: "18.0 unit.kilometer" },
+      ],
+    });
+  });
+
   test("builds sensor booster rows with scan and range bonuses", () => {
     const model = renderModel({ modules: { "532": makeModule({ sensorBooster: { scanResolutionBonusPercent: 15, maxTargetRangeBonusPercent: 23, overloadStrengthBonusPercent: 50, capacitorNeed: 8, cycleTime: 10, requiredSkillIds: [] } }) } }, "532");
     expect(model?.sections[0]).toEqual({
@@ -170,6 +212,20 @@ describe("ModuleHintProviderImpl", () => {
       rows: [
         { label: "label.scanResolution", value: "+15%" },
         { label: "label.targetingRange", value: "+23%" },
+      ],
+    });
+  });
+
+  test("builds scripted sensor booster rows with effective scan and range bonuses", () => {
+    const model = renderModel({
+      modules: { "532": makeModule({ sensorBooster: { scanResolutionBonusPercent: 15, maxTargetRangeBonusPercent: 23, overloadStrengthBonusPercent: 50, capacitorNeed: 8, cycleTime: 10, requiredSkillIds: [] } }) },
+      sensorBoosterScripts: { "29011": { scanResolutionMultiplier: 1.5, maxTargetRangeMultiplier: 0, id: "29011", name: "Scan Resolution Boost Script" } },
+    }, "532", "29011");
+    expect(model?.sections[0]).toEqual({
+      heading: "moduleHint.section.effect",
+      rows: [
+        { label: "label.scanResolution", value: "+22.5%" },
+        { label: "label.targetingRange", value: "0%" },
       ],
     });
   });
@@ -244,6 +300,37 @@ describe("ModuleHintProviderImpl", () => {
       heading: "moduleHint.section.effect",
       rows: [
         { label: "label.explosionRadius", value: "-5.5%" },
+        { label: "label.missileVelocity", value: "+20%" },
+        { label: "label.flightTime", value: "+25%" },
+      ],
+    });
+  });
+
+  test("builds scripted tracking computer rows with effective bonuses and zero rows kept", () => {
+    const model = renderModel({
+      trackingComputers: { "1978": { trackingBonusPercent: 15, optimalBonusPercent: 7.5, falloffBonusPercent: 0, capacitorNeed: 10, cycleTime: 10, requiredSkillIds: [], id: "1978", name: "Tracking Computer II" } },
+      scripts: { "29003": { trackingMultiplier: 1.6, optimalMultiplier: 0, falloffMultiplier: 0, id: "29003", name: "Tracking Speed Script" } },
+    }, "1978", "29003");
+    expect(model?.sections[0]).toEqual({
+      heading: "moduleHint.section.effect",
+      rows: [
+        { label: "label.trackingSpeed", value: "+24%" },
+        { label: "label.optimalRange", value: "0%" },
+        { label: "label.falloffRange", value: "0%" },
+      ],
+    });
+  });
+
+  test("builds scripted missile guidance computer rows with effective bonuses and zero rows kept", () => {
+    const model = renderModel({
+      missileGuidanceComputers: { "4371": { explosionRadiusBonusPercent: -5.5, explosionVelocityBonusPercent: 0, missileVelocityBonusPercent: 20, flightTimeBonusPercent: 25, overloadStrengthBonusPercent: 50, capacitorNeed: 12, cycleTime: 10, requiredSkillIds: [], id: "4371", name: "Missile Guidance Computer II" } },
+      missileScripts: { "29013": { explosionRadiusMultiplier: 1.4, explosionVelocityMultiplier: 0, missileVelocityMultiplier: 1, flightTimeMultiplier: 1, id: "29013", name: "Missile Precision Script" } },
+    }, "4371", "29013");
+    expect(model?.sections[0]).toEqual({
+      heading: "moduleHint.section.effect",
+      rows: [
+        { label: "label.explosionRadius", value: "-7.7%" },
+        { label: "label.explosionVelocity", value: "0%" },
         { label: "label.missileVelocity", value: "+20%" },
         { label: "label.flightTime", value: "+25%" },
       ],

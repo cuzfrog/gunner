@@ -31,6 +31,8 @@ export { StackingPenaltyImpl } from "./stackingPenalty";
 export { scheduledDrainsFromProjections } from "./scheduledDrains";
 export { EwarResolverImpl } from "./ewarResolver";
 export type { StackingPenalty } from "./stackingPenalty";
+export type { TrackingScriptMultipliers, SensorScriptMultipliers, MissileScriptMultipliers } from "./scriptedEffect";
+export { disruptionEffectStrengths, trackingEffectPercents, sensorEffectPercents, missileEffectPercents } from "./scriptedEffect";
 export type {
   ActiveOffensiveModule,
   AppliedEwarEffect,

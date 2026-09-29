@@ -216,4 +216,27 @@ describe("BoosterController", () => {
     expect(button.getAttribute("data-value")).toBe(LOADOUT.computers[0].moduleId);
     expect(nameSpan.getAttribute("data-hint")).toBeNull();
   });
+
+  test("module buttons carry the selected script id for the hint provider", () => {
+    const { controller, boosterEls, document } = buildBoosterController();
+    controller.setLoadout("shipA", LOADOUT);
+    const section = boosterEls.sections.shipA as unknown as FakeElement;
+    const rows = (section.children[0] as FakeElement).children.filter((child) => child.className.split(" ").includes("modules-row"));
+    const unscriptedButton = rows[0]!.children[0] as unknown as FakeElement;
+    expect(unscriptedButton.getAttribute("data-script")).toBeNull();
+    const scriptedButton = rows[1]!.children[0] as unknown as FakeElement;
+    expect(scriptedButton.getAttribute("data-script")).toBe(TRACKING_SCRIPT.moduleId);
+
+    const gear0 = rows[0]!.children.find((child) => child.className.split(" ").includes("script-gear"))!;
+    gear0.trigger("click");
+    const popup = scriptPopupFor(document, "shipA")!;
+    findOptionByName(popup, OPTIMAL_SCRIPT.name)!.trigger("click");
+    expect(unscriptedButton.getAttribute("data-script")).toBe(OPTIMAL_SCRIPT.moduleId);
+
+    const gear1 = rows[1]!.children.find((child) => child.className.split(" ").includes("script-gear"))!;
+    gear1.trigger("click");
+    const reopened = scriptPopupFor(document, "shipA")!;
+    reopened.children.find((child) => child.getAttribute("data-value") === "none")!.trigger("click");
+    expect(scriptedButton.getAttribute("data-script")).toBeNull();
+  });
 });
