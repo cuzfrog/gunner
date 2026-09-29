@@ -114,11 +114,12 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
       mountEl: this.els.modulesFields[side],
       parentPopup: this.modulesPopup.popup(side),
       popupGroup: this.popupGroup,
-      listShape: { itemClass: "script-option", nameClass: "", role: "menuitem" },
+      listShape: { itemClass: "script-option", nameClass: "script-name", iconClass: "script-icon", role: "menuitem" },
       placement: side === "shipA" ? "alongside-end" : "alongside-start",
       options: (index) => this.buildScriptOptions(side, index),
       onSelect: (index, value) => this.onScriptSelected(side, index, value),
       gearHint: (index) => this.gearHintForSide(side, index),
+      gearIcon: (_index, value) => this.scriptIconForValue(side, value),
     });
   }
 
@@ -219,6 +220,7 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
       row.appendChild(overloadButton);
       const gear = this.scriptSections[side].createGear(i, {
         hint: this.gearHintForScript(activation.script),
+        iconUrl: this.scriptIconUrl(activation.script),
         disabled: !activation.active,
         dataIndex: i,
       });
@@ -244,6 +246,18 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
   private scriptDisplayName(script: MissileScriptSpec | undefined): string {
     if (script === undefined) return this.i18n.t("missileBooster.script.none");
     return this.fittingImport.itemNameForId(script.moduleId, this.i18n.current());
+  }
+
+  private scriptIconUrl(script: MissileScriptSpec | undefined): string | undefined {
+    return script === undefined ? undefined : this.imageCatalog.itemIconUrl(script.moduleId);
+  }
+
+  private scriptIconForValue(side: Side, value: string): string | undefined {
+    const byId = typeIdFromString(value);
+    if (byId === undefined) return undefined;
+    const state = this.states.get(side);
+    if (!state) return undefined;
+    return this.scriptIconUrl(state.loadout.scripts.find((s) => s.moduleId === byId));
   }
 
   private createModuleButton(active: boolean, computer: MissileBoosterSpec): HTMLButtonElement {
@@ -291,6 +305,7 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
       ...state.loadout.scripts.map((script) => ({
         value: String(script.moduleId),
         label: `${this.scriptDisplayName(script)} · ${missileScriptStatSuffix(script)}`,
+        iconUrl: this.imageCatalog.itemIconUrl(script.moduleId),
         selected: current !== undefined && current.moduleId === script.moduleId,
       })),
     ];

@@ -1,6 +1,10 @@
+import { html } from "../markup";
+
 export interface IconActionShape {
   readonly buttonClass: string;
   readonly iconSvg: string;
+  readonly iconUrl?: string;
+  readonly iconClass?: string;
   readonly hint: string | (() => string);
   readonly ariaLabel?: string | (() => string);
   readonly ariaPressed?: boolean;
@@ -13,6 +17,7 @@ export interface IconActionShape {
 
 export interface IconAction {
   create(onClick: () => void): HTMLButtonElement;
+  updateIcon(button: HTMLButtonElement, iconUrl: string | undefined): void;
 }
 
 export class IconActionImpl implements IconAction {
@@ -29,7 +34,7 @@ export class IconActionImpl implements IconAction {
     const hint = resolveText(this.shape.hint) ?? "";
     button.setAttribute("data-hint", hint);
     button.setAttribute("aria-label", resolveText(this.shape.ariaLabel) ?? hint);
-    button.innerHTML = this.shape.iconSvg;
+    this.updateIcon(button, this.shape.iconUrl);
     if (this.shape.ariaPressed !== undefined) button.setAttribute("aria-pressed", String(this.shape.ariaPressed));
     if (this.shape.disabled) button.setAttribute("disabled", "");
     if (this.shape.dataIndex !== undefined) button.setAttribute("data-index", String(this.shape.dataIndex));
@@ -38,6 +43,16 @@ export class IconActionImpl implements IconAction {
     if (this.shape.ariaControls) button.setAttribute("aria-controls", this.shape.ariaControls);
     button.addEventListener("click", onClick);
     return button;
+  }
+
+  updateIcon(button: HTMLButtonElement, iconUrl: string | undefined): void {
+    if (iconUrl === undefined || this.shape.iconClass === undefined) {
+      button.innerHTML = this.shape.iconSvg;
+      return;
+    }
+    button.innerHTML = "";
+    const img = html`<img class=${this.shape.iconClass} src=${iconUrl} alt="">` as unknown as HTMLImageElement;
+    button.appendChild(img);
   }
 }
 

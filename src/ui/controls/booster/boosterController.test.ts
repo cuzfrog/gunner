@@ -94,6 +94,10 @@ function scriptPopupFor(document: Document, side: "shipA" | "shipB"): FakeElemen
   return field.children.find((child) => child.id === `${side === "shipA" ? "ship-a" : "ship-b"}-booster-script-popup`);
 }
 
+function findOptionByName(popup: FakeElement, name: string): FakeElement | undefined {
+  return popup.children.find((child) => child.children.some((grandchild) => grandchild.textContent?.includes(name)));
+}
+
 function firstRow(section: FakeElement): FakeElement | undefined {
   const block = section.children.find((child) => child.className === "preview-section") as FakeElement | undefined;
   const children = block?.children ?? section.children;
@@ -188,7 +192,7 @@ describe("BoosterController", () => {
     const gear = row.children.find((child) => child.className.split(" ").includes("script-gear"))!;
     gear.trigger("click");
     const popup = scriptPopupFor(document, "shipA")!;
-    const optimalOption = popup.children.find((child) => child.textContent?.includes(OPTIMAL_SCRIPT.name));
+    const optimalOption = findOptionByName(popup, OPTIMAL_SCRIPT.name);
     expect(optimalOption).toBeDefined();
     optimalOption!.trigger("click");
     expect(controller.capture("shipA")?.[0]?.script).toBe(OPTIMAL_SCRIPT.moduleId);
@@ -206,7 +210,7 @@ describe("BoosterController", () => {
     const gear = row.children.find((child) => child.className.split(" ").includes("script-gear"))!;
     gear.trigger("click");
     const popup = scriptPopupFor(document, "shipA")!;
-    const optimalOption = popup.children.find((child) => child.textContent?.includes(OPTIMAL_SCRIPT.name));
+    const optimalOption = findOptionByName(popup, OPTIMAL_SCRIPT.name);
     optimalOption!.trigger("click");
     expect(button.getAttribute("data-hint-content")).toBe("module");
     expect(button.getAttribute("data-value")).toBe(LOADOUT.computers[0].moduleId);

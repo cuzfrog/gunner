@@ -92,4 +92,31 @@ describe("IconActionImpl", () => {
     const button2 = action.create(() => {});
     expect(button2.getAttribute("aria-label")).toBe("Label B");
   });
+
+  test("create renders an image icon when iconUrl and iconClass are set", () => {
+    const action = new IconActionImpl({ ...shape, iconUrl: "/icons/script.png", iconClass: "script-gear-icon" });
+    const button = action.create(() => {});
+    const img = button.children[0];
+    expect(img.tagName).toBe("IMG");
+    expect(img.className).toBe("script-gear-icon");
+    expect(img.getAttribute("src")).toBe("/icons/script.png");
+  });
+
+  test("create keeps the sprite when iconUrl is absent", () => {
+    const action = new IconActionImpl({ ...shape, iconClass: "script-gear-icon" });
+    const button = action.create(() => {});
+    expect(button.innerHTML).toBe(shape.iconSvg);
+  });
+
+  test("updateIcon swaps sprite for image and restores sprite when undefined", () => {
+    const action = new IconActionImpl({ ...shape, iconClass: "script-gear-icon" });
+    const button = action.create(() => {});
+    action.updateIcon(button, "/icons/script.png");
+    const img = button.children[0];
+    expect(img.tagName).toBe("IMG");
+    expect(img.getAttribute("src")).toBe("/icons/script.png");
+    action.updateIcon(button, undefined);
+    expect(button.innerHTML).toBe(shape.iconSvg);
+    expect(button.children).toHaveLength(0);
+  });
 });

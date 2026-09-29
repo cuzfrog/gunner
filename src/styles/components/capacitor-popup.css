@@ -163,6 +163,13 @@
   font-size: 13px;
 }
 
+.capacitor-charge-option .capacitor-charge-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex: none;
+}
+
 .trigger-summary-count.is-critical,
 .trigger-summary-count.is-empty {
   color: var(--danger-red);

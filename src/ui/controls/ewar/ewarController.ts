@@ -162,6 +162,7 @@ export class EwarControllerImpl implements EwarController {
       options: (key) => this.buildScriptOptions(side, key),
       onSelect: (key, value) => this.onScriptSelected(side, key, value),
       gearHint: (key) => this.gearHintForSide(side, key),
+      gearIcon: (key, value) => this.scriptIconForValue(side, key, value),
       heading: (key) => this.headingForSide(side, key),
     });
   }
@@ -390,6 +391,7 @@ export class EwarControllerImpl implements EwarController {
       const key: EwarScriptKey = { kind: "disruptor", index: i };
       const gear = this.scriptSections[side].createGear(key, {
         hint: this.gearHintForSide(side, key),
+        iconUrl: this.scriptIconUrl(activation.script),
         disabled: !activation.active,
         dataIndex: i,
       });
@@ -429,6 +431,7 @@ export class EwarControllerImpl implements EwarController {
       const key: EwarScriptKey = { kind: "dampener", index: i };
       const gear = this.scriptSections[side].createGear(key, {
         hint: this.gearHintForSide(side, key),
+        iconUrl: this.scriptIconUrl(activation.script),
         disabled: !activation.active,
         dataIndex: i,
       });
@@ -501,6 +504,20 @@ export class EwarControllerImpl implements EwarController {
   private scriptDisplayName(script: { readonly moduleId: TypeId } | undefined): string {
     if (script === undefined) return this.i18n.t("ewar.script.none");
     return this.fittingImport.itemNameForId(script.moduleId, this.i18n.current());
+  }
+
+  private scriptIconUrl(script: { readonly moduleId: TypeId } | undefined): string | undefined {
+    return script === undefined ? undefined : this.imageCatalog.itemIconUrl(script.moduleId);
+  }
+
+  private scriptIconForValue(side: Side, key: EwarScriptKey, value: string): string | undefined {
+    if (value === "none") return undefined;
+    const byId = typeIdFromString(value);
+    if (byId === undefined) return undefined;
+    const state = this.states.get(side);
+    if (!state) return undefined;
+    const script = key.kind === "disruptor" ? state.loadout.scripts.find((s) => s.moduleId === byId) : state.loadout.dampenerScripts.find((s) => s.moduleId === byId);
+    return script === undefined ? undefined : this.imageCatalog.itemIconUrl(script.moduleId);
   }
 
   private createModuleButton(active: boolean, spec: { readonly moduleId: TypeId }): HTMLButtonElement {

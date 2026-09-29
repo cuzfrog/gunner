@@ -38,6 +38,12 @@
   cursor: not-allowed;
 }
 
+.script-gear-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
 .script-gear[aria-expanded="true"] {
   border-color: var(--accent-orange);
   color: var(--accent-orange);

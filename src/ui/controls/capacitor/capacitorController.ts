@@ -9,6 +9,7 @@ import { formatWithCommas } from "../controlsFormat";
 import { ChoiceGroupImpl } from "../choiceGroup";
 import { html } from "../markup";
 import type { PopupGroup } from "../popup";
+import type { ImageCatalog } from "../../icons";
 import { IconActionImpl, PopupField, ScriptSection, SectionBlockImpl, spriteIcon, type ScriptOption } from "../shared";
 import type { Side } from "../side";
 import type { CapacitorController, CapacitorEls } from "./capacitorControllerContract";
@@ -66,18 +67,20 @@ export class CapacitorControllerImpl implements CapacitorController {
   private readonly injectAction: IconActionImpl;
   private readonly fields: Record<Side, PopupField>;
   private readonly itemNameCatalog: ItemNameCatalog;
+  private readonly imageCatalog: ImageCatalog;
   private readonly chargeSections: Record<Side, ScriptSection<TypeId>>;
   private readonly liveRefs: Record<Side, LiveRefs | undefined> = { shipA: undefined, shipB: undefined };
   private readonly summaryRefs: Record<Side, SummaryRefs | undefined> = { shipA: undefined, shipB: undefined };
   private playing = false;
 
-  constructor(deps: { els: CapacitorEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents; itemNameCatalog: ItemNameCatalog; statsSource: CapacitorStatsView }) {
+  constructor(deps: { els: CapacitorEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents; itemNameCatalog: ItemNameCatalog; imageCatalog: ImageCatalog; statsSource: CapacitorStatsView }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.popupGroup = deps.popupGroup;
     this.statsSource = deps.statsSource;
     this.itemNameCatalog = deps.itemNameCatalog;
+    this.imageCatalog = deps.imageCatalog;
     this.sectionBlock = new SectionBlockImpl();
     this.injectAction = new IconActionImpl({
       buttonClass: "capacitor-inject-button btn icon-button",
@@ -184,7 +187,7 @@ export class CapacitorControllerImpl implements CapacitorController {
       mountEl: this.els[side].field,
       parentPopup: this.fields[side].popup,
       popupGroup: this.popupGroup,
-      listShape: { itemClass: "capacitor-charge-option", nameClass: "capacitor-charge-name", role: "menuitem" },
+      listShape: { itemClass: "capacitor-charge-option", nameClass: "capacitor-charge-name", iconClass: "capacitor-charge-icon", role: "menuitem" },
       placement: side === "shipA" ? "alongside-end" : "alongside-start",
       options: (moduleId) => this.chargeOptions(side, moduleId),
       onSelect: (moduleId, value) => { this.setCapBoosterCharge(side, moduleId, toTypeId(value)); this.renderSide(side); },
@@ -201,8 +204,14 @@ export class CapacitorControllerImpl implements CapacitorController {
       value: option.id,
       label: option.name,
       hint: `${formatWithCommas(option.amount)} ${GJ}`,
+      iconUrl: this.imageCatalog.itemIconUrl(option.id),
       selected: option.id === current,
     }));
+  }
+
+  private chargeIconUrl(side: Side, moduleId: TypeId): string | undefined {
+    const chargeId = this.capBoosterCharge(side, moduleId);
+    return chargeId === undefined ? undefined : this.imageCatalog.itemIconUrl(chargeId);
   }
 
   private chargeGearHint(side: Side, moduleId: TypeId): string {
@@ -378,7 +387,7 @@ export class CapacitorControllerImpl implements CapacitorController {
     for (const booster of stats.boosters) {
       const modeGroup = this.buildModeGroup(side, booster.moduleId);
       const injectButton = this.buildInjectButton(side, booster.moduleId);
-      const gear = this.chargeSections[side].createGear(booster.moduleId, { hint: this.chargeGearHint(side, booster.moduleId) });
+      const gear = this.chargeSections[side].createGear(booster.moduleId, { hint: this.chargeGearHint(side, booster.moduleId), iconUrl: this.chargeIconUrl(side, booster.moduleId) });
       const status = html`<span class="capacitor-booster-status mono"></span>` as unknown as HTMLElement;
       const controls = html`<span class="capacitor-booster-controls">${modeGroup}${gear}${injectButton}</span>` as unknown as HTMLElement;
       rows.push(html`<div class="capacitor-booster-row"><span class="capacitor-booster-name">${booster.moduleName}</span>${controls}${status}</div>`);

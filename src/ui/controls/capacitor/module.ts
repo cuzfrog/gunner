@@ -8,12 +8,13 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export function registerCapacitorModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    capacitorController: asFunction(({ els, popupGroup, i18n, uiEvents, itemNameCatalog, capacitorStatsSource }) => new CapacitorControllerImpl({
+    capacitorController: asFunction(({ els, popupGroup, i18n, uiEvents, itemNameCatalog, imageCatalog, capacitorStatsSource }) => new CapacitorControllerImpl({
       els: capacitorEls(els),
       popupGroup,
       i18n,
       events: uiEvents,
       itemNameCatalog,
+      imageCatalog,
       statsSource: capacitorStatsSource,
     })).singleton(),
   });

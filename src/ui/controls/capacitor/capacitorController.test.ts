@@ -1,5 +1,6 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { ItemNameCatalog } from "../../../gamedata";
+import type { ImageCatalog } from "../../icons";
 import type { CapacitorStats } from "../../../fitting";
 import type { CapacitorView } from "../../../sim";
 import { FakeElement, fakeDocument } from "../../testing";
@@ -118,6 +119,10 @@ function buildCatalog(): ItemNameCatalog {
   return { nameForId: vi.fn((id: TypeId) => (id === NEUTRALIZER_MODULE ? "Heavy Energy Neutralizer II" : id === NOSFERATU_MODULE ? "Medium Energy Nosferatu II" : `mod-${id}`)) };
 }
 
+function buildImageCatalog(): ImageCatalog {
+  return { shipImageUrl: vi.fn(() => undefined), itemIconUrl: vi.fn((id: TypeId) => `/icon-${id}.png`), droneIconUrl: vi.fn(() => "/drone.png") };
+}
+
 function statsWithBooster(chargeId: TypeId | undefined): CapacitorStats {
   return capacitorStats({
     boosters: [{
@@ -161,7 +166,7 @@ function summaryText(els: CapacitorEls): string {
 
 function buildController(els: CapacitorEls, stats: CapacitorStats | undefined = capacitorStats()): { controller: CapacitorControllerImpl; mock: EventsMock } {
   const { events, mock } = buildEvents();
-  const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog(), statsSource: { stats: () => stats } });
+  const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog(), imageCatalog: buildImageCatalog(), statsSource: { stats: () => stats } });
   return { controller, mock };
 }
 
@@ -175,7 +180,7 @@ describe("CapacitorControllerImpl stats rendering", () => {
   test("disables the field and clears the summary when no capacitor stats exist", () => {
     const els = buildEls();
     const { events } = buildEvents();
-    new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog(), statsSource: { stats: () => undefined } });
+    new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog(), imageCatalog: buildImageCatalog(), statsSource: { stats: () => undefined } });
     expect(els.shipA.trigger.disabled).toBe(true);
     expect(els.shipA.trigger.getAttribute("data-hint")).toBe("No fitting imported");
     expect(summaryText(els)).toBe("");
@@ -407,7 +412,7 @@ describe("CapacitorControllerImpl events", () => {
     const els = buildEls();
     const { events, mock } = buildEvents();
     let current: CapacitorStats | undefined = capacitorStats();
-    new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog(), statsSource: { stats: () => current } });
+    new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog(), imageCatalog: buildImageCatalog(), statsSource: { stats: () => current } });
     expect(summaryText(els)).toBe("Stable @ 87.3%");
     current = capacitorStats({ stablePercent: undefined, depletesInSeconds: 90.4 });
     const listener = mock.onConfigInvalidated.mock.calls[0][0] as () => void;
@@ -442,7 +447,7 @@ describe("CapacitorControllerImpl events", () => {
   test("re-renders on language change", () => {
     const els = buildEls();
     const { events, mock } = buildEvents();
-    new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog(), statsSource: { stats: () => capacitorStats() } });
+    new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog(), imageCatalog: buildImageCatalog(), statsSource: { stats: () => capacitorStats() } });
     expect(summaryText(els)).toBe("Stable @ 87.3%");
     const listener = mock.onLanguageChanged.mock.calls[0][0] as () => void;
     listener();

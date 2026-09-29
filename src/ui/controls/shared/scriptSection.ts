@@ -14,6 +14,7 @@ export interface ScriptOption {
 
 export interface ScriptGearOptions {
   readonly hint: string;
+  readonly iconUrl?: string;
   readonly disabled?: boolean;
   readonly dataIndex?: number | string;
 }
@@ -28,6 +29,7 @@ export interface ScriptSectionConfig<K> {
   readonly options: (key: K) => readonly ScriptOption[];
   readonly onSelect: (key: K, value: string) => void;
   readonly gearHint: (key: K, value: string) => string;
+  readonly gearIcon?: (key: K, value: string) => string | undefined;
   readonly heading?: (key: K) => string;
 }
 
@@ -46,6 +48,7 @@ export class ScriptSection<K> {
     this.gearAction = new IconActionImpl({
       buttonClass: "script-gear btn icon-button",
       iconSvg: spriteIcon("gear"),
+      iconClass: "script-gear-icon",
       hint: "",
       ariaHaspopup: "menu",
       ariaExpanded: false,
@@ -65,6 +68,7 @@ export class ScriptSection<K> {
     gear.setAttribute("data-hint", options.hint);
     gear.setAttribute("aria-label", options.hint);
     if (options.disabled) gear.setAttribute("disabled", "");
+    if (options.iconUrl !== undefined) this.gearAction.updateIcon(gear, options.iconUrl);
     return gear;
   }
 
@@ -114,6 +118,7 @@ export class ScriptSection<K> {
       const hint = this.config.gearHint(key, value);
       this.currentGear.setAttribute("data-hint", hint);
       this.currentGear.setAttribute("aria-label", hint);
+      this.gearAction.updateIcon(this.currentGear, this.config.gearIcon?.(key, value));
     }
     this.config.popupGroup.close(this.popup);
     this.focusTrigger();
