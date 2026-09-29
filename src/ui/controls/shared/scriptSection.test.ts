@@ -57,7 +57,7 @@ function makeConfig(overrides?: Partial<ScriptSectionConfig<TestKey>>): ScriptSe
     mountEl,
     parentPopup,
     popupGroup,
-    listShape: { itemClass: "ewar-script-option", nameClass: "", role: "menuitem" },
+    listShape: { itemClass: "script-option", nameClass: "", role: "menuitem" },
     placement: "alongside-end",
     options: makeOptions(),
     onSelect: vi.fn(),

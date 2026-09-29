@@ -130,13 +130,13 @@ function missileBoosterSection(document: Document, side: "shipA" | "shipB"): Fak
 function computerRows(section: FakeElement): FakeElement[] {
   const computerBlock = section.children.find((block) => block.children[0]?.textContent === "label.missileBooster.computer");
   if (!computerBlock) return [];
-  return computerBlock.children.filter((c) => c.className.includes("ewar-row"));
+  return computerBlock.children.filter((c) => c.className.includes("modules-row"));
 }
 
 function enhancerRows(section: FakeElement): FakeElement[] {
   const enhancerBlock = section.children.find((block) => block.children[0]?.textContent === "label.missileBooster.enhancer");
   if (!enhancerBlock) return [];
-  return enhancerBlock.children.filter((c) => c.className.includes("ewar-row"));
+  return enhancerBlock.children.filter((c) => c.className.includes("modules-row"));
 }
 
 describe("MissileBoosterController", () => {
@@ -160,25 +160,25 @@ describe("MissileBoosterController", () => {
     const { controller, document } = buildMissileBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const row = computerRows(missileBoosterSection(document, "shipA"))[0];
-    expect(row.children.find((c) => c.className === "ewar-module-toggle")).toBeDefined();
-    expect(row.children.find((c) => c.className.split(" ").includes("ewar-overload-button"))).toBeDefined();
-    expect(row.children.find((c) => c.className.split(" ").includes("ewar-script-gear"))).toBeDefined();
+    expect(row.children.find((c) => c.className === "modules-module-toggle")).toBeDefined();
+    expect(row.children.find((c) => c.className.split(" ").includes("modules-overload-button"))).toBeDefined();
+    expect(row.children.find((c) => c.className.split(" ").includes("script-gear"))).toBeDefined();
   });
 
   test("enhancer row has only toggle button", () => {
     const { controller, document } = buildMissileBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const row = enhancerRows(missileBoosterSection(document, "shipA"))[0];
-    expect(row.children.find((c) => c.className === "ewar-module-toggle")).toBeDefined();
-    expect(row.children.find((c) => c.className.split(" ").includes("ewar-overload-button"))).toBeUndefined();
-    expect(row.children.find((c) => c.className.split(" ").includes("ewar-script-gear"))).toBeUndefined();
+    expect(row.children.find((c) => c.className === "modules-module-toggle")).toBeDefined();
+    expect(row.children.find((c) => c.className.split(" ").includes("modules-overload-button"))).toBeUndefined();
+    expect(row.children.find((c) => c.className.split(" ").includes("script-gear"))).toBeUndefined();
   });
 
   test("toggleComputer deactivates the row and updates summary", () => {
     const { controller, document, emitConfigInvalidated } = buildMissileBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const row = computerRows(missileBoosterSection(document, "shipA"))[0];
-    const button = row.children.find((c) => c.className === "ewar-module-toggle")!;
+    const button = row.children.find((c) => c.className === "modules-module-toggle")!;
     button.dispatchEvent(new Event("click"));
     expect(button.getAttribute("aria-pressed")).toBe("false");
     expect(emitConfigInvalidated).toHaveBeenCalled();
@@ -188,7 +188,7 @@ describe("MissileBoosterController", () => {
     const { controller, document } = buildMissileBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const row = computerRows(missileBoosterSection(document, "shipA"))[0];
-    const overloadButton = row.children.find((c) => c.className.split(" ").includes("ewar-overload-button"))!;
+    const overloadButton = row.children.find((c) => c.className.split(" ").includes("modules-overload-button"))!;
     expect(overloadButton.getAttribute("aria-pressed")).toBe("false");
     overloadButton.dispatchEvent(new Event("click"));
     expect(overloadButton.getAttribute("aria-pressed")).toBe("true");
@@ -201,7 +201,7 @@ describe("MissileBoosterController", () => {
     const computerSummaryBefore = summary.children[0];
     const titleBefore = computerSummaryBefore.getAttribute("data-hint") ?? "";
     const row = computerRows(missileBoosterSection(document, "shipA"))[0];
-    const overloadButton = row.children.find((c) => c.className.split(" ").includes("ewar-overload-button"))!;
+    const overloadButton = row.children.find((c) => c.className.split(" ").includes("modules-overload-button"))!;
     overloadButton.dispatchEvent(new Event("click"));
     const computerSummaryAfter = getFake(document, "ship-a-missile-booster-summary").children[0];
     const titleAfter = computerSummaryAfter.getAttribute("data-hint") ?? "";
@@ -265,7 +265,7 @@ describe("MissileBoosterController", () => {
     controller.setLoadout("shipA", LOADOUT);
     const section = missileBoosterSection(document, "shipA");
     const row = computerRows(section)[0];
-    const gear = row.children.find((c) => c.className.split(" ").includes("ewar-script-gear"))!;
+    const gear = row.children.find((c) => c.className.split(" ").includes("script-gear"))!;
     gear.dispatchEvent(new Event("click"));
     const field = getFake(document, "ship-a-ewar-field");
     const popup = field.children.find((c) => c.id === "ship-a-missile-booster-script-popup");

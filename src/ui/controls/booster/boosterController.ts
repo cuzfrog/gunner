@@ -105,7 +105,7 @@ export class BoosterControllerImpl implements BoosterController {
       mountEl: this.els.modulesFields[side],
       parentPopup: this.modulesPopup.popup(side),
       popupGroup: this.popupGroup,
-      listShape: { itemClass: "ewar-script-option", nameClass: "", role: "menuitem" },
+      listShape: { itemClass: "script-option", nameClass: "", role: "menuitem" },
       placement: side === "shipA" ? "alongside-end" : "alongside-start",
       options: (index) => this.buildScriptOptions(side, index),
       onSelect: (index, value) => this.onScriptSelected(side, index, value),
@@ -176,7 +176,7 @@ export class BoosterControllerImpl implements BoosterController {
 
   private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, hint: string): void {
     const iconUrl = this.imageCatalog.itemIconUrl(moduleId);
-    const item = html`<span class="trigger-summary-item" data-hint=${hint}><img class="ewar-summary-icon" alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}><span class="trigger-summary-count mono">${active}/${total}</span></span>` as unknown as HTMLSpanElement;
+    const item = html`<span class="trigger-summary-item" data-hint=${hint}><img class="modules-summary-icon" alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}><span class="trigger-summary-count mono">${active}/${total}</span></span>` as unknown as HTMLSpanElement;
     summary.appendChild(item);
   }
 
@@ -202,7 +202,7 @@ export class BoosterControllerImpl implements BoosterController {
     for (let i = 0; i < state.loadout.computers.length; i++) {
       const computer = state.loadout.computers[i];
       const activation = state.activation[i];
-      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}></div>` as unknown as HTMLDivElement;
+      const row = html`<div class=${activation.active ? "modules-row" : "modules-row modules-row-inactive"}></div>` as unknown as HTMLDivElement;
       const button = this.createModuleButton(activation.active, computer);
       button.addEventListener("click", () => this.toggleComputer(side, i, button, row));
       row.appendChild(button);
@@ -229,7 +229,7 @@ export class BoosterControllerImpl implements BoosterController {
     const displayName = this.moduleDisplayName(computer);
     const iconUrl = this.imageCatalog.itemIconUrl(computer.moduleId);
     const nameSpan = html`<span class="truncate">${displayName}</span>` as unknown as HTMLSpanElement;
-    const button = html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName} data-hint-content="module" data-value=${String(computer.moduleId)}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
+    const button = html`<button type="button" class="modules-module-toggle" aria-pressed=${String(active)} aria-label=${displayName} data-hint-content="module" data-value=${String(computer.moduleId)}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
     return button;
   }
 
@@ -280,7 +280,7 @@ export class BoosterControllerImpl implements BoosterController {
     const activation = state.activation[index];
     activation.active = !activation.active;
     button.setAttribute("aria-pressed", String(activation.active));
-    row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
+    row.className = activation.active ? "modules-row" : "modules-row modules-row-inactive";
     this.renderSide(side);
     this.events.emitConfigInvalidated();
   }

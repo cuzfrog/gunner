@@ -206,13 +206,13 @@ function jammerSection(document: Document, side: "shipA" | "shipB"): FakeElement
 }
 
 function overloadFor(row: FakeElement): FakeElement {
-  const button = row.children.find((child) => child.className.split(" ").includes("ewar-overload-button"));
+  const button = row.children.find((child) => child.className.split(" ").includes("modules-overload-button"));
   if (!button) throw new Error("Missing overload button");
   return button;
 }
 
 function gearFor(row: FakeElement): FakeElement {
-  const gear = row.children.find((child) => child.className.split(" ").includes("ewar-script-gear"));
+  const gear = row.children.find((child) => child.className.split(" ").includes("script-gear"));
   if (!gear) throw new Error("Missing script gear");
   return gear;
 }
@@ -270,7 +270,7 @@ describe("EwarController", () => {
     expect(webs.children.length).toBe(2);
 
     const webRow = webs.children[1];
-    expect(webRow.className).toBe("ewar-row");
+    expect(webRow.className).toBe("modules-row");
     const webButton = webRow.children[0];
     expect(webButton.tagName).toBe("BUTTON");
     expect(webButton.getAttribute("aria-pressed")).toBe("true");
@@ -285,17 +285,17 @@ describe("EwarController", () => {
     expect(disruptors.children.length).toBe(3);
 
     const firstDisruptorRow = disruptors.children[1];
-    expect(firstDisruptorRow.className).toBe("ewar-row");
+    expect(firstDisruptorRow.className).toBe("modules-row");
     const toggle = firstDisruptorRow.children[0];
     expect(toggle.getAttribute("aria-pressed")).toBe("true");
     expect(toggle.children[1].textContent).toBe(DISRUPTOR.moduleName);
 
     const firstGear = gearFor(firstDisruptorRow);
     expect(firstGear.tagName).toBe("BUTTON");
-    expect(firstGear.className).toBe("ewar-script-gear btn icon-button");
+    expect(firstGear.className).toBe("script-gear btn icon-button");
     expect(firstGear.getAttribute("aria-haspopup")).toBe("menu");
     expect(firstGear.getAttribute("aria-expanded")).toBe("false");
-    expect(firstGear.getAttribute("aria-controls")).toBe("ship-a-ewar-script-popup");
+    expect(firstGear.getAttribute("aria-controls")).toBe("ship-a-script-popup");
     expect(firstGear.getAttribute("data-hint")).toBe("ewar.script.none");
     expect(firstGear.getAttribute("aria-label")).toBe("ewar.script.none");
     expect(firstGear.disabled).toBe(false);
@@ -327,7 +327,7 @@ describe("EwarController", () => {
     expect(grapplers.children[0].textContent).toBe("label.ewar.grappler");
     expect(grapplers.children.length).toBe(2);
     const row = grapplers.children[1];
-    expect(row.className).toBe("ewar-row");
+    expect(row.className).toBe("modules-row");
     const button = row.children[0];
     expect(button.children[1].textContent).toBe(GRAPPLER.moduleName);
     const overload = overloadFor(row);
@@ -426,16 +426,16 @@ describe("EwarController", () => {
     const row = section.children[1];
     const gear = gearFor(row);
     const overload = overloadFor(row);
-    expect(row.className).toBe("ewar-row");
+    expect(row.className).toBe("modules-row");
     expect(gear.disabled).toBe(false);
     expect(overload.disabled).toBe(false);
     row.children[0].trigger("click");
-    expect(row.className).toBe("ewar-row ewar-row-inactive");
+    expect(row.className).toBe("modules-row modules-row-inactive");
     expect(row.children[0].getAttribute("aria-pressed")).toBe("false");
     expect(gear.disabled).toBe(true);
     expect(overload.disabled).toBe(true);
     row.children[0].trigger("click");
-    expect(row.className).toBe("ewar-row");
+    expect(row.className).toBe("modules-row");
     expect(row.children[0].getAttribute("aria-pressed")).toBe("true");
     expect(gear.disabled).toBe(false);
     expect(overload.disabled).toBe(false);
@@ -592,7 +592,7 @@ describe("EwarController", () => {
     const button = row.children[0];
     button.trigger("click");
     expect(button.getAttribute("aria-pressed")).toBe("false");
-    expect(row.className).toBe("ewar-row ewar-row-inactive");
+    expect(row.className).toBe("modules-row modules-row-inactive");
     expect(emitConfigInvalidated).toHaveBeenCalled();
 
     expect(controller.capture("shipA")).toEqual({ webs: [], grapplers: [], disruptors: [], painters: [], dampeners: [], jammers: [{ active: false, overloaded: false }] });
@@ -790,8 +790,8 @@ describe("EwarController", () => {
 
     const webRows = webSection(document, "shipA")!.children.slice(1);
     const disruptorRows = disruptorSection(document, "shipA")!.children.slice(1);
-    for (const row of webRows) expect(overloadFor(row).className).toBe("ewar-overload-button btn icon-button");
-    for (const row of disruptorRows) expect(overloadFor(row).className).toBe("ewar-overload-button btn icon-button");
+    for (const row of webRows) expect(overloadFor(row).className).toBe("modules-overload-button btn icon-button");
+    for (const row of disruptorRows) expect(overloadFor(row).className).toBe("modules-overload-button btn icon-button");
   });
 
   test("clicking an overload button toggles its aria-pressed and capture output", () => {
@@ -847,11 +847,11 @@ describe("EwarController", () => {
     expect(webOverload.getAttribute("aria-pressed")).toBe("true");
 
     webRow.children[0].trigger("click");
-    expect(webRow.className).toBe("ewar-row ewar-row-inactive");
+    expect(webRow.className).toBe("modules-row modules-row-inactive");
     expect(webOverload.disabled).toBe(true);
 
     webRow.children[0].trigger("click");
-    expect(webRow.className).toBe("ewar-row");
+    expect(webRow.className).toBe("modules-row");
     expect(webOverload.disabled).toBe(false);
     expect(webOverload.getAttribute("aria-pressed")).toBe("true");
     expect(controller.capture("shipA")?.webs?.[0]).toEqual({ active: true, overloaded: true });
@@ -880,11 +880,11 @@ describe("EwarController", () => {
     const popup = getFake(document, "ship-a-ewar-popup");
     popup.hidden = false;
     const webRow = webSection(document, "shipA")!.children[1];
-    expect(webRow.className).toBe("ewar-row");
+    expect(webRow.className).toBe("modules-row");
     webRow.children[0].trigger("click");
-    expect(webRow.className).toBe("ewar-row ewar-row-inactive");
+    expect(webRow.className).toBe("modules-row modules-row-inactive");
     webRow.children[0].trigger("click");
-    expect(webRow.className).toBe("ewar-row");
+    expect(webRow.className).toBe("modules-row");
   });
 
   test("summary items receive title attributes from the effect describer", () => {
@@ -946,11 +946,11 @@ describe("EwarController", () => {
 
     const section = ewarSection(document, "shipA").children.find((s) => s.children[0]?.textContent === "label.ewar.painter");
     expect(section).toBeDefined();
-    const rows = section!.children.filter((c) => c.className.includes("ewar-row"));
+    const rows = section!.children.filter((c) => c.className.includes("modules-row"));
     expect(rows.length).toBe(1);
     const row = rows[0];
-    expect(row.children.find((c) => c.className === "ewar-module-toggle")).toBeDefined();
-    expect(row.children.find((c) => c.className.split(" ").includes("ewar-overload-button"))).toBeDefined();
+    expect(row.children.find((c) => c.className === "modules-module-toggle")).toBeDefined();
+    expect(row.children.find((c) => c.className.split(" ").includes("modules-overload-button"))).toBeDefined();
   });
 
   test("painter toggle deactivates the row and updates the summary", () => {
@@ -959,12 +959,12 @@ describe("EwarController", () => {
     controller.setLoadout("shipA", loadout);
 
     const section = ewarSection(document, "shipA").children.find((s) => s.children[0]?.textContent === "label.ewar.painter");
-    const row = section!.children.find((c) => c.className.includes("ewar-row"))!;
-    const button = row.children.find((c) => c.className === "ewar-module-toggle")!;
+    const row = section!.children.find((c) => c.className.includes("modules-row"))!;
+    const button = row.children.find((c) => c.className === "modules-module-toggle")!;
     button.dispatchEvent(new Event("click"));
 
     expect(button.getAttribute("aria-pressed")).toBe("false");
-    expect(row.className).toContain("ewar-row-inactive");
+    expect(row.className).toContain("modules-row-inactive");
     expect(ewarEffectDescriber.painterHint).toHaveBeenCalled();
   });
 
@@ -974,7 +974,7 @@ describe("EwarController", () => {
     controller.setLoadout("shipA", loadout);
 
     const section = ewarSection(document, "shipA").children.find((s) => s.children[0]?.textContent === "label.ewar.painter");
-    const row = section!.children.find((c) => c.className.includes("ewar-row"))!;
+    const row = section!.children.find((c) => c.className.includes("modules-row"))!;
     const overloadButton = overloadFor(row);
     expect(overloadButton.getAttribute("aria-pressed")).toBe("false");
     overloadButton.dispatchEvent(new Event("click"));
@@ -1015,7 +1015,7 @@ describe("EwarController", () => {
     expect(section.children[0].textContent).toBe("label.ewar.dampener");
     expect(section.children.length).toBe(2);
     const row = section.children[1];
-    expect(row.className).toBe("ewar-row");
+    expect(row.className).toBe("modules-row");
     const button = row.children[0];
     expect(button.getAttribute("aria-pressed")).toBe("true");
     expect(button.children[1].textContent).toBe(DAMPENER2.moduleName);
@@ -1040,14 +1040,14 @@ describe("EwarController", () => {
     const button = row.children[0];
     const gear = gearFor(row);
     const overload = overloadFor(row);
-    expect(row.className).toBe("ewar-row");
+    expect(row.className).toBe("modules-row");
     button.trigger("click");
-    expect(row.className).toBe("ewar-row ewar-row-inactive");
+    expect(row.className).toBe("modules-row modules-row-inactive");
     expect(button.getAttribute("aria-pressed")).toBe("false");
     expect(gear.disabled).toBe(true);
     expect(overload.disabled).toBe(true);
     button.trigger("click");
-    expect(row.className).toBe("ewar-row");
+    expect(row.className).toBe("modules-row");
     expect(gear.disabled).toBe(false);
     expect(overload.disabled).toBe(false);
   });
@@ -1183,18 +1183,18 @@ describe("EwarController starved indication", () => {
 
     const section = neutralizerSection(document, "shipA")!;
     const row = section.children[1];
-    expect(row.className).toBe("ewar-row");
-    const stateLabel = row.children.find((child) => child.className === "ewar-row-state");
+    expect(row.className).toBe("modules-row");
+    const stateLabel = row.children.find((child) => child.className === "modules-row-state");
     expect(stateLabel).toBeDefined();
     expect(stateLabel!.hidden).toBe(true);
 
     controller.updateStarvedModules({ shipA: [NEUTRALIZER.moduleId], shipB: [] });
-    expect(row.className).toBe("ewar-row ewar-row-starved");
+    expect(row.className).toBe("modules-row modules-row-starved");
     expect(stateLabel!.hidden).toBe(false);
     expect(stateLabel!.textContent).toBe("capacitor.insufficient");
 
     controller.updateStarvedModules({ shipA: [], shipB: [] });
-    expect(row.className).toBe("ewar-row");
+    expect(row.className).toBe("modules-row");
     expect(stateLabel!.hidden).toBe(true);
   });
 
@@ -1206,8 +1206,8 @@ describe("EwarController starved indication", () => {
     const row = section.children[1];
     const toggle = row.children[0];
     toggle.trigger("click");
-    expect(row.className).toBe("ewar-row ewar-row-inactive");
+    expect(row.className).toBe("modules-row modules-row-inactive");
     controller.updateStarvedModules({ shipA: [NEUTRALIZER.moduleId], shipB: [] });
-    expect(row.className).toBe("ewar-row ewar-row-inactive");
+    expect(row.className).toBe("modules-row modules-row-inactive");
   });
 });

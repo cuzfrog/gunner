@@ -131,13 +131,13 @@ function sensorBoosterSection(document: Document, side: "shipA" | "shipB"): Fake
 function boosterRows(section: FakeElement): FakeElement[] {
   const boosterBlock = section.children.find((block) => block.children[0]?.textContent === "label.sensorBooster.booster");
   if (!boosterBlock) return [];
-  return boosterBlock.children.filter((c) => c.className.includes("ewar-row"));
+  return boosterBlock.children.filter((c) => c.className.includes("modules-row"));
 }
 
 function amplifierRows(section: FakeElement): FakeElement[] {
   const amplifierBlock = section.children.find((block) => block.children[0]?.textContent === "label.sensorBooster.amplifier");
   if (!amplifierBlock) return [];
-  return amplifierBlock.children.filter((c) => c.className.includes("ewar-row"));
+  return amplifierBlock.children.filter((c) => c.className.includes("modules-row"));
 }
 
 describe("SensorBoosterController", () => {
@@ -161,25 +161,25 @@ describe("SensorBoosterController", () => {
     const { controller, document } = buildSensorBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const row = boosterRows(sensorBoosterSection(document, "shipA"))[0];
-    expect(row.children.find((c) => c.className === "ewar-module-toggle")).toBeDefined();
-    expect(row.children.find((c) => c.className.split(" ").includes("ewar-overload-button"))).toBeDefined();
-    expect(row.children.find((c) => c.className.split(" ").includes("ewar-script-gear"))).toBeDefined();
+    expect(row.children.find((c) => c.className === "modules-module-toggle")).toBeDefined();
+    expect(row.children.find((c) => c.className.split(" ").includes("modules-overload-button"))).toBeDefined();
+    expect(row.children.find((c) => c.className.split(" ").includes("script-gear"))).toBeDefined();
   });
 
   test("amplifier row has only toggle button (passive display)", () => {
     const { controller, document } = buildSensorBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const row = amplifierRows(sensorBoosterSection(document, "shipA"))[0];
-    expect(row.children.find((c) => c.className === "ewar-module-toggle")).toBeDefined();
-    expect(row.children.find((c) => c.className.split(" ").includes("ewar-overload-button"))).toBeUndefined();
-    expect(row.children.find((c) => c.className.split(" ").includes("ewar-script-gear"))).toBeUndefined();
+    expect(row.children.find((c) => c.className === "modules-module-toggle")).toBeDefined();
+    expect(row.children.find((c) => c.className.split(" ").includes("modules-overload-button"))).toBeUndefined();
+    expect(row.children.find((c) => c.className.split(" ").includes("script-gear"))).toBeUndefined();
   });
 
   test("toggleBooster deactivates the row and emits configInvalidated", () => {
     const { controller, document, emitConfigInvalidated } = buildSensorBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const row = boosterRows(sensorBoosterSection(document, "shipA"))[0];
-    const button = row.children.find((c) => c.className === "ewar-module-toggle")!;
+    const button = row.children.find((c) => c.className === "modules-module-toggle")!;
     button.dispatchEvent(new Event("click"));
     expect(button.getAttribute("aria-pressed")).toBe("false");
     expect(emitConfigInvalidated).toHaveBeenCalled();
@@ -189,7 +189,7 @@ describe("SensorBoosterController", () => {
     const { controller, document } = buildSensorBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const row = boosterRows(sensorBoosterSection(document, "shipA"))[0];
-    const overloadButton = row.children.find((c) => c.className.split(" ").includes("ewar-overload-button"))!;
+    const overloadButton = row.children.find((c) => c.className.split(" ").includes("modules-overload-button"))!;
     expect(overloadButton.getAttribute("aria-pressed")).toBe("false");
     overloadButton.dispatchEvent(new Event("click"));
     expect(overloadButton.getAttribute("aria-pressed")).toBe("true");
@@ -270,7 +270,7 @@ describe("SensorBoosterController", () => {
     controller.setLoadout("shipA", LOADOUT);
     const section = sensorBoosterSection(document, "shipA");
     const row = boosterRows(section)[0];
-    const gear = row.children.find((c) => c.className.split(" ").includes("ewar-script-gear"))!;
+    const gear = row.children.find((c) => c.className.split(" ").includes("script-gear"))!;
     gear.dispatchEvent(new Event("click"));
     const popup = getFake(document, "ship-a-ewar-field").children.find((c) => c.id === "ship-a-sensor-booster-script-popup");
     expect(popup).toBeDefined();

@@ -44,14 +44,14 @@ export class ScriptSection<K> {
     this.config = config;
     this.list = new SelectableListImpl(config.listShape);
     this.gearAction = new IconActionImpl({
-      buttonClass: "ewar-script-gear btn icon-button",
+      buttonClass: "script-gear btn icon-button",
       iconSvg: spriteIcon("gear"),
       hint: "",
       ariaHaspopup: "menu",
       ariaExpanded: false,
     });
     const placementClass = config.placement === "alongside-end" ? "script-popup-alongside-end" : "script-popup-alongside-start";
-    const classAttr = `ewar-script-popup popup ${placementClass}`;
+    const classAttr = `script-popup popup ${placementClass}`;
     this.popupEl = html`<div id=${config.popupId} class=${classAttr} role="menu" hidden></div>` as unknown as HTMLElement;
     config.mountEl.appendChild(this.popupEl);
     this.popup = this.createPopup();
@@ -94,7 +94,7 @@ export class ScriptSection<K> {
     const heading = this.config.heading?.(key);
     if (heading) {
       const labelId = `${this.config.popupId}-label`;
-      const label = html`<div id=${labelId} class="ewar-script-popup-label">${heading}</div>`;
+      const label = html`<div id=${labelId} class="script-popup-label">${heading}</div>`;
       this.popupEl.setAttribute("aria-labelledby", labelId);
       this.popupEl.appendChild(label as unknown as Node);
     } else {

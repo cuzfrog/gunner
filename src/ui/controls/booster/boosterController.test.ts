@@ -97,7 +97,7 @@ function scriptPopupFor(document: Document, side: "shipA" | "shipB"): FakeElemen
 function firstRow(section: FakeElement): FakeElement | undefined {
   const block = section.children.find((child) => child.className === "preview-section") as FakeElement | undefined;
   const children = block?.children ?? section.children;
-  return children.find((child) => child.className.split(" ").includes("ewar-row"));
+  return children.find((child) => child.className.split(" ").includes("modules-row"));
 }
 
 describe("BoosterController", () => {
@@ -109,7 +109,7 @@ describe("BoosterController", () => {
     const block = section.children[0] as unknown as FakeElement;
     expect(block.className).toBe("preview-section");
     expect(block.children[0]?.textContent).toBe("label.booster.computer");
-    const rows = block.children.filter((child) => child.className.split(" ").includes("ewar-row"));
+    const rows = block.children.filter((child) => child.className.split(" ").includes("modules-row"));
     expect(rows).toHaveLength(2);
     expect(rows[0]?.children[0]?.getAttribute("aria-pressed")).toBe("true");
   });
@@ -119,7 +119,7 @@ describe("BoosterController", () => {
     controller.setLoadout("shipA", LOADOUT);
     const section = boosterEls.sections.shipA as unknown as FakeElement;
     const block = section.children[0] as unknown as FakeElement;
-    const rows = block.children.filter((child) => child.className.split(" ").includes("ewar-row"));
+    const rows = block.children.filter((child) => child.className.split(" ").includes("modules-row"));
     const firstButton = rows[0]?.children[0] as unknown as FakeElement;
     const nameSpan = firstButton.children[1] as unknown as FakeElement;
     expect(firstButton.getAttribute("data-hint-content")).toBe("module");
@@ -143,7 +143,7 @@ describe("BoosterController", () => {
     const button = row.children[0] as FakeElement;
     button.trigger("click");
     expect(button.getAttribute("aria-pressed")).toBe("false");
-    expect(row.className).toBe("ewar-row ewar-row-inactive");
+    expect(row.className).toBe("modules-row modules-row-inactive");
   });
 
   test("capture and restore round-trip activations and selected scripts", () => {
@@ -185,7 +185,7 @@ describe("BoosterController", () => {
     controller.setLoadout("shipA", LOADOUT);
     const section = boosterEls.sections.shipA as unknown as FakeElement;
     const row = firstRow(section)!;
-    const gear = row.children.find((child) => child.className.split(" ").includes("ewar-script-gear"))!;
+    const gear = row.children.find((child) => child.className.split(" ").includes("script-gear"))!;
     gear.trigger("click");
     const popup = scriptPopupFor(document, "shipA")!;
     const optimalOption = popup.children.find((child) => child.textContent?.includes(OPTIMAL_SCRIPT.name));
@@ -203,7 +203,7 @@ describe("BoosterController", () => {
     const button = row.children[0] as unknown as FakeElement;
     const nameSpan = button.children[1] as unknown as FakeElement;
     expect(button.getAttribute("data-value")).toBe(LOADOUT.computers[0].moduleId);
-    const gear = row.children.find((child) => child.className.split(" ").includes("ewar-script-gear"))!;
+    const gear = row.children.find((child) => child.className.split(" ").includes("script-gear"))!;
     gear.trigger("click");
     const popup = scriptPopupFor(document, "shipA")!;
     const optimalOption = popup.children.find((child) => child.textContent?.includes(OPTIMAL_SCRIPT.name));
