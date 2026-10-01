@@ -41,7 +41,7 @@ export function num(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaEl
 }
 
 export function setText(el: HTMLElement, text: string): void {
-  el.textContent = text;
+  if (el.textContent !== text) el.textContent = text;
 }
 
 export function fittingAreaSelector(side: "shipA" | "shipB"): string {

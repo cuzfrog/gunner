@@ -28,6 +28,7 @@ export class DefenseControllerImpl implements DefenseController {
   private readonly sectionBlock: SectionBlockImpl;
   private readonly overloadAction: IconActionImpl;
   private readonly fields: Record<Side, PopupField>;
+  private readonly summaryValues: Record<Side, HTMLElement | undefined> = { shipA: undefined, shipB: undefined };
   private defenseView: DefenseView | undefined;
 
   constructor(deps: { els: DefenseEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents; defenseAssessor: DefenseAssessor }) {
@@ -42,8 +43,8 @@ export class DefenseControllerImpl implements DefenseController {
       hint: "",
     });
     this.fields = {
-      shipA: new PopupField({ els: deps.els.shipA, popupGroup: deps.popupGroup }),
-      shipB: new PopupField({ els: deps.els.shipB, popupGroup: deps.popupGroup }),
+      shipA: new PopupField({ els: deps.els.shipA, popupGroup: deps.popupGroup, onOpen: () => this.renderSide("shipA") }),
+      shipB: new PopupField({ els: deps.els.shipB, popupGroup: deps.popupGroup, onOpen: () => this.renderSide("shipB") }),
     };
     this.events.onFittingImported((side, imported) => this.setDefenseSpec(side, imported.defense));
     this.events.onLanguageChanged(() => this.render());
@@ -66,8 +67,8 @@ export class DefenseControllerImpl implements DefenseController {
   updateAssessments(view: EngagementView): void {
     this.assessments.set("shipA", view.defenses.shipA);
     this.assessments.set("shipB", view.defenses.shipB);
-    if (!this.fields.shipA.isOpen()) this.renderSide("shipA");
-    if (!this.fields.shipB.isOpen()) this.renderSide("shipB");
+    this.updateSummary("shipA");
+    this.updateSummary("shipB");
   }
 
   updateDefenseView(view: DefenseView): void {
@@ -361,15 +362,25 @@ export class DefenseControllerImpl implements DefenseController {
   private updateSummary(side: Side): void {
     const summary = this.els[side].summary;
     const spec = this.specs.get(side);
-    summary.innerHTML = "";
     if (!spec) {
-      summary.textContent = "";
+      if (this.summaryValues[side]) {
+        summary.innerHTML = "";
+        this.summaryValues[side] = undefined;
+      }
       return;
     }
+    let value: HTMLElement | undefined = this.summaryValues[side];
+    if (!value) {
+      const item = html`<span class="trigger-summary-item"><span class="trigger-summary-count mono"></span></span>` as unknown as HTMLElement;
+      const span = item.querySelector<HTMLElement>(".trigger-summary-count");
+      if (!span) throw new Error("defense summary markup incomplete");
+      summary.innerHTML = "";
+      summary.appendChild(item);
+      this.summaryValues[side] = span;
+      value = span;
+    }
     const assessment = this.assessments.get(side) ?? this.defenseAssessor.assess(spec, ZERO_DAMAGE, true);
-    const totalEhp = assessment.totalEhp;
-    const item = html`<span class="trigger-summary-item"><span class="trigger-summary-count mono">${formatWithCommas(totalEhp)} EHP</span></span>`;
-    summary.appendChild(item);
+    value.textContent = `${formatWithCommas(assessment.totalEhp)} EHP`;
   }
 }
 

@@ -71,6 +71,7 @@ export class CapacitorControllerImpl implements CapacitorController {
   private readonly chargeSections: Record<Side, ScriptSection<TypeId>>;
   private readonly liveRefs: Record<Side, LiveRefs | undefined> = { shipA: undefined, shipB: undefined };
   private readonly summaryRefs: Record<Side, SummaryRefs | undefined> = { shipA: undefined, shipB: undefined };
+  private readonly renderedStats: Record<Side, CapacitorStats | undefined> = { shipA: undefined, shipB: undefined };
   private playing = false;
 
   constructor(deps: { els: CapacitorEls; popupGroup: PopupGroup; i18n: I18n; events: UiEvents; itemNameCatalog: ItemNameCatalog; imageCatalog: ImageCatalog; statsSource: CapacitorStatsView }) {
@@ -233,6 +234,7 @@ export class CapacitorControllerImpl implements CapacitorController {
     const field = this.fields[side];
     const section = field.clearSection();
     const stats = this.statsSource.stats(side);
+    this.renderedStats[side] = stats;
     const label = this.i18n.t("label.capacitor");
     field.applyLabel(label);
     this.liveRefs[side] = undefined;
@@ -485,7 +487,7 @@ export class CapacitorControllerImpl implements CapacitorController {
 
   private renderSummaryValue(side: Side): void {
     const refs = this.summaryRefs[side];
-    const stats = this.statsSource.stats(side);
+    const stats = this.renderedStats[side];
     if (!refs || !stats) return;
     const view = this.runtimeViews[side];
     const live = this.playing && view !== undefined;

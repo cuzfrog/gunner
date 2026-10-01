@@ -1,5 +1,12 @@
+const NUMBER_FORMATS = new Map<number, Intl.NumberFormat>();
+
 export function formatWithCommas(value: number, decimals = 0): string {
-  return value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  let format = NUMBER_FORMATS.get(decimals);
+  if (!format) {
+    format = new Intl.NumberFormat("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    NUMBER_FORMATS.set(decimals, format);
+  }
+  return format.format(value);
 }
 
 export function formatDistance(m: number, t: (key: string) => string): string {

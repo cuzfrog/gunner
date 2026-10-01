@@ -327,6 +327,28 @@ describe("CapacitorControllerImpl summary and playing state", () => {
   });
 });
 
+describe("CapacitorControllerImpl stats caching", () => {
+  beforeEach(() => {
+    globalThis.document = fakeDocument();
+    globalThis.Element = FakeElement as unknown as typeof Element;
+    globalThis.HTMLButtonElement = FakeElement as unknown as typeof HTMLButtonElement;
+  });
+
+  test("runtime and playing updates do not re-derive stats from the source", () => {
+    const els = buildEls();
+    let calls = 0;
+    const { events } = buildEvents();
+    const controller = new CapacitorControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events, itemNameCatalog: buildCatalog(), imageCatalog: buildImageCatalog(), statsSource: { stats: () => { calls++; return capacitorStats(); } } });
+    const afterConstruction = calls;
+    controller.updateRuntime({ shipA: capacitorView(), shipB: capacitorView() });
+    controller.setPlaying(true);
+    controller.updateRuntime({ shipA: capacitorView({ percentage: 30 }), shipB: capacitorView() });
+    controller.setPlaying(false);
+    expect(calls).toBe(afterConstruction);
+    expect(summaryText(els)).toBe("Stable @ 87.3%");
+  });
+});
+
 describe("CapacitorControllerImpl configuration state", () => {
   beforeEach(() => {
     globalThis.document = fakeDocument();

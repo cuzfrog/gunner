@@ -155,20 +155,6 @@ describe("DefenseControllerImpl EHP and repairer HP/s", () => {
     return { assess: vi.fn(() => assessment) } as unknown as DefenseAssessor;
   }
 
-  function fakeEngagementView(totalEhp: number, incomingEm = 0, incomingThermal = 0, incomingKinetic = 0, incomingExplosive = 0): EngagementView {
-    const assessment: DefenseAssessment = {
-      layers: {
-        shield: { layer: "shield", hp: 1000, ehp: Math.round(1000 / 0.25) },
-        armor: { layer: "armor", hp: 800, ehp: Math.round(800 / 0.25) },
-        hull: { layer: "hull", hp: 600, ehp: Math.round(600 / 0.25) },
-      },
-      totalEhp,
-      repairPerSecond: { shield: 0, armor: 0, hull: 0 },
-      shieldRegenPerSecond: 0,
-    };
-    return { defenses: { shipA: assessment, shipB: assessment } } as unknown as EngagementView;
-  }
-
   test("summary EHP uses the assessment totalEhp when a view is available", () => {
     const els = buildEls();
     const assessor = fakeAssessor({
@@ -234,6 +220,20 @@ describe("DefenseControllerImpl EHP and repairer HP/s", () => {
     expect(statsText).toContain((100 / 4).toFixed(1));
   });
 });
+
+function fakeEngagementView(totalEhp: number): EngagementView {
+  const assessment: DefenseAssessment = {
+    layers: {
+      shield: { layer: "shield", hp: 1000, ehp: Math.round(1000 / 0.25) },
+      armor: { layer: "armor", hp: 800, ehp: Math.round(800 / 0.25) },
+      hull: { layer: "hull", hp: 600, ehp: Math.round(600 / 0.25) },
+    },
+    totalEhp,
+    repairPerSecond: { shield: 0, armor: 0, hull: 0 },
+    shieldRegenPerSecond: 0,
+  };
+  return { defenses: { shipA: assessment, shipB: assessment } } as unknown as EngagementView;
+}
 
 function findRepairerStatsText(root: HTMLElement): string {
   const fake = root as unknown as FakeElement;
@@ -347,5 +347,53 @@ describe("DefenseControllerImpl starved indication", () => {
     expect(row.className).toBe("defense-module-row is-starved");
     const status = row.children.find((child) => child.className.includes("defense-module-status"));
     expect(status?.textContent).toBe("capacitor.insufficient");
+  });
+});
+
+describe("DefenseControllerImpl render on demand", () => {
+  beforeEach(() => {
+    globalThis.document = fakeDocument();
+    globalThis.Element = FakeElement as unknown as typeof Element;
+    globalThis.HTMLButtonElement = FakeElement as unknown as typeof HTMLButtonElement;
+  });
+
+  function deepText(root: FakeElement): string {
+    return root.textContent + root.children.map(deepText).join("");
+  }
+
+  function buildController(): { els: DefenseEls; controller: DefenseControllerImpl } {
+    const els = buildEls();
+    const controller = new DefenseControllerImpl({ els, popupGroup: new FakePopupGroup(), i18n: buildI18n(), events: buildUiEvents(), defenseAssessor: defaultAssessor() });
+    return { els, controller };
+  }
+
+  test("updateAssessments updates the summary without rebuilding the popup section", () => {
+    const { els, controller } = buildController();
+    controller.setDefenseSpec("shipA", defenseSpecWithPenalty(0));
+    const section = els.shipA.section as unknown as FakeElement;
+    const childrenBefore = [...section.children];
+    controller.updateAssessments(fakeEngagementView(1234));
+    expect([...section.children]).toEqual(childrenBefore);
+    expect(findSummaryText(els.shipA.summary)).toContain("1,234");
+  });
+
+  test("opening the popup renders the section with the latest assessment", () => {
+    const { els, controller } = buildController();
+    controller.setDefenseSpec("shipA", defenseSpecWithPenalty(0));
+    controller.updateAssessments(fakeEngagementView(4321));
+    (els.shipA.trigger as unknown as FakeElement).trigger("click");
+    expect(els.shipA.popup.hidden).toBe(false);
+    expect(deepText(els.shipA.section as unknown as FakeElement)).toContain("4,321");
+  });
+
+  test("updateAssessments does not rebuild the section while the popup is open", () => {
+    const { els, controller } = buildController();
+    controller.setDefenseSpec("shipA", defenseSpecWithPenalty(0));
+    (els.shipA.trigger as unknown as FakeElement).trigger("click");
+    const section = els.shipA.section as unknown as FakeElement;
+    const childrenWhileOpen = [...section.children];
+    controller.updateAssessments(fakeEngagementView(9999));
+    expect([...section.children]).toEqual(childrenWhileOpen);
+    expect(findSummaryText(els.shipA.summary)).toContain("9,999");
   });
 });
