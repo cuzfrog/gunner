@@ -31,6 +31,7 @@ export class AppImpl implements App {
   start(): void {
     this.refreshCameraRanges();
     this.loop.setTickHandler((dt) => this.tick(dt));
+    this.loop.setFrameHandler(() => this.engine.publish());
     this.loop.setSpeed(this.controls.getSpeed());
     this.controls.setCallbacks({
       onReset: () => {
@@ -68,7 +69,7 @@ export class AppImpl implements App {
     this.engine.reset(this.controls.getEngineConfig());
   }
 
-  tick(dt: number): void { this.engine.step(dt); }
+  tick(dt: number): void { this.engine.advance(dt); }
 
   private isEnded(): boolean {
     const dead = this.engine.view().defenseRuntime.dead;

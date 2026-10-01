@@ -1,5 +1,7 @@
 export interface Loop {
   setTickHandler(handler: (dt: number) => void): void;
+  /** Called once per animation frame in which at least one tick ran, after those ticks — the frame boundary where a render belongs. */
+  setFrameHandler(handler: () => void): void;
   start(): void;
   stop(): void;
   toggle(): void;
@@ -17,9 +19,14 @@ export class RafLoop implements Loop {
   private accumulator = 0;
   private speed = 1;
   private onTick?: (dt: number) => void;
+  private onFrame?: () => void;
 
   setTickHandler(handler: (dt: number) => void): void {
     this.onTick = handler;
+  }
+
+  setFrameHandler(handler: () => void): void {
+    this.onFrame = handler;
   }
 
   start(): void {
@@ -59,10 +66,13 @@ export class RafLoop implements Loop {
     this.lastT = t;
     this.accumulator += frameDelta * this.speed;
 
+    let ticked = false;
     while (this.accumulator >= FIXED_DT) {
       this.onTick?.(FIXED_DT);
       this.accumulator -= FIXED_DT;
+      ticked = true;
     }
+    if (ticked) this.onFrame?.();
 
     this.rafId = requestAnimationFrame((next) => this.frame(next));
   }

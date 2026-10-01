@@ -115,6 +115,8 @@ const engine = vi.mocked<EngagementEngine>({
   reset: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
   update: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
   step: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
+  advance: vi.fn(),
+  publish: vi.fn(() => { const v = baseView(); emitView(v); return v; }),
   view: vi.fn(() => baseView()),
   injectCapBooster: vi.fn(() => baseView()),
   events: vi.fn(() => engineEvents),
@@ -123,6 +125,7 @@ const engine = vi.mocked<EngagementEngine>({
 const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setDroneRangeVisibility: vi.fn(), setDroneControlRangeVisibility: vi.fn(), setManualZoom: vi.fn(), setCameraRanges: vi.fn(), setLockStates: vi.fn() });
 const loop = vi.mocked<Loop>({
   setTickHandler: vi.fn(),
+  setFrameHandler: vi.fn(),
   start: vi.fn(),
   stop: vi.fn(),
   toggle: vi.fn(),
@@ -143,6 +146,7 @@ describe("AppImpl", () => {
     engine.reset.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
     engine.update.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
     engine.step.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
+    engine.publish.mockImplementation(() => { const v = baseView(); emitView(v); return v; });
     engine.view.mockReturnValue(baseView());
     uiEvents = mockUiEvents();
     app = new AppImpl({ controls, engine, renderer, loop, uiEvents });
@@ -172,6 +176,7 @@ describe("AppImpl", () => {
   test("start wires the loop, controls callbacks, resets the engine, and renders the initial frame via view event", () => {
     app.start();
     expect(loop.setTickHandler).toHaveBeenCalled();
+    expect(loop.setFrameHandler).toHaveBeenCalled();
     expect(loop.setSpeed).toHaveBeenCalledWith(1);
     expect(controls.setCallbacks).toHaveBeenCalled();
     expect(engine.reset).toHaveBeenCalledWith(engineConfig);
@@ -187,12 +192,26 @@ describe("AppImpl", () => {
     expect(engine.injectCapBooster).toHaveBeenCalledWith("shipA", 2);
   });
 
-  test("tick delegates only to engine.step; no direct death check in tick", () => {
+  test("tick delegates only to engine.advance and does not publish a view", () => {
     app.start();
     renderer.draw.mockClear();
-    engine.step.mockClear();
+    engine.advance.mockClear();
+    engine.publish.mockClear();
     app.tick(0.1);
-    expect(engine.step).toHaveBeenCalledWith(0.1);
+    expect(engine.advance).toHaveBeenCalledWith(0.1);
+    expect(engine.publish).not.toHaveBeenCalled();
+    expect(renderer.draw).not.toHaveBeenCalled();
+  });
+
+  test("frame handler publishes the engine view, which drives the render", () => {
+    app.start();
+    const frameHandler = loop.setFrameHandler.mock.calls.at(-1)?.[0];
+    expect(frameHandler).toBeDefined();
+    renderer.draw.mockClear();
+    engine.publish.mockClear();
+    frameHandler!();
+    expect(engine.publish).toHaveBeenCalledTimes(1);
+    expect(renderer.draw).toHaveBeenCalledTimes(1);
   });
 
   test("shipDestroyed event stops the loop and sets playing false", () => {
@@ -230,11 +249,11 @@ describe("AppImpl", () => {
 
   test("display change re-renders from engine.view() without stepping the engine", () => {
     app.start();
-    engine.step.mockClear();
+    engine.advance.mockClear();
     const before = renderer.draw.mock.calls.length;
     callbacks().onDisplayChange();
     expect(renderer.draw).toHaveBeenCalledTimes(before + 1);
-    expect(engine.step).not.toHaveBeenCalled();
+    expect(engine.advance).not.toHaveBeenCalled();
   });
 
   test("play/pause toggles the loop and reflects its state in the controls", () => {

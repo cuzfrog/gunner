@@ -26,7 +26,7 @@ import type { Simulation, SimulationState } from "./simulation";
 import type { SimWorld } from "./simWorld";
 import type { WeaponClock, WeaponClockState } from "./weaponClock";
 import type { CapacitorSimulator, CapacitorSimulatorState, CapacitorView } from "./capacitorSimulator";
-import type { EngineConfig } from "./engagementEngine";
+import type { EngineConfig, EngineView } from "./engagementEngine";
 import type { CapacitorSideConfig } from "./types";
 
 const LOCKED_STATE: LockState = { status: "locked", progress: 1, remaining: 0, lockTime: 0, inRange: true };
@@ -253,6 +253,65 @@ describe("EngagementEngineImpl", () => {
     deps.live.defenseSimulator.step.mockImplementation(() => { order.push("defense"); });
     deps.engine.step(0.1);
     expect(order).toEqual(["capacitor", "simulation", "lock", "compose", "missile", "weapon", "drone", "fighter", "defense"]);
+  });
+
+  test("advance steps the live world without publishing a view", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    let viewEvents = 0;
+    deps.engine.events().onViewUpdated(() => { viewEvents++; });
+    deps.live.simulation.step.mockClear();
+    deps.engine.advance(0.1);
+    expect(deps.live.simulation.step).toHaveBeenCalledWith(0.1, expect.any(Object));
+    expect(deps.live.defenseSimulator.step).toHaveBeenCalledWith(0.1, [], deps.live.capacitorSimulator, expect.any(Object));
+    expect(viewEvents).toBe(0);
+  });
+
+  test("view stays at the last published state until publish runs", () => {
+    const deps = makeEngine();
+    const before = deps.engine.reset(engineConfig());
+    deps.engine.advance(0.1);
+    expect(deps.engine.view()).toBe(before);
+  });
+
+  test("publish emits one view reflecting the latest advanced state", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    const views: EngineView[] = [];
+    deps.engine.events().onViewUpdated((view) => views.push(view));
+    deps.engine.advance(0.1);
+    deps.engine.advance(0.1);
+    const view = deps.engine.publish();
+    expect(views).toHaveLength(1);
+    expect(views[0]).toBe(view);
+    expect(view.snapshot).toBe(snapshot);
+    // publishing again without an advance republishes the same view
+    expect(deps.engine.publish()).toBe(view);
+    expect(views).toHaveLength(2);
+  });
+
+  test("advance followed by publish is equivalent to step", () => {
+    const stepped = makeEngine();
+    stepped.engine.reset(engineConfig());
+    let steppedViews = 0;
+    stepped.engine.events().onViewUpdated(() => { steppedViews++; });
+    stepped.engine.step(0.1);
+
+    const advanced = makeEngine();
+    advanced.engine.reset(engineConfig());
+    let advancedViews = 0;
+    advanced.engine.events().onViewUpdated(() => { advancedViews++; });
+    advanced.engine.advance(0.1);
+    advanced.engine.publish();
+
+    expect(advancedViews).toBe(steppedViews);
+    expect(advanced.live.simulation.step).toHaveBeenCalledTimes(stepped.live.simulation.step.mock.calls.length);
+  });
+
+  test("advance and publish throw before reset", () => {
+    const deps = makeEngine();
+    expect(() => deps.engine.advance(0.1)).toThrow("before reset");
+    expect(() => deps.engine.publish()).toThrow("before reset");
   });
 
   test("drone and fighter steps receive the same-frame damage events after the weapon clock", () => {

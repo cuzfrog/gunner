@@ -44,6 +44,10 @@ export interface EngineEvents {
 export interface EngagementEngine {
   reset(config: EngineConfig): EngineView;
   update(config: EngineConfig): EngineView;
+  /** Steps the simulation without building or publishing a view; the view stays stale until publish. */
+  advance(dt: number): void;
+  /** Builds and publishes the view from the latest advanced state (or republishes the last view); returns it. */
+  publish(): EngineView;
   step(dt: number): EngineView;
   view(): EngineView;
   injectCapBooster(side: Side, boosterIndex: number): EngineView;
@@ -66,6 +70,7 @@ export class EngagementEngineImpl implements EngagementEngine {
   private readonly destroyedSides = new Set<Side>();
   private config: EngineConfig | undefined;
   private lastView: EngineView | undefined;
+  private pendingCompose: { composed: EngagementView; snapshot: SimSnapshot } | undefined;
   private projectionCache: Record<Side, InflictedDps> | undefined;
   private projectionAtTime = Number.NEGATIVE_INFINITY;
   private projectionDirty = true;
@@ -118,13 +123,25 @@ export class EngagementEngineImpl implements EngagementEngine {
     return this.lastView;
   }
 
-  step(dt: number): EngineView {
+  advance(dt: number): void {
     const config = this.config;
-    if (!config) throw new Error("EngagementEngine.step called before reset");
-    const { composed, snapshot } = this.runStep(this.live, config, dt);
-    this.lastView = this.buildView(composed, snapshot);
+    if (!config) throw new Error("EngagementEngine.advance called before reset");
+    this.pendingCompose = this.runStep(this.live, config, dt);
+  }
+
+  publish(): EngineView {
+    if (this.pendingCompose) {
+      this.lastView = this.buildView(this.pendingCompose.composed, this.pendingCompose.snapshot);
+      this.pendingCompose = undefined;
+    }
+    if (!this.lastView) throw new Error("EngagementEngine.publish called before reset");
     this.publishView(this.lastView);
     return this.lastView;
+  }
+
+  step(dt: number): EngineView {
+    this.advance(dt);
+    return this.publish();
   }
 
   view(): EngineView {
