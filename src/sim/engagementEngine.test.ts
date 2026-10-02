@@ -13,7 +13,7 @@ import { EMPTY_DEFENSE_SPEC, EMPTY_EWAR_LOADOUT, IDENTITY_BURST_MODIFIERS, ZERO_
 import { EMPTY_DEFENSE_ASSESSMENT } from "./defenseAssessment";
 import type { AttackAssessment } from "./fireControl";
 import type { DefenseSimulator, DefenseSimulatorState, DefenseView, SidePoolsSnapshot } from "./defenseSimulator";
-import type { InflictedDps } from "./types";
+import type { DroneSpec, InflictedDps } from "./types";
 import type { DroneSimulator, DroneSimulatorState } from "./droneSimulator";
 import type { FighterSimulator, FighterSimulatorState } from "./fighterSimulator";
 import type { EngagementFrameComposer, EngagementView } from "./engagementFrameComposer";
@@ -142,7 +142,7 @@ function mockWorld() {
     fighterSimulator: vi.mocked<FighterSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), states: vi.fnUntracked(() => []), capture: vi.fnUntracked(fighterSimulatorState), restore: vi.fnUntracked() }),
     missileSimulator: vi.mocked<MissileSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(() => []), states: vi.fnUntracked(() => []), facts: vi.fnUntracked(() => ({ inFlightCount: 0, nearestTimeToImpact: 0, predicted: { application: 0, signatureTerm: 1, velocityTerm: 1 }, interceptable: false })), capture: vi.fnUntracked(missileSimulatorState), restore: vi.fnUntracked() }),
     weaponClock: vi.mocked<WeaponClock>({ reset: vi.fnUntracked(), step: vi.fnUntracked(() => []), capture: vi.fnUntracked(weaponClockState), restore: vi.fnUntracked(), spoolCycles: vi.fnUntracked(() => 0) }),
-    defenseSimulator: vi.mocked<DefenseSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), flushPendingDamage: vi.fnUntracked(), view: vi.fnUntracked(() => emptyDefenseView), inflictedTotals: vi.fnUntracked(zeroTotals), capture: vi.fnUntracked(defenseSimulatorState), restore: vi.fnUntracked() }),
+    defenseSimulator: vi.mocked<DefenseSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), flushPendingDamage: vi.fnUntracked(), view: vi.fnUntracked(() => emptyDefenseView), deadSides: vi.fnUntracked(() => ({ shipA: false, shipB: false })), inflictedTotals: vi.fnUntracked(zeroTotals), capture: vi.fnUntracked(defenseSimulatorState), restore: vi.fnUntracked() }),
     capacitorSimulator: vi.mocked<CapacitorSimulator>({ reset: vi.fnUntracked(), update: vi.fnUntracked(), step: vi.fnUntracked(), view: vi.fnUntracked(() => emptyCapacitorView), attemptDebit: vi.fnUntracked(() => true), incomingDrains: vi.fnUntracked(), propulsionStarved: vi.fnUntracked(() => false), injectBooster: vi.fnUntracked(), drainRunning: vi.fnUntracked(() => false), capture: vi.fnUntracked(capacitorSimulatorState), restore: vi.fnUntracked() }),
   };
 }
@@ -312,6 +312,31 @@ describe("EngagementEngineImpl", () => {
     const deps = makeEngine();
     expect(() => deps.engine.advance(0.1)).toThrow("before reset");
     expect(() => deps.engine.publish()).toThrow("before reset");
+  });
+
+  test("advance reads liveness through deadSides without building a defense view", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    deps.live.defenseSimulator.view.mockClear();
+    deps.live.defenseSimulator.deadSides.mockClear();
+    deps.engine.advance(0.1);
+    expect(deps.live.defenseSimulator.deadSides).toHaveBeenCalled();
+    expect(deps.live.defenseSimulator.view).not.toHaveBeenCalled();
+  });
+
+  test("drone and fighter specs are cached across publishes and refreshed on config change", () => {
+    const drone: DroneSpec = { kind: "drone", moduleId: toTypeId("2"), tracking: 0.1, sigResolution: 40, optimal: 1000, falloff: 1000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, droneCount: 5, maxVelocity: 1000, orbitSpeed: 500, orbitRange: 1000, isSentry: false, controlRange: 50000 };
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    const first = deps.engine.publish();
+    deps.engine.advance(0.1);
+    const second = deps.engine.publish();
+    expect(second.droneSpecs).toBe(first.droneSpecs);
+    expect(second.fighterSpecs).toBe(first.fighterSpecs);
+    deps.engine.update({ ...engineConfig(), weapons: { shipA: [drone], shipB: [turret] } });
+    const third = deps.engine.view();
+    expect(third.droneSpecs.shipA).toEqual([drone]);
+    expect(third.droneSpecs).not.toBe(first.droneSpecs);
   });
 
   test("drone and fighter steps receive the same-frame damage events after the weapon clock", () => {
@@ -769,10 +794,13 @@ describe("EngagementEngineImpl", () => {
       const projection = ewarProjection();
       const withEwar: SimSnapshot = { ...snapshot, shipB: { ...snapshot.shipB, ewar: projection } };
       const deadView: DefenseView = { ...emptyDefenseView, dead: { shipA: false, shipB: true } };
+      const deadSides = { shipA: false, shipB: true };
       deps.live.simulation.snapshot.mockReturnValue(withEwar);
       deps.projection.simulation.snapshot.mockReturnValue(withEwar);
       deps.live.defenseSimulator.view.mockReturnValue(deadView);
       deps.projection.defenseSimulator.view.mockReturnValue(deadView);
+      deps.live.defenseSimulator.deadSides.mockReturnValue(deadSides);
+      deps.projection.defenseSimulator.deadSides.mockReturnValue(deadSides);
       deps.ewarResolver.appliedEffects.mockImplementation((candidate) => (candidate === projection ? [{ family: "neutralizer", moduleId: NEUT_ID, amountPerCycle: 600, cycleTime: 24 }] : []));
       deps.engine.reset(engineConfig());
       deps.engine.step(0.1);
@@ -900,6 +928,7 @@ describe("engagement engine command bursts", () => {
     const config: import("./engagementEngine").EngineConfig = { ...base, sim: { ...base.sim, shipB: { ...base.sim.shipB, commandBursts: [burstSpec] } } };
     deps.live.capacitorSimulator.drainRunning.mockImplementation(() => true);
     deps.live.defenseSimulator.view.mockImplementation(() => ({ ...emptyDefenseView, dead: { shipA: true, shipB: false } }));
+    deps.live.defenseSimulator.deadSides.mockImplementation(() => ({ shipA: true, shipB: false }));
     deps.engine.reset(config);
     deps.engine.step(1);
     expect(deps.live.defenseSimulator.step).toHaveBeenLastCalledWith(1, expect.anything(), deps.live.capacitorSimulator, { shipA: IDENTITY_BURST_MODIFIERS, shipB: { ...IDENTITY_BURST_MODIFIERS, shieldResonance: 0.92 } });

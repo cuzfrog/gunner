@@ -153,6 +153,8 @@ export interface DefenseSimulator extends Restorable<DefenseSimulatorState> {
   step(dt: number, events: readonly DamageEvent[], capacitor?: CapacitorGate, bursts?: Record<Side, BurstModifiers>): void;
   flushPendingDamage(capacitor?: CapacitorGate): void;
   view(): DefenseView;
+  /** Whether each side's ship is destroyed; a cheap read for per-step gating that avoids building the full view. */
+  deadSides(): Record<Side, boolean>;
   inflictedTotals(): Record<Side, LayerDamage>;
 }
 
@@ -300,6 +302,10 @@ export class DefenseSimulatorImpl implements DefenseSimulator {
       rah: { shipA: rahView(this.sides.shipA), shipB: rahView(this.sides.shipB) },
       hardeners: { shipA: hardenerViews(this.sides.shipA), shipB: hardenerViews(this.sides.shipB) },
     };
+  }
+
+  deadSides(): Record<Side, boolean> {
+    return { shipA: this.sides.shipA.dead, shipB: this.sides.shipB.dead };
   }
 
   inflictedTotals(): Record<Side, LayerDamage> {

@@ -69,6 +69,7 @@ export class EngagementEngineImpl implements EngagementEngine {
   private readonly shipDestroyedListeners = new Set<(side: Side) => void>();
   private readonly destroyedSides = new Set<Side>();
   private config: EngineConfig | undefined;
+  private viewSpecs: ViewSpecs | undefined;
   private lastView: EngineView | undefined;
   private pendingCompose: { composed: EngagementView; snapshot: SimSnapshot } | undefined;
   private projectionCache: Record<Side, InflictedDps> | undefined;
@@ -91,6 +92,7 @@ export class EngagementEngineImpl implements EngagementEngine {
 
   reset(config: EngineConfig): EngineView {
     this.config = config;
+    this.viewSpecs = viewSpecsFrom(config);
     this.destroyedSides.clear();
     this.live.simulation.reset(config.sim);
     const spawn = this.live.simulation.snapshot();
@@ -111,6 +113,7 @@ export class EngagementEngineImpl implements EngagementEngine {
 
   update(config: EngineConfig): EngineView {
     this.config = config;
+    this.viewSpecs = viewSpecsFrom(config);
     this.live.simulation.update(config.sim);
     this.live.droneSimulator.update(droneSimConfigFrom(config));
     this.live.fighterSimulator.update(fighterSimConfigFrom(config));
@@ -192,8 +195,8 @@ export class EngagementEngineImpl implements EngagementEngine {
   }
 
   private buildView(composed: EngagementView, snapshot: SimSnapshot): EngineView {
-    const config = this.config;
-    if (!config) throw new Error("buildView called before config set");
+    const viewSpecs = this.viewSpecs;
+    if (!viewSpecs) throw new Error("buildView called before config set");
     const defenseRuntime = this.live.defenseSimulator.view();
     return {
       ...composed,
@@ -202,9 +205,9 @@ export class EngagementEngineImpl implements EngagementEngine {
       capacitorRuntime: this.live.capacitorSimulator.view(),
       inflicted: this.projectedInflicted(snapshot.time),
       drones: { shipA: this.live.droneSimulator.states("shipA"), shipB: this.live.droneSimulator.states("shipB") },
-      droneSpecs: { shipA: droneSpecsFrom(config.weapons.shipA), shipB: droneSpecsFrom(config.weapons.shipB) },
+      droneSpecs: viewSpecs.drones,
       fighters: { shipA: this.live.fighterSimulator.states("shipA"), shipB: this.live.fighterSimulator.states("shipB") },
-      fighterSpecs: { shipA: fighterSpecsFrom(config.weapons.shipA), shipB: fighterSpecsFrom(config.weapons.shipB) },
+      fighterSpecs: viewSpecs.fighters,
       missiles: { shipA: this.live.missileSimulator.states("shipA"), shipB: this.live.missileSimulator.states("shipB") },
     };
   }
@@ -402,7 +405,7 @@ export class EngagementEngineImpl implements EngagementEngine {
 
 /** A side whose ship is destroyed stops acting: it projects no ewar and every outgoing gate treats it as offline. */
 function operationalSides(defense: DefenseSimulator): Record<Side, boolean> {
-  const dead = defense.view().dead;
+  const dead = defense.deadSides();
   return { shipA: !dead.shipA, shipB: !dead.shipB };
 }
 
@@ -425,6 +428,16 @@ function fighterAliveCountsFor(world: SimWorld, side: Side): readonly number[] {
 
 function droneSimConfigFrom(config: EngineConfig): DroneSimConfig {
   return { shipA: droneSpecsFrom(config.weapons.shipA), shipB: droneSpecsFrom(config.weapons.shipB) };
+}
+
+/** Drone/fighter spec records the published view reuses across frames; derived once per config install. */
+interface ViewSpecs {
+  readonly drones: Record<Side, readonly DroneSpec[]>;
+  readonly fighters: Record<Side, readonly FighterSpec[]>;
+}
+
+function viewSpecsFrom(config: EngineConfig): ViewSpecs {
+  return { drones: droneSimConfigFrom(config), fighters: fighterSimConfigFrom(config) };
 }
 
 function fighterSimConfigFrom(config: EngineConfig): FighterSimConfig {

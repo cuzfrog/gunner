@@ -320,6 +320,14 @@ describe("DefenseSimulatorImpl", () => {
     expect(sim.view().dead.shipA).toBe(true);
   });
 
+  test("deadSides tracks death per side as a cheap read", () => {
+    const sim = newSim();
+    sim.reset(config(spec({ shieldHp: 0, armorHp: 0, hullHp: 100, hullResists: { em: 0 } })));
+    expect(sim.deadSides()).toEqual({ shipA: false, shipB: false });
+    sim.step(1, events(EM_DAMAGE, ZERO_DAMAGE));
+    expect(sim.deadSides()).toEqual({ shipA: true, shipB: false });
+  });
+
   test("update preserves repairer cycle progress", () => {
     const sim = newSim();
     const repairSpec = spec({ shieldHp: 0, armorHp: 1000, hullHp: 1000, armorResists: { em: 0 }, repairers: [{ layer: "armor", amount: 100, cycleTime: 4, capacitorNeed: 0, heatDamage: 0, overload: { amountMultiplier: 1, cycleTimeMultiplier: 1 } }] });
