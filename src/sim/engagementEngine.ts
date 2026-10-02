@@ -94,10 +94,11 @@ export class EngagementEngineImpl implements EngagementEngine {
     this.config = config;
     this.viewSpecs = viewSpecsFrom(config);
     this.destroyedSides.clear();
+    this.pendingCompose = undefined;
     this.live.simulation.reset(config.sim);
     const spawn = this.live.simulation.snapshot();
-    this.live.droneSimulator.reset(droneSimConfigFrom(config));
-    this.live.fighterSimulator.reset(fighterSimConfigFrom(config));
+    this.live.droneSimulator.reset(this.viewSpecs.drones);
+    this.live.fighterSimulator.reset(this.viewSpecs.fighters);
     this.live.missileSimulator.reset(missileSimConfigFrom(config), { shipA: spawn.shipA.position, shipB: spawn.shipB.position });
     this.live.weaponClock.reset();
     this.live.lockClock.reset();
@@ -114,9 +115,10 @@ export class EngagementEngineImpl implements EngagementEngine {
   update(config: EngineConfig): EngineView {
     this.config = config;
     this.viewSpecs = viewSpecsFrom(config);
+    this.pendingCompose = undefined;
     this.live.simulation.update(config.sim);
-    this.live.droneSimulator.update(droneSimConfigFrom(config));
-    this.live.fighterSimulator.update(fighterSimConfigFrom(config));
+    this.live.droneSimulator.update(this.viewSpecs.drones);
+    this.live.fighterSimulator.update(this.viewSpecs.fighters);
     this.live.missileSimulator.update(missileSimConfigFrom(config));
     this.live.defenseSimulator.update(config.defense);
     this.live.capacitorSimulator.update(capacitorSimConfigFrom(config));
@@ -158,6 +160,7 @@ export class EngagementEngineImpl implements EngagementEngine {
     if (!this.config || !this.lastView) throw new Error("EngagementEngine.injectCapBooster called before reset");
     this.live.capacitorSimulator.injectBooster(side, boosterIndex);
     this.projectionDirty = true;
+    this.pendingCompose = undefined;
     this.lastView = { ...this.lastView, capacitorRuntime: this.live.capacitorSimulator.view() };
     this.publishView(this.lastView);
     return this.lastView;

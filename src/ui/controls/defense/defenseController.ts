@@ -4,6 +4,7 @@ import type { StoredRahActivation, StoredRepairMode, StoredRepairerActivation } 
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import { formatWithCommas } from "../controlsFormat";
+import { setText } from "../controlsDom";
 import { ChoiceGroupImpl } from "../choiceGroup";
 import { DAMAGE_ICON_URLS, DAMAGE_TYPE_ORDER } from "../damageTypeIcons";
 import { html } from "../markup";
@@ -380,7 +381,7 @@ export class DefenseControllerImpl implements DefenseController {
       value = span;
     }
     const assessment = this.assessments.get(side) ?? this.defenseAssessor.assess(spec, ZERO_DAMAGE, true);
-    value.textContent = `${formatWithCommas(assessment.totalEhp)} EHP`;
+    setText(value, `${formatWithCommas(assessment.totalEhp)} EHP`);
   }
 }
 

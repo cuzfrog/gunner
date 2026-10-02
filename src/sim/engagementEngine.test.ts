@@ -339,6 +339,32 @@ describe("EngagementEngineImpl", () => {
     expect(third.droneSpecs).not.toBe(first.droneSpecs);
   });
 
+  test("reset and update feed the simulators the same spec records the view publishes", () => {
+    const drone: DroneSpec = { kind: "drone", moduleId: toTypeId("2"), tracking: 0.1, sigResolution: 40, optimal: 1000, falloff: 1000, damagePerShot: ZERO_DAMAGE, cycleTime: 1, droneCount: 5, maxVelocity: 1000, orbitSpeed: 500, orbitRange: 1000, isSentry: false, controlRange: 50000 };
+    const config: import("./engagementEngine").EngineConfig = { ...engineConfig(), weapons: { shipA: [drone], shipB: [turret] } };
+    const deps = makeEngine();
+    const view = deps.engine.reset(config);
+    expect(deps.live.droneSimulator.reset.mock.calls[0]?.[0]).toBe(view.droneSpecs);
+    expect(deps.live.fighterSimulator.reset.mock.calls[0]?.[0]).toBe(view.fighterSpecs);
+    const updated = deps.engine.update(config);
+    expect(deps.live.droneSimulator.update.mock.calls[0]?.[0]).toBe(updated.droneSpecs);
+    expect(deps.live.fighterSimulator.update.mock.calls[0]?.[0]).toBe(updated.fighterSpecs);
+  });
+
+  test("update and reset drop a pending compose so publish republishes the fresh view", () => {
+    const deps = makeEngine();
+    deps.engine.reset(engineConfig());
+    deps.engine.advance(0.1);
+    const updated = { ...snapshot, time: 42 };
+    deps.live.simulation.snapshot.mockReturnValue(updated);
+    deps.engine.update(engineConfig());
+    expect(deps.engine.publish().snapshot).toBe(updated);
+    deps.engine.advance(0.1);
+    deps.live.simulation.snapshot.mockReturnValue(snapshot);
+    deps.engine.reset(engineConfig());
+    expect(deps.engine.publish().snapshot).toBe(snapshot);
+  });
+
   test("drone and fighter steps receive the same-frame damage events after the weapon clock", () => {
     const deps = makeEngine();
     deps.engine.reset(engineConfig());
