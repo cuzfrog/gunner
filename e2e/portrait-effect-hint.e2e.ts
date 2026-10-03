@@ -1,7 +1,22 @@
 import { test, expect, loadFittingText, importFittingViaPaste, FITTING_THRASHER, FITTING_ISHTAR } from "./fixtures";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 let page: Page;
+
+// The effect list churns while the sim runs (icons are created/removed as effects start and
+// stop), and an anchor change under the pointer can cancel the hover hint's delayed show. A
+// single hover is therefore racy under CI load: re-hover until the hint is actually visible.
+async function hoverUntilHintVisible(icon: Locator, hint: Locator): Promise<void> {
+  await expect.poll(async () => {
+    try {
+      if (!(await icon.isVisible())) return false;
+      await icon.hover();
+      return hint.isVisible();
+    } catch {
+      return false;
+    }
+  }, { timeout: 10000 }).toBe(true);
+}
 
 test.describe.serial("portrait effect hint", () => {
   test.beforeAll(async ({ browser }) => {
@@ -24,9 +39,8 @@ test.describe.serial("portrait effect hint", () => {
   test("drone weapon icon shows applied DPS and the active drone count", async () => {
     const icon = page.locator("#ship-a-portrait .portrait-effect-icon[data-weapon-kind='drone']");
     await expect(icon).toBeVisible();
-    await icon.hover();
     const hint = page.locator("#hover-hint");
-    await expect(hint).toBeVisible();
+    await hoverUntilHintVisible(icon, hint);
     await expect(hint.locator(".stat-hint-subtitle")).toHaveText("Drones");
     await expect(hint.locator(".stat-hint-row", { hasText: "Active drones" }).locator(".stat-hint-value")).toHaveText(/\d+\/\d+/);
     await expect(hint.locator(".stat-hint-row", { hasText: "Applied DPS" }).locator(".stat-hint-value")).toContainText("DPS");
@@ -38,16 +52,20 @@ test.describe.serial("portrait effect hint", () => {
     await page.mouse.move(5, 5);
     await expect(page.locator("#hover-hint")).toBeHidden();
     const icon = page.locator("#ship-a-portrait .portrait-effect-icon[data-weapon-kind='drone']");
-    await icon.hover();
     const hint = page.locator("#hover-hint");
-    await expect(hint).toBeVisible();
     await expect.poll(async () => {
-      const box = await hint.boundingBox();
-      if (box === null) return false;
-      const viewport = page.viewportSize();
-      if (viewport === null) return false;
-      return box.y >= 0 && box.y + box.height <= viewport.height;
-    }, { timeout: 5000 }).toBe(true);
+      try {
+        if (!(await icon.isVisible())) return false;
+        await icon.hover();
+        if (!(await hint.isVisible())) return false;
+        const box = await hint.boundingBox();
+        const viewport = page.viewportSize();
+        if (box === null || viewport === null) return false;
+        return box.y >= 0 && box.y + box.height <= viewport.height;
+      } catch {
+        return false;
+      }
+    }, { timeout: 10000 }).toBe(true);
   });
 
   test("repairer icon shows layer, repair per second and per cycle", async () => {
@@ -55,9 +73,8 @@ test.describe.serial("portrait effect hint", () => {
     await expect(page.locator("#hover-hint")).toBeHidden();
     const icon = page.locator("#ship-b-portrait .portrait-effect-icon[data-effect-kind='repairer']").first();
     await expect(icon).toBeVisible();
-    await icon.hover();
     const hint = page.locator("#hover-hint");
-    await expect(hint).toBeVisible();
+    await hoverUntilHintVisible(icon, hint);
     await expect(hint.locator(".stat-hint-subtitle")).toContainText(/Shield|Armor|Hull/);
     await expect(hint.locator(".stat-hint-row", { has: page.locator(".stat-hint-label", { hasText: "HP/s" }) })).toBeVisible();
     await expect(hint.locator(".stat-hint-row", { has: page.locator(".stat-hint-label", { hasText: "HP/cycle" }) })).toBeVisible();

@@ -151,10 +151,17 @@ function reconcileEffectIcons(effects: HTMLElement, allEffects: readonly Portrai
     if (icon === undefined) continue;
     icons.set(key, icon);
   }
-  for (const icon of icons.values()) effects.appendChild(icon);
-  const kept = new Set<Element>(icons.values());
-  for (const child of Array.from(effects.children)) {
-    if (!kept.has(child)) child.remove();
+  const desired = Array.from(icons.values());
+  const current = Array.from(effects.children);
+  // Skip all DOM writes when the row already matches: moving connected icon nodes (appendChild
+  // re-inserts them) fires boundary events that cancel a pending hover-hint show under the pointer.
+  const unchanged = current.length === desired.length && desired.every((icon, index) => current[index] === icon);
+  if (!unchanged) {
+    for (const icon of desired) effects.appendChild(icon);
+    const kept = new Set<Element>(icons.values());
+    for (const child of current) {
+      if (!kept.has(child)) child.remove();
+    }
   }
   return icons;
 }

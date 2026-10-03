@@ -361,6 +361,17 @@ describe("PortraitsController", () => {
     expect(els.shipAEffects.children[0]).toBe(original);
   });
 
+  test("lock badge toggle does not touch the effect row when the icon order is unchanged", () => {
+    const { controller, els, profiles, viewStream } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }));
+    controller.update();
+    const appendChild = vi.spyOnUntracked(els.shipAEffects, "appendChild");
+    viewStream.currentView.mockReturnValue(makeView({ shipA: [{ category: "ewar", family: "web", moduleId: toTypeId("527"), speedMultiplier: 0.4 }], shipB: [] }, { shipA: { status: "locked", progress: 1, remaining: 0, lockTime: 3, inRange: true }, shipB: IDLE_LOCK }));
+    controller.update();
+    expect(appendChild).not.toHaveBeenCalled();
+  });
+
   test("removed effect drops its icon element from the row", () => {
     const { controller, els, profiles, viewStream } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
